@@ -1,0 +1,3251 @@
+<!DOCTYPE html>
+
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>أن تصبح منهجيًا: المسار الأقل استخدامًا</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&amp;family=Source+Sans+Pro:wght@300;400;600;700&amp;display=swap" rel="stylesheet"/>
+<style>
+    :root {
+      --navy: #1E2761;
+      --deep-navy: #141B3D;
+      --gold: #D4AF37;
+      --cream: #FAF8F5;
+      --light-cream: #FFFFFF;
+      --text: #2D3748;
+      --light-text: #718096;
+      --red: #C53030;
+      --green: #22c55e;
+      --teal: #0d9488;
+      --orange: #ea580c;
+      --purple: #7c3aed;
+      --transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      height: 100%;
+      font-family: 'Source Sans Pro', sans-serif;
+      background: var(--deep-navy);
+      color: var(--cream);
+    }
+
+    .course-container {
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 280px;
+      background: linear-gradient(180deg, var(--deep-navy) 0%, #0a0f1a 100%);
+      border-left: 1px solid rgba(212,175,55,0.2);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    .sidebar-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+    }
+
+    .sidebar-header h1 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--gold);
+      margin-bottom: 0.25rem;
+    }
+
+    .sidebar-header p {
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.6);
+    }
+
+    .module-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem 0;
+    }
+
+    .module-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      border-right: 3px solid transparent;
+    }
+
+    .module-item:hover { background: rgba(212,175,55,0.1); }
+    .module-item.active {
+      background: rgba(212,175,55,0.15);
+      border-right-color: var(--gold);
+    }
+    .module-item.completed .module-number {
+      background: var(--green);
+      color: white;
+    }
+
+    .module-number {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .module-item.active .module-number {
+      background: var(--gold);
+      color: var(--navy);
+    }
+
+    .module-info { flex: 1; min-width: 0; }
+    .module-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .module-subtitle {
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.7);
+    }
+
+    .sidebar-footer {
+      padding: 1rem 1.5rem;
+      border-top: 1px solid rgba(212,175,55,0.2);
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.4);
+    }
+
+    /* Main Content */
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .content-header {
+      padding: 1rem 2rem;
+      background: rgba(0,0,0,0.3);
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .breadcrumb {
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.6);
+    }
+    .breadcrumb span { color: var(--gold); }
+    .header-actions { display: flex; gap: 0.5rem; }
+
+    .btn {
+      padding: 0.5rem 1rem;
+      border: 1px solid rgba(212,175,55,0.3);
+      border-radius: 6px;
+      background: rgba(255,255,255,0.05);
+      color: var(--cream);
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn:hover {
+      background: rgba(212,175,55,0.2);
+      border-color: var(--gold);
+    }
+    .btn.primary {
+      background: var(--gold);
+      color: var(--navy);
+      border-color: var(--gold);
+      font-weight: 600;
+    }
+
+    .content-body {
+      flex: 1;
+      overflow: hidden;
+      display: flex;
+    }
+
+    /* Slides */
+    .slides-container {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .module-slides {
+      display: none;
+      width: 100%;
+      height: 100%;
+    }
+    .module-slides.active { display: block; }
+
+    .slide {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      padding: 2rem 2rem 4rem 2rem;
+      padding-top: 3rem;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity var(--transition), visibility var(--transition);
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .slide .content, .slide .refrain, .slide .title {
+      margin-top: auto;
+      margin-bottom: auto;
+    }
+
+    .slide > * { max-width: 100%; word-wrap: break-word; }
+    .slide.active { opacity: 1; visibility: visible; }
+    .slide.dark { background: var(--deep-navy); color: var(--cream); }
+    .slide.light { background: var(--cream); color: var(--text); }
+    .slide.black { background: #000; color: var(--cream); }
+    .slide.red { background: linear-gradient(135deg, #7f1d1d 0%, #450a0a 100%); color: var(--cream); }
+    .slide.green { background: linear-gradient(135deg, #14532d 0%, #052e16 100%); color: var(--cream); }
+    .slide.teal { background: linear-gradient(135deg, #134e4a 0%, #042f2e 100%); color: var(--cream); }
+    .slide.purple { background: linear-gradient(135deg, #581c87 0%, #3b0764 100%); color: var(--cream); }
+
+    /* Typography */
+    .serif { font-family: 'Cormorant Garamond', Georgia, serif; }
+
+    .title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 700;
+      margin-bottom: 1rem;
+      line-height: 1.2;
+    }
+    .title.navy { color: var(--navy); }
+    .title.gold { color: var(--gold); }
+    .title.cream { color: var(--cream); }
+
+    .subtitle {
+      font-size: clamp(1rem, 2vw, 1.5rem);
+      color: var(--light-text);
+      margin-bottom: 2rem;
+    }
+    .slide.dark .subtitle { color: rgba(255,255,255,0.7); }
+
+    .big-number {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(4rem, 15vw, 10rem);
+      font-weight: 700;
+      line-height: 1;
+    }
+    .big-number.navy { color: var(--navy); }
+    .big-number.gold { color: var(--gold); }
+    .big-number.red { color: var(--red); }
+
+    .refrain {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(1.5rem, 4vw, 2.5rem);
+      font-style: italic;
+      color: var(--gold);
+      text-align: center;
+      max-width: 800px;
+    }
+
+    /* Storytelling elements */
+    .direct-address {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(1.2rem, 2.5vw, 1.6rem);
+      color: var(--gold);
+      text-align: center;
+      margin: 1rem 0;
+      font-style: italic;
+    }
+
+    .rhetorical {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(1.3rem, 3vw, 1.8rem);
+      font-style: italic;
+      color: rgba(255,255,255,0.9);
+      text-align: center;
+      max-width: 700px;
+      margin: 0.5rem 0;
+    }
+
+    .story-box {
+      background: linear-gradient(135deg, rgba(212,175,55,0.15), rgba(30,39,97,0.2));
+      border-right: 4px solid var(--gold);
+      padding: 1.5rem 2rem;
+      margin: 1.5rem 0;
+      max-width: 700px;
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.1rem;
+      line-height: 1.7;
+      font-style: italic;
+    }
+
+    .warning-box {
+      background: linear-gradient(135deg, rgba(197,48,48,0.2), rgba(127,29,29,0.3));
+      border-right: 4px solid var(--red);
+      padding: 1.5rem 2rem;
+      margin: 1.5rem 0;
+      max-width: 700px;
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.1rem;
+      line-height: 1.7;
+    }
+
+    .success-box {
+      background: linear-gradient(135deg, rgba(34,197,94,0.15), rgba(20,83,45,0.3));
+      border-right: 4px solid var(--green);
+      padding: 1.5rem 2rem;
+      margin: 1.5rem 0;
+      max-width: 700px;
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.1rem;
+      line-height: 1.7;
+    }
+
+    .profile-box {
+      background: linear-gradient(135deg, rgba(13,148,136,0.15), rgba(4,47,46,0.3));
+      border-right: 4px solid var(--teal);
+      padding: 1.5rem 2rem;
+      margin: 1.5rem 0;
+      max-width: 700px;
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.05rem;
+      line-height: 1.7;
+    }
+
+    .witness-statement {
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(212,175,55,0.3);
+      border-radius: 8px;
+      padding: 1.25rem 1.5rem;
+      margin: 1rem 0;
+      max-width: 600px;
+    }
+    .witness-statement .source {
+      font-size: 0.8rem;
+      color: var(--gold);
+      margin-bottom: 0.5rem;
+    }
+    .witness-statement .quote {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.1rem;
+      font-style: italic;
+      line-height: 1.6;
+    }
+
+    /* Gold line divider */
+    .gold-line {
+      width: 80px;
+      height: 3px;
+      background: var(--gold);
+      margin: 1.5rem auto;
+    }
+
+    /* Stats grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1.5rem;
+      max-width: 800px;
+      margin: 1.5rem 0;
+    }
+    .stat-box {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(212,175,55,0.3);
+      border-radius: 8px;
+      padding: 1.25rem;
+      text-align: center;
+    }
+    .stat-box.highlight {
+      border-color: var(--gold);
+      background: rgba(212,175,55,0.1);
+    }
+    .stat-box.danger {
+      border-color: var(--red);
+      background: rgba(197,48,48,0.1);
+    }
+    .stat-box.success {
+      border-color: var(--green);
+      background: rgba(34,197,94,0.1);
+    }
+    .stat-value, .stat-box .stat {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--gold);
+      line-height: 1;
+    }
+    .stat-box.danger .stat-value { color: var(--red); }
+    .stat-box.success .stat-value { color: var(--green); }
+    .stat-label, .stat-box .label {
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.7);
+      margin-top: 0.5rem;
+    }
+
+    /* Comparison panels */
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      max-width: 900px;
+      margin: 1.5rem 0;
+    }
+    .comparison-panel {
+      background: white;
+      border-radius: 8px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .comparison-panel.highlight {
+      border: 2px solid var(--gold);
+    }
+    .comparison-panel h4 {
+      color: var(--navy);
+      margin-bottom: 0.75rem;
+      font-size: 1.1rem;
+    }
+    .comparison-panel p {
+      color: var(--text);
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    /* Case study */
+    .case-study {
+      background: white;
+      border-radius: 8px;
+      padding: 1.5rem 2rem;
+      max-width: 700px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+    }
+    .case-study h4 {
+      color: var(--navy);
+      margin-bottom: 1rem;
+      font-size: 1.1rem;
+    }
+    .case-study p {
+      color: var(--text);
+      font-size: 0.95rem;
+      line-height: 1.6;
+      margin-bottom: 0.5rem;
+    }
+
+    /* Decision trees */
+    .decision-tree {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      max-width: 800px;
+      margin: 1rem 0;
+    }
+    .decision-node {
+      background: white;
+      border: 2px solid var(--navy);
+      border-radius: 8px;
+      padding: 1rem 1.5rem;
+      text-align: center;
+      font-size: 0.95rem;
+      color: var(--text);
+      max-width: 300px;
+    }
+    .decision-node.question {
+      background: var(--navy);
+      color: white;
+      border-color: var(--navy);
+    }
+    .decision-node.outcome-yes {
+      background: var(--green);
+      color: white;
+      border-color: var(--green);
+    }
+    .decision-node.outcome-no {
+      background: var(--red);
+      color: white;
+      border-color: var(--red);
+    }
+    .decision-node.warning {
+      background: var(--orange);
+      color: white;
+      border-color: var(--orange);
+    }
+    .decision-branches {
+      display: flex;
+      gap: 2rem;
+      margin-top: 0.5rem;
+    }
+    .decision-branch {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .branch-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.25rem 0.75rem;
+      border-radius: 4px;
+      margin: 0.5rem 0;
+    }
+    .branch-label.yes { background: var(--green); color: white; }
+    .branch-label.no { background: var(--red); color: white; }
+    .arrow-down {
+      width: 2px;
+      height: 20px;
+      background: var(--navy);
+      position: relative;
+    }
+    .arrow-down::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: -4px;
+      border-right: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-top: 6px solid var(--navy);
+    }
+
+    /* Story Decision Trees */
+    .story-decision-tree {
+      margin: 1.5rem 0;
+      padding: 1rem;
+      background: rgba(212,175,55,0.1);
+      border-radius: 8px;
+      max-width: 700px;
+    }
+    .story-decision-tree .decision-prompt {
+      font-weight: 600;
+      color: var(--gold);
+      margin-bottom: 1rem;
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.1rem;
+    }
+    .story-decision-tree .decision-options {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .story-decision-tree .decision-option {
+      padding: 1rem;
+      background: rgba(255,255,255,0.1);
+      border-radius: 8px;
+      border-right: 4px solid var(--navy);
+      min-height: 44px;
+    }
+    .story-decision-tree .decision-option[data-path="wrong"] {
+      border-right-color: #c0392b;
+    }
+    .story-decision-tree .decision-option[data-path="right"] {
+      border-right-color: var(--gold);
+    }
+    .story-decision-tree .decision-option[data-path="neutral"] {
+      border-right-color: var(--teal);
+    }
+    .story-decision-tree .consequence {
+      margin-top: 0.5rem;
+      font-style: italic;
+      color: rgba(255,255,255,0.8);
+      font-size: 0.9rem;
+    }
+    .slide.light .story-decision-tree {
+      background: rgba(30,39,97,0.1);
+    }
+    .slide.light .story-decision-tree .decision-prompt {
+      color: var(--navy);
+    }
+    .slide.light .story-decision-tree .decision-option {
+      background: white;
+    }
+    .slide.light .story-decision-tree .consequence {
+      color: var(--text);
+      opacity: 0.8;
+    }
+
+    .decision-option:focus-visible {
+      outline: 3px solid var(--gold);
+      outline-offset: 2px;
+    }
+
+    /* Quiz styling */
+    .quiz-container {
+      max-width: 700px;
+      width: 100%;
+    }
+    .quiz-question h4 {
+      color: var(--navy);
+      margin-bottom: 1rem;
+      font-size: 1.1rem;
+      line-height: 1.4;
+    }
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .quiz-option {
+      background: white;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      text-align: right;
+    }
+    .quiz-option:hover {
+      border-color: var(--gold);
+      background: rgba(212,175,55,0.05);
+    }
+    .quiz-option span {
+      font-weight: 700;
+      color: var(--navy);
+    }
+    .quiz-option.correct {
+      border-color: var(--green);
+      background: rgba(34,197,94,0.1);
+    }
+    .quiz-option.incorrect {
+      border-color: var(--red);
+      background: rgba(197,48,48,0.1);
+    }
+
+    /* Slide navigation */
+    .slide-nav {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 1rem 2rem;
+      background: linear-gradient(transparent, rgba(0,0,0,0.5));
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
+    }
+    .nav-btn {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.3);
+      color: white;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1.2rem;
+      transition: all 0.2s;
+    }
+    .nav-btn:hover {
+      background: var(--gold);
+      color: var(--navy);
+      border-color: var(--gold);
+    }
+    .nav-center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .slide-counter {
+      font-size: 0.8rem;
+      opacity: 0.6;
+      color: rgba(255,255,255,0.6);
+    }
+    .progress { display: flex; gap: 2px; }
+    .progress-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.25);
+      cursor: pointer;
+      transition: all 0.2s;
+      padding: 18px;
+      margin: -18px;
+      background-clip: content-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .progress-dot:focus {
+      outline: 2px solid var(--gold);
+      outline-offset: 2px;
+    }
+    .progress-dot.active {
+      background: var(--gold);
+      background-clip: content-box;
+      transform: scale(1.3);
+    }
+    @media (pointer: coarse) {
+      .progress { gap: 8px; }
+      .progress-dot {
+        width: 12px;
+        height: 12px;
+        padding: 16px;
+        margin: -16px;
+      }
+    }
+
+    /* Utilities */
+    .text-center { text-align: center; }
+    .mb-1 { margin-bottom: 1rem; }
+    .mb-2 { margin-bottom: 2rem; }
+    .mt-1 { margin-top: 1rem; }
+    .mt-2 { margin-top: 2rem; }
+
+    .content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: 1000px;
+    }
+
+    /* Mobile */
+    @media (max-width: 768px) {
+      .sidebar {
+        position: fixed;
+        left: -280px;
+        top: 0;
+        height: 100vh;
+        z-index: 1000;
+        transition: left 0.3s ease;
+      }
+      .sidebar.open { left: 0; }
+      .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 999;
+      }
+      .sidebar-overlay.open { display: block; }
+      .hamburger {
+        display: flex !important;
+        position: fixed;
+        top: 1rem;
+        left: 1rem;
+        z-index: 998;
+        background: var(--navy);
+        border: 1px solid var(--gold);
+        color: var(--gold);
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        cursor: pointer;
+      }
+      .content-header { padding-right: 4rem; }
+      .slide { padding: 1.5rem 1rem 4rem 1rem; }
+      .stats-grid { grid-template-columns: 1fr 1fr; gap: 1rem; }
+      .comparison-grid { grid-template-columns: 1fr; }
+      .decision-branches { flex-direction: column; gap: 1rem; }
+    }
+
+    .hamburger { display: none; }
+
+    /* Animations */
+    .animate {
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeInUp 0.6s ease forwards;
+    }
+    .animate.delay-1 { animation-delay: 0.2s; }
+    .animate.delay-2 { animation-delay: 0.4s; }
+    .animate.delay-3 { animation-delay: 0.6s; }
+
+    @keyframes fadeInUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Print stylesheet */
+    @media print {
+      .sidebar, .slide-nav, .hamburger, .content-header { display: none !important; }
+      .course-container { display: block; }
+      .main-content { display: block; }
+      .slides-container { display: block; height: auto; }
+      .module-slides { display: block !important; }
+      .slide {
+        position: relative !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        page-break-inside: avoid;
+        padding: 2rem;
+        border-bottom: 1px solid #ccc;
+        margin-bottom: 1rem;
+      }
+      .slide.dark, .slide.black, .slide.red, .slide.green { background: white !important; color: black !important; }
+      .refrain, .direct-address, .rhetorical { color: var(--navy) !important; }
+    }
+
+    /* Focus-visible styles for keyboard navigation */
+    :focus-visible {
+      outline: 2px solid var(--gold, #D4AF37);
+      outline-offset: 2px;
+    }
+
+    :focus:not(:focus-visible) {
+      outline: none;
+    }
+
+    button:focus-visible,
+    a:focus-visible,
+    [role="button"]:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible {
+      outline: 2px solid var(--gold, #D4AF37);
+      outline-offset: 2px;
+      box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.3);
+    }
+
+    /* Reduced motion for accessibility */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      .slide { transition: none; }
+      .animate { opacity: 1; transform: none; }
+    }
+
+    /* Accessible decision tree linear descriptions */
+    .decision-tree-sr {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    /* Focus indicators for keyboard navigation */
+    .quiz-option:focus {
+      outline: 3px solid var(--gold);
+      outline-offset: 2px;
+    }
+    .nav-btn:focus, .btn:focus, .module-item:focus {
+      outline: 3px solid var(--gold);
+      outline-offset: 2px;
+    }
+
+    /* Citation box styling */
+    .citation-box {
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(212,175,55,0.3);
+      border-radius: 6px;
+      padding: 0.75rem 1rem;
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.7);
+      margin-top: 1rem;
+      max-width: 600px;
+    }
+    .citation-box a { color: var(--gold); }
+
+    /* Scenario quiz styling */
+    .scenario-box {
+      background: linear-gradient(135deg, rgba(124,58,237,0.15), rgba(30,39,97,0.2));
+      border: 1px solid var(--purple);
+      border-radius: 8px;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+    .scenario-box .scenario-label {
+      color: var(--purple);
+      font-weight: 700;
+      font-size: 0.8rem;
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* Path/career cards */
+    .path-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      max-width: 900px;
+      margin: 1.5rem 0;
+    }
+    .path-card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(212,175,55,0.3);
+      border-radius: 8px;
+      padding: 1.25rem;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    .path-card:hover {
+      border-color: var(--gold);
+      background: rgba(212,175,55,0.1);
+    }
+    .path-card h4 {
+      color: var(--gold);
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+    }
+    .path-card p {
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.7);
+      line-height: 1.4;
+    }
+    .path-card .salary {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.3rem;
+      color: var(--green);
+      margin-top: 0.5rem;
+    }
+
+    /* Timeline */
+    .timeline-vertical {
+      position: relative;
+      max-width: 600px;
+      margin: 1.5rem 0;
+      padding-right: 2rem;
+    }
+    .timeline-vertical::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: var(--gold);
+    }
+    .timeline-item {
+      position: relative;
+      margin-bottom: 1.5rem;
+      padding-right: 1.5rem;
+    }
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -2rem;
+      top: 0.5rem;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--gold);
+      border: 3px solid var(--deep-navy);
+    }
+    .timeline-item h4 {
+      color: var(--gold);
+      font-size: 0.9rem;
+      margin-bottom: 0.25rem;
+    }
+    .timeline-item p {
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.8);
+      line-height: 1.5;
+    }
+
+    /* Spaced Retrieval System */
+    .spaced-retrieval-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      padding: 1rem;
+    }
+    .spaced-retrieval-modal {
+      background: linear-gradient(135deg, var(--deep-navy) 0%, #0a0f1a 100%);
+      border: 2px solid var(--gold);
+      border-radius: 12px;
+      padding: 2rem;
+      max-width: 500px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+    .retrieval-header {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.5rem;
+      color: var(--gold);
+      margin-bottom: 1rem;
+    }
+    .retrieval-question {
+      font-size: 1.1rem;
+      line-height: 1.6;
+      color: var(--cream);
+      margin-bottom: 1.5rem;
+      font-style: italic;
+    }
+    .retrieval-btn {
+      background: var(--gold);
+      color: var(--navy);
+      border: none;
+      padding: 0.75rem 1.5rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-bottom: 1rem;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .retrieval-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(212,175,55,0.4);
+    }
+    .retrieval-answer {
+      background: rgba(212,175,55,0.1);
+      border-right: 3px solid var(--gold);
+      padding: 1rem;
+      margin: 1rem 0;
+      text-align: right;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      color: var(--cream);
+    }
+    .retrieval-close {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.3);
+      color: var(--cream);
+      padding: 0.5rem 1rem;
+      font-size: 0.85rem;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .retrieval-close:hover {
+      background: rgba(255,255,255,0.1);
+      border-color: var(--gold);
+    }
+
+    /* Action Plan Checklist */
+    .action-checklist {
+      text-align: right;
+      max-width: 600px;
+      margin: 1rem 0;
+    }
+    .action-checklist label {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.75rem;
+      background: rgba(255,255,255,0.05);
+      border-radius: 6px;
+      margin-bottom: 0.5rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .action-checklist label:hover {
+      background: rgba(212,175,55,0.1);
+    }
+    .action-checklist input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      margin-top: 2px;
+      accent-color: var(--gold);
+    }
+    .action-checklist .action-text {
+      flex: 1;
+    }
+    .action-checklist .action-title {
+      font-weight: 600;
+      color: var(--gold);
+      margin-bottom: 0.25rem;
+    }
+    .action-checklist .action-desc {
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.7);
+    }
+  </style>
+</head>
+<body>
+<a class="skip-link" href="#main-content" style="position: absolute; left: -9999px; top: 0; z-index: 9999; padding: 1rem; background: var(--gold); color: var(--navy);">انتقل إلى المحتوى</a>
+<button aria-expanded="false" aria-label="Open navigation menu" class="hamburger" onclick="toggleSidebar()">☰</button>
+<div aria-hidden="true" class="sidebar-overlay" onclick="toggleSidebar()"></div>
+<div aria-label="أن تصبح دورة تدريبية منهجية" class="course-container">
+ الشريط الجانبي 
+<nav aria-label="وحدات الدورة التدريبية" class="sidebar" role="navigation">
+<div class="sidebar-header">
+<a href="index-ar.html" onmouseout="this.style.color='rgba(212,175,55,0.7)'" onmouseover="this.style.color='#D4AF37'" style="display:block;font-size:0.7rem;color:rgba(212,175,55,0.7);text-decoration:none;margin-bottom:0.5rem;">← مكتبة الدورة</a>
+<h1>أن تصبح منهجيًا</h1>
+<p>المسار الأقل سفرًا</p>
+</div>
+<div class="module-list" id="moduleList"></div>
+<div class="sidebar-footer">
+<p style="text-align: center;">التقدم: <span id="progressPercent">0%</span></p>
+<button aria-label="إعادة تعيين تقدم الدورة التدريبية" class="btn" onclick="resetProgress()" style="width: 100%; margin-top: 0.5rem; font-size: 0.7rem;">إعادة ضبط التقدم</button>
+</div>
+</nav>
+ المحتوى الرئيسي 
+<main aria-label="محتوى الدورة التدريبية" class="main-content" role="main">
+<header class="content-header">
+<div class="breadcrumb">
+          الوحدة <span id="currentModuleNum">0</span>: <span id="currentModuleName">النداء</span>
+</div>
+<div class="header-actions">
+<button class="btn" onclick="prevSlide()">← Previous</button>
+<button class="btn primary" onclick="nextSlide()">Next →</button>
+</div>
+</header>
+<div class="content-body">
+<div class="slides-container" id="main-content">
+ الوحدة 0: الاتصال 
+<div class="module-slides active" data-module="0">
+<div class="slide dark active" data-index="0">
+<p class="refrain animate">يقوم البعض ببناء المنزل. ويضمن الآخرون صمود الأساس.</p>
+</div>
+<div class="slide dark" data-index="1">
+<p class="direct-address animate">هل تساءلت يومًا من الذي يتحقق من أدوات الداما؟</p>
+<p class="direct-address animate delay-1">من يضمن أن الأساليب المستخدمة وراء القرارات الطبية سليمة؟</p>
+<div class="gold-line animate delay-2"></div>
+</div>
+<div class="slide dark" data-index="2">
+<p class="title cream animate">المهندسون المعماريون غير المرئيين</p>
+<div class="story-box animate delay-1">
+<strong>حكاية الجسر المفتش:</strong><br/><br/>
+                قامت مدينة ببناء جسر رائع. احتفل المهندسون. يعبر المواطنون يوميا. لكن إحدى النساء أمضت أيامها بالأسفل، تفحص اللحامات، وتقيس الضغط، وتوثق الشقوق.<br/><br/>
+                "لماذا لا تبني الجسور؟" سألوا.<br/><br/>
+                قالت: "لأنني أضمن أن كل جسر يتم بناؤه سيصمد."<br/><br/>
+<span style="color: var(--gold);">علماء المنهجيات هم مفتشو الأدلة الطبية. إنهم لا يجرون التجارب، بل يتأكدون من أن التجارب تخبرنا الحقيقة.</span>
+</div>
+</div>
+<div class="slide light" data-index="3">
+<div class="content">
+<h2 class="title navy animate">التأثير الخفي</h2>
+<div class="stats-grid animate delay-1">
+<div class="stat-box highlight">
+<div class="stat-value">$2.6B</div>
+<div class="stat-label">تم الحفظ عندما أثبتت طرق تجربة RECOVERY نجاح الديكساميثازون</div>
+</div>
+<div class="stat-box danger">
+<div class="stat-value">15K+</div>
+<div class="stat-label">الوفيات الزائدة الناجمة عن دراسات الأبروتينين المعيبة قبل مراجعة الأساليب</div>
+</div>
+<div class="stat-box">
+<div class="stat-value">85%</div>
+<div class="stat-label">للأبحاث الطبية قيود منهجية</div>
+</div>
+</div>
+<p class="animate delay-2" style="font-size: 0.9rem; color: var(--light-text); text-align: center; max-width: 600px;">
+                  طرق العمل ليست براقة. ولكن هناك فرق بين الطب الذي يشفي والدواء الذي يضر.
+                </p>
+</div>
+</div>
+<div class="slide dark" data-index="4">
+<p class="rhetorical animate">فكر في قصة الدكتور دوج ألتمان...</p>
+<div class="gold-line animate delay-1"></div>
+</div>
+<div class="slide dark" data-index="5">
+<div class="profile-box animate">
+<strong>دوغ ألتمان (1948-2018): فضيحة الأبحاث الطبية الضعيفة</strong><br/><br/>
+                في عام 1994، نشر أحد الإحصائيين افتتاحية في المجلة الطبية البريطانية بعنوان "فضيحة الأبحاث الطبية الضعيفة". كتب:<br/><br/>
+<em>"نحن بحاجة إلى أبحاث أقل، وأبحاث أفضل، وإجراء الأبحاث للأسباب الصحيحة."</em><br/><br/>
+                لم يكتشف دوج ألتمان أدوية جديدة. ولم يقم بإجراء العمليات الجراحية. لقد أمضى حياته المهنية في تطوير المبادئ التوجيهية لإعداد التقارير (CONSORT، STROBE، PRISMA) التي غيرت الطريقة التي يقدم بها العالم الأدلة.<br/><br/>
+<span style="color: var(--gold);">استشهاداته: أكثر من 500000. تُستخدم أدواته في كل المجلات الكبرى. لم يبني أي جسور — ولكن كل جسر يستخدم الآن معايير الفحص الخاصة به.</span>
+</div>
+<div class="citation-box animate delay-1">
+                ألتمان دي جي. فضيحة ضعف الأبحاث الطبية. بمج 199؛308:283-4. الاستشهادات: 6,000+
+              </div>
+</div>
+<div class="slide light" data-index="6">
+<div class="content">
+<h2 class="title navy animate">ما هو المنهجي؟</h2>
+<div class="comparison-grid animate delay-1">
+<div class="comparison-panel">
+<h4>ما يفعلونه</h4>
+<p>• صمم أساليب دراسة صارمة</p>
+<p>• وضع إرشادات لإعداد التقارير</p>
+<p>• خلق خطر أدوات التحيز</p>
+<p>• التقنيات الإحصائية المتقدمة</p>
+<p>• تدريب الجيل القادم</p>
+</div>
+<div class="comparison-panel highlight">
+<h4>ما لا يفعلونه</h4>
+<p>• لا تكون في العادة بيانات أولية المجموعة</p>
+<p>• لا تتضمن عادةً رعاية المرضى</p>
+<p>• نادرًا ما تظهر في العناوين الرئيسية</p>
+<p>• غالبًا لا تكون "المؤلف الأول"</p>
+<p>• لا تمثل وجهًا للاكتشافات</p>
+</div>
+</div>
+<p class="animate delay-2" style="font-size: 0.85rem; color: var(--light-text); text-align: center; margin-top: 1rem;">
+                  علماء المنهجيات هم مهندسو الأدلة، وليس بناة الدراسات الفردية.
+                </p>
+</div>
+</div>
+<div class="slide dark" data-index="7">
+<p class="story-box animate">
+<strong>قصة خريطة الكوليرا التي وضعها جون سنو:</strong><br/><br/>
+                في عام 1854، اعتقد أطباء لندن أن الكوليرا تنتشر من خلال "الهواء الفاسد". وكانت خرائطهم جميلة، تبين أنماط الرياح والارتفاعات.<br/><br/>
+                د. أنشأ جون سنو خريطة بسيطة - مجرد نقاط تظهر الوفيات المتجمعة حول مضخة شارع برود. حددت خريطته البسيطة والسليمة منهجيًا المياه الملوثة باعتبارها المصدر.<br/><br/>
+                كانت خرائط المياسما أنيقة ولكنها خاطئة. لقد أنقذت خريطة سنو البسيطة الأرواح.<br/><br/>
+<span style="color: var(--gold);">المنهجية أكثر من العرض.</span>
+</p>
+<div class="story-decision-tree animate delay-1">
+<p class="decision-prompt">أنت طبيب من لندن في عام 1854. الكوليرا تنتشر. ماذا تختار؟</p>
+<div class="decision-options">
+<div class="decision-option" data-path="wrong" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();}" role="button" tabindex="0">
+<strong>المسار أ:</strong> اتبع نظرية المياسما - أنشئ خرائط جميلة لأنماط الرياح وجودة الهواء.
+                    <div class="consequence">→ يموت المرضى أثناء قيامك بدراسة الهواء. يستمر المرض دون رادع.</div>
+</div>
+<div class="decision-option" data-path="right" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();}" role="button" tabindex="0">
+<strong>المسار ب:</strong> ارسم خريطة للوفيات بشكل منهجي - ارسم الحالات وابحث عن الأنماط في البيانات.
+                    <div class="consequence">← ابحث عن مضخة Broad Street. قم بإزالة المقبض. إنقاذ الأرواح من خلال التفكير المنهجي.</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide light" data-index="8">
+<div class="content">
+<h2 class="title navy animate">واقع السوق</h2>
+<div class="stats-grid animate delay-1">
+<div class="stat-box success">
+<div class="stat-value">+340%</div>
+<div class="stat-label">النمو في مناصب HTA منذ عام 2015</div>
+</div>
+<div class="stat-box">
+<div class="stat-value">$95K-$180K</div>
+<div class="stat-label">نطاق الرواتب لكبار المنهجيين</div>
+</div>
+<div class="stat-box highlight">
+<div class="stat-value">72%</div>
+<div class="stat-label">الإبلاغ عن الرضا الوظيفي العالي</div>
+</div>
+</div>
+<p class="animate delay-2" style="font-size: 0.85rem; color: var(--light-text); text-align: center; max-width: 600px; margin-top: 1rem;">
+                  الطلب آخذ في الارتفاع. تحتاج الهيئات التنظيمية والدوائية والأنظمة الصحية جميعًا إلى أشخاص يفهمون جودة الأدلة.
+                </p>
+</div>
+</div>
+<div class="slide black" data-index="9">
+<p class="refrain animate">الطريق واضح لأولئك الذين يرغبون في السير عليه.</p>
+<div class="gold-line animate delay-1"></div>
+<p class="animate delay-2" style="font-size: 1.25rem; margin-top: 1.5rem;">الوحدة 1: ما يفعله المنهجيون</p>
+</div>
+</div>
+ الوحدة 1: ما هي المنهجيات افعل 
+<div class="module-slides" data-module="1">
+<div class="slide dark active" data-index="0">
+<p class="refrain animate">إنهم لا يقومون ببناء السفينة. ويضمنون أنها لن تغرق.</p>
+</div>
+<div class="slide dark" data-index="1">
+<p class="direct-address animate">صورة يوم في الحياة...</p>
+<p class="direct-address animate delay-1">ليست حياة واحدة - حياة كثيرة، في كثير الإعدادات.</p>
+<div class="gold-line animate delay-2"></div>
+</div>
+<div class="slide dark" data-index="2">
+<p class="story-box animate">
+<strong>المنهجي الذي غير الطب: آرتشي كوكرين</strong><br/><br/>
+                في عام 1972، نشر طبيب يُدعى آرتشي كوكرين <em>الفعالية والكفاءة</em>بحجة أن معظم القرارات الطبية تفتقر إلى الأدلة من التجارب ذات الشواهد. لقد تحدى المؤسسة الطبية بأكملها لإثبات أن العلاجات فعالة بالفعل.<br/><br/>
+                قبل دعوة كوكرين، لم يتم اختبار الغالبية العظمى من العلاجات الطبية في تجارب عشوائية محكومة. بحلول الوقت الذي تأسست فيه تعاونية كوكرين في عام 1993، أصبحت المراجعات المنهجية هي المعيار الذهبي للطب المبني على الأدلة.<br/><br/>
+<span style="color: var(--gold);">إن إصرار أحد علماء المنهج على الدقة أدى إلى إنشاء البنية التحتية التي يعتمد عليها الطب الحديث الآن.</span>
+</p>
+<div class="story-decision-tree animate delay-1">
+<p class="decision-prompt">أنت باحث شاب في عام 1975. يرفض أحد كبار الأساتذة اقتراحك بإجراء مراجعة منهجية، قائلاً: "نحن نعرف بالفعل ما الذي ينجح من خلال الخبرة السريرية".</p>
+<div class="decision-options">
+<div class="decision-option" data-path="wrong" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();}" role="button" tabindex="0">
+<strong>المسار أ:</strong> الإذعان للسلطة – قبول أن الخبرة السريرية كافية والتخلي عن فكرة التوليف المنهجي للأدلة.
+                    <div class="consequence">→ تستمر العلاجات غير المختبرة دون منازع. يتضرر المرضى من الرعاية غير الفعالة أو الخطيرة التي "يعلم الجميع أنها ناجحة".</div>
+</div>
+<div class="decision-option" data-path="right" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();}" role="button" tabindex="0">
+<strong>المسار ب:</strong> اتبع رؤية كوكرين – وأصر على جمع الأدلة وتقييمها بشكل منهجي، حتى عندما لا تحظى بشعبية.
+                    <div class="consequence">→ أنت تساعد في بناء المنهجية التي تحول الطب على مستوى العالم. أصبحت المراجعات المنهجية أساس المبادئ التوجيهية السريرية في جميع أنحاء العالم.</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark" data-index="3">
+<p class="title cream animate">الإعداد 1: المركز الطبي الأكاديمي</p>
+<div class="profile-box animate delay-1">
+<strong>الدكتورة سارة تشين، أستاذ مشارك في الإحصاء الحيوي</strong><br/>
+<em>جامعة ماكماستر، هاميلتون، كندا</em><br/><br/>
+<strong>8:00 AM:</strong> يراجع مسودة بروتوكول المراجعة المنهجية من طالب دكتوراه. اكتشف عيبًا قاتلًا: لقد خططوا لفحص فردي. يوصي بتمارين المعايرة التجريبية.<br/><br/>
+<strong>10:00 AM:</strong> يقوم بتدريس ورشة عمل GRADE لـ 40 طبيبًا. نصفهم مرتبكون بـ "غير المباشرة". إنها تستخدم مثال الأسبرين للصداع مقابل النوبة القلبية. المصابيح مستمرة.<br/><br/>
+<strong>2:00 PM:</strong> اجتماع مؤلف مشارك لورقة طرق حول عدم اتساق التحليل التلوي للشبكة. يجادل من أجل نهج تصوري جديد.<br/><br/>
+<strong>4:00 PM:</strong> يراجع طلب المنح باعتباره منهجيًا. يشير إلى خطأ في حساب حجم العينة والذي من شأنه أن يقضي على تجربة بقيمة 2 مليون دولار.<br/><br/>
+<span style="color: var(--gold);">التأثير: منع تجربة واحدة معيبة، وتدريب 40 من مستخدمي الأدلة في المستقبل، وتطوير هذا المجال.</span>
+</div>
+</div>
+<div class="slide dark" data-index="4">
+<p class="title cream animate">الإعداد 2: وكالة تقييم التكنولوجيا الصحية</p>
+<div class="profile-box animate delay-1">
+<strong>أحمد الراشد، محلل أول HTA</strong><br/>
+<em>هيئة الغذاء والدواء السعودية، الرياض</em><br/><br/>
+<strong>8:30 AM:</strong> يتلقى ملف الشركة المصنعة لدواء مرض السكري الجديد. 847 صفحة. وظيفته: تقييم جودة الأدلة خلال 3 أسابيع.<br/><br/>
+<strong>10:00 AM:</strong> يكشف عن مشكلة: استخدمت التجربة المحورية نقطة نهاية بديلة (HbA1c) ولكنها تدعي فائدة الوفيات. بديل ≠ النتائج ذات الصلة بالمريض.<br/><br/>
+<strong>1:00 PM:</strong> يجتمع مع الخبراء السريريين. يقولون: "الدواء فعال". "ولكن هل يهم المرضى؟" يسأل. تم تحديد فجوة الأدلة.<br/><br/>
+<strong>3:00 PM:</strong> مسودات تقرير التقييم. يوصي بالموافقة المشروطة مع متطلبات جمع الأدلة في العالم الحقيقي.<br/><br/>
+<span style="color: var(--gold);">التأثير: يعتمد قرار تغطية الأدوية في الدولة الآن على أساليب صارمة، وليس على ادعاءات تسويقية.</span>
+</div>
+</div>
+<div class="slide dark" data-index="5">
+<p class="title cream animate">الإعداد 3: صناعة الأدوية</p>
+<div class="profile-box animate delay-1">
+<strong>د. ماريا سانتوس، مديرة استراتيجية الأدلة</strong><br/>
+<em>شركة الأدوية العالمية، بازل</em><br/><br/>
+<strong>9:00 AM:</strong> تصاميم بروتوكول المرحلة الثالثة التجريبية. النضال من أجل التصميم العملي على حساب التصميم التوضيحي – يصعب توظيفه، ولكن النتائج ستنطبق على المرضى الحقيقيين.<br/><br/>
+<strong>11:00 AM:</strong> تراجع التجارب المنشورة للمنافس. ملاحظات: نتائج مفتوحة، نتائج ذاتية، استنزاف مرتفع. يعد إحاطة المناظر الطبيعية التنافسية.<br/><br/>
+<strong>2:00 PM:</strong> يقوم بتدريب الفريق السريري في اجتماع ما قبل التقديم لإدارة الغذاء والدواء. "سوف يسألونك عن نقطة النهاية الأساسية لديك. جهز تحليلات الحساسية."<br/><br/>
+<strong>4:30 PM:</strong> ينضم إلى الدعوة العالمية بشأن التحليل التلوي للشبكة لتقديمات HTA. يناقش افتراضات العبور لمدة 90 دقيقة.<br/><br/>
+<span style="color: var(--gold);">التأثير: تجارب ذات تصميم أفضل، ومسار تنظيمي أنظف، وأدلة تخدم المرضى والشركات.</span>
+</div>
+</div>
+<div class="slide dark" data-index="6">
+<p class="title cream animate">الإعداد 4: منظمة الصحة العالمية/الصحة العالمية</p>
+<div class="profile-box animate delay-1">
+<strong>الدكتور كوامي أسانتي، المسؤول الفني</strong><br/>
+<em>منظمة الصحة العالمية، جنيف</em><br/><br/>
+<strong>8:00 AM:</strong> مكالمة صباحية مع منطقة AFRO. يلزم تحديث المبادئ التوجيهية الخاصة بالملاريا. المراجعات التي يمكن تكييفها مع المراجعات السريعة هي التي تحتاج إلى أدلة جديدة.<br/><br/>
+<strong>10:30 AM:</strong> اجتماع مجموعة تطوير المبادئ التوجيهية. 14 خبيرا يختلفون على التدخل. دوره: التأكد من تقديم الأدلة بشكل موضوعي، بغض النظر عمن هو الأعلى صوتا.<br/><br/>
+<strong>1:00 PM:</strong> صياغة ملف تعريف أدلة GRADE لتوصية اختبار فيروس نقص المناعة البشرية. "اليقين المنخفض جدًا" لا يعني "لا أوصي" - فهو يكتب الملخص بلغة واضحة.<br/><br/>
+<strong>4:00 PM:</strong> مراجعات لوحة المراجعة المنهجية الحية. ثلاث تجارب معشاة ذات شواهد جديدة منذ الشهر الماضي. مشغلات تحديث البروتوكول.<br/><br/>
+<span style="color: var(--gold);">التأثير: المبادئ التوجيهية المستخدمة من قبل 194 دولة عضو. تؤثر قرارات الأساليب على الملايين.</span>
+</div>
+</div>
+<div class="slide light" data-index="7">
+<div class="content">
+<h2 class="title navy animate">الأنشطة الأساسية</h2>
+<div class="path-grid animate delay-1">
+<div class="path-card">
+<h4>التصميم</h4>
+<p>إنشاء بروتوكولات الدراسة، وحسابات حجم العينة، واختيار نقطة النهاية</p>
+</div>
+<div class="path-card">
+<h4>التقييم</h4>
+<p>خطر تقييم التحيز، وتصنيفات GRADE، والتقييم النقدي</p>
+</div>
+<div class="path-card">
+<h4>التجميع</h4>
+<p>التحليل التلوي، والتحليل التلوي للشبكة، والتوليف النوعي</p>
+</div>
+<div class="path-card">
+<h4>التطوير</h4>
+<p>أدوات جديدة، ومبادئ توجيهية، ومعايير إعداد التقارير، والبرمجيات</p>
+</div>
+<div class="path-card">
+<h4>التدريس</h4>
+<p>تدريب الباحثين والأطباء وصانعي السياسات</p>
+</div>
+<div class="path-card">
+<h4>تقديم المشورة</h4>
+<p>مشاورات بشأن دراسات محددة، المنح والتقديمات</p>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark" data-index="8">
+<p class="rhetorical animate">فكر فيما يحدث عندما تفشل الأساليب...</p>
+<div class="gold-line animate delay-1"></div>
+</div>
+<div class="slide red" data-index="9">
+<p class="title cream animate">كارثة أبروتينين</p>
+<div class="warning-box animate delay-1" style="background: rgba(0,0,0,0.3);">
+<strong>1993-2007: دواء كان يجب إيقافه قبل سنوات</strong><br/><br/>
+                تم استخدام أبروتينين في جراحة القلب للحد من النزيف. أشارت الدراسات المبكرة إلى أنها نجحت. لكن المنهجيين لاحظوا مشاكل:<br/><br/>
+                • كانت الدراسات الرصدية محيرة للغاية<br/>
+                • كانت التجارب المعشاة ذات الشواهد صغيرة جدًا بالنسبة لنتائج السلامة<br/>
+                • التحليلات التلوية المجمعة السكان غير المتوافقة<br/><br/>
+<strong>2007:</strong> أظهرت تجربة بارت أخيرًا زيادة في معدل الوفيات. المخدرات سحبت.<br/><br/>
+<span style="color: var(--gold);">التقدير: 15.000-22.000 حالة وفاة زائدة مع تجاهل المخاوف المنهجية.</span>
+</div>
+<div class="citation-box animate delay-2" style="background: rgba(0,0,0,0.5);">
+                فيرجسون وآخرون. نيم 2008. شو وآخرون. بي إم جيه 2014.
+              </div>
+</div>
+<div class="slide green" data-index="10">
+<p class="title cream animate">انتصار RECOVERY</p>
+<div class="success-box animate delay-1" style="background: rgba(0,0,0,0.3);">
+<strong>2020: اتباع الأساليب الصحيحة ينقذ الأرواح</strong><br/><br/>
+                استخدمت تجربة RECOVERY أساليب صارمة منذ اليوم الأول:<br/><br/>
+                • التصميم العملي المضمن في الرعاية الروتينية<br/>
+                • حجم عينة مناسب (الآلاف، وليس العشرات)<br/>
+                • نقاط نهاية وتحليلات محددة مسبقًا الخطة<br/>
+                • لجنة مراقبة البيانات المستقلة<br/><br/>
+<strong>النتيجة:</strong> ثبت ديكساميثازون في 100 يوم. تم إنقاذ حياة مليون شخص على مستوى العالم.<br/><br/>
+<span style="color: var(--gold);">إن المنهجيين الذين صمموا هذا البروتوكول هم من بين العلماء الأكثر تأثيرًا في عصرنا - ومع ذلك فإن القليل منهم يعرفون أسمائهم.</span>
+</div>
+<div class="citation-box animate delay-2" style="background: rgba(0,0,0,0.5);">
+                مجموعة التعافي التعاونية. NEJM 2021. Horby P، Landray M (رئيس المحققين المشاركين).
+              </div>
+</div>
+<div class="slide light" data-index="11">
+<div class="content">
+<h2 class="title navy animate">اختبار الوحدة 1</h2>
+<div class="quiz-container">
+<div class="quiz-question">
+<h4>الدور الأساسي لأخصائي المنهج هو:</h4>
+<div class="quiz-options" role="radiogroup">
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>A.</span> إجراء بحث أولي وجمع بيانات المرضى
+                      </div>
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" onkeydown="handleQuizKey(event, this, true)" role="radio" tabindex="0">
+<span>B.</span> التأكد من دقة أساليب البحث والأدلة جديرة بالثقة
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>C.</span> كتابة طلبات المنح للباحثين الآخرين
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>D.</span> إدارة توظيف التجارب السريرية
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide light" data-index="12">
+<div class="content">
+<h2 class="title navy animate">اختبار الوحدة 1 (2)</h2>
+<div class="quiz-container">
+<div class="scenario-box animate delay-1">
+<div class="scenario-label">السيناريو</div>
+                    أدت حالة الأبروتينين إلى ما يقدر بنحو 15000 إلى 22000 حالة وفاة. كانت حالات الفشل المنهجية الأساسية هي:
+                  </div>
+<div class="quiz-question">
+<h4>اختر الإجابة الأكثر دقة:</h4>
+<div class="quiz-options" role="radiogroup">
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>A.</span> كان الدواء نفسه ملوثًا
+                      </div>
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" onkeydown="handleQuizKey(event, this, true)" role="radio" tabindex="0">
+<span>B.</span> دراسات رصدية مشوشة وتجارب معشاة ذات شواهد ضعيفة السلامة
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>C.</span> وافقت الوكالات التنظيمية عليه بسرعة كبيرة
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>D.</span> استخدم الجراحون جرعات غير صحيحة
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black" data-index="13">
+<p class="refrain animate">الطرق ليست مجردة. الأساليب هي حياة أو موت.</p>
+<div class="gold-line animate delay-1"></div>
+<p class="animate delay-2" style="font-size: 1.25rem; margin-top: 1.5rem;">الوحدة 2: مجموعة المهارات</p>
+</div>
+</div>
+ الوحدة 2: مجموعة المهارات 
+<div class="module-slides" data-module="2">
+<div class="slide dark active" data-index="0">
+<p class="refrain animate">المنهجي ليس شيئًا واحدًا. المنهجي هو أشياء كثيرة منسوجة معًا.</p>
+</div>
+<div class="slide dark" data-index="1">
+<p class="direct-address animate">ما هي المهارات التي تفصل المنهجي عن الباحث؟</p>
+<p class="direct-address animate delay-1">ليس عمقًا في منطقة واحدة، بل جسورًا بين مناطق كثيرة.</p>
+<div class="gold-line animate delay-2"></div>
+</div>
+<div class="slide light" data-index="2">
+<div class="content">
+<h2 class="title navy animate">الأربعة الركائز</h2>
+<div class="comparison-grid animate delay-1">
+<div class="comparison-panel highlight">
+<h4>1. الإحصائيات والأساليب الكمية</h4>
+<p>• الانحدار، تحليل البقاء</p>
+<p>• التحليل التلوي (الزوجي، الشبكة)</p>
+<p>• الأساليب الافتراضية (بشكل متزايد)</p>
+<p>• البيانات المفقودة، تحليل الحساسية</p>
+</div>
+<div class="comparison-panel">
+<h4>2. علم الأوبئة وتصميم الدراسة</h4>
+<p>• التعرف على التحيز (الاختيار، المعلومات، الإرباك)</p>
+<p>• تصميم التجارب المعشاة ذات الشواهد وCONSORT</p>
+<p>• قيود الدراسة الرصدية</p>
+<p>• أطر الاستدلال السببي</p>
+</div>
+<div class="comparison-panel">
+<h4>3. خبرة المجال</h4>
+<p>• المعرفة السريرية (كافية لطرح الأسئلة الصحيحة)</p>
+<p>• فهم أنظمة الرعاية الصحية</p>
+<p>• سياق السياسة واتخاذ القرار</p>
+<p>• النتائج ذات الصلة بالمريض</p>
+</div>
+<div class="comparison-panel highlight">
+<h4>4. الاتصالات</h4>
+<p>• ترجمة التعقيد إلى وضوح</p>
+<p>• الكتابة لجماهير متنوعة</p>
+<p>• التدريس والتوجيه</p>
+<p>• الخلاف الدبلوماسي</p>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark" data-index="3">
+<p class="story-box animate">
+<strong>قصة اكتشاف الحمض النووي:</strong><br/><br/>
+                في عام 1953، تطلب اكتشاف بنية الحمض النووي أربعة تخصصات:<br/><br/>
+                كشفت دراسة البلورات بالأشعة السينية التي قامت بها روزاليند فرانكلين عن الشكل الحلزوني.<br/>
+                أظهرت كيمياء إروين تشارجاف قواعد الاقتران الأساسية.<br/>
+                اقترحت خبرة لينوس بولينج في عرض الأزياء الحلزوني.<br/>
+                جمعت رؤية واتسون وكريك البيولوجية القطع.<br/><br/>
+                لا يمكن لأي متخصص أن يحلها بمفرده. ولم يظهر الحلزون المزدوج إلا عندما تقاربت التخصصات.<br/><br/>
+<span style="color: var(--gold);">المنهجي هو المترجم بين المتخصصين. ليس الأعمق في أي مجال، ولكنه يتقن جميع المجالات.</span>
+</p>
+<div class="story-decision-tree animate delay-1">
+<p class="decision-prompt">لديك بيانات أشعة سينية مهمة حول بنية الحمض النووي. ماذا تختار؟</p>
+<div class="decision-options">
+<div class="decision-option" data-path="wrong" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();}" role="button" tabindex="0">
+<strong>المسار أ:</strong> اعمل بمعزل عن الآخرين - قم بتحسين تحليلك بمفردك، واحرس بياناتك بعناية.
+                    <div class="consequence">→ يرى الآخرون بياناتك من خلال القنوات الخلفية، انشرها أولاً. مساهمتك مسجلة في التاريخ.</div>
+</div>
+<div class="decision-option" data-path="right" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();}" role="button" tabindex="0">
+<strong>المسار ب:</strong> التعاون عبر التخصصات، وتبادل الأفكار، والتفاعل مع علماء الأحياء والكيميائيين.
+                    <div class="consequence">← الاكتشاف الجماعي. الاختراق يأتي من التوليف. يتقدم العلم معًا.</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide light" data-index="4">
+<div class="content">
+<h2 class="title navy animate">الإحصائيات: ما تحتاجه</h2>
+<div class="case-study animate delay-1">
+<h4>الكفاءات الأساسية (يجب أن تمتلك)</h4>
+<p>• <strong>أساسيات الانحدار:</strong> تفسير المعاملات الخطية واللوجستية</p>
+<p>• <strong>تحليل البقاء:</strong> كابلان ماير، انحدار كوكس، نسب المخاطر</p>
+<p>• <strong>التحليل التلوي:</strong> التأثيرات الثابتة/العشوائية، عدم التجانس (I²، τ²)، الغابة المخططات</p>
+<p>• <strong>البيانات المفقودة:</strong> MCAR/MAR/MNAR، أساسيات التضمين المتعددة</p>
+<p style="margin-top: 1rem;"><strong>مجالات النمو (ذات قيمة متزايدة)</strong></p>
+<p>• التحليل التلوي للشبكة والمقارنات غير المباشرة</p>
+<p>• الأساليب بايزي (الأسبقية، الفواصل الزمنية الموثوقة)</p>
+<p>• التعلم الآلي لنماذج التنبؤ</p>
+<p>• طرق الاستدلال السببي (IPW، طرق G)</p>
+</div>
+</div>
+</div>
+<div class="slide dark" data-index="5">
+<p class="title cream animate">قصة جون يوانيديس</p>
+<div class="profile-box animate delay-1">
+<strong>من الطبيب السريري إلى الأساليب الثورية</strong><br/><br/>
+                تم تدريب جون إيوانيديس كطبيب للأمراض المعدية. كان من الممكن أن يقضي حياته المهنية في علاج المرضى.<br/><br/>
+                بدلاً من ذلك، في عام 2005، نشر "لماذا تعتبر معظم نتائج الأبحاث المنشورة" خطأ" - حجة إحصائية مفادها أن معظم نتائج الأبحاث المزعومة خاطئة.<br/><br/>
+                تم الاستشهاد بالمقالة في <strong>15000 مرة</strong>. لقد غيّر طريقة تفكير المجلات والممولين والباحثين بشأن الأدلة.<br/><br/>
+<span style="color: var(--gold);">لم يكن بحاجة إلى أن يكون أفضل إحصائي في العالم. لقد كان بحاجة إلى فهم الإحصائيات جيدًا بما يكفي لطرح السؤال الذي لم يطرحه أي شخص آخر.</span>
+</div>
+<div class="citation-box animate delay-2">
+                إيوانيديس JPA. بلوس الطب 200؛2(8):e124. المقالة الأكثر وصولا في تاريخ المجلة.
+              </div>
+</div>
+<div class="slide light" data-index="6">
+<div class="content">
+<h2 class="title navy animate">علم الأوبئة: مجموعة أدوات صائد التحيز</h2>
+<div class="comparison-grid animate delay-1">
+<div class="comparison-panel">
+<h4>التحيز في الاختيار</h4>
+<p>من يدخل الدراسة هو السكان المستهدفين</p>
+<p><em>مثال: التجارب التي استبعدت المرضى المسنين، ثم تم تطبيقها على دور رعاية المسنين</em></p>
+</div>
+<div class="comparison-panel">
+<h4>تحيز المعلومات</h4>
+<p>خطأ في القياس، انحياز الاستدعاء، انحياز الكشف</p>
+<p><em>مثال: يقوم مقيمو النتائج غير المعماة بتقييم نقاط النهاية الذاتية</em></p>
+</div>
+<div class="comparison-panel">
+<h4>مربك</h4>
+<p>المتغير الثالث ينشئ ارتباطًا زائفًا</p>
+<p><em>مثال: فيتامين د وكوفيد - يبقى المرضى في منازلهم</em></p>
+</div>
+<div class="comparison-panel highlight">
+<h4>سؤال المنهجي</h4>
+<p>"ما هي التحيزات التي يمكن أن تفسر هذه النتيجة - وإلى أي مدى سيحتاجون إلى تفسيرها؟ اشرح؟"</p>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark" data-index="7">
+<p class="story-box animate">
+<strong>قصة القهوة وأمراض القلب:</strong><br/><br/>
+                لعقود من الزمن، أظهرت الدراسات الرصدية أن شاربي القهوة يعانون من أمراض القلب أكثر. حذرت الإرشادات من تناول القهوة.<br/><br/>
+                ثم لاحظ علماء المنهجيات أن شاربي القهوة يدخنون أكثر أيضًا. وعندما تم تعديل الدراسات لتتناسب مع التدخين، اختفت هذه العلاقة.<br/><br/>
+                أظهرت دراسات لاحقة، باستخدام طرق أفضل، أن القهوة قد تكون في الواقع وقائية.<br/><br/>
+<span style="color: var(--gold);">إن وظيفة المنهجي ليست إعلان الحقيقة - بل طرح السؤال: "ما الذي يمكن أن يفسر هذا أيضًا؟"</span>
+</p>
+</div>
+<div class="slide light" data-index="8">
+<div class="content">
+<h2 class="title navy animate">التواصل: الاستخفاف المهارة</h2>
+<div class="stats-grid animate delay-1">
+<div class="stat-box">
+<div class="stat-value">50%</div>
+<div class="stat-label">من الوقت الذي يقضيه المنهجي في التواصل مع غير المنهجيين</div>
+</div>
+<div class="stat-box highlight">
+<div class="stat-value">1</div>
+<div class="stat-label">الشريحة التي تشرح GRADE أفضل من 100 ورقة</div>
+</div>
+<div class="stat-box">
+<div class="stat-value">∞</div>
+<div class="stat-label">يضاعف التأثير عندما يفهم الأطباء الأساليب</div>
+</div>
+</div>
+<div class="story-box animate delay-2" style="background: rgba(30,39,97,0.1); border-color: var(--navy);">
+<strong>الاختبار:</strong> هل يمكنك شرح "أدلة يقين منخفضة للغاية" لمريض في جملة واحدة؟<br/><br/>
+                  "لسنا واثقين من هذه النتائج - قد يكون التأثير الحقيقي مختلفًا تمامًا عما أظهرته الدراسات."
+                </div>
+</div>
+</div>
+<div class="slide light" data-index="9">
+<div class="content">
+<h2 class="title navy animate">شجرة القرار: هل لديك الأساس؟</h2>
+<div aria-label="Decision tree for assessing methodologist skill readiness" class="decision-tree animate delay-1" role="img">
+<div class="decision-node question">
+                    هل يمكنك شرح فترة الثقة للطبيب؟
+                  </div>
+<div class="decision-branches">
+<div class="decision-branch">
+<div class="branch-label yes">YES</div>
+<div class="arrow-down"></div>
+<div class="decision-node question" style="font-size: 0.85rem;">
+                        هل يمكنك تحديد 3 تحيزات في دراسة قائمة على الملاحظة؟
+                      </div>
+<div class="decision-branches" style="margin-top: 0.5rem;">
+<div class="decision-branch">
+<div class="branch-label yes" style="font-size: 0.7rem;">YES</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node outcome-yes" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>جاهز</strong><br/>الأساس في مكانه
+                          </div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no" style="font-size: 0.7rem;">NO</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node warning" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>بناء برنامج التحصين الموسع</strong><br/>مطلوب دورة تصميم الدراسة
+                          </div>
+</div>
+</div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no">NO</div>
+<div class="arrow-down"></div>
+<div class="decision-node outcome-no" style="font-size: 0.85rem;">
+<strong>بناء الإحصائيات</strong><br/>دورة الإحصاء الحيوي أولاً
+                      </div>
+</div>
+</div>
+</div>
+<div class="decision-tree-sr">
+                  شجرة القرار: هل يمكنك شرح فاصل الثقة للطبيب؟ إذا كانت الإجابة بنعم، هل يمكنك تحديد 3 تحيزات في دراسة قائمة على الملاحظة؟ إذا كانت الإجابة بنعم على كلا الأمرين، فأنت جاهزة مع وضع كريم الأساس في مكانه. إذا لم تتمكن من تحديد التحيزات، فاشترك في دورة تصميم الدراسة. إذا لم تتمكن من شرح فترات الثقة، فخذ دورة في الإحصاء الحيوي أولاً.
+                </div>
+</div>
+</div>
+<div class="slide light" data-index="10">
+<div class="content">
+<h2 class="title navy animate">اختبار الوحدة 2</h2>
+<div class="quiz-container">
+<div class="quiz-question">
+<h4>الركائز الأربع لمهارات المنهجي هي:</h4>
+<div class="quiz-options" role="radiogroup">
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>A.</span> الرياضيات، الفيزياء، الكيمياء، الأحياء
+                      </div>
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" onkeydown="handleQuizKey(event, this, true)" role="radio" tabindex="0">
+<span>B.</span> الإحصاء وعلم الأوبئة وخبرة المجال والاتصالات
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>C.</span> البرمجة، علم البيانات، التعلم الآلي، الذكاء الاصطناعي
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>D.</span> القراءة، الكتابة، الحساب، التفكير الناقد
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide light" data-index="11">
+<div class="content">
+<h2 class="title navy animate">اختبار الوحدة 2 (2)</h2>
+<div class="quiz-container">
+<div class="scenario-box animate delay-1">
+<div class="scenario-label">السيناريو</div>
+                    أظهرت إحدى الدراسات أن الأشخاص الذين يتناولون الأطعمة العضوية لديهم معدلات إصابة بالسرطان أقل. الدراسة رصدية مع 50000 مشارك. ماذا يجب أن يكون السؤال الأول لأخصائي المنهج؟
+                  </div>
+<div class="quiz-question">
+<h4>اختر أفضل سؤال منهجي:</h4>
+<div class="quiz-options" role="radiogroup">
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>A.</span> هل كانت القيمة p مهمة؟
+                      </div>
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" onkeydown="handleQuizKey(event, this, true)" role="radio" tabindex="0">
+<span>B.</span> ما هي الإرباكات التي قد تفسر هذا الارتباط؟
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>C.</span> كم تكلفة الأغذية العضوية؟
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>D.</span> ما هي المجلة التي نشرت الدراسة؟
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black" data-index="12">
+<p class="refrain animate">المهارات هي الأساس. الآن - أين ستبني؟</p>
+<div class="gold-line animate delay-1"></div>
+<p class="animate delay-2" style="font-size: 1.25rem; margin-top: 1.5rem;">الوحدة 3: المسارات الوظيفية</p>
+</div>
+</div>
+ الوحدة 3: المسارات المهنية 
+<div class="module-slides" data-module="3">
+<div class="slide dark active" data-index="0">
+<p class="refrain animate">تؤدي العديد من الطرق إلى الأساليب. كل طريق يشكل ما ستصبح عليه.</p>
+</div>
+<div class="slide dark" data-index="1">
+<p class="direct-address animate">أين يعمل المنهجيون؟</p>
+<p class="direct-address animate delay-1">قد تفاجئك الإجابة.</p>
+<div class="gold-line animate delay-2"></div>
+</div>
+<div class="slide light" data-index="2">
+<div class="content">
+<h2 class="title navy animate">المسارات الوظيفية الستة</h2>
+<div class="path-grid animate delay-1">
+<div class="path-card">
+<h4>الأوساط الأكاديمية</h4>
+<p>الجامعات، معاهد البحوث</p>
+<div class="salary">$80K-$180K</div>
+</div>
+<div class="path-card">
+<h4>وكالات HTA</h4>
+<p>نيس، CADTH، IQWIG، السلطات الإقليمية</p>
+<div class="salary">$70K-$140K</div>
+</div>
+<div class="path-card">
+<h4>كوكرين/JBI</h4>
+<p>منظمات تركيب الأدلة</p>
+<div class="salary">$65K-$120K</div>
+</div>
+<div class="path-card">
+<h4>منظمة الصحة العالمية/الصحة العالمية</h4>
+<p>المنظمات الدولية والمنظمات غير الحكومية</p>
+<div class="salary">$90K-$160K</div>
+</div>
+<div class="path-card">
+<h4>استشارات صيدلانية</h4>
+<p>فرق أدلة الصناعة، CROs</p>
+<div class="salary">$100K-$220K</div>
+</div>
+<div class="path-card">
+<h4>Consulting</h4>
+<p>الشركات المستقلة أو المتخصصة</p>
+<div class="salary">$120K-$300K+</div>
+</div>
+</div>
+<p class="animate delay-2" style="font-size: 0.75rem; color: var(--light-text); margin-top: 1rem;">
+                  نطاقات الرواتب تقريبية، بالدولار الأمريكي، وتختلف حسب المنطقة والأقدمية. المصدر: مسوحات الصناعة 2023-2024.
+                </p>
+</div>
+</div>
+<div class="slide dark" data-index="3">
+<p class="title cream animate">المسار 1: الأوساط الأكاديمية</p>
+<div class="profile-box animate delay-1">
+<strong>الملف الشخصي</strong><br/><br/>
+<strong>يومًا بيوم:</strong> التدريس والبحث والإشراف وكتابة المنح وعمل اللجان<br/>
+<strong>الاستقلالية:</strong> مرتفع (أنت اختر أسئلتك)<br/>
+<strong>الاستقرار:</strong> المتغير (مسار الحيازة مقابل الأموال الناعمة)<br/>
+<strong>الجدول الزمني للتأثير:</strong> طويل (تستغرق المنشورات سنوات)<br/><br/>
+<strong>من يزدهر هنا:</strong> أولئك الذين يحبون التدريس، ويريدون حرية البحث، يمكنهم تحمل الوتيرة البطيئة والسياسة الأكاديمية<br/><br/>
+<strong>احترس من:</strong> ضغط النشر أو الهلاك، عدم اليقين بشأن المنح، التطبيق العملي المحدود
+              </div>
+<div class="witness-statement animate delay-2">
+<div class="source">منهج أكاديمي، 15 عامًا</div>
+<div class="quote">"لقد نشرت 300 ورقة بحثية. ربما 10 منها غيرت الممارسة. لكن الطلاب الذين قمت بتدريبهم؟ إنهم يغيرون ممارساتهم كل يوم."</div>
+</div>
+</div>
+<div class="slide dark" data-index="4">
+<p class="title cream animate">المسار 2: وكالات HTA</p>
+<div class="profile-box animate delay-1">
+<strong>الملف الشخصي</strong><br/><br/>
+<strong>يومًا بيوم:</strong> مراجعة تقارير الشركات المصنعة، وكتابة تقارير التقييم، وتطوير المبادئ التوجيهية<br/>
+<strong>الاستقلالية:</strong> متوسطة (عمليات منظمة)<br/>
+<strong>الاستقرار:</strong> عالية (حكومية/شبه حكومية)<br/>
+<strong>الجدول الزمني للتأثير:</strong> فورية (تؤثر القرارات على التغطية)<br/><br/>
+<strong>من يزدهر هنا:</strong> أولئك الذين يريدون تأثيرًا مباشرًا على السياسات، يستمتعون بعمل منظم، ويشعرون بالارتياح تجاه المساءلة<br/><br/>
+<strong>احترس من:</strong> ضغط سياسي، ومواعيد نهائية ضيقة، وإبداع بحثي أقل
+              </div>
+<div class="witness-statement animate delay-2">
+<div class="source">NICE Senior محلل، المملكة المتحدة</div>
+<div class="quote">"كل تقرير أكتبه قد يحدد ما إذا كان 100.000 مريض سيحصلون على العلاج. وهذا التركيز يبقيني متيقظًا."</div>
+</div>
+</div>
+<div class="slide dark" data-index="5">
+<p class="title cream animate">المسار 3: منظمة الصحة العالمية والصحة العالمية</p>
+<div class="profile-box animate delay-1">
+<strong>الملف الشخصي</strong><br/><br/>
+<strong>يومًا بيوم:</strong> تطوير المبادئ التوجيهية، واستعراض الأدلة، والمساعدة التقنية للبلدان<br/>
+<strong>الاستقلالية:</strong> متوسطة (القيود الدبلوماسية)<br/>
+<strong>الاستقرار:</strong> متوسطة (قائمة على العقود، ولكنها قابلة للتجديد)<br/>
+<strong>الجدول الزمني للتأثير:</strong> متغيرة (يمكن أن تستغرق المبادئ التوجيهية سنوات؛ وتكون الاستجابة لحالات الطوارئ فورية)<br/><br/>
+<strong>من يزدهر هنا:</strong> أولئك الذين يريدون تأثيرًا عالميًا، يستمتعون بالعمل عبر الثقافات، يمكنهم التنقل بين البيروقراطية<br/><br/>
+<strong>احترس من:</strong> بطء عملية صنع القرار، والاعتبارات السياسية، والسفر المتكرر
+              </div>
+<div class="witness-statement animate delay-2">
+<div class="source">المسؤول الفني لمنظمة الصحة العالمية، جنيف</div>
+<div class="quote">"لدينا يتم استخدام المبادئ التوجيهية الخاصة بالملاريا من قبل 40 دولة، لكن الحصول على موافقة 15 خبيرًا على جملة واحدة قد يستغرق ستة أشهر.</div>
+</div>
+</div>
+<div class="slide dark" data-index="6">
+<p class="title cream animate">المسار 4: صناعة الأدوية</p>
+<div class="profile-box animate delay-1">
+<strong>الملف الشخصي</strong><br/><br/>
+<strong>يومًا بيوم:</strong> تصميم التجارب، تقديمات HTA، الذكاء التنافسي، دعم الشؤون الطبية<br/>
+<strong>الاستقلالية:</strong> الوسيط (أهداف العمل)<br/>
+<strong>الاستقرار:</strong> الوسيط (مشترك إعادة الهيكلة)<br/>
+<strong>الجدول الزمني للتأثير:</strong> الوسيط (دورة حياة المنتج)<br/><br/>
+<strong>من يزدهر هنا:</strong> أولئك الذين يريدون تعويضات عالية، يتمتعون بخطى سريعة ومريحة مع سياق تجاري<br/><br/>
+<strong>احترس من:</strong> تضارب المصالح، والضغط من أجل "العثور على الإجابة الصحيحة"، وحرية نشر أقل
+              </div>
+<div class="witness-statement animate delay-2">
+<div class="source">مدير استراتيجية الأدلة، Global Pharma</div>
+<div class="quote">"نعم، نريد الموافقة على أدويتنا. لكن التصميم السيئ للتجربة الذي يفشل في المرحلة الثالثة يكلف 500 مليون دولار. الصرامة هي عمل جيد."</div>
+</div>
+</div>
+<div class="slide light" data-index="7">
+<div class="content">
+<h2 class="title navy animate">شجرة القرار: أي مسار يناسب أنت؟</h2>
+<div aria-label="Decision tree for choosing career path" class="decision-tree animate delay-1" role="img">
+<div class="decision-node question">
+                    هل التأثير المباشر للسياسة أكثر أهمية من حرية البحث؟
+                  </div>
+<div class="decision-branches">
+<div class="decision-branch">
+<div class="branch-label yes">التأثير</div>
+<div class="arrow-down"></div>
+<div class="decision-node question" style="font-size: 0.85rem;">
+                        نطاق عالمي أم تركيز وطني؟
+                      </div>
+<div class="decision-branches" style="margin-top: 0.5rem;">
+<div class="decision-branch">
+<div class="branch-label yes" style="font-size: 0.7rem;">عالمي</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node" style="font-size: 0.75rem; padding: 0.5rem; background: var(--teal); color: white; border-color: var(--teal);">
+<strong>منظمة الصحة العالمية / المنظمة غير الحكومية</strong>
+</div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no" style="font-size: 0.7rem;">وطني</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node" style="font-size: 0.75rem; padding: 0.5rem; background: var(--purple); color: white; border-color: var(--purple);">
+<strong>وكالة HTA</strong>
+</div>
+</div>
+</div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no">حرية</div>
+<div class="arrow-down"></div>
+<div class="decision-node question" style="font-size: 0.85rem;">
+                        أولوية التعويض أم الاستقلال الذاتي؟
+                      </div>
+<div class="decision-branches" style="margin-top: 0.5rem;">
+<div class="decision-branch">
+<div class="branch-label yes" style="font-size: 0.7rem;">$$</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node" style="font-size: 0.75rem; padding: 0.5rem; background: var(--green); color: white; border-color: var(--green);">
+<strong>فارما / استشارات</strong>
+</div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no" style="font-size: 0.7rem;">استقلال</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node" style="font-size: 0.75rem; padding: 0.5rem; background: var(--navy); color: white; border-color: var(--navy);">
+<strong>أكاديمي</strong>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="decision-tree-sr">
+                  شجرة القرار: هل التأثير المباشر للسياسة أكثر أهمية من حرية البحث؟ إذا كان التأثير، فاختر بين النطاق العالمي (منظمة الصحة العالمية/المنظمات غير الحكومية) أو التركيز الوطني (وكالة HTA). إذا كانت الحرية، فاختر بين أولوية التعويض (فارما/الاستشارات) أو أولوية الاستقلالية (الأكاديمية).
+                </div>
+</div>
+</div>
+<div class="slide dark" data-index="8">
+<p class="story-box animate">
+<strong>قصة المنهجيين الثلاثة:</strong><br/><br/>
+                قضى دوج ألتمان 40 عامًا في جامعة أكسفورد، وهو يعمل ببطء على بناء معايير CONSORT وPRISMA وإعداد التقارير، وقد امتد تأثيره إلى عقود من الزمن. ترك ديفيد ساكيت المجال الأكاديمي لممارسة الطب المبني على الأدلة مباشرة مع المرضى في هاميلتون، وهو ما يمثل فائدة سريرية فورية. استخدم هانز روزلينج تدريبه في علم الأوبئة لإنشاء Gapminder - حيث وصل إلى الملايين من خلال تصور البيانات.<br/><br/>
+                نفس التدريب، ثلاثة مسارات.<br/><br/>
+<span style="color: var(--gold);">Altman the Canyon (تأثير عميق وبطيء)، Sackett the Mill (الاستخدام السريري اليومي)، Rosling the delta (وصول عام واسع).</span>
+</p>
+<div class="story-decision-tree animate delay-1">
+<p class="decision-prompt">لقد اكتسبت خبرة في تجميع الأدلة. اختر المسار الخاص بك:</p>
+<div class="decision-options">
+<div class="decision-option" data-path="neutral" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();}" role="button" tabindex="0">
+<strong>المسار أ (القطاع الأكاديمي):</strong> مثل ألتمان - قم ببناء المعايير وتشكيل المنهجية على مدار 40 عامًا.
+                    <div class="consequence">→ كونسورت، بريسما، خط الاستواء. تأثير عميق وبطيء ودائم. يمكنك تغيير كيفية الإبلاغ عن العلم.</div>
+</div>
+<div class="decision-option" data-path="neutral" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();}" role="button" tabindex="0">
+<strong>المسار ب (الممارسة السريرية):</strong> مثل ساكيت – تقديم الأدلة مباشرة إلى رعاية المرضى.
+                    <div class="consequence">→ فائدة سريرية فورية. كل مريض يستفيد. ترى التأثير يوميًا.</div>
+</div>
+<div class="decision-option" data-path="neutral" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();}" role="button" tabindex="0">
+<strong>المسار ج (الاتصالات العامة):</strong> مثل روزلينج - ترجمة البيانات للملايين.
+                    <div class="consequence">→ Gapminder، محادثات TED، الوصول العالمي. أنت تغير الطريقة التي يرى بها العالم البيانات.</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide light" data-index="9">
+<div class="content">
+<h2 class="title navy animate">المسار الهجين: الأكثر شيوعًا</h2>
+<div class="timeline-vertical animate delay-1">
+<div class="timeline-item">
+<h4>السنوات 1-5: التأسيس</h4>
+<p>درجة الدراسات العليا (MPH، ماجستير، دكتوراه). الوظيفة الأولى في كثير من الأحيان دور أكاديمي أو مبتدئ في HTA.</p>
+</div>
+<div class="timeline-item">
+<h4>السنوات 5-10: التخصص</h4>
+<p>تطوير الخبرات المتخصصة. قد تتحرك القطاعات. بناء سجل النشر والشبكة.</p>
+</div>
+<div class="timeline-item">
+<h4>السنوات 10-15: القيادة</h4>
+<p>الأدوار العليا. في كثير من الأحيان التشاور على الجانب. خبير مدعو للحصول على إرشادات.</p>
+</div>
+<div class="timeline-item">
+<h4>سنوات 15+: التأثير</h4>
+<p>شكل الحقل. اكتب الكتب المدرسية. تدريب الجيل القادم.</p>
+</div>
+</div>
+<p class="animate delay-2" style="font-size: 0.85rem; color: var(--light-text); margin-top: 1rem;">
+                  لقد عمل معظم كبار المنهجيين في 2-3 قطاعات. التنقل هو أحد الأصول.
+                </p>
+</div>
+</div>
+<div class="slide light" data-index="10">
+<div class="content">
+<h2 class="title navy animate">الوحدة 3 مسابقة</h2>
+<div class="quiz-container">
+<div class="quiz-question">
+<h4>ما هو المسار الوظيفي الذي يقدم عادةً أعلى تعويض ولكنه يتطلب الراحة مع السياق التجاري؟</h4>
+<div class="quiz-options" role="radiogroup">
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>A.</span> الأوساط الأكاديمية
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>B.</span> منظمة الصحة العالمية/الصحة العالمية
+                      </div>
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" onkeydown="handleQuizKey(event, this, true)" role="radio" tabindex="0">
+<span>C.</span> صناعة الأدوية / الاستشارات
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>D.</span> وكالات HTA
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black" data-index="11">
+<p class="refrain animate">تم اختيار المسار. الآن — كيف تصبح مرئيًا؟</p>
+<div class="gold-line animate delay-1"></div>
+<p class="animate delay-2" style="font-size: 1.25rem; margin-top: 1.5rem;">الوحدة 4: بناء محفظتك الاستثمارية</p>
+</div>
+</div>
+ الوحدة 4: بناء محفظتك الاستثمارية 
+<div class="module-slides" data-module="4">
+<div class="slide dark active" data-index="0">
+<p class="refrain animate">في مجال المهندسين المعماريين غير المرئيين، كيف تصبح معروفًا؟</p>
+</div>
+<div class="slide dark" data-index="1">
+<p class="direct-address animate">المنهجي بدون رؤية هو منهجي بدون تأثير.</p>
+<p class="direct-address animate delay-1">يجب أن يتحدث عملك، ولكن يجب أن يسمعه الناس أولاً.</p>
+<div class="gold-line animate delay-2"></div>
+</div>
+<div class="slide dark" data-index="2">
+<p class="title cream animate">قصة الإحصائي المجهول</p>
+<div class="story-box animate delay-1">
+<strong>المنهجي الذي غير الطب – مجهول:</strong><br/><br/>
+                في عام 1996، قاد خبير إحصائي يُدعى ديفيد موهير مجموعة لإنشاء مبادئ توجيهية CONSORT للإبلاغ عن التجارب العشوائية.<br/><br/>
+                ولم يكن مشهوراً. ولم يكن في جامعة هارفارد. كان عالمًا منهجيًا في معهد أبحاث كندي.<br/><br/>
+                اليوم، CONSORT مطلوب من قبل أكثر من 600 مجلة. تم الاستشهاد به أكثر من 35000 مرة. يمكن القول إنها أنقذت أرواحًا أكثر من معظم الأدوية، وذلك من خلال التأكد من أننا نعرف الأدوية التي تعمل بالفعل.<br/><br/>
+<span style="color: var(--gold);">لقد بنى موهير سمعته ليس من خلال العبقرية وحدها، ولكن من خلال المساهمة الواضحة التي لا هوادة فيها في مشكلة واجهها الجميع.</span>
+</div>
+</div>
+<div class="slide light" data-index="3">
+<div class="content">
+<h2 class="title navy animate">الرؤية المكدس</h2>
+<div class="comparison-grid animate delay-1">
+<div class="comparison-panel">
+<h4>1. المنشورات</h4>
+<p>• أوراق الأساليب في المجلات الجيدة</p>
+<p>• الأوراق التطبيقية التعاونية (دور الأساليب)</p>
+<p>• التعليقات والرسائل</p>
+<p>• البرامج التعليمية والأدلة الإرشادية</p>
+</div>
+<div class="comparison-panel highlight">
+<h4>2. الأدوات والموارد</h4>
+<p>• حزم البرامج (R، Stata)</p>
+<p>• قوائم المراجعة وإرشادات إعداد التقارير</p>
+<p>• المواد التعليمية (الوصول المفتوح)</p>
+<p>• الآلات الحاسبة و مساعدات اتخاذ القرار</p>
+</div>
+<div class="comparison-panel">
+<h4>3. حضور</h4>
+<p>• العروض التقديمية في المؤتمر</p>
+<p>• ورش العمل والتدريب</p>
+<p>• وسائل التواصل الاجتماعي (X/Twitter، LinkedIn)</p>
+<p>• منشورات المدونة والنشرات الإخبارية</p>
+</div>
+<div class="comparison-panel">
+<h4>4. شبكة</h4>
+<p>• مشاركة كوكرين/كامبل</p>
+<p>• عضوية لجنة المبادئ التوجيهية</p>
+<p>• مجالس تحرير المجلة</p>
+<p>• علاقات الإرشاد</p>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark" data-index="4">
+<p class="title cream animate">قوة الأدوات</p>
+<div class="stats-grid animate delay-1">
+<div class="stat-box highlight">
+<div class="stat-value">تعريف</div>
+<div class="stat-label">حزمة R بواسطة Wolfgang Viechtbauer. 10000+ الاستشهادات.</div>
+</div>
+<div class="stat-box">
+<div class="stat-value">ROB 2</div>
+<div class="stat-label">خطر أداة التحيز. معيار لمراجعات كوكرين في جميع أنحاء العالم.</div>
+</div>
+<div class="stat-box">
+<div class="stat-value">الدرجة</div>
+<div class="stat-label">إطار العمل بقلم جويات وآخرون. تستخدم من قبل أكثر من 100 منظمة.</div>
+</div>
+</div>
+<div class="story-box animate delay-2">
+                مقياس الأدوات. تتم قراءة ورقة مرة واحدة. يتم استخدام الأداة آلاف المرات.<br/><br/>
+<span style="color: var(--gold);">إذا تمكنت من حل مشكلة متكررة وتعبئتها جيدًا، فسيتضاعف تأثيرك.</span>
+</div>
+</div>
+<div class="slide light" data-index="5">
+<div class="content">
+<h2 class="title navy animate">استراتيجية النشر: الجودة أكثر من الكمية</h2>
+<div class="case-study animate delay-1">
+<h4>صيغة ورقة الأساليب</h4>
+<p><strong>المشكلة:</strong> تحديد التحدي المنهجي المتكرر</p>
+<p><strong>الحل:</strong> اقتراح نهج واضح وقابل للتنفيذ</p>
+<p><strong>العرض التوضيحي:</strong> تطبيقها على البيانات الحقيقية أو المحاكاة</p>
+<p><strong>إمكانية الوصول:</strong> توفير تعليمات برمجية أو أدوات أو قوالب</p>
+<p><strong>التحقق من الصحة:</strong> أظهر أنه يعمل بشكل أفضل من الوضع الراهن</p>
+<p style="margin-top: 1rem; color: var(--light-text); font-size: 0.85rem;">
+<strong>المجلات المستهدفة:</strong> BMJ، JAMA، حوليات الطب الباطني (أقسام الطرق)، الإحصاء في الطب، طرق تجميع الأبحاث، مجلة علم الأوبئة السريرية
+                  </p>
+</div>
+</div>
+</div>
+<div class="slide dark" data-index="6">
+<p class="title cream animate">مضاعف التعاون</p>
+<div class="profile-box animate delay-1">
+<strong>كيف قامت جورجيا سالانتي ببناء إمبراطورية الأساليب:</strong><br/><br/>
+                لم تكتب جورجيا سالانتي عن التحليل التلوي للشبكة فحسب، بل تعاونت مع الأبحاث السريرية الفرق التي كانت في حاجة إليها.<br/><br/>
+                أنتج كل تعاون ما يلي: (1) ورقة بحثية تطبيقية تحل مشكلة سريرية، (2) رؤى طرقية لورقة الأساليب التالية، (3) زميل ممتن أوصى بها للآخرين.<br/><br/>
+                نموت شبكتها بشكل كبير. وهي الآن تقود واحدة من أكثر مجموعات تركيب الأدلة إنتاجية في أوروبا.<br/><br/>
+<span style="color: var(--gold);">الدرس: لا تنتظر أن يُطلب منك ذلك. قدم خبرتك في الأساليب للفرق التي لديها أسئلة سريرية مهمة.</span>
+</div>
+<div class="citation-box animate delay-2">
+                سالانتي جي، جامعة برن. أكثر من 500 منشور. تم تطوير إطار CINeMA لثقة NMA.
+              </div>
+</div>
+<div class="slide light" data-index="7">
+<div class="content">
+<h2 class="title navy animate">بناء تواجدك عبر الإنترنت</h2>
+<div class="comparison-grid animate delay-1">
+<div class="comparison-panel highlight">
+<h4>ما الذي ينجح</h4>
+<p>• مشاركة المحتوى المفيد (برامج تعليمية وشروحات)</p>
+<p>• المشاركة في مناقشات الأساليب باحترام</p>
+<p>• الاحتفال بعمل الآخرين</p>
+<p>• جعل الأفكار المعقدة في متناول الجميع</p>
+<p>• عرض رحلة التعلم الخاصة بك</p>
+</div>
+<div class="comparison-panel">
+<h4>ما لا يصلح</h4>
+<p>• الترويج الذاتي بلا قيمة</p>
+<p>• مهاجمة أساليب الآخرين علنًا</p>
+<p>• منشورات مليئة بالمصطلحات اللغوية</p>
+<p>• غير متسق الحضور</p>
+<p>• تجاهل المشاركة</p>
+</div>
+</div>
+<p class="animate delay-2" style="font-size: 0.85rem; color: var(--light-text); margin-top: 1rem;">
+                  أفضل حسابات المنهجيين: @EpiEllie، @statsepi، @CochraneCollab، @GRADEWorkingGrp
+                </p>
+</div>
+</div>
+<div class="slide dark" data-index="8">
+<p class="story-box animate">
+<strong>قصة روزاليند فرانكلين:</strong><br/><br/>
+                كانت صورة روزاليند فرانكلين بالأشعة السينية (الصورة 51) حاسمة في اكتشاف بنية الحمض النووي. لكنها نشرت بحذر ولم تروج لنفسها.<br/><br/>
+                اطلع واتسون وكريك على بياناتها، ونُشرت أولاً، وفازا بجائزة نوبل. توفيت فرانكلين عن عمر يناهز 37 عامًا، ولم يتم اعتمادها إلى حد كبير.<br/><br/>
+                بعد عقود، كشفت دفاتر ملاحظاتها أنها كانت على بعد أسابيع من حل البنية بنفسها. تم التعتيم على العمل الرائع، الذي تمت مشاركته بهدوء شديد.<br/><br/>
+<span style="color: var(--gold);">لا يتطلب التأثير الاكتشاف فحسب، بل التواصل أيضًا.</span>
+</p>
+<div class="story-decision-tree animate delay-1">
+<p class="decision-prompt">لقد قمت باكتشاف مهم. ماذا تختار؟</p>
+<div class="decision-options">
+<div class="decision-option" data-path="wrong" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();}" role="button" tabindex="0">
+<strong>المسار أ:</strong> انشر بحذر - انتظر البيانات المثالية، وتجنب الترويج الذاتي.
+                    <div class="consequence">→ يرى الآخرون عملك، قم بالنشر أولاً. يتم تذكرك كحاشية سفلية، ولم يتم إثباتها إلا بعد عقود.</div>
+</div>
+<div class="decision-option" data-path="right" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();}" role="button" tabindex="0">
+<strong>المسار ب:</strong> مشاركة النتائج بشكل نشط — إشراك المجتمع، والحضور في المؤتمرات، والتعاون بشكل مفتوح.
+                    <div class="consequence">→ هناك خطر التعرض للسبق الصحفي، ولكن تأكد من أن مساهمتك مرئية. الائتمان يتبع التواصل.</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide light" data-index="9">
+<div class="content">
+<h2 class="title navy animate">اختبار الوحدة 4</h2>
+<div class="quiz-container">
+<div class="quiz-question">
+<h4>إن الطريقة الأكثر قابلية للتوسع التي يمكن لأخصائي المنهجية زيادة التأثير هي:</h4>
+<div class="quiz-options" role="radiogroup">
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>A.</span> نشر المزيد من الأوراق البحثية في المجلات عالية التأثير
+                      </div>
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" onkeydown="handleQuizKey(event, this, true)" role="radio" tabindex="0">
+<span>B.</span> إنشاء أدوات أو برامج أو إرشادات يستخدمها الآخرون مرارا وتكرارا
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>C.</span> حضور المزيد من المؤتمرات
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>D.</span> الحصول على منصب في جامعة مرموقة
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black" data-index="10">
+<p class="refrain animate">الظهور بدون مضمون هو ضجيج. المادة بدون رؤية هي الصمت.</p>
+<div class="gold-line animate delay-1"></div>
+<p class="animate delay-2" style="font-size: 1.25rem; margin-top: 1.5rem;">الوحدة 5: مجموعة الأدوات</p>
+</div>
+</div>
+ الوحدة 5: مجموعة الأدوات 
+<div class="module-slides" data-module="5">
+<div class="slide dark active" data-index="0">
+<p class="refrain animate">يكون الحرفي جيدًا بقدر أدواته - وإتقانه لها.</p>
+</div>
+<div class="slide dark" data-index="1">
+<p class="direct-address animate">ما هي البرامج التي يستخدمها المنهجيون؟</p>
+<p class="direct-address animate delay-1">ما هي الموارد التي تشكل تفكيرهم؟</p>
+<div class="gold-line animate delay-2"></div>
+</div>
+<div class="slide light" data-index="2">
+<div class="content">
+<h2 class="title navy animate">البرامج الإحصائية</h2>
+<div class="comparison-grid animate delay-1">
+<div class="comparison-panel highlight">
+<h4>R (أساسي)</h4>
+<p>• <strong>metafor:</strong> المعيار الذهبي لـ التحليل التلوي</p>
+<p>• <strong>netmeta:</strong> التحليل التلوي للشبكة</p>
+<p>• <strong>robvis:</strong> خطر التصور المتحيز</p>
+<p>• <strong>tidyverse:</strong> معالجة البيانات</p>
+<p style="font-size: 0.8rem; color: var(--light-text); margin-top: 0.5rem;">مجاني ومفتوح المصدر وقابل للتكرار</p>
+</div>
+<div class="comparison-panel">
+<h4>Stata (عام)</h4>
+<p>• <strong>metan/admetan:</strong> التحليل التلوي</p>
+<p>• <strong>الشبكة:</strong> NMA</p>
+<p>• قوي في تحليل البقاء على قيد الحياة</p>
+<p>• المفضل من قبل بعض وكالات HTA</p>
+<p style="font-size: 0.8rem; color: var(--light-text); margin-top: 0.5rem;">مطلوب ترخيص تجاري</p>
+</div>
+<div class="comparison-panel">
+<h4>RevMan (كوكرين)</h4>
+<p>• أداة كوكرين الرسمية</p>
+<p>• واجهة سهلة الاستخدام</p>
+<p>• تخصيص محدود</p>
+<p>• جيدة للمراجعات القياسية</p>
+<p style="font-size: 0.8rem; color: var(--light-text); margin-top: 0.5rem;">مجانية لمراجعات كوكرين</p>
+</div>
+<div class="comparison-panel">
+<h4>Python (متنامي)</h4>
+<p>• <strong>بيميتا:</strong> التحليل التلوي</p>
+<p>• تكامل ML لـ الفحص</p>
+<p>• قدرات التعدين النص</p>
+<p>• البرامج النصية للأتمتة</p>
+<p style="font-size: 0.8rem; color: var(--light-text); margin-top: 0.5rem;">مجاني، جيد لتكامل الذكاء الاصطناعي</p>
+</div>
+</div>
+</div>
+</div>
+<div class="slide light" data-index="3">
+<div class="content">
+<h2 class="title navy animate">أدوات المراجعة المنهجية</h2>
+<div class="path-grid animate delay-1">
+<div class="path-card">
+<h4>كوفيدينس</h4>
+<p>الفحص والاستخراج والتعاون</p>
+<div class="salary" style="color: var(--navy);">$$</div>
+</div>
+<div class="path-card">
+<h4>الريان</h4>
+<p>الفحص بمساعدة الذكاء الاصطناعي، طبقة مجانية</p>
+<div class="salary" style="color: var(--green);">Free</div>
+</div>
+<div class="path-card">
+<h4>ASReview</h4>
+<p>فحص التعلم النشط</p>
+<div class="salary" style="color: var(--green);">Free</div>
+</div>
+<div class="path-card">
+<h4>EPPI-المراجع</h4>
+<p>سير العمل الكامل، واستخراج النص</p>
+<div class="salary" style="color: var(--navy);">$$</div>
+</div>
+<div class="path-card">
+<h4>المقطرSR</h4>
+<p>ميزات المؤسسة والذكاء الاصطناعي</p>
+<div class="salary" style="color: var(--red);">$$$</div>
+</div>
+<div class="path-card">
+<h4>SysRev</h4>
+<p>خيار مفتوح المصدر</p>
+<div class="salary" style="color: var(--green);">Free</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark" data-index="4">
+<p class="title cream animate">الموارد الأساسية</p>
+<div class="profile-box animate delay-1">
+<strong>رف كتب المنهجي:</strong><br/><br/>
+<strong>دليل كوكرين:</strong> مرجع المعيار الذهبي. مجاني على الإنترنت. اقرأ الفصول 6-10 عن كثب.<br/><br/>
+<strong>هيغينز وغرين ← هيغينز وآخرون:</strong> يتم تحديثه بانتظام. مرجعك لأي سؤال حول SR.<br/><br/>
+<strong>بورنشتاين وآخرون. "مقدمة في التحليل التلوي":</strong> أفضل مؤسسة إحصائية.<br/><br/>
+<strong>غيات وآخرون. أدلة مستخدمي JAMA:</strong> أساسيات علم الأوبئة السريرية.<br/><br/>
+<strong>المنظمة الدولية للهجرة "إيجاد ما يصلح في مجال الرعاية الصحية":</strong> معايير المراجعات المنهجية.<br/><br/>
+<span style="color: var(--gold);">قراءة فصل واحد في الأسبوع. في غضون عامين، سيكون لديك تعليم الدراسات العليا في الأساليب.</span>
+</div>
+</div>
+<div class="slide light" data-index="5">
+<div class="content">
+<h2 class="title navy animate">المنظمات والشبكات الرئيسية</h2>
+<div class="comparison-grid animate delay-1">
+<div class="comparison-panel highlight">
+<h4>كوكرين</h4>
+<p>أكبر منتج SR. تمرين. مجموعات الأساليب. فرص التطوع.</p>
+</div>
+<div class="comparison-panel">
+<h4>تعاون كامبل</h4>
+<p>العلوم الاجتماعية ريال. تزايد. أقل قدرة على المنافسة للانضمام.</p>
+</div>
+<div class="comparison-panel">
+<h4>جي بي آي (جوانا بريجز)</h4>
+<p>التمريض / التركيز على الصحة المتحالفة. برنامج تدريبي قوي.</p>
+</div>
+<div class="comparison-panel">
+<h4>مجموعة عمل الصف</h4>
+<p>تقييم اليقين. مؤثر. العضوية عن طريق الدعوة.</p>
+</div>
+<div class="comparison-panel">
+<h4>شبكة خط الاستواء</h4>
+<p>مركز إرشادات إعداد التقارير. فرص تطوير المبادئ التوجيهية.</p>
+</div>
+<div class="comparison-panel">
+<h4>HTAi</h4>
+<p>المجتمع المهني HTA. المؤتمر السنوي. مجموعات المصالح.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark" data-index="6">
+<p class="story-box animate">
+<strong>قصة رسومات فلورنس نايتنجيل:</strong><br/><br/>
+                حصلت فلورنس نايتنجيل على تدريب إحصائي أساسي - أقل بكثير من علماء الرياضيات الجامعيين في عصرها. لكنها أتقنت أداة واحدة: مخطط المنطقة القطبية.<br/><br/>
+                أظهرت مخططاتها "coxcomb" أن الجنود ماتوا بسبب العدوى أكثر من جروح المعارك. البرلمان، الذي تجاهل جداول الأرقام، فهم رسوماتها على الفور.<br/><br/>
+<span style="color: var(--gold);">لم يكن لديها أفضل الأدوات. لقد أتقنت ما كانت تمتلكه، وغيرت الطب العسكري إلى الأبد.</span>
+</p>
+<div class="story-decision-tree animate delay-1">
+<p class="decision-prompt">لديك بيانات تظهر أن الجنود يموتون بسبب العدوى، وليس بسبب جروح المعركة. ويجب على البرلمان أن يتحرك. ماذا تختار؟</p>
+<div class="decision-options">
+<div class="decision-option" data-path="wrong" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();}" role="button" tabindex="0">
+<strong>المسار أ:</strong> اعرض جداول الأرقام - البيانات تتحدث عن نفسها، أظهر الإحصائيات الأولية.
+                    <div class="consequence">→ البرلمان يتجاهلك. الأرقام بدون تصور تكون غير مرئية للسياسيين المشغولين.</div>
+</div>
+<div class="decision-option" data-path="right" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();}" role="button" tabindex="0">
+<strong>المسار ب:</strong> إنشاء رسوم بيانية مرئية - تحويل البيانات إلى صور تحكي القصة في لمحة.
+                    <div class="consequence">→ البرلمان يفهم على الفور. تغييرات السياسة. يتم إصلاح المستشفيات العسكرية. يتم إنقاذ الأرواح.</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide light" data-index="7">
+<div class="content">
+<h2 class="title navy animate">اختبار الوحدة 5</h2>
+<div class="quiz-container">
+<div class="quiz-question">
+<h4>حزمة R الأكثر استخدامًا على نطاق واسع للتحليل التلوي هي:</h4>
+<div class="quiz-options" role="radiogroup">
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" onkeydown="handleQuizKey(event, this, true)" role="radio" tabindex="0">
+<span>A.</span> تعريف
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>B.</span> ggplot2
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>C.</span> com.dplyr
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>D.</span> لامعة
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black" data-index="8">
+<p class="refrain animate">يتم تعلم الأدوات. الآن — أين ستتخصص؟</p>
+<div class="gold-line animate delay-1"></div>
+<p class="animate delay-2" style="font-size: 1.25rem; margin-top: 1.5rem;">الوحدة 6: العثور على المجال الذي يناسبك</p>
+</div>
+</div>
+ الوحدة 6: العثور على المجال الذي يناسبك 
+<div class="module-slides" data-module="6">
+<div class="slide dark active" data-index="0">
+<p class="refrain animate">يعرف الاختصاصي شيئًا عن كل شيء. المتخصص يعرف كل شيء عن شيء ما. يعرف أخصائي المنهجية الأسئلة التي يجب طرحها حول كليهما.</p>
+</div>
+<div class="slide dark" data-index="1">
+<p class="direct-address animate">لا يمكنك إتقان جميع الطرق.</p>
+<p class="direct-address animate delay-1">ولكن يمكنك أن تصبح خبيرًا عالميًا في إحدى الطرق.</p>
+<div class="gold-line animate delay-2"></div>
+</div>
+<div class="slide light" data-index="2">
+<div class="content">
+<h2 class="title navy animate">المنافذ الرئيسية</h2>
+<div class="path-grid animate delay-1">
+<div class="path-card">
+<h4>التحليل التلوي للشبكة</h4>
+<p>المقارنات غير المباشرة والتدخلات المعقدة</p>
+<div class="salary" style="color: var(--teal);">ارتفاع الطلب</div>
+</div>
+<div class="path-card">
+<h4>دقة الاختبار التشخيصي</h4>
+<p>الحساسية/النوعية، منحنيات SROC</p>
+<div class="salary" style="color: var(--teal);">المتخصصة</div>
+</div>
+<div class="path-card">
+<h4>التحليل التلوي IPD</h4>
+<p>بيانات المريض الفردية، إحصائيات متقدمة</p>
+<div class="salary" style="color: var(--green);">تزايد</div>
+</div>
+<div class="path-card">
+<h4>مراجعات منهجية حية</h4>
+<p>التحديث المستمر، والأتمتة</p>
+<div class="salary" style="color: var(--green);">الناشئة</div>
+</div>
+<div class="path-card">
+<h4>التجميع النوعي</h4>
+<p>الإثنوغرافيا الوصفية، وتوليف الإطار</p>
+<div class="salary" style="color: var(--purple);">محرومة</div>
+</div>
+<div class="path-card">
+<h4>خطر التحيز الأدوات</h4>
+<p>تطوير الأدوات والتحقق من صحتها</p>
+<div class="salary" style="color: var(--gold);">مؤثر</div>
+</div>
+<div class="path-card">
+<h4>إرشادات إعداد التقارير</h4>
+<p>CONSORT، امتدادات PRISMA</p>
+<div class="salary" style="color: var(--gold);">تأثير كبير</div>
+</div>
+<div class="path-card">
+<h4>الذكاء الاصطناعي/تعلم الآلة في تجميع الأدلة</h4>
+<p>التشغيل الآلي، والفحص، والاستخراج</p>
+<div class="salary" style="color: var(--green);">الحدود</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark" data-index="3">
+<p class="title cream animate">الغوص العميق: التحليل التلوي للشبكة</p>
+<div class="profile-box animate delay-1">
+<strong>لماذا هذا التخصص؟</strong><br/><br/>
+<strong>المشكلة:</strong> يحتاج صناع السياسات إلى المقارنة بين عشرة أدوية. لدينا تجارب A vs B، B vs C، C vs D... ولكن ليس A vs D مباشرة.<br/><br/>
+<strong>يحل NMA:</strong> يستعير القوة عبر الشبكة لتقدير جميع المقارنات.<br/><br/>
+<strong>الفرصة:</strong> تطلب وكالات HTA NMA لاتخاذ قرارات السداد. فارما تحتاج إلى خبراء NMA. قليل من الناس يفهمون ذلك حقًا.<br/><br/>
+<strong>الحاجز:</strong> يتطلب إحصائيات بايزي، ونظرية الرسم البياني، والفهم العميق للعبرية. منحنى التعلم 2-3 سنوات.<br/><br/>
+<span style="color: var(--gold);">الأسماء الرئيسية: سالانتي، كالدويل، دياس، ويلتون. المورد الرئيسي: وثائق الدعم الفني NICE DSU.</span>
+</div>
+</div>
+<div class="slide dark" data-index="4">
+<p class="title cream animate">التعمق في: الذكاء الاصطناعي/تعلم الآلة في تركيب الأدلة</p>
+<div class="profile-box animate delay-1">
+<strong>لماذا هذا التخصص؟</strong><br/><br/>
+<strong>المشكلة:</strong> يستغرق فحص 50 ألف ملخص يدويًا شهورًا. يعد استخراج البيانات من 200 ورقة أمرًا شاقًا وعرضة للخطأ.<br/><br/>
+<strong>عروض الذكاء الاصطناعي/التعلم الآلي:</strong> التعلم النشط للفحص (تقليل عبء العمل بنسبة 50-90%). البرمجة اللغوية العصبية لاستخراج البيانات. GPT لصياغة البروتوكول.<br/><br/>
+<strong>الفرصة:</strong> الحقل جديد. المعايير ليست موجودة بعد. كل من يكتب أطر التحقق من الصحة يشكل الحقل.<br/><br/>
+<strong>الحاجز:</strong> يتطلب معرفة ML وفهمًا عميقًا لأساليب SR. معظم الأشخاص في تعلم الآلة لا يعرفون SR؛ معظم الأشخاص في SR لا يعرفون تعلم الآلة.<br/><br/>
+<span style="color: var(--gold);">الأسماء الرئيسية: مارشال، والاس، توماس. الأدوات الرئيسية: ASReview، RobotReviewer، Trialstreamer.</span>
+</div>
+</div>
+<div class="slide light" data-index="5">
+<div class="content">
+<h2 class="title navy animate">شجرة القرار: العثور على مكانك المناسب</h2>
+<div aria-label="Decision tree for choosing methodological niche" class="decision-tree animate delay-1" role="img">
+<div class="decision-node question">
+                    هل تنجذب أكثر إلى التعقيد الإحصائي أو تحسين العمليات؟
+                  </div>
+<div class="decision-branches">
+<div class="decision-branch">
+<div class="branch-label yes">إحصائيات</div>
+<div class="arrow-down"></div>
+<div class="decision-node question" style="font-size: 0.85rem;">
+                        هل تشعر بالارتياح تجاه الأساليب الافتراضية؟
+                      </div>
+<div class="decision-branches" style="margin-top: 0.5rem;">
+<div class="decision-branch">
+<div class="branch-label yes" style="font-size: 0.7rem;">YES</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node" style="font-size: 0.75rem; padding: 0.5rem; background: var(--teal); color: white; border-color: var(--teal);">
+<strong>نما / إي بي دي</strong>
+</div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no" style="font-size: 0.7rem;">ليس بعد</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node" style="font-size: 0.75rem; padding: 0.5rem; background: var(--purple); color: white; border-color: var(--purple);">
+<strong>DTA / التنبؤ</strong>
+</div>
+</div>
+</div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no">عملية</div>
+<div class="arrow-down"></div>
+<div class="decision-node question" style="font-size: 0.85rem;">
+                        الاهتمام بالتكنولوجيا/الترميز؟
+                      </div>
+<div class="decision-branches" style="margin-top: 0.5rem;">
+<div class="decision-branch">
+<div class="branch-label yes" style="font-size: 0.7rem;">YES</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node" style="font-size: 0.75rem; padding: 0.5rem; background: var(--green); color: white; border-color: var(--green);">
+<strong>الذكاء الاصطناعي/تعلم الآلة / SRs الحية</strong>
+</div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no" style="font-size: 0.7rem;">NO</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node" style="font-size: 0.75rem; padding: 0.5rem; background: var(--gold); color: var(--navy); border-color: var(--gold);">
+<strong>المبادئ التوجيهية / أدوات RoB</strong>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="decision-tree-sr">
+                  شجرة القرار: هل تنجذب إلى التعقيد الإحصائي أو تحسين العمليات؟ إذا كانت الإحصائيات، هل أنت مرتاح للطرق البايزية؟ إذا كانت الإجابة بنعم، ففكر في التحليل التلوي لـ NMA أو IPD. إذا لم يكن الأمر كذلك بعد، ففكر في نماذج DTA أو التنبؤ. إذا كنت تركز على العمليات، هل لديك اهتمام بالتكنولوجيا/البرمجة؟ إذا كانت الإجابة بنعم، ففكر في الذكاء الاصطناعي/التعلم الآلي أو المراجعات المنهجية المباشرة. إذا كانت الإجابة لا، ففكر في الإرشادات أو مخاطر أدوات التحيز.
+                </div>
+</div>
+</div>
+<div class="slide dark" data-index="6">
+<p class="story-box animate">
+<strong>قصة آرتشي كوكرين:</strong><br/><br/>
+                كان من الممكن أن يظل آرتشي كوكرين طبيبًا عامًا. وبدلاً من ذلك، أمضى عقودًا من الزمن يطرح سؤالًا واحدًا: "أين الدليل؟"<br/><br/>
+                وكان يدافع عن التجارب العشوائية عندما كان زملاؤه يثقون في الحدس السريري. لقد تم الاستهزاء به، وتجاهله، ووصفه بالوسواس. وبحلول الوقت الذي توفي فيه عام 1988، كان "هوسه" قد أصبح أساس الطب المبني على الأدلة.<br/><br/>
+<span style="color: var(--gold);">تحمل مؤسسة كوكرين اسمه. الخبرة العميقة في سؤال واحد غيرت الرعاية الصحية إلى الأبد.</span>
+</p>
+<div class="story-decision-tree animate delay-1">
+<p class="decision-prompt">يثق زملائك في الحدس السريري أكثر من التجارب. أنت تعتقد أن الأدلة يجب أن توجه الممارسة. ماذا تختار؟</p>
+<div class="decision-options">
+<div class="decision-option" data-path="wrong" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();}" role="button" tabindex="0">
+<strong>المسار أ:</strong> تقبل الوضع الراهن - فالخبرة السريرية ذات قيمة، وتوافق مع الممارسة الراسخة.
+                    <div class="consequence">→ يظل الطب قائمًا على الرأي. وتستمر العلاجات دون أدلة. يتلقى المرضى الرعاية على أساس التقاليد، وليس الدليل.</div>
+</div>
+<div class="decision-option" data-path="right" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();}" role="button" tabindex="0">
+<strong>المسار ب:</strong> استمر في المطالبة بالأدلة - استمر في التساؤل "أين الدليل؟" رغم السخرية.
+                    <div class="consequence">→ يُطلق عليك لقب الهوس لعقود من الزمن. في نهاية المطاف تحويل الطب. تعاون عالمي يحمل اسمك.</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide light" data-index="7">
+<div class="content">
+<h2 class="title navy animate">اختبار الوحدة 6</h2>
+<div class="quiz-container">
+<div class="quiz-question">
+<h4>يعد التحليل التلوي للشبكة ذا قيمة خاصة عندما:</h4>
+<div class="quiz-options" role="radiogroup">
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>A.</span> لديك دراسة واحدة فقط لتحليلها
+                      </div>
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" onkeydown="handleQuizKey(event, this, true)" role="radio" tabindex="0">
+<span>B.</span> يحتاج صناع السياسات إلى مقارنة علاجات متعددة لم تتم مقارنتها بشكل مباشر في التجارب
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>C.</span> النتيجة ثنائية
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>D.</span> الدراسات كلها رصدية
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black" data-index="8">
+<p class="refrain animate">يتم اختيار المجال المتخصص. الآن — تعلم من أولئك الذين مشوا من قبل.</p>
+<div class="gold-line animate delay-1"></div>
+<p class="animate delay-2" style="font-size: 1.25rem; margin-top: 1.5rem;">الوحدة 7: الرحلات الحقيقية</p>
+</div>
+</div>
+ الوحدة 7: الرحلات الحقيقية 
+<div class="module-slides" data-module="7">
+<div class="slide dark active" data-index="0">
+<p class="refrain animate">كان كل متخصص في المنهجية مبتدئًا ولم ينسحب.</p>
+</div>
+<div class="slide dark" data-index="1">
+<p class="direct-address animate">كيف وصلوا إلى هنا بالفعل؟</p>
+<p class="direct-address animate delay-1">نادرًا ما تكون المسارات مستقيمة.</p>
+<div class="gold-line animate delay-2"></div>
+</div>
+<div class="slide dark" data-index="2">
+<p class="title cream animate">الرحلة الأولى: الطبيب الذي سأل لماذا</p>
+<div class="profile-box animate delay-1">
+<strong>جوردون جويات: من طبيب إلى منشئ الصف</strong><br/><br/>
+                كان جوردون جويات طبيبًا باطنيًا ممارسًا في الثمانينات. ولاحظ أن كبار الأطباء أدلىوا بتصريحات واثقة، لكن أدلتهم كانت ضعيفة.<br/><br/>
+<strong>نقطة التحول:</strong> هو من صاغ "الطب المبني على الأدلة" في عام 1991. لكنه لم يتوقف عند هذا الحد. لقد أدرك أن الأطباء بحاجة إلى أطر عمل لتقييم جودة الأدلة.<br/><br/>
+<strong>المسار:</strong> دكتوراه في الطب → الممارسة السريرية → الإحباط من العقيدة → التدريب المنهجي → قيادة مجموعة العمل الصفية<br/><br/>
+<strong>اليوم:</strong> GRADE هو المعيار العالمي لتقييم اليقين. تستخدمه منظمة الصحة العالمية وكوكرين وأكثر من 100 منظمة.<br/><br/>
+<span style="color: var(--gold);">الدرس: يمكن أن يصبح الإحباط السريري ابتكارًا منهجيًا.</span>
+</div>
+</div>
+<div class="slide dark" data-index="3">
+<p class="title cream animate">الرحلة الثانية: الإحصائي الذي رأى الفوضى</p>
+<div class="profile-box animate delay-1">
+<strong>دوغ ألتمان: من الأرقام إلى المعايير</strong><br/><br/>
+                تم تدريب دوغ ألتمان كخبير إحصائي، وليس كطبيب. ولكن عندما نظر إلى المجلات الطبية، رأى فوضى إحصائية - اختبارات خاطئة، ونتائج تم الإبلاغ عنها بشكل خاطئ، وأرقام مستحيلة.<br/><br/>
+<strong>نقطة التحول:</strong> مقالته الافتتاحية "فضيحة الأبحاث الطبية الضعيفة" عام 1994 في المجلة الطبية البريطانية. كان يمكن أن يشكو. وبدلاً من ذلك، قام ببناء الحلول.<br/><br/>
+<strong>المسار:</strong> درجة الإحصاء ← وحدة الإحصاء الطبي ← الإحباط من إعداد التقارير ← CONSORT، STROBE، PRISMA، EQUATOR Network<br/><br/>
+<strong>اليوم:</strong> غيرت إرشادات إعداد التقارير الخاصة به التواصل العلمي. تم الاستشهاد به أكثر من 500000 مرة عبر عمله.<br/><br/>
+<span style="color: var(--gold);">الدرس: تحديد مشكلة واسعة الانتشار، ثم حلها بشكل منهجي.</span>
+</div>
+</div>
+<div class="slide dark" data-index="4">
+<p class="title cream animate">الرحلة 3: الدخيل الذي وجد فجوة</p>
+<div class="profile-box animate delay-1">
+<strong>من طالب دكتوراه إلى رائد NMA</strong><br/><br/>
+                كانت جورجيا سالانتي طالبة دكتوراه في اليونان عندما كان التحليل التلوي للشبكة بمثابة فضول متخصص. قليل من الناس فهموا ذلك. أقل من يستطيع تدريسها.<br/><br/>
+<strong>نقطة التحول:</strong> لقد أدركت أن NMA سيصبح ضروريًا لـ HTA. لقد وضعت نفسها في المقدمة.<br/><br/>
+<strong>المسار:</strong> دكتوراه في الإحصاء → ما بعد الدكتوراه في كامبريدج → تركيز عميق على NMA → مجموعة بحث خاصة في برن → مطور إطار عمل CINeMA<br/><br/>
+<strong>اليوم:</strong> أحد أكثر منهجيات NMA استشهادًا على مستوى العالم. تم استشارتها من قبل منظمة الصحة العالمية، وNICE، وشركات الأدوية.<br/><br/>
+<span style="color: var(--gold);">الدرس: ابحث عن الطريقة الناشئة التي سيحتاجها الجميع - وأتقنها قبل أن يفعلوا ذلك.</span>
+</div>
+</div>
+<div class="slide dark" data-index="5">
+<p class="title cream animate">الرحلة الرابعة: الرائد الإقليمي</p>
+<div class="profile-box animate delay-1">
+<strong>بناء قدرات الأساليب في الشرق الأوسط</strong><br/><br/>
+                في في عام 2010، كان التدريب على أساليب المراجعة المنهجية في منطقة الشرق الأوسط وشمال أفريقيا نادرًا. تم تدريب معظم علماء المنهجيات في أوروبا أو أمريكا الشمالية.<br/><br/>
+<strong>الرواد:</strong> الأطباء والباحثون الذين سعوا للحصول على التدريب في الخارج، ثم عادوا لبناء القدرات المحلية.<br/><br/>
+<strong>المسار:</strong> شهادة طبية محلية ← زمالة الأساليب الدولية ← العودة إلى الوطن ← إنشاء برامج تدريبية ← أن نصبح خبراء إقليميين<br/><br/>
+<strong>اليوم:</strong> تتمتع الأردن ولبنان وإيران والمملكة العربية السعودية وعمان بقدرة متزايدة على تجميع الأدلة. ظهور فروع كوكرين الإقليمية.<br/><br/>
+<span style="color: var(--gold);">الدرس: خبرة الأساليب قابلة للنقل. إحضاره إلى المنزل يضاعف تأثيرك.</span>
+</div>
+</div>
+<div class="slide light" data-index="6">
+<div class="content">
+<h2 class="title navy animate">الأنماط الشائعة عبر الرحلات</h2>
+<div class="comparison-grid animate delay-1">
+<div class="comparison-panel">
+<h4>كان لديهم جميعًا...</h4>
+<p>• الإحباط الذي أصبح مهمة</p>
+<p>• الاستعداد للتعلم المستمر</p>
+<p>• المتعاونون الذين آمنوا بها</p>
+<p>• المثابرة من خلال الرفض</p>
+<p>• التركيز الذي تعمق بمرور الوقت</p>
+</div>
+<div class="comparison-panel highlight">
+<h4>لم يكن لديهم...</h4>
+<p>• نسب مثالية</p>
+<p>• مسارات واضحة من البداية</p>
+<p>• التعرف الفوري</p>
+<p>• التحرر من النكسات</p>
+<p>• جميع المهارات من اليوم الأول</p>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark" data-index="7">
+<p class="story-box animate">
+<strong>قصة إجناز سيملفيس:</strong><br/><br/>
+                في عام 1847، اكتشف إجناز سيملفيس أن غسل اليدين يمكن أن يقلل معدل وفيات الأمهات من 18% إلى 2%. رفضته المؤسسة الطبية.<br/><br/>
+                تم فصله من العمل، والسخرية منه، وتم إيداعه في نهاية المطاف في مصحة، حيث توفي عن عمر يناهز 47 عامًا. واستغرق الأمر 20 عامًا أخرى حتى تثبت نظرية الجراثيم صحة كلامه.<br/><br/>
+<span style="color: var(--gold);">لم يرى سيملفيس تأثيره. لكن كل جراح يفرك اليوم يتبع طريقه. وصل النهر إلى البحر – بعد وفاته.</span>
+</p>
+<div class="story-decision-tree animate delay-1">
+<p class="decision-prompt">لقد اكتشفت أن غسل اليدين ينقذ الأرواح، لكن زملائك يرفضون ذلك. ماذا تختار؟</p>
+<div class="decision-options">
+<div class="decision-option" data-path="wrong" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();}" role="button" tabindex="0">
+<strong>المسار أ:</strong> استسلم - اقبل الرفض، توقف عن محاربة المؤسسة.
+                    <div class="consequence">→ مت منسيًا ومنكسر القلب. احصل على براءتك بعد وفاته، ولكن لا ترى تأثيرك أبدًا.</div>
+</div>
+<div class="decision-option" data-path="right" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();}" role="button" tabindex="0">
+<strong>المسار ب:</strong> قم بتوثيق كل شيء، واستمر على الرغم من الرفض، وتأكد من بقاء الأدلة.
+                    <div class="consequence">→ حتى لو تم رفضها في حياتك، فإن أدلتك الموثقة ستظل موجودة. الأجيال القادمة ترث الحقيقة.</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide light" data-index="8">
+<div class="content">
+<h2 class="title navy animate">اختبار الوحدة السابعة</h2>
+<div class="quiz-container">
+<div class="quiz-question">
+<h4>بدأ مسار جوردون جويات لإنشاء GRADE بما يلي:</h4>
+<div class="quiz-options" role="radiogroup">
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>A.</span> دكتوراه في الإحصاء
+                      </div>
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" onkeydown="handleQuizKey(event, this, true)" role="radio" tabindex="0">
+<span>B.</span> الإحباط السريري بسبب التصريحات العقائدية التي تفتقر إلى الأدلة
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>C.</span> عرض عمل من منظمة الصحة العالمية
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>D.</span> القراءة عن الأساليب في كتاب مدرسي
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide light" data-index="9">
+<div class="content">
+<h2 class="title navy animate">وظيفتك الأولى: من أين تبدأ</h2>
+<div class="comparison-grid animate delay-1">
+<div class="comparison-panel highlight">
+<h4>أفضل نقاط الدخول</h4>
+<p>• <strong>مساعد باحث</strong> في المراجعة المنهجية فرق</p>
+<p>• <strong>محلل مبتدئ لـ HTA</strong> في الوكالات الوطنية/الإقليمية</p>
+<p>• <strong>زميل Cochrane/JBI</strong> (تنافسي ولكن محدد للمهنة)</p>
+<p>• <strong>ما بعد الدكتوراه</strong> مع منهجيات راسخة</p>
+</div>
+<div class="comparison-panel">
+<h4>ما يريده أصحاب العمل</h4>
+<p>• دليل على خبرة SR/MA (حتى لو تم نشر واحدة)</p>
+<p>• إتقان R أو Stata</p>
+<p>• شهادات التدريب على الدرجة أو خطر التحيز</p>
+<p>• عينات كتابية قوية</p>
+</div>
+</div>
+<p class="animate delay-2" style="font-size: 0.85rem; color: var(--light-text); margin-top: 1rem; text-align: center;">
+<strong>نصيحة احترافية:</strong> تطوع كفاحص في مراجعة كوكرين. إنه تدريب مجاني واعتماد للنشر.
+                </p>
+</div>
+</div>
+<div class="slide dark" data-index="10">
+<p class="title cream animate">قائمة القراءة: ترتيب الأولويات</p>
+<div class="profile-box animate delay-1">
+<strong>ابدأ هنا (الشهر 1-3):</strong><br/>
+                1. <span style="color: var(--gold);">دليل كوكرين</span> — الفصول 6-10 (مجانًا على الإنترنت)<br/>
+                2. <span style="color: var(--gold);">بورنشتاين "مقدمة في التحليل التلوي"</span> — الأساس الإحصائي<br/><br/>
+<strong>ثم (شهر) 4-6):</strong><br/>
+                3. <span style="color: var(--gold);">دليل مستخدمي JAMA في جويات</span> — علم الأوبئة السريرية<br/>
+                4. <span style="color: var(--gold);">دليل GRADE</span> — تقييم اليقين (مجاني عبر الإنترنت)<br/><br/>
+<strong>التخصص (الشهر 7-12):</strong><br/>
+                5. <span style="color: var(--gold);">مستندات الدعم الفني لـ NICE DSU</span> — لمجموعة أوراق Ioannidis<br/>
+                6. <span style="color: var(--gold);">— مجموعة أوراق Ioannidis</span> — كلاسيكيات الأبحاث الوصفية<br/><br/>
+<span style="color: var(--gold);">فصل واحد في الأسبوع = التعليم على مستوى الدراسات العليا في عامين.</span>
+</div>
+</div>
+<div class="slide dark" data-index="11">
+<p class="title cream animate">المسار الإقليمي: منطقة الشرق الأوسط وشمال أفريقيا والجنوب العالمي</p>
+<div class="profile-box animate delay-1">
+<strong>بناء قدرات الأساليب في الخليج والشرق الأوسط:</strong><br/><br/>
+<strong>التحدي:</strong> برامج تدريب محلية محدودة. تم تدريب معظم المنهجيين في الخارج.<br/><br/>
+<strong>الفرصة:</strong> تزايد الطلب. تقوم إدارة الغذاء والدواء السعودية ومؤسسة الرعاية الصحية الأولية في قطر ووزارة الصحة في الإمارات العربية المتحدة ببناء قدرات HTA. ميزة المتحرك الأول حقيقية.<br/><br/>
+<strong>المسار:</strong><br/>
+                • التدريب الدولي الكامل (McMaster، Oxford، JBI)<br/>
+                • العودة مع الشهادة والشبكة<br/>
+                • الشراكة مع المؤسسات الإقليمية<br/>
+                • كن خبيرًا محليًا يستشير الآخرين<br/><br/>
+<span style="color: var(--gold);">المؤتمرات الإقليمية: ISPE الشرق الأوسط، منتدى الصحة في دبي، اجتماعات شبكة HTA الخليجية.</span>
+</div>
+</div>
+<div class="slide light" data-index="12">
+<div class="content">
+<h2 class="title navy animate">البرامج التدريبية والزمالات</h2>
+<div class="path-grid animate delay-1">
+<div class="path-card">
+<h4>ماكماستر الصف/EBM</h4>
+<p>المعيار الذهبي. خيارات عبر الإنترنت + شخصيًا.</p>
+<div class="salary" style="color: var(--gold);">ضروري</div>
+</div>
+<div class="path-card">
+<h4>تدريب كوكرين</h4>
+<p>وحدات مجانية عبر الإنترنت. مسارات الشهادة متاحة.</p>
+<div class="salary" style="color: var(--green);">Free</div>
+</div>
+<div class="path-card">
+<h4>برامج JBI</h4>
+<p>تدريب شامل على SR. قوية من حيث النوعية.</p>
+<div class="salary" style="color: var(--teal);">محترم</div>
+</div>
+<div class="path-card">
+<h4>أكسفورد CEBM</h4>
+<p>دورات قصيرة وخيارات ماجستير.</p>
+<div class="salary" style="color: var(--purple);">مرموقة</div>
+</div>
+<div class="path-card">
+<h4>كورسيرا/إدكس</h4>
+<p>علم الأوبئة، أسس الإحصاء الحيوي.</p>
+<div class="salary" style="color: var(--green);">بسعر معقول</div>
+</div>
+<div class="path-card">
+<h4>زمالات AHRQ EPC</h4>
+<p>مقرها الولايات المتحدة. تنافسية ولكنها تحدد المهنة.</p>
+<div class="salary" style="color: var(--gold);">نخبة</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black" data-index="13">
+<p class="refrain animate">لقد شاهدت الرحلات. الآن — هل أنت مستعد لبدء اختبارك؟</p>
+<div class="gold-line animate delay-1"></div>
+<p class="animate delay-2" style="font-size: 1.25rem; margin-top: 1.5rem;">التقييم النهائي</p>
+</div>
+</div>
+ الوحدة 8: التقييم النهائي 
+<div class="module-slides" data-module="8">
+<div class="slide dark active" data-index="0">
+<p class="refrain animate">لقد سافرت عبر عالم الأساليب.</p>
+</div>
+<div class="slide dark" data-index="1">
+<p class="title cream animate">المبادئ الخمسة للمنهجي</p>
+<div class="gold-line animate delay-1"></div>
+<div class="animate delay-2" style="text-align: right; max-width: 700px;">
+<p style="margin: 0.6rem 0; color: var(--gold); font-size: 1.1rem;">1. الصرامة ليست اختيارية، بل هي أساس الثقة.</p>
+<p style="margin: 0.6rem 0; color: var(--gold); font-size: 1.1rem;">2. العمل غير المرئي له عواقب واضحة.</p>
+<p style="margin: 0.6rem 0; color: var(--gold); font-size: 1.1rem;">3. العمق في منطقة واحدة يتيح اتساع التأثير.</p>
+<p style="margin: 0.6rem 0; color: var(--gold); font-size: 1.1rem;">4. الأدوات تخدم الأساليب؛ الأساليب تخدم الحقيقة.</p>
+<p style="margin: 0.6rem 0; color: var(--gold); font-size: 1.1rem;">5. يسأل اختصاصي المنهجية: "ما الذي يمكن أن يفسر هذا أيضًا؟"</p>
+</div>
+</div>
+<div class="slide light" data-index="2">
+<div class="content">
+<h2 class="title navy animate">الاختبار النهائي (1/5)</h2>
+<div class="quiz-container">
+<div class="quiz-question">
+<h4>تم الاستشهاد بإرشادات CONSORT الخاصة بـ Doug Altman على:</h4>
+<div class="quiz-options" role="radiogroup">
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>A.</span> 1000 مرة
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>B.</span> 10,000 مرة
+                      </div>
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" onkeydown="handleQuizKey(event, this, true)" role="radio" tabindex="0">
+<span>C.</span> 35,000+ مرة
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>D.</span> 500 مرة
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide light" data-index="3">
+<div class="content">
+<h2 class="title navy animate">الاختبار النهائي (2/5)</h2>
+<div class="quiz-container">
+<div class="quiz-question">
+<h4>توضح حالة الأبروتينين (15.000-22.000 حالة وفاة زائدة):</h4>
+<div class="quiz-options" role="radiogroup">
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>A.</span> لا ينبغي أبدا الموافقة على الأدوية
+                      </div>
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" onkeydown="handleQuizKey(event, this, true)" role="radio" tabindex="0">
+<span>B.</span> يمكن أن يؤدي الفشل المنهجي في تقييم الأدلة إلى وفاة آلاف الأرواح
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>C.</span> التجارب العشوائية غير ضرورية
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>D.</span> يجب على الجراحين عدم استخدام أي أدوية
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide light" data-index="4">
+<div class="content">
+<h2 class="title navy animate">الاختبار النهائي (3/5)</h2>
+<div class="quiz-container">
+<div class="quiz-question">
+<h4>عند تقييم دراسة رصدية تظهر أن شاربي القهوة لديهم المزيد من أمراض القلب، يجب أن يكون السؤال الأول لأخصائي المنهجية هو:</h4>
+<div class="quiz-options" role="radiogroup">
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>A.</span> ما هي كمية القهوة التي شربوها؟
+                      </div>
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" onkeydown="handleQuizKey(event, this, true)" role="radio" tabindex="0">
+<span>B.</span> ما هي الإرباكات التي قد تفسر هذا الارتباط؟
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>C.</span> هل كانت المجلة مراجعة النظراء؟
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>D.</span> هل يجب أن أتوقف عن شرب القهوة؟
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide light" data-index="5">
+<div class="content">
+<h2 class="title navy animate">الاختبار النهائي (4/5)</h2>
+<div class="quiz-container">
+<div class="quiz-question">
+<h4>الطريقة الأكثر قابلية للتوسع لأخصائي المنهجية لمضاعفة تأثيرها هي:</h4>
+<div class="quiz-options" role="radiogroup">
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>A.</span> النشر في المجلات ذات التأثير الأعلى
+                      </div>
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" onkeydown="handleQuizKey(event, this, true)" role="radio" tabindex="0">
+<span>B.</span> إنشاء أدوات أو برامج أو إرشادات يستخدمها الآخرون مرارا وتكرارا
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>C.</span> العمل في أرقى المؤسسات
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>D.</span> تجنب وسائل التواصل الاجتماعي بشكل كامل
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide light" data-index="6">
+<div class="content">
+<h2 class="title navy animate">الاختبار النهائي (5/5)</h2>
+<div class="quiz-container">
+<div class="quiz-question">
+<h4>يقدم المسار الوظيفي عادةً أعلى تعويض ولكنه يتطلب الراحة مع السياق التجاري هو:</h4>
+<div class="quiz-options" role="radiogroup">
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>A.</span> الأوساط الأكاديمية
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>B.</span> منظمة الصحة العالمية/الصحة العالمية
+                      </div>
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" onkeydown="handleQuizKey(event, this, true)" role="radio" tabindex="0">
+<span>C.</span> صناعة الأدوية / الاستشارات
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>D.</span> كوكرين
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide light" data-index="7">
+<div class="content">
+<h2 class="title navy animate">خطة العمل الخاصة بك لمدة 6 أشهر</h2>
+<p class="animate delay-1" style="margin-bottom: 1rem; color: #333;">
+                  الالتزام بتطويرك. قم بتأشير كل معلم عند إكماله:
+                </p>
+<form class="action-checklist animate delay-2" id="actionPlanForm">
+<label>
+<input onchange="saveActionPlan()" type="checkbox"/>
+<div class="action-text">
+<span class="action-title">الشهر 1-2: التأسيس</span>
+<span class="action-desc">أكمل الفصول من 1 إلى 10 في دليل كوكرين. اختر مراجعة منهجية واحدة لتظليلها.</span>
+</div>
+</label>
+<label>
+<input onchange="saveActionPlan()" type="checkbox"/>
+<div class="action-text">
+<span class="action-title">الشهر 2-3: بناء المهارات</span>
+<span class="action-desc">استعارة رئيسية في R. إجراء تحليل تلوي عملي على البيانات العامة.</span>
+</div>
+</label>
+<label>
+<input onchange="saveActionPlan()" type="checkbox"/>
+<div class="action-text">
+<span class="action-title">الشهر 3-4: المساهمة</span>
+<span class="action-desc">انضم إلى فريق مؤلفي كوكرين أو قدم دعمًا للطرق لمجموعة بحثية.</span>
+</div>
+</label>
+<label>
+<input onchange="saveActionPlan()" type="checkbox"/>
+<div class="action-text">
+<span class="action-title">الشهر 4-5: الرؤية</span>
+<span class="action-desc">اكتب منشور مدونة أو برنامج تعليمي لإحدى الطرق. حاضر في نادي المجلات.</span>
+</div>
+</label>
+<label>
+<input onchange="saveActionPlan()" type="checkbox"/>
+<div class="action-text">
+<span class="action-title">الشهر 5-6: التخصص</span>
+<span class="action-desc">اختر مجال تخصصك. ابدأ مشروعًا شغوفًا واحدًا يتماشى مع مسار حياتك المهنية.</span>
+</div>
+</label>
+<label>
+<input onchange="saveActionPlan()" type="checkbox"/>
+<div class="action-text">
+<span class="action-title">مستمر: الشبكة</span>
+<span class="action-desc">تواصل مع 3 منهجيين على LinkedIn/Twitter. حضور مؤتمر / ندوة عبر الإنترنت واحدة.</span>
+</div>
+</label>
+</form>
+<p class="animate delay-3" style="font-size: 0.85rem; margin-top: 1rem; color: #666;">
+<em>يتم حفظ تقدمك تلقائيًا في هذا المتصفح.</em>
+</p>
+</div>
+</div>
+<div class="slide black" data-index="8">
+<p class="refrain animate">لقد أكملت الرحلة.</p>
+<div class="gold-line animate delay-1"></div>
+<p class="animate delay-2" style="font-size: 1.2rem; margin-top: 1rem;">
+                تقدم وقم ببناء الأسس التي سيرتكز عليها الآخرون.
+              </p>
+<p class="animate delay-3" style="font-size: 0.9rem; margin-top: 2rem; color: rgba(255,255,255,0.6);">
+                تذكر:<br/>
+                الطرق غير مرئية. التأثير ليس كذلك.<br/>
+                يتم تعلم الأدوات. تم اكتساب الحكم.<br/>
+<span style="color: var(--gold);">المسار الأقل حركة هو أقل ازدحامًا لسبب ما. المشي على أي حال.</span>
+</p>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<script>
+    const modules = [
+      { title: 'الدعوة', subtitle: 'لماذا هذا المسار؟' },
+      { title: 'العمل', subtitle: 'يوم في الحياة' },
+      { title: 'المهارات', subtitle: 'إنشاء مجموعتك' },
+      { title: 'المسارات', subtitle: 'Career Options' },
+      { title: 'المحفظة', subtitle: 'Building Visibility' },
+      { title: 'مجموعة الأدوات', subtitle: 'Essential Resources' },
+      { title: 'المتخصصة', subtitle: 'العثور على التركيز' },
+      { title: 'الرحلة', subtitle: 'Real Stories' },
+      { title: 'Final Assessment', subtitle: 'اختبر معلوماتك' }
+    ];
+
+    let currentModule = 0;
+    let currentSlide = 0;
+    let completedModules = new Set();
+
+    // localStorage persistence
+    function saveProgress() {
+      try {
+        localStorage.setItem('methodologistProgress', JSON.stringify({
+          currentModule,
+          currentSlide,
+          completedModules: Array.from(completedModules)
+        }));
+      } catch (e) {}
+    }
+
+    function loadProgress() {
+      try {
+        const saved = localStorage.getItem('methodologistProgress');
+        if (saved) {
+          const data = JSON.parse(saved);
+          currentModule = data.currentModule || 0;
+          currentSlide = data.currentSlide || 0;
+          completedModules = new Set(data.completedModules || []);
+        }
+      } catch (e) {
+        console.warn('فشل تحميل التقدم، باستخدام الإعدادات الافتراضية');
+      }
+    }
+
+    function resetProgress() {
+      if (confirm('هل تريد إعادة ضبط كل التقدم؟ لا يمكن التراجع عن هذا.')) {
+        localStorage.removeItem('methodologistProgress');
+        currentModule = 0;
+        currentSlide = 0;
+        completedModules = new Set();
+        location.reload();
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadProgress();
+      renderModuleList();
+      setupSlideNavigation();
+      updateProgressBar();
+      if (currentModule > 0 || currentSlide > 0) {
+        document.querySelectorAll('.module-slides').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.module-slides')[currentModule].classList.add('active');
+        goToSlide(currentSlide);
+        updateHeader();
+      }
+    });
+
+    function renderModuleList() {
+      const list = document.getElementById('moduleList');
+      list.innerHTML = modules.map((m, i) => `
+        <div class="عنصر الوحدة النمطية ${i === currentModule ? 'active' : ''} ${CompletedModules.has(i) ؟ 'مكتمل' : ''}"
+             onclick="goToModule(${i})" tabindex="0" role="button" aria-label="Module ${i}: ${m.title}"
+             onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();goToModule(${i});}">
+          <div class="module-number">${completedModules.has(i) ? '✓' : i}</div>
+          <div class="module-info">
+            <div class="module-title">${m.title}</div>
+            <div class="module-subtitle">${m.subtitle}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function setupSlideNavigation() {
+      document.querySelectorAll('.module-slides').forEach(moduleEl => {
+        const slides = moduleEl.querySelectorAll('.slide');
+        const nav = document.createElement('div');
+        nav.className = 'slide-nav';
+        nav.innerHTML = `
+          <button class="nav-btn" onclick="prevSlide()" aria-label="الشريحة السابقة" title="الشريحة السابقة (←)">←</button>
+          <div class="nav-center">
+            <div class="slide-counter" aria-live="polite"><span class="current">1</span> / <span class="total">${slides.length}</span></div>
+            <div class="progress" role="tablist" aria-label="Slide navigation">
+              ${Array.from(slides).map((_, i) => `<div class="progress-dot ${i === 0 ? 'active' : ''}" role="tab" aria-label="انتقل إلى الشريحة ${i + 1}" onclick="goToSlide(${i})"></div>`).join('')}
+            </div>
+          </div>
+          <button class="nav-btn" onclick="nextSlide()" aria-label="الشريحة التالية" title="الشريحة التالية (←)">→</button>
+        `;
+        moduleEl.appendChild(nav);
+      });
+    }
+
+    function goToModule(index) {
+      if (currentModule !== index) {
+        if (index > currentModule) completedModules.add(currentModule);
+        document.querySelectorAll('.module-slides').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.module-slides')[index].classList.add('active');
+        currentModule = index;
+        currentSlide = 0;
+        updateSlideDisplay();
+        renderModuleList();
+        updateHeader();
+        updateProgressBar();
+      }
+    }
+
+    function goToSlide(index) {
+      const moduleEl = document.querySelectorAll('.module-slides')[currentModule];
+      const slides = moduleEl.querySelectorAll('.slide');
+      slides.forEach(s => s.classList.remove('active'));
+      slides[index].classList.add('active');
+      currentSlide = index;
+      updateSlideDisplay();
+      saveProgress();
+    }
+
+    function nextSlide() {
+      const moduleEl = document.querySelectorAll('.module-slides')[currentModule];
+      const slides = moduleEl.querySelectorAll('.slide');
+      if (currentSlide < slides.length - 1) goToSlide(currentSlide + 1);
+    }
+
+    function prevSlide() {
+      if (currentSlide > 0) goToSlide(currentSlide - 1);
+    }
+
+    function nextModule() {
+      if (currentModule < modules.length - 1) goToModule(currentModule + 1);
+    }
+
+    function updateSlideDisplay() {
+      const moduleEl = document.querySelectorAll('.module-slides')[currentModule];
+      const nav = moduleEl.querySelector('.slide-nav');
+      if (nav) {
+        nav.querySelector('.current').textContent = currentSlide + 1;
+        nav.querySelectorAll('.progress-dot').forEach((dot, i) => {
+          dot.classList.toggle('active', i === currentSlide);
+        });
+      }
+    }
+
+    function updateHeader() {
+      document.getElementById('currentModuleNum').textContent = currentModule;
+      document.getElementById('currentModuleName').textContent = modules[currentModule].title;
+    }
+
+    function updateProgressBar() {
+      const percent = Math.round((completedModules.size / modules.length) * 100);
+      document.getElementById('progressPercent').textContent = percent + '%';
+      saveProgress();
+    }
+
+    function checkAnswer(element, isCorrect) {
+      const options = element.parentElement.querySelectorAll('.quiz-option');
+      options.forEach(opt => {
+        opt.style.pointerEvents = 'none';
+        opt.setAttribute('tabindex', '-1');
+      });
+      element.setAttribute('aria-selected', 'true');
+      if (isCorrect) {
+        element.classList.add('correct');
+        element.setAttribute('aria-label', 'الإجابة الصحيحة');
+      } else {
+        element.classList.add('incorrect');
+        element.setAttribute('aria-label', 'إجابة غير صحيحة');
+        options.forEach(opt => {
+          if (opt.dataset.correct === 'true') {
+            opt.classList.add('correct');
+            opt.setAttribute('aria-label', 'كان هذا هو الصحيح الإجابة');
+          }
+        });
+      }
+    }
+
+    function handleQuizKey(event, element, isCorrect) {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        checkAnswer(element, isCorrect);
+      }
+    }
+
+    // ============================================
+    // SPACED RETRIEVAL SYSTEM
+    // ============================================
+    const spacedRetrievalQuestions = [
+      { q: "ما هي الركائز الأربع لمهارات المنهجية؟", a: "الإحصاء وعلم الأوبئة وخبرة المجال والاتصالات" },
+      { q: "كم عدد الوفيات الزائدة الناتجة عن الفشل المنهجي للأبروتينين؟", a: "15,000-22,000 حالة وفاة زائدة قبل سحب الدواء" },
+      { q: "كم مرة تم الاستشهاد بإرشادات CONSORT الخاصة بـ Doug Altman؟", a: "أكثر من 35,000 مرة (مع الاستشهاد بإجمالي أعماله أكثر من 500,000 مرة)" },
+      { q: "ما هي حزمة R التي تعتبر المعيار الذهبي للتحليل التلوي؟", a: "metafor بواسطة Wolfgang Viechtbauer" },
+      { q: "ما هو نطاق الرواتب لكبار المنهجيين؟", a: "95 ألف دولار - 180 ألف دولار (يختلف حسب القطاع، مع الاستشارات/الأدوية أعلى)" },
+      { q: "ما هي أنواع التحيز الثلاثة التي يجب على المنهجي أخذها في الاعتبار دائمًا؟", a: "تحيز الاختيار، وتحيز المعلومات، والارتباك" },
+      { q: "قم بتسمية مجالين بحالة \"الطلب المرتفع\" أو \"الناشئة\".", a: "التحليل التلوي للشبكة (طلب مرتفع)، التحليل التلوي IPD (آخذ في النمو)، SRs الحية (الناشئة)، AI/ML (الحدود)" },
+      { q: "ما الذي أنشأه Gordon Guyatt والذي يستخدم الآن من قبل أكثر من 100 مؤسسة؟", a: "GRADE (تصنيف تقييم التوصيات وتطويرها وتقييمها)" }
+    ];
+
+    function showSpacedRetrievalPrompt() {
+      const lastPrompt = localStorage.getItem('methodologistLastRetrieval');
+      const now = Date.now();
+      const oneDay = 24 * 60 * 60 * 1000;
+
+      if (completedModules.size >= 2 && (!lastPrompt || (now - parseInt(lastPrompt)) > oneDay)) {
+        const randomQ = spacedRetrievalQuestions[Math.floor(Math.random() * spacedRetrievalQuestions.length)];
+
+        const promptHTML = `
+          <div class="spaced-retrieval-overlay" id="spacedRetrievalOverlay">
+            <div class="spaced-retrieval-modal">
+              <div class="retrieval-header">📚 Quick Review</div>
+              <div class="retrieval-question">${randomQ.q}</div>
+              <button class="retrieval-btn" onclick="revealRetrievalAnswer()">Reveal Answer</button>
+              <div class="retrieval-answer" id="retrievalAnswer" style="display:none;">
+                <strong>Answer:</strong> ${randomQ.a}
+              </div>
+              <button class="retrieval-close" onclick="closeRetrievalPrompt()">Continue to Course</button>
+            </div>
+          </div>
+        `;
+
+        document.body.insertAdjacentHTML('beforeend', promptHTML);
+        localStorage.setItem('methodologistLastRetrieval', now.toString());
+      }
+    }
+
+    function revealRetrievalAnswer() {
+      document.getElementById('retrievalAnswer').style.display = 'block';
+    }
+
+    function closeRetrievalPrompt() {
+      const overlay = document.getElementById('spacedRetrievalOverlay');
+      if (overlay) overlay.remove();
+    }
+
+    setTimeout(() => {
+      if (completedModules.size >= 2) showSpacedRetrievalPrompt();
+    }, 2000);
+
+    // ============================================
+    // ACTION PLAN PERSISTENCE
+    // ============================================
+    function saveActionPlan() {
+      const form = document.getElementById('actionPlanForm');
+      if (!form) return;
+      const checkboxes = form.querySelectorAll('input[type="checkbox"]');
+      const states = Array.from(checkboxes).map(cb => cb.checked);
+      localStorage.setItem('methodologistActionPlan', JSON.stringify(states));
+    }
+
+    function loadActionPlan() {
+      const saved = localStorage.getItem('methodologistActionPlan');
+      if (!saved) return;
+      const states = JSON.parse(saved);
+      const form = document.getElementById('actionPlanForm');
+      if (!form) return;
+      const checkboxes = form.querySelectorAll('input[type="checkbox"]');
+      checkboxes.forEach((cb, i) => {
+        if (states[i] !== undefined) cb.checked = states[i];
+      });
+    }
+
+    // Load action plan when DOM ready
+    document.addEventListener('DOMContentLoaded', loadActionPlan);
+
+    document.addEventListener('keydown', (e) => {
+      const tag = e.target.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || e.target.isContentEditable) return;
+      if (e.target.matches('زر، أ، [role = "button"]، [role = "radio"]، [role = "option"]')) {
+          if (e.key === ' ' || e.key === 'Enter') return;
+      }
+      if (e.key === 'ArrowLeft' || e.key === ' ') { e.preventDefault(); nextSlide(); }
+      else if (e.key === 'ArrowRight') { e.preventDefault(); prevSlide(); }
+      else if (e.key === 'ArrowDown') { e.preventDefault(); nextModule(); }
+      else if (e.key === 'Escape') { closeSidebar(); }
+    });
+
+    function toggleSidebar() {
+      document.querySelector('.sidebar').classList.toggle('open');
+      document.querySelector('.sidebar-overlay').classList.toggle('open');
+      var btn = document.querySelector('.sidebar-toggle, .hamburger, .mobile-menu-btn'); if (btn) btn.setAttribute('aria-expanded', btn.getAttribute('aria-expanded') === 'true' ? 'false' : 'true');
+    }
+
+    function closeSidebar() {
+      document.querySelector('.sidebar').classList.remove('open');
+      document.querySelector('.sidebar-overlay').classList.remove('open');
+    }
+  </script>
+</body>
+</html>

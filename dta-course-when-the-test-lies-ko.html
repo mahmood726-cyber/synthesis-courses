@@ -1,0 +1,2591 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>테스트가 거짓말을 할 때: 진단 테스트 정확성에 관한 과정</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&amp;family=Source+Sans+Pro:wght@300;400;600;700&amp;display=swap" rel="stylesheet"/>
+<style>
+    :root {
+      --navy: #1E2761;
+      --deep-navy: #141B3D;
+      --gold: #D4AF37;
+      --cream: #FAF8F5;
+      --light-cream: #FFFFFF;
+      --text: #2D3748;
+      --light-text: #718096;
+      --red: #C53030;
+      --green: #22c55e;
+      --teal: #00D4AA;
+      --purple: #A855F7;
+      --orange: #F97316;
+      --blood-red: #8B0000;
+      --transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      height: 100%;
+      font-family: 'Source Sans Pro', sans-serif;
+      background: var(--deep-navy);
+      color: var(--cream);
+    }
+
+    .course-container {
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 300px;
+      background: linear-gradient(180deg, var(--deep-navy) 0%, #0a0f1a 100%);
+      border-right: 1px solid rgba(212,175,55,0.2);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    /* mobile sidebar handled by hamburger toggle below */
+
+    .sidebar-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+    }
+
+    .sidebar-header h1 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--gold);
+      margin-bottom: 0.25rem;
+    }
+
+    .sidebar-header p {
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.6);
+    }
+
+    .module-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem 0;
+    }
+
+    .module-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      border-left: 3px solid transparent;
+    }
+
+    .module-item:hover { background: rgba(212,175,55,0.1); }
+    .module-item.active { background: rgba(212,175,55,0.15); border-left-color: var(--gold); }
+    .module-item.completed .module-number { background: var(--green); color: white; }
+
+    .module-number {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .module-item.active .module-number { background: var(--gold); color: var(--navy); }
+
+    .module-info { flex: 1; min-width: 0; }
+    .module-title { font-size: 0.85rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .module-subtitle { font-size: 0.7rem; color: rgba(255,255,255,0.7); }
+
+    .sidebar-footer {
+      padding: 1rem 1.5rem;
+      border-top: 1px solid rgba(212,175,55,0.2);
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.4);
+      line-height: 1.4;
+    }
+
+    /* Main Content */
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .content-header {
+      padding: 1rem 2rem;
+      background: rgba(0,0,0,0.3);
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .breadcrumb { font-size: 0.85rem; color: rgba(255,255,255,0.6); }
+    .breadcrumb span { color: var(--gold); }
+
+    .header-actions { display: flex; gap: 0.5rem; }
+
+    .btn {
+      padding: 0.5rem 1rem;
+      border: 1px solid rgba(212,175,55,0.3);
+      border-radius: 6px;
+      background: rgba(255,255,255,0.05);
+      color: var(--cream);
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn:hover { background: rgba(212,175,55,0.2); border-color: var(--gold); }
+    .btn.primary { background: var(--gold); color: var(--navy); border-color: var(--gold); font-weight: 600; }
+
+    .content-body { flex: 1; overflow: hidden; display: flex; }
+
+    /* Slides */
+    .slides-container { flex: 1; position: relative; overflow: hidden; }
+
+    .module-slides { display: none; width: 100%; height: 100%; }
+    .module-slides.active { display: block; }
+
+    .slide {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      padding: 2rem 2rem 4rem 2rem;
+      padding-top: 3rem;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity var(--transition), visibility var(--transition);
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .slide .content { margin-top: auto; margin-bottom: auto; }
+    .slide > * { max-width: 100%; word-wrap: break-word; }
+    .slide.active { opacity: 1; visibility: visible; }
+
+    .slide.dark { background: var(--deep-navy); color: var(--cream); }
+    .slide.light { background: var(--cream); color: var(--text); }
+    .slide.black { background: #000; color: var(--cream); }
+    .slide.gradient { background: linear-gradient(135deg, var(--deep-navy) 0%, #2a1a4a 100%); color: var(--cream); }
+    .slide.blood { background: linear-gradient(135deg, #1a0a0a 0%, #2d1515 100%); color: var(--cream); }
+    .slide.hope { background: linear-gradient(135deg, #0a1a0a 0%, #152d15 100%); color: var(--cream); }
+    .slide.fraud { background: linear-gradient(135deg, #1a1a0a 0%, #2d2515 100%); color: var(--cream); }
+
+    /* Typography */
+    .serif { font-family: 'Cormorant Garamond', Georgia, serif; }
+
+    .title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(1.8rem, 5vw, 3.5rem);
+      font-weight: 700;
+      margin-bottom: 1rem;
+      line-height: 1.2;
+    }
+
+    .title.navy { color: var(--navy); }
+    .title.gold { color: var(--gold); }
+    .title.cream { color: var(--cream); }
+    .title.red { color: var(--red); }
+    .title.green { color: var(--green); }
+
+    .subtitle {
+      font-size: clamp(1rem, 2vw, 1.5rem);
+      color: var(--light-text);
+      margin-bottom: 2rem;
+    }
+
+    .slide.dark .subtitle { color: rgba(255,255,255,0.7); }
+
+    .big-number {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(4rem, 15vw, 10rem);
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .big-number.navy { color: var(--navy); }
+    .big-number.gold { color: var(--gold); }
+    .big-number.red { color: var(--red); }
+    .big-number.green { color: var(--green); }
+
+    /* Refrain */
+    .refrain {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(1.4rem, 4vw, 2.5rem);
+      font-style: italic;
+      color: var(--gold);
+      text-align: center;
+      max-width: 800px;
+      line-height: 1.4;
+    }
+
+    .refrain.warning {
+      color: var(--red);
+      border-left: 4px solid var(--red);
+      padding-left: 1.5rem;
+      text-align: left;
+    }
+
+    .refrain.hope { color: var(--green); }
+
+    /* Rhetorical */
+    .rhetorical {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(1.2rem, 3vw, 2rem);
+      color: rgba(255,255,255,0.9);
+      text-align: center;
+      max-width: 700px;
+      line-height: 1.5;
+    }
+
+    .rhetorical em { color: var(--gold); font-style: normal; }
+
+    /* Simple explanation box */
+    .simple-box {
+      background: linear-gradient(135deg, rgba(0,212,170,0.1), rgba(0,0,0,0.2));
+      border: 2px solid var(--teal);
+      border-radius: 12px;
+      padding: 1.5rem;
+      max-width: 600px;
+      margin: 1rem 0;
+    }
+
+    .simple-box .simple-title {
+      color: var(--teal);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.75rem;
+    }
+
+    .simple-box .simple-text {
+      font-size: 1.1rem;
+      line-height: 1.6;
+    }
+
+    .simple-box .simple-text strong { color: var(--gold); }
+
+    /* Story card */
+    .story-card {
+      background: rgba(0,0,0,0.3);
+      border-left: 4px solid var(--gold);
+      padding: 1.5rem 2rem;
+      max-width: 700px;
+      margin: 1rem 0;
+    }
+
+    .story-card .place {
+      font-size: 0.75rem;
+      color: var(--gold);
+      letter-spacing: 0.1em;
+      margin-bottom: 0.5rem;
+    }
+
+    .story-card .narrative {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      line-height: 1.6;
+      color: rgba(255,255,255,0.9);
+    }
+
+    .story-card .source {
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.5);
+      margin-top: 1rem;
+      font-style: italic;
+    }
+
+    /* Decision Tree */
+    .decision-tree {
+      background: rgba(0,0,0,0.3);
+      border: 2px solid var(--gold);
+      border-radius: 12px;
+      padding: 1.5rem;
+      max-width: 700px;
+      width: 100%;
+    }
+
+    .decision-tree h4 {
+      color: var(--gold);
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+
+    .tree-level {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      margin: 0.5rem 0;
+      position: relative;
+    }
+
+    .tree-node {
+      background: var(--navy);
+      border: 2px solid var(--gold);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      text-align: center;
+      min-width: 100px;
+      font-size: 0.8rem;
+    }
+
+    .tree-node.root { background: var(--gold); color: var(--navy); font-weight: 700; }
+    .tree-node.positive { background: rgba(197,48,48,0.3); border-color: var(--red); }
+    .tree-node.negative { background: rgba(34,197,94,0.3); border-color: var(--green); }
+    .tree-node.tp { background: var(--green); color: white; }
+    .tree-node.fp { background: var(--red); color: white; }
+    .tree-node.fn { background: var(--orange); color: white; }
+    .tree-node.tn { background: var(--teal); color: var(--navy); }
+
+    .tree-arrow {
+      color: var(--gold);
+      font-size: 1.5rem;
+      text-align: center;
+    }
+
+    .tree-label {
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.7);
+      text-align: center;
+      margin-top: 0.25rem;
+    }
+
+    /* 2x2 Table */
+    .confusion-matrix {
+      background: rgba(0,0,0,0.3);
+      border-radius: 12px;
+      padding: 1.5rem;
+      max-width: 500px;
+    }
+
+    .confusion-matrix h4 {
+      color: var(--gold);
+      text-align: center;
+      margin-bottom: 1rem;
+      font-family: 'Cormorant Garamond', serif;
+    }
+
+    .matrix-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .matrix-table th, .matrix-table td {
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 0.75rem;
+      text-align: center;
+      font-size: 0.85rem;
+    }
+
+    .matrix-table th {
+      background: var(--navy);
+      color: var(--gold);
+    }
+
+    .matrix-table .tp { background: rgba(34,197,94,0.3); }
+    .matrix-table .fp { background: rgba(197,48,48,0.3); }
+    .matrix-table .fn { background: rgba(249,115,22,0.3); }
+    .matrix-table .tn { background: rgba(0,212,170,0.3); }
+
+    /* Stats */
+    .stats-grid {
+      display: flex;
+      gap: 1rem;
+      margin: 1.5rem 0;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .stat-box {
+      background: var(--navy);
+      color: var(--cream);
+      padding: 1rem 1.5rem;
+      text-align: center;
+      min-width: 130px;
+      border-radius: 8px;
+    }
+
+    .stat-value {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(1.4rem, 3vw, 2rem);
+      font-weight: 700;
+    }
+
+    .stat-label { font-size: 0.7rem; opacity: 0.8; margin-top: 0.25rem; }
+
+    /* Death toll */
+    .death-toll {
+      background: linear-gradient(135deg, rgba(197,48,48,0.3), rgba(0,0,0,0.5));
+      border: 2px solid var(--red);
+      padding: 2rem;
+      text-align: center;
+      max-width: 400px;
+      border-radius: 12px;
+    }
+
+    .death-toll .number {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 4rem;
+      font-weight: 700;
+      color: var(--red);
+    }
+
+    .death-toll .label {
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.8);
+      margin-top: 0.5rem;
+    }
+
+    /* Fraud box */
+    .fraud-box {
+      background: linear-gradient(135deg, rgba(139,0,0,0.3), rgba(0,0,0,0.5));
+      border: 2px solid var(--blood-red);
+      padding: 2rem;
+      text-align: center;
+      max-width: 400px;
+      border-radius: 12px;
+    }
+
+    .fraud-box .amount {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 3rem;
+      font-weight: 700;
+      color: var(--gold);
+    }
+
+    .fraud-box .label {
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.8);
+      margin-top: 0.5rem;
+    }
+
+    /* Lesson items */
+    .lesson-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      margin: 0.6rem 0;
+      max-width: 800px;
+      text-align: left;
+    }
+
+    .lesson-number {
+      background: var(--gold);
+      color: var(--navy);
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      flex-shrink: 0;
+      border-radius: 4px;
+    }
+
+    .lesson-content h4 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--cream);
+      margin-bottom: 0.2rem;
+    }
+
+    .lesson-content p { font-size: 0.85rem; color: rgba(255,255,255,0.7); }
+
+    /* Formula box */
+    .formula-box {
+      background: rgba(0,0,0,0.4);
+      border: 1px solid var(--purple);
+      border-radius: 8px;
+      padding: 1rem 1.5rem;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.2rem;
+      text-align: center;
+      max-width: 500px;
+      margin: 1rem 0;
+    }
+
+    .formula-box .formula {
+      color: var(--gold);
+      margin: 0.5rem 0;
+    }
+
+    .formula-box .label {
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.6);
+      font-family: 'Source Sans Pro', sans-serif;
+    }
+
+    /* ROC visualization */
+    .roc-visual {
+      background: rgba(0,0,0,0.3);
+      border: 2px solid var(--purple);
+      border-radius: 12px;
+      padding: 1.5rem;
+      max-width: 400px;
+    }
+
+    .roc-visual h4 {
+      color: var(--purple);
+      text-align: center;
+      margin-bottom: 1rem;
+      font-family: 'Cormorant Garamond', serif;
+    }
+
+    .roc-canvas {
+      width: 100%;
+      height: 250px;
+      position: relative;
+      background: linear-gradient(135deg, rgba(0,0,0,0.3), rgba(168,85,247,0.1));
+      border: 1px solid rgba(168,85,247,0.3);
+      border-radius: 8px;
+    }
+
+    /* Card */
+    .card {
+      background: var(--light-cream);
+      border: 1px solid var(--gold);
+      padding: 1.5rem 2rem;
+      margin: 0.75rem 0;
+      max-width: 800px;
+      width: 100%;
+      border-radius: 8px;
+    }
+
+    .card.navy-bg { background: var(--navy); color: var(--cream); }
+    .card.dark-bg { background: rgba(0,0,0,0.4); color: var(--cream); border-color: rgba(212,175,55,0.3); }
+    .card.red-border { border: 2px solid var(--red); }
+    .card.green-border { border: 2px solid var(--green); }
+
+    .card-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+    }
+
+    .card-text { font-size: clamp(0.9rem, 1.8vw, 1.1rem); line-height: 1.6; }
+
+    /* Certainty badges */
+    .certainty-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.75rem;
+      max-width: 700px;
+    }
+
+    @media (max-width: 600px) { .certainty-grid { grid-template-columns: 1fr; } }
+
+    .certainty-badge {
+      padding: 1rem;
+      text-align: center;
+      border-radius: 8px;
+    }
+
+    .certainty-badge.tp-badge { background: linear-gradient(135deg, rgba(34,197,94,0.3), rgba(34,197,94,0.1)); border: 2px solid var(--green); }
+    .certainty-badge.fp-badge { background: linear-gradient(135deg, rgba(197,48,48,0.3), rgba(197,48,48,0.1)); border: 2px solid var(--red); }
+    .certainty-badge.fn-badge { background: linear-gradient(135deg, rgba(249,115,22,0.3), rgba(249,115,22,0.1)); border: 2px solid var(--orange); }
+    .certainty-badge.tn-badge { background: linear-gradient(135deg, rgba(0,212,170,0.3), rgba(0,212,170,0.1)); border: 2px solid var(--teal); }
+
+    .certainty-badge h4 { font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; margin-bottom: 0.4rem; }
+    .certainty-badge p { font-size: 0.7rem; opacity: 0.9; }
+
+    /* Timeline */
+    .timeline {
+      max-width: 600px;
+      width: 100%;
+    }
+
+    .timeline-item {
+      display: flex;
+      gap: 1rem;
+      margin: 1rem 0;
+      padding-left: 1rem;
+      border-left: 3px solid var(--gold);
+    }
+
+    .timeline-year {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--gold);
+      min-width: 60px;
+    }
+
+    .timeline-content {
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.8);
+    }
+
+    /* Gold line */
+    .gold-line { width: 150px; height: 2px; background: var(--gold); margin: 1.5rem auto; }
+
+    /* Content wrapper */
+    .content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: 1000px;
+    }
+
+    /* Animation */
+    .slide.active .animate { animation: fadeUp 0.6s ease-out forwards; }
+    .slide.active .animate.delay-1 { animation-delay: 0.1s; }
+    .slide.active .animate.delay-2 { animation-delay: 0.2s; }
+    .slide.active .animate.delay-3 { animation-delay: 0.3s; }
+    .slide.active .animate.delay-4 { animation-delay: 0.4s; }
+    .slide.active .animate.delay-5 { animation-delay: 0.5s; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate { opacity: 0; }
+
+    /* Slide Nav */
+    .slide-nav {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      padding: 1rem 1rem 1.5rem 1rem;
+      z-index: 100;
+      pointer-events: none;
+    }
+
+    .nav-btn {
+      background: rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: white;
+      font-size: 1.25rem;
+      cursor: pointer;
+      opacity: 0.6;
+      transition: all 0.2s;
+      padding: 0.5rem 0.75rem;
+      border-radius: 8px;
+      pointer-events: auto;
+    }
+
+    .nav-btn:hover { opacity: 1; background: rgba(0,0,0,0.7); border-color: var(--gold); }
+
+    .nav-center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.25rem;
+      pointer-events: auto;
+    }
+
+    .slide-counter { color: rgba(255,255,255,0.6); font-size: 0.85rem; min-width: 50px; text-align: center; }
+    .progress { display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; max-width: 200px; }
+
+    .progress-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.25);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .progress-dot.active { background: var(--gold); transform: scale(1.3); }
+    .progress-dot:hover { background: rgba(255,255,255,0.6); }
+
+    /* Quiz */
+    .quiz-container {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(212,175,55,0.3);
+      padding: 1.5rem;
+      max-width: 700px;
+      width: 100%;
+      border-radius: 8px;
+    }
+
+    .quiz-question {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+      color: var(--gold);
+      line-height: 1.4;
+    }
+
+    .quiz-options { display: flex; flex-direction: column; gap: 0.5rem; }
+
+    .quiz-option {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: left;
+      border-radius: 6px;
+      font-size: 0.9rem;
+    }
+
+    .quiz-option:hover { background: rgba(212,175,55,0.1); border-color: var(--gold); }
+    .quiz-option.correct { background: rgba(34,197,94,0.2); border-color: var(--green); }
+    .quiz-option.incorrect { background: rgba(197,48,48,0.2); border-color: var(--red); }
+
+    .quiz-feedback {
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: 8px;
+      display: none;
+      font-size: 0.9rem;
+    }
+
+    .quiz-feedback.show { display: block; }
+    .quiz-feedback.correct { background: rgba(34,197,94,0.2); border: 1px solid var(--green); }
+    .quiz-feedback.incorrect { background: rgba(197,48,48,0.2); border: 1px solid var(--red); }
+
+    /* References */
+    .references {
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(212,175,55,0.3);
+      border-radius: 8px;
+      padding: 1.5rem;
+      max-width: 700px;
+      text-align: left;
+      font-size: 0.75rem;
+      line-height: 1.8;
+    }
+
+    .references h4 {
+      color: var(--gold);
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+    }
+
+    .references ol { padding-left: 1.5rem; }
+    .references li { margin-bottom: 0.5rem; color: rgba(255,255,255,0.8); }
+    .references .journal { font-style: italic; }
+
+    .text-center { text-align: center; }
+    .mb-1 { margin-bottom: 1rem; }
+    .mb-2 { margin-bottom: 2rem; }
+    .mt-1 { margin-top: 1rem; }
+    .mt-2 { margin-top: 2rem; }
+    .mobile-menu-toggle{display:none;position:fixed;top:12px;left:12px;z-index:1001;background:#1E2761;border:1px solid #D4AF37;color:#D4AF37;width:40px;height:40px;border-radius:8px;font-size:1.2rem;cursor:pointer;align-items:center;justify-content:center;}
+    @media(max-width:768px){.mobile-menu-toggle{display:flex;}.sidebar{transform:translateX(-100%);transition:transform 0.3s ease;position:fixed;z-index:1000;height:100vh;}.sidebar.open{transform:translateX(0);}.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:999;}.sidebar-overlay.show{display:block;}}
+    .skip-link{position:absolute;top:-40px;left:0;background:#D4AF37;color:#1E2761;padding:8px 16px;z-index:100;transition:top 0.3s;font-family:'Source Sans Pro',sans-serif;text-decoration:none;font-weight:600;}.skip-link:focus{top:0;}
+
+    /* Focus-visible styles for keyboard navigation */
+    :focus-visible {
+      outline: 2px solid var(--gold, #D4AF37);
+      outline-offset: 2px;
+    }
+
+    :focus:not(:focus-visible) {
+      outline: none;
+    }
+
+    button:focus-visible,
+    a:focus-visible,
+    [role="button"]:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible {
+      outline: 2px solid var(--gold, #D4AF37);
+      outline-offset: 2px;
+      box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.3);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<button aria-expanded="false" aria-label="Toggle navigation menu" class="mobile-menu-toggle" onclick="toggleSidebar()">☰</button>
+<div class="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show');"></div>
+<div class="course-container">
+<!-- Sidebar -->
+<nav aria-label="코스 탐색" class="sidebar" role="navigation">
+<div class="sidebar-header">
+<a href="index.html" onmouseout="this.style.color='rgba(212,175,55,0.7)'" onmouseover="this.style.color='#D4AF37'" style="display:block;font-size:0.7rem;color:rgba(212,175,55,0.7);text-decoration:none;margin-bottom:0.5rem;">← Course Library</a>
+<h1>테스트가 거짓말을 할 때</h1>
+<p>Diagnostic Test Accuracy Meta-Analysis</p>
+</div>
+<div class="module-list" id="moduleList"></div>
+<div class="sidebar-footer">
+        "A test is only as trustworthy as its validation."
+        <br/><br/>
+        Every positive has a price. Every negative has a cost.
+      </div>
+</nav>
+<!-- Main Content -->
+<main class="main-content" id="main-content">
+<header class="content-header">
+<div class="breadcrumb">
+          DTA Course &gt; <span id="currentModule">The Fraud</span>
+</div>
+<div class="header-actions">
+<button class="btn" onclick="goToModule(11)">References</button>
+<button class="btn primary" onclick="nextSlide()">Continue</button>
+</div>
+</header>
+<div class="content-body">
+<div class="slides-container">
+ ======================== 모듈 1: 사기(THERANOS) ==================== 
+<div class="module-slides active" data-module="1">
+<!-- Slide 1.1: Opening -->
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  그 여자의 이야기를 들어보셨나요<br/>
+                  who promised to <em>피 한 방울로 세상을 바꿉니다</em>,<br/>
+                  who raised billions on a test that <em>never worked</em>?
+                </div>
+</div>
+</div>
+ 슬라이드 1.2: 테라노스 스토리 
+<div class="slide fraud">
+<div class="content text-center">
+<div class="title gold animate">Palo Alto, 2003</div>
+<div class="story-card animate delay-1">
+<div class="place">STANFORD UNIVERSITY</div>
+<div class="narrative">
+                    A 19세 소년은 손가락에 찔려 고통 없이 한 방울에 수백 번의 혈액 검사를 수행할 수 있는 장치에 대한 비전을 갖고 대학을 중퇴했습니다.
+                    <br/><br/>
+                    No more needles. No more vials. No more waiting.
+                    <br/><br/>
+                    Investors believed. Walgreens believed. The Pentagon believed.
+                    <br/><br/>
+<strong>They gave her $9 billion.</strong>
+</div>
+<div class="source">Carreyrou J. Bad Blood: Secrets and Lies in a Silicon Valley Startup. 2018</div>
+</div>
+</div>
+</div>
+ 슬라이드 1.3: 사기 
+<div class="slide blood">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  그러나 테스트 <em>lied</em>.
+                </div>
+<div class="fraud-box animate delay-2">
+<div class="amount">$9 Billion</div>
+<div class="label">Built on a test that didn't work</div>
+</div>
+<div class="simple-box animate delay-3">
+<div class="simple-title">WHAT HAPPENED</div>
+<div class="simple-text">
+                    Theranos 기계 <strong>wrong results</strong>를 제공했습니다. 환자들은 HIV에 감염되지 않았는데도 HIV에 걸렸다는 말을 들었습니다. 환자들은 <strong>dying</strong>일 때 혈액이 정상이라는 말을 들었습니다. 회사는 <strong>15 years</strong>.
+                  </div>
+</div>
+</div>
+</div>
+ 슬라이드 1.4: 피해자 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title red animate">The Victims</div>
+<div class="story-card animate delay-1">
+<div class="place">PHOENIX, ARIZONA</div>
+<div class="narrative">
+                    에서 진실을 숨겼습니다. 한 임산부는 아기가 염색체 이상을 가지고 태어날 것이라는 말을 들었습니다. 그녀는 최악의 상황에 대비하고 있었습니다. 그녀는 슬퍼하고 있었습니다.
+                    <br/><br/>
+                    테스트가 잘못되었습니다. 아기는 건강했습니다.
+                    <br/><br/>
+                    But how many women, receiving the same news, made <strong>different decisions</strong>?
+                  </div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">THE QUESTION</div>
+<div class="simple-text">
+                    How do we know when a test is telling the truth?
+                    How do we <strong>measure</strong> a test's honesty?
+                  </div>
+</div>
+</div>
+</div>
+ 슬라이드 1.5: 자제 
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  "그리고 테스트는 거짓말을 했습니다.<br/>
+                  거짓말은 확실하게 차려입었고<br/>
+                  아무도 아기에게 의문을 제기하지 않았습니다. "
+                </div>
+<div class="gold-line animate delay-2"></div>
+<p class="animate delay-3" style="color:rgba(255,255,255,0.6);font-style:italic;">
+                  이것이 우리가 진단 테스트 정확도를 연구하는 이유입니다.
+                </p>
+</div>
+</div>
+</div>
+ ==================== 모듈 2: 4가지 결과 =================== 
+<div class="module-slides" data-module="2">
+<!-- Slide 2.1: Opening -->
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  When a test gives a result,<br/>
+                  오직 <em>four possible truths</em>.
+                  <br/><br/>
+                  두 가지만이 축복입니다. 두 가지는 저주입니다.
+                </div>
+</div>
+</div>
+ 슬라이드 2.2: 의사결정 트리 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">결과 트리</div>
+<div class="decision-tree animate delay-1">
+<h4>Every Test Result Has a Reality Behind It</h4>
+<div class="tree-level">
+<div class="tree-node root">Patient Tested</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-level" style="gap: 3rem;">
+<div>
+<div class="tree-node positive">Test Says: POSITIVE</div>
+<div class="tree-label">"You have it"</div>
+</div>
+<div>
+<div class="tree-node negative">Test Says: NEGATIVE</div>
+<div class="tree-label">"You're clear"</div>
+</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-level" style="gap: 1rem;">
+<div class="tree-node tp">TP</div>
+<div class="tree-node fp">FP</div>
+<div class="tree-node fn">FN</div>
+<div class="tree-node tn">TN</div>
+</div>
+<div class="tree-level" style="gap: 1rem; margin-top: 0.5rem;">
+<div class="tree-label" style="min-width:70px;">Has disease<br/>Test: Positive</div>
+<div class="tree-label" style="min-width:70px;">No disease<br/>Test: Positive</div>
+<div class="tree-label" style="min-width:70px;">Has disease<br/>Test: Negative</div>
+<div class="tree-label" style="min-width:70px;">No disease<br/>Test: Negative</div>
+</div>
+</div>
+</div>
+</div>
+ 슬라이드 2.3: 4개 사분면 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">4개 진실</div>
+<div class="certainty-grid animate delay-1">
+<div class="certainty-badge tp-badge">
+<h4 style="color:var(--green);">True Positive (TP)</h4>
+<p>Sick person correctly identified.<br/><strong>테스트는 진실을 말했습니다.</strong></p>
+</div>
+<div class="certainty-badge fp-badge">
+<h4 style="color:var(--red);">False Positive (FP)</h4>
+<p>Healthy person wrongly alarmed.<br/><strong>테스트는 거짓말을 했습니다.</strong></p>
+</div>
+<div class="certainty-badge fn-badge">
+<h4 style="color:var(--orange);">False Negative (FN)</h4>
+<p>Sick person wrongly reassured.<br/><strong>가장 치명적인 거짓말</strong></p>
+</div>
+<div class="certainty-badge tn-badge">
+<h4 style="color:var(--teal);">True Negative (TN)</h4>
+<p>Healthy person correctly cleared.<br/><strong>테스트는 진실을 말했습니다.</strong></p>
+</div>
+</div>
+</div>
+</div>
+ 슬라이드 2.4: 2x2 테이블 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">성스러운 표</div>
+<div class="confusion-matrix animate delay-1">
+<h4>2x2 혼동 행렬</h4>
+<table class="matrix-table">
+<tr>
+<th></th>
+<th>Disease Present</th>
+<th>Disease Absent</th>
+</tr>
+<tr>
+<th>Test Positive</th>
+<td class="tp"><strong>TP</strong><br/>True Positive</td>
+<td class="fp"><strong>FP</strong><br/>False Positive</td>
+</tr>
+<tr>
+<th>Test Negative</th>
+<td class="fn"><strong>FN</strong><br/>False Negative</td>
+<td class="tn"><strong>TN</strong><br/>True Negative</td>
+</tr>
+</table>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">REMEMBER</div>
+<div class="simple-text">
+                    모든 진단 연구는 다음을 보고해야 합니다 <strong>four numbers</strong>.
+                    Without them, you cannot judge a test.
+                  </div>
+</div>
+</div>
+</div>
+ 슬라이드 2.5: 자제 
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  "Two outcomes save. Two outcomes harm.<br/>
+                  Know them by name.<br/>
+                  TP, TN: 테스트 결과는 사실입니다.<br/>
+                  FP, FN: 테스트는 거짓말을 했습니다."
+                </div>
+</div>
+</div>
+</div>
+ ==================== 모듈 3: 감도 및 특이성 ==================== 
+<div class="module-slides" data-module="3">
+<!-- Slide 3.1: Opening -->
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  A test has two virtues and two vices.
+                  <br/><br/>
+<em>Sensitivity</em> asks: Can it find the sick?
+                  <br/><br/>
+<em>Specificity</em> asks: Can it spare the healthy?
+                </div>
+</div>
+</div>
+<!-- Slide 3.2: Sensitivity -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Sensitivity</div>
+<div class="subtitle animate delay-1">"모든 아픈 사람 중에서 테스트를 수행한 사람은 몇 명입니까? 잡나요?"</div>
+<div class="formula-box animate delay-2">
+<div class="label">THE FORMULA</div>
+<div class="formula">Sensitivity = TP / (TP + FN)</div>
+<div class="label">True Positives divided by All Diseased</div>
+</div>
+<div class="simple-box animate delay-3">
+<div class="simple-title">IN SIMPLE WORDS</div>
+<div class="simple-text">
+                    100명이 암에 걸렸는데 검사 결과 90명이 발견된다면,
+                    <strong>sensitivity = 90%</strong>.
+                    <br/><br/>
+                    High sensitivity = few false negatives = <strong>few missed cases</strong>.
+                  </div>
+</div>
+</div>
+</div>
+<!-- Slide 3.3: Specificity -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Specificity</div>
+<div class="subtitle animate delay-1">"건강한 사람 중 몇 명이나 검사를 통해 여유가 생겼습니까?"</div>
+<div class="formula-box animate delay-2">
+<div class="label">THE FORMULA</div>
+<div class="formula">Specificity = TN / (TN + FP)</div>
+<div class="label">True Negatives divided by All Non-Diseased</div>
+</div>
+<div class="simple-box animate delay-3">
+<div class="simple-title">IN SIMPLE WORDS</div>
+<div class="simple-text">
+                    100명이 건강하고 그 중 95명이 검사 결과 "음성"으로 올바르게 표시되면
+                    <strong>specificity = 95%</strong>.
+                    <br/><br/>
+                    High specificity = few false positives = <strong>few false alarms</strong>.
+                  </div>
+</div>
+</div>
+</div>
+ 슬라이드 3.4: 절충 
+<div class="slide blood">
+<div class="content text-center">
+<div class="title red animate">잔혹한 상황 절충</div>
+<div class="story-card animate delay-1">
+<div class="place">THE DILEMMA</div>
+<div class="narrative">
+                    A test cannot have both perfect sensitivity AND perfect specificity.
+                    <br/><br/>
+                    Lower the threshold to catch more sick people?
+                    <strong>You'll alarm more healthy people.</strong>
+<br/><br/>
+                    Raise the threshold to spare healthy people?
+                    <strong>You'll miss more sick people.</strong>
+<br/><br/>
+                    This is the <em>threshold effect</em>—진단의 시소.
+                  </div>
+</div>
+</div>
+</div>
+ 슬라이드 3.5: SnNout 및 SpPin 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">기억 규칙</div>
+<div class="lesson-item animate delay-1">
+<div class="lesson-number" style="background:var(--green);">Sn</div>
+<div class="lesson-content">
+<h4>SnNout: Sensitive tests rule OUT</h4>
+<p>A highly sensitive test, when negative, rules out disease. If it didn't find it, it's probably not there.</p>
+</div>
+</div>
+<div class="lesson-item animate delay-2">
+<div class="lesson-number" style="background:var(--red);">Sp</div>
+<div class="lesson-content">
+<h4>SpPin: Specific tests rule IN</h4>
+<p>매우 구체적인 테스트가 양성일 경우 질병을 결정합니다. 갖고 있다고 하면 아마 그럴 것입니다.</p>
+</div>
+</div>
+<div class="simple-box animate delay-3">
+<div class="simple-title">REMEMBER</div>
+<div class="simple-text">
+<strong>SnNout:</strong> Sensitive Negative rules OUT<br/>
+<strong>SpPin:</strong> Specific Positive rules IN
+                  </div>
+</div>
+</div>
+</div>
+<!-- Slide 3.6: Refrain -->
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  "민감함이 병을 잡습니다.<br/>
+                  특이성이 장점을 살려줍니다.<br/>
+                  But no test masters both perfectly—<br/>
+                  이것이 우리가 짊어져야 할 부담입니다. 곰."
+                </div>
+</div>
+</div>
+</div>
+ ===================== 모듈 4: 코로나19 테스트 스캔 ==================== 
+<div class="module-slides" data-module="4">
+<!-- Slide 4.1: Opening -->
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  2020년, 전염병이 전 세계를 휩쓸던 해. 지구,<br/>
+                  세상에는 <em>감염자를 빠르게 찾을 수 있는 테스트가 필요했습니다</em>.
+                  <br/><br/>
+                  But what if the rapid test <em>missed too many</em>?
+                </div>
+</div>
+</div>
+ 슬라이드 4.2: 약속 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">신속한 테스트의 약속</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box">
+<div class="stat-value" style="color:var(--gold);">15 min</div>
+<div class="stat-label">Results Time</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--teal);">$5</div>
+<div class="stat-label">Cost per Test</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--purple);">Home</div>
+<div class="stat-label">Self-Administered</div>
+</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">THE HOPE</div>
+<div class="simple-text">
+                    Rapid antigen tests could be used at home, at work, before gatherings.
+                    They could <strong>stop outbreaks before they started</strong>.
+                  </div>
+</div>
+</div>
+</div>
+ 슬라이드 4.3: 현실 
+<div class="slide blood">
+<div class="content text-center">
+<div class="title red animate">The Reality</div>
+<div class="story-card animate delay-1">
+<div class="place">코크란 체계적 검토, 2022</div>
+<div class="narrative">
+                    연구원들이 코로나19 신속 항원 검사에 관한 155개 연구의 데이터를 통합했을 때:
+                    <br/><br/>
+<strong>증상이 있는 사람들의 경우:</strong><br/>
+                    Sensitivity: 73% (missed 27% of cases)
+                    <br/><br/>
+<strong>In people WITHOUT symptoms:</strong><br/>
+                    Sensitivity: 55% (missed 45% of cases)
+                    <br/><br/>
+<em>거의 절반 무증상 감염된 사람들은 깨끗하다는 말을 들었습니다.</em>
+</div>
+<div class="source">Dinnes J et al. Cochrane Database Syst Rev. 2022;7:CD013705</div>
+</div>
+</div>
+</div>
+ 슬라이드 4.4: 결과 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">거짓 음성 확산</div>
+<div class="lesson-item animate delay-1">
+<div class="lesson-number" style="background:var(--red);">1</div>
+<div class="lesson-content">
+<h4>Thanksgiving Dinners</h4>
+<p>Families tested negative in the morning, gathered indoors, unknowingly infected grandparents</p>
+</div>
+</div>
+<div class="lesson-item animate delay-2">
+<div class="lesson-number" style="background:var(--red);">2</div>
+<div class="lesson-content">
+<h4>Workplace Outbreaks</h4>
+<p>Workers tested negative, came to work, infected colleagues in the break room</p>
+</div>
+</div>
+<div class="lesson-item animate delay-3">
+<div class="lesson-number" style="background:var(--red);">3</div>
+<div class="lesson-content">
+<h4>Hospital Transmission</h4>
+<p>Patients tested negative, admitted to wards, infected vulnerable patients</p>
+</div>
+</div>
+<div class="simple-box animate delay-4">
+<div class="simple-title">THE LESSON</div>
+<div class="simple-text">
+                    A 55% sensitivity means <strong>45% false negative rate</strong>.
+                    False negatives are invisible. They feel safe. They spread disease.
+                  </div>
+</div>
+</div>
+</div>
+<!-- Slide 4.5: Refrain -->
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  "그리고 검사 결과는 '음성'으로 나왔고<br/>
+                  그리고 그 가족은<br/>
+                  할아버지는 손자들을 안고<br/>
+                  겨울이 끝날 무렵 사라졌습니다."
+                </div>
+</div>
+</div>
+</div>
+ =================== 모듈 5: 유사 비율 ==================== 
+<div class="module-slides" data-module="5">
+<!-- Slide 5.1: Opening -->
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  감도와 특이성이 테스트를 설명합니다.
+                  <br/><br/>
+                  그러나 환자는 다른 질문을 합니다.
+                  <br/><br/>
+<em>"I tested positive. What are my chances?"</em>
+</div>
+</div>
+</div>
+ 슬라이드 5.2: 문제 Sens/Spec 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">The Disconnect</div>
+<div class="story-card animate delay-1">
+<div class="place">A DOCTOR'S DILEMMA</div>
+<div class="narrative">
+                    A test has 99% sensitivity and 95% specificity. Sounds excellent.
+                    <br/><br/>
+                    귀하의 환자는 희귀 질병에 대해 양성 반응을 보였습니다(유병률은 1000명 중 1명).
+                    <br/><br/>
+<strong>Question:</strong> 실제로 질병에 걸렸을 확률은 얼마나 됩니까?
+                    <br/><br/>
+                    대부분의 의사는 95%라고 말합니다. 실제 답변은 무엇입니까? <strong>About 2%.</strong>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 5.3: Likelihood Ratios -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Likelihood Ratios</div>
+<div class="subtitle animate delay-1">How much a test result changes the odds</div>
+<div class="formula-box animate delay-2">
+<div class="label">POSITIVE LIKELIHOOD RATIO</div>
+<div class="formula">LR+ = Sensitivity / (1 - Specificity)</div>
+<div class="label">How much more likely is a positive result in sick vs healthy?</div>
+</div>
+<div class="formula-box animate delay-3">
+<div class="label">NEGATIVE LIKELIHOOD RATIO</div>
+<div class="formula">LR- = (1 - Sensitivity) / Specificity</div>
+<div class="label">How much more likely is a negative result in sick vs healthy?</div>
+</div>
+</div>
+</div>
+<!-- Slide 5.4: Interpreting LRs -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">What Good LRs Look Like</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box" style="background:var(--green);">
+<div class="stat-value" style="color:white;">LR+ &gt; 10</div>
+<div class="stat-label">Strong rule-in</div>
+</div>
+<div class="stat-box" style="background:var(--gold);">
+<div class="stat-value" style="color:var(--navy);">LR+ 5-10</div>
+<div class="stat-label">Moderate rule-in</div>
+</div>
+<div class="stat-box" style="background:var(--orange);">
+<div class="stat-value" style="color:white;">LR+ 2-5</div>
+<div class="stat-label">Weak evidence</div>
+</div>
+</div>
+<div class="stats-grid animate delay-2">
+<div class="stat-box" style="background:var(--green);">
+<div class="stat-value" style="color:white;">LR- &lt; 0.1</div>
+<div class="stat-label">Strong rule-out</div>
+</div>
+<div class="stat-box" style="background:var(--gold);">
+<div class="stat-value" style="color:var(--navy);">LR- 0.1-0.2</div>
+<div class="stat-label">Moderate rule-out</div>
+</div>
+<div class="stat-box" style="background:var(--orange);">
+<div class="stat-value" style="color:white;">LR- 0.2-0.5</div>
+<div class="stat-label">Weak evidence</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 5.5: Refrain -->
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  "Sensitivity tells how many sick the test will catch.<br/>
+                  Specificity tells how many well it will spare.<br/>
+                  But only the likelihood ratio answers:<br/>
+<em>이 결과는 이 환자에게 무엇을 의미합니까?</em>"
+                </div>
+</div>
+</div>
+</div>
+ ==================== 모듈 6: 유방촬영 논란 ==================== 
+<div class="module-slides" data-module="6">
+<!-- Slide 6.1: Opening -->
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  검진 논란을 들어보셨나요<br/>
+                  that <em>found too much</em>?
+                  <br/><br/>
+                  When does finding disease become <em>causing harm</em>?
+                </div>
+</div>
+</div>
+ 슬라이드 6.2: 검진의 약속 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">조기 발견의 꿈</div>
+<div class="story-card animate delay-1">
+<div class="place">1970s - PRESENT</div>
+<div class="narrative">
+                    논리는 아름다웠습니다. 암을 조기에 발견하고, 조기에 치료하고, 생명을 구하는 것입니다.
+                    <br/><br/>
+                    Mammography could detect tumors too small to feel.
+                    <br/><br/>
+                    여성들은 다음과 같은 말을 들었습니다. <strong>"Annual mammograms save lives."</strong>
+<br/><br/>
+                    But what if some of those "cancers" would never have killed?
+                  </div>
+</div>
+</div>
+</div>
+<!-- Slide 6.3: Overdiagnosis -->
+<div class="slide blood">
+<div class="content text-center">
+<div class="title red animate">과잉진단의 저주</div>
+<div class="death-toll animate delay-1">
+<div class="number" style="font-size:3rem;">19-30%</div>
+<div class="label">of screen-detected breast cancers may be overdiagnosed</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">WHAT IS OVERDIAGNOSIS?</div>
+<div class="simple-text">
+                    "암"을 찾아내는 것 <strong>never have caused symptoms or death</strong>
+                    그 사람의 일생 동안.
+                    <br/><br/>
+                    그 여성은 진단을 받고 수술, 방사선, 화학 요법으로 치료를 받습니다.
+                    <strong>결코 그녀에게 해를 끼치지 않았을 질병 때문이었습니다.</strong>
+</div>
+</div>
+<p class="animate delay-3" style="font-size:0.7rem;color:rgba(255,255,255,0.5);">
+                  Independent UK Panel on Breast Cancer Screening. Lancet. 2012;380:1778-1786
+                </p>
+</div>
+</div>
+ 슬라이드 6.4: 숫자 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">검사를 받은 여성 10,000명당</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box" style="background:var(--green);">
+<div class="stat-value" style="color:white;">3-4</div>
+<div class="stat-label">Lives saved<br/>유방암에서</div>
+</div>
+<div class="stat-box" style="background:var(--red);">
+<div class="stat-value" style="color:white;">~15</div>
+<div class="stat-label">Overdiagnosed<br/>(treated unnecessarily)</div>
+</div>
+<div class="stat-box" style="background:var(--orange);">
+<div class="stat-value" style="color:white;">~500</div>
+<div class="stat-label">False alarms<br/>(anxiety, biopsies)</div>
+</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">THE TRADE-OFF</div>
+<div class="simple-text">
+                    To save <strong>3-4 lives</strong>, 당신은 그것을 받아들여야 합니다 <strong>~15 women</strong>
+                    결코 해를 끼치지 않았을 암 치료를 받게 될 것이며, <strong>~500 women</strong> will experience false alarms.
+                    <br/><br/>
+<strong>이것은 좋은 거래입니까?</strong> 대답은 숫자뿐만 아니라 가치에 따라 달라집니다.
+                  </div>
+</div>
+</div>
+</div>
+<!-- Slide 6.5: Refrain -->
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  "그리고 테스트 결과 숨겨진 것이 무엇인지 알아냈고,<br/>
+                  그리고 그것을 질병이라고 불렀습니다.<br/>
+                  그리고 그 여자는 베임을 당하고 불에 타서 독살을 당했습니다.<br/>
+                  그녀의 나날을 결코 어둡게 하지 않을 그림자를 위해."
+                </div>
+<div class="gold-line animate delay-2"></div>
+<p class="animate delay-3" style="color:rgba(255,255,255,0.6);font-style:italic;">
+                  과잉진단의 문제가 바로 이것이다.
+                </p>
+</div>
+</div>
+</div>
+ ===================== 모듈 7: DTA의 메타 분석 ===================== 
+<div class="module-slides" data-module="7">
+<!-- Slide 7.1: Opening -->
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  한 가지 연구는 거짓말을 할 수도 있습니다. 한 연구는 아첨할 수도 있습니다.
+                  <br/><br/>
+                  하지만 모이면 <em>모든 연구</em>,<br/>
+                  그들의 증거를 종합해보면—
+                  <br/><br/>
+<em>The truth becomes harder to hide.</em>
+</div>
+</div>
+</div>
+<!-- Slide 7.2: Why Meta-Analysis -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">증거를 모으는 이유는 무엇입니까?</div>
+<div class="lesson-item animate delay-1">
+<div class="lesson-number">1</div>
+<div class="lesson-content">
+<h4>More Precision</h4>
+<p>Combining studies gives narrower confidence intervals, reducing uncertainty</p>
+</div>
+</div>
+<div class="lesson-item animate delay-2">
+<div class="lesson-number">2</div>
+<div class="lesson-content">
+<h4>Detect Heterogeneity</h4>
+<p>Why do different studies give different answers? Setting? Population? Threshold?</p>
+</div>
+</div>
+<div class="lesson-item animate delay-3">
+<div class="lesson-number">3</div>
+<div class="lesson-content">
+<h4>Expose Publication Bias</h4>
+<p>부정적인 연구가 숨겨져 있습니까? 깔때기 도표는 비대칭성을 드러냅니다.</p>
+</div>
+</div>
+<div class="lesson-item animate delay-4">
+<div class="lesson-number">4</div>
+<div class="lesson-content">
+<h4>Explore Thresholds</h4>
+<p>Build SROC curves to understand the sensitivity-specificity trade-off</p>
+</div>
+</div>
+</div>
+</div>
+ 슬라이드 7.3: 이변량 모델 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">이변량 모델</div>
+<div class="simple-box animate delay-1">
+<div class="simple-title">WHY IT'S SPECIAL</div>
+<div class="simple-text">
+                    민감도와 특이도를 별도로 통합할 수는 없습니다.
+                    <br/><br/>
+                    They are <strong>correlated</strong>: 하나가 올라가면 다른 하나는 내려가는 경향이 있습니다(문턱효과).
+                    <br/><br/>
+                    The <strong>bivariate model</strong> 이 상관관계를 설명하여 유효한 통합 추정치를 제공합니다.
+                  </div>
+</div>
+<p class="animate delay-2" style="font-size:0.75rem;color:rgba(255,255,255,0.5);margin-top:1rem;">
+                  Reitsma JB et al. J Clin Epidemiol. 2005;58:982-990
+                </p>
+</div>
+</div>
+<!-- Slide 7.4: SROC Curve -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">요약 ROC 곡선</div>
+<div class="roc-visual animate delay-1">
+<h4>ROC Space</h4>
+<div class="roc-canvas" style="display:flex;flex-direction:column;justify-content:space-between;padding:1rem;">
+<div style="display:flex;justify-content:space-between;">
+<span style="font-size:0.7rem;color:var(--gold);">Perfect test</span>
+<span style="font-size:0.7rem;color:rgba(255,255,255,0.5);">1-Specificity (FPR) →</span>
+</div>
+<div style="text-align:center;color:var(--purple);font-style:italic;">
+                      각 점 = 하나의 연구<br/>
+                      곡선은 상충관계를 보여줍니다.<br/>
+                      Higher = better test
+                    </div>
+<div style="display:flex;justify-content:space-between;">
+<span style="font-size:0.7rem;color:rgba(255,255,255,0.5);">↓ Sensitivity</span>
+<span style="font-size:0.7rem;color:var(--red);">Useless test (chance line)</span>
+</div>
+</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">SROC 읽기</div>
+<div class="simple-text">
+<strong>Top-left corner</strong> = perfect test (100% sens, 100% spec)<br/>
+<strong>Diagonal line</strong> = useless test (random guessing)<br/>
+<strong>The curve</strong> = 모든 연구 성과 요약
+                  </div>
+</div>
+</div>
+</div>
+<!-- Slide 7.5: Refrain -->
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain hope animate">
+                  "한 가지 연구는 속일 수 있습니다. 여러 연구를 종합해 보면,<br/>
+                  진실을 밝히기 시작합니다.<br/>
+                  SROC 곡선은 증거의 경로입니다.<br/>
+                  showing what the test can truly do."
+                </div>
+</div>
+</div>
+</div>
+<!-- ==================== MODULE 8: HETEROGENEITY ==================== -->
+<div class="module-slides" data-module="8">
+<!-- Slide 8.1: Opening -->
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  하지만 연구를 한다면 어떨까요? <em>disagree</em>?
+                  <br/><br/>
+                  한 연구에서는 민감도가 95%라고 말합니다.<br/>
+                  Another says 60%.
+                  <br/><br/>
+<em>어떤 진실을 믿습니까?</em>
+</div>
+</div>
+</div>
+<!-- Slide 8.2: What is Heterogeneity -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">이질성: 불일치</div>
+<div class="simple-box animate delay-1">
+<div class="simple-title">DEFINITION</div>
+<div class="simple-text">
+<strong>Heterogeneity</strong> 우연만으로는 설명할 수 없는 연구 간의 차이입니다.
+                    <br/><br/>
+                    High heterogeneity means <strong>연구에서는 서로 다른 측정을 수행하고 있습니다. 사물</strong>—
+                    or the test performs differently in different settings.
+                  </div>
+</div>
+</div>
+</div>
+<!-- Slide 8.3: Sources of Heterogeneity -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">연구 결과가 일치하지 않는 이유</div>
+<div class="lesson-item animate delay-1">
+<div class="lesson-number" style="background:var(--purple);">T</div>
+<div class="lesson-content">
+<h4>Threshold Differences</h4>
+<p>"긍정적" 결과에 대한 서로 다른 기준(예: 당뇨병에 대한 서로 다른 HbA1c 역치)</p>
+</div>
+</div>
+<div class="lesson-item animate delay-2">
+<div class="lesson-number" style="background:var(--teal);">P</div>
+<div class="lesson-content">
+<h4>Population Differences</h4>
+<p>Disease severity, age, comorbidities differ between studies</p>
+</div>
+</div>
+<div class="lesson-item animate delay-3">
+<div class="lesson-number" style="background:var(--gold);">S</div>
+<div class="lesson-content">
+<h4>Setting Differences</h4>
+<p>Primary care vs. specialist clinic vs. emergency room</p>
+</div>
+</div>
+<div class="lesson-item animate delay-4">
+<div class="lesson-number" style="background:var(--orange);">Q</div>
+<div class="lesson-content">
+<h4>Quality Differences</h4>
+<p>Risk of bias, verification bias, spectrum bias</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 8.4: Measuring Heterogeneity -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">불일치 측정</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box">
+<div class="stat-value" style="color:var(--green);">I² &lt; 25%</div>
+<div class="stat-label">Low heterogeneity<br/>Studies agree</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--gold);">I² 25-75%</div>
+<div class="stat-label">Moderate<br/>Some disagreement</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--red);">I² &gt; 75%</div>
+<div class="stat-label">High heterogeneity<br/>Major disagreement</div>
+</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">THE WARNING</div>
+<div class="simple-text">
+                    When I² &gt; 75%, the pooled estimate may be <strong>meaningless</strong>.
+                    <br/><br/>
+                    사과와 오렌지의 평균을 낼 수는 없습니다. <strong>explain</strong> why studies differ
+                    before pooling them.
+                  </div>
+</div>
+</div>
+</div>
+<!-- Slide 8.5: Refrain -->
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  "연구 결과에 동의하지 않을 경우<br/>
+                  반대 의견을 침묵시키지 마십시오.<br/>
+                  Ask: Why do they see differently?<br/>
+                  동의 불일치 자체가 교훈을 줍니다."
+                </div>
+</div>
+</div>
+</div>
+ ===================== 모듈 9: DTA TOOLKIT =================== 
+<div class="module-slides" data-module="9">
+<!-- Slide 9.1: Opening -->
+<div class="slide gradient active">
+<div class="content text-center">
+<div class="title gold animate">DTA 툴킷</div>
+<div class="subtitle animate delay-1">필수 조치 및 사용 시기</div>
+</div>
+</div>
+ 슬라이드 9.2: 조치 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Essential Metrics</div>
+<div class="lesson-item animate delay-1">
+<div class="lesson-number">1</div>
+<div class="lesson-content">
+<h4>Sensitivity &amp; Specificity</h4>
+<p>How well the test performs on sick vs. healthy people</p>
+</div>
+</div>
+<div class="lesson-item animate delay-2">
+<div class="lesson-number">2</div>
+<div class="lesson-content">
+<h4>Likelihood Ratios (LR+, LR-)</h4>
+<p>How much a result changes the probability of disease</p>
+</div>
+</div>
+<div class="lesson-item animate delay-3">
+<div class="lesson-number">3</div>
+<div class="lesson-content">
+<h4>Diagnostic Odds Ratio (DOR)</h4>
+<p>Single measure of test discrimination (DOR = LR+ / LR-)</p>
+</div>
+</div>
+<div class="lesson-item animate delay-4">
+<div class="lesson-number">4</div>
+<div class="lesson-content">
+<h4>SROC 아래 영역 Curve(AUC)</h4>
+<p>Overall test performance across all thresholds (0.5 = useless, 1.0 = perfect)</p>
+</div>
+</div>
+</div>
+</div>
+ 슬라이드 9.3: 도구 및 소프트웨어 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">업무용 도구</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box">
+<div class="stat-value" style="color:var(--teal);font-size:1.3rem;">mada</div>
+<div class="stat-label">R package for<br/>bivariate meta-analysis</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--gold);font-size:1.3rem;">metaDTA</div>
+<div class="stat-label">Stata module<br/>DTA 검토용</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--purple);font-size:1.3rem;">DTA Pro</div>
+<div class="stat-label">Browser-based<br/>오픈 액세스 도구</div>
+</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">표준 참조</div>
+<div class="simple-text">
+<strong>Reitsma et al. 2005</strong> - Bivariate model<br/>
+<strong>Rutter &amp; Gatsonis 2001</strong> - HSROC model<br/>
+<strong>Cochrane Handbook Ch. 10</strong> - DTA methods
+                  </div>
+</div>
+</div>
+</div>
+ 슬라이드 9.4: 체크리스트 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">DTA 연구를 신뢰하기 전에</div>
+<div class="lesson-item animate delay-1">
+<div class="lesson-number" style="background:var(--green);">✓</div>
+<div class="lesson-content">
+<h4>Was there a valid reference standard?</h4>
+<p>Gold standard test applied to all patients?</p>
+</div>
+</div>
+<div class="lesson-item animate delay-2">
+<div class="lesson-number" style="background:var(--green);">✓</div>
+<div class="lesson-content">
+<h4>통역사의 눈이 멀었나요?</h4>
+<p>Test readers unaware of diagnosis, and vice versa?</p>
+</div>
+</div>
+<div class="lesson-item animate delay-3">
+<div class="lesson-number" style="background:var(--green);">✓</div>
+<div class="lesson-content">
+<h4>스펙트럼이 적절했습니까?</h4>
+<p>Patients similar to your clinical population?</p>
+</div>
+</div>
+<div class="lesson-item animate delay-4">
+<div class="lesson-number" style="background:var(--green);">✓</div>
+<div class="lesson-content">
+<h4>임계값이 미리 지정되어 있습니까?</h4>
+<p>아니면 결과를 최대화하기 위해 선택되었습니까?</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 9.5: Refrain -->
+<div class="slide hope">
+<div class="content text-center">
+<div class="refrain hope animate">
+                  "Armed with sensitivity, specificity, likelihood,<br/>
+                  SROC와 일치 정도<br/>
+                  로 무장하여 테스트의 거짓말을 꿰뚫어 볼 수 있으며<br/>
+                  진실 여부를 판단할 수 있습니다. "
+                </div>
+</div>
+</div>
+</div>
+ ===================== 모듈 10: 실제 의사 결정 스토리 =================== 
+<div class="module-slides" data-module="10">
+ =========== 스토리 1: THERANOS MIRAGE ========== 
+<!-- Slide 10.1: Opening Rhetorical -->
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  Have you considered what happens when a test <em>promises everything</em>?
+                  <br/><br/>
+                  When a machine claims to see what no other machine can see,<br/>
+                  아무도 묻지 않습니다: <em>"증거를 보여주세요"</em>?
+                </div>
+</div>
+</div>
+ 슬라이드 10.2: 실제 데이터 상자 
+<div class="slide fraud">
+<div class="content text-center">
+<div class="title red animate">Theranos Mirage</div>
+<div class="card dark-bg red-border animate delay-1">
+<div class="card-label" style="color:var(--red);">REAL DATA: FDA INSPECTION FINDINGS</div>
+<div class="card-text">
+<strong style="color:var(--gold);">Theranos claimed:</strong> 200+ tests from a single finger prick<br/><br/>
+<strong style="color:var(--red);">FDA found:</strong><br/>
+                    • Results varied by <strong>146%</strong> between runs on the same sample<br/>
+                    • Edison machines failed <strong>87%</strong> of proficiency tests<br/>
+                    • <strong>Zero</strong> 동료 검토 검증 연구 발표<br/>
+                    • 환자는 음성 샘플에 대해 HIV 양성 결과를 받았습니다
+                  </div>
+</div>
+<p class="animate delay-2" style="font-size:0.7rem;color:rgba(255,255,255,0.5);margin-top:1rem;">
+                  Sources: FDA Warning Letter 2016; Carreyrou J. Bad Blood. 2018; CMS Inspection Reports.
+                </p>
+</div>
+</div>
+<!-- Slide 10.3: Decision Tree -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">결정나무</div>
+<div class="subtitle animate delay-1">당신은 병원 관리자입니다. Theranos는 귀하에게 계약을 제안합니다.</div>
+<div class="decision-tree animate delay-2" style="max-width:800px;">
+<h4>무엇을 선택하시겠습니까?</h4>
+<div class="tree-level">
+<div class="tree-node root">Theranos Contract Offered</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-level" style="gap: 2rem;">
+<div style="flex:1;">
+<div class="tree-node positive" style="background:rgba(197,48,48,0.4);">PATH A: Trust Marketing Claims</div>
+<div class="tree-label" style="margin-top:0.5rem;">↓</div>
+<div class="tree-node fp" style="margin-top:0.5rem;">계약서에 서명</div>
+<div class="tree-label" style="margin-top:0.5rem;">↓</div>
+<div class="tree-node" style="background:var(--blood-red);color:white;margin-top:0.5rem;">
+                        Misdiagnose thousands<br/>Face lawsuits<br/>Harm patients
+                      </div>
+</div>
+<div style="flex:1;">
+<div class="tree-node negative" style="background:rgba(34,197,94,0.4);">경로 B: 수요 검증 데이터</div>
+<div class="tree-label" style="margin-top:0.5rem;">↓</div>
+<div class="tree-node tn" style="margin-top:0.5rem;">동료 검토 연구 없음</div>
+<div class="tree-label" style="margin-top:0.5rem;">↓</div>
+<div class="tree-node" style="background:var(--green);color:white;margin-top:0.5rem;">
+                        거부 계약서<br/>환자 보호<br/>Avoid Scandal
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+ 슬라이드 10.4: 계시 
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate" style="color:var(--gold);font-size:clamp(1.2rem,3vw,1.8rem);">
+                  THE REVELATION
+                </div>
+<div class="gold-line animate delay-1"></div>
+<div class="story-card animate delay-2">
+<div class="narrative" style="font-size:1.2rem;">
+                    Elizabeth Holmes never validated a single test externally.<br/><br/>
+                    A <strong style="color:var(--gold);">$9 billion valuation</strong> became a <strong style="color:var(--red);">criminal fraud conviction</strong>.<br/><br/>
+                    서명하기 전에 검증 데이터를 요구한 모든 병원<br/>
+<em>거짓말로부터 보호되었습니다.</em><br/><br/>
+                    신뢰한 모든 병원 마케팅<br/>
+<em>became complicit in harming patients.</em>
+</div>
+</div>
+<div class="simple-box animate delay-3">
+<div class="simple-title" style="color:var(--gold);">THE LESSON</div>
+<div class="simple-text">
+<strong>No peer-reviewed validation = No trust.</strong><br/>
+                    증거의 부재는 마케팅 문제가 아닙니다.<br/>
+                    It is a <strong style="color:var(--red);">patient safety emergency</strong>.
+                  </div>
+</div>
+</div>
+</div>
+ =========== 스토리 2: 코로나19 급속 테스트 혼란 ========== 
+<!-- Slide 10.5: Opening Rhetorical -->
+<div class="slide black">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  When speed defeats accuracy,<br/>
+<em>비용을 지불하는 사람 가격은?</em>
+<br/><br/>
+                  The test result comes in 15 minutes.<br/>
+                  그러나 결과가 <em>15 minutes of false confidence</em>?
+                </div>
+</div>
+</div>
+ 슬라이드 10.6: 실제 데이터 상자 
+<div class="slide blood">
+<div class="content text-center">
+<div class="title red animate">The COVID Rapid Test Chaos</div>
+<div class="card dark-bg red-border animate delay-1">
+<div class="card-label" style="color:var(--red);">실제 데이터: MANUFACTURER VS. 현실</div>
+<div class="card-text">
+<strong style="color:var(--gold);">Manufacturer claims:</strong> 97% sensitivity<br/><br/>
+<strong style="color:var(--red);">Real-world performance (Cochrane 2022):</strong><br/>
+                    • Symptomatic individuals: <strong>73% sensitivity</strong> (missed 27%)<br/>
+                    • Asymptomatic individuals: <strong>58% sensitivity</strong> (missed 42%)<br/>
+                    • Early infection (days 0-3): <strong>~50% sensitivity</strong><br/><br/>
+<em style="color:rgba(255,255,255,0.7);">감염된 무증상 감염자의 거의 절반이 "해독"이라는 말을 들었습니다.</em>
+</div>
+</div>
+<p class="animate delay-2" style="font-size:0.7rem;color:rgba(255,255,255,0.5);margin-top:1rem;">
+                  Source: Dinnes J et al. Cochrane Database Syst Rev. 2022;7:CD013705
+                </p>
+</div>
+</div>
+<!-- Slide 10.7: Decision Tree -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">결정나무</div>
+<div class="subtitle animate delay-1">당신은 코로나19 급증 기간 동안 학교 간호사입니다. 증상이 있는 교사는 신속 테스트에서 음성 판정을 받았습니다.</div>
+<div class="decision-tree animate delay-2" style="max-width:800px;">
+<h4>무엇을 선택하시겠습니까?</h4>
+<div class="tree-level">
+<div class="tree-node root">Symptomatic Teacher + Negative Rapid Test</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-level" style="gap: 2rem;">
+<div style="flex:1;">
+<div class="tree-node positive" style="background:rgba(197,48,48,0.4);">PATH A: Trust the Negative Result</div>
+<div class="tree-label" style="margin-top:0.5rem;">↓</div>
+<div class="tree-node fp" style="margin-top:0.5rem;">Send Teacher to Class</div>
+<div class="tree-label" style="margin-top:0.5rem;">↓</div>
+<div class="tree-node" style="background:var(--blood-red);color:white;margin-top:0.5rem;">
+                        Outbreak infects 30 students<br/>School closure<br/>Three hospitalizations
+                      </div>
+</div>
+<div style="flex:1;">
+<div class="tree-node negative" style="background:rgba(34,197,94,0.4);">PATH B: Remember Sensitivity Limits</div>
+<div class="tree-label" style="margin-top:0.5rem;">↓</div>
+<div class="tree-node tn" style="margin-top:0.5rem;">Require PCR Confirmation</div>
+<div class="tree-label" style="margin-top:0.5rem;">↓</div>
+<div class="tree-node" style="background:var(--green);color:white;margin-top:0.5rem;">
+                        PCR positive confirmed<br/>Teacher isolates<br/>Outbreak prevented
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+ 슬라이드 10.8: 계시 
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate" style="color:var(--gold);font-size:clamp(1.2rem,3vw,1.8rem);">
+                  THE REVELATION
+                </div>
+<div class="gold-line animate delay-1"></div>
+<div class="story-card animate delay-2">
+<div class="narrative" style="font-size:1.2rem;">
+                    A <strong style="color:var(--red);">negative test</strong> 는 <strong>no infection</strong>.<br/><br/>
+                    It means: <em>"not detected."</em><br/><br/>
+                    이 두 문구의 차이점<br/>
+                    is measured in <strong style="color:var(--gold);">lives</strong>.
+                  </div>
+</div>
+<div class="simple-box animate delay-3">
+<div class="simple-title" style="color:var(--gold);">THE LESSON</div>
+<div class="simple-text">
+                    When sensitivity is 58%, a negative result in a symptomatic person<br/>
+                    is <strong>almost meaningless</strong>.<br/><br/>
+<strong style="color:var(--green);">SnNout only works when sensitivity is HIGH.</strong><br/>
+                    Know your test's limits before trusting its verdict.
+                  </div>
+</div>
+</div>
+</div>
+ ========== 스토리 3: THE 유방조영술 논쟁 ========== 
+<!-- Slide 10.9: Opening Rhetorical -->
+<div class="slide black">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  테스트할 수 있는 방법 <em>finds cancer</em><br/>
+                  still <em>cause harm</em>?
+                  <br/><br/>
+                  암이 발견되면 어떻게 될까요<br/>
+                  would never have hurt you?
+                </div>
+</div>
+</div>
+ 슬라이드 10.10: Real Data Box 
+<div class="slide blood">
+<div class="content text-center">
+<div class="title red animate">유방조영술 논란</div>
+<div class="card dark-bg red-border animate delay-1">
+<div class="card-label" style="color:var(--red);">실제 데이터: 검사의 역설</div>
+<div class="card-text">
+<strong style="color:var(--gold);">Test characteristics:</strong><br/>
+                    Sensitivity: ~85% | Specificity: ~90%<br/><br/>
+<strong style="color:var(--red);">10년 동안 매년 1,000명의 여성을 대상으로 검사를 실시했습니다.</strong><br/>
+                    • <strong style="color:var(--green);">1 death prevented</strong> 유방암에서<br/>
+                    • <strong style="color:var(--orange);">5 women overtreated</strong> 자신에게 해를 끼치지 않았을 암<br/>
+                    • <strong style="color:var(--red);">100-500 false alarms</strong> leading to biopsies, anxiety, repeat imaging<br/><br/>
+<em style="color:rgba(255,255,255,0.7);">Overdiagnosis rate: 19-30% of screen-detected cancers</em>
+</div>
+</div>
+<p class="animate delay-2" style="font-size:0.7rem;color:rgba(255,255,255,0.5);margin-top:1rem;">
+                  Source: Independent UK Panel on Breast Cancer Screening. Lancet. 2012;380:1778-1786
+                </p>
+</div>
+</div>
+<!-- Slide 10.11: Decision Tree -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">결정나무</div>
+<div class="subtitle animate delay-1">A 45-year-old woman asks your advice on mammography screening.</div>
+<div class="decision-tree animate delay-2" style="max-width:800px;">
+<h4>무엇을 선택하시겠습니까?</h4>
+<div class="tree-level">
+<div class="tree-node root">Patient Asks: "Should I Get Annual Mammograms?"</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-level" style="gap: 2rem;">
+<div style="flex:1;">
+<div class="tree-node positive" style="background:rgba(197,48,48,0.4);">PATH A: Recommend Without Context</div>
+<div class="tree-label" style="margin-top:0.5rem;">↓</div>
+<div class="tree-node fp" style="margin-top:0.5rem;">Small Tumor Found</div>
+<div class="tree-label" style="margin-top:0.5rem;">↓</div>
+<div class="tree-node" style="background:var(--blood-red);color:white;margin-top:0.5rem;">
+                        Mastectomy performed<br/>종양은 잠잠했습니다. (DCIS)<br/>Would never have harmed her
+                      </div>
+</div>
+<div style="flex:1;">
+<div class="tree-node negative" style="background:rgba(34,197,94,0.4);">PATH B: Explain Trade-offs</div>
+<div class="tree-label" style="margin-top:0.5rem;">↓</div>
+<div class="tree-node tn" style="margin-top:0.5rem;">Shared Decision-Making</div>
+<div class="tree-label" style="margin-top:0.5rem;">↓</div>
+<div class="tree-node" style="background:var(--green);color:white;margin-top:0.5rem;">
+                        Patient makes informed choice<br/>장점과 해악을 이해합니다<br/>Autonomy preserved
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+ 슬라이드 10.12: 계시 
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate" style="color:var(--gold);font-size:clamp(1.2rem,3vw,1.8rem);">
+                  THE REVELATION
+                </div>
+<div class="gold-line animate delay-1"></div>
+<div class="story-card animate delay-2">
+<div class="narrative" style="font-size:1.2rem;">
+<strong style="color:var(--gold);">테스트 정확도가 유일한 척도는 아닙니다.</strong><br/><br/>
+                    A test can be <em>accurate</em> 그리고 여전히 <em>harm</em>.<br/><br/>
+                    When overdiagnosis exceeds lives saved,<br/>
+                    we must ask: <strong style="color:var(--red);">Is finding always helping?</strong>
+</div>
+</div>
+<div class="simple-box animate delay-3">
+<div class="simple-title" style="color:var(--gold);">THE LESSON</div>
+<div class="simple-text">
+                    해를 유발합니다 <strong>오류 및 과잉 진단</strong><br/>
+                    은 <strong>true positives</strong>.<br/><br/>
+<strong style="color:var(--green);">Always weigh benefits against harms.</strong><br/>
+                    검사가 항상 절약되는 것은 아닙니다.
+                  </div>
+</div>
+</div>
+</div>
+ ========== 이야기 4: PSA 역설 ========== 
+<!-- Slide 10.13: Opening Rhetorical -->
+<div class="slide black">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  What if <em>finding</em> the disease<br/>
+                  is worse than <em>missing</em> it?
+                  <br/><br/>
+                  What if the treatment causes more suffering<br/>
+                  than the disease ever would?
+                </div>
+</div>
+</div>
+ 슬라이드 10.14: 실제 데이터 상자 
+<div class="slide blood">
+<div class="content text-center">
+<div class="title red animate">PSA 역설</div>
+<div class="card dark-bg red-border animate delay-1">
+<div class="card-label" style="color:var(--red);">실제 데이터: 임계값 함정</div>
+<div class="card-text">
+<strong style="color:var(--gold);">PSA cutoff of 4.0 ng/mL:</strong><br/>
+                    • 고등급 암에 대한 민감도: <strong>21%</strong><br/>
+                    • Detects many indolent cancers that would never harm<br/><br/>
+<strong style="color:var(--gold);">Lower cutoff to 2.5 ng/mL:</strong><br/>
+                    • Sensitivity rises to: <strong>40%</strong><br/>
+                    • But overdiagnosis <strong>doubles</strong><br/><br/>
+<strong style="color:var(--red);">Treatment consequences:</strong><br/>
+                    • 20-30% of men experience incontinence after prostatectomy<br/>
+                    • 30-70% experience erectile dysfunction
+                  </div>
+</div>
+<p class="animate delay-2" style="font-size:0.7rem;color:rgba(255,255,255,0.5);margin-top:1rem;">
+                  Source: US Preventive Services Task Force. JAMA. 2018;319(18):1901-1913
+                </p>
+</div>
+</div>
+<!-- Slide 10.15: Decision Tree -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">결정나무</div>
+<div class="subtitle animate delay-1">의료 시스템에 대한 PSA 검사 정책을 설정하고 있습니다. 당신 앞에는 세 가지 길이 놓여 있습니다.</div>
+<div class="decision-tree animate delay-2" style="max-width:900px;">
+<h4>어떤 임계값을 선택하십니까?</h4>
+<div class="tree-level">
+<div class="tree-node root">PSA Screening Policy Decision</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-level" style="gap: 1rem;flex-wrap:wrap;">
+<div style="flex:1;min-width:200px;">
+<div class="tree-node positive" style="background:rgba(197,48,48,0.4);font-size:0.75rem;">PATH A: Low Threshold (2.5)</div>
+<div class="tree-label" style="margin-top:0.5rem;font-size:0.65rem;">↓</div>
+<div class="tree-node" style="background:var(--blood-red);color:white;margin-top:0.5rem;font-size:0.7rem;">
+                        Maximize sensitivity<br/>Thousands of unnecessary<br/>생검 및 치료
+                      </div>
+</div>
+<div style="flex:1;min-width:200px;">
+<div class="tree-node" style="background:rgba(249,115,22,0.4);border-color:var(--orange);font-size:0.75rem;">PATH B: High Threshold (4.0)</div>
+<div class="tree-label" style="margin-top:0.5rem;font-size:0.65rem;">↓</div>
+<div class="tree-node" style="background:var(--orange);color:white;margin-top:0.5rem;font-size:0.7rem;">
+                        Miss some cancers<br/>But most missed are indolent<br/>Fewer unnecessary treatments
+                      </div>
+</div>
+<div style="flex:1;min-width:200px;">
+<div class="tree-node negative" style="background:rgba(168,85,247,0.4);border-color:var(--purple);font-size:0.75rem;">PATH C: Abandon PSA Screening</div>
+<div class="tree-label" style="margin-top:0.5rem;font-size:0.65rem;">↓</div>
+<div class="tree-node" style="background:var(--purple);color:white;margin-top:0.5rem;font-size:0.7rem;">
+                        Miss aggressive cancers<br/>Some preventable deaths<br/>No overtreatment harm
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+ 슬라이드 10.16: 계시 
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate" style="color:var(--gold);font-size:clamp(1.2rem,3vw,1.8rem);">
+                  THE REVELATION
+                </div>
+<div class="gold-line animate delay-1"></div>
+<div class="story-card animate delay-2">
+<div class="narrative" style="font-size:1.2rem;">
+                    There is <strong style="color:var(--red);">no "right" cutoff</strong>.<br/><br/>
+                    Every threshold trades <strong style="color:var(--gold);">감도 특이성</strong>,<br/>
+<strong style="color:var(--green);">과다진단 감지</strong>.<br/><br/>
+                    의학적 선택은 아닙니다. <em>ethical</em>.<br/>
+                    어떤 피해를 기꺼이 받아들이느냐에 따라 다릅니다.
+                  </div>
+</div>
+<div class="simple-box animate delay-3">
+<div class="simple-title" style="color:var(--gold);">THE LESSON</div>
+<div class="simple-text">
+<strong>역치 효과는 기술적인 문제가 아닙니다.</strong><br/>
+                    It is a values problem.<br/><br/>
+                    Before choosing a cutoff, ask:<br/>
+<em>What is worse: missing disease or overtreating the healthy?</em>
+</div>
+</div>
+</div>
+</div>
+ ========== 이야기 5: 두 집단을 대상으로 한 결핵 테스트 ========== 
+<!-- Slide 10.17: Opening Rhetorical -->
+<div class="slide black">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  동일한 테스트입니다. 동일한 컷오프.<br/>
+<em>Different truths.</em>
+<br/><br/>
+                  How can identical numbers<br/>
+                  mean opposite things?
+                </div>
+</div>
+</div>
+ 슬라이드 10.18: 실제 데이터 상자 
+<div class="slide blood">
+<div class="content text-center">
+<div class="title red animate">두 인구 집단의 결핵 테스트</div>
+<div class="card dark-bg red-border animate delay-1">
+<div class="card-label" style="color:var(--red);">REAL DATA: SAME TEST, DIFFERENT MEANING</div>
+<div class="card-text">
+<strong style="color:var(--gold);">Tuberculin Skin Test (10mm cutoff)</strong><br/>
+                    Sensitivity: ~80% | Specificity: ~95%<br/><br/>
+<strong style="color:var(--green);">In high-prevalence setting (TB prevalence 10%):</strong><br/>
+                    • Positive Predictive Value: <strong>85%</strong><br/>
+                    • A positive test <em>usually means TB</em><br/><br/>
+<strong style="color:var(--red);">In low-prevalence setting (TB prevalence 0.1%):</strong><br/>
+                    • Positive Predictive Value: <strong>15%</strong><br/>
+                    • A positive test is <em>usually a false positive</em>
+</div>
+</div>
+<p class="animate delay-2" style="font-size:0.7rem;color:rgba(255,255,255,0.5);margin-top:1rem;">
+                  Source: Pai M et al. Lancet Infect Dis. 2014;14(8):765-773
+                </p>
+</div>
+</div>
+<!-- Slide 10.19: Decision Tree -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">결정나무</div>
+<div class="subtitle animate delay-1">당신은 런던에서 결핵 발병률이 높은 국가에서 온 이민자를 진료하는 의사입니다. TST는 긍정적입니다.</div>
+<div class="decision-tree animate delay-2" style="max-width:800px;">
+<h4>당신의 결론은 무엇입니까?</h4>
+<div class="tree-level">
+<div class="tree-node root">Positive TST in Immigrant Patient</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-level" style="gap: 2rem;">
+<div style="flex:1;">
+<div class="tree-node positive" style="background:rgba(197,48,48,0.4);">PATH A: Apply UK Population PPV</div>
+<div class="tree-label" style="margin-top:0.5rem;">↓</div>
+<div class="tree-node fp" style="margin-top:0.5rem;">Assume "Probably False Positive"</div>
+<div class="tree-label" style="margin-top:0.5rem;">↓</div>
+<div class="tree-node" style="background:var(--blood-red);color:white;margin-top:0.5rem;">
+                        Miss active TB<br/>Patient infects family<br/>진단이 수개월간 지연됩니다
+                      </div>
+</div>
+<div style="flex:1;">
+<div class="tree-node negative" style="background:rgba(34,197,94,0.4);">PATH B: Consider Patient's Pre-Test Probability</div>
+<div class="tree-label" style="margin-top:0.5rem;">↓</div>
+<div class="tree-node tn" style="margin-top:0.5rem;">Recognize PPV Depends on Prevalence</div>
+<div class="tree-label" style="margin-top:0.5rem;">↓</div>
+<div class="tree-node" style="background:var(--green);color:white;margin-top:0.5rem;">
+                        Investigate further<br/>Chest X-ray, sputum<br/>Treat early if confirmed
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+ 슬라이드 10.20: 계시 
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate" style="color:var(--gold);font-size:clamp(1.2rem,3vw,1.8rem);">
+                  THE REVELATION
+                </div>
+<div class="gold-line animate delay-1"></div>
+<div class="story-card animate delay-2">
+<div class="narrative" style="font-size:1.2rem;">
+<strong style="color:var(--gold);">민감도 및 특이성</strong> are properties of <em>the test</em>.<br/><br/>
+<strong style="color:var(--gold);">PPV 및 NPV</strong> are properties of <em>the population</em>.<br/><br/>
+                    동일한 결과는 <strong style="color:var(--red);">different things</strong><br/>
+                    in different people.
+                  </div>
+</div>
+<div class="simple-box animate delay-3">
+<div class="simple-title" style="color:var(--gold);">THE LESSON</div>
+<div class="simple-text">
+<strong>Never interpret a test result without knowing the pre-test probability.</strong><br/><br/>
+                    A positive test in a high-risk patient means disease.<br/>
+                    The same positive in a low-risk patient means <em>probably nothing</em>.<br/><br/>
+<strong style="color:var(--green);">Context is everything.</strong>
+</div>
+</div>
+</div>
+</div>
+ 슬라이드 10.21: 모듈 요약 
+<div class="slide gradient">
+<div class="content text-center">
+<div class="title gold animate">Five Stories, Five Lessons</div>
+<div class="lesson-item animate delay-1">
+<div class="lesson-number" style="background:var(--red);">1</div>
+<div class="lesson-content">
+<h4>Theranos: Demand Validation</h4>
+<p>No peer-reviewed data = no trust, regardless of marketing claims</p>
+</div>
+</div>
+<div class="lesson-item animate delay-2">
+<div class="lesson-number" style="background:var(--orange);">2</div>
+<div class="lesson-content">
+<h4>COVID Rapid Tests: Know Sensitivity Limits</h4>
+<p>"검출되지 않음"은 "감염되지 않음"과 동일하지 않음</p>
+</div>
+</div>
+<div class="lesson-item animate delay-3">
+<div class="lesson-number" style="background:var(--purple);">3</div>
+<div class="lesson-content">
+<h4>Mammography: Weigh Benefits vs. Harms</h4>
+<p>Finding is not always helping; overdiagnosis causes real harm</p>
+</div>
+</div>
+<div class="lesson-item animate delay-4">
+<div class="lesson-number" style="background:var(--teal);">4</div>
+<div class="lesson-content">
+<h4>PSA: The Threshold is a Values Choice</h4>
+<p>모든 컷오프는 특이성에 대한 민감도를 교환합니다. "정답"은 없습니다</p>
+</div>
+</div>
+<div class="lesson-item animate delay-5">
+<div class="lesson-number" style="background:var(--gold);color:var(--navy);">5</div>
+<div class="lesson-content">
+<h4>TB Test: Context Determines Meaning</h4>
+<p>The same result means different things in different populations</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+ ==================== 모듈 11: 참조 및 퀴즈 =================== 
+<div class="module-slides" data-module="11">
+<!-- Slide 10.1: References -->
+<div class="slide dark active">
+<div class="content text-center">
+<div class="title gold animate">References</div>
+<div class="references animate delay-1">
+<h4>여기에 인용된 주요 출처 과정</h4>
+<ol>
+<li>Carreyrou J. <span class="journal">Bad Blood: Secrets and Lies in a Silicon Valley Startup.</span> Knopf, 2018.</li>
+<li>Dinnes J, et al. Rapid, point-of-care antigen tests for diagnosis of SARS-CoV-2 infection. <span class="journal">Cochrane Database Syst Rev.</span> 2022;7:CD013705.</li>
+<li>유방암 검진에 관한 영국의 독립 패널. 유방암 검진의 이점과 해로움 <span class="journal">Lancet.</span> 2012;380:1778-1786.</li>
+<li>Reitsma JB, et al. 민감도와 특이도에 대한 이변량 분석은 진단 검토에서 유용한 요약 측정값을 생성합니다. <span class="journal">J Clin Epidemiol.</span> 2005;58:982-990.</li>
+<li>Rutter CM, Gatsonis CA. A hierarchical regression approach to meta-analysis of diagnostic test accuracy evaluations. <span class="journal">Stat Med.</span> 2001;20:2865-2884.</li>
+<li>Deeks JJ, et al. The performance of tests of publication bias in systematic reviews of diagnostic test accuracy. <span class="journal">J Clin Epidemiol.</span> 2005;58:882-893.</li>
+<li>Macaskill P, et al. Cochrane Handbook for Systematic Reviews of Diagnostic Test Accuracy. Chapter 10. 2023.</li>
+<li>Higgins JPT, Thompson SG. Quantifying heterogeneity in a meta-analysis. <span class="journal">Stat Med.</span> 2002;21:1539-1558.</li>
+<li>US Food and Drug Administration. Warning Letter to Theranos Inc. 2016.</li>
+<li>US Preventive Services Task Force. Screening for Prostate Cancer. <span class="journal">JAMA.</span> 2018;319(18):1901-1913.</li>
+<li>Pai M, et al. Tuberculosis. <span class="journal">Lancet Infect Dis.</span> 2014;14(8):765-773.</li>
+</ol>
+</div>
+</div>
+</div>
+<!-- Slide 10.2: Quiz 1 -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="quiz-container animate">
+<div class="quiz-question">Theranos 이야기에서 혈액 검사의 근본적인 문제는 무엇이었습니까?</div>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkAnswer(this, false)">너무 비싸다</div>
+<div class="quiz-option" onclick="checkAnswer(this, true)">환자에게 해를 끼칠 수 있는 잘못된 결과를 얻었습니다</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)">너무나 컸습니다 느림</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)">They required too much blood</div>
+</div>
+<div class="quiz-feedback"></div>
+</div>
+</div>
+</div>
+<!-- Slide 10.3: Quiz 2 -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="quiz-container animate">
+<div class="quiz-question">A COVID rapid test has 55% sensitivity in asymptomatic people. What does this mean?</div>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkAnswer(this, false)">긍정적 결과의 55%가 정확함</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)">테스트가 55%의 확률로 작동함</div>
+<div class="quiz-option" onclick="checkAnswer(this, true)">The test misses 45% of infected asymptomatic people</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)">부정적 결과의 55%가 틀림</div>
+</div>
+<div class="quiz-feedback"></div>
+</div>
+</div>
+</div>
+<!-- Slide 10.4: Quiz 3 -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="quiz-container animate">
+<div class="quiz-question">What does "SnNout" mean?</div>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkAnswer(this, true)">A highly Sensitive test, when Negative, rules OUT disease</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)">A highly Specific test, when Negative, rules OUT disease</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)">A sensitive test should be used for screening</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)">민감도와 특이도는 부정적 Correlated</div>
+</div>
+<div class="quiz-feedback"></div>
+</div>
+</div>
+</div>
+<!-- Slide 10.5: Quiz 4 -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="quiz-container animate">
+<div class="quiz-question">메타 분석에서 민감도와 특이도를 별도로 통합할 수 없는 이유는 무엇입니까?</div>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkAnswer(this, false)">They use different scales</div>
+<div class="quiz-option" onclick="checkAnswer(this, true)">이들은 임계값 효과로 인해 상호 연관되어 있습니다</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)">They come from different populations</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)">It's computationally too difficult</div>
+</div>
+<div class="quiz-feedback"></div>
+</div>
+</div>
+</div>
+<!-- Slide 10.6: Completion -->
+<div class="slide hope">
+<div class="content text-center">
+<div class="big-number green animate" style="font-size:5rem;">✔</div>
+<div class="title green animate delay-1">Course Complete</div>
+<div class="gold-line animate delay-2"></div>
+<div class="refrain hope animate delay-3">
+                  "이제 네 가지 결과,<br/>
+                  테스트의 두 가지 장점<br/>
+                  임계값의 잔인한 절충<br/>
+                  및 풀링 기술을 알게 되었습니다. 증거.<br/>
+<br/>
+                  다음 테스트가 당신에게 놓여 있을 때—<br/>
+                  you will know how to see through it."
+                </div>
+<p class="animate delay-4" style="color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:1.2rem;margin-top:1.5rem;">
+                  테스트가 거짓말을 할 때 — 이제 당신은 알게 되었습니다.
+                </p>
+</div>
+</div>
+</div>
+<!-- Navigation -->
+<div class="slide-nav">
+<button class="nav-btn" onclick="prevSlide()">←</button>
+<div class="nav-center">
+<div class="slide-counter" id="slideCounter">1 / 5</div>
+<div class="progress" id="progressDots"></div>
+</div>
+<button class="nav-btn" onclick="nextSlide()">→</button>
+</div>
+</div>
+</div>
+</main>
+</div>
+<script>
+    function toggleSidebar() {
+      document.querySelector('.sidebar').classList.toggle('open');
+      var overlay = document.querySelector('.sidebar-overlay');
+      if (overlay) overlay.classList.toggle('show');
+      var btn = document.querySelector('.mobile-menu-toggle, .sidebar-toggle, .hamburger');
+      if (btn) btn.setAttribute('aria-expanded', btn.getAttribute('aria-expanded') === 'true' ? 'false' : 'true');
+    }
+
+    const modules = [
+      { id: 1, title: "The Fraud", subtitle: "Theranos: $9B on a lie", slides: 5 },
+      { id: 2, title: "네 가지 결과", subtitle: "TP, FP, FN, TN", slides: 5 },
+      { id: 3, title: "Sensitivity & Specificity", subtitle: "두 가지 장점", slides: 6 },
+      { id: 4, title: "코로나19 스캔들", subtitle: "When rapid tests failed", slides: 5 },
+      { id: 5, title: "Likelihood Ratios", subtitle: "결과의 실제 의미", slides: 5 },
+      { id: 6, title: "유방촬영 논쟁", subtitle: "Finding too much", slides: 5 },
+      { id: 7, title: "DTA Meta-Analysis", subtitle: "증거", slides: 5 },
+      { id: 8, title: "Heterogeneity", subtitle: "연구가 일치하지 않는 경우", slides: 5 },
+      { id: 9, title: "DTA 툴킷", subtitle: "Essential measures", slides: 5 },
+      { id: 10, title: "Decision Stories", subtitle: "Five real-world cases", slides: 21 },
+      { id: 11, title: "Test & Sources", subtitle: "Quiz + references", slides: 6 }
+    ];
+
+    let currentModule = 1;
+    let currentSlide = 1;
+    const completedModules = new Set();
+
+    function init() {
+      renderModuleList();
+      updateSlideNav();
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === ' ') {
+          e.preventDefault();
+          nextSlide();
+        } else if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          prevSlide();
+        }
+      });
+    }
+
+    function renderModuleList() {
+      const list = document.getElementById('moduleList');
+      list.innerHTML = modules.map(m => `
+        <div class="module-item ${m.id === currentModule ? 'active' : ''} ${completedModules.has(m.id) ? 'completed' : ''}"
+             onclick="goToModule(${m.id})">
+          <div class="module-number">${completedModules.has(m.id) ? '&#10003;' : m.id}</div>
+          <div class="module-info">
+            <div class="module-title">${m.title}</div>
+            <div class="module-subtitle">${m.subtitle}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function goToModule(moduleId) {
+      if (moduleId > currentModule) completedModules.add(currentModule);
+      currentModule = moduleId;
+      currentSlide = 1;
+
+      document.querySelectorAll('.module-slides').forEach(el => el.classList.remove('active'));
+      document.querySelector(`.module-slides[data-module="${moduleId}"]`).classList.add('active');
+
+      updateSlideVisibility();
+      updateSlideNav();
+      renderModuleList();
+      document.getElementById('currentModule').textContent = modules[moduleId - 1].title;
+    }
+
+    function updateSlideVisibility() {
+      const moduleSlides = document.querySelector(`.module-slides[data-module="${currentModule}"]`);
+      const slides = moduleSlides.querySelectorAll('.slide');
+      slides.forEach((slide, index) => slide.classList.toggle('active', index + 1 === currentSlide));
+    }
+
+    function updateSlideNav() {
+      const module = modules[currentModule - 1];
+      document.getElementById('slideCounter').textContent = `${currentSlide} / ${module.slides}`;
+      document.getElementById('progressDots').innerHTML = Array.from({ length: module.slides }, (_, i) =>
+        `<div class="progress-dot ${i + 1 === currentSlide ? 'active' : ''}" onclick="goToSlide(${i + 1})"></div>`
+      ).join('');
+    }
+
+    function goToSlide(slideNum) {
+      currentSlide = slideNum;
+      updateSlideVisibility();
+      updateSlideNav();
+    }
+
+    function nextSlide() {
+      const module = modules[currentModule - 1];
+      if (currentSlide < module.slides) {
+        currentSlide++;
+        updateSlideVisibility();
+        updateSlideNav();
+      } else if (currentModule < modules.length) {
+        goToModule(currentModule + 1);
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 1) {
+        currentSlide--;
+        updateSlideVisibility();
+        updateSlideNav();
+      } else if (currentModule > 1) {
+        const prevModuleSlides = modules[currentModule - 2].slides;
+        currentModule--;
+        currentSlide = prevModuleSlides;
+
+        document.querySelectorAll('.module-slides').forEach(el => el.classList.remove('active'));
+        document.querySelector(`.module-slides[data-module="${currentModule}"]`).classList.add('active');
+
+        updateSlideVisibility();
+        updateSlideNav();
+        renderModuleList();
+        document.getElementById('currentModule').textContent = modules[currentModule - 1].title;
+      }
+    }
+
+    function checkAnswer(element, isCorrect) {
+      const container = element.closest('.quiz-container');
+      const options = container.querySelectorAll('.quiz-option');
+      const feedback = container.querySelector('.quiz-feedback');
+
+      options.forEach(opt => {
+        opt.style.pointerEvents = 'none';
+        if (opt === element) opt.classList.add(isCorrect ? 'correct' : 'incorrect');
+      });
+
+      feedback.classList.add('show', isCorrect ? 'correct' : 'incorrect');
+      feedback.textContent = isCorrect
+        ? '정확합니다. 이해하셨습니다.'
+        : '정확하지 않습니다. 당신이 들었던 이야기를 생각해보십시오.';
+    }
+
+    init();
+  </script>
+</body>
+</html>

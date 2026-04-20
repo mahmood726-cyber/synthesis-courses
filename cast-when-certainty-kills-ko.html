@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>확실성이 사라질 때: CAST 이야기</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&amp;family=Source+Sans+Pro:wght@300;400;600;700&amp;display=swap" rel="stylesheet"/>
+<style>
+    :root {
+      --navy: #1E2761;
+      --deep-navy: #141B3D;
+      --gold: #D4AF37;
+      --cream: #FAF8F5;
+      --light-cream: #FFFFFF;
+      --text: #2D3748;
+      --light-text: #718096;
+      --red: #C53030;
+      --transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+      font-family: 'Source Sans Pro', sans-serif;
+      background: var(--deep-navy);
+    }
+
+    .presentation {
+      width: 100%;
+      height: 100%;
+      position: relative;
+    }
+
+    .slide {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 5vh 8vw;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity var(--transition), visibility var(--transition);
+    }
+
+    .slide.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .slide.dark {
+      background: var(--deep-navy);
+      color: var(--cream);
+    }
+
+    .slide.light {
+      background: var(--cream);
+      color: var(--text);
+    }
+
+    .slide.black {
+      background: #000;
+      color: var(--cream);
+    }
+
+    /* Typography */
+    .serif {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+    }
+
+    .title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 700;
+      margin-bottom: 1rem;
+      line-height: 1.2;
+    }
+
+    .title.navy { color: var(--navy); }
+    .title.gold { color: var(--gold); }
+    .title.cream { color: var(--cream); }
+
+    .subtitle {
+      font-size: clamp(1rem, 2vw, 1.5rem);
+      color: var(--light-text);
+      margin-bottom: 2rem;
+    }
+
+    .slide.dark .subtitle { color: rgba(255,255,255,0.7); }
+
+    .big-number {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(4rem, 15vw, 10rem);
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .big-number.navy { color: var(--navy); }
+    .big-number.gold { color: var(--gold); }
+
+    /* Refrain slides */
+    .refrain {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(1.5rem, 4vw, 2.5rem);
+      font-style: italic;
+      color: var(--gold);
+      text-align: center;
+      max-width: 800px;
+    }
+
+    /* Content cards */
+    .card {
+      background: var(--light-cream);
+      border: 1px solid var(--gold);
+      padding: 1.5rem 2rem;
+      margin: 0.75rem 0;
+      max-width: 800px;
+      width: 100%;
+    }
+
+    .card.navy-bg {
+      background: var(--navy);
+      color: var(--cream);
+    }
+
+    .card.red-border {
+      border: 2px solid var(--red);
+    }
+
+    .card-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+    }
+
+    .card-text {
+      font-size: clamp(0.9rem, 1.8vw, 1.1rem);
+    }
+
+    .card.navy-bg .card-text { color: var(--cream); }
+
+    /* Stats grid */
+    .stats-grid {
+      display: flex;
+      gap: 1rem;
+      margin: 1.5rem 0;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .stat-box {
+      background: var(--navy);
+      color: var(--cream);
+      padding: 1rem 1.5rem;
+      text-align: center;
+      min-width: 140px;
+    }
+
+    .stat-value {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(1.5rem, 3vw, 2rem);
+      font-weight: 700;
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      opacity: 0.8;
+      margin-top: 0.25rem;
+    }
+
+    /* Design grid */
+    .design-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      max-width: 900px;
+      width: 100%;
+    }
+
+    @media (max-width: 768px) {
+      .design-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .design-item {
+      background: var(--light-cream);
+      border-left: 3px solid var(--gold);
+      padding: 1rem;
+    }
+
+    .design-item-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--gold);
+      margin-bottom: 0.5rem;
+    }
+
+    .design-item-value {
+      font-size: 0.85rem;
+      color: var(--text);
+      line-height: 1.4;
+    }
+
+    /* Table */
+    .results-table {
+      width: 100%;
+      max-width: 700px;
+      border-collapse: collapse;
+      margin: 1rem 0;
+    }
+
+    .results-table th {
+      background: var(--navy);
+      color: var(--cream);
+      padding: 0.75rem 1rem;
+      text-align: left;
+      font-weight: 600;
+    }
+
+    .results-table th:not(:first-child) {
+      text-align: center;
+    }
+
+    .results-table td {
+      padding: 0.6rem 1rem;
+      border-bottom: 1px solid #E2E8F0;
+    }
+
+    .results-table td:not(:first-child) {
+      text-align: center;
+    }
+
+    .results-table .highlight {
+      color: var(--red);
+      font-weight: 700;
+    }
+
+    /* Result box */
+    .result-box {
+      background: var(--navy);
+      padding: 1rem 2rem;
+      text-align: center;
+      margin: 1rem 0;
+      max-width: 500px;
+    }
+
+    .result-box .value {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(1.5rem, 3vw, 2rem);
+      font-weight: 700;
+      color: var(--gold);
+    }
+
+    .result-box .label {
+      font-size: 0.9rem;
+      color: var(--cream);
+      margin-top: 0.25rem;
+    }
+
+    /* Forest plot */
+    .forest-plot {
+      width: 100%;
+      max-width: 900px;
+      margin: 1rem 0;
+    }
+
+    .fp-header {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1.5fr 3fr;
+      background: var(--navy);
+      padding: 0.5rem 1rem;
+      color: var(--cream);
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .fp-row {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1.5fr 3fr;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid #E2E8F0;
+      align-items: center;
+      background: var(--light-cream);
+    }
+
+    .fp-row.overall {
+      background: #F7FAFC;
+      font-weight: 600;
+    }
+
+    .fp-row > div:not(:first-child):not(:last-child) {
+      text-align: center;
+    }
+
+    .fp-visual {
+      position: relative;
+      height: 24px;
+      display: flex;
+      align-items: center;
+    }
+
+    .fp-line {
+      position: absolute;
+      left: 25%;
+      width: 75%;
+      height: 1px;
+      background: #E2E8F0;
+    }
+
+    .fp-null {
+      position: absolute;
+      left: 35%;
+      height: 100%;
+      width: 1px;
+      background: var(--text);
+      opacity: 0.5;
+    }
+
+    .fp-ci {
+      position: absolute;
+      height: 2px;
+      background: var(--red);
+    }
+
+    .fp-point {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      background: var(--red);
+      transform: translateX(-50%);
+    }
+
+    .fp-row.overall .fp-ci,
+    .fp-row.overall .fp-point {
+      background: var(--navy);
+    }
+
+    .fp-axis {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.5rem 1rem;
+      font-size: 0.75rem;
+      color: var(--light-text);
+      max-width: 900px;
+    }
+
+    .fp-axis-labels {
+      display: flex;
+      justify-content: space-between;
+      padding: 0 1rem;
+      font-size: 0.7rem;
+      color: var(--light-text);
+      max-width: 900px;
+    }
+
+    /* Lessons */
+    .lesson-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      margin: 0.75rem 0;
+      max-width: 800px;
+    }
+
+    .lesson-number {
+      background: var(--gold);
+      color: var(--navy);
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .lesson-content h4 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 0.25rem;
+    }
+
+    .lesson-content p {
+      font-size: 0.9rem;
+      color: var(--light-text);
+    }
+
+    /* What went wrong */
+    .wrong-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      background: var(--light-cream);
+      padding: 1rem;
+      margin: 0.5rem 0;
+      max-width: 800px;
+      width: 100%;
+    }
+
+    .wrong-number {
+      background: var(--navy);
+      color: var(--cream);
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    /* Closing slide */
+    .closing-line {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(1.2rem, 2.5vw, 1.75rem);
+      margin: 0.5rem 0;
+      text-align: center;
+    }
+
+    .closing-line.gold {
+      color: var(--gold);
+      font-weight: 700;
+    }
+
+    .closing-line.italic {
+      font-style: italic;
+      opacity: 0.9;
+    }
+
+    .gold-line {
+      width: 150px;
+      height: 2px;
+      background: var(--gold);
+      margin: 1.5rem auto;
+    }
+
+    /* The Leap badge */
+    .leap-badge {
+      background: var(--red);
+      color: white;
+      padding: 0.5rem 1rem;
+      font-size: 0.85rem;
+      font-weight: 700;
+      position: absolute;
+      right: -10px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .card-wrapper {
+      position: relative;
+      max-width: 800px;
+      width: 100%;
+    }
+
+    /* Navigation */
+    .nav {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      z-index: 100;
+      background: rgba(0,0,0,0.3);
+      padding: 0.75rem 1.5rem;
+      border-radius: 50px;
+      backdrop-filter: blur(10px);
+    }
+
+    .nav-btn {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+      padding: 0.25rem 0.5rem;
+    }
+
+    .nav-btn:hover {
+      opacity: 1;
+    }
+
+    .nav-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .progress {
+      display: flex;
+      gap: 6px;
+    }
+
+    .progress-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.3);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .progress-dot.active {
+      background: var(--gold);
+      transform: scale(1.2);
+    }
+
+    .progress-dot:hover {
+      background: rgba(255,255,255,0.6);
+    }
+
+    .slide-counter {
+      color: rgba(255,255,255,0.6);
+      font-size: 0.85rem;
+      min-width: 50px;
+      text-align: center;
+    }
+
+    /* Hint */
+    .hint {
+      position: fixed;
+      bottom: 6rem;
+      left: 50%;
+      transform: translateX(-50%);
+      color: rgba(255,255,255,0.4);
+      font-size: 0.8rem;
+      z-index: 100;
+      transition: opacity 0.5s;
+    }
+
+    .hint.hidden {
+      opacity: 0;
+    }
+
+    /* Focus box */
+    .focus-box {
+      background: var(--navy);
+      padding: 1rem 2rem;
+      text-align: center;
+      max-width: 600px;
+    }
+
+    .focus-box .main {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.3rem;
+      font-style: italic;
+      color: var(--gold);
+    }
+
+    .focus-box .sub {
+      font-size: 0.9rem;
+      color: var(--cream);
+      margin-top: 0.5rem;
+    }
+
+    /* Footnote */
+    .footnote {
+      font-size: 0.75rem;
+      color: var(--light-text);
+      font-style: italic;
+      text-align: center;
+      margin-top: 1rem;
+    }
+
+    /* Arrow */
+    .arrow {
+      color: var(--light-text);
+      font-size: 1.2rem;
+      margin: 0.25rem 0;
+    }
+
+    /* Emphasis box */
+    .emphasis-box {
+      background: var(--navy);
+      padding: 0.75rem 2rem;
+      text-align: center;
+      margin-top: 1.5rem;
+    }
+
+    .emphasis-box p {
+      color: var(--cream);
+      font-weight: 600;
+    }
+
+    /* Patient voice */
+    .patient-voice {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.1rem;
+      font-style: italic;
+      color: var(--gold);
+      text-align: center;
+      margin-top: 1.5rem;
+    }
+
+    /* Comparison box */
+    .comparison-box {
+      background: rgba(45, 58, 95, 0.8);
+      padding: 1rem 2rem;
+      text-align: center;
+      margin: 1rem 0;
+    }
+
+    .comparison-box p {
+      color: var(--cream);
+      font-size: 1rem;
+    }
+
+    /* Content wrapper */
+    .content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: 1000px;
+    }
+
+    .text-center { text-align: center; }
+    .mb-1 { margin-bottom: 1rem; }
+    .mb-2 { margin-bottom: 2rem; }
+    .mt-1 { margin-top: 1rem; }
+    .mt-2 { margin-top: 2rem; }
+
+    /* Animation for elements */
+    .slide.active .animate {
+      animation: fadeUp 0.6s ease-out forwards;
+    }
+
+    .slide.active .animate.delay-1 { animation-delay: 0.1s; }
+    .slide.active .animate.delay-2 { animation-delay: 0.2s; }
+    .slide.active .animate.delay-3 { animation-delay: 0.3s; }
+    .slide.active .animate.delay-4 { animation-delay: 0.4s; }
+    .slide.active .animate.delay-5 { animation-delay: 0.5s; }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .animate {
+      opacity: 0;
+    }
+
+    /* Red text */
+    .red { color: var(--red); }
+    .skip-link{position:absolute;top:-40px;left:0;background:#D4AF37;color:#1E2761;padding:8px 16px;z-index:100;transition:top 0.3s;font-family:'Source Sans Pro',sans-serif;text-decoration:none;font-weight:600;}.skip-link:focus{top:0;}
+
+    /* Focus-visible styles for keyboard navigation */
+    :focus-visible {
+      outline: 2px solid var(--gold, #D4AF37);
+      outline-offset: 2px;
+    }
+
+    :focus:not(:focus-visible) {
+      outline: none;
+    }
+
+    button:focus-visible,
+    a:focus-visible,
+    [role="button"]:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible {
+      outline: 2px solid var(--gold, #D4AF37);
+      outline-offset: 2px;
+      box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.3);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<div class="presentation" id="main-content">
+<!-- Slide 1: Opening Refrain -->
+<div class="slide dark active" data-index="0">
+<p class="refrain animate">Not every bright sign is guidance.</p>
+</div>
+<!-- Slide 2: Title -->
+<div class="slide dark" data-index="1">
+<p class="title cream animate text-center">이것은 오류에 관한 이야기가 아닙니다.</p>
+<p class="title gold animate delay-1 text-center">확실성에 관한 이야기입니다.</p>
+</div>
+ 슬라이드 3: 후크 
+<div class="slide light" data-index="2">
+<p class="big-number navy animate">50,000</p>
+<p class="subtitle animate delay-1">deaths per year</p>
+<p class="serif animate delay-2" style="font-size: 1.25rem; font-style: italic; color: var(--text);">From a treatment everyone believed worked.</p>
+<div class="gold-line animate delay-3"></div>
+<p class="animate delay-4" style="color: var(--light-text);">이것은 우리가 어떻게 믿었는지에 대한 이야기입니다. 틀렸습니다.</p>
+</div>
+ 슬라이드 4: 관찰 
+<div class="slide light" data-index="3">
+<div class="content">
+<h2 class="title navy animate">The Observation</h2>
+<div class="card animate delay-1">
+<p class="card-text text-center">Patients with frequent PVCs after MI had 2–5× higher mortality.</p>
+</div>
+<div class="stats-grid animate delay-2">
+<div class="stat-box">
+<div class="stat-value">400,000+</div>
+<div class="stat-label">MI survivors/year</div>
+</div>
+<div class="stat-box">
+<div class="stat-value">~40%</div>
+<div class="stat-label">중요한 PVC 포함</div>
+</div>
+<div class="stat-box">
+<div class="stat-value">160,000</div>
+<div class="stat-label">at elevated risk</div>
+</div>
+</div>
+<p class="footnote animate delay-3">A massive clinical need. A clear target.</p>
+</div>
+</div>
+ 슬라이드 5: 반응 
+<div class="slide light" data-index="4">
+<div class="content">
+<h2 class="title navy animate">The Response</h2>
+<p class="animate delay-1" style="font-size: 1.2rem; text-align: center; margin: 1rem 0;">Antiarrhythmic drugs were developed, FDA approved,<br/>and prescribed to ~200,000 patients per year.</p>
+<div class="focus-box animate delay-2">
+<p class="main">이 이야기에는 악당이 등장하지 않습니다.</p>
+<p class="sub">모두가 최선의 증거에 따라 행동했습니다.</p>
+</div>
+</div>
+</div>
+<!-- Slide 6: The Logic (First showing - no leap) -->
+<div class="slide light" data-index="5">
+<div class="content">
+<h2 class="title navy animate">모두를 설득한 논리</h2>
+<div class="card animate delay-1">
+<div class="card-label">PREMISE 1</div>
+<p class="card-text">PVCs after MI predict sudden cardiac death</p>
+</div>
+<div class="arrow animate delay-1">↓</div>
+<div class="card animate delay-2">
+<div class="card-label">PREMISE 2</div>
+<p class="card-text">Antiarrhythmic drugs suppress PVCs</p>
+</div>
+<div class="arrow animate delay-2">↓</div>
+<div class="card animate delay-3">
+<div class="card-label">PREMISE 3</div>
+<p class="card-text">Suppressing PVCs should prevent sudden death</p>
+</div>
+<div class="arrow animate delay-3">↓</div>
+<div class="card navy-bg animate delay-4">
+<div class="card-label">CONCLUSION</div>
+<p class="card-text">Antiarrhythmics save lives in post-MI patients</p>
+</div>
+<p class="footnote animate delay-5">체인은 논리적이었습니다. 결론은 불가피하다고 느꼈습니다.</p>
+</div>
+</div>
+<!-- Slide 7: CAST Trial Design -->
+<div class="slide light" data-index="6">
+<div class="content">
+<h2 class="title navy animate">CAST: The Cardiac Arrhythmia Suppression Trial</h2>
+<p class="serif animate delay-1" style="font-style: italic; color: var(--gold); margin-bottom: 1.5rem;">Finally, someone asked: "Does suppressing PVCs actually save lives?"</p>
+<div class="design-grid animate delay-2">
+<div class="design-item">
+<div class="design-item-label">Design</div>
+<div class="design-item-value">Randomized, double-blind, placebo-controlled</div>
+</div>
+<div class="design-item">
+<div class="design-item-label">Population</div>
+<div class="design-item-value">Post-MI patients with asymptomatic PVCs</div>
+</div>
+<div class="design-item">
+<div class="design-item-label">Intervention</div>
+<div class="design-item-value">Encainide, flecainide, or moricizine vs placebo</div>
+</div>
+<div class="design-item">
+<div class="design-item-label">Run-in</div>
+<div class="design-item-value">Only patients with ≥80% PVC suppression randomized</div>
+</div>
+<div class="design-item">
+<div class="design-item-label">Primary endpoint</div>
+<div class="design-item-value">Death or cardiac arrest with resuscitation</div>
+</div>
+<div class="design-item">
+<div class="design-item-label">Sample size</div>
+<div class="design-item-value">1,498 patients (encainide/flecainide arms)</div>
+</div>
+</div>
+<div class="emphasis-box animate delay-3">
+<p>Outcome tested: survival. Not assumed. Measured.</p>
+</div>
+</div>
+</div>
+ 슬라이드 8: 결과 표 
+<div class="slide light" data-index="7">
+<div class="content">
+<h2 class="title navy animate">결과: 1989년 4월</h2>
+<p class="red animate delay-1" style="font-style: italic; margin-bottom: 1rem;">데이터 안전 모니터링 위원회(Data Safety Monitoring Board)는 임상시험을 조기에 중단했습니다.</p>
+<table class="results-table animate delay-2">
+<thead>
+<tr>
+<th>Outcome</th>
+<th>Drug (n=755)</th>
+<th>Placebo (n=743)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Arrhythmic deaths</td>
+<td class="highlight">33</td>
+<td>9</td>
+</tr>
+<tr>
+<td>All cardiac deaths</td>
+<td class="highlight">43</td>
+<td>16</td>
+</tr>
+<tr>
+<td>Total deaths</td>
+<td class="highlight">56</td>
+<td>22</td>
+</tr>
+<tr>
+<td><strong>Death rate</strong></td>
+<td class="highlight">7.4%</td>
+<td><strong>3.0%</strong></td>
+</tr>
+</tbody>
+</table>
+<div class="result-box animate delay-3">
+<div class="value">Relative Risk of Death: 2.5</div>
+<div class="label">95% CI: 1.6 – 4.5 | p &lt; 0.001</div>
+</div>
+<p class="footnote animate delay-4">부정맥을 완벽하게 억제하는 약물은 사망률을 150%.</p>
+</div>
+</div>
+<!-- Slide 9: Forest Plot -->
+<div class="slide light" data-index="8">
+<div class="content">
+<h2 class="title navy animate">Forest Plot: CAST Mortality Results</h2>
+<div class="forest-plot animate delay-1">
+<div class="fp-header">
+<div>Outcome</div>
+<div>Drug</div>
+<div>Placebo</div>
+<div>RR (95% CI)</div>
+<div></div>
+</div>
+<div class="fp-row">
+<div>Arrhythmic death</div>
+<div>33/755</div>
+<div>9/743</div>
+<div>3.6 (1.7-7.5)</div>
+<div class="fp-visual">
+<div class="fp-line"></div>
+<div class="fp-null"></div>
+<div class="fp-ci" style="left: 45%; width: 35%;"></div>
+<div class="fp-point" style="left: 70%;"></div>
+</div>
+</div>
+<div class="fp-row">
+<div>Cardiac death</div>
+<div>43/755</div>
+<div>16/743</div>
+<div>2.6 (1.5-4.7)</div>
+<div class="fp-visual">
+<div class="fp-line"></div>
+<div class="fp-null"></div>
+<div class="fp-ci" style="left: 42%; width: 28%;"></div>
+<div class="fp-point" style="left: 58%;"></div>
+</div>
+</div>
+<div class="fp-row">
+<div>Total mortality</div>
+<div>56/755</div>
+<div>22/743</div>
+<div>2.5 (1.5-4.0)</div>
+<div class="fp-visual">
+<div class="fp-line"></div>
+<div class="fp-null"></div>
+<div class="fp-ci" style="left: 42%; width: 25%;"></div>
+<div class="fp-point" style="left: 55%;"></div>
+</div>
+</div>
+<div class="fp-row overall">
+<div><strong>Overall</strong></div>
+<div>56/755</div>
+<div>22/743</div>
+<div>2.5 (1.5-4.0)</div>
+<div class="fp-visual">
+<div class="fp-line"></div>
+<div class="fp-null"></div>
+<div class="fp-ci" style="left: 42%; width: 25%;"></div>
+<div class="fp-point" style="left: 55%;"></div>
+</div>
+</div>
+</div>
+<div class="fp-axis-labels animate delay-2" style="max-width: 900px; width: 100%;">
+<span style="margin-left: 58%;">Favors Drug</span>
+<span>Favors Placebo</span>
+</div>
+<p class="animate delay-3" style="font-weight: 600; margin-top: 1rem; text-align: center;">Every endpoint shows harm. The entire confidence interval excludes benefit.</p>
+<p class="footnote animate delay-4">Note: Forest plot shows outcomes within CAST, not pooled trials. I² = 0% (consistent harm).</p>
+</div>
+</div>
+<!-- Slide 10: Human Cost -->
+<div class="slide dark" data-index="9">
+<div class="content">
+<h2 class="title cream animate">인적 비용</h2>
+<p class="animate delay-1" style="margin-bottom: 1rem;">Before CAST, ~200,000 Americans per year received these drugs.</p>
+<p class="big-number gold animate delay-2">≈ 9,000</p>
+<p class="animate delay-2" style="font-size: 1.25rem;">excess deaths per year — possibly more</p>
+<div class="comparison-box animate delay-3">
+<p>Vietnam War: ~6,000 US deaths/year • These drugs: ~9,000+ deaths/year</p>
+</div>
+<p class="patient-voice animate delay-4">For every number, a name we will never know.</p>
+</div>
+</div>
+<!-- Slide 11: Look Again -->
+<div class="slide black" data-index="10">
+<p class="serif animate" style="font-size: clamp(2rem, 5vw, 3rem);">Look again.</p>
+</div>
+ 슬라이드 12: 논리 재검토(도약 포함) 
+<div class="slide light" data-index="11">
+<div class="content">
+<h2 class="title navy animate">논리 — 재검토</h2>
+<div class="card animate delay-1">
+<div class="card-label">PREMISE 1</div>
+<p class="card-text">PVCs after MI predict sudden cardiac death</p>
+</div>
+<div class="arrow animate delay-1">↓</div>
+<div class="card-wrapper animate delay-2">
+<div class="card">
+<div class="card-label">PREMISE 2</div>
+<p class="card-text">Antiarrhythmic drugs suppress PVCs</p>
+</div>
+<div class="leap-badge">← THE LEAP</div>
+</div>
+<div class="arrow animate delay-2">↓</div>
+<div class="card red-border animate delay-3">
+<div class="card-label">PREMISE 3</div>
+<p class="card-text">Suppressing PVCs should prevent sudden death</p>
+</div>
+<div class="arrow animate delay-3">↓</div>
+<div class="card navy-bg animate delay-4">
+<div class="card-label">CONCLUSION</div>
+<p class="card-text">Antiarrhythmics save lives in post-MI patients</p>
+</div>
+<p class="footnote animate delay-5">마커를 억제하면 결과가 수정될 것이라는 가정은 결코 없었습니다. 테스트를 거쳤습니다.</p>
+</div>
+</div>
+<!-- Slide 13: What Went Wrong -->
+<div class="slide light" data-index="12">
+<div class="content">
+<h2 class="title navy animate">What Went Wrong: The Surrogate Trap</h2>
+<div class="wrong-item animate delay-1">
+<div class="wrong-number">1</div>
+<p>PVC는 사망 원인이 아니라 손상된 조직의 지표였습니다</p>
+</div>
+<div class="wrong-item animate delay-2">
+<div class="wrong-number">2</div>
+<p>The drugs had proarrhythmic effects — triggering deadlier rhythms</p>
+</div>
+<div class="wrong-item animate delay-3">
+<div class="wrong-number">3</div>
+<p>대리모는 개선되었지만 결과는 악화되었습니다. 해리된 대리모</p>
+</div>
+<div class="focus-box animate delay-4 mt-2">
+<p class="main">대리모는 거짓말을 하지 않았습니다. 우리는 잘못된 질문을 했습니다.</p>
+</div>
+</div>
+</div>
+ 슬라이드 14: 교훈 
+<div class="slide light" data-index="13">
+<div class="content">
+<h2 class="title navy animate">증거 종합에 대한 교훈</h2>
+<div class="lesson-item animate delay-1">
+<div class="lesson-number">1</div>
+<div class="lesson-content">
+<h4>생물학적 타당성은 증거가 아닙니다</h4>
+<p>A logical mechanism doesn't guarantee the expected effect.</p>
+</div>
+</div>
+<div class="lesson-item animate delay-2">
+<div class="lesson-number">2</div>
+<div class="lesson-content">
+<h4>Surrogate endpoints can mislead</h4>
+<p>Improving a biomarker doesn't prove improvement in outcomes.</p>
+</div>
+</div>
+<div class="lesson-item animate delay-3">
+<div class="lesson-number">3</div>
+<div class="lesson-content">
+<h4>Only randomized trials establish causation</h4>
+<p>Observational data cannot prove intervention effects.</p>
+</div>
+</div>
+<div class="lesson-item animate delay-4">
+<div class="lesson-number">4</div>
+<div class="lesson-content">
+<h4>합의는 증거가 아닙니다 증거</h4>
+<p>200,000건의 처방, FDA 승인 및 지침이 모두 잘못되었습니다.</p>
+</div>
+</div>
+<p class="serif animate delay-5" style="font-style: italic; color: var(--gold); margin-top: 1.5rem; text-align: center;">This is why we do meta-analysis: to see past apparent truths.</p>
+</div>
+</div>
+<!-- Slide 15: Closing -->
+<div class="slide dark" data-index="14">
+<p class="closing-line animate">What appears certain may be wrong.</p>
+<p class="closing-line animate delay-1">What everyone believes may be false.</p>
+<p class="closing-line gold animate delay-2">환자가 우리의 신뢰에 대해 비용을 지불하지 않도록 하는 방법이 존재합니다.</p>
+<div class="gold-line animate delay-3"></div>
+<p class="closing-line italic animate delay-4">이것이 바로 귀하가 여기에 있는 이유입니다.</p>
+</div>
+<!-- Slide 16: Closing Refrain -->
+<div class="slide black" data-index="15">
+<p class="refrain animate">Not every bright sign is guidance.</p>
+<p class="animate delay-1" style="font-size: 1.25rem; margin-top: 1.5rem;">방법은 환자를 우리의 신뢰로부터 보호합니다.</p>
+</div>
+</div>
+<!-- Back to Library -->
+<a href="index.html" onmouseout="this.style.color='rgba(212,175,55,0.7)'" onmouseover="this.style.color='#D4AF37'" style="position:fixed;top:0.75rem;left:0.75rem;font-size:0.75rem;color:rgba(212,175,55,0.7);text-decoration:none;z-index:100;">← Course Library</a>
+<!-- Navigation -->
+<nav aria-label="Slide navigation" class="nav" role="navigation">
+<button class="nav-btn" disabled="" id="prevBtn">←</button>
+<div class="progress" id="progress"></div>
+<span class="slide-counter" id="counter">1 / 16</span>
+<button class="nav-btn" id="nextBtn">→</button>
+</nav>
+<p class="hint" id="hint">Press arrow keys or click to navigate</p>
+<script>
+    const slides = document.querySelectorAll('.slide');
+    const progress = document.getElementById('progress');
+    const counter = document.getElementById('counter');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const hint = document.getElementById('hint');
+    
+    let currentSlide = 0;
+    const totalSlides = slides.length;
+
+    // Create progress dots
+    for (let i = 0; i < totalSlides; i++) {
+      const dot = document.createElement('div');
+      dot.className = 'progress-dot' + (i === 0 ? ' active' : '');
+      dot.addEventListener('click', () => goToSlide(i));
+      progress.appendChild(dot);
+    }
+
+    function updateSlide() {
+      slides.forEach((slide, index) => {
+        slide.classList.toggle('active', index === currentSlide);
+      });
+
+      document.querySelectorAll('.progress-dot').forEach((dot, index) => {
+        dot.classList.toggle('active', index === currentSlide);
+      });
+
+      counter.textContent = `${currentSlide + 1} / ${totalSlides}`;
+      prevBtn.disabled = currentSlide === 0;
+      nextBtn.disabled = currentSlide === totalSlides - 1;
+    }
+
+    function goToSlide(index) {
+      if (index >= 0 && index < totalSlides) {
+        currentSlide = index;
+        updateSlide();
+        hideHint();
+      }
+    }
+
+    function nextSlide() {
+      if (currentSlide < totalSlides - 1) {
+        currentSlide++;
+        updateSlide();
+        hideHint();
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 0) {
+        currentSlide--;
+        updateSlide();
+        hideHint();
+      }
+    }
+
+    function hideHint() {
+      hint.classList.add('hidden');
+    }
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') {
+        e.preventDefault();
+        nextSlide();
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        prevSlide();
+      }
+    });
+
+    // Button navigation
+    prevBtn.addEventListener('click', prevSlide);
+    nextBtn.addEventListener('click', nextSlide);
+
+    // Click navigation (on slide area)
+    document.querySelector('.presentation').addEventListener('click', (e) => {
+      if (e.target.closest('.nav') || e.target.closest('button')) return;
+      const rect = document.body.getBoundingClientRect();
+      if (e.clientX > rect.width / 2) {
+        nextSlide();
+      } else {
+        prevSlide();
+      }
+    });
+
+    // Touch swipe
+    let touchStartX = 0;
+    document.addEventListener('touchstart', (e) => {
+      touchStartX = e.touches[0].clientX;
+    });
+
+    document.addEventListener('touchend', (e) => {
+      const touchEndX = e.changedTouches[0].clientX;
+      const diff = touchStartX - touchEndX;
+      if (Math.abs(diff) > 50) {
+        if (diff > 0) {
+          nextSlide();
+        } else {
+          prevSlide();
+        }
+      }
+    });
+
+    // Hide hint after 5 seconds
+    setTimeout(() => {
+      hint.classList.add('hidden');
+    }, 5000);
+  </script>
+</body>
+</html>

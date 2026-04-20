@@ -1,0 +1,2062 @@
+HTML
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Dominio del Riesgo de Sesgo: Las Amenazas Ocultas</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&amp;family=Source+Sans+Pro:wght@300;400;600;700&amp;display=swap" rel="stylesheet"/>
+<style>
+    :root {
+      --navy: #1E2761;
+      --deep-navy: #141B3D;
+      --gold: #D4AF37;
+      --cream: #FAF8F5;
+      --light-cream: #FFFFFF;
+      --text: #2D3748;
+      --light-text: #718096;
+      --red: #C53030;
+      --green: #22c55e;
+      --teal: #0f766e;
+      --purple: #7c3aed;
+      --orange: #f59e0b;
+      --transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      height: 100%;
+      font-family: 'Source Sans Pro', sans-serif;
+      background: var(--deep-navy);
+      color: var(--cream);
+    }
+
+    .course-container { display: flex; height: 100vh; overflow: hidden; }
+
+    /* Skip Link */
+    .skip-link {
+      position: absolute;
+      top: -40px;
+      left: 0;
+      background: var(--gold);
+      color: var(--navy);
+      padding: 8px 16px;
+      z-index: 10000;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .skip-link:focus { top: 0; }
+
+    /* Sidebar */
+    .sidebar {
+      width: 300px;
+      background: linear-gradient(180deg, var(--deep-navy) 0%, #0a0f1a 100%);
+      border-right: 1px solid rgba(212,175,55,0.2);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    .sidebar-header {
+      padding: 1.25rem;
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+      text-align: center;
+    }
+    .sidebar-header h1 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--gold);
+    }
+    .sidebar-header p {
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.6);
+    }
+
+    .stats-panel {
+      padding: 1rem;
+      background: rgba(212,175,55,0.1);
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+    }
+    .level-display {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+    .level-badge {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, var(--gold), #f0c040);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      box-shadow: 0 2px 8px rgba(212,175,55,0.4);
+    }
+    .level-info { flex: 1; }
+    .level-title { font-weight: 700; font-size: 0.9rem; color: var(--gold); }
+    .level-subtitle { font-size: 0.7rem; color: rgba(255,255,255,0.6); }
+    .xp-bar {
+      height: 8px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 0.5rem;
+    }
+    .xp-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--gold), var(--orange));
+      border-radius: 4px;
+      transition: width 0.5s ease;
+    }
+    .xp-text {
+      font-size: 0.65rem;
+      color: rgba(255,255,255,0.5);
+      text-align: right;
+      margin-top: 0.25rem;
+    }
+    .quick-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+    }
+    .quick-stat {
+      background: rgba(0,0,0,0.2);
+      padding: 0.5rem;
+      border-radius: 6px;
+      text-align: center;
+    }
+    .quick-stat-value {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--gold);
+    }
+    .quick-stat-label {
+      font-size: 0.6rem;
+      color: rgba(255,255,255,0.5);
+    }
+
+    .course-progress {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+      background: rgba(0,0,0,0.2);
+    }
+    .course-progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.6);
+      margin-bottom: 0.35rem;
+    }
+    .course-progress-bar {
+      height: 6px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .course-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--green), #22d3ee);
+      border-radius: 3px;
+      transition: width 0.5s ease;
+    }
+
+    .module-list { flex: 1; overflow-y: auto; padding: 0.5rem 0; }
+    .module-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.6rem 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      border-left: 3px solid transparent;
+    }
+    .module-item:hover { background: rgba(212,175,55,0.1); }
+    .module-item.active { background: rgba(212,175,55,0.15); border-left-color: var(--gold); }
+    .module-item.completed .module-number { background: var(--green); color: white; }
+    .module-item.locked { opacity: 0.5; cursor: not-allowed; }
+    .module-number {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .module-item.active .module-number { background: var(--gold); color: var(--navy); }
+    .module-info { flex: 1; min-width: 0; }
+    .module-title { font-size: 0.8rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .module-subtitle { font-size: 0.65rem; color: rgba(255,255,255,0.5); }
+    .module-xp { font-size: 0.6rem; color: var(--gold); }
+    .module-time { font-size: 0.55rem; color: rgba(255,255,255,0.4); display: flex; align-items: center; gap: 0.25rem; margin-top: 0.15rem; }
+
+    .badges-panel {
+      padding: 1rem;
+      border-top: 1px solid rgba(212,175,55,0.2);
+    }
+    .badges-title { font-size: 0.75rem; font-weight: 600; color: var(--gold); margin-bottom: 0.5rem; }
+    .badges-grid { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+    .badge-item {
+      width: 32px;
+      height: 32px;
+      background: rgba(255,255,255,0.05);
+      border: 2px solid rgba(255,255,255,0.1);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      font-family: inherit;
+      color: inherit;
+      padding: 0;
+      opacity: 0.3;
+      transition: all 0.3s;
+      cursor: pointer;
+      position: relative;
+    }
+    .badge-item.earned { opacity: 1; background: rgba(212,175,55,0.2); border-color: var(--gold); }
+    .badge-item:hover::after,
+    .badge-item:focus::after,
+    .badge-item:focus-visible::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--navy);
+      color: white;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.6rem;
+      white-space: nowrap;
+      z-index: 100;
+    }
+    .badge-item:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+    /* Main Content */
+    .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .content-header {
+      padding: 0.75rem 1.5rem;
+      background: rgba(0,0,0,0.3);
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .breadcrumb { font-size: 0.85rem; color: rgba(255,255,255,0.6); }
+    .breadcrumb span { color: var(--gold); }
+    .header-actions { display: flex; gap: 0.5rem; align-items: center; }
+    .streak-display {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: rgba(239,68,68,0.2);
+      border: 1px solid rgba(239,68,68,0.4);
+      padding: 0.35rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+    }
+    .streak-display.active { background: rgba(249,115,22,0.2); border-color: var(--orange); }
+    .streak-flame { font-size: 1rem; }
+    .streak-count { font-weight: 700; color: var(--orange); }
+
+    .btn {
+      padding: 0.5rem 1rem;
+      border: 1px solid rgba(212,175,55,0.3);
+      border-radius: 6px;
+      background: rgba(255,255,255,0.05);
+      color: var(--cream);
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn:hover { background: rgba(212,175,55,0.2); border-color: var(--gold); }
+    .btn.primary { background: var(--gold); color: var(--navy); border-color: var(--gold); font-weight: 600; }
+
+    .content-body { flex: 1; overflow: hidden; display: flex; }
+
+    /* Slides */
+    .slides-container { flex: 1; position: relative; overflow: hidden; }
+    .module-slides { display: none; width: 100%; height: 100%; }
+    .module-slides.active { display: block; }
+
+    .slide {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      padding: 2rem 2rem 4rem;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity var(--transition), visibility var(--transition);
+      overflow-y: auto;
+    }
+    .slide.active { opacity: 1; visibility: visible; }
+    .slide.dark { background: var(--deep-navy); }
+    .slide.light { background: var(--cream); color: var(--text); }
+    .slide.black { background: #000; }
+    .slide.red-bg { background: linear-gradient(135deg, #7f1d1d, #450a0a); }
+    .slide.green-bg { background: linear-gradient(135deg, #14532d, #052e16); }
+    .slide.purple-bg { background: linear-gradient(135deg, #4c1d95, #2e1065); }
+    .slide.orange-bg { background: linear-gradient(135deg, #9a3412, #431407); }
+    .slide.teal-bg { background: linear-gradient(135deg, #0f766e, #042f2e); }
+
+    .slide-progress-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--gold), var(--orange));
+      transition: width 0.3s ease;
+      z-index: 50;
+    }
+
+    .serif { font-family: 'Cormorant Garamond', Georgia, serif; }
+    .title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      font-weight: 700;
+      margin-bottom: 1rem;
+      line-height: 1.2;
+      text-align: center;
+    }
+    .title.gold { color: var(--gold); }
+    .title.navy { color: var(--navy); }
+    .subtitle {
+      font-size: clamp(0.9rem, 2vw, 1.3rem);
+      color: rgba(255,255,255,0.7);
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .slide.light .subtitle { color: var(--light-text); }
+
+    .big-number {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(4rem, 12vw, 8rem);
+      font-weight: 700;
+      line-height: 1;
+    }
+    .big-number.gold { color: var(--gold); }
+    .big-number.red { color: var(--red); }
+
+    .refrain {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(1.3rem, 3vw, 2rem);
+      font-style: italic;
+      color: var(--gold);
+      text-align: center;
+      max-width: 700px;
+    }
+
+    .content { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 850px; }
+
+    /* Cards */
+    .card {
+      background: var(--light-cream);
+      border: 1px solid var(--gold);
+      padding: 1.25rem 1.5rem;
+      margin: 0.5rem 0;
+      max-width: 750px;
+      width: 100%;
+      border-radius: 8px;
+    }
+    .card.navy-bg { background: var(--navy); color: var(--cream); }
+    .card-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 0.05em;
+      margin-bottom: 0.4rem;
+      text-transform: uppercase;
+    }
+    .card-text { font-size: 0.95rem; line-height: 1.6; }
+    .card.navy-bg .card-text { color: var(--cream); }
+
+    /* Story box */
+    .story-box {
+      background: linear-gradient(135deg, rgba(197,48,48,0.15), rgba(30,39,97,0.2));
+      border-left: 4px solid var(--red);
+      padding: 1.25rem;
+      margin: 0.75rem 0;
+      max-width: 750px;
+      width: 100%;
+      border-radius: 0 8px 8px 0;
+    }
+    .story-box.success { background: linear-gradient(135deg, rgba(34,197,94,0.15), rgba(30,39,97,0.2)); border-left-color: var(--green); }
+    .story-box.warning { background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(30,39,97,0.2)); border-left-color: var(--orange); }
+    .story-box.teal { background: linear-gradient(135deg, rgba(15,118,110,0.15), rgba(30,39,97,0.2)); border-left-color: var(--teal); }
+    .story-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: var(--red);
+      margin-bottom: 0.4rem;
+      text-transform: uppercase;
+    }
+    .story-box.success .story-label { color: var(--green); }
+    .story-box.warning .story-label { color: var(--orange); }
+    .story-box.teal .story-label { color: var(--teal); }
+    .story-text { font-size: 0.95rem; line-height: 1.6; }
+
+    /* Confidence Colors */
+    .cerqual-high { background: linear-gradient(135deg, rgba(34,197,94,0.2), rgba(30,39,97,0.2)); border-color: var(--green); }
+    .cerqual-moderate { background: linear-gradient(135deg, rgba(59,130,246,0.2), rgba(30,39,97,0.2)); border-color: #3b82f6; }
+    .cerqual-low { background: linear-gradient(135deg, rgba(245,158,11,0.2), rgba(30,39,97,0.2)); border-color: var(--orange); }
+    .cerqual-very-low { background: linear-gradient(135deg, rgba(197,48,48,0.2), rgba(30,39,97,0.2)); border-color: var(--red); }
+
+    .cerqual-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .cerqual-badge.high { background: var(--green); color: white; }
+    .cerqual-badge.moderate { background: #3b82f6; color: white; }
+    .cerqual-badge.low { background: var(--orange); color: white; }
+    .cerqual-badge.very-low { background: var(--red); color: white; }
+
+    /* Stats */
+    .stats-grid {
+      display: flex;
+      gap: 0.75rem;
+      margin: 1rem 0;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .stat-box {
+      background: var(--navy);
+      color: var(--cream);
+      padding: 1rem 1.25rem;
+      text-align: center;
+      min-width: 120px;
+      border-radius: 8px;
+    }
+    .stat-value {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.3rem, 2.5vw, 2rem);
+      font-weight: 700;
+    }
+    .stat-value.gold { color: var(--gold); }
+    .stat-value.red { color: var(--red); }
+    .stat-value.green { color: var(--green); }
+    .stat-label { font-size: 0.75rem; opacity: 0.8; margin-top: 0.2rem; }
+
+    /* Timeline */
+    .timeline { display: flex; flex-direction: column; gap: 0.4rem; width: 100%; max-width: 650px; }
+    .timeline-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.6rem 0.75rem;
+      background: rgba(255,255,255,0.05);
+      border-radius: 6px;
+      border-left: 4px solid var(--gold);
+    }
+    .timeline-days { font-weight: 700; font-size: 0.8rem; min-width: 70px; color: var(--gold); }
+    .timeline-content { flex: 1; }
+    .timeline-title { font-weight: 600; font-size: 0.9rem; }
+    .timeline-desc { font-size: 0.75rem; opacity: 0.7; }
+
+    /* Checklist */
+    .checklist { display: flex; flex-direction: column; gap: 0.4rem; width: 100%; max-width: 650px; }
+    .checklist-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+      padding: 0.6rem 0.75rem;
+      background: rgba(255,255,255,0.05);
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .check-icon {
+      width: 20px;
+      height: 20px;
+      background: var(--green);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      color: white;
+      flex-shrink: 0;
+    }
+    .checklist-text { font-size: 0.9rem; }
+
+    /* Decision Tree */
+    .decision-tree {
+      background: linear-gradient(135deg, rgba(124,58,237,0.1), rgba(30,39,97,0.2));
+      border: 2px solid var(--purple);
+      border-radius: 12px;
+      padding: 1.25rem;
+      width: 100%;
+      max-width: 700px;
+    }
+    .decision-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    .decision-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--purple);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+    }
+    .decision-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+    .decision-xp {
+      margin-left: auto;
+      background: rgba(212,175,55,0.2);
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      color: var(--gold);
+      font-weight: 600;
+    }
+    .decision-scenario {
+      background: rgba(0,0,0,0.2);
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+    .decision-question {
+      font-weight: 600;
+      color: var(--gold);
+      margin-bottom: 0.75rem;
+      font-size: 1rem;
+    }
+    .decision-options { display: flex; flex-direction: column; gap: 0.5rem; }
+    .decision-option {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      background: rgba(255,255,255,0.05);
+      border: 2px solid rgba(255,255,255,0.15);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .decision-option:hover { background: rgba(124,58,237,0.2); border-color: var(--purple); }
+    .decision-option.selected { background: rgba(124,58,237,0.3); border-color: var(--purple); }
+    .decision-option.correct { background: rgba(34,197,94,0.2); border-color: var(--green); }
+    .decision-option.incorrect { background: rgba(239,68,68,0.15); border-color: var(--red); }
+    .decision-option.disabled { pointer-events: none; opacity: 0.7; }
+    .decision-option:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+    .option-letter {
+      width: 24px;
+      height: 24px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.8rem;
+      flex-shrink: 0;
+    }
+    .decision-option.correct .option-letter { background: var(--green); color: white; }
+    .decision-option.incorrect .option-letter { background: var(--red); color: white; }
+    .option-text { font-size: 0.9rem; }
+    .decision-feedback {
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: 8px;
+      display: none;
+    }
+    .decision-feedback.show { display: block; }
+    .decision-feedback.correct { background: rgba(34,197,94,0.2); border: 1px solid var(--green); }
+    .decision-feedback.incorrect { background: rgba(239,68,68,0.15); border: 1px solid var(--red); }
+    .feedback-title { font-weight: 700; margin-bottom: 0.5rem; }
+    .feedback-text { font-size: 0.9rem; line-height: 1.5; }
+
+    /* Quiz */
+    .quiz-container { width: 100%; max-width: 650px; }
+    .quiz-question {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.2rem;
+      margin-bottom: 1.25rem;
+      text-align: center;
+    }
+    .quiz-options { display: flex; flex-direction: column; gap: 0.5rem; }
+    .quiz-option {
+      padding: 0.75rem 1rem;
+      background: rgba(255,255,255,0.05);
+      border: 2px solid rgba(255,255,255,0.2);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+    .quiz-option:hover { background: rgba(212,175,55,0.15); border-color: var(--gold); }
+    .quiz-option.correct { background: rgba(34,197,94,0.2); border-color: var(--green); }
+    .quiz-option.incorrect { background: rgba(239,68,68,0.15); border-color: var(--red); }
+    .quiz-option.disabled { pointer-events: none; }
+    .quiz-option:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+    .quiz-feedback {
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: 8px;
+      display: none;
+      font-size: 0.9rem;
+    }
+    .quiz-feedback.show { display: block; }
+    .quiz-feedback.correct { background: rgba(34,197,94,0.2); border: 1px solid var(--green); }
+    .quiz-feedback.incorrect { background: rgba(239,68,68,0.15); border: 1px solid var(--red); }
+
+    /* Learning Objectives */
+    .objectives-box {
+      background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(30,39,97,0.25));
+      border: 2px solid #3b82f6;
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin: 0.75rem 0;
+      max-width: 700px;
+      width: 100%;
+    }
+    .objectives-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+    .objectives-icon {
+      width: 36px;
+      height: 36px;
+      background: #3b82f6;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+    }
+    .objectives-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #60a5fa;
+    }
+    .objectives-list { list-style: none; padding: 0; }
+    .objectives-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      padding: 0.4rem 0;
+      font-size: 0.9rem;
+    }
+    .objectives-list li::before { content: 'o'; color: #3b82f6; font-weight: bold; }
+
+    /* Animation */
+    .slide.active .animate { animation: fadeUp 0.5s ease-out forwards; }
+    .slide.active .animate.delay-1 { animation-delay: 0.1s; }
+    .slide.active .animate.delay-2 { animation-delay: 0.2s; }
+    .slide.active .animate.delay-3 { animation-delay: 0.3s; }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate { opacity: 0; }
+
+    /* XP Popup */
+    .xp-popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      background: linear-gradient(135deg, var(--gold), #f0c040);
+      color: var(--navy);
+      padding: 1.5rem 2.5rem;
+      border-radius: 12px;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2rem;
+      font-weight: 700;
+      z-index: 1000;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+      transition: transform 0.3s ease;
+    }
+    .xp-popup.show { transform: translate(-50%, -50%) scale(1); }
+    .xp-popup .xp-amount { font-size: 3rem; display: block; }
+
+    /* Badge Modal */
+    .badge-modal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.85);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1001;
+    }
+    .badge-modal.show { display: flex; }
+    .badge-modal-content {
+      background: linear-gradient(135deg, var(--deep-navy), #0a0f1a);
+      border: 2px solid var(--gold);
+      border-radius: 16px;
+      padding: 2rem;
+      text-align: center;
+      max-width: 350px;
+    }
+    .badge-modal-icon { font-size: 4rem; margin-bottom: 1rem; }
+    .badge-modal-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.5rem;
+      color: var(--gold);
+      margin-bottom: 0.5rem;
+    }
+    .badge-modal-desc { font-size: 0.9rem; opacity: 0.8; margin-bottom: 1rem; }
+    .badge-modal-close {
+      padding: 0.5rem 1.5rem;
+      background: var(--gold);
+      color: var(--navy);
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* Confetti */
+    .confetti-container {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 999;
+      overflow: hidden;
+    }
+    .confetti {
+      position: absolute;
+      width: 10px; height: 10px;
+      opacity: 0;
+      animation: confetti-fall 3s ease-out forwards;
+    }
+    @keyframes confetti-fall {
+      0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .confetti { animation: none; display: none; }
+      .xp-popup { transition: none; }
+      .slide { transition: none; }
+    }
+
+    /* Nav */
+    .slide-nav {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      padding: 0.75rem 1rem 1.25rem;
+      z-index: 100;
+      pointer-events: none;
+    }
+    .nav-btn {
+      background: rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: white;
+      font-size: 1.1rem;
+      cursor: pointer;
+      opacity: 0.6;
+      transition: all 0.2s;
+      padding: 0.4rem 0.6rem;
+      border-radius: 6px;
+      pointer-events: auto;
+    }
+    .nav-btn:hover { opacity: 1; background: rgba(0,0,0,0.7); border-color: var(--gold); }
+    .nav-btn:disabled { opacity: 0.2; cursor: not-allowed; }
+    .nav-btn:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+    .nav-center { display: flex; flex-direction: column; align-items: center; gap: 0.2rem; pointer-events: auto; }
+    .slide-counter { font-size: 0.7rem; opacity: 0.5; }
+    .progress-dots { display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; max-width: 220px; }
+    .progress-dot {
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border: none;
+      padding: 0;
+      appearance: none;
+      background: transparent;
+    }
+    .progress-dot::after {
+      content: '';
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--text-muted, #ccc);
+      transition: all 0.2s ease;
+    }
+    .progress-dot.active::after,
+    .progress-dot.completed::after {
+      background: var(--gold);
+      width: 14px;
+      height: 14px;
+    }
+    .progress-dot:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+    /* Mobile */
+    @media (max-width: 768px) {
+      .sidebar {
+        position: fixed;
+        left: -300px;
+        top: 0;
+        bottom: 0;
+        z-index: 1000;
+        transition: left 0.3s ease;
+      }
+      .sidebar.open { left: 0; }
+      .sidebar-toggle {
+        display: flex;
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        z-index: 1001;
+        width: 40px;
+        height: 40px;
+        background: var(--gold);
+        color: var(--navy);
+        border: none;
+        border-radius: 8px;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        cursor: pointer;
+      }
+      .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 999;
+      }
+      .sidebar-overlay.show { display: block; }
+    }
+    @media (min-width: 769px) {
+      .sidebar-toggle { display: none; }
+      .sidebar-overlay { display: none !important; }
+    }
+
+    /* Combo Counter */
+    .combo-display {
+      position: fixed;
+      top: 80px;
+      right: 20px;
+      background: linear-gradient(135deg, var(--orange), #ef4444);
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      z-index: 500;
+      transform: scale(0);
+      transition: transform 0.3s ease;
+      box-shadow: 0 4px 15px rgba(239,68,68,0.4);
+    }
+    .combo-display.show { transform: scale(1); }
+
+    /* Quote Block */
+    .quote-block {
+      background: linear-gradient(135deg, rgba(15,118,110,0.2), rgba(30,39,97,0.2));
+      border-left: 4px solid var(--teal);
+      padding: 1.25rem;
+      margin: 0.75rem 0;
+      max-width: 700px;
+      width: 100%;
+      border-radius: 0 8px 8px 0;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      font-style: italic;
+    }
+    .quote-attribution {
+      margin-top: 0.75rem;
+      font-size: 0.85rem;
+      font-style: normal;
+      color: var(--teal);
+    }
+  </style>
+</head>
+<body>
+<a class="skip-link" href="#main-content">Saltar al contenido principal</a>
+<div class="course-container">
+<!-- Sidebar -->
+<nav aria-label="Navegacion del curso" class="sidebar" role="navigation">
+<div class="sidebar-header">
+<a href="index.html" onmouseout="this.style.color='rgba(212,175,55,0.7)'" onmouseover="this.style.color='#D4AF37'" style="display:block;font-size:0.7rem;color:rgba(212,175,55,0.7);text-decoration:none;margin-bottom:0.5rem;">← Biblioteca de Cursos</a>
+<h1>Riesgo de Sesgo</h1>
+<p>Habilidad Fundamental para Toda Revision</p>
+</div>
+<div class="stats-panel">
+<div class="level-display">
+<div class="level-badge" id="levelIcon">CS</div>
+<div class="level-info">
+<div class="level-title" id="levelTitle">Centinela del Sesgo</div>
+<div class="level-subtitle">Nivel <span id="levelNum">1</span></div>
+</div>
+</div>
+<div class="xp-bar"><div class="xp-fill" id="xpFill" style="width: 0%"></div></div>
+<div class="xp-text"><span id="xpCurrent">0</span> / <span id="xpNeeded">100</span> XP</div>
+<div class="quick-stats">
+<div class="quick-stat">
+<div class="quick-stat-value" id="correctCount">0</div>
+<div class="quick-stat-label">Correctas</div>
+</div>
+<div class="quick-stat">
+<div class="quick-stat-value" id="decisionCount">0</div>
+<div class="quick-stat-label">Decisiones</div>
+</div>
+<div class="quick-stat">
+<div class="quick-stat-value" id="synthesisCount">0</div>
+<div class="quick-stat-label">Juicios</div>
+</div>
+</div>
+</div>
+<div class="course-progress">
+<div class="course-progress-label">
+<span>Progreso del Curso</span>
+<span id="courseProgressPct">0%</span>
+</div>
+<div class="course-progress-bar">
+<div class="course-progress-fill" id="courseProgressFill" style="width: 0%"></div>
+</div>
+</div>
+<div class="module-list" id="moduleList"></div>
+<div class="badges-panel">
+<div class="badges-title">Logros</div>
+<div class="badges-grid" id="badgesGrid"></div>
+</div>
+</nav>
+<!-- Main Content -->
+<main class="main-content" id="main-content">
+<header class="content-header">
+<div class="breadcrumb">Riesgo de Sesgo / <span id="currentModule">Modulo 1</span></div>
+<div class="header-actions">
+<div class="streak-display" id="streakDisplay">
+<span class="streak-flame">RC</span>
+<span class="streak-count" id="streakCount">0</span>
+<span>dias consecutivos</span>
+</div>
+<button class="btn" onclick="resetProgress()">Reiniciar</button>
+</div>
+</header>
+<div class="content-body">
+<div class="slides-container" id="slidesContainer"></div>
+</div>
+</main>
+</div>
+<!-- XP Popup -->
+<div aria-atomic="true" aria-live="polite" class="xp-popup" id="xpPopup" role="status">
+<span class="xp-amount" id="xpAmount">+25</span>
+    XP
+  </div>
+<!-- Badge Modal -->
+<div aria-labelledby="badgeModalTitle" aria-modal="true" class="badge-modal" id="badgeModal" role="dialog">
+<div class="badge-modal-content">
+<div class="badge-modal-icon" id="badgeModalIcon">LG</div>
+<div class="badge-modal-title" id="badgeModalTitle">Insignia Obtenida!</div>
+<div class="badge-modal-desc" id="badgeModalDesc">Has desbloqueado un nuevo logro</div>
+<button class="badge-modal-close" onclick="closeBadgeModal()">Excelente!</button>
+</div>
+</div>
+<!-- Confetti Container -->
+<div class="confetti-container" id="confettiContainer"></div>
+<!-- Combo Counter -->
+<div aria-live="polite" class="combo-display" id="comboDisplay" role="status">COMBINADO <span id="comboCount">0</span>x</div>
+<!-- Mobile Sidebar Toggle -->
+<button aria-expanded="false" aria-label="Alternar menu" class="sidebar-toggle" onclick="toggleSidebar()">MENÚ</button>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<script>
+// ===== GAMIFICATION STATE =====
+const DEFAULT_STATE = {
+  xp: 0,
+  level: 1,
+  streak: 0,
+  lastActive: null,
+  correctAnswers: 0,
+  decisionsCompleted: 0,
+  synthesisCount: 0,
+  badges: [],
+  completedModules: [],
+  answeredQuestions: {}
+};
+
+function safeGetStorage(key, fallback) {
+  try {
+    const item = localStorage.getItem(key);
+    return item ? JSON.parse(item) : fallback;
+  } catch (e) {
+    return fallback;
+  }
+}
+
+function safeSetStorage(key, value) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch (e) {}
+}
+
+// Migration from old storage key to versioned key
+(function migrateStorage() {
+  try {
+    const oldData = localStorage.getItem('riskBiasMasteryGame_es');
+    if (oldData && !localStorage.getItem('riskBiasMasteryGame_es_v1')) {
+      localStorage.setItem('riskBiasMasteryGame_es_v1', oldData);
+      localStorage.removeItem('riskBiasMasteryGame_es');
+    }
+  } catch (e) {}
+})();
+
+let gameState = safeGetStorage('riskBiasMasteryGame_es_v1', DEFAULT_STATE);
+
+const LEVELS = [
+  { level: 1, title: "Centinela del Sesgo", icon: "CS", xp: 0 },
+  { level: 2, title: "Guardian de Asignacion", icon: "GA", xp: 120 },
+  { level: 3, title: "Vigilante del Cegamiento", icon: "VC", xp: 300 },
+  { level: 4, title: "Auditor de Desercion", icon: "AD", xp: 520 },
+  { level: 5, title: "Rastreador de Reportes", icon: "RR", xp: 780 },
+  { level: 6, title: "Analista de Confusion", icon: "AC", xp: 1050 },
+  { level: 7, title: "Juez de RdS", icon: "JR", xp: 1350 },
+  { level: 8, title: "Maestro del Sesgo", icon: "MS", xp: 1700 }
+];
+
+const BADGES = [
+  { id: "first_judgment", icon: "PJ", name: "Primer Juicio", desc: "Completa tu primer escenario de decision" },
+  { id: "allocation_guard", icon: "GA", name: "Guardian de Asignacion", desc: "Completa el modulo La Asignacion" },
+  { id: "blinding_watch", icon: "VC", name: "Vigilante del Cegamiento", desc: "Completa el modulo La Venda" },
+  { id: "attrition_auditor", icon: "AD", name: "Auditor de Desercion", desc: "Completa el modulo El Rastro Perdido" },
+  { id: "reporting_tracker", icon: "RR", name: "Rastreador de Reportes", desc: "Completa el modulo El Resultado Oculto" },
+  { id: "confounding_analyst", icon: "AC", name: "Analista de Confusion", desc: "Completa el modulo El Camino Confundido" },
+  { id: "judgment_master", icon: "JR", name: "Maestro del Juicio", desc: "Completa el modulo El Juicio" },
+  { id: "perfect_5", icon: "5X", name: "Cinco Estrellas", desc: "Obtiene 5 respuestas correctas seguidas" },
+  { id: "decision_maker", icon: "TD", name: "Tomador de Decisiones", desc: "Completa 14 arboles de decision" },
+  { id: "finisher", icon: "FN", name: "Curso Completo", desc: "Termina el curso completo" },
+  { id: "streak_3", icon: "R3", name: "En Llamas", desc: "Mantiene una racha de 3 dias" },
+  { id: "streak_7", icon: "R7", name: "Guerrero Semanal", desc: "Mantiene una racha de 7 dias" }
+];
+
+// ===== MODULES DATA =====
+const MODULES = [
+  {
+    id: 1, title: "La Apertura", subtitle: "Por que el sesgo lo cambia todo", xp: 140,
+    slides: [
+      { type: "title", theme: "teal-bg", content: { title: "Dominio del Riesgo de Sesgo", subtitle: "Ve las amenazas ocultas antes de que moldeen la respuesta" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "Definir el riesgo de sesgo como una amenaza a la verdad causal",
+          "Reconocer cuando resultados impresionantes se construyen sobre cimientos debiles",
+          "Usar historia, contraste y estribillo para agudizar el juicio",
+          "Practicar arboles de decision en casos reales"
+        ],
+        tip: "Usamos tecnicas narrativas: contraste, estribillos y finales reflejados para entrenar el juicio disciplinado."
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "EL ESPEJO", title: "Terapia hormonal y la respuesta pulida",
+        text: "Durante anos, los estudios observacionales sugirieron que la terapia hormonal reducia el riesgo de enfermedad cardiaca. La historia era simple y elegante. Luego el ensayo Womens Health Initiative inscribio a unas 16000 mujeres y fue detenido tempranamente por dano. La direccion se invirtio.",
+        followup: "La leccion no fue que los ensayos siempre tienen razon. La leccion fue que el sesgo puede pulir un espejo hasta que parece verdad. El riesgo de sesgo decide si el espejo refleja la realidad o la decoracion."
+      }},
+      { type: "stats", theme: "dark", content: {
+        title: "Resumen del Caso",
+        stats: [
+          { value: "16000", label: "Participantes WHI (aprox)" },
+          { value: "1", label: "Gran ECA invirtio direccion" },
+          { value: "2", label: "Flujos de evidencia en conflicto" },
+          { value: "Temprano", label: "Ensayo detenido por dano" }
+        ],
+        caption: "Numeros simplificados para la ensenanza."
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "Que es el Riesgo de Sesgo",
+        subtitle: "No son malos metodos, sino verdad distorsionada",
+        text: "El riesgo de sesgo es la probabilidad de que el diseno, conduccion o reporte de un estudio empuje los resultados lejos de la verdad. Se trata de validez interna, no de prestigio o tamano muestral.",
+        highlight: "Un estudio grande sesgado puede enganar mas que uno pequeno honesto."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "CS", title: "Escenario: Evidencia en Conflicto", xp: 25,
+        scenario: "Tienes 6 estudios observacionales que sugieren beneficio y 1 gran ensayo aleatorizado que muestra dano.",
+        question: "Cual juicio refleja mejor los principios de riesgo de sesgo?",
+        options: [
+          { letter: "A", text: "Promediar todos los resultados para ser justos", correct: false },
+          { letter: "B", text: "Priorizar el ensayo aleatorizado para afirmaciones causales", correct: true },
+          { letter: "C", text: "Excluir el ensayo porque entra en conflicto", correct: false },
+          { letter: "D", text: "Asumir que los estudios observacionales son mas realistas", correct: false }
+        ],
+        feedback: {
+          correct: "Correcto. Cuando el objetivo es la inferencia causal, los disenos con menor riesgo de sesgo tienen mas peso. Los conflictos deben explicarse, no promediarse.",
+          incorrect: "El riesgo de sesgo trata sobre credibilidad causal. Cuando los disenos difieren, debes ponderar la evidencia por riesgo de sesgo, no solo por volumen."
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "CS", title: "Escenario: El Espejo Pulido", xp: 25,
+        scenario: "Un conjunto de datos muy grande muestra una fuerte asociacion, pero la exposicion es autoseleccionada y los resultados son autorreportados.",
+        question: "Cual es la respuesta mas defendible?",
+        options: [
+          { letter: "A", text: "Alta confianza porque el tamano muestral es grande", correct: false },
+          { letter: "B", text: "Senalar riesgo serio de sesgo por confusion y medicion", correct: true },
+          { letter: "C", text: "Ignorar el sesgo si el efecto es grande", correct: false },
+          { letter: "D", text: "Asumir que la aleatorizacion es innecesaria", correct: false }
+        ],
+        feedback: {
+          correct: "Correcto. El gran tamano no corrige la confusion ni el sesgo de medicion. El riesgo de sesgo debe evaluarse antes de confiar en el tamano del efecto.",
+          incorrect: "El tamano muestral puede reducir el error aleatorio, pero no puede reparar el sesgo sistematico."
+        }
+      }},
+      { type: "refrain", theme: "black", content: { text: "El espejo puede brillar y aun mentir." }}
+    ]
+  },
+  {
+    id: 2, title: "La Asignacion", subtitle: "Sesgo de seleccion y ocultamiento", xp: 150,
+    slides: [
+      { type: "title", theme: "gold-bg", content: { title: "La Asignacion", subtitle: "Quien entra al camino y quien es retenido" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "Separar la secuencia aleatoria del ocultamiento de la asignacion",
+          "Detectar asignacion predecible y sesgo de reclutamiento",
+          "Usar el equilibrio basal como senal de advertencia, no como prueba",
+          "Emitir un juicio claro de bajo o alto riesgo"
+        ],
+        tip: "La asignacion aleatoria del ensayo CAST aseguro que los grupos fueran comparables, permitiendo la impactante conclusion de que los medicamentos mataron pacientes."
+      }},
+      { type: "story", theme: "gold-bg", content: {
+        label: "LA PUERTA", title: "Cuando se conoce la proxima asignacion",
+        text: "Los ensayos tempranos a menudo usaban alternancia o fecha de nacimiento. Los clinicos podian adivinar quien recibiria el nuevo tratamiento y quien no. Siguieron elecciones sutiles.",
+        followup: "La secuencia aleatoria sin ocultamiento es una puerta dejada abierta. El metodo correcto es ambos: verdaderamente aleatorio y verdaderamente oculto."
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "Lista de Verificacion de Sesgo de Seleccion",
+        subtitle: "Dos preguntas que ambas deben ser si",
+        text: "1) Fue la secuencia aleatoria? <br><br>2) Estuvo la asignacion oculta de los reclutadores?",
+        highlight: "Si cualquier respuesta es no, la puerta esta comprometida."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "GA", title: "Escenario: Asignacion Predecible", xp: 25,
+        scenario: "Los participantes son asignados por numero de registro medico par o impar.",
+        question: "Cual es el riesgo de sesgo para la aleatorizacion?",
+        options: [
+          { letter: "A", text: "Bajo riesgo porque es simple", correct: false },
+          { letter: "B", text: "Alto riesgo porque la asignacion es predecible", correct: true },
+          { letter: "C", text: "Solo algunas preocupaciones", correct: false },
+          { letter: "D", text: "No se puede juzgar", correct: false }
+        ],
+        feedback: {
+          correct: "Correcto. La asignacion predecible permite manipulacion, incluso involuntariamente. Este es un alto riesgo de sesgo de seleccion.",
+          incorrect: "La simplicidad no es aleatoriedad. Si los clinicos pueden predecir la asignacion, el sesgo de seleccion es probable."
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "GA", title: "Escenario: La Prueba del Sobre", xp: 25,
+        scenario: "El ensayo usa sobres sellados, pero no son opacos y se abren antes del consentimiento.",
+        question: "Como debe juzgarse el ocultamiento de la asignacion?",
+        options: [
+          { letter: "A", text: "Bajo riesgo porque se usaron sobres", correct: false },
+          { letter: "B", text: "Alto riesgo porque se rompio el ocultamiento", correct: true },
+          { letter: "C", text: "Solo algunas preocupaciones", correct: false },
+          { letter: "D", text: "No claro", correct: false }
+        ],
+        feedback: {
+          correct: "Correcto. Si los reclutadores pueden ver la proxima asignacion antes del consentimiento, el ocultamiento falla y el sesgo de seleccion es probable.",
+          incorrect: "Los sobres son tan buenos como su opacidad y momento. La previsibilidad significa alto riesgo."
+        }
+      }},
+      { type: "refrain", theme: "black", content: { text: "Una puerta justa esta oculta del que elige." }}
+    ]
+  },
+  {
+    id: 3, title: "La Venda", subtitle: "Sesgo de desempeno y deteccion", xp: 160,
+    slides: [
+      { type: "title", theme: "purple-bg", content: { title: "La Venda", subtitle: "Cuando saber cambia lo que se ve" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "Distinguir el cegamiento de participantes, proveedores y evaluadores",
+          "Reconocer cuando los resultados subjetivos inflan los efectos",
+          "Usar resultados objetivos para reducir el sesgo cuando falla el cegamiento",
+          "Asignar riesgo de sesgo para la medicion"
+        ],
+        tip: "En los ensayos DECREASE, la falta de cegamiento permitio a los investigadores favorecer inconscientemente el tratamiento, contribuyendo al fraude de datos."
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "EL TESTIGO", title: "Ensayos de dolor y el impulso de etiqueta abierta",
+        text: "Los ensayos de dolor con etiqueta abierta a menudo reportan efectos mayores que los ensayos cegados. Cuando las expectativas son visibles, los resultados cambian, especialmente cuando las medidas son subjetivas.",
+        followup: "Por eso importan los controles simulados y la evaluacion cegada. Una venda no hace perfecto a un estudio, pero protege el resultado de la esperanza y la decepcion."
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "Mapa de Cegamiento",
+        subtitle: "Quien puede ser influenciado?",
+        text: "Participantes, proveedores y evaluadores de resultados pueden introducir sesgo cada uno. Cuanto mas subjetivo el resultado, mas importa el cegamiento.",
+        highlight: "Sin cegamiento mas resultados subjetivos es una senal de alto riesgo."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "VC", title: "Escenario: Resultado Subjetivo", xp: 25,
+        scenario: "Los participantes no estan cegados y el resultado primario es la puntuacion de dolor autorreportada.",
+        question: "Como debe juzgarse el sesgo de deteccion?",
+        options: [
+          { letter: "A", text: "Bajo riesgo porque el dolor es real", correct: false },
+          { letter: "B", text: "Alto riesgo porque el resultado es subjetivo y sin cegamiento", correct: true },
+          { letter: "C", text: "Algunas preocupaciones", correct: false },
+          { letter: "D", text: "No aplicable", correct: false }
+        ],
+        feedback: {
+          correct: "Correcto. Los resultados subjetivos sin cegamiento tienen alto riesgo de sesgo de deteccion.",
+          incorrect: "El resultado puede ser real, pero las expectativas aun pueden inflar las puntuaciones."
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "VC", title: "Escenario: Resultado Objetivo", xp: 25,
+        scenario: "Los participantes no estan cegados, pero el resultado es mortalidad por todas las causas verificada por registro.",
+        question: "Cual es el juicio mas defendible?",
+        options: [
+          { letter: "A", text: "Bajo riesgo para sesgo de deteccion", correct: true },
+          { letter: "B", text: "Alto riesgo porque no hay cegamiento", correct: false },
+          { letter: "C", text: "Algunas preocupaciones", correct: false },
+          { letter: "D", text: "No se puede juzgar", correct: false }
+        ],
+        feedback: {
+          correct: "Correcto. Los resultados objetivos son menos susceptibles al sesgo de deteccion incluso sin cegamiento.",
+          incorrect: "El cegamiento importa, pero los resultados objetivos pueden tener bajo riesgo de sesgo de medicion."
+        }
+      }},
+      { type: "refrain", theme: "black", content: { text: "Lo que se ve depende de quien puede verlo." }}
+    ]
+  },
+  {
+    id: 4, title: "El Rastro Perdido", subtitle: "Desercion y datos incompletos", xp: 160,
+    slides: [
+      { type: "title", theme: "green-bg", content: { title: "El Rastro Perdido", subtitle: "Cuando el camino pierde viajeros" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "Identificar cuando los datos faltantes pueden cambiar las conclusiones",
+          "Usar la intencion de tratar como proteccion contra el sesgo",
+          "Detectar abandono diferencial entre grupos",
+          "Juzgar el riesgo cuando las suposiciones no estan respaldadas"
+        ],
+        tip: "En los ensayos de rosiglitazona, los pacientes que abandonaron estaban mas enfermos, haciendo que el medicamento pareciera mas seguro de lo que era."
+      }},
+      { type: "story", theme: "gold-bg", content: {
+        label: "LAS BRECHAS", title: "Programas de perdida de peso y las salidas silenciosas",
+        text: "Un ensayo reporto gran perdida de peso entre los que completaron, pero el 35 por ciento abandono el grupo de intervencion. El resultado publicado parecia fuerte.",
+        followup: "Cuando los datos faltantes son desiguales, el final puede estar escrito por quienes se quedaron, no por lo que funciono."
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "Senales de Desercion",
+        subtitle: "Quien se fue y por que",
+        text: "Busca: abandono general, desequilibrio entre grupos y razones vinculadas a resultados.",
+        highlight: "Abandono alto o desigual sin analisis de sensibilidad es una bandera roja de sesgo."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "AD", title: "Escenario: Abandono Desigual", xp: 25,
+        scenario: "El abandono es 10 por ciento en control y 35 por ciento en intervencion, sin analisis de resultados faltantes.",
+        question: "Como debe calificarse el sesgo de desercion?",
+        options: [
+          { letter: "A", text: "Bajo riesgo porque quedan algunos datos", correct: false },
+          { letter: "B", text: "Alto riesgo porque la falta de datos es desequilibrada", correct: true },
+          { letter: "C", text: "Algunas preocupaciones", correct: false },
+          { letter: "D", text: "No se puede juzgar", correct: false }
+        ],
+        feedback: {
+          correct: "Correcto. Abandono grande y desequilibrado sin justificacion o analisis de sensibilidad es alto riesgo.",
+          incorrect: "Cuando la falta de datos difiere entre grupos, el resultado puede estar distorsionado."
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "AD", title: "Escenario: Intencion de Tratar", xp: 25,
+        scenario: "Un ensayo reporta solo analisis por protocolo, excluyendo el 20 por ciento de los participantes aleatorizados.",
+        question: "Cual es el mejor juicio?",
+        options: [
+          { letter: "A", text: "Bajo riesgo si los resultados son significativos", correct: false },
+          { letter: "B", text: "Algunas preocupaciones o alto riesgo dependiendo de las exclusiones", correct: true },
+          { letter: "C", text: "Sin riesgo porque se permiten exclusiones", correct: false },
+          { letter: "D", text: "No se puede juzgar", correct: false }
+        ],
+        feedback: {
+          correct: "Correcto. Excluir participantes aleatorizados puede sesgar resultados. Si las exclusiones son sustanciales o relacionadas con resultados, el riesgo es alto.",
+          incorrect: "Por protocolo puede ser valido para algunas preguntas, pero aumenta el riesgo de sesgo para estimaciones de efectividad."
+        }
+      }},
+      { type: "refrain", theme: "black", content: { text: "Los que se fueron aun dan forma al resultado." }}
+    ]
+  },
+  {
+    id: 5, title: "El Resultado Oculto", subtitle: "Reporte selectivo", xp: 160,
+    slides: [
+      { type: "title", theme: "red-bg", content: { title: "El Resultado Oculto", subtitle: "Cuando el registro es editado" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "Comparar los resultados publicados con el protocolo",
+          "Detectar cambio de resultados y reporte selectivo",
+          "Juzgar el riesgo cuando solo aparecen resultados favorables",
+          "Entender por que importan los registros"
+        ],
+        tip: "El Estudio 329 oculto intentos de suicidio en adolescentes. Lo que se reporto selectivamente cambio la prescripcion global."
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "LA EDICION", title: "Estudio 329 y el final reescrito",
+        text: "El Estudio 329 probo paroxetina en adolescentes. El articulo publicado reporto beneficio, pero el reanalisis posterior mostro que los resultados primarios fueron negativos y los danos subreportados.",
+        followup: "Este no fue un pequeno detalle. Fue una historia diferente. El reporte selectivo puede hacer que un ensayo parezca responder una pregunta que no respondio."
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "Verificacion de Sesgo de Reporte",
+        subtitle: "Comparar plan y publicacion",
+        text: "Pregunta: Se reportaron todos los resultados preespecificados? Se cambiaron los puntos de tiempo? Se introdujeron nuevos resultados sin justificacion?",
+        highlight: "Cuando el plan y el articulo no coinciden, el riesgo aumenta."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "RR", title: "Escenario: Cambio de Resultado", xp: 25,
+        scenario: "Un registro de ensayos lista puntuacion de depresion a las 12 semanas como primario, pero el articulo reporta puntuacion de ansiedad a las 6 semanas como primario.",
+        question: "Como debe calificarse el sesgo de reporte?",
+        options: [
+          { letter: "A", text: "Bajo riesgo porque se encontro un resultado positivo", correct: false },
+          { letter: "B", text: "Alto riesgo debido al cambio de resultado", correct: true },
+          { letter: "C", text: "Solo algunas preocupaciones", correct: false },
+          { letter: "D", text: "No se puede juzgar", correct: false }
+        ],
+        feedback: {
+          correct: "Correcto. Cambiar resultados primarios despues de ver los datos es una senal de alto riesgo de reporte selectivo.",
+          incorrect: "El cambio de resultado rompe el contrato entre protocolo y publicacion."
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "RR", title: "Escenario: Danos Faltantes", xp: 25,
+        scenario: "El protocolo lista eventos adversos, pero el articulo no reporta ninguno y no proporciona tabla.",
+        question: "Cual es el mejor juicio?",
+        options: [
+          { letter: "A", text: "Bajo riesgo si la eficacia es fuerte", correct: false },
+          { letter: "B", text: "Alto riesgo porque los danos se omiten selectivamente", correct: true },
+          { letter: "C", text: "Algunas preocupaciones", correct: false },
+          { letter: "D", text: "No se puede juzgar", correct: false }
+        ],
+        feedback: {
+          correct: "Correcto. Los danos omitidos son reporte selectivo. El riesgo de sesgo aumenta cuando faltan danos preespecificados.",
+          incorrect: "La omision selectiva de danos puede invertir el balance de beneficios y riesgos."
+        }
+      }},
+      { type: "refrain", theme: "black", content: { text: "Lo que no se reporta aun habla." }}
+    ]
+  },
+  {
+    id: 6, title: "El Camino Confundido", subtitle: "Sesgo en evidencia observacional", xp: 170,
+    slides: [
+      { type: "title", theme: "green-bg", content: { title: "El Camino Confundido", subtitle: "Cuando las causas se mezclan con las elecciones" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "Identificar confusion y sesgo de indicacion",
+          "Reconocer sesgo relacionado con el tiempo y tiempo inmortal",
+          "Juzgar evidencia observacional con estandares claros",
+          "Decidir cuando los resultados son lo suficientemente creibles para combinar"
+        ],
+        tip: "El ensayo WHI parecia sencillo hasta que los analisis post-hoc revelaron la hipotesis del tiempo, una complejidad oculta."
+      }},
+      { type: "story", theme: "gold-bg", content: {
+        label: "EL GIRO", title: "Beta caroteno y cancer de pulmon",
+        text: "Los estudios observacionales sugirieron que el beta caroteno protegia contra el cancer de pulmon. Grandes ensayos en fumadores mostraron posteriormente aumento del riesgo de cancer de pulmon y fueron detenidos temprano.",
+        followup: "Los factores de confusion eran fuertes: las personas que eligen suplementos difieren de muchas maneras de las que no. Cuando las elecciones impulsan la exposicion, el sesgo sigue."
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "Senales de Confusion",
+        subtitle: "Cuando causa y eleccion se mezclan",
+        text: "Busca diferencias en riesgo basal, acceso a la atencion y comportamiento de salud. Verifica como se midieron y ajustaron los confusores.",
+        highlight: "La confusion no medida puede revertir el efecto aparente."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "AC", title: "Escenario: Sesgo de Indicacion", xp: 25,
+        scenario: "Los pacientes mas enfermos tienen mas probabilidad de recibir la intervencion en estudios de atencion de rutina.",
+        question: "Como debe juzgarse el riesgo de sesgo?",
+        options: [
+          { letter: "A", text: "Bajo riesgo si el tamano muestral es grande", correct: false },
+          { letter: "B", text: "Alto riesgo a menos que la confusion se aborde convincentemente", correct: true },
+          { letter: "C", text: "Algunas preocupaciones", correct: false },
+          { letter: "D", text: "No aplicable", correct: false }
+        ],
+        feedback: {
+          correct: "Correcto. El sesgo de indicacion puede abrumar la senal. Sin ajuste fuerte, el riesgo es alto.",
+          incorrect: "El gran tamano no corrige la confusion. La clave es si los confusores se miden y controlan."
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "AC", title: "Escenario: Tiempo Inmortal", xp: 25,
+        scenario: "La exposicion se define despues de un periodo durante el cual los pacientes deben sobrevivir para ser clasificados como tratados.",
+        question: "Que implica esto?",
+        options: [
+          { letter: "A", text: "Bajo riesgo porque es comun", correct: false },
+          { letter: "B", text: "Alto riesgo debido al sesgo de tiempo inmortal", correct: true },
+          { letter: "C", text: "Algunas preocupaciones", correct: false },
+          { letter: "D", text: "No se puede juzgar", correct: false }
+        ],
+        feedback: {
+          correct: "Correcto. El tiempo inmortal crea una falsa ventaja de supervivencia y es un riesgo serio de sesgo.",
+          incorrect: "El momento de la exposicion es crucial. Clasificar mal el tiempo-persona puede crear un beneficio enganoso."
+        }
+      }},
+      { type: "refrain", theme: "black", content: { text: "Cuando la eleccion lidera el camino, la causalidad se desvanece." }}
+    ]
+  },
+  {
+    id: 7, title: "El Juicio", subtitle: "Uniendo todo", xp: 190,
+    slides: [
+      { type: "title", theme: "teal-bg", content: { title: "El Juicio", subtitle: "Resume el riesgo sin miedo ni favor" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "Aplicar juicios de dominio a un riesgo de sesgo general",
+          "Justificar decisiones con razones transparentes",
+          "Usar analisis de sensibilidad para probar conclusiones",
+          "Salir con un guion de decision repetible"
+        ],
+        tip: "La estructura de anillo cierra la leccion donde comenzo: el espejo y la verdad."
+      }},
+      { type: "story", theme: "green-bg", content: {
+        label: "EL RETORNO", title: "Dos revisiones, una honesta",
+        text: "Dos equipos revisaron la misma intervencion. Uno califico todos los ensayos como bajo riesgo porque los resultados se veian limpios. El otro documento fugas de asignacion, datos faltantes y cambio de resultados. Su conclusion fue cautelosa y cambio la guia.",
+        followup: "El objetivo no es el pesimismo. Es la precision. La revision mas util es la que nombra la incertidumbre claramente."
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "Juicio General",
+        subtitle: "Un guion de decision simple",
+        text: "Si algun dominio tiene alto riesgo y afecta directamente el resultado primario, el riesgo general es alto. Si las preocupaciones son moderadas y es poco probable que cambien la direccion, el riesgo general puede ser algunas preocupaciones.",
+        highlight: "El juicio debe ser razonado, no promediado."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "JR", title: "Escenario: Riesgo General", xp: 35,
+        scenario: "Un ensayo tiene bajo riesgo en aleatorizacion, alto riesgo en datos faltantes, y el resultado primario es sensible a la falta de datos.",
+        question: "Cual es el riesgo de sesgo general?",
+        options: [
+          { letter: "A", text: "Bajo riesgo", correct: false },
+          { letter: "B", text: "Algunas preocupaciones", correct: false },
+          { letter: "C", text: "Alto riesgo", correct: true },
+          { letter: "D", text: "No se puede juzgar", correct: false }
+        ],
+        feedback: {
+          correct: "Correcto. Un dominio de alto riesgo que afecta directamente el resultado primario impulsa el juicio general.",
+          incorrect: "El riesgo general no es un promedio. Es un juicio sobre si el sesgo puede cambiar la respuesta."
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "JR", title: "Escenario: Verificacion de Sensibilidad", xp: 35,
+        scenario: "Tu metaanalisis incluye 3 ensayos de bajo riesgo y 4 ensayos de alto riesgo. El efecto combinado desaparece cuando se eliminan los ensayos de alto riesgo.",
+        question: "Cual es la conclusion mas defendible?",
+        options: [
+          { letter: "A", text: "Reportar el efecto combinado completo como final", correct: false },
+          { letter: "B", text: "Reportar la conclusion primaria basada en ensayos de bajo riesgo", correct: true },
+          { letter: "C", text: "Excluir ensayos de bajo riesgo para mantener tamano muestral", correct: false },
+          { letter: "D", text: "Ignorar el analisis de sensibilidad", correct: false }
+        ],
+        feedback: {
+          correct: "Correcto. Los analisis de sensibilidad prueban la robustez. Si el efecto depende de ensayos de alto riesgo, las conclusiones deben reflejar esa incertidumbre.",
+          incorrect: "Si los resultados cambian cuando se eliminan los ensayos de alto riesgo, la conclusion mas segura se basa en la evidencia mas creible."
+        }
+      }},
+      { type: "refrain", theme: "black", content: { text: "Nombra el sesgo, y la respuesta se aclara." }}
+    ]
+  }
+];
+
+// ===== NAVIGATION STATE =====
+let currentModule = 0;
+let currentSlide = 0;
+let consecutiveCorrect = 0;
+
+// ===== SAVE/LOAD =====
+function saveGame() {
+  safeSetStorage('riskBiasMasteryGame_es_v1', gameState);
+}
+
+function resetProgress() {
+  if (confirm('Reiniciar todo el progreso y logros?')) {
+    gameState = { ...DEFAULT_STATE, answeredQuestions: {}, badges: [], completedModules: [] };
+    saveGame();
+    currentModule = 0;
+    currentSlide = 0;
+    renderAll();
+  }
+}
+
+// ===== COURSE PROGRESS =====
+function updateCourseProgress() {
+  const totalModules = MODULES.length;
+  const completedCount = gameState.completedModules.length;
+  const pct = Math.round((completedCount / totalModules) * 100);
+  const fillEl = document.getElementById('courseProgressFill');
+  const pctEl = document.getElementById('courseProgressPct');
+  if (fillEl) fillEl.style.width = pct + '%';
+  if (pctEl) pctEl.textContent = pct + '%';
+}
+
+// ===== XP & LEVELING =====
+function addXP(amount) {
+  gameState.xp += amount;
+  checkLevelUp();
+  saveGame();
+  updateStatsDisplay();
+  showXPPopup(amount);
+}
+
+function checkLevelUp() {
+  for (let i = LEVELS.length - 1; i >= 0; i--) {
+    if (gameState.xp >= LEVELS[i].xp && gameState.level < LEVELS[i].level) {
+      gameState.level = LEVELS[i].level;
+      showLevelUp(LEVELS[i]);
+      break;
+    }
+  }
+}
+
+function showXPPopup(amount) {
+  const popup = document.getElementById('xpPopup');
+  document.getElementById('xpAmount').textContent = `+${amount}`;
+  popup.classList.add('show');
+  setTimeout(() => popup.classList.remove('show'), 1500);
+}
+
+function showLevelUp(levelData) {
+  triggerConfetti();
+}
+
+// ===== BADGES =====
+function awardBadge(badgeId) {
+  if (gameState.badges.includes(badgeId)) return;
+  gameState.badges.push(badgeId);
+  saveGame();
+  const badge = BADGES.find(b => b.id === badgeId);
+  if (badge) showBadgeModal(badge);
+  updateBadges();
+}
+
+function showBadgeModal(badge, celebrate = true) {
+  document.getElementById('badgeModalIcon').textContent = badge.icon;
+  document.getElementById('badgeModalTitle').textContent = badge.name;
+  document.getElementById('badgeModalDesc').textContent = badge.desc;
+  const modal = document.getElementById('badgeModal');
+  modal.classList.add('show');
+  if (celebrate) triggerConfetti();
+
+  // Focus trap
+  const focusableElements = modal.querySelectorAll('button, [tabindex]:not([tabindex="-1"])');
+  if (focusableElements.length > 0) {
+    const firstFocusable = focusableElements[0];
+    const lastFocusable = focusableElements[focusableElements.length - 1];
+    firstFocusable.focus();
+
+    // Remove any existing focus trap listener
+    if (modal._focusTrapHandler) {
+      modal.removeEventListener('keydown', modal._focusTrapHandler);
+    }
+
+    modal._focusTrapHandler = function(e) {
+      if (e.key === 'Tab') {
+        if (e.shiftKey && document.activeElement === firstFocusable) {
+          e.preventDefault();
+          lastFocusable.focus();
+        } else if (!e.shiftKey && document.activeElement === lastFocusable) {
+          e.preventDefault();
+          firstFocusable.focus();
+        }
+      }
+      if (e.key === 'Escape') {
+        closeBadgeModal();
+      }
+    };
+    modal.addEventListener('keydown', modal._focusTrapHandler);
+  }
+}
+
+function showBadgeDetails(badgeId) {
+  const badge = BADGES.find(b => b.id === badgeId);
+  if (!badge) return;
+  const earned = gameState.badges.includes(badgeId);
+  const desc = earned ? badge.desc : `${badge.desc} (Bloqueado)`;
+  showBadgeModal({ ...badge, desc }, earned);
+}
+
+function closeBadgeModal() {
+  document.getElementById('badgeModal').classList.remove('show');
+}
+
+// ===== STREAK =====
+function updateStreak() {
+  const today = new Date().toDateString();
+  if (gameState.lastActive !== today) {
+    const yesterday = new Date(Date.now() - 86400000).toDateString();
+    if (gameState.lastActive === yesterday) {
+      gameState.streak++;
+      if (gameState.streak >= 3) awardBadge('streak_3');
+      if (gameState.streak >= 7) awardBadge('streak_7');
+    } else if (gameState.lastActive) {
+      gameState.streak = 1;
+    } else {
+      gameState.streak = 1;
+    }
+    gameState.lastActive = today;
+    saveGame();
+  }
+}
+
+// ===== CONFETTI =====
+function triggerConfetti() {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const container = document.getElementById('confettiContainer');
+  const colors = ['#D4AF37', '#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#0f766e'];
+  for (let i = 0; i < 50; i++) {
+    const confetti = document.createElement('div');
+    confetti.className = 'confetti';
+    confetti.style.left = Math.random() * 100 + '%';
+    confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+    confetti.style.animationDelay = Math.random() * 0.5 + 's';
+    container.appendChild(confetti);
+    setTimeout(() => confetti.remove(), 3500);
+  }
+}
+
+// ===== COMBO =====
+function updateComboDisplay() {
+  const comboEl = document.getElementById('comboDisplay');
+  const countEl = document.getElementById('comboCount');
+  if (consecutiveCorrect >= 2) {
+    countEl.textContent = consecutiveCorrect;
+    comboEl.classList.add('show');
+  } else {
+    comboEl.classList.remove('show');
+  }
+}
+
+// ===== MOBILE SIDEBAR =====
+function toggleSidebar() {
+  document.querySelector('.sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('show');
+  var btn = document.querySelector('.sidebar-toggle, .hamburger, .mobile-menu-btn'); if (btn) btn.setAttribute('aria-expanded', btn.getAttribute('aria-expanded') === 'true' ? 'false' : 'true');
+}
+
+// ===== RENDER =====
+function renderAll() {
+  updateStreak();
+  renderSidebar();
+  renderSlides();
+  updateStatsDisplay();
+  updateBadges();
+  updateCourseProgress();
+}
+
+function updateStatsDisplay() {
+  const levelData = LEVELS.find(l => l.level === gameState.level) || LEVELS[0];
+  const nextLevel = LEVELS.find(l => l.level === gameState.level + 1);
+
+  document.getElementById('levelIcon').textContent = levelData.icon;
+  document.getElementById('levelTitle').textContent = levelData.title;
+  document.getElementById('levelNum').textContent = gameState.level;
+
+  const currentXP = gameState.xp - levelData.xp;
+  const neededXP = nextLevel ? (nextLevel.xp - levelData.xp) : 500;
+  const pct = Math.min(100, (currentXP / neededXP) * 100);
+
+  document.getElementById('xpFill').style.width = pct + '%';
+  document.getElementById('xpCurrent').textContent = currentXP;
+  document.getElementById('xpNeeded').textContent = neededXP;
+
+  document.getElementById('correctCount').textContent = gameState.correctAnswers;
+  document.getElementById('decisionCount').textContent = gameState.decisionsCompleted;
+  document.getElementById('synthesisCount').textContent = gameState.synthesisCount || 0;
+  document.getElementById('streakCount').textContent = gameState.streak;
+
+  const streakEl = document.getElementById('streakDisplay');
+  streakEl.classList.toggle('active', gameState.streak > 0);
+}
+
+function updateBadges() {
+  const grid = document.getElementById('badgesGrid');
+  grid.innerHTML = BADGES.map(b => {
+    const earned = gameState.badges.includes(b.id);
+    const label = `${b.name}: ${b.desc}`;
+    return `<button class="badge-item ${earned ? 'earned' : ''}" type="button" data-tooltip="${label}" aria-label="${label}" title="${label}" onclick="showBadgeDetails('${b.id}')">${b.icon}</button>`;
+  }).join('');
+}
+
+function renderSidebar() {
+  const list = document.getElementById('moduleList');
+  list.innerHTML = MODULES.map((mod, i) => {
+    const completed = gameState.completedModules.includes(mod.id);
+    const locked = i > 0 && !gameState.completedModules.includes(MODULES[i-1].id);
+    const estMins = Math.round(mod.slides.length * 1.5);
+    return `
+      <div class="module-item ${i === currentModule ? 'active' : ''} ${completed ? 'completed' : ''} ${locked ? 'locked' : ''}"
+           onclick="${locked ? '' : `goToModule(${i})`}"
+           tabindex="${locked ? -1 : 0}"
+           role="button"
+           aria-disabled="${locked ? 'true' : 'false'}">
+        <div class="module-number">${completed ? 'OK' : (locked ? 'BL' : mod.id)}</div>
+        <div class="module-info">
+          <div class="module-title">${mod.title}</div>
+          <div class="module-subtitle">${mod.subtitle}</div>
+          <div class="module-xp">+${mod.xp} XP</div>
+          <div class="module-time">T ~${estMins} min</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderSlides() {
+  const container = document.getElementById('slidesContainer');
+  container.innerHTML = MODULES.map((mod, mi) => {
+    const progressPct = ((currentSlide + 1) / mod.slides.length) * 100;
+    return `
+    <div class="module-slides ${mi === currentModule ? 'active' : ''}" data-module="${mi}">
+      <div class="slide-progress-bar" style="width: ${mi === currentModule ? progressPct : 0}%"></div>
+      ${mod.slides.map((slide, si) => renderSlide(slide, si, mi)).join('')}
+      <div class="slide-nav">
+        <button class="nav-btn" onclick="prevSlide()" ${currentSlide === 0 ? 'disabled' : ''} aria-label="Diapositiva anterior">&lt;</button>
+        <div class="nav-center">
+          <div class="slide-counter">${currentSlide + 1} / ${mod.slides.length}</div>
+          <div class="progress-dots">
+            ${mod.slides.map((_, i) => `<button class="progress-dot ${i === currentSlide ? 'active' : ''}" type="button" onclick="goToSlide(${i})" aria-label="Ir a diapositiva ${i + 1}" ${i === currentSlide ? 'aria-current="true"' : ''}></button>`).join('')}
+          </div>
+        </div>
+        <button class="nav-btn" onclick="nextSlide()" aria-label="Siguiente diapositiva">&gt;</button>
+      </div>
+      <div class="keyboard-hint" style="position:absolute;bottom:5px;left:50%;transform:translateX(-50%);font-size:0.6rem;opacity:0.4;">Flechas izquierda / derecha o desliza para navegar</div>
+    </div>
+  `;
+  }).join('');
+  document.getElementById('currentModule').textContent = MODULES[currentModule].title;
+  updateSlideVisibility();
+}
+
+function renderSlide(slide, index, moduleIndex) {
+  const theme = slide.theme || 'dark';
+  let html = `<div class="slide ${theme} ${index === currentSlide ? 'active' : ''}" data-slide="${index}">`;
+
+  switch(slide.type) {
+    case 'title':
+      html += `<div class="content"><h1 class="title gold animate">${slide.content.title}</h1><p class="subtitle animate delay-1">${slide.content.subtitle}</p></div>`;
+      break;
+
+    case 'objectives':
+      html += `<div class="content">
+        <div class="objectives-box animate">
+          <div class="objectives-header">
+            <div class="objectives-icon">META</div>
+            <div class="objectives-title">Objetivos de Aprendizaje</div>
+          </div>
+          <ul class="objectives-list">
+            ${slide.content.objectives.map(obj => `<li>${obj}</li>`).join('')}
+          </ul>
+        </div>
+        ${slide.content.tip ? `<p class="subtitle animate delay-1" style="font-size:0.85rem;max-width:600px">${slide.content.tip}</p>` : ''}
+      </div>`;
+      break;
+
+    case 'story':
+      html += `<div class="content">
+        <article class="story-box ${slide.content.success ? 'success' : ''} ${slide.content.warning ? 'warning' : ''} ${slide.content.teal ? 'teal' : ''} animate" role="article">
+          <div class="story-label">${slide.content.label}</div>
+          ${slide.content.title ? `<h2 class="title gold" style="font-size:1.8rem;margin-bottom:0.75rem">${slide.content.title}</h2>` : ''}
+          <p class="story-text">${slide.content.text}</p>
+          ${slide.content.followup ? `<p class="story-text" style="margin-top:0.75rem;font-style:italic;opacity:0.9">${slide.content.followup}</p>` : ''}
+        </article>
+      </div>`;
+      break;
+
+    case 'stats':
+      html += `<div class="content">
+        ${slide.content.title ? `<h2 class="title gold animate">${slide.content.title}</h2>` : ''}
+        ${slide.content.subtitle ? `<p class="subtitle animate delay-1">${slide.content.subtitle}</p>` : ''}
+        <div class="stats-grid animate delay-2">
+          ${slide.content.stats.map(s => `<div class="stat-box"><div class="stat-value gold">${s.value}</div><div class="stat-label">${s.label}</div></div>`).join('')}
+        </div>
+        ${slide.content.caption ? `<p class="subtitle animate delay-3" style="font-size:0.85rem;margin-top:0.75rem">${slide.content.caption}</p>` : ''}
+      </div>`;
+      break;
+
+    case 'refrain':
+      html += `<div class="content" style="justify-content:center;height:100%"><p class="refrain animate">"${slide.content.text}"</p></div>`;
+      break;
+
+    case 'concept':
+      html += `<div class="content">
+        <h2 class="title ${theme === 'light' ? 'navy' : 'gold'} animate">${slide.content.title}</h2>
+        ${slide.content.subtitle ? `<p class="subtitle animate delay-1">${slide.content.subtitle}</p>` : ''}
+        ${slide.content.text ? `<div class="card ${theme === 'light' ? '' : 'navy-bg'} animate delay-2"><p class="card-text">${slide.content.text}</p></div>` : ''}
+        ${slide.content.highlight ? `<div class="story-box warning animate delay-3"><div class="story-label">Perspectiva Clave</div><p class="story-text">${slide.content.highlight}</p></div>` : ''}
+        ${slide.content.checkpoints ? `
+          <div class="timeline animate delay-2" style="margin-top:0.75rem">
+            ${slide.content.checkpoints.map(cp => `
+              <div class="timeline-item"><div class="timeline-days">${cp.day}</div><div class="timeline-content"><div class="timeline-title">${cp.event}</div></div></div>
+            `).join('')}
+          </div>
+        ` : ''}
+      </div>`;
+      break;
+
+    case 'checklist':
+      html += `<div class="content">
+        <h2 class="title gold animate">${slide.content.title}</h2>
+        <div class="checklist animate delay-1">
+          ${slide.content.items.map(item => `
+            <div class="checklist-item">
+              <div class="check-icon">OK</div>
+              <div class="checklist-text">${item}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>`;
+      break;
+
+    case 'decision':
+      const did = `dec_${moduleIndex}_${index}`;
+      const answered = gameState.answeredQuestions[did];
+      html += `<div class="content">
+        <div class="decision-tree animate">
+          <div class="decision-header">
+            <div class="decision-icon">${slide.content.icon}</div>
+            <div class="decision-title">${slide.content.title}</div>
+            <div class="decision-xp">+${slide.content.xp} XP</div>
+          </div>
+          <div class="decision-scenario">${slide.content.scenario}</div>
+          <div class="decision-question">${slide.content.question}</div>
+          <div class="decision-options">
+            ${slide.content.options.map(opt => {
+              const isSelected = answered === opt.letter;
+              const showCorrect = answered && opt.correct;
+              const showIncorrect = answered && isSelected && !opt.correct;
+              return `
+                <div class="decision-option ${isSelected ? 'selected' : ''} ${showCorrect ? 'correct' : ''} ${showIncorrect ? 'incorrect' : ''} ${answered ? 'disabled' : ''}"
+                     onclick="answerDecision('${did}', '${opt.letter}', ${opt.correct}, ${slide.content.xp})"
+                     tabindex="0"
+                     role="button"
+                     aria-pressed="${isSelected ? 'true' : 'false'}"
+                     aria-disabled="${answered ? 'true' : 'false'}">
+                  <div class="option-letter">${opt.letter}</div>
+                  <div class="option-text">${opt.text}</div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+          <div class="decision-feedback ${answered ? 'show' : ''} ${answered && slide.content.options.find(o => o.letter === answered)?.correct ? 'correct' : 'incorrect'}" role="alert" aria-live="polite">
+            <div class="feedback-title">${answered && slide.content.options.find(o => o.letter === answered)?.correct ? 'Correcto!' : 'No exactamente'}</div>
+            <div class="feedback-text">${answered && slide.content.options.find(o => o.letter === answered)?.correct ? slide.content.feedback.correct : slide.content.feedback.incorrect}</div>
+          </div>
+        </div>
+      </div>`;
+      break;
+
+    case 'quiz':
+      const qid = `quiz_${moduleIndex}_${index}`;
+      const qAnswered = gameState.answeredQuestions[qid];
+      html += `<div class="content">
+        <div class="quiz-container animate">
+          <div class="quiz-question">${slide.content.question}</div>
+          <div class="quiz-options">
+            ${slide.content.options.map((opt, oi) => {
+              const isSelected = qAnswered === oi;
+              const showCorrect = qAnswered !== undefined && opt.correct;
+              const showIncorrect = qAnswered !== undefined && isSelected && !opt.correct;
+              return `
+                <div class="quiz-option ${showCorrect ? 'correct' : ''} ${showIncorrect ? 'incorrect' : ''} ${qAnswered !== undefined ? 'disabled' : ''}"
+                     onclick="answerQuiz('${qid}', ${oi}, ${opt.correct}, ${slide.content.xp})"
+                     tabindex="0"
+                     role="button"
+                     aria-pressed="${isSelected ? 'true' : 'false'}"
+                     aria-disabled="${qAnswered !== undefined ? 'true' : 'false'}">
+                  ${opt.text}
+                </div>
+              `;
+            }).join('')}
+          </div>
+          <div class="quiz-feedback ${qAnswered !== undefined ? 'show' : ''} ${qAnswered !== undefined && slide.content.options[qAnswered]?.correct ? 'correct' : 'incorrect'}" role="alert" aria-live="polite">
+            ${qAnswered !== undefined && slide.content.options[qAnswered]?.correct ? slide.content.feedback.correct : slide.content.feedback.incorrect}
+          </div>
+        </div>
+      </div>`;
+      break;
+  }
+
+  html += '</div>';
+  return html;
+}
+
+function updateSlideVisibility() {
+  const container = document.querySelector('.module-slides.active');
+  if (!container) return;
+
+  container.querySelectorAll('.slide').forEach((slide, i) => {
+    slide.classList.toggle('active', i === currentSlide);
+  });
+
+  const progressBar = container.querySelector('.slide-progress-bar');
+  if (progressBar) {
+    const pct = ((currentSlide + 1) / MODULES[currentModule].slides.length) * 100;
+    progressBar.style.width = pct + '%';
+  }
+
+  container.querySelector('.slide-counter').textContent = `${currentSlide + 1} / ${MODULES[currentModule].slides.length}`;
+  container.querySelectorAll('.progress-dot').forEach((dot, i) => {
+    const isActive = i === currentSlide;
+    dot.classList.toggle('active', isActive);
+    if (isActive) {
+      dot.setAttribute('aria-current', 'true');
+    } else {
+      dot.removeAttribute('aria-current');
+    }
+  });
+  container.querySelector('.nav-btn').disabled = currentSlide === 0;
+}
+
+// ===== ANSWERS =====
+function answerDecision(did, letter, correct, xp) {
+  if (gameState.answeredQuestions[did] !== undefined) return;
+  gameState.answeredQuestions[did] = letter;
+  gameState.decisionsCompleted++;
+  gameState.synthesisCount = (gameState.synthesisCount || 0) + 1;
+
+  if (gameState.decisionsCompleted === 1) awardBadge('first_judgment');
+
+  if (correct) {
+    gameState.correctAnswers++;
+    consecutiveCorrect++;
+    addXP(xp);
+    if (consecutiveCorrect >= 5) awardBadge('perfect_5');
+    if (gameState.decisionsCompleted >= 14) awardBadge('decision_maker');
+  } else {
+    consecutiveCorrect = 0;
+  }
+  saveGame();
+  renderSlides();
+  updateComboDisplay();
+  updateStatsDisplay();
+}
+
+function answerQuiz(qid, choice, correct, xp) {
+  if (gameState.answeredQuestions[qid] !== undefined) return;
+  gameState.answeredQuestions[qid] = choice;
+
+  if (correct) {
+    gameState.correctAnswers++;
+    consecutiveCorrect++;
+    addXP(xp);
+    if (consecutiveCorrect >= 5) awardBadge('perfect_5');
+  } else {
+    consecutiveCorrect = 0;
+  }
+  saveGame();
+  renderSlides();
+  updateComboDisplay();
+}
+
+// ===== NAVIGATION =====
+function goToModule(index) {
+  if (index > 0 && !gameState.completedModules.includes(MODULES[index-1].id)) return;
+  currentModule = index;
+  currentSlide = 0;
+  renderSlides();
+  renderSidebar();
+}
+
+function goToSlide(index) {
+  currentSlide = index;
+  updateSlideVisibility();
+}
+
+function nextSlide() {
+  const mod = MODULES[currentModule];
+  if (currentSlide < mod.slides.length - 1) {
+    currentSlide++;
+    updateSlideVisibility();
+  } else {
+    completeModule();
+  }
+}
+
+function prevSlide() {
+  if (currentSlide > 0) {
+    currentSlide--;
+    updateSlideVisibility();
+  }
+}
+
+function completeModule() {
+  const mod = MODULES[currentModule];
+  if (!gameState.completedModules.includes(mod.id)) {
+    gameState.completedModules.push(mod.id);
+    addXP(mod.xp);
+
+    // Module-specific badges
+    if (mod.id === 2) awardBadge('allocation_guard');
+    if (mod.id === 3) awardBadge('blinding_watch');
+    if (mod.id === 4) awardBadge('attrition_auditor');
+    if (mod.id === 5) awardBadge('reporting_tracker');
+    if (mod.id === 6) awardBadge('confounding_analyst');
+    if (mod.id === 7) awardBadge('judgment_master');
+    if (gameState.completedModules.length === MODULES.length) awardBadge('finisher');
+
+    saveGame();
+    triggerConfetti();
+    updateCourseProgress();
+  }
+
+  if (currentModule < MODULES.length - 1) {
+    goToModule(currentModule + 1);
+  }
+}
+
+// ===== KEYBOARD =====
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    document.getElementById('badgeModal').classList.remove('show');
+    document.querySelector('.sidebar').classList.remove('open');
+    document.getElementById('sidebarOverlay').classList.remove('show');
+    return;
+  }
+  const isRoleButton = e.target && e.target.getAttribute && e.target.getAttribute('role') === 'button';
+  const isFormControl = e.target && e.target.closest && e.target.closest('button, a, input, textarea, select');
+  if (isRoleButton || isFormControl) {
+    if (e.key === ' ' && isRoleButton) {
+      e.preventDefault();
+      e.target.click();
+    }
+    return;
+  }
+  if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextSlide(); }
+  else if (e.key === 'ArrowLeft') { e.preventDefault(); prevSlide(); }
+});
+
+document.addEventListener('keydown', (e) => {
+  if ((e.target.classList.contains('module-item') || e.target.classList.contains('decision-option') || e.target.classList.contains('quiz-option')) && (e.key === 'Enter' || e.key === ' ')) {
+    e.preventDefault();
+    e.target.click();
+  }
+});
+
+// ===== TOUCH =====
+let touchStartX = 0;
+document.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
+document.addEventListener('touchend', (e) => {
+  const diff = touchStartX - e.changedTouches[0].screenX;
+  if (Math.abs(diff) > 50) { diff > 0 ? nextSlide() : prevSlide(); }
+}, { passive: true });
+
+// ===== INIT =====
+renderAll();
+</script>
+</body>
+</html>

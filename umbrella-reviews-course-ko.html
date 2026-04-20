@@ -1,0 +1,2675 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Umbrella 리뷰: 리뷰의 리뷰</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&amp;family=Source+Sans+Pro:wght@300;400;600;700&amp;display=swap" rel="stylesheet"/>
+<style>
+    :root {
+      --navy: #1E2761;
+      --deep-navy: #141B3D;
+      --gold: #D4AF37;
+      --cream: #FAF8F5;
+      --light-cream: #FFFFFF;
+      --text: #2D3748;
+      --light-text: #718096;
+      --red: #C53030;
+      --green: #22c55e;
+      --teal: #0f766e;
+      --purple: #7c3aed;
+      --orange: #f59e0b;
+      --transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      height: 100%;
+      font-family: 'Source Sans Pro', sans-serif;
+      background: var(--deep-navy);
+      color: var(--cream);
+    }
+
+    .course-container { display: flex; height: 100vh; overflow: hidden; }
+
+    /* Skip Link */
+    .skip-link {
+      position: absolute;
+      top: -40px;
+      left: 0;
+      background: var(--gold);
+      color: var(--navy);
+      padding: 8px 16px;
+      z-index: 10000;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .skip-link:focus { top: 0; }
+
+    /* Sidebar */
+    .sidebar {
+      width: 300px;
+      background: linear-gradient(180deg, var(--deep-navy) 0%, #0a0f1a 100%);
+      border-right: 1px solid rgba(212,175,55,0.2);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    .sidebar-header {
+      padding: 1.25rem;
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+      text-align: center;
+    }
+    .sidebar-header h1 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--gold);
+    }
+    .sidebar-header p {
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.6);
+    }
+
+    .stats-panel {
+      padding: 1rem;
+      background: rgba(212,175,55,0.1);
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+    }
+    .level-display {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+    .level-badge {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, var(--gold), #f0c040);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      box-shadow: 0 2px 8px rgba(212,175,55,0.4);
+    }
+    .level-info { flex: 1; }
+    .level-title { font-weight: 700; font-size: 0.9rem; color: var(--gold); }
+    .level-subtitle { font-size: 0.7rem; color: rgba(255,255,255,0.6); }
+    .xp-bar {
+      height: 8px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 0.5rem;
+    }
+    .xp-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--gold), var(--orange));
+      border-radius: 4px;
+      transition: width 0.5s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .xp-fill::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      animation: shimmer 2s infinite;
+    }
+    @keyframes shimmer {
+      to { left: 100%; }
+    }
+    .xp-text {
+      font-size: 0.65rem;
+      color: rgba(255,255,255,0.5);
+      text-align: right;
+      margin-top: 0.25rem;
+    }
+    .quick-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+    }
+    .quick-stat {
+      background: rgba(0,0,0,0.2);
+      padding: 0.5rem;
+      border-radius: 6px;
+      text-align: center;
+    }
+    .quick-stat-value {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--gold);
+    }
+    .quick-stat-label {
+      font-size: 0.6rem;
+      color: rgba(255,255,255,0.5);
+    }
+
+    .course-progress {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+      background: rgba(0,0,0,0.2);
+    }
+    .course-progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.6);
+      margin-bottom: 0.35rem;
+    }
+    .course-progress-bar {
+      height: 6px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .course-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--green), #22d3ee);
+      border-radius: 3px;
+      transition: width 0.5s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .course-progress-fill::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      animation: shimmer 2s infinite;
+    }
+
+    .module-list { flex: 1; overflow-y: auto; padding: 0.5rem 0; }
+    .module-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.6rem 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      border-left: 3px solid transparent;
+    }
+    .module-item:hover { background: rgba(212,175,55,0.1); }
+    .module-item.active { background: rgba(212,175,55,0.15); border-left-color: var(--gold); }
+    .module-item.completed .module-number { background: var(--green); color: white; }
+    .module-item.locked { opacity: 0.5; cursor: not-allowed; }
+    .module-number {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .module-item.active .module-number { background: var(--gold); color: var(--navy); }
+    .module-info { flex: 1; min-width: 0; }
+    .module-title { font-size: 0.8rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .module-subtitle { font-size: 0.65rem; color: rgba(255,255,255,0.5); }
+    .module-xp { font-size: 0.6rem; color: var(--gold); }
+    .module-time { font-size: 0.55rem; color: rgba(255,255,255,0.4); display: flex; align-items: center; gap: 0.25rem; margin-top: 0.15rem; }
+
+    .badges-panel {
+      padding: 1rem;
+      border-top: 1px solid rgba(212,175,55,0.2);
+    }
+    .badges-title { font-size: 0.75rem; font-weight: 600; color: var(--gold); margin-bottom: 0.5rem; }
+    .badges-grid { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+    .badge-item {
+      width: 32px;
+      height: 32px;
+      min-width: 44px;
+      min-height: 44px;
+      background: rgba(255,255,255,0.05);
+      border: 2px solid rgba(255,255,255,0.1);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      font-family: inherit;
+      color: inherit;
+      padding: 0;
+      opacity: 0.3;
+      transition: all 0.3s;
+      cursor: pointer;
+      position: relative;
+    }
+    .badge-item.earned { opacity: 1; background: rgba(212,175,55,0.2); border-color: var(--gold); }
+    .badge-item:hover::after,
+    .badge-item:focus::after,
+    .badge-item:focus-visible::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--navy);
+      color: white;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.6rem;
+      white-space: nowrap;
+      z-index: 100;
+    }
+    .badge-item:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+    /* Main Content */
+    .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .content-header {
+      padding: 0.75rem 1.5rem;
+      background: rgba(0,0,0,0.3);
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .breadcrumb { font-size: 0.85rem; color: rgba(255,255,255,0.6); }
+    .breadcrumb span { color: var(--gold); }
+    .header-actions { display: flex; gap: 0.5rem; align-items: center; }
+    .streak-display {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: rgba(239,68,68,0.2);
+      border: 1px solid rgba(239,68,68,0.4);
+      padding: 0.35rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+    }
+    .streak-display.active {
+      background: rgba(249,115,22,0.2);
+      border-color: var(--orange);
+      animation: flamePulse 1.5s ease-in-out infinite;
+    }
+    @keyframes flamePulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+    .streak-flame { font-size: 1rem; }
+    .streak-count { font-weight: 700; color: var(--orange); }
+
+    .btn {
+      padding: 0.5rem 1rem;
+      border: 1px solid rgba(212,175,55,0.3);
+      border-radius: 6px;
+      background: rgba(255,255,255,0.05);
+      color: var(--cream);
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn:hover { background: rgba(212,175,55,0.2); border-color: var(--gold); }
+    .btn.primary { background: var(--gold); color: var(--navy); border-color: var(--gold); font-weight: 600; }
+
+    .content-body { flex: 1; overflow: hidden; display: flex; }
+
+    /* Slides */
+    .slides-container { flex: 1; position: relative; overflow: hidden; touch-action: pan-x pan-y; }
+    .module-slides { display: none; width: 100%; height: 100%; }
+    .module-slides.active { display: block; }
+
+    .slide {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      padding: 2rem 2rem 4rem;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity var(--transition), visibility var(--transition);
+      overflow-y: auto;
+    }
+    .slide.active { opacity: 1; visibility: visible; }
+    .slide.dark { background: var(--deep-navy); }
+    .slide.light { background: var(--cream); color: var(--text); }
+    .slide.black { background: #000; }
+    .slide.red-bg { background: linear-gradient(135deg, #7f1d1d, #450a0a); }
+    .slide.green-bg { background: linear-gradient(135deg, #14532d, #052e16); }
+    .slide.purple-bg { background: linear-gradient(135deg, #4c1d95, #2e1065); }
+    .slide.orange-bg { background: linear-gradient(135deg, #9a3412, #431407); }
+    .slide.teal-bg { background: linear-gradient(135deg, #0f766e, #042f2e); }
+    .slide.gold-bg { background: linear-gradient(135deg, #92702a 0%, #5c4520 100%); }
+
+    .slide-progress-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--gold), var(--orange));
+      transition: width 0.3s ease;
+      z-index: 50;
+    }
+
+    .serif { font-family: 'Cormorant Garamond', Georgia, serif; }
+    .title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      font-weight: 700;
+      margin-bottom: 1rem;
+      line-height: 1.2;
+      text-align: center;
+    }
+    .title.gold { color: var(--gold); }
+    .title.navy { color: var(--navy); }
+    .subtitle {
+      font-size: clamp(0.9rem, 2vw, 1.3rem);
+      color: rgba(255,255,255,0.7);
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .slide.light .subtitle { color: var(--light-text); }
+
+    .big-number {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(4rem, 12vw, 8rem);
+      font-weight: 700;
+      line-height: 1;
+    }
+    .big-number.gold { color: var(--gold); }
+    .big-number.red { color: var(--red); }
+
+    .refrain {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(1.3rem, 3vw, 2rem);
+      font-style: italic;
+      color: var(--gold);
+      text-align: center;
+      max-width: 700px;
+    }
+
+    .content { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 850px; }
+
+    /* Cards */
+    .card {
+      background: var(--light-cream);
+      border: 1px solid var(--gold);
+      padding: 1.25rem 1.5rem;
+      margin: 0.5rem 0;
+      max-width: 750px;
+      width: 100%;
+      border-radius: 8px;
+    }
+    .card.navy-bg { background: var(--navy); color: var(--cream); }
+    .card-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 0.05em;
+      margin-bottom: 0.4rem;
+      text-transform: uppercase;
+    }
+    .card-text { font-size: 0.95rem; line-height: 1.6; }
+    .card.navy-bg .card-text { color: var(--cream); }
+
+    /* Story box */
+    .story-box {
+      background: linear-gradient(135deg, rgba(197,48,48,0.15), rgba(30,39,97,0.2));
+      border-left: 4px solid var(--red);
+      padding: 1.25rem;
+      margin: 0.75rem 0;
+      max-width: 750px;
+      width: 100%;
+      border-radius: 0 8px 8px 0;
+    }
+    .story-box.success { background: linear-gradient(135deg, rgba(34,197,94,0.15), rgba(30,39,97,0.2)); border-left-color: #4CAF50; }
+    .story-box.warning { background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(30,39,97,0.2)); border-left-color: var(--gold); }
+    .story-box.teal { background: linear-gradient(135deg, rgba(15,118,110,0.15), rgba(30,39,97,0.2)); border-left-color: var(--teal); }
+    .story-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: var(--red);
+      margin-bottom: 0.4rem;
+      text-transform: uppercase;
+    }
+    .story-box.success .story-label { color: var(--green); }
+    .story-box.warning .story-label { color: var(--orange); }
+    .story-box.teal .story-label { color: var(--teal); }
+    .story-text { font-size: 0.95rem; line-height: 1.6; }
+
+    /* Stats */
+    .stats-grid {
+      display: flex;
+      gap: 0.75rem;
+      margin: 1rem 0;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .stat-box {
+      background: var(--navy);
+      color: var(--cream);
+      padding: 1rem 1.25rem;
+      text-align: center;
+      min-width: 120px;
+      border-radius: 8px;
+    }
+    .stat-value {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.3rem, 2.5vw, 2rem);
+      font-weight: 700;
+    }
+    .stat-value.gold { color: var(--gold); }
+    .stat-value.red { color: var(--red); }
+    .stat-value.green { color: var(--green); }
+    .stat-label { font-size: 0.75rem; opacity: 0.8; margin-top: 0.2rem; }
+
+    /* Timeline */
+    .timeline { display: flex; flex-direction: column; gap: 0.4rem; width: 100%; max-width: 650px; }
+    .timeline-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.6rem 0.75rem;
+      background: rgba(255,255,255,0.05);
+      border-radius: 6px;
+      border-left: 4px solid var(--gold);
+    }
+    .timeline-days { font-weight: 700; font-size: 0.8rem; min-width: 70px; color: var(--gold); }
+    .timeline-content { flex: 1; }
+    .timeline-title { font-weight: 600; font-size: 0.9rem; }
+    .timeline-desc { font-size: 0.75rem; opacity: 0.7; }
+
+    /* Checklist */
+    .checklist { display: flex; flex-direction: column; gap: 0.4rem; width: 100%; max-width: 650px; }
+    .checklist-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+      padding: 0.6rem 0.75rem;
+      background: rgba(255,255,255,0.05);
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .check-icon {
+      width: 20px;
+      height: 20px;
+      background: var(--green);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      color: white;
+      flex-shrink: 0;
+    }
+    .checklist-text { font-size: 0.9rem; }
+
+    /* Decision Tree */
+    .decision-tree {
+      background: linear-gradient(135deg, rgba(124,58,237,0.1), rgba(30,39,97,0.2));
+      border: 2px solid var(--purple);
+      border-radius: 12px;
+      padding: 1.25rem;
+      width: 100%;
+      max-width: 700px;
+    }
+    .decision-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    .decision-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--purple);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+    }
+    .decision-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+    .decision-xp {
+      margin-left: auto;
+      background: rgba(212,175,55,0.2);
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      color: var(--gold);
+      font-weight: 600;
+    }
+    .decision-scenario {
+      background: rgba(0,0,0,0.2);
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+    .decision-question {
+      font-weight: 600;
+      color: var(--gold);
+      margin-bottom: 0.75rem;
+      font-size: 1rem;
+    }
+    .decision-options { display: flex; flex-direction: column; gap: 0.5rem; }
+    .decision-option {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      background: rgba(255,255,255,0.05);
+      border: 2px solid rgba(255,255,255,0.15);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .decision-option:hover {
+      background: rgba(124,58,237,0.2);
+      border-color: var(--purple);
+      transform: translateX(4px);
+    }
+    .decision-option:active {
+      transform: scale(0.98);
+    }
+    .decision-option.selected { background: rgba(124,58,237,0.3); border-color: var(--purple); }
+    .decision-option.correct { background: rgba(34,197,94,0.2); border-color: var(--green); }
+    .decision-option.incorrect { background: rgba(239,68,68,0.15); border-color: var(--red); }
+    .decision-option.disabled { pointer-events: none; opacity: 0.7; }
+    .decision-option:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+    .option-letter {
+      width: 24px;
+      height: 24px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.8rem;
+      flex-shrink: 0;
+    }
+    .decision-option.correct .option-letter { background: var(--green); color: white; }
+    .decision-option.incorrect .option-letter { background: var(--red); color: white; }
+    .option-text { font-size: 0.9rem; }
+    .decision-feedback {
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: 8px;
+      display: none;
+    }
+    .decision-feedback.show { display: block; }
+    .decision-feedback.correct { background: rgba(34,197,94,0.2); border: 1px solid var(--green); }
+    .decision-feedback.incorrect { background: rgba(239,68,68,0.15); border: 1px solid var(--red); }
+    .feedback-title { font-weight: 700; margin-bottom: 0.5rem; }
+    .feedback-text { font-size: 0.9rem; line-height: 1.5; }
+
+    /* Learning Objectives */
+    .objectives-box {
+      background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(30,39,97,0.25));
+      border: 2px solid #3b82f6;
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin: 0.75rem 0;
+      max-width: 700px;
+      width: 100%;
+    }
+    .objectives-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+    .objectives-icon {
+      width: 36px;
+      height: 36px;
+      background: #3b82f6;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+    }
+    .objectives-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #60a5fa;
+    }
+    .objectives-list { list-style: none; padding: 0; }
+    .objectives-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      padding: 0.4rem 0;
+      font-size: 0.9rem;
+    }
+    .objectives-list li::before { content: 'o'; color: #3b82f6; font-weight: bold; }
+
+    /* Animation */
+    .slide.active .animate { animation: fadeUp 0.5s ease-out forwards; }
+    .slide.active .animate.delay-1 { animation-delay: 0.1s; }
+    .slide.active .animate.delay-2 { animation-delay: 0.2s; }
+    .slide.active .animate.delay-3 { animation-delay: 0.3s; }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate { opacity: 0; }
+
+    /* XP Popup */
+    .xp-popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      background: linear-gradient(135deg, var(--gold), #f0c040);
+      color: var(--navy);
+      padding: 1.5rem 2.5rem;
+      border-radius: 12px;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2rem;
+      font-weight: 700;
+      z-index: 1000;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+      transition: transform 0.3s ease;
+    }
+    .xp-popup.show { transform: translate(-50%, -50%) scale(1); }
+    .xp-popup .xp-amount { font-size: 3rem; display: block; }
+
+    /* Badge Modal */
+    .badge-modal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.85);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1001;
+    }
+    .badge-modal.show { display: flex; }
+    @keyframes badgeBounce {
+      0% { transform: scale(0); opacity: 0; }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .badge-modal.show .badge-modal-icon {
+      animation: badgeBounce 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+    .badge-modal-content {
+      background: linear-gradient(135deg, var(--deep-navy), #0a0f1a);
+      border: 2px solid var(--gold);
+      border-radius: 16px;
+      padding: 2rem;
+      text-align: center;
+      max-width: 350px;
+    }
+    .badge-modal-icon { font-size: 4rem; margin-bottom: 1rem; }
+    .badge-modal-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.5rem;
+      color: var(--gold);
+      margin-bottom: 0.5rem;
+    }
+    .badge-modal-desc { font-size: 0.9rem; opacity: 0.8; margin-bottom: 1rem; }
+    .badge-modal-close {
+      padding: 0.5rem 1.5rem;
+      background: var(--gold);
+      color: var(--navy);
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* Confetti */
+    .confetti-container {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 999;
+      overflow: hidden;
+    }
+    .confetti {
+      position: absolute;
+      width: 10px; height: 10px;
+      opacity: 0;
+      animation: confetti-fall 3s ease-out forwards;
+    }
+    @keyframes confetti-fall {
+      0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      .confetti { display: none; }
+    }
+
+    /* Nav */
+    .slide-nav {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      padding: 0.75rem 1rem 1.25rem;
+      z-index: 100;
+      pointer-events: none;
+    }
+    .nav-btn {
+      background: rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: white;
+      font-size: 1.1rem;
+      cursor: pointer;
+      opacity: 0.6;
+      transition: all 0.2s;
+      padding: 0.4rem 0.6rem;
+      border-radius: 6px;
+      pointer-events: auto;
+    }
+    .nav-btn:hover { opacity: 1; background: rgba(0,0,0,0.7); border-color: var(--gold); }
+    .nav-btn:active { transform: scale(0.95); }
+    .nav-btn:disabled { opacity: 0.2; cursor: not-allowed; }
+    .nav-btn:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+    .nav-center { display: flex; flex-direction: column; align-items: center; gap: 0.2rem; pointer-events: auto; }
+    .slide-counter { font-size: 0.7rem; opacity: 0.5; }
+    .progress-dots { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; max-width: 280px; }
+    .progress-dot {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: transparent;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+      padding: 0;
+      appearance: none;
+      position: relative;
+    }
+    .progress-dot::after {
+      content: '';
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.25);
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      transition: all 0.2s;
+    }
+    .progress-dot.active::after { width: 14px; height: 14px; background: var(--gold); transform: translate(-50%, -50%); }
+    .progress-dot:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+    /* Mobile */
+    @media (max-width: 768px) {
+      .sidebar {
+        position: fixed;
+        left: -300px;
+        top: 0;
+        bottom: 0;
+        z-index: 1000;
+        transition: left 0.3s ease;
+      }
+      .sidebar.open { left: 0; }
+      .sidebar-toggle {
+        display: flex;
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        z-index: 1001;
+        width: 40px;
+        height: 40px;
+        background: var(--gold);
+        color: var(--navy);
+        border: none;
+        border-radius: 8px;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        cursor: pointer;
+      }
+      .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 999;
+      }
+      .sidebar-overlay.show { display: block; }
+    }
+    @media (min-width: 769px) {
+      .sidebar-toggle { display: none; }
+      .sidebar-overlay { display: none !important; }
+    }
+
+    /* Combo Counter */
+    .combo-display {
+      position: fixed;
+      top: 80px;
+      right: 20px;
+      background: linear-gradient(135deg, var(--orange), #ef4444);
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      z-index: 500;
+      transform: scale(0);
+      transition: transform 0.3s ease;
+      box-shadow: 0 4px 15px rgba(239,68,68,0.4);
+    }
+    .combo-display.show { transform: scale(1); }
+
+    /* Quote Block */
+    .quote-block {
+      background: linear-gradient(135deg, rgba(15,118,110,0.2), rgba(30,39,97,0.2));
+      border-left: 4px solid var(--teal);
+      padding: 1.25rem;
+      margin: 0.75rem 0;
+      max-width: 700px;
+      width: 100%;
+      border-radius: 0 8px 8px 0;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      font-style: italic;
+    }
+    .quote-attribution {
+      margin-top: 0.75rem;
+      font-size: 0.85rem;
+      font-style: normal;
+      color: var(--teal);
+    }
+
+    /* Course Completion Overlay */
+    .completion-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.9);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1002;
+    }
+    .completion-overlay.show { display: flex; }
+    .completion-content {
+      background: linear-gradient(135deg, var(--deep-navy), #0a0f1a);
+      border: 2px solid var(--gold);
+      border-radius: 16px;
+      padding: 2.5rem;
+      text-align: center;
+      max-width: 450px;
+      width: 90%;
+    }
+    .completion-icon { font-size: 3rem; margin-bottom: 1rem; color: var(--gold); }
+    .completion-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2rem;
+      color: var(--gold);
+      margin-bottom: 0.5rem;
+    }
+    .completion-subtitle {
+      font-size: 1rem;
+      color: rgba(255,255,255,0.7);
+      margin-bottom: 1.5rem;
+    }
+    .completion-stats {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .completion-stat {
+      text-align: center;
+    }
+    .completion-stat-value {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--gold);
+    }
+    .completion-stat-label {
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.6);
+    }
+    .completion-actions { display: flex; gap: 0.75rem; justify-content: center; }
+
+    /* Level Up Modal */
+    .level-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.9);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1003;
+    }
+    .level-modal.show { display: flex; }
+    .level-modal-content {
+      background: linear-gradient(135deg, var(--deep-navy), #0a0f1a);
+      border: 2px solid var(--gold);
+      border-radius: 16px;
+      padding: 2.5rem;
+      text-align: center;
+      max-width: 380px;
+      width: 90%;
+      animation: levelModalPop 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+    @keyframes levelModalPop {
+      0% { transform: scale(0); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .level-modal-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      animation: levelIconPulse 1s ease-in-out infinite;
+    }
+    @keyframes levelIconPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.15); }
+    }
+    .level-modal-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.8rem;
+      color: var(--gold);
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+    .level-modal-level {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 3rem;
+      font-weight: 700;
+      color: var(--cream);
+      margin-bottom: 0.25rem;
+    }
+    .level-modal-name {
+      font-size: 1.2rem;
+      color: var(--gold);
+      margin-bottom: 1.5rem;
+      font-weight: 600;
+    }
+
+    /* Tablet breakpoint */
+    @media (max-width: 1024px) and (min-width: 769px) {
+      .sidebar { width: 280px; }
+    }
+
+    /* Small mobile improvements */
+    @media (max-width: 480px) {
+      .decision-option {
+        padding: 1rem 1.25rem;
+        font-size: 0.95rem;
+      }
+    }
+
+    /* Landscape orientation handling */
+    @media (orientation: landscape) and (max-height: 500px) {
+      .slide-content { padding: 1rem; }
+      .slide .title { font-size: 1.5rem; }
+      .slide-nav { padding: 0.5rem; }
+    }
+
+    /* Safe area insets for notched devices */
+    @supports (padding-bottom: env(safe-area-inset-bottom)) {
+      .sidebar {
+        padding-bottom: max(1rem, env(safe-area-inset-bottom));
+      }
+      .slide-nav {
+        padding-bottom: max(1rem, env(safe-area-inset-bottom));
+      }
+    }
+  </style>
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<div class="course-container">
+<!-- Sidebar -->
+<nav aria-label="코스 탐색" class="sidebar" role="navigation">
+<div class="sidebar-header">
+<a href="index.html" onmouseout="this.style.color='rgba(212,175,55,0.7)'" onmouseover="this.style.color='#D4AF37'" style="display:block;font-size:0.7rem;color:rgba(212,175,55,0.7);text-decoration:none;margin-bottom:0.5rem;">← Course Library</a>
+<h1>Umbrella Reviews</h1>
+<p>리뷰의 리뷰</p>
+</div>
+<div class="stats-panel">
+<div class="level-display">
+<div class="level-badge" id="levelIcon">RR</div>
+<div class="level-info">
+<div class="level-title" id="levelTitle">Review Reader</div>
+<div class="level-subtitle">Level <span id="levelNum">1</span></div>
+</div>
+</div>
+<div class="xp-bar"><div class="xp-fill" id="xpFill" style="width: 0%"></div></div>
+<div class="xp-text"><span id="xpCurrent">0</span> / <span id="xpNeeded">100</span> XP</div>
+<div class="quick-stats">
+<div class="quick-stat">
+<div class="quick-stat-value" id="correctCount">0</div>
+<div class="quick-stat-label">Correct</div>
+</div>
+<div class="quick-stat">
+<div class="quick-stat-value" id="decisionCount">0</div>
+<div class="quick-stat-label">Decisions</div>
+</div>
+<div class="quick-stat">
+<div class="quick-stat-value" id="synthesisCount">0</div>
+<div class="quick-stat-label">Reviews</div>
+</div>
+</div>
+</div>
+<div class="course-progress">
+<div class="course-progress-label">
+<span>Course Progress</span>
+<span id="courseProgressPct">0%</span>
+</div>
+<div class="course-progress-bar">
+<div class="course-progress-fill" id="courseProgressFill" style="width: 0%"></div>
+</div>
+</div>
+<div class="module-list" id="moduleList" role="list"></div>
+<div class="badges-panel">
+<div class="badges-title">Achievements</div>
+<div class="badges-grid" id="badgesGrid"></div>
+</div>
+</nav>
+<!-- Main Content -->
+<main class="main-content" id="main-content">
+<header class="content-header">
+<div class="breadcrumb">Umbrella Reviews / <span id="currentModule">Module 1</span></div>
+<div class="header-actions">
+<div class="streak-display" id="streakDisplay">
+<span aria-hidden="true" class="streak-flame">🔥</span>
+<span class="streak-count" id="streakCount">0</span>
+<span>day streak</span>
+</div>
+<button class="btn" onclick="resetProgress()">Reset</button>
+</div>
+</header>
+<div class="content-body">
+<div class="slides-container" id="slidesContainer"></div>
+</div>
+</main>
+</div>
+<!-- XP Popup -->
+<div aria-atomic="true" aria-live="polite" class="xp-popup" id="xpPopup" role="status">
+<span class="xp-amount" id="xpAmount">+25</span>
+    XP
+  </div>
+<!-- Badge Modal -->
+<div aria-labelledby="badgeModalTitle" aria-modal="true" class="badge-modal" id="badgeModal" role="dialog">
+<div class="badge-modal-content">
+<div class="badge-modal-icon" id="badgeModalIcon">AW</div>
+<div class="badge-modal-title" id="badgeModalTitle">Badge Earned!</div>
+<div class="badge-modal-desc" id="badgeModalDesc">새로운 업적을 달성하셨습니다.</div>
+<button class="badge-modal-close" onclick="closeBadgeModal()">Awesome!</button>
+</div>
+</div>
+<!-- Confetti Container -->
+<div class="confetti-container" id="confettiContainer"></div>
+<!-- Combo Counter -->
+<div aria-live="polite" class="combo-display" id="comboDisplay" role="status">COMBO <span id="comboCount">0</span>x</div>
+ 과정 완료 오버레이 
+<div class="completion-overlay" id="completionOverlay">
+<div class="completion-content">
+<div class="completion-icon">🏆</div>
+<div class="completion-title">Course Complete!</div>
+<div class="completion-subtitle">You have mastered umbrella reviews.</div>
+<div class="completion-stats">
+<div class="completion-stat">
+<div class="completion-stat-value" id="completionXP">0</div>
+<div class="completion-stat-label">Total XP</div>
+</div>
+<div class="completion-stat">
+<div class="completion-stat-value" id="completionBadges">0</div>
+<div class="completion-stat-label">Badges Earned</div>
+</div>
+<div class="completion-stat">
+<div class="completion-stat-value" id="completionLevel">1</div>
+<div class="completion-stat-label">Final Level</div>
+</div>
+</div>
+<div class="completion-actions">
+<button class="btn primary" onclick="downloadCertificate()">Download Certificate</button>
+<button class="btn" onclick="reviewBadges()">Review Badges</button>
+<button class="btn" onclick="closeCompletion()">Close</button>
+</div>
+</div>
+</div>
+<!-- Level Up Modal -->
+<div aria-hidden="true" aria-labelledby="levelModalTitle" aria-modal="true" class="level-modal" id="levelModal" role="dialog">
+<div class="level-modal-content">
+<div class="level-modal-icon">🎖️</div>
+<div class="level-modal-title" id="levelModalTitle">Level Up!</div>
+<div class="level-modal-level" id="levelModalLevel">Level 2</div>
+<div class="level-modal-name" id="levelModalName">Search Scout</div>
+<button class="btn primary" onclick="closeLevelModal()">Continue</button>
+</div>
+</div>
+<!-- Mobile Sidebar Toggle -->
+<button aria-expanded="false" aria-label="Toggle menu" class="sidebar-toggle" onclick="toggleSidebar()">MENU</button>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<script>
+// ===== GAMIFICATION STATE =====
+const DEFAULT_STATE = {
+  xp: 0,
+  level: 1,
+  streak: 0,
+  lastActive: null,
+  correctAnswers: 0,
+  decisionsCompleted: 0,
+  synthesisCount: 0,
+  badges: [],
+  completedModules: [],
+  answeredQuestions: {},
+  consecutiveCorrect: 0,
+  courseCompleted: false
+};
+
+function safeGetStorage(key, fallback) {
+  try {
+    const item = localStorage.getItem(key);
+    return item ? JSON.parse(item) : fallback;
+  } catch (e) {
+    return fallback;
+  }
+}
+
+function safeSetStorage(key, value) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch (e) {}
+}
+
+// Migration from old storage key to versioned key
+(function migrateStorage() {
+  try {
+    const oldData = localStorage.getItem('umbrellaReviewGame');
+    if (oldData && !localStorage.getItem('umbrellaReviewGame_v1')) {
+      localStorage.setItem('umbrellaReviewGame_v1', oldData);
+      localStorage.removeItem('umbrellaReviewGame');
+    }
+  } catch (e) {}
+})();
+
+let gameState = safeGetStorage('umbrellaReviewGame_v1', DEFAULT_STATE);
+
+const LEVELS = [
+  { level: 1, title: "Review Reader", icon: "RR", xp: 0 },
+  { level: 2, title: "Search Scout", icon: "SS", xp: 120 },
+  { level: 3, title: "Quality Assessor", icon: "QA", xp: 300 },
+  { level: 4, title: "Overlap Analyst", icon: "OA", xp: 520 },
+  { level: 5, title: "Evidence Synthesizer", icon: "ES", xp: 780 },
+  { level: 6, title: "Gap Mapper", icon: "GM", xp: 1050 },
+  { level: 7, title: "Reporting Expert", icon: "RE", xp: 1350 },
+  { level: 8, title: "Umbrella Master", icon: "UM", xp: 1700 }
+];
+
+const BADGES = [
+  { id: "canopy_explorer", icon: "\u{1F333}", name: "Canopy Explorer", desc: "모듈 1 완료: 캐노피" },
+  { id: "first_scenario", icon: "\u{1F3AF}", name: "First Scenario", desc: "첫 번째 결정 시나리오 완료" },
+  { id: "harvest_expert", icon: "\u{1F33E}", name: "Harvest Expert", desc: "수확 모듈 완료" },
+  { id: "quality_judge", icon: "\u{1F50D}", name: "Quality Judge", desc: "렌즈 모듈 완료" },
+  { id: "overlap_detective", icon: "\u{1F50E}", name: "Overlap Detective", desc: "오버랩 모듈 완료" },
+  { id: "evidence_weaver", icon: "\u{1F9F5}", name: "Evidence Weaver", desc: "합성 완료 모듈" },
+  { id: "gap_finder", icon: "\u{1F5FA}", name: "Gap Finder", desc: "맵 모듈 완료" },
+  { id: "report_champion", icon: "\u{1F4DC}", name: "Report Champion", desc: "보고서 모듈 완료" },
+  { id: "perfect_5", icon: "\u{2B50}", name: "Five Star", desc: "Get 5 correct answers in a row" },
+  { id: "decision_maker", icon: "\u{1F9E0}", name: "Decision Maker", desc: "21개 의사결정 시나리오 모두 완료" },
+  { id: "finisher", icon: "\u{1F3C6}", name: "Course Complete", desc: "전체 과정 완료" },
+  { id: "streak_3", icon: "\u{1F525}", name: "On Fire", desc: "Maintain a 3-day streak" },
+  { id: "streak_7", icon: "\u{1F4AA}", name: "Weekly Warrior", desc: "Maintain a 7-day streak" }
+];
+
+// ===== MODULES DATA =====
+const MODULES = [
+  {
+    id: 1, title: "The Canopy", subtitle: "한 번의 검토가 부족한 이유", xp: 160,
+    slides: [
+      { type: "title", theme: "teal-bg", content: { title: "Umbrella Reviews", subtitle: "한 번의 체계적인 검토로 충분하지 않은 경우 충분합니다" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "Explain why multiple systematic reviews on the same topic create confusion",
+          "우수 검토 정의 및 표준 체계적 검토와 어떻게 다른지",
+          "우수 검토가 올바른 설계 선택인지 식별",
+          "우수 검토 워크플로의 핵심 단계 인식"
+        ],
+        tip: "우수 검토는 1차 연구를 통합하지 않습니다. 이는 체계적 검토의 결론을 통합합니다."
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "THE FLOOD", title: "When five reviews gave five answers",
+        text: "지침 패널은 동일한 개입에 대해 5개의 체계적 검토를 발견했습니다. 세 명은 효과가 있다고 말했고, 한 명은 불확실했고, 한 명은 해를 끼칠 것이라고 경고했습니다. 각각은 서로 다른 검색 날짜, 포함 기준 및 품질 도구를 사용했습니다. 패널은 어느 것을 신뢰할지 결정할 수 없었습니다.",
+        followup: "개별 리뷰 위에 서서 전체 환경을 평가하는 포괄적인 리뷰가 바로 이 순간에 존재합니다."
+      }},
+      { type: "story", theme: "gold-bg", content: {
+        label: "THE PAIR", title: "Two teams, two strategies",
+        text: "Team A conducted a sixth systematic review on the same topic, adding to the noise. Team B conducted an umbrella review: they mapped all existing reviews, assessed their quality, checked for overlap, and synthesized conclusions across them.",
+        followup: "B팀은 리뷰가 동의하지 않는 이유와 신뢰할 수 있는 결론을 설명하는 단일 문서를 생성했습니다.",
+        warning: true
+      }},
+      { type: "stats", theme: "dark", content: {
+        title: "증거 풍경",
+        stats: [
+          { value: "8000+", label: "Systematic reviews published yearly" },
+          { value: "multiple", label: "임상 질문별 검토" },
+          { value: "30-50%", label: "Overlap in primary studies across SRs" },
+          { value: "growing", label: "규모에 따른 증거 종합의 필요성" }
+        ],
+        caption: "서지학 연구의 대략적인 수치."
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "우산 검토란",
+        subtitle: "체계적인 검토 리뷰",
+        text: "우수 리뷰(리뷰 개요 또는 메타 리뷰라고도 함)는 관련 주제에 대한 여러 체계적 리뷰에서 얻은 결과를 체계적으로 식별, 평가 및 종합합니다. 분석 단위는 1차 연구가 아닌 체계적 검토 자체입니다.",
+        highlight: "상위 검토는 원래 작업을 다시 실행하지 않습니다. 이를 평가, 비교 및 매핑합니다."
+      }},
+      { type: "checklist", theme: "dark", content: {
+        title: "Umbrella Review를 선택해야 하는 경우",
+        items: [
+          "Multiple systematic reviews already exist on the topic",
+          "Reviews reach discordant conclusions",
+          "Decision makers need a single trustworthy summary",
+          "광범위한 질문에 걸쳐 증거 격차를 매핑해야 합니다.",
+          "모든 1차 연구를 다시 실행하기에는 자원이 부족합니다"
+        ]
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "RR", title: "Scenario: Design Choice", xp: 25,
+        scenario: "보건부가 비타민 D와 호흡기에 대한 증거를 요청합니다. 감염. 다양한 결론을 지닌 12개의 체계적 검토가 이미 존재합니다.",
+        question: "가장 적절한 연구 설계는 무엇입니까?",
+        options: [
+          { letter: "A", text: "13차 체계적 검토 수행", correct: false },
+          { letter: "B", text: "12개의 체계적 검토 수행", correct: true },
+          { letter: "C", text: "가장 최근 검토 선택", correct: false },
+          { letter: "D", text: "Narrative opinion piece", correct: false }
+        ],
+        feedback: {
+          correct: "맞습니다. 결론이 다양한 여러 SR이 존재하는 경우 포괄적 검토를 통해 이를 체계적으로 종합하고 평가합니다.",
+          incorrect: "붐비는 필드에 다른 SR을 추가하면 노이즈가 증가합니다. 우산 검토는 기존 증거를 정리합니다."
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "RR", title: "시나리오: 분석 단위", xp: 25,
+        scenario: "연구원이 우산 검토를 계획합니다. 포함된 체계적 검토에서 발견된 모든 RCT에서 데이터를 추출합니다.",
+        question: "문제가 무엇인가요?",
+        options: [
+          { letter: "A", text: "아무것도 아닙니다. 올바른 절차입니다.", correct: false },
+          { letter: "B", text: "분석 단위는 RCT가 아닌 SR이어야 합니다.", correct: true },
+          { letter: "C", text: "They should only include meta-analyses", correct: false },
+          { letter: "D", text: "They need more RCTs", correct: false }
+        ],
+        feedback: {
+          correct: "옳은. 포괄적 검토에서는 체계적 검토가 분석 단위입니다. 1차 연구 데이터 추출은 다른 설계와 교차합니다.",
+          incorrect: "Umbrella 리뷰는 체계적 리뷰를 단위로 분석합니다. 1차 연구로 돌아가면 설계가 기존 SR 또는 재분석으로 변경됩니다."
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "RR", title: "Scenario: Too Few Reviews", xp: 25,
+        scenario: "Only one systematic review exists on a rare disease intervention.",
+        question: "상위 검토를 수행해야 합니까?",
+        options: [
+          { letter: "A", text: "Yes, any topic can have an umbrella review", correct: false },
+          { letter: "B", text: "No, an umbrella review requires multiple SRs to compare", correct: true },
+          { letter: "C", text: "Only if the single SR is low quality", correct: false },
+          { letter: "D", text: "Only if the disease is common enough", correct: false }
+        ],
+        feedback: {
+          correct: "맞습니다. Umbrella 검토는 여러 SR을 비교하고 종합하도록 설계되었습니다. 하나만 있으면 SR을 업데이트하거나 복제하십시오.",
+          incorrect: "An umbrella review needs multiple systematic reviews to fulfill its purpose of cross-review synthesis."
+        }
+      }},
+      { type: "refrain", theme: "black", content: { text: "When reviews multiply, the umbrella gathers them." }}
+    ]
+  },
+  {
+    id: 2, title: "The Harvest", subtitle: "리뷰 찾기 및 선택", xp: 150,
+    slides: [
+      { type: "title", theme: "gold-bg", content: { title: "The Harvest", subtitle: "모든 관련 리뷰 수집" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "Design a search strategy targeting systematic reviews",
+          "Apply eligibility criteria specific to umbrella reviews",
+          "Handle borderline study designs (scoping reviews, rapid reviews)",
+          "Document selection with a modified PRISMA flow"
+        ],
+        tip: "상위 리뷰의 수확은 시험을 찾는 것이 아닙니다. 이미 임상시험을 찾은 리뷰를 찾는 것입니다."
+      }},
+      { type: "story", theme: "gold-bg", content: {
+        label: "THE NET", title: "검색에서 리뷰의 절반이 누락되었을 때",
+        text: "우수 리뷰에서는 MEDLINE만 검색했고 지역 데이터베이스에 게시된 체계적 리뷰, Cochrane 및 PROSPERO에 등록된 리뷰 결과가 누락되었습니다. 최종 종합은 불완전했고 영어 저널에 치우쳐 있었습니다.",
+        followup: "Searching for systematic reviews requires the same rigor as searching for primary studies: multiple databases, grey literature, and hand-searching reference lists of included reviews.",
+        warning: true
+      }},
+      { type: "stats", theme: "dark", content: {
+        title: "Search Sources for Systematic Reviews",
+        stats: [
+          { value: "MEDLINE", label: "Core biomedical database" },
+          { value: "Cochrane", label: "Largest SR repository" },
+          { value: "Epistemonikos", label: "SR-specific database" },
+          { value: "PROSPERO", label: "SR protocol registry" }
+        ],
+        caption: "Key sources; additional databases depend on the topic."
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "리뷰 검색 전략",
+        subtitle: "올바른 연구 설계를 위한 필터",
+        text: "체계적인 리뷰와 메타 분석을 위해 검증된 검색 필터를 사용하세요. 주제 용어를 방법론적 필터와 결합합니다. Epistemonikos 및 Cochrane Database of Systematic Reviews와 같은 SR 관련 데이터베이스를 확인하세요. 완료되었지만 게시되지 않은 리뷰에 대한 PROSPERO 화면.",
+        highlight: "누락된 리뷰는 관점을 놓친 것입니다. 포괄적인 검색은 선택 사항이 아닙니다."
+      }},
+      { type: "checklist", theme: "dark", content: {
+        title: "Harvest Checklist",
+        items: [
+          "Search at least three major databases with SR filters",
+          "Cochrane Library 및 Epistemonikos가 포함되어 있습니다.",
+          "Check PROSPERO for registered reviews",
+          "Hand-search reference lists of included reviews",
+          "Define clear eligibility criteria before screening"
+        ]
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "SS", title: "시나리오: 범위 지정 검토", xp: 25,
+        scenario: "심사 중에 주제에 대한 증거를 매핑하지만 풀 효과는 없는 잘 수행된 범위 지정 검토를 찾습니다.",
+        question: "우산 리뷰에 포함해야 할까요?",
+        options: [
+          { letter: "A", text: "Yes, include all review types", correct: false },
+          { letter: "B", text: "Exclude it; umbrella reviews include only systematic reviews", correct: true },
+          { letter: "C", text: "Include it but label it differently", correct: false },
+          { letter: "D", text: "Include only its reference list", correct: false }
+        ],
+        feedback: {
+          correct: "맞습니다. 엄브렐러 리뷰에는 일반적으로 체계적인 리뷰(메타 분석 포함 또는 제외)만 포함됩니다. 범위 지정 검토는 다양한 방법과 품질 표준을 사용합니다.",
+          incorrect: "범위 지정 검토는 다른 방법론을 따르며 AMSTAR 2와 같은 SR 품질 도구로 평가할 수 없습니다."
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "SS", title: "시나리오: 오래된 검토", xp: 25,
+        scenario: "2008년의 체계적 검토는 자격 기준을 충족하지만 2008년의 업데이트 버전으로 대체되었습니다. 2022.",
+        question: "이 문제를 어떻게 처리해야 합니까?",
+        options: [
+          { letter: "A", text: "Include both versions as separate entries", correct: false },
+          { letter: "B", text: "Include only the most recent version", correct: true },
+          { letter: "C", text: "Exclude both to avoid double counting", correct: false },
+          { letter: "D", text: "Merge them into one entry", correct: false }
+        ],
+        feedback: {
+          correct: "맞습니다. 리뷰가 공식적으로 업데이트되면 동일한 증거 기반이 중복 계산되는 것을 방지하기 위해 최신 버전만 포함하세요.",
+          incorrect: "두 버전을 모두 포함하면 동일한 1차 연구도 중복 계산됩니다. 업데이트된 버전이 원본을 대체합니다."
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "SS", title: "Scenario: Protocol Screening", xp: 25,
+        scenario: "주제와 완벽하게 일치하지만 게시된 결과가 없는 체계적 검토를 위한 PROSPERO 등록을 찾았습니다.",
+        question: "어떻게 해야 합니까?",
+        options: [
+          { letter: "A", text: "프로토콜을 완료된 검토로 포함", correct: false },
+          { letter: "B", text: "저작자에게 문의하여 게시되지 않은 버전을 확인하세요. 결과", correct: true },
+          { letter: "C", text: "Ignore it entirely", correct: false },
+          { letter: "D", text: "게시를 무기한 기다리세요", correct: false }
+        ],
+        feedback: {
+          correct: "맞습니다. 작성자에게 연락하면 완료되었지만 게시되지 않은 리뷰가 공개되어 종합 리뷰에서 출판 편향이 줄어듭니다.",
+          incorrect: "Registered but unpublished reviews may contain important evidence. Author contact is a standard step to reduce bias."
+        }
+      }},
+      { type: "refrain", theme: "black", content: { text: "리뷰를 놓친 수확은 진실을 놓치는 것입니다." }}
+    ]
+  },
+  {
+    id: 3, title: "The Lens", subtitle: "AMSTAR 2를 사용한 품질 평가", xp: 160,
+    slides: [
+      { type: "title", theme: "purple-bg", content: { title: "The Lens", subtitle: "Not all reviews deserve equal trust" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "Apply AMSTAR 2 to assess the methodological quality of included SRs",
+          "Distinguish critical from non-critical domains",
+          "Assign overall confidence ratings: high, moderate, low, critically low",
+          "Use quality assessment to weight conclusions, not just exclude reviews"
+        ],
+        tip: "AMSTAR 2는 점수가 아닙니다. 이는 검토 결과에 대한 신뢰도를 분류하는 구조화된 판단입니다."
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "THE FLAW", title: "When a flawed review drove policy",
+        text: "편향 평가의 위험이 없고 검색이 불완전한 체계적 검토가 국가 지침에 인용되었습니다. 나중에 포괄적인 리뷰를 통해 이 리뷰는 AMSTAR 2에 대한 신뢰도가 매우 낮은 것으로 나타났으며, 품질이 높은 3개의 리뷰에서는 정반대의 결론에 도달했습니다.",
+        followup: "품질 평가 없이 가장 영향력 있는 리뷰가 승리합니다. 이를 통해 가장 신뢰할 수 있는 검토가 이루어집니다."
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "AMSTAR 2: 표준 도구",
+        subtitle: "16 items, 7 critical domains",
+        text: "AMSTAR 2 evaluates systematic review methodology across 16 items. Seven are designated critical: protocol registration, comprehensive search, justification for exclusions, risk of bias assessment, appropriate meta-analytic methods, consideration of risk of bias in interpreting results, and assessment of publication bias.",
+        highlight: "A single critical flaw drops the overall rating. Two or more critical flaws means critically low confidence."
+      }},
+      { type: "checklist", theme: "dark", content: {
+        title: "AMSTAR 2 Critical Domains",
+        items: [
+          "검토가 시작되기 전에 등록된 프로토콜",
+          "Comprehensive literature search performed",
+          "개별 연구 제외에 대한 근거 제공",
+          "포함된 연구에 대해 평가된 비뚤림 위험",
+          "메타 분석에 사용된 적절한 방법",
+          "Risk of bias considered when interpreting results",
+          "Publication bias assessed and discussed"
+        ]
+      }},
+      { type: "amstar16", theme: "dark", content: {
+        title: "AMSTAR 2: All 16 Items",
+        subtitle: "7 Critical (starred) and 9 Non-critical items",
+        critical: [
+          { num: 2, text: "검토가 시작되기 전에 등록된 프로토콜" },
+          { num: 4, text: "Comprehensive literature search strategy" },
+          { num: 7, text: "개별 연구 제외에 대한 정당성 연구" },
+          { num: 9, text: "Satisfactory technique for assessing risk of bias" },
+          { num: 11, text: "적절한 메타분석 방법" },
+          { num: 13, text: "Risk of bias considered when interpreting results" },
+          { num: 15, text: "Publication bias assessed and discussed" }
+        ],
+        nonCritical: [
+          { num: 1, text: "Research questions include PICO components" },
+          { num: 3, text: "실시 전 확립된 방법 검토" },
+          { num: 5, text: "중복 수행 연구 선택" },
+          { num: 6, text: "중복 수행 데이터 추출" },
+          { num: 8, text: "포함된 항목에 대한 적절한 설명 연구" },
+          { num: 10, text: "보고된 포함된 연구에 대한 자금 출처" },
+          { num: 12, text: "Impact of risk of bias on meta-analysis assessed" },
+          { num: 14, text: "이질성 논의 및 설명" },
+          { num: 16, text: "Conflicts of interest reported and managed" }
+        ]
+      }},
+      { type: "stats", theme: "dark", content: {
+        title: "Confidence Rating Scale",
+        stats: [
+          { value: "High", label: "No or one non-critical weakness" },
+          { value: "Moderate", label: "More than one non-critical weakness" },
+          { value: "Low", label: "One critical flaw with/without non-critical" },
+          { value: "Crit. Low", label: "More than one critical flaw" }
+        ],
+        caption: "Based on the AMSTAR 2 classification scheme by Shea et al. 2017."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "QA", title: "Scenario: Missing Risk of Bias", xp: 25,
+        scenario: "상위 검토에 포함된 체계적인 검토에서는 1차 연구에서 편향 위험을 평가하지 않았습니다.",
+        question: "AMSTAR 2란 무엇입니까? 암시?",
+        options: [
+          { letter: "A", text: "Non-critical weakness only", correct: false },
+          { letter: "B", text: "Critical flaw, drops confidence to low or critically low", correct: true },
+          { letter: "C", text: "메타 분석이 올바르게 수행된 경우 영향 없음", correct: false },
+          { letter: "D", text: "리뷰 전체 제외", correct: false }
+        ],
+        feedback: {
+          correct: "Correct. Risk of bias assessment is a critical domain. Its absence constitutes a critical flaw.",
+          incorrect: "Risk of bias assessment is one of the seven critical domains in AMSTAR 2. Missing it is a critical flaw."
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "QA", title: "Scenario: Quality Exclusion", xp: 25,
+        scenario: "포함된 리뷰 중 하나를 제외하고 모두 AMSTAR 2에서 매우 낮은 평가를 받았습니다. 나머지 리뷰는 높은 평가를 받았습니다.",
+        question: "이를 어떻게 처리해야 합니까? 종합?",
+        options: [
+          { letter: "A", text: "Exclude all critically low reviews", correct: false },
+          { letter: "B", text: "Include all but weight conclusions by quality rating", correct: true },
+          { letter: "C", text: "모든 결과를 동일하게 평균화", correct: false },
+          { letter: "D", text: "고품질 리뷰만 보고하세요", correct: false }
+        ],
+        feedback: {
+          correct: "Correct. Umbrella reviews should include all eligible reviews but use quality ratings to contextualize findings and weight conclusions.",
+          incorrect: "Excluding low-quality reviews risks bias. Include them but clearly note how quality affects the strength of conclusions."
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "QA", title: "Scenario: Dual Assessment", xp: 25,
+        scenario: "두 명의 리뷰어가 체계적인 리뷰가 포괄적인 검색을 위한 AMSTAR 2 기준을 충족하는지 여부에 동의하지 않습니다.",
+        question: "가장 좋은 리뷰는 무엇인가요? 해결?",
+        options: [
+          { letter: "A", text: "Accept the more generous rating", correct: false },
+          { letter: "B", text: "의사 결정 규칙을 논의하고 적용하고 해결 방법을 문서화하세요.", correct: true },
+          { letter: "C", text: "이견을 피하기 위해 검토를 제외하세요", correct: false },
+          { letter: "D", text: "Let a third person decide without seeing the assessments", correct: false }
+        ],
+        feedback: {
+          correct: "정답입니다. 불일치는 미리 지정된 결정 규칙에 따른 논의와 해결 방법을 문서화하여 해결해야 합니다.",
+          incorrect: "문서를 통한 투명한 해결은 품질 평가의 무결성을 유지합니다."
+        }
+      }},
+      { type: "refrain", theme: "black", content: { text: "품질을 무시하는 렌즈는 오류를 확대합니다." }}
+    ]
+  },
+  {
+    id: 4, title: "The Overlap", subtitle: "리뷰가 동일한 것을 공유하면 연구", xp: 160,
+    slides: [
+      { type: "title", theme: "green-bg", content: { title: "The Overlap", subtitle: "The hidden problem of double counting" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "Explain why primary study overlap matters in umbrella reviews",
+          "Calculate the Corrected Covered Area to quantify overlap",
+          "Apply strategies to manage moderate and high overlap",
+          "Report overlap transparently"
+        ],
+        tip: "5개의 리뷰 각각에 동일한 3개의 RCT가 포함되어 있는 경우 5개의 독립적인 증거가 없습니다. 하나의 증거 기반이 5번 계산되었습니다."
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "THE ECHO", title: "동일한 환자가 3번 계산된 경우",
+        text: "우수 검토에서는 4개의 체계적 검토에서 결과를 모았습니다. 저자에게는 알려지지 않았지만 4개의 ​​리뷰 중 3개가 동일한 대규모 RCT를 포함했습니다. 통합된 결과는 거의 전적으로 여러 번 계산된 단일 시도에 의해 구동되어 잘못된 정밀도를 생성합니다.",
+        followup: "중복 감지는 선택 사항이 아닙니다. 그것이 없으면 포괄적 리뷰는 증거 대신 반향을 증폭시킵니다."
+      }},
+      { type: "stats", theme: "dark", content: {
+        title: "Overlap Thresholds (CCA)",
+        stats: [
+          { value: "0-5%", label: "Slight overlap" },
+          { value: "6-10%", label: "Moderate overlap" },
+          { value: "11-15%", label: "High overlap" },
+          { value: ">15%", label: "Very high overlap" }
+        ],
+        caption: "Corrected Covered Area thresholds by Pieper et al. 2014."
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "Corrected Covered Area (CCA)",
+        subtitle: "1차 연구 중복에 대한 측정항목",
+        text: "The CCA measures the degree to which the same primary studies appear across multiple systematic reviews. Build a citation matrix listing all primary studies (rows) against all included SRs (columns). Formula: CCA = (N &minus; r) / (r &times; c &minus; r), where N = total citations across all SRs, r = number of unique primary studies, and c = number of included SRs.",
+        highlight: "중복률이 높다는 것은 리뷰가 독립적이지 않다는 것을 의미합니다. 결과를 덧셈이 아닌 상관 관계로 처리합니다."
+      }},
+      { type: "checklist", theme: "dark", content: {
+        title: "Overlap Management",
+        items: [
+          "Build a citation matrix of primary studies across SRs",
+          "Calculate the Corrected Covered Area",
+          "겹침 정도와 그 의미를 보고합니다",
+          "Consider using only the most comprehensive or most recent SR per comparison",
+          "겹치는 정도가 큰 SR의 결과를 마치 독립적인 것처럼 풀링하지 마세요"
+        ]
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "OA", title: "Scenario: Very High Overlap", xp: 25,
+        scenario: "인용 매트릭스는 CCA 22%를 나타냅니다. 대부분의 리뷰는 동일한 5개의 핵심 RCT를 공유합니다.",
+        question: "최상의 종합 접근 방식은 무엇입니까?",
+        options: [
+          { letter: "A", text: "모든 리뷰 결과를 독립적인 추정치로 통합", correct: false },
+          { letter: "B", text: "Select the most comprehensive SR or conduct a de novo meta-analysis", correct: true },
+          { letter: "C", text: "중복을 무시하고 진행", correct: false },
+          { letter: "D", text: "모든 리뷰에서 겹치는 연구를 제거하세요.", correct: false }
+        ],
+        feedback: {
+          correct: "Correct. With very high overlap, pooling is misleading. Select the most comprehensive review or return to primary data.",
+          incorrect: "겹침이 매우 높다는 것은 리뷰가 독립적인 소스가 아니라는 것을 의미합니다. 풀링은 잘못된 정밀도를 생성합니다."
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "OA", title: "시나리오: 매트릭스 구축", xp: 25,
+        scenario: "포함된 리뷰 중 2개는 포리스트 플롯이나 테이블에 개별 연구 참조를 나열하지 않습니다.",
+        question: "인용 매트릭스에 대해 이를 어떻게 처리해야 합니까?",
+        options: [
+          { letter: "A", text: "두 리뷰가 중복되지 않는다고 가정합니다. 리뷰", correct: false },
+          { letter: "B", text: "Extract references from reference lists or contact authors", correct: true },
+          { letter: "C", text: "우수 리뷰에서 해당 리뷰를 제외하세요", correct: false },
+          { letter: "D", text: "Skip the citation matrix entirely", correct: false }
+        ],
+        feedback: {
+          correct: "맞습니다. 참조 목록에서 또는 저자에게 연락하여 포함된 연구를 식별하기 위한 노력을 기울여야 합니다.",
+          incorrect: "인용 매트릭스를 사용하려면 각 SR에 어떤 연구가 포함되었는지 알아야 합니다. 누락된 데이터는 추정이 아니라 찾아야 합니다."
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "OA", title: "Scenario: Slight Overlap", xp: 25,
+        scenario: "귀하의 CCA는 3%입니다. 각 리뷰는 검색 날짜와 포함 기준이 다르기 때문에 매우 독특한 1차 연구 세트를 사용했습니다.",
+        question: "이것이 합성에 어떤 영향을 미치나요?",
+        options: [
+          { letter: "A", text: "리뷰를 대체로 독립적으로 처리할 수 있습니다.", correct: true },
+          { letter: "B", text: "여전히 하나의 리뷰만 선택해야 합니다", correct: false },
+          { letter: "C", text: "Overlap is always a fatal problem", correct: false },
+          { letter: "D", text: "모든 1차 연구를 결합해야 합니다. 대신", correct: false }
+        ],
+        feedback: {
+          correct: "맞습니다. 약간의 중복은 리뷰가 대체로 독립적인 증거를 제공한다는 것을 의미합니다. 합성은 적절한 주의를 기울여 진행할 수 있습니다.",
+          incorrect: "약간의 중복은 허용됩니다. 핵심은 이를 측정하고 보고하고 그에 따라 결과를 해석하는 것입니다."
+        }
+      }},
+      { type: "refrain", theme: "black", content: { text: "반향이 아닌 증거를 한 번 계산합니다." }}
+    ]
+  },
+  {
+    id: 5, title: "The Synthesis", subtitle: "리뷰 전반에 걸쳐 증거 엮기", xp: 170,
+    slides: [
+      { type: "title", theme: "red-bg", content: { title: "The Synthesis", subtitle: "많은 리뷰에서 하나의 답변으로" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "Choose between narrative and quantitative synthesis approaches",
+          "Understand when re-analysis of primary data is justified",
+          "일치하지 않는 결과 제시 투명하게",
+          "Apply GRADE or a similar framework to rate certainty across reviews"
+        ],
+        tip: "종합은 포괄적 검토가 그 가치를 얻는 곳입니다. 상충되는 신호를 구조화된 판단으로 변환합니다."
+      }},
+      { type: "story", theme: "gold-bg", content: {
+        label: "THE WEAVE", title: "When three meta-analyses disagreed",
+        text: "3개의 체계적인 검토가 각각 동일한 개입에 대한 메타 분석을 실행했습니다. 하나는 상당한 이점을 발견했고, 다른 하나는 효과를 발견하지 못했고, 다른 하나는 해를 끼치는 경향을 발견했습니다. 포괄적 검토에서는 다양한 포함 기준, 편향 처리 위험 및 통계 모델의 불일치를 추적했습니다.",
+        followup: "종합에서는 승자를 선택하지 못했습니다. 왜 동의하지 않았으며 어떤 방법론적 선택이 차이를 가져왔는지 설명했습니다.",
+        warning: true
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "Synthesis Approaches",
+        subtitle: "방법을 데이터와 일치시킵니다.",
+        text: "내러티브 합성은 구조화된 테이블을 사용하여 여러 리뷰의 결과를 비교합니다. 정량적 재분석은 중복이 적고 데이터에 액세스할 수 있는 경우 1차 연구 데이터를 풀링합니다. 하이브리드 접근 방식은 리뷰 수준 결과를 표로 작성하고 포레스트 플롯을 사용하여 일치 및 불일치를 시각적으로 표시합니다.",
+        highlight: "겹친 리뷰의 결과를 독립적인 연구인 것처럼 통합하지 마십시오."
+      }},
+      { type: "checklist", theme: "dark", content: {
+        title: "Synthesis Checklist",
+        items: [
+          "모든 리뷰 결과를 품질 등급과 나란히 표로 작성합니다",
+          "Identify sources of discordance (scope, methods, dates, bias handling)",
+          "각각에 대한 방향, 크기 및 정밀도를 보고합니다. 검토",
+          "Apply GRADE or equivalent to assess certainty of evidence",
+          "Present both concordant and discordant findings transparently"
+        ]
+      }},
+      { type: "stats", theme: "dark", content: {
+        title: "Discordance Drivers",
+        stats: [
+          { value: "scope", label: "Different PICO definitions" },
+          { value: "search", label: "Different databases or dates" },
+          { value: "bias", label: "다양한 품질 도구" },
+          { value: "analysis", label: "Different statistical models" }
+        ],
+        caption: "Common reasons reviews on the same topic disagree."
+      }},
+      { type: "grade5", theme: "dark", content: {
+        title: "GRADE: 5개 영역",
+        subtitle: "Rate certainty by assessing each domain",
+        domains: [
+          { name: "Risk of Bias", desc: "결과 편향을 초래할 수 있는 연구 설계 또는 실행의 제한" },
+          { name: "Inconsistency", desc: "전체 결과에서 설명할 수 없는 이질성 연구" },
+          { name: "Indirectness", desc: "증거가 질문에 직접 적용되지 않습니다(인구, 개입, 비교자, 결과)" },
+          { name: "Imprecision", desc: "Wide confidence intervals due to small sample size or few events" },
+          { name: "Publication Bias", desc: "결과에 따른 연구의 선택적 게시" }
+        ],
+        note: "Each domain can downgrade certainty from high to moderate, low, or very low."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "ES", title: "Scenario: Pooling Decision", xp: 25,
+        scenario: "중간 중복(CCA 9%)된 6개의 SR이 포함되어 있습니다. 4개는 유사한 PICO 기준으로 랜덤 효과 메타 분석을 사용했습니다.",
+        question: "메타 분석 결과를 통합할 수 있습니까?",
+        options: [
+          { letter: "A", text: "Yes, pool all six review-level estimates", correct: false },
+          { letter: "B", text: "No, use narrative synthesis with a structured comparison table", correct: true },
+          { letter: "C", text: "중복을 무시하고 유사한 방법으로 4개만 통합했습니다", correct: false },
+          { letter: "D", text: "Conduct a meta-analysis of meta-analyses without checking overlap", correct: false }
+        ],
+        feedback: {
+          correct: "정답입니다. 중간 정도의 중복이 있는 경우 검토 수준 추정치를 합산하면 이중 계산이 발생할 위험이 있습니다. 구조화된 비교를 통한 서술적 합성이 더 안전합니다.",
+          incorrect: "중간 중복은 리뷰가 주요 연구를 공유한다는 것을 의미합니다. 결과를 합치면 공유된 연구에 과중하게 됩니다."
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "ES", title: "Scenario: Discordance Explained", xp: 25,
+        scenario: "Two high-quality SRs disagree: one finds benefit, the other no effect. You trace the discordance to a single large trial included in one but not the other.",
+        question: "이를 보고하려면 어떻게 해야 합니까?",
+        options: [
+          { letter: "A", text: "시도 없이 리뷰를 닫습니다", correct: false },
+          { letter: "B", text: "불일치 원인을 설명하고 두 결과를 맥락과 함께 제시합니다", correct: true },
+          { letter: "C", text: "두 결과의 평균", correct: false },
+          { letter: "D", text: "Exclude both reviews", correct: false }
+        ],
+        feedback: {
+          correct: "Correct. Transparent reporting of discordance sources is a core function of umbrella reviews.",
+          incorrect: "Umbrella 리뷰는 리뷰를 숨기는 것이 아니라 리뷰가 동의하지 않는 이유를 설명하여 가치를 더합니다. 동의하지 않습니다."
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "ES", title: "Scenario: GRADE in Umbrella Reviews", xp: 25,
+        scenario: "포함된 리뷰 전반에 걸쳐 증거의 전반적인 확실성을 평가하려고 합니다. 여러 검토에서 다양한 GRADE 접근 방식을 사용했습니다.",
+        question: "권장 접근 방식은 무엇입니까?",
+        options: [
+          { letter: "A", text: "각 검토의 GRADE 평점 평균", correct: false },
+          { letter: "B", text: "가용한 최상의 기본 데이터를 기반으로 독립적으로 GRADE 적용", correct: true },
+          { letter: "C", text: "모든 검토에서 가장 높은 GRADE 평점 사용 검토", correct: false },
+          { letter: "D", text: "Skip certainty assessment in umbrella reviews", correct: false }
+        ],
+        feedback: {
+          correct: "맞습니다. 엄브렐라 리뷰는 포함된 리뷰의 가장 신뢰할 수 있는 근거 기반과 품질을 고려하여 GRADE 또는 이와 동등한 등급을 독립적으로 적용해야 합니다.",
+          incorrect: "평균화 또는 선별 GRADE 등급은 유효하지 않습니다. 우산 검토 팀은 스스로 확실성 판단을 내려야 합니다."
+        }
+      }},
+      { type: "refrain", theme: "black", content: { text: "합성을 통해 노이즈 이면의 신호가 드러납니다." }}
+    ]
+  },
+  {
+    id: 6, title: "The Map", subtitle: "간격, 일치 및 시각화", xp: 170,
+    slides: [
+      { type: "title", theme: "gold-bg", content: { title: "The Map", subtitle: "See what is known and what is missing" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "증거가 강한지 약한지를 보여주는 증거 지도 만들기",
+          "Identify research gaps that future reviews or trials should address",
+          "Visualize concordance and discordance across reviews",
+          "Use structured tables and harvest plots to communicate findings"
+        ],
+        tip: "결과만 요약하는 우산 검토는 가장 큰 것을 놓칩니다. 강점: 증거 지형의 형태를 드러냅니다."
+      }},
+      { type: "story", theme: "gold-bg", content: {
+        label: "THE BLANK", title: "지도가 격차를 드러냈을 때",
+        text: "운동과 정신 건강에 대한 종합 리뷰에서는 우울증에 대한 리뷰가 12개 발견되었지만 양극성 장애에 대한 리뷰는 없었습니다. 증거 지도를 통해 이러한 격차를 단일 수치로 볼 수 있었고 세 가지 새로운 임상시험으로 이어진 연구 자금 요청이 촉발되었습니다.",
+        followup: "증거가 없다는 것 자체가 발견입니다. 지도는 그것을 보이게 합니다.",
+        warning: true
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "Evidence Mapping",
+        subtitle: "풍경을 구조화하세요",
+        text: "An evidence map cross-tabulates populations, interventions, comparisons, and outcomes against the number and quality of available reviews. Cells with many high-quality reviews show strong evidence; empty cells reveal gaps. Harvest plots display direction and strength of effects across reviews at a glance.",
+        highlight: "지도는 장식이 아닙니다. 이것이 결정 도구입니다."
+      }},
+      { type: "checklist", theme: "dark", content: {
+        title: "Mapping Checklist",
+        items: [
+          "Define the matrix dimensions (population, intervention, outcome)",
+          "리뷰의 수와 품질로 각 셀을 채웁니다.",
+          "Mark cells with discordant findings",
+          "Highlight empty cells as research gaps",
+          "의사소통을 위해 시각적 도구(수확 플롯, 버블 플롯)를 사용합니다."
+        ]
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "GM", title: "Scenario: Priority Setting", xp: 25,
+        scenario: "증거 지도에는 품질이 매우 낮은 리뷰 4개가 있고 고품질 리뷰가 없는 셀이 표시됩니다. 임상적 질문이 중요합니다.",
+        question: "우선순위 권장 사항은 무엇입니까?",
+        options: [
+          { letter: "A", text: "매우 낮은 근거를 충분한 것으로 받아들입니다", correct: false },
+          { letter: "B", text: "간격을 메우기 위해 고품질의 체계적 검토를 권장", correct: true },
+          { letter: "C", text: "Recommend more umbrella reviews", correct: false },
+          { letter: "D", text: "셀을 무시합니다 완전히", correct: false }
+        ],
+        feedback: {
+          correct: "맞습니다. 품질이 낮은 리뷰만 있는 셀은 존재하지만 신뢰할 수 없는 증거를 나타냅니다. 엄격한 새 SR이 우선순위입니다.",
+          incorrect: "매우 낮은 품질의 리뷰는 질문에 대한 신뢰성 있는 답변을 제공하지 않습니다. 격차는 양이 아니라 질에 있습니다."
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "GM", title: "Scenario: Concordance Display", xp: 25,
+        scenario: "6개의 리뷰는 모두 동일한 중재-결과 쌍에 대해 상당한 이점을 발견했지만 효과 크기는 작은 것부터 큰 것까지 다양합니다.",
+        question: "이를 증거 지도에 어떻게 표시해야 합니까?",
+        options: [
+          { letter: "A", text: "효과 크기에 대한 메모와 함께 셀을 일치하는 것으로 표시합니다. range", correct: true },
+          { letter: "B", text: "Mark it as discordant because effect sizes differ", correct: false },
+          { letter: "C", text: "Report only the median effect size", correct: false },
+          { letter: "D", text: "셀을 비워 두세요", correct: false }
+        ],
+        feedback: {
+          correct: "맞습니다. 크기 변화에 따른 방향 일치는 일반적이고 중요한 발견입니다. 합의와 범위를 모두 보고합니다.",
+          incorrect: "방향은 일치하지만 크기가 다른 검토는 방법에 따라 정밀도가 다르며 핵심 질문과 일치합니다."
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "GM", title: "Scenario: Empty Cell", xp: 25,
+        scenario: "증거 맵에는 체계적인 검토가 없는 전체 인구 열(5세 미만 어린이)이 있습니다.",
+        question: "어떤 결론을 내려야 할까요?",
+        options: [
+          { letter: "A", text: "이 개입은 효과가 없습니다. 인구", correct: false },
+          { letter: "B", text: "Evidence is absent, flag as a research gap, avoid making effectiveness claims", correct: true },
+          { letter: "C", text: "성인 데이터에서 추정", correct: false },
+          { letter: "D", text: "지도에서 인구 제거", correct: false }
+        ],
+        feedback: {
+          correct: "옳은. 증거가 없다고 해서 부재의 증거는 아닙니다. 격차를 표시하고 향후 조사를 권장합니다.",
+          incorrect: "빈 셀은 질문에 대한 답변이 없음을 의미하며 답변이 부정적이라는 의미는 아닙니다."
+        }
+      }},
+      { type: "refrain", theme: "black", content: { text: "지도는 우리가 알고 있는 것뿐만 아니라 아직 배우지 못한 것도 보여줍니다." }}
+    ]
+  },
+  {
+    id: 7, title: "The Report", subtitle: "표준, 함정 및 종료", xp: 200,
+    slides: [
+      { type: "title", theme: "teal-bg", content: { title: "The Report", subtitle: "투명한 보고로 루프 종료" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "Apply reporting guidelines for umbrella reviews (PRIOR, PRISMA adaptations)",
+          "Avoid the most common pitfalls in published umbrella reviews",
+          "Decide when an umbrella review adds value versus when a new SR is needed",
+          "구조화된 답변으로 시작 시나리오로 돌아가기"
+        ],
+        tip: "Ring structure: we return to the five conflicting reviews from Module 1. Now you have the tools to resolve them."
+      }},
+      { type: "story", theme: "green-bg", content: {
+        label: "THE RETURN", title: "가이드라인 패널 재검토",
+        text: "The panel that faced five conflicting reviews now has an umbrella review. It shows that three of the five reviews had critically low quality, overlap was high, and the two trustworthy reviews agreed on a moderate benefit with low certainty. The panel has a clear, justified basis for its recommendation.",
+        followup: "우수 검토에서는 새로운 데이터가 생성되지 않았습니다. 기존 증거를 신뢰할 수 있는 판단으로 구성했습니다.",
+        success: true
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "Reporting Standards",
+        subtitle: "PRIOR 및 PRISMA 조정",
+        text: "The Preferred Reporting Items for Overviews of Reviews (PRIOR) statement provides a checklist for transparent reporting of umbrella reviews. Key items include explicit description of overlap assessment, quality appraisal methods, synthesis approach, and certainty of evidence assessment. When PRIOR is unavailable, a PRISMA adaptation with umbrella-specific modifications is acceptable.",
+        highlight: "A well-reported umbrella review enables others to judge its trustworthiness. Poor reporting defeats its purpose."
+      }},
+      { type: "checklist", theme: "dark", content: {
+        title: "Common Pitfalls to Avoid",
+        items: [
+          "Failing to assess or report primary study overlap",
+          "Using AMSTAR 2 as a numeric score instead of a confidence classification",
+          "조정 없이 중복된 리뷰에서 결과 풀링",
+          "Ignoring discordance or reporting only concordant findings",
+          "구조화된 증거 맵 또는 차이 분석 생략"
+        ]
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "RE", title: "Scenario: Missing Overlap Report", xp: 35,
+        scenario: "리뷰어는 인용 매트릭스와 CCA를 제거할 것을 제안했습니다. 공간을 절약하기 위한 원고. 편집자도 동의합니다.",
+        question: "정답은 무엇인가요?",
+        options: [
+          { letter: "A", text: "Agree, overlap is minor detail", correct: false },
+          { letter: "B", text: "Keep the overlap assessment, move to supplement if needed", correct: true },
+          { letter: "C", text: "Remove it and mention overlap in one sentence", correct: false },
+          { letter: "D", text: "중복률이 낮은 진술로 대체", correct: false }
+        ],
+        feedback: {
+          correct: "Correct. Overlap assessment is a core methodological requirement. If space is limited, move it to a supplement but never omit it.",
+          incorrect: "중복 평가는 우산 검토 타당성의 기본입니다. 최소한 보충 자료로 보고되어야 합니다."
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "RE", title: "Scenario: Umbrella vs. New SR", xp: 35,
+        scenario: "한 연구팀이 새로운 약물 계열의 효과를 연구하려고 합니다. 품질이 낮은 SR이 두 개 존재하며 둘 다 검색이 불완전합니다.",
+        question: "우수 검토를 수행해야 합니까, 아니면 새로운 체계적 검토를 수행해야 합니까?",
+        options: [
+          { letter: "A", text: "두 개의 기존 SR에 대한 우산 검토", correct: false },
+          { letter: "B", text: "새롭고 엄격한 체계적 검토", correct: true },
+          { letter: "C", text: "Both simultaneously", correct: false },
+          { letter: "D", text: "둘 중 하나도 아닙니다. 증거가 충분합니다", correct: false }
+        ],
+        feedback: {
+          correct: "맞습니다. 품질이 낮은 SR이 2개뿐인 경우 포괄적인 검토는 기반이 취약합니다. 새롭게 잘 수행된 SR은 더욱 가치가 높습니다.",
+          incorrect: "상위 리뷰는 포함된 리뷰만큼만 강력합니다. 기존 증거 기반이 작고 약한 경우 새로운 SR이 올바른 선택입니다."
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "RE", title: "Scenario: Final Judgment", xp: 35,
+        scenario: "Your umbrella review includes ten SRs. Seven are concordant (moderate benefit), two are discordant (no benefit), and one reports harm. Overlap is moderate. The seven concordant reviews are mostly high quality; the discordant ones are critically low quality.",
+        question: "적절한 결론은 무엇입니까?",
+        options: [
+          { letter: "A", text: "Definitive benefit, ignore the discordant reviews", correct: false },
+          { letter: "B", text: "낮은 품질의 리뷰와의 불일치를 지적하면서 중간 수준의 확실성과 중간 정도의 이익이 예상됩니다", correct: true },
+          { letter: "C", text: "No conclusion possible due to discordance", correct: false },
+          { letter: "D", text: "Harm signal overrides all other findings", correct: false }
+        ],
+        feedback: {
+          correct: "맞습니다. 종합은 품질, 일치성 및 중복에 중점을 둡니다. 고품질 일치 증거는 불일치를 투명하게 인정하면서 결론을 뒷받침합니다.",
+          incorrect: "우산 검토는 품질, 일치 및 중복을 통합하여 단순한 투표 수가 아닌 구조화된 판단을 형성합니다."
+        }
+      }},
+      { type: "refrain", theme: "black", content: { text: "When reviews multiply, the umbrella gathers them." }}
+    ]
+  }
+];
+
+// ===== NAVIGATION STATE =====
+let currentModule = 0;
+let currentSlide = 0;
+let consecutiveCorrect = gameState.consecutiveCorrect || 0;
+
+// ===== SAVE/LOAD =====
+function saveGame() {
+  safeSetStorage('umbrellaReviewGame_v1', gameState);
+}
+
+function resetProgress() {
+  if (confirm('Reset all progress and achievements?')) {
+    gameState = { ...DEFAULT_STATE, answeredQuestions: {}, badges: [], completedModules: [], consecutiveCorrect: 0 };
+    saveGame();
+    currentModule = 0;
+    currentSlide = 0;
+    renderAll();
+  }
+}
+
+// ===== COURSE PROGRESS =====
+function updateCourseProgress() {
+  const totalModules = MODULES.length;
+  const completedCount = gameState.completedModules.length;
+  const pct = Math.round((completedCount / totalModules) * 100);
+  const fillEl = document.getElementById('courseProgressFill');
+  const pctEl = document.getElementById('courseProgressPct');
+  if (fillEl) fillEl.style.width = pct + '%';
+  if (pctEl) pctEl.textContent = pct + '%';
+}
+
+// ===== XP & LEVELING =====
+function addXP(amount) {
+  gameState.xp += amount;
+  checkLevelUp();
+  saveGame();
+  updateStatsDisplay();
+  showXPPopup(amount);
+}
+
+function checkLevelUp() {
+  for (let i = LEVELS.length - 1; i >= 0; i--) {
+    if (gameState.xp >= LEVELS[i].xp && gameState.level < LEVELS[i].level) {
+      gameState.level = LEVELS[i].level;
+      showLevelUp(LEVELS[i]);
+      break;
+    }
+  }
+}
+
+function showXPPopup(amount) {
+  const popup = document.getElementById('xpPopup');
+  document.getElementById('xpAmount').textContent = `+${amount}`;
+  popup.classList.add('show');
+  setTimeout(() => popup.classList.remove('show'), 1500);
+}
+
+function showLevelUp(levelData) {
+  triggerConfetti();
+  const modal = document.getElementById('levelModal');
+  document.getElementById('levelModalLevel').textContent = `Level ${levelData.level}`;
+  document.getElementById('levelModalName').textContent = levelData.title;
+  modal.classList.add('show');
+  modal.setAttribute('aria-hidden', 'false');
+
+  // Auto-close after 3 seconds
+  setTimeout(() => {
+    closeLevelModal();
+  }, 3000);
+}
+
+function closeLevelModal() {
+  const modal = document.getElementById('levelModal');
+  if (modal) {
+    modal.classList.remove('show');
+    modal.setAttribute('aria-hidden', 'true');
+  }
+}
+
+// ===== BADGES =====
+function awardBadge(badgeId) {
+  if (gameState.badges.includes(badgeId)) return;
+  gameState.badges.push(badgeId);
+  saveGame();
+  const badge = BADGES.find(b => b.id === badgeId);
+  if (badge) showBadgeModal(badge);
+  updateBadges();
+}
+
+function showBadgeModal(badge, celebrate = true) {
+  document.getElementById('badgeModalIcon').textContent = badge.icon;
+  document.getElementById('badgeModalTitle').textContent = badge.name;
+  document.getElementById('badgeModalDesc').textContent = badge.desc;
+  const modal = document.getElementById('badgeModal');
+  modal.classList.add('show');
+  if (celebrate) triggerConfetti();
+
+  // Focus trap
+  const focusableElements = modal.querySelectorAll('button, [tabindex]:not([tabindex="-1"])');
+  if (focusableElements.length > 0) {
+    const firstFocusable = focusableElements[0];
+    const lastFocusable = focusableElements[focusableElements.length - 1];
+    firstFocusable.focus();
+
+    // Remove any existing focus trap listener
+    if (modal._focusTrapHandler) {
+      modal.removeEventListener('keydown', modal._focusTrapHandler);
+    }
+
+    modal._focusTrapHandler = function(e) {
+      if (e.key === 'Tab') {
+        if (e.shiftKey && document.activeElement === firstFocusable) {
+          e.preventDefault();
+          lastFocusable.focus();
+        } else if (!e.shiftKey && document.activeElement === lastFocusable) {
+          e.preventDefault();
+          firstFocusable.focus();
+        }
+      }
+      if (e.key === 'Escape') {
+        closeBadgeModal();
+      }
+    };
+    modal.addEventListener('keydown', modal._focusTrapHandler);
+  }
+}
+
+function showBadgeDetails(badgeId) {
+  const badge = BADGES.find(b => b.id === badgeId);
+  if (!badge) return;
+  const earned = gameState.badges.includes(badgeId);
+  const desc = earned ? badge.desc : `${badge.desc} (Locked)`;
+  showBadgeModal({ ...badge, desc }, earned);
+}
+
+function closeBadgeModal() {
+  const modal = document.getElementById('badgeModal');
+  if (modal._focusTrapHandler) {
+    modal.removeEventListener('keydown', modal._focusTrapHandler);
+    modal._focusTrapHandler = null;
+  }
+  modal.classList.remove('show');
+}
+
+// ===== STREAK =====
+function updateStreak() {
+  const today = new Date().toDateString();
+  if (gameState.lastActive !== today) {
+    const yesterday = new Date(Date.now() - 86400000).toDateString();
+    if (gameState.lastActive === yesterday) {
+      gameState.streak++;
+      if (gameState.streak >= 3) awardBadge('streak_3');
+      if (gameState.streak >= 7) awardBadge('streak_7');
+    } else if (gameState.lastActive) {
+      gameState.streak = 1;
+    } else {
+      gameState.streak = 1;
+    }
+    gameState.lastActive = today;
+    saveGame();
+  }
+}
+
+// ===== CONFETTI =====
+function triggerConfetti() {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const container = document.getElementById('confettiContainer');
+  const colors = ['#D4AF37', '#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#0f766e'];
+  for (let i = 0; i < 50; i++) {
+    const confetti = document.createElement('div');
+    confetti.className = 'confetti';
+    confetti.style.left = Math.random() * 100 + '%';
+    confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+    confetti.style.animationDelay = Math.random() * 0.5 + 's';
+    container.appendChild(confetti);
+    setTimeout(() => confetti.remove(), 3500);
+  }
+}
+
+// ===== COMBO =====
+function updateComboDisplay() {
+  const comboEl = document.getElementById('comboDisplay');
+  const countEl = document.getElementById('comboCount');
+  if (consecutiveCorrect >= 2) {
+    countEl.textContent = consecutiveCorrect;
+    comboEl.classList.add('show');
+  } else {
+    comboEl.classList.remove('show');
+  }
+}
+
+// ===== MOBILE SIDEBAR =====
+function toggleSidebar() {
+  document.querySelector('.sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('show');
+  var btn = document.querySelector('.sidebar-toggle'); if (btn) btn.setAttribute('aria-expanded', btn.getAttribute('aria-expanded') === 'true' ? 'false' : 'true');
+}
+
+// ===== RENDER =====
+function renderAll() {
+  updateStreak();
+  renderSidebar();
+  renderSlides();
+  updateStatsDisplay();
+  updateBadges();
+  updateCourseProgress();
+}
+
+function updateStatsDisplay() {
+  const levelData = LEVELS.find(l => l.level === gameState.level) || LEVELS[0];
+  const nextLevel = LEVELS.find(l => l.level === gameState.level + 1);
+
+  document.getElementById('levelIcon').textContent = levelData.icon;
+  document.getElementById('levelTitle').textContent = levelData.title;
+  document.getElementById('levelNum').textContent = gameState.level;
+
+  const currentXP = gameState.xp - levelData.xp;
+  const neededXP = nextLevel ? (nextLevel.xp - levelData.xp) : 500;
+  const pct = Math.min(100, (currentXP / neededXP) * 100);
+
+  document.getElementById('xpFill').style.width = pct + '%';
+  document.getElementById('xpCurrent').textContent = currentXP;
+  document.getElementById('xpNeeded').textContent = neededXP;
+
+  document.getElementById('correctCount').textContent = gameState.correctAnswers;
+  document.getElementById('decisionCount').textContent = gameState.decisionsCompleted;
+  document.getElementById('synthesisCount').textContent = gameState.completedModules.length;
+  document.getElementById('streakCount').textContent = gameState.streak;
+
+  const streakEl = document.getElementById('streakDisplay');
+  streakEl.classList.toggle('active', gameState.streak > 0);
+}
+
+function updateBadges() {
+  const grid = document.getElementById('badgesGrid');
+  grid.innerHTML = BADGES.map(b => {
+    const earned = gameState.badges.includes(b.id);
+    const label = `${b.name}: ${b.desc}`;
+    return `<button class="badge-item ${earned ? 'earned' : ''}" type="button" data-tooltip="${label}" aria-label="${label}" title="${label}" onclick="showBadgeDetails('${b.id}')">${b.icon}</button>`;
+  }).join('');
+}
+
+function renderSidebar() {
+  const list = document.getElementById('moduleList');
+  list.innerHTML = MODULES.map((mod, i) => {
+    const completed = gameState.completedModules.includes(mod.id);
+    const locked = i > 0 && !gameState.completedModules.includes(MODULES[i-1].id);
+    const estMins = Math.round(mod.slides.length * 1.5);
+    return `
+      <div class="module-item ${i === currentModule ? 'active' : ''} ${completed ? 'completed' : ''} ${locked ? 'locked' : ''}"
+           onclick="${locked ? '' : `goToModule(${i})`}"
+           tabindex="${locked ? -1 : 0}"
+           role="button"
+           aria-disabled="${locked ? 'true' : 'false'}">
+        <div class="module-number">${completed ? 'OK' : (locked ? 'LK' : mod.id)}</div>
+        <div class="module-info">
+          <div class="module-title">${mod.title}</div>
+          <div class="module-subtitle">${mod.subtitle}</div>
+          <div class="module-xp">+${mod.xp} XP</div>
+          <div class="module-time">Time ~${estMins} min</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderSlides() {
+  const container = document.getElementById('slidesContainer');
+  container.innerHTML = MODULES.map((mod, mi) => {
+    const progressPct = ((currentSlide + 1) / mod.slides.length) * 100;
+    return `
+    <div class="module-slides ${mi === currentModule ? 'active' : ''}" data-module="${mi}">
+      <div class="slide-progress-bar" style="width: ${mi === currentModule ? progressPct : 0}%"></div>
+      ${mod.slides.map((slide, si) => renderSlide(slide, si, mi)).join('')}
+      <div class="slide-nav">
+        <button class="nav-btn prev" onclick="prevSlide()" ${currentSlide === 0 ? 'disabled' : ''} aria-label="Previous slide">&lt;</button>
+        <div class="nav-center">
+          <div class="slide-counter">${currentSlide + 1} / ${mod.slides.length}</div>
+          <div class="progress-dots">
+            ${mod.slides.map((_, i) => `<button class="progress-dot ${i === currentSlide ? 'active' : ''}" type="button" onclick="goToSlide(${i})" aria-label="Go to slide ${i + 1}" ${i === currentSlide ? 'aria-current="true"' : ''}></button>`).join('')}
+          </div>
+        </div>
+        <button class="nav-btn next" onclick="nextSlide()" aria-label="Next slide">&gt;</button>
+      </div>
+      <div class="keyboard-hint" style="position:absolute;bottom:5px;left:50%;transform:translateX(-50%);font-size:0.6rem;opacity:0.4;">Left / Right arrows or swipe to navigate</div>
+    </div>
+  `;
+  }).join('');
+  document.getElementById('currentModule').textContent = MODULES[currentModule].title;
+  updateSlideVisibility();
+}
+
+function renderSlide(slide, index, moduleIndex) {
+  const theme = slide.theme || 'dark';
+  let html = `<div class="slide ${theme} ${index === currentSlide ? 'active' : ''}" data-slide="${index}">`;
+
+  switch(slide.type) {
+    case 'title':
+      html += `<div class="content"><h1 class="title gold animate">${slide.content.title}</h1><p class="subtitle animate delay-1">${slide.content.subtitle}</p></div>`;
+      break;
+
+    case 'objectives':
+      html += `<div class="content">
+        <div class="objectives-box animate">
+          <div class="objectives-header">
+            <div class="objectives-icon">GOAL</div>
+            <div class="objectives-title">Learning Objectives</div>
+          </div>
+          <ul class="objectives-list">
+            ${slide.content.objectives.map(obj => `<li>${obj}</li>`).join('')}
+          </ul>
+        </div>
+        ${slide.content.tip ? `<p class="subtitle animate delay-1" style="font-size:0.85rem;max-width:600px">${slide.content.tip}</p>` : ''}
+      </div>`;
+      break;
+
+    case 'story':
+      html += `<div class="content">
+        <article class="story-box ${slide.content.success ? 'success' : ''} ${slide.content.warning ? 'warning' : ''} ${slide.content.teal ? 'teal' : ''} animate" role="article">
+          <div class="story-label">${slide.content.label}</div>
+          ${slide.content.title ? `<h2 class="title gold" style="font-size:1.8rem;margin-bottom:0.75rem">${slide.content.title}</h2>` : ''}
+          <p class="story-text">${slide.content.text}</p>
+          ${slide.content.followup ? `<p class="story-text" style="margin-top:0.75rem;font-style:italic;opacity:0.9">${slide.content.followup}</p>` : ''}
+        </article>
+      </div>`;
+      break;
+
+    case 'stats':
+      html += `<div class="content">
+        ${slide.content.title ? `<h2 class="title gold animate">${slide.content.title}</h2>` : ''}
+        ${slide.content.subtitle ? `<p class="subtitle animate delay-1">${slide.content.subtitle}</p>` : ''}
+        <div class="stats-grid animate delay-2">
+          ${slide.content.stats.map(s => `<div class="stat-box"><div class="stat-value gold">${s.value}</div><div class="stat-label">${s.label}</div></div>`).join('')}
+        </div>
+        ${slide.content.caption ? `<p class="subtitle animate delay-3" style="font-size:0.85rem;margin-top:0.75rem">${slide.content.caption}</p>` : ''}
+      </div>`;
+      break;
+
+    case 'refrain':
+      html += `<div class="content" style="justify-content:center;height:100%"><p class="refrain animate">"${slide.content.text}"</p></div>`;
+      break;
+
+    case 'concept':
+      html += `<div class="content">
+        <h2 class="title ${theme === 'light' ? 'navy' : 'gold'} animate">${slide.content.title}</h2>
+        ${slide.content.subtitle ? `<p class="subtitle animate delay-1">${slide.content.subtitle}</p>` : ''}
+        ${slide.content.text ? `<div class="card ${theme === 'light' ? '' : 'navy-bg'} animate delay-2"><p class="card-text">${slide.content.text}</p></div>` : ''}
+        ${slide.content.highlight ? `<div class="story-box warning animate delay-3"><div class="story-label">Key Insight</div><p class="story-text">${slide.content.highlight}</p></div>` : ''}
+        ${slide.content.checkpoints ? `
+          <div class="timeline animate delay-2" style="margin-top:0.75rem">
+            ${slide.content.checkpoints.map(cp => `
+              <div class="timeline-item"><div class="timeline-days">${cp.day}</div><div class="timeline-content"><div class="timeline-title">${cp.event}</div></div></div>
+            `).join('')}
+          </div>
+        ` : ''}
+      </div>`;
+      break;
+
+    case 'checklist':
+      html += `<div class="content">
+        <h2 class="title gold animate">${slide.content.title}</h2>
+        <div class="checklist animate delay-1">
+          ${slide.content.items.map(item => `
+            <div class="checklist-item">
+              <div class="check-icon">OK</div>
+              <div class="checklist-text">${item}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>`;
+      break;
+
+    case 'amstar16':
+      html += `<div class="content">
+        <h2 class="title gold animate">${slide.content.title}</h2>
+        <p class="subtitle animate delay-1">${slide.content.subtitle}</p>
+        <div style="display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;max-width:900px;margin-top:1rem" class="animate delay-2">
+          <div style="flex:1;min-width:280px;background:rgba(239,68,68,0.15);border:2px solid var(--red);border-radius:8px;padding:1rem">
+            <h3 style="color:var(--red);font-size:0.9rem;margin-bottom:0.75rem;font-weight:700">CRITICAL ITEMS (7)</h3>
+            ${slide.content.critical.map(item => `
+              <div style="display:flex;align-items:flex-start;gap:0.5rem;padding:0.35rem 0;font-size:0.85rem">
+                <span style="color:var(--red);font-weight:700;min-width:24px">${item.num}*</span>
+                <span>${item.text}</span>
+              </div>
+            `).join('')}
+          </div>
+          <div style="flex:1;min-width:280px;background:rgba(34,197,94,0.1);border:2px solid var(--green);border-radius:8px;padding:1rem">
+            <h3 style="color:var(--green);font-size:0.9rem;margin-bottom:0.75rem;font-weight:700">NON-CRITICAL ITEMS (9)</h3>
+            ${slide.content.nonCritical.map(item => `
+              <div style="display:flex;align-items:flex-start;gap:0.5rem;padding:0.35rem 0;font-size:0.85rem">
+                <span style="color:var(--green);font-weight:700;min-width:24px">${item.num}</span>
+                <span>${item.text}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </div>`;
+      break;
+
+    case 'grade5':
+      html += `<div class="content">
+        <h2 class="title gold animate">${slide.content.title}</h2>
+        <p class="subtitle animate delay-1">${slide.content.subtitle}</p>
+        <div style="display:flex;flex-direction:column;gap:0.6rem;max-width:700px;margin-top:1rem" class="animate delay-2">
+          ${slide.content.domains.map((domain, idx) => `
+            <div style="display:flex;align-items:flex-start;gap:0.75rem;background:rgba(124,58,237,0.15);border-left:4px solid var(--purple);border-radius:0 8px 8px 0;padding:0.75rem 1rem">
+              <div style="width:28px;height:28px;background:var(--purple);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;flex-shrink:0">${idx + 1}</div>
+              <div>
+                <div style="font-weight:700;color:var(--gold);font-size:0.95rem">${domain.name}</div>
+                <div style="font-size:0.85rem;opacity:0.9">${domain.desc}</div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+        <p class="subtitle animate delay-3" style="font-size:0.85rem;margin-top:1rem;max-width:600px">${slide.content.note}</p>
+      </div>`;
+      break;
+
+    case 'decision':
+      const did = `dec_${moduleIndex}_${index}`;
+      const answered = gameState.answeredQuestions[did];
+      html += `<div class="content">
+        <div class="decision-tree animate">
+          <div class="decision-header">
+            <div class="decision-icon">${slide.content.icon}</div>
+            <div class="decision-title">${slide.content.title}</div>
+            <div class="decision-xp">+${slide.content.xp} XP</div>
+          </div>
+          <div class="decision-scenario">${slide.content.scenario}</div>
+          <div class="decision-question">${slide.content.question}</div>
+          <div class="decision-options">
+            ${slide.content.options.map(opt => {
+              const isSelected = answered === opt.letter;
+              const showCorrect = answered && opt.correct;
+              const showIncorrect = answered && isSelected && !opt.correct;
+              return `
+                <div class="decision-option ${isSelected ? 'selected' : ''} ${showCorrect ? 'correct' : ''} ${showIncorrect ? 'incorrect' : ''} ${answered ? 'disabled' : ''}"
+                     onclick="answerDecision('${did}', '${opt.letter}', ${opt.correct}, ${slide.content.xp})"
+                     tabindex="0"
+                     role="button"
+                     aria-pressed="${isSelected ? 'true' : 'false'}"
+                     aria-disabled="${answered ? 'true' : 'false'}">
+                  <div class="option-letter">${opt.letter}</div>
+                  <div class="option-text">${opt.text}</div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+          <div class="decision-feedback ${answered ? 'show' : ''} ${answered && slide.content.options.find(o => o.letter === answered)?.correct ? 'correct' : 'incorrect'}" role="alert" aria-live="polite">
+            <div class="feedback-title">${answered && slide.content.options.find(o => o.letter === answered)?.correct ? 'Correct!' : 'Not quite'}</div>
+            <div class="feedback-text">${answered && slide.content.options.find(o => o.letter === answered)?.correct ? slide.content.feedback.correct : slide.content.feedback.incorrect}</div>
+            ${answered && !(slide.content.options.find(o => o.letter === answered)?.correct) ? `<div style="margin-top:0.5rem;font-size:0.8rem;color:var(--orange);font-weight:600;">Partial credit: +${Math.floor(slide.content.xp * 0.2)} XP</div>` : ''}
+          </div>
+        </div>
+      </div>`;
+      break;
+
+    default:
+      html += '<div class="slide-content"><p>Unknown slide type</p></div>';
+      break;
+  }
+
+  html += '</div>';
+  return html;
+}
+
+function updateSlideVisibility() {
+  const container = document.querySelector('.module-slides.active');
+  if (!container) return;
+
+  container.querySelectorAll('.slide').forEach((slide, i) => {
+    slide.classList.toggle('active', i === currentSlide);
+  });
+
+  const progressBar = container.querySelector('.slide-progress-bar');
+  if (progressBar) {
+    const pct = ((currentSlide + 1) / MODULES[currentModule].slides.length) * 100;
+    progressBar.style.width = pct + '%';
+  }
+
+  container.querySelector('.slide-counter').textContent = `${currentSlide + 1} / ${MODULES[currentModule].slides.length}`;
+  container.querySelectorAll('.progress-dot').forEach((dot, i) => {
+    const isActive = i === currentSlide;
+    dot.classList.toggle('active', isActive);
+    if (isActive) {
+      dot.setAttribute('aria-current', 'true');
+    } else {
+      dot.removeAttribute('aria-current');
+    }
+  });
+  const prevBtn = container.querySelector('.nav-btn.prev');
+  const nextBtn = container.querySelector('.nav-btn.next');
+  if (prevBtn) prevBtn.disabled = currentSlide === 0;
+  if (nextBtn) {
+    const onLastSlide = currentSlide === MODULES[currentModule].slides.length - 1;
+    nextBtn.disabled = onLastSlide && gameState.completedModules.includes(MODULES[currentModule].id);
+  }
+}
+
+// ===== ANSWERS =====
+function answerDecision(did, letter, correct, xp) {
+  if (gameState.answeredQuestions[did] !== undefined) return;
+  gameState.answeredQuestions[did] = letter;
+  gameState.decisionsCompleted++;
+
+  if (gameState.decisionsCompleted === 1) awardBadge('first_scenario');
+
+  if (correct) {
+    gameState.correctAnswers++;
+    consecutiveCorrect++;
+    addXP(xp);
+    if (consecutiveCorrect >= 5) awardBadge('perfect_5');
+    if (gameState.decisionsCompleted >= 21) awardBadge('decision_maker');
+  } else {
+    consecutiveCorrect = 0;
+    addXP(Math.floor(xp * 0.2));
+  }
+  gameState.consecutiveCorrect = consecutiveCorrect;
+  saveGame();
+  renderSlides();
+  updateComboDisplay();
+  updateStatsDisplay();
+}
+
+// ===== NAVIGATION =====
+function goToModule(index) {
+  if (index > 0 && !gameState.completedModules.includes(MODULES[index-1].id)) return;
+  currentModule = index;
+  currentSlide = 0;
+  renderSlides();
+  renderSidebar();
+}
+
+function goToSlide(index) {
+  currentSlide = index;
+  updateSlideVisibility();
+}
+
+function nextSlide() {
+  const mod = MODULES[currentModule];
+  if (currentSlide < mod.slides.length - 1) {
+    currentSlide++;
+    updateSlideVisibility();
+  } else {
+    completeModule();
+  }
+}
+
+function prevSlide() {
+  if (currentSlide > 0) {
+    currentSlide--;
+    updateSlideVisibility();
+  }
+}
+
+function completeModule() {
+  const mod = MODULES[currentModule];
+  if (!gameState.completedModules.includes(mod.id)) {
+    gameState.completedModules.push(mod.id);
+    addXP(mod.xp);
+
+    // Module-specific badges
+    if (mod.id === 1) awardBadge('canopy_explorer');
+    if (mod.id === 2) awardBadge('harvest_expert');
+    if (mod.id === 3) awardBadge('quality_judge');
+    if (mod.id === 4) awardBadge('overlap_detective');
+    if (mod.id === 5) awardBadge('evidence_weaver');
+    if (mod.id === 6) awardBadge('gap_finder');
+    if (mod.id === 7) awardBadge('report_champion');
+    if (gameState.completedModules.length === MODULES.length) awardBadge('finisher');
+
+    saveGame();
+    triggerConfetti();
+    updateCourseProgress();
+  }
+
+  if (currentModule < MODULES.length - 1) {
+    goToModule(currentModule + 1);
+  } else if (gameState.completedModules.length === MODULES.length && !gameState.courseCompleted) {
+    gameState.courseCompleted = true;
+    saveGame();
+    showCourseCompletion();
+  }
+}
+
+function showCourseCompletion() {
+  document.getElementById('completionXP').textContent = gameState.xp;
+  document.getElementById('completionBadges').textContent = gameState.badges.length;
+  document.getElementById('completionLevel').textContent = gameState.level;
+  document.getElementById('completionOverlay').classList.add('show');
+  triggerConfetti();
+}
+
+function closeCompletion() {
+  document.getElementById('completionOverlay').classList.remove('show');
+}
+
+function reviewBadges() {
+  document.getElementById('completionOverlay').classList.remove('show');
+  // Scroll to badges panel and highlight it
+  const badgesPanel = document.querySelector('.badges-panel');
+  if (badgesPanel) {
+    badgesPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    badgesPanel.style.transition = 'box-shadow 0.3s ease';
+    badgesPanel.style.boxShadow = '0 0 20px 5px rgba(212,175,55,0.6)';
+    setTimeout(() => {
+      badgesPanel.style.boxShadow = '';
+    }, 2000);
+  }
+}
+
+function downloadCertificate() {
+  const courseName = 'Umbrella Reviews: Synthesis of Syntheses';
+  const completionDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  const level = LEVELS[gameState.level - 1] || LEVELS[0];
+  const badgeCount = gameState.badges.length;
+  const totalXP = gameState.xp;
+
+  const certHTML = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Certificate of Completion - ${courseName}</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Source+Sans+Pro:wght@400;600&display=swap');
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Source Sans Pro', sans-serif; background: #f5f5f5; padding: 20px; }
+    .certificate {
+      max-width: 800px; margin: 0 auto; background: linear-gradient(135deg, #1E2761 0%, #141B3D 100%);
+      border: 8px solid #D4AF37; border-radius: 12px; padding: 60px 50px; text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    .cert-header { font-family: 'Cormorant Garamond', serif; color: #D4AF37; font-size: 1rem; letter-spacing: 0.3em; text-transform: uppercase; margin-bottom: 10px; }
+    .cert-title { font-family: 'Cormorant Garamond', serif; color: #FAF8F5; font-size: 3rem; font-weight: 700; margin-bottom: 30px; }
+    .cert-subtitle { color: rgba(255,255,255,0.8); font-size: 1.1rem; margin-bottom: 40px; }
+    .cert-course { font-family: 'Cormorant Garamond', serif; color: #D4AF37; font-size: 2rem; font-weight: 600; margin-bottom: 15px; padding: 20px; border-top: 1px solid rgba(212,175,55,0.3); border-bottom: 1px solid rgba(212,175,55,0.3); }
+    .cert-stats { display: flex; justify-content: center; gap: 40px; margin: 30px 0; }
+    .cert-stat { text-align: center; }
+    .cert-stat-value { font-family: 'Cormorant Garamond', serif; font-size: 2rem; color: #D4AF37; font-weight: 700; }
+    .cert-stat-label { font-size: 0.8rem; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 0.1em; }
+    .cert-date { color: rgba(255,255,255,0.7); font-size: 0.95rem; margin-top: 40px; }
+    .cert-footer { margin-top: 40px; padding-top: 30px; border-top: 1px solid rgba(212,175,55,0.2); }
+    .cert-issuer { color: rgba(255,255,255,0.5); font-size: 0.85rem; }
+    .cert-badge { display: inline-block; margin-top: 15px; padding: 8px 20px; background: rgba(212,175,55,0.2); border: 1px solid rgba(212,175,55,0.4); border-radius: 20px; color: #D4AF37; font-size: 0.9rem; }
+    @media print {
+      body { background: white; padding: 0; }
+      .certificate { box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="certificate">
+    <div class="cert-header">Synthesis Course Collection</div>
+    <div class="cert-title">Certificate of Completion</div>
+    <div class="cert-subtitle">This certifies successful completion of</div>
+    <div class="cert-course">${courseName}</div>
+    <div class="cert-stats">
+      <div class="cert-stat">
+        <div class="cert-stat-value">${totalXP.toLocaleString()}</div>
+        <div class="cert-stat-label">Total XP Earned</div>
+      </div>
+      <div class="cert-stat">
+        <div class="cert-stat-value">${badgeCount}</div>
+        <div class="cert-stat-label">Badges Earned</div>
+      </div>
+      <div class="cert-stat">
+        <div class="cert-stat-value">${level.title}</div>
+        <div class="cert-stat-label">Final Level</div>
+      </div>
+    </div>
+    <div class="cert-date">Completed on ${completionDate}</div>
+    <div class="cert-footer">
+      <div class="cert-issuer">Synthesis Course Collection — Evidence Synthesis & Meta-Analysis Training</div>
+      <div class="cert-badge">Verified Completion</div>
+    </div>
+  </div>
+  <script>window.onload = () => window.print();<\/script>
+</body>
+</html>`;
+
+  const blob = new Blob([certHTML], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'Certificate-Umbrella-Reviews-Course.html';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// ===== KEYBOARD =====
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    closeBadgeModal();
+    document.getElementById('completionOverlay').classList.remove('show');
+    closeLevelModal();
+    document.querySelector('.sidebar').classList.remove('open');
+    document.getElementById('sidebarOverlay').classList.remove('show');
+    return;
+  }
+
+  if ((e.target.classList.contains('module-item') || e.target.classList.contains('decision-option')) && (e.key === 'Enter' || e.key === ' ')) {
+    e.preventDefault();
+    e.target.click();
+    return;
+  }
+
+  const isRoleButton = e.target && e.target.getAttribute && e.target.getAttribute('role') === 'button';
+  const isFormControl = e.target && e.target.closest && e.target.closest('button, a, input, textarea, select');
+  if (isRoleButton || isFormControl) {
+    if (e.key === ' ' && isRoleButton) {
+      e.preventDefault();
+      e.target.click();
+    }
+    return;
+  }
+
+  if (e.key === 'ArrowRight' || e.key === ' ') {
+    e.preventDefault();
+    const mod = MODULES[currentModule];
+    const onLastSlide = currentSlide === mod.slides.length - 1;
+    if (onLastSlide && gameState.completedModules.includes(mod.id)) return;
+    nextSlide();
+  } else if (e.key === 'ArrowLeft') {
+    e.preventDefault();
+    prevSlide();
+  }
+});
+
+// ===== TOUCH =====
+let touchStartX = 0;
+document.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
+document.addEventListener('touchend', (e) => {
+  const diff = touchStartX - e.changedTouches[0].screenX;
+  if (Math.abs(diff) > 50) {
+    if (diff > 0) {
+      const mod = MODULES[currentModule];
+      const onLastSlide = currentSlide === mod.slides.length - 1;
+      if (onLastSlide && gameState.completedModules.includes(mod.id)) return;
+      nextSlide();
+    } else {
+      prevSlide();
+    }
+  }
+}, { passive: true });
+
+// ===== INIT =====
+renderAll();
+</script>
+</body>
+</html>

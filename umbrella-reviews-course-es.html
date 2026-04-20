@@ -1,0 +1,2675 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Reseñas generales: La revisión de reseñas</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&amp;family=Source+Sans+Pro:wght@300;400;600;700&amp;display=swap" rel="stylesheet"/>
+<style>
+    :root {
+      --navy: #1E2761;
+      --deep-navy: #141B3D;
+      --gold: #D4AF37;
+      --cream: #FAF8F5;
+      --light-cream: #FFFFFF;
+      --text: #2D3748;
+      --light-text: #718096;
+      --red: #C53030;
+      --green: #22c55e;
+      --teal: #0f766e;
+      --purple: #7c3aed;
+      --orange: #f59e0b;
+      --transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      height: 100%;
+      font-family: 'Source Sans Pro', sans-serif;
+      background: var(--deep-navy);
+      color: var(--cream);
+    }
+
+    .course-container { display: flex; height: 100vh; overflow: hidden; }
+
+    /* Skip Link */
+    .skip-link {
+      position: absolute;
+      top: -40px;
+      left: 0;
+      background: var(--gold);
+      color: var(--navy);
+      padding: 8px 16px;
+      z-index: 10000;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .skip-link:focus { top: 0; }
+
+    /* Sidebar */
+    .sidebar {
+      width: 300px;
+      background: linear-gradient(180deg, var(--deep-navy) 0%, #0a0f1a 100%);
+      border-right: 1px solid rgba(212,175,55,0.2);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    .sidebar-header {
+      padding: 1.25rem;
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+      text-align: center;
+    }
+    .sidebar-header h1 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--gold);
+    }
+    .sidebar-header p {
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.6);
+    }
+
+    .stats-panel {
+      padding: 1rem;
+      background: rgba(212,175,55,0.1);
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+    }
+    .level-display {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+    .level-badge {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, var(--gold), #f0c040);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      box-shadow: 0 2px 8px rgba(212,175,55,0.4);
+    }
+    .level-info { flex: 1; }
+    .level-title { font-weight: 700; font-size: 0.9rem; color: var(--gold); }
+    .level-subtitle { font-size: 0.7rem; color: rgba(255,255,255,0.6); }
+    .xp-bar {
+      height: 8px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 0.5rem;
+    }
+    .xp-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--gold), var(--orange));
+      border-radius: 4px;
+      transition: width 0.5s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .xp-fill::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      animation: shimmer 2s infinite;
+    }
+    @keyframes shimmer {
+      to { left: 100%; }
+    }
+    .xp-text {
+      font-size: 0.65rem;
+      color: rgba(255,255,255,0.5);
+      text-align: right;
+      margin-top: 0.25rem;
+    }
+    .quick-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+    }
+    .quick-stat {
+      background: rgba(0,0,0,0.2);
+      padding: 0.5rem;
+      border-radius: 6px;
+      text-align: center;
+    }
+    .quick-stat-value {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--gold);
+    }
+    .quick-stat-label {
+      font-size: 0.6rem;
+      color: rgba(255,255,255,0.5);
+    }
+
+    .course-progress {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+      background: rgba(0,0,0,0.2);
+    }
+    .course-progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.6);
+      margin-bottom: 0.35rem;
+    }
+    .course-progress-bar {
+      height: 6px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .course-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--green), #22d3ee);
+      border-radius: 3px;
+      transition: width 0.5s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .course-progress-fill::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      animation: shimmer 2s infinite;
+    }
+
+    .module-list { flex: 1; overflow-y: auto; padding: 0.5rem 0; }
+    .module-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.6rem 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      border-left: 3px solid transparent;
+    }
+    .module-item:hover { background: rgba(212,175,55,0.1); }
+    .module-item.active { background: rgba(212,175,55,0.15); border-left-color: var(--gold); }
+    .module-item.completed .module-number { background: var(--green); color: white; }
+    .module-item.locked { opacity: 0.5; cursor: not-allowed; }
+    .module-number {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .module-item.active .module-number { background: var(--gold); color: var(--navy); }
+    .module-info { flex: 1; min-width: 0; }
+    .module-title { font-size: 0.8rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .module-subtitle { font-size: 0.65rem; color: rgba(255,255,255,0.5); }
+    .module-xp { font-size: 0.6rem; color: var(--gold); }
+    .module-time { font-size: 0.55rem; color: rgba(255,255,255,0.4); display: flex; align-items: center; gap: 0.25rem; margin-top: 0.15rem; }
+
+    .badges-panel {
+      padding: 1rem;
+      border-top: 1px solid rgba(212,175,55,0.2);
+    }
+    .badges-title { font-size: 0.75rem; font-weight: 600; color: var(--gold); margin-bottom: 0.5rem; }
+    .badges-grid { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+    .badge-item {
+      width: 32px;
+      height: 32px;
+      min-width: 44px;
+      min-height: 44px;
+      background: rgba(255,255,255,0.05);
+      border: 2px solid rgba(255,255,255,0.1);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      font-family: inherit;
+      color: inherit;
+      padding: 0;
+      opacity: 0.3;
+      transition: all 0.3s;
+      cursor: pointer;
+      position: relative;
+    }
+    .badge-item.earned { opacity: 1; background: rgba(212,175,55,0.2); border-color: var(--gold); }
+    .badge-item:hover::after,
+    .badge-item:focus::after,
+    .badge-item:focus-visible::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--navy);
+      color: white;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.6rem;
+      white-space: nowrap;
+      z-index: 100;
+    }
+    .badge-item:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+    /* Main Content */
+    .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .content-header {
+      padding: 0.75rem 1.5rem;
+      background: rgba(0,0,0,0.3);
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .breadcrumb { font-size: 0.85rem; color: rgba(255,255,255,0.6); }
+    .breadcrumb span { color: var(--gold); }
+    .header-actions { display: flex; gap: 0.5rem; align-items: center; }
+    .streak-display {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: rgba(239,68,68,0.2);
+      border: 1px solid rgba(239,68,68,0.4);
+      padding: 0.35rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+    }
+    .streak-display.active {
+      background: rgba(249,115,22,0.2);
+      border-color: var(--orange);
+      animation: flamePulse 1.5s ease-in-out infinite;
+    }
+    @keyframes flamePulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+    .streak-flame { font-size: 1rem; }
+    .streak-count { font-weight: 700; color: var(--orange); }
+
+    .btn {
+      padding: 0.5rem 1rem;
+      border: 1px solid rgba(212,175,55,0.3);
+      border-radius: 6px;
+      background: rgba(255,255,255,0.05);
+      color: var(--cream);
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn:hover { background: rgba(212,175,55,0.2); border-color: var(--gold); }
+    .btn.primary { background: var(--gold); color: var(--navy); border-color: var(--gold); font-weight: 600; }
+
+    .content-body { flex: 1; overflow: hidden; display: flex; }
+
+    /* Slides */
+    .slides-container { flex: 1; position: relative; overflow: hidden; touch-action: pan-x pan-y; }
+    .module-slides { display: none; width: 100%; height: 100%; }
+    .module-slides.active { display: block; }
+
+    .slide {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      padding: 2rem 2rem 4rem;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity var(--transition), visibility var(--transition);
+      overflow-y: auto;
+    }
+    .slide.active { opacity: 1; visibility: visible; }
+    .slide.dark { background: var(--deep-navy); }
+    .slide.light { background: var(--cream); color: var(--text); }
+    .slide.black { background: #000; }
+    .slide.red-bg { background: linear-gradient(135deg, #7f1d1d, #450a0a); }
+    .slide.green-bg { background: linear-gradient(135deg, #14532d, #052e16); }
+    .slide.purple-bg { background: linear-gradient(135deg, #4c1d95, #2e1065); }
+    .slide.orange-bg { background: linear-gradient(135deg, #9a3412, #431407); }
+    .slide.teal-bg { background: linear-gradient(135deg, #0f766e, #042f2e); }
+    .slide.gold-bg { background: linear-gradient(135deg, #92702a 0%, #5c4520 100%); }
+
+    .slide-progress-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--gold), var(--orange));
+      transition: width 0.3s ease;
+      z-index: 50;
+    }
+
+    .serif { font-family: 'Cormorant Garamond', Georgia, serif; }
+    .title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      font-weight: 700;
+      margin-bottom: 1rem;
+      line-height: 1.2;
+      text-align: center;
+    }
+    .title.gold { color: var(--gold); }
+    .title.navy { color: var(--navy); }
+    .subtitle {
+      font-size: clamp(0.9rem, 2vw, 1.3rem);
+      color: rgba(255,255,255,0.7);
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .slide.light .subtitle { color: var(--light-text); }
+
+    .big-number {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(4rem, 12vw, 8rem);
+      font-weight: 700;
+      line-height: 1;
+    }
+    .big-number.gold { color: var(--gold); }
+    .big-number.red { color: var(--red); }
+
+    .refrain {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(1.3rem, 3vw, 2rem);
+      font-style: italic;
+      color: var(--gold);
+      text-align: center;
+      max-width: 700px;
+    }
+
+    .content { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 850px; }
+
+    /* Cards */
+    .card {
+      background: var(--light-cream);
+      border: 1px solid var(--gold);
+      padding: 1.25rem 1.5rem;
+      margin: 0.5rem 0;
+      max-width: 750px;
+      width: 100%;
+      border-radius: 8px;
+    }
+    .card.navy-bg { background: var(--navy); color: var(--cream); }
+    .card-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 0.05em;
+      margin-bottom: 0.4rem;
+      text-transform: uppercase;
+    }
+    .card-text { font-size: 0.95rem; line-height: 1.6; }
+    .card.navy-bg .card-text { color: var(--cream); }
+
+    /* Story box */
+    .story-box {
+      background: linear-gradient(135deg, rgba(197,48,48,0.15), rgba(30,39,97,0.2));
+      border-left: 4px solid var(--red);
+      padding: 1.25rem;
+      margin: 0.75rem 0;
+      max-width: 750px;
+      width: 100%;
+      border-radius: 0 8px 8px 0;
+    }
+    .story-box.success { background: linear-gradient(135deg, rgba(34,197,94,0.15), rgba(30,39,97,0.2)); border-left-color: #4CAF50; }
+    .story-box.warning { background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(30,39,97,0.2)); border-left-color: var(--gold); }
+    .story-box.teal { background: linear-gradient(135deg, rgba(15,118,110,0.15), rgba(30,39,97,0.2)); border-left-color: var(--teal); }
+    .story-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: var(--red);
+      margin-bottom: 0.4rem;
+      text-transform: uppercase;
+    }
+    .story-box.success .story-label { color: var(--green); }
+    .story-box.warning .story-label { color: var(--orange); }
+    .story-box.teal .story-label { color: var(--teal); }
+    .story-text { font-size: 0.95rem; line-height: 1.6; }
+
+    /* Stats */
+    .stats-grid {
+      display: flex;
+      gap: 0.75rem;
+      margin: 1rem 0;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .stat-box {
+      background: var(--navy);
+      color: var(--cream);
+      padding: 1rem 1.25rem;
+      text-align: center;
+      min-width: 120px;
+      border-radius: 8px;
+    }
+    .stat-value {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.3rem, 2.5vw, 2rem);
+      font-weight: 700;
+    }
+    .stat-value.gold { color: var(--gold); }
+    .stat-value.red { color: var(--red); }
+    .stat-value.green { color: var(--green); }
+    .stat-label { font-size: 0.75rem; opacity: 0.8; margin-top: 0.2rem; }
+
+    /* Timeline */
+    .timeline { display: flex; flex-direction: column; gap: 0.4rem; width: 100%; max-width: 650px; }
+    .timeline-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.6rem 0.75rem;
+      background: rgba(255,255,255,0.05);
+      border-radius: 6px;
+      border-left: 4px solid var(--gold);
+    }
+    .timeline-days { font-weight: 700; font-size: 0.8rem; min-width: 70px; color: var(--gold); }
+    .timeline-content { flex: 1; }
+    .timeline-title { font-weight: 600; font-size: 0.9rem; }
+    .timeline-desc { font-size: 0.75rem; opacity: 0.7; }
+
+    /* Checklist */
+    .checklist { display: flex; flex-direction: column; gap: 0.4rem; width: 100%; max-width: 650px; }
+    .checklist-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+      padding: 0.6rem 0.75rem;
+      background: rgba(255,255,255,0.05);
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .check-icon {
+      width: 20px;
+      height: 20px;
+      background: var(--green);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      color: white;
+      flex-shrink: 0;
+    }
+    .checklist-text { font-size: 0.9rem; }
+
+    /* Decision Tree */
+    .decision-tree {
+      background: linear-gradient(135deg, rgba(124,58,237,0.1), rgba(30,39,97,0.2));
+      border: 2px solid var(--purple);
+      border-radius: 12px;
+      padding: 1.25rem;
+      width: 100%;
+      max-width: 700px;
+    }
+    .decision-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    .decision-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--purple);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+    }
+    .decision-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+    .decision-xp {
+      margin-left: auto;
+      background: rgba(212,175,55,0.2);
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      color: var(--gold);
+      font-weight: 600;
+    }
+    .decision-scenario {
+      background: rgba(0,0,0,0.2);
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+    .decision-question {
+      font-weight: 600;
+      color: var(--gold);
+      margin-bottom: 0.75rem;
+      font-size: 1rem;
+    }
+    .decision-options { display: flex; flex-direction: column; gap: 0.5rem; }
+    .decision-option {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      background: rgba(255,255,255,0.05);
+      border: 2px solid rgba(255,255,255,0.15);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .decision-option:hover {
+      background: rgba(124,58,237,0.2);
+      border-color: var(--purple);
+      transform: translateX(4px);
+    }
+    .decision-option:active {
+      transform: scale(0.98);
+    }
+    .decision-option.selected { background: rgba(124,58,237,0.3); border-color: var(--purple); }
+    .decision-option.correct { background: rgba(34,197,94,0.2); border-color: var(--green); }
+    .decision-option.incorrect { background: rgba(239,68,68,0.15); border-color: var(--red); }
+    .decision-option.disabled { pointer-events: none; opacity: 0.7; }
+    .decision-option:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+    .option-letter {
+      width: 24px;
+      height: 24px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.8rem;
+      flex-shrink: 0;
+    }
+    .decision-option.correct .option-letter { background: var(--green); color: white; }
+    .decision-option.incorrect .option-letter { background: var(--red); color: white; }
+    .option-text { font-size: 0.9rem; }
+    .decision-feedback {
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: 8px;
+      display: none;
+    }
+    .decision-feedback.show { display: block; }
+    .decision-feedback.correct { background: rgba(34,197,94,0.2); border: 1px solid var(--green); }
+    .decision-feedback.incorrect { background: rgba(239,68,68,0.15); border: 1px solid var(--red); }
+    .feedback-title { font-weight: 700; margin-bottom: 0.5rem; }
+    .feedback-text { font-size: 0.9rem; line-height: 1.5; }
+
+    /* Learning Objectives */
+    .objectives-box {
+      background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(30,39,97,0.25));
+      border: 2px solid #3b82f6;
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin: 0.75rem 0;
+      max-width: 700px;
+      width: 100%;
+    }
+    .objectives-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+    .objectives-icon {
+      width: 36px;
+      height: 36px;
+      background: #3b82f6;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+    }
+    .objectives-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #60a5fa;
+    }
+    .objectives-list { list-style: none; padding: 0; }
+    .objectives-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      padding: 0.4rem 0;
+      font-size: 0.9rem;
+    }
+    .objectives-list li::before { content: 'o'; color: #3b82f6; font-weight: bold; }
+
+    /* Animation */
+    .slide.active .animate { animation: fadeUp 0.5s ease-out forwards; }
+    .slide.active .animate.delay-1 { animation-delay: 0.1s; }
+    .slide.active .animate.delay-2 { animation-delay: 0.2s; }
+    .slide.active .animate.delay-3 { animation-delay: 0.3s; }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate { opacity: 0; }
+
+    /* XP Popup */
+    .xp-popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      background: linear-gradient(135deg, var(--gold), #f0c040);
+      color: var(--navy);
+      padding: 1.5rem 2.5rem;
+      border-radius: 12px;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2rem;
+      font-weight: 700;
+      z-index: 1000;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+      transition: transform 0.3s ease;
+    }
+    .xp-popup.show { transform: translate(-50%, -50%) scale(1); }
+    .xp-popup .xp-amount { font-size: 3rem; display: block; }
+
+    /* Badge Modal */
+    .badge-modal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.85);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1001;
+    }
+    .badge-modal.show { display: flex; }
+    @keyframes badgeBounce {
+      0% { transform: scale(0); opacity: 0; }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .badge-modal.show .badge-modal-icon {
+      animation: badgeBounce 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+    .badge-modal-content {
+      background: linear-gradient(135deg, var(--deep-navy), #0a0f1a);
+      border: 2px solid var(--gold);
+      border-radius: 16px;
+      padding: 2rem;
+      text-align: center;
+      max-width: 350px;
+    }
+    .badge-modal-icon { font-size: 4rem; margin-bottom: 1rem; }
+    .badge-modal-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.5rem;
+      color: var(--gold);
+      margin-bottom: 0.5rem;
+    }
+    .badge-modal-desc { font-size: 0.9rem; opacity: 0.8; margin-bottom: 1rem; }
+    .badge-modal-close {
+      padding: 0.5rem 1.5rem;
+      background: var(--gold);
+      color: var(--navy);
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* Confetti */
+    .confetti-container {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 999;
+      overflow: hidden;
+    }
+    .confetti {
+      position: absolute;
+      width: 10px; height: 10px;
+      opacity: 0;
+      animation: confetti-fall 3s ease-out forwards;
+    }
+    @keyframes confetti-fall {
+      0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      .confetti { display: none; }
+    }
+
+    /* Nav */
+    .slide-nav {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      padding: 0.75rem 1rem 1.25rem;
+      z-index: 100;
+      pointer-events: none;
+    }
+    .nav-btn {
+      background: rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: white;
+      font-size: 1.1rem;
+      cursor: pointer;
+      opacity: 0.6;
+      transition: all 0.2s;
+      padding: 0.4rem 0.6rem;
+      border-radius: 6px;
+      pointer-events: auto;
+    }
+    .nav-btn:hover { opacity: 1; background: rgba(0,0,0,0.7); border-color: var(--gold); }
+    .nav-btn:active { transform: scale(0.95); }
+    .nav-btn:disabled { opacity: 0.2; cursor: not-allowed; }
+    .nav-btn:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+    .nav-center { display: flex; flex-direction: column; align-items: center; gap: 0.2rem; pointer-events: auto; }
+    .slide-counter { font-size: 0.7rem; opacity: 0.5; }
+    .progress-dots { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; max-width: 280px; }
+    .progress-dot {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: transparent;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+      padding: 0;
+      appearance: none;
+      position: relative;
+    }
+    .progress-dot::after {
+      content: '';
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.25);
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      transition: all 0.2s;
+    }
+    .progress-dot.active::after { width: 14px; height: 14px; background: var(--gold); transform: translate(-50%, -50%); }
+    .progress-dot:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+    /* Mobile */
+    @media (max-width: 768px) {
+      .sidebar {
+        position: fixed;
+        left: -300px;
+        top: 0;
+        bottom: 0;
+        z-index: 1000;
+        transition: left 0.3s ease;
+      }
+      .sidebar.open { left: 0; }
+      .sidebar-toggle {
+        display: flex;
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        z-index: 1001;
+        width: 40px;
+        height: 40px;
+        background: var(--gold);
+        color: var(--navy);
+        border: none;
+        border-radius: 8px;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        cursor: pointer;
+      }
+      .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 999;
+      }
+      .sidebar-overlay.show { display: block; }
+    }
+    @media (min-width: 769px) {
+      .sidebar-toggle { display: none; }
+      .sidebar-overlay { display: none !important; }
+    }
+
+    /* Combo Counter */
+    .combo-display {
+      position: fixed;
+      top: 80px;
+      right: 20px;
+      background: linear-gradient(135deg, var(--orange), #ef4444);
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      z-index: 500;
+      transform: scale(0);
+      transition: transform 0.3s ease;
+      box-shadow: 0 4px 15px rgba(239,68,68,0.4);
+    }
+    .combo-display.show { transform: scale(1); }
+
+    /* Quote Block */
+    .quote-block {
+      background: linear-gradient(135deg, rgba(15,118,110,0.2), rgba(30,39,97,0.2));
+      border-left: 4px solid var(--teal);
+      padding: 1.25rem;
+      margin: 0.75rem 0;
+      max-width: 700px;
+      width: 100%;
+      border-radius: 0 8px 8px 0;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      font-style: italic;
+    }
+    .quote-attribution {
+      margin-top: 0.75rem;
+      font-size: 0.85rem;
+      font-style: normal;
+      color: var(--teal);
+    }
+
+    /* Course Completion Overlay */
+    .completion-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.9);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1002;
+    }
+    .completion-overlay.show { display: flex; }
+    .completion-content {
+      background: linear-gradient(135deg, var(--deep-navy), #0a0f1a);
+      border: 2px solid var(--gold);
+      border-radius: 16px;
+      padding: 2.5rem;
+      text-align: center;
+      max-width: 450px;
+      width: 90%;
+    }
+    .completion-icon { font-size: 3rem; margin-bottom: 1rem; color: var(--gold); }
+    .completion-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2rem;
+      color: var(--gold);
+      margin-bottom: 0.5rem;
+    }
+    .completion-subtitle {
+      font-size: 1rem;
+      color: rgba(255,255,255,0.7);
+      margin-bottom: 1.5rem;
+    }
+    .completion-stats {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .completion-stat {
+      text-align: center;
+    }
+    .completion-stat-value {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--gold);
+    }
+    .completion-stat-label {
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.6);
+    }
+    .completion-actions { display: flex; gap: 0.75rem; justify-content: center; }
+
+    /* Level Up Modal */
+    .level-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.9);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1003;
+    }
+    .level-modal.show { display: flex; }
+    .level-modal-content {
+      background: linear-gradient(135deg, var(--deep-navy), #0a0f1a);
+      border: 2px solid var(--gold);
+      border-radius: 16px;
+      padding: 2.5rem;
+      text-align: center;
+      max-width: 380px;
+      width: 90%;
+      animation: levelModalPop 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+    @keyframes levelModalPop {
+      0% { transform: scale(0); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .level-modal-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      animation: levelIconPulse 1s ease-in-out infinite;
+    }
+    @keyframes levelIconPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.15); }
+    }
+    .level-modal-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.8rem;
+      color: var(--gold);
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+    .level-modal-level {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 3rem;
+      font-weight: 700;
+      color: var(--cream);
+      margin-bottom: 0.25rem;
+    }
+    .level-modal-name {
+      font-size: 1.2rem;
+      color: var(--gold);
+      margin-bottom: 1.5rem;
+      font-weight: 600;
+    }
+
+    /* Tablet breakpoint */
+    @media (max-width: 1024px) and (min-width: 769px) {
+      .sidebar { width: 280px; }
+    }
+
+    /* Small mobile improvements */
+    @media (max-width: 480px) {
+      .decision-option {
+        padding: 1rem 1.25rem;
+        font-size: 0.95rem;
+      }
+    }
+
+    /* Landscape orientation handling */
+    @media (orientation: landscape) and (max-height: 500px) {
+      .slide-content { padding: 1rem; }
+      .slide .title { font-size: 1.5rem; }
+      .slide-nav { padding: 0.5rem; }
+    }
+
+    /* Safe area insets for notched devices */
+    @supports (padding-bottom: env(safe-area-inset-bottom)) {
+      .sidebar {
+        padding-bottom: max(1rem, env(safe-area-inset-bottom));
+      }
+      .slide-nav {
+        padding-bottom: max(1rem, env(safe-area-inset-bottom));
+      }
+    }
+  </style>
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<div class="course-container">
+<!-- Sidebar -->
+<nav aria-label="Navegación del curso" class="sidebar" role="navigation">
+<div class="sidebar-header">
+<a href="index.html" onmouseout="this.style.color='rgba(212,175,55,0.7)'" onmouseover="this.style.color='#D4AF37'" style="display:block;font-size:0.7rem;color:rgba(212,175,55,0.7);text-decoration:none;margin-bottom:0.5rem;">← Course Library</a>
+<h1>Umbrella Reviews</h1>
+<p>La revisión de reseñas</p>
+</div>
+<div class="stats-panel">
+<div class="level-display">
+<div class="level-badge" id="levelIcon">RR</div>
+<div class="level-info">
+<div class="level-title" id="levelTitle">Review Reader</div>
+<div class="level-subtitle">Level <span id="levelNum">1</span></div>
+</div>
+</div>
+<div class="xp-bar"><div class="xp-fill" id="xpFill" style="width: 0%"></div></div>
+<div class="xp-text"><span id="xpCurrent">0</span> / <span id="xpNeeded">100</span> XP</div>
+<div class="quick-stats">
+<div class="quick-stat">
+<div class="quick-stat-value" id="correctCount">0</div>
+<div class="quick-stat-label">Correct</div>
+</div>
+<div class="quick-stat">
+<div class="quick-stat-value" id="decisionCount">0</div>
+<div class="quick-stat-label">Decisions</div>
+</div>
+<div class="quick-stat">
+<div class="quick-stat-value" id="synthesisCount">0</div>
+<div class="quick-stat-label">Reviews</div>
+</div>
+</div>
+</div>
+<div class="course-progress">
+<div class="course-progress-label">
+<span>Course Progress</span>
+<span id="courseProgressPct">0%</span>
+</div>
+<div class="course-progress-bar">
+<div class="course-progress-fill" id="courseProgressFill" style="width: 0%"></div>
+</div>
+</div>
+<div class="module-list" id="moduleList" role="list"></div>
+<div class="badges-panel">
+<div class="badges-title">Achievements</div>
+<div class="badges-grid" id="badgesGrid"></div>
+</div>
+</nav>
+<!-- Main Content -->
+<main class="main-content" id="main-content">
+<header class="content-header">
+<div class="breadcrumb">Umbrella Reviews / <span id="currentModule">Module 1</span></div>
+<div class="header-actions">
+<div class="streak-display" id="streakDisplay">
+<span aria-hidden="true" class="streak-flame">🔥</span>
+<span class="streak-count" id="streakCount">0</span>
+<span>day streak</span>
+</div>
+<button class="btn" onclick="resetProgress()">Reset</button>
+</div>
+</header>
+<div class="content-body">
+<div class="slides-container" id="slidesContainer"></div>
+</div>
+</main>
+</div>
+<!-- XP Popup -->
+<div aria-atomic="true" aria-live="polite" class="xp-popup" id="xpPopup" role="status">
+<span class="xp-amount" id="xpAmount">+25</span>
+    XP
+  </div>
+<!-- Badge Modal -->
+<div aria-labelledby="badgeModalTitle" aria-modal="true" class="badge-modal" id="badgeModal" role="dialog">
+<div class="badge-modal-content">
+<div class="badge-modal-icon" id="badgeModalIcon">AW</div>
+<div class="badge-modal-title" id="badgeModalTitle">Badge Earned!</div>
+<div class="badge-modal-desc" id="badgeModalDesc">Desbloqueaste un nuevo logro</div>
+<button class="badge-modal-close" onclick="closeBadgeModal()">Awesome!</button>
+</div>
+</div>
+<!-- Confetti Container -->
+<div class="confetti-container" id="confettiContainer"></div>
+<!-- Combo Counter -->
+<div aria-live="polite" class="combo-display" id="comboDisplay" role="status">COMBO <span id="comboCount">0</span>x</div>
+ Superposición de finalización del curso 
+<div class="completion-overlay" id="completionOverlay">
+<div class="completion-content">
+<div class="completion-icon">🏆</div>
+<div class="completion-title">Course Complete!</div>
+<div class="completion-subtitle">You have mastered umbrella reviews.</div>
+<div class="completion-stats">
+<div class="completion-stat">
+<div class="completion-stat-value" id="completionXP">0</div>
+<div class="completion-stat-label">Total XP</div>
+</div>
+<div class="completion-stat">
+<div class="completion-stat-value" id="completionBadges">0</div>
+<div class="completion-stat-label">Badges Earned</div>
+</div>
+<div class="completion-stat">
+<div class="completion-stat-value" id="completionLevel">1</div>
+<div class="completion-stat-label">Final Level</div>
+</div>
+</div>
+<div class="completion-actions">
+<button class="btn primary" onclick="downloadCertificate()">Download Certificate</button>
+<button class="btn" onclick="reviewBadges()">Review Badges</button>
+<button class="btn" onclick="closeCompletion()">Close</button>
+</div>
+</div>
+</div>
+<!-- Level Up Modal -->
+<div aria-hidden="true" aria-labelledby="levelModalTitle" aria-modal="true" class="level-modal" id="levelModal" role="dialog">
+<div class="level-modal-content">
+<div class="level-modal-icon">🎖️</div>
+<div class="level-modal-title" id="levelModalTitle">Level Up!</div>
+<div class="level-modal-level" id="levelModalLevel">Level 2</div>
+<div class="level-modal-name" id="levelModalName">Search Scout</div>
+<button class="btn primary" onclick="closeLevelModal()">Continue</button>
+</div>
+</div>
+<!-- Mobile Sidebar Toggle -->
+<button aria-expanded="false" aria-label="Toggle menu" class="sidebar-toggle" onclick="toggleSidebar()">MENU</button>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<script>
+// ===== GAMIFICATION STATE =====
+const DEFAULT_STATE = {
+  xp: 0,
+  level: 1,
+  streak: 0,
+  lastActive: null,
+  correctAnswers: 0,
+  decisionsCompleted: 0,
+  synthesisCount: 0,
+  badges: [],
+  completedModules: [],
+  answeredQuestions: {},
+  consecutiveCorrect: 0,
+  courseCompleted: false
+};
+
+function safeGetStorage(key, fallback) {
+  try {
+    const item = localStorage.getItem(key);
+    return item ? JSON.parse(item) : fallback;
+  } catch (e) {
+    return fallback;
+  }
+}
+
+function safeSetStorage(key, value) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch (e) {}
+}
+
+// Migration from old storage key to versioned key
+(function migrateStorage() {
+  try {
+    const oldData = localStorage.getItem('umbrellaReviewGame');
+    if (oldData && !localStorage.getItem('umbrellaReviewGame_v1')) {
+      localStorage.setItem('umbrellaReviewGame_v1', oldData);
+      localStorage.removeItem('umbrellaReviewGame');
+    }
+  } catch (e) {}
+})();
+
+let gameState = safeGetStorage('umbrellaReviewGame_v1', DEFAULT_STATE);
+
+const LEVELS = [
+  { level: 1, title: "Review Reader", icon: "RR", xp: 0 },
+  { level: 2, title: "Search Scout", icon: "SS", xp: 120 },
+  { level: 3, title: "Quality Assessor", icon: "QA", xp: 300 },
+  { level: 4, title: "Overlap Analyst", icon: "OA", xp: 520 },
+  { level: 5, title: "Evidence Synthesizer", icon: "ES", xp: 780 },
+  { level: 6, title: "Gap Mapper", icon: "GM", xp: 1050 },
+  { level: 7, title: "Reporting Expert", icon: "RE", xp: 1350 },
+  { level: 8, title: "Umbrella Master", icon: "UM", xp: 1700 }
+];
+
+const BADGES = [
+  { id: "canopy_explorer", icon: "\u{1F333}", name: "Canopy Explorer", desc: "Completa el módulo 1: The Canopy" },
+  { id: "first_scenario", icon: "\u{1F3AF}", name: "First Scenario", desc: "Completa tu primer escenario de decisión" },
+  { id: "harvest_expert", icon: "\u{1F33E}", name: "Harvest Expert", desc: "Completa el módulo de cosecha" },
+  { id: "quality_judge", icon: "\u{1F50D}", name: "Quality Judge", desc: "Completa el módulo de lentes" },
+  { id: "overlap_detective", icon: "\u{1F50E}", name: "Overlap Detective", desc: "Completa el módulo de superposición" },
+  { id: "evidence_weaver", icon: "\u{1F9F5}", name: "Evidence Weaver", desc: "Completa el módulo de síntesis" },
+  { id: "gap_finder", icon: "\u{1F5FA}", name: "Gap Finder", desc: "Completa el mapa módulo" },
+  { id: "report_champion", icon: "\u{1F4DC}", name: "Report Champion", desc: "Complete el módulo Informe" },
+  { id: "perfect_5", icon: "\u{2B50}", name: "Five Star", desc: "Get 5 correct answers in a row" },
+  { id: "decision_maker", icon: "\u{1F9E0}", name: "Decision Maker", desc: "Completa los 21 escenarios de decisión" },
+  { id: "finisher", icon: "\u{1F3C6}", name: "Course Complete", desc: "Termina todo el curso" },
+  { id: "streak_3", icon: "\u{1F525}", name: "On Fire", desc: "Maintain a 3-day streak" },
+  { id: "streak_7", icon: "\u{1F4AA}", name: "Weekly Warrior", desc: "Maintain a 7-day streak" }
+];
+
+// ===== MODULES DATA =====
+const MODULES = [
+  {
+    id: 1, title: "The Canopy", subtitle: "Por qué una revisión no es suficiente", xp: 160,
+    slides: [
+      { type: "title", theme: "teal-bg", content: { title: "Umbrella Reviews", subtitle: "Cuándo una revisión sistemática no es suficiente" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "Explain why multiple systematic reviews on the same topic create confusion",
+          "Defina una revisión general y en qué se diferencia de una revisión sistemática estándar",
+          "Identificar cuándo una revisión general es la opción de diseño correcta",
+          "Reconocer los pasos centrales en un flujo de trabajo de revisión general"
+        ],
+        tip: "Una revisión general no agrupa estudios primarios. Reúne las conclusiones de revisiones sistemáticas."
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "THE FLOOD", title: "When five reviews gave five answers",
+        text: "Un panel de directrices encontró cinco revisiones sistemáticas sobre la misma intervención. Tres dijeron que funcionó, uno no estaba seguro y uno advirtió sobre posibles daños. Cada uno utilizó diferentes fechas de búsqueda, criterios de inclusión y herramientas de calidad. El panel no pudo decidir en quién confiar.",
+        followup: "Existe una revisión general precisamente para este momento: para estar por encima de las revisiones individuales y evaluar el panorama completo."
+      }},
+      { type: "story", theme: "gold-bg", content: {
+        label: "THE PAIR", title: "Two teams, two strategies",
+        text: "Team A conducted a sixth systematic review on the same topic, adding to the noise. Team B conducted an umbrella review: they mapped all existing reviews, assessed their quality, checked for overlap, and synthesized conclusions across them.",
+        followup: "El equipo B produjo un único documento que explicaba por qué las revisiones no estaban de acuerdo y qué conclusiones eran confiables.",
+        warning: true
+      }},
+      { type: "stats", theme: "dark", content: {
+        title: "La evidencia Panorama",
+        stats: [
+          { value: "8000+", label: "Systematic reviews published yearly" },
+          { value: "multiple", label: "Revisiones por pregunta clínica" },
+          { value: "30-50%", label: "Overlap in primary studies across SRs" },
+          { value: "growing", label: "Necesidad de síntesis de evidencia a escala" }
+        ],
+        caption: "Cifras aproximadas de estudios bibliométricos."
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "Qué es una revisión general",
+        subtitle: "Una revisión sistemática de revisiones",
+        text: "Una revisión general (también llamada descripción general de revisiones o meta-revisión) identifica, evalúa y sintetiza sistemáticamente los hallazgos de múltiples revisiones sistemáticas sobre un tema relacionado. La unidad de análisis es la revisión sistemática en sí, no el estudio primario.",
+        highlight: "La revisión general no rehace el trabajo original. Lo evalúa, lo compara y lo mapea."
+      }},
+      { type: "checklist", theme: "dark", content: {
+        title: "Cuándo elegir una revisión general",
+        items: [
+          "Multiple systematic reviews already exist on the topic",
+          "Reviews reach discordant conclusions",
+          "Decision makers need a single trustworthy summary",
+          "Es necesario mapear las brechas de evidencia en una pregunta amplia",
+          "Los recursos son insuficientes para rehacer todos los estudios primarios"
+        ]
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "RR", title: "Scenario: Design Choice", xp: 25,
+        scenario: "Un ministerio de salud solicita evidencia sobre la vitamina D y las infecciones respiratorias. Ya existen doce revisiones sistemáticas con diferentes conclusiones.",
+        question: "¿Cuál es el diseño de estudio más apropiado?",
+        options: [
+          { letter: "A", text: "Realizar una decimotercera revisión sistemática", correct: false },
+          { letter: "B", text: "Realizar una revisión general de las doce", correct: true },
+          { letter: "C", text: "Elija la revisión más reciente sólo", correct: false },
+          { letter: "D", text: "Narrative opinion piece", correct: false }
+        ],
+        feedback: {
+          correct: "Correcto. Cuando existen múltiples SR con conclusiones diferentes, una revisión general las sintetiza y evalúa sistemáticamente.",
+          incorrect: "Agregar otra SR a un campo abarrotado aumenta el ruido. Una revisión general organiza la evidencia existente."
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "RR", title: "Escenario: Unidad de análisis", xp: 25,
+        scenario: "Un investigador planifica una revisión general. Extraen datos de cada ECA encontrado en las revisiones sistemáticas incluidas.",
+        question: "¿Cuál es el problema?",
+        options: [
+          { letter: "A", text: "Nada, este es el procedimiento correcto", correct: false },
+          { letter: "B", text: "La unidad de análisis debe ser la RS, no el ECA", correct: true },
+          { letter: "C", text: "They should only include meta-analyses", correct: false },
+          { letter: "D", text: "They need more RCTs", correct: false }
+        ],
+        feedback: {
+          correct: "Correcto. En una revisión general, la revisión sistemática es la unidad de análisis. La extracción de datos de estudios primarios se cruza con un diseño diferente.",
+          incorrect: "Las revisiones generales analizan las revisiones sistemáticas como su unidad. Volver a los estudios primarios cambia el diseño a una RS tradicional o un nuevo análisis."
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "RR", title: "Scenario: Too Few Reviews", xp: 25,
+        scenario: "Only one systematic review exists on a rare disease intervention.",
+        question: "¿Debería realizar una revisión general?",
+        options: [
+          { letter: "A", text: "Yes, any topic can have an umbrella review", correct: false },
+          { letter: "B", text: "No, an umbrella review requires multiple SRs to compare", correct: true },
+          { letter: "C", text: "Only if the single SR is low quality", correct: false },
+          { letter: "D", text: "Only if the disease is common enough", correct: false }
+        ],
+        feedback: {
+          correct: "Correcto. Las revisiones generales están diseñadas para comparar y sintetizar múltiples SR. Con solo uno, actualice o replique la SR.",
+          incorrect: "An umbrella review needs multiple systematic reviews to fulfill its purpose of cross-review synthesis."
+        }
+      }},
+      { type: "refrain", theme: "black", content: { text: "When reviews multiply, the umbrella gathers them." }}
+    ]
+  },
+  {
+    id: 2, title: "The Harvest", subtitle: "Buscar y seleccionar reseñas", xp: 150,
+    slides: [
+      { type: "title", theme: "gold-bg", content: { title: "The Harvest", subtitle: "Reúna todas las reseñas relevantes" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "Design a search strategy targeting systematic reviews",
+          "Apply eligibility criteria specific to umbrella reviews",
+          "Handle borderline study designs (scoping reviews, rapid reviews)",
+          "Document selection with a modified PRISMA flow"
+        ],
+        tip: "La cosecha en una revisión general no se trata de encontrar pruebas. Se trata de encontrar las revisiones que ya encontraron los ensayos."
+      }},
+      { type: "story", theme: "gold-bg", content: {
+        label: "THE NET", title: "Cuando la búsqueda omitió la mitad de las revisiones",
+        text: "Una revisión general buscó solo en MEDLINE y omitió revisiones sistemáticas publicadas en bases de datos regionales, Cochrane y revisiones registradas en PROSPERO con resultados. La síntesis final estaba incompleta y sesgada hacia las revistas en inglés.",
+        followup: "Searching for systematic reviews requires the same rigor as searching for primary studies: multiple databases, grey literature, and hand-searching reference lists of included reviews.",
+        warning: true
+      }},
+      { type: "stats", theme: "dark", content: {
+        title: "Search Sources for Systematic Reviews",
+        stats: [
+          { value: "MEDLINE", label: "Core biomedical database" },
+          { value: "Cochrane", label: "Largest SR repository" },
+          { value: "Epistemonikos", label: "SR-specific database" },
+          { value: "PROSPERO", label: "SR protocol registry" }
+        ],
+        caption: "Key sources; additional databases depend on the topic."
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "Estrategia de búsqueda de reseñas",
+        subtitle: "Filtro para el diseño de estudio correcto",
+        text: "Utilice filtros de búsqueda validados para revisiones sistemáticas y metanálisis. Combina términos temáticos con filtros metodológicos. Consulte bases de datos específicas de RS como Epistemonikos y la base de datos Cochrane de revisiones sistemáticas. Busque en PROSPERO revisiones completas pero no publicadas.",
+        highlight: "Una revisión perdida es una perspectiva perdida. La búsqueda exhaustiva no es opcional."
+      }},
+      { type: "checklist", theme: "dark", content: {
+        title: "Harvest Checklist",
+        items: [
+          "Search at least three major databases with SR filters",
+          "Incluir la Biblioteca Cochrane y Epistemonikos",
+          "Check PROSPERO for registered reviews",
+          "Hand-search reference lists of included reviews",
+          "Define clear eligibility criteria before screening"
+        ]
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "SS", title: "Escenario: Revisión de alcance", xp: 25,
+        scenario: "Durante la selección, encontrará una revisión de alcance bien realizada que mapea la evidencia sobre su tema pero no agrupa el efecto. tamaños.",
+        question: "¿Deberías incluirlo en tu revisión general?",
+        options: [
+          { letter: "A", text: "Yes, include all review types", correct: false },
+          { letter: "B", text: "Exclude it; umbrella reviews include only systematic reviews", correct: true },
+          { letter: "C", text: "Include it but label it differently", correct: false },
+          { letter: "D", text: "Include only its reference list", correct: false }
+        ],
+        feedback: {
+          correct: "Correcto. Las revisiones generales suelen incluir sólo revisiones sistemáticas (con o sin metanálisis). Las revisiones de alcance utilizan diferentes métodos y estándares de calidad.",
+          incorrect: "Las revisiones de alcance siguen una metodología diferente y no se pueden evaluar con herramientas de calidad SR como AMSTAR 2."
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "SS", title: "Escenario: Revisión desactualizada", xp: 25,
+        scenario: "Una revisión sistemática de 2008 cumple con sus criterios de elegibilidad, pero ha sido reemplazada por una versión actualizada de 2022.",
+        question: "¿Cómo debes manejar esto?",
+        options: [
+          { letter: "A", text: "Include both versions as separate entries", correct: false },
+          { letter: "B", text: "Include only the most recent version", correct: true },
+          { letter: "C", text: "Exclude both to avoid double counting", correct: false },
+          { letter: "D", text: "Merge them into one entry", correct: false }
+        ],
+        feedback: {
+          correct: "Correcto. Cuando una revisión se haya actualizado formalmente, incluya solo la versión más reciente para evitar el doble conteo de la misma base de evidencia.",
+          incorrect: "Incluir ambas versiones contabilizaría dos veces los mismos estudios primarios. La versión actualizada reemplaza la original."
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "SS", title: "Scenario: Protocol Screening", xp: 25,
+        scenario: "Encontrará un registro de PROSPERO para una revisión sistemática que coincide perfectamente con su tema pero no tiene resultados publicados.",
+        question: "¿Qué debe hacer?",
+        options: [
+          { letter: "A", text: "Incluya el protocolo como una revisión completa", correct: false },
+          { letter: "B", text: "Comuníquese con los autores para verificar si no están publicados. resultados", correct: true },
+          { letter: "C", text: "Ignore it entirely", correct: false },
+          { letter: "D", text: "Esperar indefinidamente la publicación", correct: false }
+        ],
+        feedback: {
+          correct: "Correcto. Contactar a los autores puede revelar reseñas completas pero no publicadas, lo que reduce el sesgo de publicación en su reseña general.",
+          incorrect: "Registered but unpublished reviews may contain important evidence. Author contact is a standard step to reduce bias."
+        }
+      }},
+      { type: "refrain", theme: "black", content: { text: "Una cosecha que no tiene reseñas pierde la verdad." }}
+    ]
+  },
+  {
+    id: 3, title: "The Lens", subtitle: "Evaluación de calidad con AMSTAR 2", xp: 160,
+    slides: [
+      { type: "title", theme: "purple-bg", content: { title: "The Lens", subtitle: "Not all reviews deserve equal trust" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "Apply AMSTAR 2 to assess the methodological quality of included SRs",
+          "Distinguish critical from non-critical domains",
+          "Assign overall confidence ratings: high, moderate, low, critically low",
+          "Use quality assessment to weight conclusions, not just exclude reviews"
+        ],
+        tip: "AMSTAR 2 no es una puntuación. Es un juicio estructurado que clasifica la confianza en los resultados de la revisión."
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "THE FLAW", title: "When a flawed review drove policy",
+        text: "Una guía nacional citó una revisión sistemática sin riesgo de sesgo de evaluación y una búsqueda incompleta. Una revisión general posterior mostró que esta revisión tenía una confianza críticamente baja en AMSTAR 2, mientras que tres revisiones de mayor calidad llegaron a la conclusión opuesta.",
+        followup: "Sin evaluación de calidad, gana la revisión más ruidosa. Con él, la revisión más confiable conduce."
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "AMSTAR 2: La herramienta estándar",
+        subtitle: "16 items, 7 critical domains",
+        text: "AMSTAR 2 evaluates systematic review methodology across 16 items. Seven are designated critical: protocol registration, comprehensive search, justification for exclusions, risk of bias assessment, appropriate meta-analytic methods, consideration of risk of bias in interpreting results, and assessment of publication bias.",
+        highlight: "A single critical flaw drops the overall rating. Two or more critical flaws means critically low confidence."
+      }},
+      { type: "checklist", theme: "dark", content: {
+        title: "AMSTAR 2 Critical Domains",
+        items: [
+          "Protocolo registrado antes de que comenzara la revisión",
+          "Comprehensive literature search performed",
+          "Justificación proporcionada para excluir estudios individuales",
+          "Riesgo de sesgo evaluado para los estudios incluidos",
+          "Métodos apropiados utilizados para el metanálisis",
+          "Risk of bias considered when interpreting results",
+          "Publication bias assessed and discussed"
+        ]
+      }},
+      { type: "amstar16", theme: "dark", content: {
+        title: "AMSTAR 2: All 16 Items",
+        subtitle: "7 Critical (starred) and 9 Non-critical items",
+        critical: [
+          { num: 2, text: "Protocolo registrado antes de que comenzara la revisión" },
+          { num: 4, text: "Comprehensive literature search strategy" },
+          { num: 7, text: "Justificación para excluir individuos estudios" },
+          { num: 9, text: "Satisfactory technique for assessing risk of bias" },
+          { num: 11, text: "Métodos metanalíticos apropiados" },
+          { num: 13, text: "Risk of bias considered when interpreting results" },
+          { num: 15, text: "Publication bias assessed and discussed" }
+        ],
+        nonCritical: [
+          { num: 1, text: "Research questions include PICO components" },
+          { num: 3, text: "Métodos de revisión establecidos antes de la realización" },
+          { num: 5, text: "Selección de estudios realizada por duplicado" },
+          { num: 6, text: "Extracción de datos realizada por duplicado" },
+          { num: 8, text: "Descripción adecuada de los incluidos estudios" },
+          { num: 10, text: "Se informaron fuentes de financiamiento para los estudios incluidos" },
+          { num: 12, text: "Impact of risk of bias on meta-analysis assessed" },
+          { num: 14, text: "Se discutió y explicó la heterogeneidad" },
+          { num: 16, text: "Conflicts of interest reported and managed" }
+        ]
+      }},
+      { type: "stats", theme: "dark", content: {
+        title: "Confidence Rating Scale",
+        stats: [
+          { value: "High", label: "No or one non-critical weakness" },
+          { value: "Moderate", label: "More than one non-critical weakness" },
+          { value: "Low", label: "One critical flaw with/without non-critical" },
+          { value: "Crit. Low", label: "More than one critical flaw" }
+        ],
+        caption: "Based on the AMSTAR 2 classification scheme by Shea et al. 2017."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "QA", title: "Scenario: Missing Risk of Bias", xp: 25,
+        scenario: "Una revisión sistemática incluida en su revisión general no evaluó el riesgo de sesgo en ninguno de sus estudios primarios.",
+        question: "¿Qué es AMSTAR 2? ¿Qué implicación?",
+        options: [
+          { letter: "A", text: "Non-critical weakness only", correct: false },
+          { letter: "B", text: "Critical flaw, drops confidence to low or critically low", correct: true },
+          { letter: "C", text: "No hay impacto si el metanálisis se realizó correctamente", correct: false },
+          { letter: "D", text: "Excluir la revisión por completo", correct: false }
+        ],
+        feedback: {
+          correct: "Correct. Risk of bias assessment is a critical domain. Its absence constitutes a critical flaw.",
+          incorrect: "Risk of bias assessment is one of the seven critical domains in AMSTAR 2. Missing it is a critical flaw."
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "QA", title: "Scenario: Quality Exclusion", xp: 25,
+        scenario: "Todas menos una de las revisiones incluidas tienen una calificación críticamente baja en AMSTAR 2. La restante tiene una calificación alta.",
+        question: "¿Cómo debe manejar esto en su ¿síntesis?",
+        options: [
+          { letter: "A", text: "Exclude all critically low reviews", correct: false },
+          { letter: "B", text: "Include all but weight conclusions by quality rating", correct: true },
+          { letter: "C", text: "Promediar todos los resultados por igual", correct: false },
+          { letter: "D", text: "Informar solo la revisión de alta calidad", correct: false }
+        ],
+        feedback: {
+          correct: "Correct. Umbrella reviews should include all eligible reviews but use quality ratings to contextualize findings and weight conclusions.",
+          incorrect: "Excluding low-quality reviews risks bias. Include them but clearly note how quality affects the strength of conclusions."
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "QA", title: "Scenario: Dual Assessment", xp: 25,
+        scenario: "Dos revisores no están de acuerdo sobre si una revisión sistemática cumple con el criterio AMSTAR 2 para búsqueda integral.",
+        question: "¿Cuál es la mejor? ¿Resolución?",
+        options: [
+          { letter: "A", text: "Accept the more generous rating", correct: false },
+          { letter: "B", text: "Discutir, aplicar reglas de decisión y documentar la resolución", correct: true },
+          { letter: "C", text: "Excluir la revisión para evitar el desacuerdo", correct: false },
+          { letter: "D", text: "Let a third person decide without seeing the assessments", correct: false }
+        ],
+        feedback: {
+          correct: "Correcto. Los desacuerdos deben resolverse mediante la discusión con reglas de decisión preespecificadas y la resolución documentada.",
+          incorrect: "La resolución transparente con documentación mantiene la integridad de la evaluación de calidad."
+        }
+      }},
+      { type: "refrain", theme: "black", content: { text: "La lente que ignora la calidad magnifica el error." }}
+    ]
+  },
+  {
+    id: 4, title: "The Overlap", subtitle: "Cuando las revisiones comparten lo mismo estudios", xp: 160,
+    slides: [
+      { type: "title", theme: "green-bg", content: { title: "The Overlap", subtitle: "The hidden problem of double counting" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "Explain why primary study overlap matters in umbrella reviews",
+          "Calculate the Corrected Covered Area to quantify overlap",
+          "Apply strategies to manage moderate and high overlap",
+          "Report overlap transparently"
+        ],
+        tip: "Si cinco revisiones incluyen cada una los mismos tres ECA, no tiene cinco pruebas independientes. Tiene una base de evidencia contada cinco veces."
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "THE ECHO", title: "Cuando los mismos pacientes fueron contados tres veces",
+        text: "Una revisión general reunió los resultados de cuatro revisiones sistemáticas. Sin que los autores lo supieran, tres de las cuatro revisiones incluyeron el mismo ECA de gran tamaño. El resultado combinado se debió casi en su totalidad a una única prueba contada varias veces, lo que creó una falsa sensación de precisión.",
+        followup: "La detección de superposición no es opcional. Sin él, las revisiones generales amplifican los ecos en lugar de la evidencia."
+      }},
+      { type: "stats", theme: "dark", content: {
+        title: "Overlap Thresholds (CCA)",
+        stats: [
+          { value: "0-5%", label: "Slight overlap" },
+          { value: "6-10%", label: "Moderate overlap" },
+          { value: "11-15%", label: "High overlap" },
+          { value: ">15%", label: "Very high overlap" }
+        ],
+        caption: "Corrected Covered Area thresholds by Pieper et al. 2014."
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "Corrected Covered Area (CCA)",
+        subtitle: "Una métrica para la superposición de estudios primarios",
+        text: "The CCA measures the degree to which the same primary studies appear across multiple systematic reviews. Build a citation matrix listing all primary studies (rows) against all included SRs (columns). Formula: CCA = (N &minus; r) / (r &times; c &minus; r), where N = total citations across all SRs, r = number of unique primary studies, and c = number of included SRs.",
+        highlight: "Una superposición alta significa que sus revisiones no son independientes. Trate sus resultados como correlacionados, no aditivos."
+      }},
+      { type: "checklist", theme: "dark", content: {
+        title: "Overlap Management",
+        items: [
+          "Build a citation matrix of primary studies across SRs",
+          "Calculate the Corrected Covered Area",
+          "Informe el grado de superposición y sus implicaciones",
+          "Consider using only the most comprehensive or most recent SR per comparison",
+          "Nunca agrupe los resultados de SR altamente superpuestos como si fueran independientes"
+        ]
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "OA", title: "Scenario: Very High Overlap", xp: 25,
+        scenario: "Su matriz de citas revela un CCA del 22 por ciento. La mayoría de las revisiones comparten los mismos cinco ECA principales.",
+        question: "¿Cuál es el mejor enfoque para la síntesis?",
+        options: [
+          { letter: "A", text: "Agrupar todos los resultados de las revisiones como estimaciones independientes", correct: false },
+          { letter: "B", text: "Select the most comprehensive SR or conduct a de novo meta-analysis", correct: true },
+          { letter: "C", text: "Ignorar la superposición y continuar", correct: false },
+          { letter: "D", text: "Elimine los estudios superpuestos de todas las revisiones", correct: false }
+        ],
+        feedback: {
+          correct: "Correct. With very high overlap, pooling is misleading. Select the most comprehensive review or return to primary data.",
+          incorrect: "Una superposición muy alta significa que las revisiones no son fuentes independientes. La agrupación crearía una precisión falsa."
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "OA", title: "Escenario: construcción de la matriz", xp: 25,
+        scenario: "Dos de las revisiones incluidas no enumeran referencias de estudios individuales en sus diagramas o tablas de bosque.",
+        question: "¿Cómo debe manejar esto para la matriz de citas?",
+        options: [
+          { letter: "A", text: "Asuma que no hay superposición para esas reseñas", correct: false },
+          { letter: "B", text: "Extract references from reference lists or contact authors", correct: true },
+          { letter: "C", text: "Excluir esas reseñas de la revisión general", correct: false },
+          { letter: "D", text: "Skip the citation matrix entirely", correct: false }
+        ],
+        feedback: {
+          correct: "Correcto. Se debe hacer un esfuerzo para identificar los estudios incluidos a partir de las listas de referencias o contactando a los autores.",
+          incorrect: "La matriz de citas requiere saber qué estudios incluyó cada RS. Los datos faltantes deben buscarse, no asumirse."
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "OA", title: "Scenario: Slight Overlap", xp: 25,
+        scenario: "Su CCA es del 3 por ciento. Cada revisión utilizó un conjunto de estudios primarios en gran medida único debido a diferentes fechas de búsqueda y criterios de inclusión.",
+        question: "¿Cómo afecta esto a su síntesis?",
+        options: [
+          { letter: "A", text: "Puede tratar las revisiones como en gran medida independientes", correct: true },
+          { letter: "B", text: "De todos modos debe seleccionar solo una revisión", correct: false },
+          { letter: "C", text: "Overlap is always a fatal problem", correct: false },
+          { letter: "D", text: "Debe combinar todos los estudios primarios en su lugar", correct: false }
+        ],
+        feedback: {
+          correct: "Correcto. Una ligera superposición significa que las revisiones proporcionan evidencia en gran medida independiente. La síntesis puede realizarse con la debida precaución.",
+          incorrect: "Es aceptable una ligera superposición. La clave es medirlo, informarlo e interpretar los resultados en consecuencia."
+        }
+      }},
+      { type: "refrain", theme: "black", content: { text: "Cuente la evidencia una vez, no el eco." }}
+    ]
+  },
+  {
+    id: 5, title: "The Synthesis", subtitle: "Tejendo evidencia a través de revisiones", xp: 170,
+    slides: [
+      { type: "title", theme: "red-bg", content: { title: "The Synthesis", subtitle: "De muchas revisiones a una respuesta" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "Choose between narrative and quantitative synthesis approaches",
+          "Understand when re-analysis of primary data is justified",
+          "Presentar resultados discordantes transparentemente",
+          "Apply GRADE or a similar framework to rate certainty across reviews"
+        ],
+        tip: "La síntesis es donde la revisión general gana su valor: transformar señales conflictivas en un juicio estructurado."
+      }},
+      { type: "story", theme: "gold-bg", content: {
+        label: "THE WEAVE", title: "When three meta-analyses disagreed",
+        text: "Tres revisiones sistemáticas realizaron cada una un metanálisis sobre la misma intervención. Uno encontró un beneficio significativo, otro no encontró ningún efecto y el otro encontró una tendencia hacia el daño. La revisión general rastreó la discordancia a diferentes criterios de inclusión, manejo del riesgo de sesgo y modelos estadísticos.",
+        followup: "La síntesis no eligió un ganador. Explicó por qué no estaban de acuerdo y qué opciones metodológicas impulsaron la diferencia.",
+        warning: true
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "Synthesis Approaches",
+        subtitle: "Empareja el método con los datos",
+        text: "La síntesis narrativa compara los hallazgos de las revisiones utilizando tablas estructuradas. El reanálisis cuantitativo agrupa los datos de los estudios primarios cuando la superposición es baja y los datos son accesibles. Un enfoque híbrido tabula los resultados a nivel de revisión y utiliza diagramas de bosque para mostrar la concordancia y la discordancia visualmente.",
+        highlight: "Nunca agrupe los resultados de revisiones superpuestas como si fueran estudios independientes."
+      }},
+      { type: "checklist", theme: "dark", content: {
+        title: "Synthesis Checklist",
+        items: [
+          "Tabule todos los resultados de las revisiones junto con las calificaciones de calidad",
+          "Identify sources of discordance (scope, methods, dates, bias handling)",
+          "Informe la dirección, magnitud y precisión de cada uno revisión",
+          "Apply GRADE or equivalent to assess certainty of evidence",
+          "Present both concordant and discordant findings transparently"
+        ]
+      }},
+      { type: "stats", theme: "dark", content: {
+        title: "Discordance Drivers",
+        stats: [
+          { value: "scope", label: "Different PICO definitions" },
+          { value: "search", label: "Different databases or dates" },
+          { value: "bias", label: "Diferentes herramientas de calidad" },
+          { value: "analysis", label: "Different statistical models" }
+        ],
+        caption: "Common reasons reviews on the same topic disagree."
+      }},
+      { type: "grade5", theme: "dark", content: {
+        title: "GRADE: Los cinco dominios",
+        subtitle: "Rate certainty by assessing each domain",
+        domains: [
+          { name: "Risk of Bias", desc: "Limitaciones en el diseño o ejecución del estudio que pueden sesgar los resultados" },
+          { name: "Inconsistency", desc: "Heterogeneidad inexplicable en los resultados estudios" },
+          { name: "Indirectness", desc: "La evidencia no se aplica directamente a la pregunta (población, intervención, comparador, resultado)" },
+          { name: "Imprecision", desc: "Wide confidence intervals due to small sample size or few events" },
+          { name: "Publication Bias", desc: "Publicación selectiva de estudios basada en resultados" }
+        ],
+        note: "Each domain can downgrade certainty from high to moderate, low, or very low."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "ES", title: "Scenario: Pooling Decision", xp: 25,
+        scenario: "Tiene seis RS incluidas con superposición moderada (CCA 9 por ciento). Cuatro utilizaron un metanálisis de efectos aleatorios con criterios PICO similares.",
+        question: "¿Puedes agrupar sus resultados metanálisis?",
+        options: [
+          { letter: "A", text: "Yes, pool all six review-level estimates", correct: false },
+          { letter: "B", text: "No, use narrative synthesis with a structured comparison table", correct: true },
+          { letter: "C", text: "Agrupar solo los cuatro con métodos similares, ignorando la superposición", correct: false },
+          { letter: "D", text: "Conduct a meta-analysis of meta-analyses without checking overlap", correct: false }
+        ],
+        feedback: {
+          correct: "Correcto. Con una superposición moderada, la combinación de estimaciones a nivel de revisión corre el riesgo de contar dos veces. La síntesis narrativa con comparación estructurada es más segura.",
+          incorrect: "La superposición moderada significa que las revisiones comparten estudios primarios. Combinar sus resultados sobreponderaría esos estudios compartidos."
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "ES", title: "Scenario: Discordance Explained", xp: 25,
+        scenario: "Two high-quality SRs disagree: one finds benefit, the other no effect. You trace the discordance to a single large trial included in one but not the other.",
+        question: "¿Cómo debe informar esto?",
+        options: [
+          { letter: "A", text: "Descartar la revisión sin la prueba", correct: false },
+          { letter: "B", text: "Explique la fuente de la discordancia y presente ambos resultados con contexto", correct: true },
+          { letter: "C", text: "Promedie los dos resultados", correct: false },
+          { letter: "D", text: "Exclude both reviews", correct: false }
+        ],
+        feedback: {
+          correct: "Correct. Transparent reporting of discordance sources is a core function of umbrella reviews.",
+          incorrect: "Las revisiones generales agregan valor al explicar por qué las revisiones no están de acuerdo, no ocultando el desacuerdo."
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "ES", title: "Scenario: GRADE in Umbrella Reviews", xp: 25,
+        scenario: "Desea calificar la certeza general de la evidencia en las revisiones incluidas. Varias revisiones utilizaron diferentes enfoques para GRADE.",
+        question: "¿Cuál es el enfoque recomendado?",
+        options: [
+          { letter: "A", text: "Promediar las calificaciones GRADE de cada revisión", correct: false },
+          { letter: "B", text: "Aplicar GRADE de forma independiente según los mejores datos primarios disponibles", correct: true },
+          { letter: "C", text: "Utilizar la calificación GRADE más alta de cualquier revisar", correct: false },
+          { letter: "D", text: "Skip certainty assessment in umbrella reviews", correct: false }
+        ],
+        feedback: {
+          correct: "Correcto. Las revisiones generales deben aplicar GRADE o equivalente de forma independiente, considerando la base de evidencia más confiable y la calidad de las revisiones incluidas.",
+          incorrect: "Promediar o seleccionar calificaciones GRADE no es válido. El equipo de revisión general debe hacer su propio juicio de certeza."
+        }
+      }},
+      { type: "refrain", theme: "black", content: { text: "La síntesis revela la señal debajo del ruido." }}
+    ]
+  },
+  {
+    id: 6, title: "The Map", subtitle: "Brechas, concordancia y visualización", xp: 170,
+    slides: [
+      { type: "title", theme: "gold-bg", content: { title: "The Map", subtitle: "See what is known and what is missing" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "Crear un mapa de evidencia que muestre dónde la evidencia es fuerte o débil",
+          "Identify research gaps that future reviews or trials should address",
+          "Visualize concordance and discordance across reviews",
+          "Use structured tables and harvest plots to communicate findings"
+        ],
+        tip: "Una revisión general que solo resume los resultados pierde su mayor fortaleza: revelar la forma del panorama de la evidencia."
+      }},
+      { type: "story", theme: "gold-bg", content: {
+        label: "THE BLANK", title: "Cuando el mapa reveló la brecha",
+        text: "Una revisión general sobre ejercicio y salud mental encontró doce revisiones sobre depresión pero ninguna sobre trastorno bipolar. El mapa de evidencia hizo visible esta brecha en una sola figura, lo que provocó una convocatoria de financiación de investigación que condujo a tres nuevos ensayos.",
+        followup: "La ausencia de evidencia es en sí misma un hallazgo. El mapa lo hace visible.",
+        warning: true
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "Evidence Mapping",
+        subtitle: "Estructura el paisaje",
+        text: "An evidence map cross-tabulates populations, interventions, comparisons, and outcomes against the number and quality of available reviews. Cells with many high-quality reviews show strong evidence; empty cells reveal gaps. Harvest plots display direction and strength of effects across reviews at a glance.",
+        highlight: "El mapa no es decoración. Es la herramienta de decisión."
+      }},
+      { type: "checklist", theme: "dark", content: {
+        title: "Mapping Checklist",
+        items: [
+          "Define the matrix dimensions (population, intervention, outcome)",
+          "Rellene cada celda con el número y la calidad de las revisiones",
+          "Mark cells with discordant findings",
+          "Highlight empty cells as research gaps",
+          "Utilice herramientas visuales (gráficos de cosecha, diagramas de burbujas) para la comunicación"
+        ]
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "GM", title: "Scenario: Priority Setting", xp: 25,
+        scenario: "Su mapa de evidencia muestra una celda con cuatro revisiones de calidad críticamente baja y ninguna revisión de alta calidad. La pregunta clínica es importante.",
+        question: "¿Cuál es la recomendación prioritaria?",
+        options: [
+          { letter: "A", text: "Aceptar la evidencia críticamente baja como suficiente", correct: false },
+          { letter: "B", text: "Recomendar una revisión sistemática de alta calidad para llenar el vacío", correct: true },
+          { letter: "C", text: "Recommend more umbrella reviews", correct: false },
+          { letter: "D", text: "Ignorar la celda Totalmente", correct: false }
+        ],
+        feedback: {
+          correct: "Correcto. Las celdas con revisiones de baja calidad representan evidencia que existe pero en la que no se puede confiar. La prioridad es una nueva RS rigurosa.",
+          incorrect: "Las revisiones de calidad críticamente baja no responden la pregunta de manera confiable. La brecha está en la calidad, no en la cantidad."
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "GM", title: "Scenario: Concordance Display", xp: 25,
+        scenario: "Seis revisiones encuentran un beneficio significativo para el mismo par intervención-resultado, pero varían en el tamaño del efecto de pequeño a grande.",
+        question: "¿Cómo debería mostrar esto en el mapa de evidencia?",
+        options: [
+          { letter: "A", text: "Marque la celda como concordante con una nota sobre el tamaño del efecto range", correct: true },
+          { letter: "B", text: "Mark it as discordant because effect sizes differ", correct: false },
+          { letter: "C", text: "Report only the median effect size", correct: false },
+          { letter: "D", text: "Deje la celda en blanco", correct: false }
+        ],
+        feedback: {
+          correct: "Correcto. La concordancia en la dirección con la variación en la magnitud es un hallazgo común e importante. Informe tanto la concordancia como el rango.",
+          incorrect: "Las revisiones que coinciden en la dirección pero difieren en magnitud son concordantes en la pregunta clave, y la precisión varía según los métodos."
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "GM", title: "Scenario: Empty Cell", xp: 25,
+        scenario: "Su mapa de evidencia tiene una columna de población completa sin revisiones sistemáticas: niños menores de cinco años.",
+        question: "¿Qué debería hacer? ¿Concluir?",
+        options: [
+          { letter: "A", text: "La intervención no funciona en esta población", correct: false },
+          { letter: "B", text: "Evidence is absent, flag as a research gap, avoid making effectiveness claims", correct: true },
+          { letter: "C", text: "Extrapolar de datos de adultos", correct: false },
+          { letter: "D", text: "Eliminar la población del mapa", correct: false }
+        ],
+        feedback: {
+          correct: "Correcto. La ausencia de evidencia no es evidencia de ausencia. Marque la brecha y recomiende investigaciones futuras.",
+          incorrect: "Las celdas vacías significan que la pregunta no ha sido respondida, no que la respuesta sea negativa."
+        }
+      }},
+      { type: "refrain", theme: "black", content: { text: "El mapa muestra no solo lo que sabemos, sino lo que aún tenemos que aprender." }}
+    ]
+  },
+  {
+    id: 7, title: "The Report", subtitle: "Estándares, dificultades y cierre", xp: 200,
+    slides: [
+      { type: "title", theme: "teal-bg", content: { title: "The Report", subtitle: "Cerrar el ciclo con informes transparentes" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "Apply reporting guidelines for umbrella reviews (PRIOR, PRISMA adaptations)",
+          "Avoid the most common pitfalls in published umbrella reviews",
+          "Decide when an umbrella review adds value versus when a new SR is needed",
+          "Regresar al escenario inicial con una respuesta estructurada"
+        ],
+        tip: "Ring structure: we return to the five conflicting reviews from Module 1. Now you have the tools to resolve them."
+      }},
+      { type: "story", theme: "green-bg", content: {
+        label: "THE RETURN", title: "El panel de directrices, revisado",
+        text: "The panel that faced five conflicting reviews now has an umbrella review. It shows that three of the five reviews had critically low quality, overlap was high, and the two trustworthy reviews agreed on a moderate benefit with low certainty. The panel has a clear, justified basis for its recommendation.",
+        followup: "La revisión general no produjo nuevos datos. Organizó la evidencia existente en un juicio confiable.",
+        success: true
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "Reporting Standards",
+        subtitle: "PRIOR y PRISMA adaptado",
+        text: "The Preferred Reporting Items for Overviews of Reviews (PRIOR) statement provides a checklist for transparent reporting of umbrella reviews. Key items include explicit description of overlap assessment, quality appraisal methods, synthesis approach, and certainty of evidence assessment. When PRIOR is unavailable, a PRISMA adaptation with umbrella-specific modifications is acceptable.",
+        highlight: "A well-reported umbrella review enables others to judge its trustworthiness. Poor reporting defeats its purpose."
+      }},
+      { type: "checklist", theme: "dark", content: {
+        title: "Common Pitfalls to Avoid",
+        items: [
+          "Failing to assess or report primary study overlap",
+          "Using AMSTAR 2 as a numeric score instead of a confidence classification",
+          "Agrupación de resultados de revisiones superpuestas sin ajuste",
+          "Ignoring discordance or reporting only concordant findings",
+          "Omitir un mapa de evidencia estructurado o un análisis de brechas"
+        ]
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "RE", title: "Scenario: Missing Overlap Report", xp: 35,
+        scenario: "Un revisor sugiere eliminar la matriz de citas y el CCA del manuscrito para ahorrar espacio. El editor está de acuerdo.",
+        question: "¿Cuál es la respuesta correcta?",
+        options: [
+          { letter: "A", text: "Agree, overlap is minor detail", correct: false },
+          { letter: "B", text: "Keep the overlap assessment, move to supplement if needed", correct: true },
+          { letter: "C", text: "Remove it and mention overlap in one sentence", correct: false },
+          { letter: "D", text: "Reemplácela con una afirmación de que la superposición fue baja", correct: false }
+        ],
+        feedback: {
+          correct: "Correct. Overlap assessment is a core methodological requirement. If space is limited, move it to a supplement but never omit it.",
+          incorrect: "La evaluación de la superposición es fundamental para la validez de una revisión general. Debe informarse, como mínimo, en materiales complementarios."
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "RE", title: "Scenario: Umbrella vs. New SR", xp: 35,
+        scenario: "Un equipo de investigación quiere estudiar el efecto de una nueva clase de fármaco. Existen dos RS de baja calidad, ambas con búsquedas incompletas.",
+        question: "¿Deberían realizar una revisión general o una nueva revisión sistemática?",
+        options: [
+          { letter: "A", text: "Revisión general de las dos RS existentes", correct: false },
+          { letter: "B", text: "Una revisión sistemática nueva y rigurosa", correct: true },
+          { letter: "C", text: "Both simultaneously", correct: false },
+          { letter: "D", text: "Ninguna de las dos, la evidencia es suficiente", correct: false }
+        ],
+        feedback: {
+          correct: "Correcto. Con sólo dos SR de baja calidad, una revisión general se basaría en una base débil. Una nueva RS bien realizada es más valiosa.",
+          incorrect: "Una revisión general es tan sólida como las revisiones incluidas. Cuando la base de evidencia existente es pequeña y débil, una nueva RS es la opción correcta."
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "RE", title: "Scenario: Final Judgment", xp: 35,
+        scenario: "Your umbrella review includes ten SRs. Seven are concordant (moderate benefit), two are discordant (no benefit), and one reports harm. Overlap is moderate. The seven concordant reviews are mostly high quality; the discordant ones are critically low quality.",
+        question: "¿Cuál es la conclusión apropiada?",
+        options: [
+          { letter: "A", text: "Definitive benefit, ignore the discordant reviews", correct: false },
+          { letter: "B", text: "Beneficio moderado probable con certeza moderada, observando discordancia de revisiones de menor calidad", correct: true },
+          { letter: "C", text: "No conclusion possible due to discordance", correct: false },
+          { letter: "D", text: "Harm signal overrides all other findings", correct: false }
+        ],
+        feedback: {
+          correct: "Correcto. La síntesis sopesa la calidad, la concordancia y la superposición. La evidencia concordante de alta calidad respalda una conclusión al tiempo que reconoce de manera transparente la discordancia.",
+          incorrect: "Las revisiones generales integran calidad, concordancia y superposición para formar un juicio estructurado, no un simple recuento de votos."
+        }
+      }},
+      { type: "refrain", theme: "black", content: { text: "When reviews multiply, the umbrella gathers them." }}
+    ]
+  }
+];
+
+// ===== NAVIGATION STATE =====
+let currentModule = 0;
+let currentSlide = 0;
+let consecutiveCorrect = gameState.consecutiveCorrect || 0;
+
+// ===== SAVE/LOAD =====
+function saveGame() {
+  safeSetStorage('umbrellaReviewGame_v1', gameState);
+}
+
+function resetProgress() {
+  if (confirm('Reset all progress and achievements?')) {
+    gameState = { ...DEFAULT_STATE, answeredQuestions: {}, badges: [], completedModules: [], consecutiveCorrect: 0 };
+    saveGame();
+    currentModule = 0;
+    currentSlide = 0;
+    renderAll();
+  }
+}
+
+// ===== COURSE PROGRESS =====
+function updateCourseProgress() {
+  const totalModules = MODULES.length;
+  const completedCount = gameState.completedModules.length;
+  const pct = Math.round((completedCount / totalModules) * 100);
+  const fillEl = document.getElementById('courseProgressFill');
+  const pctEl = document.getElementById('courseProgressPct');
+  if (fillEl) fillEl.style.width = pct + '%';
+  if (pctEl) pctEl.textContent = pct + '%';
+}
+
+// ===== XP & LEVELING =====
+function addXP(amount) {
+  gameState.xp += amount;
+  checkLevelUp();
+  saveGame();
+  updateStatsDisplay();
+  showXPPopup(amount);
+}
+
+function checkLevelUp() {
+  for (let i = LEVELS.length - 1; i >= 0; i--) {
+    if (gameState.xp >= LEVELS[i].xp && gameState.level < LEVELS[i].level) {
+      gameState.level = LEVELS[i].level;
+      showLevelUp(LEVELS[i]);
+      break;
+    }
+  }
+}
+
+function showXPPopup(amount) {
+  const popup = document.getElementById('xpPopup');
+  document.getElementById('xpAmount').textContent = `+${amount}`;
+  popup.classList.add('show');
+  setTimeout(() => popup.classList.remove('show'), 1500);
+}
+
+function showLevelUp(levelData) {
+  triggerConfetti();
+  const modal = document.getElementById('levelModal');
+  document.getElementById('levelModalLevel').textContent = `Level ${levelData.level}`;
+  document.getElementById('levelModalName').textContent = levelData.title;
+  modal.classList.add('show');
+  modal.setAttribute('aria-hidden', 'false');
+
+  // Auto-close after 3 seconds
+  setTimeout(() => {
+    closeLevelModal();
+  }, 3000);
+}
+
+function closeLevelModal() {
+  const modal = document.getElementById('levelModal');
+  if (modal) {
+    modal.classList.remove('show');
+    modal.setAttribute('aria-hidden', 'true');
+  }
+}
+
+// ===== BADGES =====
+function awardBadge(badgeId) {
+  if (gameState.badges.includes(badgeId)) return;
+  gameState.badges.push(badgeId);
+  saveGame();
+  const badge = BADGES.find(b => b.id === badgeId);
+  if (badge) showBadgeModal(badge);
+  updateBadges();
+}
+
+function showBadgeModal(badge, celebrate = true) {
+  document.getElementById('badgeModalIcon').textContent = badge.icon;
+  document.getElementById('badgeModalTitle').textContent = badge.name;
+  document.getElementById('badgeModalDesc').textContent = badge.desc;
+  const modal = document.getElementById('badgeModal');
+  modal.classList.add('show');
+  if (celebrate) triggerConfetti();
+
+  // Focus trap
+  const focusableElements = modal.querySelectorAll('button, [tabindex]:not([tabindex="-1"])');
+  if (focusableElements.length > 0) {
+    const firstFocusable = focusableElements[0];
+    const lastFocusable = focusableElements[focusableElements.length - 1];
+    firstFocusable.focus();
+
+    // Remove any existing focus trap listener
+    if (modal._focusTrapHandler) {
+      modal.removeEventListener('keydown', modal._focusTrapHandler);
+    }
+
+    modal._focusTrapHandler = function(e) {
+      if (e.key === 'Tab') {
+        if (e.shiftKey && document.activeElement === firstFocusable) {
+          e.preventDefault();
+          lastFocusable.focus();
+        } else if (!e.shiftKey && document.activeElement === lastFocusable) {
+          e.preventDefault();
+          firstFocusable.focus();
+        }
+      }
+      if (e.key === 'Escape') {
+        closeBadgeModal();
+      }
+    };
+    modal.addEventListener('keydown', modal._focusTrapHandler);
+  }
+}
+
+function showBadgeDetails(badgeId) {
+  const badge = BADGES.find(b => b.id === badgeId);
+  if (!badge) return;
+  const earned = gameState.badges.includes(badgeId);
+  const desc = earned ? badge.desc : `${badge.desc} (Locked)`;
+  showBadgeModal({ ...badge, desc }, earned);
+}
+
+function closeBadgeModal() {
+  const modal = document.getElementById('badgeModal');
+  if (modal._focusTrapHandler) {
+    modal.removeEventListener('keydown', modal._focusTrapHandler);
+    modal._focusTrapHandler = null;
+  }
+  modal.classList.remove('show');
+}
+
+// ===== STREAK =====
+function updateStreak() {
+  const today = new Date().toDateString();
+  if (gameState.lastActive !== today) {
+    const yesterday = new Date(Date.now() - 86400000).toDateString();
+    if (gameState.lastActive === yesterday) {
+      gameState.streak++;
+      if (gameState.streak >= 3) awardBadge('streak_3');
+      if (gameState.streak >= 7) awardBadge('streak_7');
+    } else if (gameState.lastActive) {
+      gameState.streak = 1;
+    } else {
+      gameState.streak = 1;
+    }
+    gameState.lastActive = today;
+    saveGame();
+  }
+}
+
+// ===== CONFETTI =====
+function triggerConfetti() {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const container = document.getElementById('confettiContainer');
+  const colors = ['#D4AF37', '#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#0f766e'];
+  for (let i = 0; i < 50; i++) {
+    const confetti = document.createElement('div');
+    confetti.className = 'confetti';
+    confetti.style.left = Math.random() * 100 + '%';
+    confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+    confetti.style.animationDelay = Math.random() * 0.5 + 's';
+    container.appendChild(confetti);
+    setTimeout(() => confetti.remove(), 3500);
+  }
+}
+
+// ===== COMBO =====
+function updateComboDisplay() {
+  const comboEl = document.getElementById('comboDisplay');
+  const countEl = document.getElementById('comboCount');
+  if (consecutiveCorrect >= 2) {
+    countEl.textContent = consecutiveCorrect;
+    comboEl.classList.add('show');
+  } else {
+    comboEl.classList.remove('show');
+  }
+}
+
+// ===== MOBILE SIDEBAR =====
+function toggleSidebar() {
+  document.querySelector('.sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('show');
+  var btn = document.querySelector('.sidebar-toggle'); if (btn) btn.setAttribute('aria-expanded', btn.getAttribute('aria-expanded') === 'true' ? 'false' : 'true');
+}
+
+// ===== RENDER =====
+function renderAll() {
+  updateStreak();
+  renderSidebar();
+  renderSlides();
+  updateStatsDisplay();
+  updateBadges();
+  updateCourseProgress();
+}
+
+function updateStatsDisplay() {
+  const levelData = LEVELS.find(l => l.level === gameState.level) || LEVELS[0];
+  const nextLevel = LEVELS.find(l => l.level === gameState.level + 1);
+
+  document.getElementById('levelIcon').textContent = levelData.icon;
+  document.getElementById('levelTitle').textContent = levelData.title;
+  document.getElementById('levelNum').textContent = gameState.level;
+
+  const currentXP = gameState.xp - levelData.xp;
+  const neededXP = nextLevel ? (nextLevel.xp - levelData.xp) : 500;
+  const pct = Math.min(100, (currentXP / neededXP) * 100);
+
+  document.getElementById('xpFill').style.width = pct + '%';
+  document.getElementById('xpCurrent').textContent = currentXP;
+  document.getElementById('xpNeeded').textContent = neededXP;
+
+  document.getElementById('correctCount').textContent = gameState.correctAnswers;
+  document.getElementById('decisionCount').textContent = gameState.decisionsCompleted;
+  document.getElementById('synthesisCount').textContent = gameState.completedModules.length;
+  document.getElementById('streakCount').textContent = gameState.streak;
+
+  const streakEl = document.getElementById('streakDisplay');
+  streakEl.classList.toggle('active', gameState.streak > 0);
+}
+
+function updateBadges() {
+  const grid = document.getElementById('badgesGrid');
+  grid.innerHTML = BADGES.map(b => {
+    const earned = gameState.badges.includes(b.id);
+    const label = `${b.name}: ${b.desc}`;
+    return `<button class="badge-item ${earned ? 'earned' : ''}" type="button" data-tooltip="${label}" aria-label="${label}" title="${label}" onclick="showBadgeDetails('${b.id}')">${b.icon}</button>`;
+  }).join('');
+}
+
+function renderSidebar() {
+  const list = document.getElementById('moduleList');
+  list.innerHTML = MODULES.map((mod, i) => {
+    const completed = gameState.completedModules.includes(mod.id);
+    const locked = i > 0 && !gameState.completedModules.includes(MODULES[i-1].id);
+    const estMins = Math.round(mod.slides.length * 1.5);
+    return `
+      <div class="module-item ${i === currentModule ? 'active' : ''} ${completed ? 'completed' : ''} ${locked ? 'locked' : ''}"
+           onclick="${locked ? '' : `goToModule(${i})`}"
+           tabindex="${locked ? -1 : 0}"
+           role="button"
+           aria-disabled="${locked ? 'true' : 'false'}">
+        <div class="module-number">${completed ? 'OK' : (locked ? 'LK' : mod.id)}</div>
+        <div class="module-info">
+          <div class="module-title">${mod.title}</div>
+          <div class="module-subtitle">${mod.subtitle}</div>
+          <div class="module-xp">+${mod.xp} XP</div>
+          <div class="module-time">Time ~${estMins} min</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderSlides() {
+  const container = document.getElementById('slidesContainer');
+  container.innerHTML = MODULES.map((mod, mi) => {
+    const progressPct = ((currentSlide + 1) / mod.slides.length) * 100;
+    return `
+    <div class="module-slides ${mi === currentModule ? 'active' : ''}" data-module="${mi}">
+      <div class="slide-progress-bar" style="width: ${mi === currentModule ? progressPct : 0}%"></div>
+      ${mod.slides.map((slide, si) => renderSlide(slide, si, mi)).join('')}
+      <div class="slide-nav">
+        <button class="nav-btn prev" onclick="prevSlide()" ${currentSlide === 0 ? 'disabled' : ''} aria-label="Previous slide">&lt;</button>
+        <div class="nav-center">
+          <div class="slide-counter">${currentSlide + 1} / ${mod.slides.length}</div>
+          <div class="progress-dots">
+            ${mod.slides.map((_, i) => `<button class="progress-dot ${i === currentSlide ? 'active' : ''}" type="button" onclick="goToSlide(${i})" aria-label="Go to slide ${i + 1}" ${i === currentSlide ? 'aria-current="true"' : ''}></button>`).join('')}
+          </div>
+        </div>
+        <button class="nav-btn next" onclick="nextSlide()" aria-label="Next slide">&gt;</button>
+      </div>
+      <div class="keyboard-hint" style="position:absolute;bottom:5px;left:50%;transform:translateX(-50%);font-size:0.6rem;opacity:0.4;">Left / Right arrows or swipe to navigate</div>
+    </div>
+  `;
+  }).join('');
+  document.getElementById('currentModule').textContent = MODULES[currentModule].title;
+  updateSlideVisibility();
+}
+
+function renderSlide(slide, index, moduleIndex) {
+  const theme = slide.theme || 'dark';
+  let html = `<div class="slide ${theme} ${index === currentSlide ? 'active' : ''}" data-slide="${index}">`;
+
+  switch(slide.type) {
+    case 'title':
+      html += `<div class="content"><h1 class="title gold animate">${slide.content.title}</h1><p class="subtitle animate delay-1">${slide.content.subtitle}</p></div>`;
+      break;
+
+    case 'objectives':
+      html += `<div class="content">
+        <div class="objectives-box animate">
+          <div class="objectives-header">
+            <div class="objectives-icon">GOAL</div>
+            <div class="objectives-title">Learning Objectives</div>
+          </div>
+          <ul class="objectives-list">
+            ${slide.content.objectives.map(obj => `<li>${obj}</li>`).join('')}
+          </ul>
+        </div>
+        ${slide.content.tip ? `<p class="subtitle animate delay-1" style="font-size:0.85rem;max-width:600px">${slide.content.tip}</p>` : ''}
+      </div>`;
+      break;
+
+    case 'story':
+      html += `<div class="content">
+        <article class="story-box ${slide.content.success ? 'success' : ''} ${slide.content.warning ? 'warning' : ''} ${slide.content.teal ? 'teal' : ''} animate" role="article">
+          <div class="story-label">${slide.content.label}</div>
+          ${slide.content.title ? `<h2 class="title gold" style="font-size:1.8rem;margin-bottom:0.75rem">${slide.content.title}</h2>` : ''}
+          <p class="story-text">${slide.content.text}</p>
+          ${slide.content.followup ? `<p class="story-text" style="margin-top:0.75rem;font-style:italic;opacity:0.9">${slide.content.followup}</p>` : ''}
+        </article>
+      </div>`;
+      break;
+
+    case 'stats':
+      html += `<div class="content">
+        ${slide.content.title ? `<h2 class="title gold animate">${slide.content.title}</h2>` : ''}
+        ${slide.content.subtitle ? `<p class="subtitle animate delay-1">${slide.content.subtitle}</p>` : ''}
+        <div class="stats-grid animate delay-2">
+          ${slide.content.stats.map(s => `<div class="stat-box"><div class="stat-value gold">${s.value}</div><div class="stat-label">${s.label}</div></div>`).join('')}
+        </div>
+        ${slide.content.caption ? `<p class="subtitle animate delay-3" style="font-size:0.85rem;margin-top:0.75rem">${slide.content.caption}</p>` : ''}
+      </div>`;
+      break;
+
+    case 'refrain':
+      html += `<div class="content" style="justify-content:center;height:100%"><p class="refrain animate">"${slide.content.text}"</p></div>`;
+      break;
+
+    case 'concept':
+      html += `<div class="content">
+        <h2 class="title ${theme === 'light' ? 'navy' : 'gold'} animate">${slide.content.title}</h2>
+        ${slide.content.subtitle ? `<p class="subtitle animate delay-1">${slide.content.subtitle}</p>` : ''}
+        ${slide.content.text ? `<div class="card ${theme === 'light' ? '' : 'navy-bg'} animate delay-2"><p class="card-text">${slide.content.text}</p></div>` : ''}
+        ${slide.content.highlight ? `<div class="story-box warning animate delay-3"><div class="story-label">Key Insight</div><p class="story-text">${slide.content.highlight}</p></div>` : ''}
+        ${slide.content.checkpoints ? `
+          <div class="timeline animate delay-2" style="margin-top:0.75rem">
+            ${slide.content.checkpoints.map(cp => `
+              <div class="timeline-item"><div class="timeline-days">${cp.day}</div><div class="timeline-content"><div class="timeline-title">${cp.event}</div></div></div>
+            `).join('')}
+          </div>
+        ` : ''}
+      </div>`;
+      break;
+
+    case 'checklist':
+      html += `<div class="content">
+        <h2 class="title gold animate">${slide.content.title}</h2>
+        <div class="checklist animate delay-1">
+          ${slide.content.items.map(item => `
+            <div class="checklist-item">
+              <div class="check-icon">OK</div>
+              <div class="checklist-text">${item}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>`;
+      break;
+
+    case 'amstar16':
+      html += `<div class="content">
+        <h2 class="title gold animate">${slide.content.title}</h2>
+        <p class="subtitle animate delay-1">${slide.content.subtitle}</p>
+        <div style="display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;max-width:900px;margin-top:1rem" class="animate delay-2">
+          <div style="flex:1;min-width:280px;background:rgba(239,68,68,0.15);border:2px solid var(--red);border-radius:8px;padding:1rem">
+            <h3 style="color:var(--red);font-size:0.9rem;margin-bottom:0.75rem;font-weight:700">CRITICAL ITEMS (7)</h3>
+            ${slide.content.critical.map(item => `
+              <div style="display:flex;align-items:flex-start;gap:0.5rem;padding:0.35rem 0;font-size:0.85rem">
+                <span style="color:var(--red);font-weight:700;min-width:24px">${item.num}*</span>
+                <span>${item.text}</span>
+              </div>
+            `).join('')}
+          </div>
+          <div style="flex:1;min-width:280px;background:rgba(34,197,94,0.1);border:2px solid var(--green);border-radius:8px;padding:1rem">
+            <h3 style="color:var(--green);font-size:0.9rem;margin-bottom:0.75rem;font-weight:700">NON-CRITICAL ITEMS (9)</h3>
+            ${slide.content.nonCritical.map(item => `
+              <div style="display:flex;align-items:flex-start;gap:0.5rem;padding:0.35rem 0;font-size:0.85rem">
+                <span style="color:var(--green);font-weight:700;min-width:24px">${item.num}</span>
+                <span>${item.text}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </div>`;
+      break;
+
+    case 'grade5':
+      html += `<div class="content">
+        <h2 class="title gold animate">${slide.content.title}</h2>
+        <p class="subtitle animate delay-1">${slide.content.subtitle}</p>
+        <div style="display:flex;flex-direction:column;gap:0.6rem;max-width:700px;margin-top:1rem" class="animate delay-2">
+          ${slide.content.domains.map((domain, idx) => `
+            <div style="display:flex;align-items:flex-start;gap:0.75rem;background:rgba(124,58,237,0.15);border-left:4px solid var(--purple);border-radius:0 8px 8px 0;padding:0.75rem 1rem">
+              <div style="width:28px;height:28px;background:var(--purple);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;flex-shrink:0">${idx + 1}</div>
+              <div>
+                <div style="font-weight:700;color:var(--gold);font-size:0.95rem">${domain.name}</div>
+                <div style="font-size:0.85rem;opacity:0.9">${domain.desc}</div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+        <p class="subtitle animate delay-3" style="font-size:0.85rem;margin-top:1rem;max-width:600px">${slide.content.note}</p>
+      </div>`;
+      break;
+
+    case 'decision':
+      const did = `dec_${moduleIndex}_${index}`;
+      const answered = gameState.answeredQuestions[did];
+      html += `<div class="content">
+        <div class="decision-tree animate">
+          <div class="decision-header">
+            <div class="decision-icon">${slide.content.icon}</div>
+            <div class="decision-title">${slide.content.title}</div>
+            <div class="decision-xp">+${slide.content.xp} XP</div>
+          </div>
+          <div class="decision-scenario">${slide.content.scenario}</div>
+          <div class="decision-question">${slide.content.question}</div>
+          <div class="decision-options">
+            ${slide.content.options.map(opt => {
+              const isSelected = answered === opt.letter;
+              const showCorrect = answered && opt.correct;
+              const showIncorrect = answered && isSelected && !opt.correct;
+              return `
+                <div class="decision-option ${isSelected ? 'selected' : ''} ${showCorrect ? 'correct' : ''} ${showIncorrect ? 'incorrect' : ''} ${answered ? 'disabled' : ''}"
+                     onclick="answerDecision('${did}', '${opt.letter}', ${opt.correct}, ${slide.content.xp})"
+                     tabindex="0"
+                     role="button"
+                     aria-pressed="${isSelected ? 'true' : 'false'}"
+                     aria-disabled="${answered ? 'true' : 'false'}">
+                  <div class="option-letter">${opt.letter}</div>
+                  <div class="option-text">${opt.text}</div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+          <div class="decision-feedback ${answered ? 'show' : ''} ${answered && slide.content.options.find(o => o.letter === answered)?.correct ? 'correct' : 'incorrect'}" role="alert" aria-live="polite">
+            <div class="feedback-title">${answered && slide.content.options.find(o => o.letter === answered)?.correct ? 'Correct!' : 'Not quite'}</div>
+            <div class="feedback-text">${answered && slide.content.options.find(o => o.letter === answered)?.correct ? slide.content.feedback.correct : slide.content.feedback.incorrect}</div>
+            ${answered && !(slide.content.options.find(o => o.letter === answered)?.correct) ? `<div style="margin-top:0.5rem;font-size:0.8rem;color:var(--orange);font-weight:600;">Partial credit: +${Math.floor(slide.content.xp * 0.2)} XP</div>` : ''}
+          </div>
+        </div>
+      </div>`;
+      break;
+
+    default:
+      html += '<div class="slide-content"><p>Unknown slide type</p></div>';
+      break;
+  }
+
+  html += '</div>';
+  return html;
+}
+
+function updateSlideVisibility() {
+  const container = document.querySelector('.module-slides.active');
+  if (!container) return;
+
+  container.querySelectorAll('.slide').forEach((slide, i) => {
+    slide.classList.toggle('active', i === currentSlide);
+  });
+
+  const progressBar = container.querySelector('.slide-progress-bar');
+  if (progressBar) {
+    const pct = ((currentSlide + 1) / MODULES[currentModule].slides.length) * 100;
+    progressBar.style.width = pct + '%';
+  }
+
+  container.querySelector('.slide-counter').textContent = `${currentSlide + 1} / ${MODULES[currentModule].slides.length}`;
+  container.querySelectorAll('.progress-dot').forEach((dot, i) => {
+    const isActive = i === currentSlide;
+    dot.classList.toggle('active', isActive);
+    if (isActive) {
+      dot.setAttribute('aria-current', 'true');
+    } else {
+      dot.removeAttribute('aria-current');
+    }
+  });
+  const prevBtn = container.querySelector('.nav-btn.prev');
+  const nextBtn = container.querySelector('.nav-btn.next');
+  if (prevBtn) prevBtn.disabled = currentSlide === 0;
+  if (nextBtn) {
+    const onLastSlide = currentSlide === MODULES[currentModule].slides.length - 1;
+    nextBtn.disabled = onLastSlide && gameState.completedModules.includes(MODULES[currentModule].id);
+  }
+}
+
+// ===== ANSWERS =====
+function answerDecision(did, letter, correct, xp) {
+  if (gameState.answeredQuestions[did] !== undefined) return;
+  gameState.answeredQuestions[did] = letter;
+  gameState.decisionsCompleted++;
+
+  if (gameState.decisionsCompleted === 1) awardBadge('first_scenario');
+
+  if (correct) {
+    gameState.correctAnswers++;
+    consecutiveCorrect++;
+    addXP(xp);
+    if (consecutiveCorrect >= 5) awardBadge('perfect_5');
+    if (gameState.decisionsCompleted >= 21) awardBadge('decision_maker');
+  } else {
+    consecutiveCorrect = 0;
+    addXP(Math.floor(xp * 0.2));
+  }
+  gameState.consecutiveCorrect = consecutiveCorrect;
+  saveGame();
+  renderSlides();
+  updateComboDisplay();
+  updateStatsDisplay();
+}
+
+// ===== NAVIGATION =====
+function goToModule(index) {
+  if (index > 0 && !gameState.completedModules.includes(MODULES[index-1].id)) return;
+  currentModule = index;
+  currentSlide = 0;
+  renderSlides();
+  renderSidebar();
+}
+
+function goToSlide(index) {
+  currentSlide = index;
+  updateSlideVisibility();
+}
+
+function nextSlide() {
+  const mod = MODULES[currentModule];
+  if (currentSlide < mod.slides.length - 1) {
+    currentSlide++;
+    updateSlideVisibility();
+  } else {
+    completeModule();
+  }
+}
+
+function prevSlide() {
+  if (currentSlide > 0) {
+    currentSlide--;
+    updateSlideVisibility();
+  }
+}
+
+function completeModule() {
+  const mod = MODULES[currentModule];
+  if (!gameState.completedModules.includes(mod.id)) {
+    gameState.completedModules.push(mod.id);
+    addXP(mod.xp);
+
+    // Module-specific badges
+    if (mod.id === 1) awardBadge('canopy_explorer');
+    if (mod.id === 2) awardBadge('harvest_expert');
+    if (mod.id === 3) awardBadge('quality_judge');
+    if (mod.id === 4) awardBadge('overlap_detective');
+    if (mod.id === 5) awardBadge('evidence_weaver');
+    if (mod.id === 6) awardBadge('gap_finder');
+    if (mod.id === 7) awardBadge('report_champion');
+    if (gameState.completedModules.length === MODULES.length) awardBadge('finisher');
+
+    saveGame();
+    triggerConfetti();
+    updateCourseProgress();
+  }
+
+  if (currentModule < MODULES.length - 1) {
+    goToModule(currentModule + 1);
+  } else if (gameState.completedModules.length === MODULES.length && !gameState.courseCompleted) {
+    gameState.courseCompleted = true;
+    saveGame();
+    showCourseCompletion();
+  }
+}
+
+function showCourseCompletion() {
+  document.getElementById('completionXP').textContent = gameState.xp;
+  document.getElementById('completionBadges').textContent = gameState.badges.length;
+  document.getElementById('completionLevel').textContent = gameState.level;
+  document.getElementById('completionOverlay').classList.add('show');
+  triggerConfetti();
+}
+
+function closeCompletion() {
+  document.getElementById('completionOverlay').classList.remove('show');
+}
+
+function reviewBadges() {
+  document.getElementById('completionOverlay').classList.remove('show');
+  // Scroll to badges panel and highlight it
+  const badgesPanel = document.querySelector('.badges-panel');
+  if (badgesPanel) {
+    badgesPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    badgesPanel.style.transition = 'box-shadow 0.3s ease';
+    badgesPanel.style.boxShadow = '0 0 20px 5px rgba(212,175,55,0.6)';
+    setTimeout(() => {
+      badgesPanel.style.boxShadow = '';
+    }, 2000);
+  }
+}
+
+function downloadCertificate() {
+  const courseName = 'Umbrella Reviews: Synthesis of Syntheses';
+  const completionDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  const level = LEVELS[gameState.level - 1] || LEVELS[0];
+  const badgeCount = gameState.badges.length;
+  const totalXP = gameState.xp;
+
+  const certHTML = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Certificate of Completion - ${courseName}</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Source+Sans+Pro:wght@400;600&display=swap');
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Source Sans Pro', sans-serif; background: #f5f5f5; padding: 20px; }
+    .certificate {
+      max-width: 800px; margin: 0 auto; background: linear-gradient(135deg, #1E2761 0%, #141B3D 100%);
+      border: 8px solid #D4AF37; border-radius: 12px; padding: 60px 50px; text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    .cert-header { font-family: 'Cormorant Garamond', serif; color: #D4AF37; font-size: 1rem; letter-spacing: 0.3em; text-transform: uppercase; margin-bottom: 10px; }
+    .cert-title { font-family: 'Cormorant Garamond', serif; color: #FAF8F5; font-size: 3rem; font-weight: 700; margin-bottom: 30px; }
+    .cert-subtitle { color: rgba(255,255,255,0.8); font-size: 1.1rem; margin-bottom: 40px; }
+    .cert-course { font-family: 'Cormorant Garamond', serif; color: #D4AF37; font-size: 2rem; font-weight: 600; margin-bottom: 15px; padding: 20px; border-top: 1px solid rgba(212,175,55,0.3); border-bottom: 1px solid rgba(212,175,55,0.3); }
+    .cert-stats { display: flex; justify-content: center; gap: 40px; margin: 30px 0; }
+    .cert-stat { text-align: center; }
+    .cert-stat-value { font-family: 'Cormorant Garamond', serif; font-size: 2rem; color: #D4AF37; font-weight: 700; }
+    .cert-stat-label { font-size: 0.8rem; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 0.1em; }
+    .cert-date { color: rgba(255,255,255,0.7); font-size: 0.95rem; margin-top: 40px; }
+    .cert-footer { margin-top: 40px; padding-top: 30px; border-top: 1px solid rgba(212,175,55,0.2); }
+    .cert-issuer { color: rgba(255,255,255,0.5); font-size: 0.85rem; }
+    .cert-badge { display: inline-block; margin-top: 15px; padding: 8px 20px; background: rgba(212,175,55,0.2); border: 1px solid rgba(212,175,55,0.4); border-radius: 20px; color: #D4AF37; font-size: 0.9rem; }
+    @media print {
+      body { background: white; padding: 0; }
+      .certificate { box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="certificate">
+    <div class="cert-header">Synthesis Course Collection</div>
+    <div class="cert-title">Certificate of Completion</div>
+    <div class="cert-subtitle">This certifies successful completion of</div>
+    <div class="cert-course">${courseName}</div>
+    <div class="cert-stats">
+      <div class="cert-stat">
+        <div class="cert-stat-value">${totalXP.toLocaleString()}</div>
+        <div class="cert-stat-label">Total XP Earned</div>
+      </div>
+      <div class="cert-stat">
+        <div class="cert-stat-value">${badgeCount}</div>
+        <div class="cert-stat-label">Badges Earned</div>
+      </div>
+      <div class="cert-stat">
+        <div class="cert-stat-value">${level.title}</div>
+        <div class="cert-stat-label">Final Level</div>
+      </div>
+    </div>
+    <div class="cert-date">Completed on ${completionDate}</div>
+    <div class="cert-footer">
+      <div class="cert-issuer">Synthesis Course Collection — Evidence Synthesis & Meta-Analysis Training</div>
+      <div class="cert-badge">Verified Completion</div>
+    </div>
+  </div>
+  <script>window.onload = () => window.print();<\/script>
+</body>
+</html>`;
+
+  const blob = new Blob([certHTML], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'Certificate-Umbrella-Reviews-Course.html';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// ===== KEYBOARD =====
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    closeBadgeModal();
+    document.getElementById('completionOverlay').classList.remove('show');
+    closeLevelModal();
+    document.querySelector('.sidebar').classList.remove('open');
+    document.getElementById('sidebarOverlay').classList.remove('show');
+    return;
+  }
+
+  if ((e.target.classList.contains('module-item') || e.target.classList.contains('decision-option')) && (e.key === 'Enter' || e.key === ' ')) {
+    e.preventDefault();
+    e.target.click();
+    return;
+  }
+
+  const isRoleButton = e.target && e.target.getAttribute && e.target.getAttribute('role') === 'button';
+  const isFormControl = e.target && e.target.closest && e.target.closest('button, a, input, textarea, select');
+  if (isRoleButton || isFormControl) {
+    if (e.key === ' ' && isRoleButton) {
+      e.preventDefault();
+      e.target.click();
+    }
+    return;
+  }
+
+  if (e.key === 'ArrowRight' || e.key === ' ') {
+    e.preventDefault();
+    const mod = MODULES[currentModule];
+    const onLastSlide = currentSlide === mod.slides.length - 1;
+    if (onLastSlide && gameState.completedModules.includes(mod.id)) return;
+    nextSlide();
+  } else if (e.key === 'ArrowLeft') {
+    e.preventDefault();
+    prevSlide();
+  }
+});
+
+// ===== TOUCH =====
+let touchStartX = 0;
+document.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
+document.addEventListener('touchend', (e) => {
+  const diff = touchStartX - e.changedTouches[0].screenX;
+  if (Math.abs(diff) > 50) {
+    if (diff > 0) {
+      const mod = MODULES[currentModule];
+      const onLastSlide = currentSlide === mod.slides.length - 1;
+      if (onLastSlide && gameState.completedModules.includes(mod.id)) return;
+      nextSlide();
+    } else {
+      prevSlide();
+    }
+  }
+}, { passive: true });
+
+// ===== INIT =====
+renderAll();
+</script>
+</body>
+</html>

@@ -1,0 +1,2969 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>当测试谎言时：终极 DTA 课程 (V4)</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&amp;family=Source+Sans+Pro:wght@300;400;600;700&amp;display=swap" rel="stylesheet"/>
+<style>
+    :root {
+      --navy: #1E2761;
+      --deep-navy: #141B3D;
+      --gold: #D4AF37;
+      --cream: #FAF8F5;
+      --text: #2D3748;
+      --light-text: #718096;
+      --red: #C53030;
+      --green: #22c55e;
+      --teal: #00D4AA;
+      --purple: #A855F7;
+      --orange: #F97316;
+      --blood-red: #8B0000;
+      --pink: #EC4899;
+      --transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      height: 100%;
+      font-family: 'Source Sans Pro', sans-serif;
+      background: var(--deep-navy);
+      color: var(--cream);
+    }
+
+    .course-container { display: flex; height: 100vh; overflow: hidden; }
+
+    .sidebar {
+      width: 280px;
+      background: linear-gradient(180deg, var(--deep-navy) 0%, #0a0f1a 100%);
+      border-right: 1px solid rgba(212,175,55,0.2);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    /* mobile sidebar handled by hamburger toggle below */
+
+    .sidebar-header { padding: 1.25rem; border-bottom: 1px solid rgba(212,175,55,0.2); }
+    .sidebar-header h1 { font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; font-weight: 700; color: var(--gold); }
+    .sidebar-header p { font-size: 0.7rem; color: rgba(255,255,255,0.6); }
+
+    .module-list { flex: 1; overflow-y: auto; padding: 0.5rem 0; }
+
+    .module-item {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.5rem 0.75rem; cursor: pointer;
+      border-left: 3px solid transparent; transition: all 0.2s;
+    }
+    .module-item:hover { background: rgba(212,175,55,0.1); }
+    .module-item.active { background: rgba(212,175,55,0.15); border-left-color: var(--gold); }
+    .module-item.completed .module-number { background: var(--green); color: white; }
+
+    .module-number {
+      width: 22px; height: 22px; border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.65rem; font-weight: 700; flex-shrink: 0;
+    }
+    .module-item.active .module-number { background: var(--gold); color: var(--navy); }
+
+    .module-info { flex: 1; min-width: 0; }
+    .module-title { font-size: 0.75rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .module-subtitle { font-size: 0.6rem; color: rgba(255,255,255,0.5); }
+
+    .sidebar-footer {
+      padding: 0.6rem 0.75rem; border-top: 1px solid rgba(212,175,55,0.2);
+      font-size: 0.6rem; color: rgba(255,255,255,0.4); line-height: 1.4;
+    }
+
+    .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+    .content-header {
+      padding: 0.6rem 1.25rem;
+      background: rgba(0,0,0,0.3);
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .breadcrumb { font-size: 0.75rem; color: rgba(255,255,255,0.6); }
+    .breadcrumb span { color: var(--gold); }
+    .header-actions { display: flex; gap: 0.4rem; }
+
+    .btn {
+      padding: 0.35rem 0.7rem; border: 1px solid rgba(212,175,55,0.3);
+      border-radius: 6px; background: rgba(255,255,255,0.05);
+      color: var(--cream); font-size: 0.7rem; cursor: pointer; transition: all 0.2s;
+    }
+    .btn:hover { background: rgba(212,175,55,0.2); border-color: var(--gold); }
+    .btn.primary { background: var(--gold); color: var(--navy); border-color: var(--gold); font-weight: 600; }
+
+    .content-body { flex: 1; overflow: hidden; display: flex; }
+    .slides-container { flex: 1; position: relative; overflow: hidden; }
+    .module-slides { display: none; width: 100%; height: 100%; }
+    .module-slides.active { display: block; }
+
+    .slide {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      display: flex; flex-direction: column; justify-content: flex-start; align-items: center;
+      padding: 1.25rem 1.25rem 3rem 1.25rem; padding-top: 1.5rem;
+      opacity: 0; visibility: hidden;
+      transition: opacity var(--transition), visibility var(--transition);
+      overflow-y: auto; overflow-x: hidden;
+    }
+    .slide .content { margin-top: auto; margin-bottom: auto; }
+    .slide.active { opacity: 1; visibility: visible; }
+    .slide.dark { background: var(--deep-navy); }
+    .slide.black { background: #000; }
+    .slide.gradient { background: linear-gradient(135deg, var(--deep-navy) 0%, #2a1a4a 100%); }
+    .slide.blood { background: linear-gradient(135deg, #1a0a0a 0%, #2d1515 100%); }
+    .slide.hope { background: linear-gradient(135deg, #0a1a0a 0%, #152d15 100%); }
+    .slide.fraud { background: linear-gradient(135deg, #1a1a0a 0%, #2d2515 100%); }
+    .slide.tb { background: linear-gradient(135deg, #0a0a1a 0%, #15152d 100%); }
+    .slide.des { background: linear-gradient(135deg, #1a0a1a 0%, #2d152d 100%); }
+
+    .title { font-family: 'Cormorant Garamond', serif; font-size: clamp(1.4rem, 3.5vw, 2.4rem); font-weight: 700; margin-bottom: 0.6rem; line-height: 1.2; }
+    .title.gold { color: var(--gold); }
+    .title.red { color: var(--red); }
+    .title.green { color: var(--green); }
+    .title.pink { color: var(--pink); }
+
+    .subtitle { font-size: clamp(0.85rem, 1.8vw, 1.1rem); color: rgba(255,255,255,0.7); margin-bottom: 1.25rem; }
+
+    .big-number { font-family: 'Cormorant Garamond', serif; font-size: clamp(2.5rem, 10vw, 6rem); font-weight: 700; line-height: 1; }
+    .big-number.red { color: var(--red); }
+    .big-number.gold { color: var(--gold); }
+    .big-number.green { color: var(--green); }
+
+    .refrain {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.1rem, 2.5vw, 1.7rem);
+      font-style: italic; color: var(--gold);
+      text-align: center; max-width: 700px; line-height: 1.4;
+    }
+    .refrain.warning { color: var(--red); border-left: 4px solid var(--red); padding-left: 1.25rem; text-align: left; }
+    .refrain.hope { color: var(--green); }
+
+    .rhetorical {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1rem, 2.2vw, 1.5rem);
+      color: rgba(255,255,255,0.9);
+      text-align: center; max-width: 600px; line-height: 1.5;
+    }
+    .rhetorical em { color: var(--gold); font-style: normal; }
+
+    .simple-box {
+      background: linear-gradient(135deg, rgba(0,212,170,0.1), rgba(0,0,0,0.2));
+      border: 2px solid var(--teal); border-radius: 10px;
+      padding: 1rem; max-width: 520px; margin: 0.6rem 0;
+    }
+    .simple-box .simple-title { color: var(--teal); font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; margin-bottom: 0.4rem; }
+    .simple-box .simple-text { font-size: 0.9rem; line-height: 1.5; }
+    .simple-box .simple-text strong { color: var(--gold); }
+
+    .story-card {
+      background: rgba(0,0,0,0.3); border-left: 4px solid var(--gold);
+      padding: 1rem 1.25rem; max-width: 600px; margin: 0.6rem 0;
+    }
+    .story-card .place { font-size: 0.65rem; color: var(--gold); letter-spacing: 0.1em; margin-bottom: 0.35rem; }
+    .story-card .narrative { font-family: 'Cormorant Garamond', serif; font-size: 0.95rem; line-height: 1.5; color: rgba(255,255,255,0.9); }
+    .story-card .source { font-size: 0.6rem; color: rgba(255,255,255,0.5); margin-top: 0.6rem; font-style: italic; }
+    .story-card.pink { border-left-color: var(--pink); }
+    .story-card.pink .place { color: var(--pink); }
+
+    /* DECISION TREES */
+    .decision-tree {
+      background: rgba(0,0,0,0.4); border: 2px solid var(--gold);
+      border-radius: 12px; padding: 1rem; max-width: 650px; width: 100%;
+    }
+    .decision-tree h4 { color: var(--gold); font-family: 'Cormorant Garamond', serif; font-size: 0.9rem; margin-bottom: 0.75rem; text-align: center; }
+
+    .tree-row { display: flex; justify-content: center; gap: 0.4rem; margin: 0.3rem 0; flex-wrap: wrap; }
+    .tree-node {
+      background: var(--navy); border: 2px solid var(--gold);
+      border-radius: 6px; padding: 0.4rem 0.6rem;
+      text-align: center; min-width: 70px; font-size: 0.7rem;
+    }
+    .tree-node.root { background: var(--gold); color: var(--navy); font-weight: 700; }
+    .tree-node.question { background: var(--purple); color: white; border-color: var(--purple); }
+    .tree-node.positive { background: rgba(197,48,48,0.3); border-color: var(--red); }
+    .tree-node.negative { background: rgba(34,197,94,0.3); border-color: var(--green); }
+    .tree-node.action { background: var(--teal); color: var(--navy); border-color: var(--teal); }
+    .tree-node.warning { background: var(--orange); color: white; border-color: var(--orange); }
+    .tree-node.tp { background: var(--green); color: white; border-color: var(--green); }
+    .tree-node.fp { background: var(--red); color: white; border-color: var(--red); }
+    .tree-node.fn { background: var(--orange); color: white; border-color: var(--orange); }
+    .tree-node.tn { background: var(--teal); color: var(--navy); border-color: var(--teal); }
+    .tree-node.pink { background: var(--pink); color: white; border-color: var(--pink); }
+    .tree-node small { display: block; font-size: 0.55rem; opacity: 0.85; margin-top: 0.15rem; }
+
+    .tree-arrow { color: var(--gold); font-size: 1rem; text-align: center; margin: 0.15rem 0; }
+    .tree-branch { display: flex; gap: 1.5rem; justify-content: center; margin-top: 0.25rem; flex-wrap: wrap; }
+    .tree-branch-item { display: flex; flex-direction: column; align-items: center; }
+    .tree-label { font-size: 0.55rem; color: rgba(255,255,255,0.6); margin: 0.15rem 0; }
+
+    /* SROC Visualization */
+    .sroc-container {
+      background: rgba(0,0,0,0.5); border: 2px solid var(--purple);
+      border-radius: 12px; padding: 1rem; max-width: 400px; width: 100%;
+    }
+    .sroc-container h4 { color: var(--purple); text-align: center; margin-bottom: 0.75rem; font-family: 'Cormorant Garamond', serif; font-size: 0.9rem; }
+    .sroc-plot {
+      position: relative; width: 100%; height: 200px;
+      background: linear-gradient(135deg, rgba(168,85,247,0.1) 0%, rgba(0,0,0,0.3) 100%);
+      border: 1px solid rgba(255,255,255,0.2); border-radius: 8px;
+    }
+    .sroc-axis-label { position: absolute; font-size: 0.55rem; color: rgba(255,255,255,0.6); }
+    .sroc-axis-label.x { bottom: -18px; left: 50%; transform: translateX(-50%); }
+    .sroc-axis-label.y { top: 50%; left: -40px; transform: rotate(-90deg) translateX(-50%); transform-origin: center; }
+    .sroc-curve { position: absolute; top: 10%; left: 10%; width: 80%; height: 80%; }
+    .sroc-curve svg { width: 100%; height: 100%; }
+    .sroc-dot { position: absolute; width: 8px; height: 8px; background: var(--gold); border-radius: 50%; transform: translate(-50%, -50%); }
+    .sroc-legend { display: flex; gap: 1rem; justify-content: center; margin-top: 0.5rem; font-size: 0.6rem; }
+    .sroc-legend-item { display: flex; align-items: center; gap: 0.25rem; }
+    .sroc-legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+    /* Fagan Nomogram */
+    .fagan-container {
+      background: rgba(0,0,0,0.4); border: 2px solid var(--purple);
+      border-radius: 12px; padding: 1rem; max-width: 550px; width: 100%;
+    }
+    .fagan-container h4 { color: var(--purple); text-align: center; margin-bottom: 0.75rem; font-family: 'Cormorant Garamond', serif; font-size: 0.9rem; }
+    .fagan-visual {
+      display: flex; justify-content: space-between; align-items: stretch;
+      height: 180px; position: relative; padding: 0 0.75rem;
+    }
+    .fagan-scale {
+      display: flex; flex-direction: column; justify-content: space-between;
+      font-size: 0.6rem; color: rgba(255,255,255,0.7); width: 55px; text-align: center;
+    }
+    .fagan-scale-title { font-size: 0.55rem; color: var(--gold); margin-bottom: 0.2rem; }
+    .fagan-line { width: 2px; background: var(--gold); position: relative; }
+    .fagan-marker {
+      position: absolute; width: 10px; height: 10px; border-radius: 50%;
+      background: var(--gold); left: -4px; transform: translateY(-50%);
+    }
+    .fagan-result { font-size: 0.65rem; text-align: center; margin-top: 0.4rem; color: rgba(255,255,255,0.8); }
+
+    /* Interactive Calculator */
+    .calculator {
+      background: rgba(0,0,0,0.4); border: 2px solid var(--teal);
+      border-radius: 12px; padding: 1rem; max-width: 500px; width: 100%;
+    }
+    .calculator h4 { color: var(--teal); text-align: center; margin-bottom: 0.75rem; font-family: 'Cormorant Garamond', serif; font-size: 0.9rem; }
+    .calc-row { display: flex; align-items: center; gap: 0.75rem; margin: 0.5rem 0; }
+    .calc-label { font-size: 0.75rem; min-width: 100px; }
+    .calc-slider { flex: 1; -webkit-appearance: none; height: 6px; border-radius: 3px; background: rgba(255,255,255,0.2); }
+    .calc-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--gold); cursor: pointer; }
+    .calc-value { font-size: 0.8rem; font-weight: 700; color: var(--gold); min-width: 50px; text-align: right; }
+    .calc-result { background: rgba(34,197,94,0.2); padding: 0.75rem; border-radius: 8px; margin-top: 0.75rem; text-align: center; }
+    .calc-result .big { font-size: 1.5rem; font-weight: 700; color: var(--gold); }
+    .calc-result .label { font-size: 0.7rem; color: rgba(255,255,255,0.7); }
+
+    /* 2x2 Table */
+    .matrix-container { background: rgba(0,0,0,0.3); border-radius: 10px; padding: 0.75rem; max-width: 420px; }
+    .matrix-container h4 { color: var(--gold); text-align: center; margin-bottom: 0.6rem; font-family: 'Cormorant Garamond', serif; font-size: 0.85rem; }
+    .matrix-table { width: 100%; border-collapse: collapse; font-size: 0.75rem; }
+    .matrix-table th, .matrix-table td { border: 1px solid rgba(255,255,255,0.2); padding: 0.5rem; text-align: center; }
+    .matrix-table th { background: var(--navy); color: var(--gold); font-size: 0.65rem; }
+    .matrix-table .tp { background: rgba(34,197,94,0.3); }
+    .matrix-table .fp { background: rgba(197,48,48,0.3); }
+    .matrix-table .fn { background: rgba(249,115,22,0.3); }
+    .matrix-table .tn { background: rgba(0,212,170,0.3); }
+
+    /* Worked Example */
+    .worked-example {
+      background: rgba(0,0,0,0.4); border: 2px solid var(--teal);
+      border-radius: 10px; padding: 1rem; max-width: 550px; width: 100%;
+    }
+    .worked-example h4 { color: var(--teal); font-size: 0.85rem; margin-bottom: 0.6rem; }
+    .worked-example .step { margin: 0.4rem 0; font-size: 0.8rem; }
+    .worked-example .step-num { color: var(--gold); font-weight: 700; }
+    .worked-example .calculation { font-family: 'Cormorant Garamond', serif; font-size: 0.95rem; color: var(--gold); margin: 0.25rem 0; }
+    .worked-example .result { background: rgba(34,197,94,0.2); padding: 0.4rem; border-radius: 6px; margin-top: 0.4rem; }
+
+    /* QUADAS-2 */
+    .quadas-container {
+      background: rgba(0,0,0,0.4); border: 2px solid var(--pink);
+      border-radius: 12px; padding: 1rem; max-width: 600px; width: 100%;
+    }
+    .quadas-container h4 { color: var(--pink); text-align: center; margin-bottom: 0.75rem; font-family: 'Cormorant Garamond', serif; font-size: 0.9rem; }
+    .quadas-domain {
+      display: flex; align-items: flex-start; gap: 0.6rem; margin: 0.5rem 0;
+      padding: 0.5rem; background: rgba(255,255,255,0.05); border-radius: 6px;
+    }
+    .quadas-icon { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; flex-shrink: 0; }
+    .quadas-icon.risk { background: var(--red); }
+    .quadas-icon.concern { background: var(--orange); }
+    .quadas-content h5 { font-size: 0.8rem; color: var(--cream); margin-bottom: 0.15rem; }
+    .quadas-content p { font-size: 0.7rem; color: rgba(255,255,255,0.7); }
+
+    .stats-grid { display: flex; gap: 0.6rem; margin: 0.75rem 0; flex-wrap: wrap; justify-content: center; }
+    .stat-box { background: var(--navy); padding: 0.6rem 0.8rem; text-align: center; min-width: 90px; border-radius: 8px; }
+    .stat-value { font-family: 'Cormorant Garamond', serif; font-size: clamp(1.1rem, 2.2vw, 1.4rem); font-weight: 700; }
+    .stat-label { font-size: 0.6rem; opacity: 0.8; margin-top: 0.15rem; }
+
+    .death-toll {
+      background: linear-gradient(135deg, rgba(197,48,48,0.3), rgba(0,0,0,0.5));
+      border: 2px solid var(--red); padding: 1.25rem; text-align: center;
+      max-width: 320px; border-radius: 10px;
+    }
+    .death-toll .number { font-family: 'Cormorant Garamond', serif; font-size: 2.5rem; font-weight: 700; color: var(--red); }
+    .death-toll .label { font-size: 0.8rem; color: rgba(255,255,255,0.8); margin-top: 0.35rem; }
+
+    .lesson-item { display: flex; align-items: flex-start; gap: 0.6rem; margin: 0.4rem 0; max-width: 650px; text-align: left; }
+    .lesson-number {
+      background: var(--gold); color: var(--navy);
+      width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
+      font-weight: 700; flex-shrink: 0; border-radius: 4px; font-size: 0.7rem;
+    }
+    .lesson-content h4 { font-size: 0.85rem; font-weight: 700; color: var(--cream); margin-bottom: 0.1rem; }
+    .lesson-content p { font-size: 0.75rem; color: rgba(255,255,255,0.7); }
+
+    .formula-box {
+      background: rgba(0,0,0,0.4); border: 1px solid var(--purple);
+      border-radius: 8px; padding: 0.6rem 1rem;
+      font-family: 'Cormorant Garamond', serif; font-size: 1rem;
+      text-align: center; max-width: 420px; margin: 0.6rem 0;
+    }
+    .formula-box .formula { color: var(--gold); margin: 0.3rem 0; }
+    .formula-box .label { font-size: 0.7rem; color: rgba(255,255,255,0.6); font-family: 'Source Sans Pro', sans-serif; }
+
+    .gold-line { width: 100px; height: 2px; background: var(--gold); margin: 0.75rem auto; }
+
+    .content { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 850px; }
+
+    .slide.active .animate { animation: fadeUp 0.5s ease-out forwards; }
+    .slide.active .animate.delay-1 { animation-delay: 0.1s; }
+    .slide.active .animate.delay-2 { animation-delay: 0.2s; }
+    .slide.active .animate.delay-3 { animation-delay: 0.3s; }
+    .slide.active .animate.delay-4 { animation-delay: 0.4s; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+    .animate { opacity: 0; }
+
+    .slide-nav {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      display: flex; justify-content: space-between; align-items: flex-end;
+      padding: 0.6rem 0.75rem 0.75rem 0.75rem; z-index: 100; pointer-events: none;
+    }
+    .nav-btn {
+      background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2);
+      color: white; font-size: 1rem; cursor: pointer; opacity: 0.6;
+      padding: 0.35rem 0.5rem; border-radius: 6px; pointer-events: auto; transition: all 0.2s;
+    }
+    .nav-btn:hover { opacity: 1; border-color: var(--gold); }
+    .nav-center { display: flex; flex-direction: column; align-items: center; gap: 0.15rem; pointer-events: auto; }
+    .slide-counter { color: rgba(255,255,255,0.6); font-size: 0.7rem; }
+    .progress { display: flex; gap: 2px; flex-wrap: wrap; justify-content: center; max-width: 160px; }
+    .progress-dot { width: 4px; height: 4px; border-radius: 50%; background: rgba(255,255,255,0.25); cursor: pointer; }
+    .progress-dot.active { background: var(--gold); transform: scale(1.2); }
+
+    .quiz-container { background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); padding: 1rem; max-width: 600px; width: 100%; border-radius: 8px; }
+    .quiz-question { font-family: 'Cormorant Garamond', serif; font-size: 1rem; margin-bottom: 0.6rem; color: var(--gold); line-height: 1.4; }
+    .quiz-options { display: flex; flex-direction: column; gap: 0.35rem; }
+    .quiz-option { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); padding: 0.5rem 0.75rem; cursor: pointer; border-radius: 6px; font-size: 0.8rem; text-align: left; min-height: 44px; }
+    .quiz-option:hover { background: rgba(212,175,55,0.1); border-color: var(--gold); }
+    .quiz-option.correct { background: rgba(34,197,94,0.2); border-color: var(--green); }
+    .quiz-option.incorrect { background: rgba(197,48,48,0.2); border-color: var(--red); }
+    .quiz-feedback { margin-top: 0.6rem; padding: 0.6rem; border-radius: 6px; display: none; font-size: 0.8rem; }
+    .quiz-feedback.show { display: block; }
+    .quiz-feedback.correct { background: rgba(34,197,94,0.2); border: 1px solid var(--green); }
+    .quiz-feedback.incorrect { background: rgba(197,48,48,0.2); border: 1px solid var(--red); }
+
+    .references { background: rgba(0,0,0,0.3); border: 1px solid rgba(212,175,55,0.3); border-radius: 8px; padding: 1rem; max-width: 600px; text-align: left; font-size: 0.65rem; line-height: 1.6; }
+    .references h4 { color: var(--gold); font-size: 0.8rem; margin-bottom: 0.6rem; }
+    .references ol { padding-left: 1rem; }
+    .references li { margin-bottom: 0.3rem; color: rgba(255,255,255,0.8); }
+
+    /* Patient Decision Aid */
+    .decision-aid {
+      background: linear-gradient(135deg, rgba(212,175,55,0.1), rgba(0,0,0,0.3));
+      border: 2px solid var(--gold); border-radius: 12px; padding: 1rem; max-width: 600px; width: 100%;
+    }
+    .decision-aid h4 { color: var(--gold); text-align: center; margin-bottom: 0.75rem; font-family: 'Cormorant Garamond', serif; font-size: 0.9rem; }
+    .decision-aid-row { display: flex; justify-content: space-between; margin: 0.5rem 0; padding: 0.5rem; background: rgba(0,0,0,0.2); border-radius: 6px; }
+    .decision-aid-label { font-size: 0.75rem; }
+    .decision-aid-value { font-size: 0.75rem; font-weight: 700; }
+    .decision-aid-value.benefit { color: var(--green); }
+    .decision-aid-value.harm { color: var(--red); }
+    .decision-aid-question { text-align: center; margin-top: 0.75rem; font-style: italic; color: var(--gold); font-size: 0.85rem; }
+
+    .text-center { text-align: center; }
+    .mobile-menu-toggle{display:none;position:fixed;top:12px;left:12px;z-index:1001;background:#1E2761;border:1px solid #D4AF37;color:#D4AF37;width:40px;height:40px;border-radius:8px;font-size:1.2rem;cursor:pointer;align-items:center;justify-content:center;}
+    @media(max-width:768px){.mobile-menu-toggle{display:flex;}.sidebar{transform:translateX(-100%);transition:transform 0.3s ease;position:fixed;z-index:1000;height:100vh;}.sidebar.open{transform:translateX(0);}.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:999;}.sidebar-overlay.show{display:block;}}
+    .skip-link{position:absolute;top:-40px;left:0;background:#D4AF37;color:#1E2761;padding:8px 16px;z-index:100;transition:top 0.3s;font-family:'Source Sans Pro',sans-serif;text-decoration:none;font-weight:600;}.skip-link:focus{top:0;}
+
+    /* Focus-visible styles for keyboard navigation */
+    :focus-visible {
+      outline: 2px solid var(--gold, #D4AF37);
+      outline-offset: 2px;
+    }
+
+    :focus:not(:focus-visible) {
+      outline: none;
+    }
+
+    button:focus-visible,
+    a:focus-visible,
+    [role="button"]:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible {
+      outline: 2px solid var(--gold, #D4AF37);
+      outline-offset: 2px;
+      box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.3);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+
+    /* ==================== STORY-BOX PATTERN ==================== */
+    .story-box {
+      background: linear-gradient(135deg, rgba(0,0,0,0.5), rgba(30,39,97,0.3));
+      border: 2px solid var(--gold);
+      border-radius: 14px;
+      padding: 1.25rem;
+      max-width: 680px;
+      width: 100%;
+    }
+    .story-opener {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1rem, 2vw, 1.3rem);
+      font-style: italic;
+      color: var(--gold);
+      text-align: center;
+      margin-bottom: 1rem;
+      line-height: 1.4;
+    }
+    .real-data-box {
+      background: rgba(0,0,0,0.4);
+      border-left: 4px solid var(--teal);
+      border-radius: 0 8px 8px 0;
+      padding: 0.75rem 1rem;
+      margin-bottom: 1rem;
+    }
+    .real-data-box h4 {
+      color: var(--teal);
+      font-size: 0.6rem;
+      letter-spacing: 0.15em;
+      font-weight: 700;
+      margin-bottom: 0.4rem;
+    }
+    .real-data-box p {
+      font-size: 0.8rem;
+      line-height: 1.5;
+      color: rgba(255,255,255,0.9);
+    }
+    .data-highlight {
+      color: var(--gold);
+      font-weight: 700;
+    }
+    .decision-tree-header {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--gold);
+      text-align: center;
+      margin-bottom: 0.5rem;
+    }
+    .decision-scenario {
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.8);
+      text-align: center;
+      margin-bottom: 0.75rem;
+      line-height: 1.4;
+    }
+    .decision-paths {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .decision-path {
+      flex: 1;
+      min-width: 200px;
+      max-width: 290px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 10px;
+      padding: 0.75rem;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.2s, border-color 0.2s;
+      border: 2px solid transparent;
+    }
+    .decision-path:hover, .decision-path:focus {
+      transform: translateY(-2px);
+    }
+    .decision-path.path-a {
+      border-color: var(--red);
+    }
+    .decision-path.path-a:hover, .decision-path.path-a:focus {
+      border-color: var(--red);
+      box-shadow: 0 0 12px rgba(197,48,48,0.3);
+    }
+    .decision-path.path-b {
+      border-color: var(--green);
+    }
+    .decision-path.path-b:hover, .decision-path.path-b:focus {
+      border-color: var(--green);
+      box-shadow: 0 0 12px rgba(34,197,94,0.3);
+    }
+    .path-label {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.4rem;
+    }
+    .path-a .path-label { color: var(--red); }
+    .path-b .path-label { color: var(--green); }
+    .path-choice {
+      font-size: 0.78rem;
+      color: rgba(255,255,255,0.9);
+      margin-bottom: 0.3rem;
+    }
+    .path-arrow {
+      font-size: 1.1rem;
+      color: var(--gold);
+      margin: 0.15rem 0;
+    }
+    .path-consequence {
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.7);
+      margin-bottom: 0.3rem;
+      line-height: 1.4;
+    }
+    .path-outcome {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.3rem 0.5rem;
+      border-radius: 4px;
+      display: inline-block;
+    }
+    .path-a .path-outcome { background: rgba(197,48,48,0.3); color: var(--red); }
+    .path-b .path-outcome { background: rgba(34,197,94,0.3); color: var(--green); }
+    .story-revelation {
+      margin-top: 1rem;
+      background: linear-gradient(135deg, rgba(212,175,55,0.15), rgba(0,0,0,0.2));
+      border: 1px solid rgba(212,175,55,0.4);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      text-align: center;
+    }
+    .revelation-label {
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      color: var(--gold);
+      margin-bottom: 0.3rem;
+    }
+    .revelation-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.9);
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<button aria-expanded="false" aria-label="Toggle navigation menu" class="mobile-menu-toggle" onclick="toggleSidebar()">☰</button>
+<div class="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show');"></div>
+<div class="course-container">
+<nav aria-label="课程导航" class="sidebar" role="navigation">
+<div class="sidebar-header">
+<a href="index.html" onmouseout="this.style.color='rgba(212,175,55,0.7)'" onmouseover="this.style.color='#D4AF37'" style="display:block;font-size:0.7rem;color:rgba(212,175,55,0.7);text-decoration:none;margin-bottom:0.5rem;">← Course Library</a>
+<h1>当测试说谎时</h1>
+<p>终极 DTA 课程 (V4)</p>
+</div>
+<div class="module-list" id="moduleList"></div>
+<div class="sidebar-footer">
+        "Every positive has a price.<br/>Every negative has a cost."
+      </div>
+</nav>
+<main class="main-content" id="main-content">
+<header class="content-header">
+<div class="breadcrumb">DTA &gt; <span id="currentModule">The Fraud</span></div>
+<div class="header-actions">
+<button class="btn" onclick="goToModule(20)">References</button>
+<button class="btn primary" onclick="nextSlide()">Continue</button>
+</div>
+</header>
+<div class="content-body">
+<div class="slides-container">
+ ====================== 第 1 单元：欺诈 (Theranos) ==================== 
+<div class="module-slides active" data-module="1">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  你没听过这个故事吗？女人<br/>
+                  who promised to <em>用一滴血改变世界</em>,<br/>
+                  who raised billions on a test that <em>never worked</em>?
+                </div>
+</div>
+</div>
+<div class="slide fraud">
+<div class="content text-center">
+<div class="title gold animate">Palo Alto, 2003</div>
+<div class="story-card animate delay-1">
+<div class="place">STANFORD UNIVERSITY</div>
+<div class="narrative">
+                    一名十九岁的女孩怀着一个愿景辍学：用一滴血进行数百次血液测试。
+                    <br/><br/>
+                    Investors believed. Walgreens believed. The Pentagon believed.
+                    <br/><br/>
+<strong>They gave her $9 billion.</strong>
+<br/><br/>
+                    但测试给出了错误的结果。患者被告知他们感染了艾滋病毒，但实际上他们并没有感染。当患者 <strong>dying</strong>.
+                  </div>
+<div class="source">Carreyrou J. Bad Blood. 2018</div>
+</div>
+</div>
+</div>
+<div class="slide blood">
+<div class="content text-center">
+<div class="title red animate">欺骗决策树</div>
+<div class="decision-tree animate delay-1">
+<h4>What Theranos Did vs. What Should Happen</h4>
+<div class="tree-row">
+<div class="tree-node root">New Diagnostic Test</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">SHOULD DO</div>
+<div class="tree-node action">Validate Against Gold Standard</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node action">Publish TP/FP/FN/TN</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node tp">FDA Approval</div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">THERANOS DID</div>
+<div class="tree-node warning">Skip Validation</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node warning">Hide Failures</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node fp">Harm Patients</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  时，患者被告知他们的血液是正常的，并且测试撒了谎，<br/>
+                  并且谎言是确定无疑的，<br/>
+                  并且没有人要求 2×2桌子。”
+                </div>
+<div class="gold-line animate delay-2"></div>
+<p class="animate delay-3" style="color:rgba(255,255,255,0.6);font-style:italic;font-size:0.85rem;">
+                  这就是我们研究诊断测试准确性的原因。
+                </p>
+</div>
+</div>
+</div>
+ ======================模块 2：四个结果==================== 
+<div class="module-slides" data-module="2">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  When a test speaks,<br/>
+                  只有 <em>four possible truths</em>.
+                  <br/><br/>
+                  两个是祝福。其中两个是诅咒。
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<p class="story-opener">当系统评价平等地信任每项研究时会发生什么？</p>
+<div class="real-data-box">
+<h4>REAL DATA</h4>
+<p>DTA 系统评价中的敏感性分析一致表明，排除高偏倚风险研究会改变汇总估计值。在乳房X光检查筛查中，采用非盲解释的病例对照设计往往会提高敏感性。一般原则有据可查：QUADAS-2 质量评估可以在消除有偏见的研究后将汇总敏感性改变 <span class="data-highlight">10-15 percentage points</span> 。</p>
+</div>
+<div class="decision-tree">
+<div class="decision-tree-header">QUADAS-2 乳房 X 光检查审计</div>
+<div class="decision-scenario">审查小组汇集了 15 项乳房 X 光 DTA 研究。由于病例对照设计和非盲解释，其中五个结果存在较高偏倚风险。</div>
+<div class="decision-paths">
+<div class="decision-path path-a" role="button" tabindex="0">
+<div class="path-label">路径 A：汇集所有研究</div>
+<div class="path-choice">Include all 15 studies regardless of quality</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">Biased 2x2 tables inflate TP counts, producing a pooled sensitivity of 87%</div>
+<div class="path-outcome">OUTCOME: Overconfidence in screening accuracy</div>
+</div>
+<div class="decision-path path-b" role="button" tabindex="0">
+<div class="path-label">PATH B: Apply Quality Assessment</div>
+<div class="path-choice">Exclude high risk-of-bias studies using QUADAS-2</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">Remaining 10 low-RoB studies yield sensitivity of approximately 75%</div>
+<div class="path-outcome">OUTCOME: Honest numbers guide honest decisions</div>
+</div>
+</div>
+</div>
+<div class="story-revelation">
+<div class="revelation-label">THE REVELATION</div>
+<div class="revelation-text">四种结果（TP、FP、FN、TN）只有在生成它们的研究值得信赖的情况下才值得信赖。有偏见的研究会污染整个 2x2 表。</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">结果树</div>
+<div class="decision-tree animate delay-1">
+<h4>Every Test Result Has a Reality Behind It</h4>
+<div class="tree-row"><div class="tree-node root">Patient Tested</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">真相是什么？</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">Has Disease</div>
+<div class="tree-node positive">D+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row" style="gap:0.4rem;">
+<div class="tree-node tp">TP<small>Test +</small></div>
+<div class="tree-node fn">FN<small>Test -</small></div>
+</div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">No Disease</div>
+<div class="tree-node negative">D-</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row" style="gap:0.4rem;">
+<div class="tree-node fp">FP<small>Test +</small></div>
+<div class="tree-node tn">TN<small>Test -</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">神圣的 2×2 桌子</div>
+<div class="matrix-container animate delay-1">
+<h4>HIV Rapid Test Example (Real Data)</h4>
+<table class="matrix-table">
+<tr><th></th><th>HIV+</th><th>HIV-</th><th>Total</th></tr>
+<tr><th>Test +</th><td class="tp"><strong>98</strong></td><td class="fp"><strong>3</strong></td><td>101</td></tr>
+<tr><th>Test -</th><td class="fn"><strong>2</strong></td><td class="tn"><strong>895</strong></td><td>897</td></tr>
+<tr><th>Total</th><td>100</td><td>898</td><td>998</td></tr>
+</table>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">从此表中得出所有真相</div>
+<div class="simple-text">
+<strong>Sensitivity</strong> = 98/100 = 98%<br/>
+<strong>Specificity</strong> = 895/898 = 99.7%
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  "Two outcomes save. Two outcomes harm.<br/>
+                  TP， TN：测试说的是真。<br/>
+                  FP、FN：测试说谎了。<br/>
+                  Know them by name, for they determine fate."
+                </div>
+</div>
+</div>
+</div>
+ ====================== 模块 3：HIV 窗口期 ==================== 
+<div class="module-slides" data-module="3">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  你没听说过那条血吗？进行了测试，<br/>
+                  found <em>clean</em>,<br/>
+                  并给予数千人——<br/>
+                  while <em>death swam within it</em>?
+                </div>
+</div>
+</div>
+<div class="slide blood">
+<div class="content text-center">
+<div class="title red animate">血液供应危机，1985年</div>
+<div class="story-card animate delay-1">
+<div class="place">UNITED STATES</div>
+<div class="narrative">
+                    When HIV testing began, doctors celebrated: they could now screen the blood supply.
+                    <br/><br/>
+                    但是测试发生了 <strong>window period</strong>——感染后几周，病毒存在，但对 <strong>undetectable</strong>.
+                    <br/><br/>
+                    血液进行了测试。血液呈“阴性”。输血了。
+                    <br/><br/>
+<strong>8,000-12,000 Americans</strong> 在更好的测试关闭窗口之前通过输血被感染。
+                  </div>
+<div class="source">CDC. MMWR. 1987;36(49):833-840</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">The Window Period Decision Tree</div>
+<div class="decision-tree animate delay-1">
+<h4>Why False Negatives Are Deadly</h4>
+<div class="tree-row"><div class="tree-node root">Person Recently Infected</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">Time Since Infection?</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">&lt; 2 weeks</div>
+<div class="tree-node fn">Test NEGATIVE<small>Virus present!</small></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node fp" style="background:var(--blood-red);">Blood Donated<small>Others infected</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">&gt; 4 weeks</div>
+<div class="tree-node tp">Test POSITIVE<small>Correctly detected</small></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node action">Blood Discarded<small>Supply safe</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">敏感性随时间变化</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box">
+<div class="stat-value" style="color:var(--red);">0%</div>
+<div class="stat-label">Day 1-7<br/>Eclipse period</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--orange);">~50%</div>
+<div class="stat-label">Day 14<br/>Seroconversion</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--gold);">~95%</div>
+<div class="stat-label">Day 21<br/>Most detected</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--green);">99.9%</div>
+<div class="stat-label">Day 45+<br/>Window closed</div>
+</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">THE LESSON</div>
+<div class="simple-text">
+<strong>敏感性不固定。</strong> It depends on <em>when</em> you test.
+                    A "99% sensitive" test may be 0% sensitive in early infection.
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  ”测试说“干净”，<br/>
+                  因为病毒还没有露面。<br/>
+                  血液被共享，<br/>
+                  感染传播到了无辜者。”
+                </div>
+</div>
+</div>
+</div>
+ ====================== 模块 4：DES TRAGEDY ==================== 
+<div class="module-slides" data-module="4">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  您没有听说过给母亲服用的药丸<br/>
+                  to <em>protect their pregnancies</em>,<br/>
+                  that planted <em>cancer in their daughters</em><br/>
+                  twenty years before it bloomed?
+                </div>
+</div>
+</div>
+<div class="slide des">
+<div class="content text-center">
+<div class="title pink animate">DES 悲剧，1938-1971</div>
+<div class="story-card pink animate delay-1">
+<div class="place">UNITED STATES &amp; EUROPE</div>
+<div class="narrative">
+                    Diethylstilbestrol (DES) was given to millions of pregnant women to prevent miscarriage.
+                    <br/><br/>
+                    No proper clinical trial was ever conducted. Doctors <strong>assumed</strong> it worked
+                    because it seemed reasonable.
+                    <br/><br/>
+                    Decades later, their daughters developed a rare cancer: <strong>clear cell adenocarcinoma
+                    of the vagina</strong>. A cancer so rare it was a diagnostic signal in itself.
+                    <br/><br/>
+<strong>5-10 million women</strong> 的危害已经暴露出来。
+                  </div>
+<div class="source">Herbst AL et al. N Engl J Med. 1971;284:878-881</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">验证决策树</div>
+<div class="decision-tree animate delay-1">
+<h4>What Should Have Happened</h4>
+<div class="tree-row"><div class="tree-node root">New Medical Intervention</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">是否经过了正确测试？</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">YES</div>
+<div class="tree-node action">Randomized Trial</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node action">Long-term Follow-up</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node tp">Know True Effects<small>好处和危害</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">NO (DES)</div>
+<div class="tree-node warning">Assumption Only</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node warning">Widespread Use</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node fp">Hidden Harm<small>Discovered too late</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">诊断信号</div>
+<div class="simple-box animate delay-1">
+<div class="simple-title">稀有性成为证据</div>
+<div class="simple-text">
+                    阴道透明细胞腺癌在年轻女性中非常罕见，以至于
+                    <strong>7 cases in one hospital</strong> triggered an investigation.
+                    <br/><br/>
+                    簇本身就是诊断信号测试：
+                    <br/><strong>Sensitivity to DES exposure: nearly 100%</strong>
+<br/>如果您在这个年龄患有这种癌症，那么您几乎肯定已经暴露了。
+                  </div>
+</div>
+<div class="stats-grid animate delay-2">
+<div class="stat-box" style="background:var(--pink);">
+<div class="stat-value" style="color:white;">1:1000</div>
+<div class="stat-label">Risk of clear cell<br/>cancer in DES daughters</div>
+</div>
+<div class="stat-box" style="background:var(--red);">
+<div class="stat-value" style="color:white;">5-10M</div>
+<div class="stat-label">Women exposed<br/>worldwide</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  “母亲们满怀希望地服用了避孕药，<br/>
+                  女儿们在阴影中成长，<br/>
+                  二十年后，癌症绽放—<br/>
+                  a diagnosis that indicted a generation of medicine."
+                </div>
+</div>
+</div>
+</div>
+ ==================== 模块 5：灵敏度和特异性 ==================== 
+<div class="module-slides" data-module="5">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  A test has two virtues and two vices.
+                  <br/><br/>
+<em>Sensitivity</em>：它能找到病人吗？
+                  <br/><br/>
+<em>Specificity</em>：它能保护健康人吗？
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<p class="story-opener">在现实世界中使用测试时，您能相信实验室提供的敏感度数字吗？</p>
+<div class="real-data-box">
+<h4>REAL DATA</h4>
+<p>The BinaxNOW COVID-19 rapid antigen test reported sensitivity of approximately <span class="data-highlight">84-97%</span> in symptomatic individuals in manufacturer studies. However, real-world evaluations found sensitivity as low as <span class="data-highlight">35-64%</span> 在无症状个体中，取决于病毒载量和时间。 Cochrane 快速抗原检测综述（Dinnes 2022）证实，在 100 多项研究评估中，有症状人群的平均敏感性为 <span class="data-highlight">73%</span> ，无症状人群的平均敏感性仅为 <span class="data-highlight">55%</span> 。</p>
+</div>
+<div class="decision-tree">
+<div class="decision-tree-header">The COVID Rapid Test Paradox: 2020-2021</div>
+<div class="decision-scenario">A university plans to screen asymptomatic students weekly before allowing campus access. They read the manufacturer's claim of high sensitivity.</div>
+<div class="decision-paths">
+<div class="decision-path path-a" role="button" tabindex="0">
+<div class="path-label">PATH A: Trust Lab Sensitivity</div>
+<div class="path-choice">Rely on manufacturer's high sensitivity figure</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">病毒载量低的无症状携带者检测呈阴性并上课，传播了病毒</div>
+<div class="path-outcome">OUTCOME: False sense of safety; campus outbreaks</div>
+</div>
+<div class="decision-path path-b" role="button" tabindex="0">
+<div class="path-label">路径B：需求真实世界数据</div>
+<div class="path-choice">在实际目标人群（无症状学生）中寻求研究</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">Discover sensitivity is roughly 55% in asymptomatic people; add serial testing and other safeguards</div>
+<div class="path-outcome">OUTCOME: Layered safety catches more cases</div>
+</div>
+</div>
+</div>
+<div class="story-revelation">
+<div class="revelation-label">THE REVELATION</div>
+<div class="revelation-text">敏感性不是测试的固定属性。它随着人口、疾病阶段和环境而变化。总是询问： <em>whom</em>?</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">灵敏度：猎人</div>
+<div class="formula-box animate delay-1">
+<div class="label">THE FORMULA</div>
+<div class="formula">Sensitivity = TP / (TP + FN)</div>
+<div class="label">"Of all the sick, how many did we catch?"</div>
+</div>
+<div class="worked-example animate delay-2">
+<h4>Worked Example: COVID PCR Test</h4>
+<div class="step"><span class="step-num">Given:</span> 200 infected patients tested</div>
+<div class="step">TP = 196 (correctly positive), FN = 4 (missed)</div>
+<div class="calculation">Sensitivity = 196 / (196 + 4) = 196/200 = <strong>98%</strong></div>
+<div class="result">Interpretation: Test catches 98 of every 100 infected people</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">特异性：守护者</div>
+<div class="formula-box animate delay-1">
+<div class="label">THE FORMULA</div>
+<div class="formula">Specificity = TN / (TN + FP)</div>
+<div class="label">"Of all the healthy, how many did we spare?"</div>
+</div>
+<div class="worked-example animate delay-2">
+<h4>Worked Example: Same COVID PCR Test</h4>
+<div class="step"><span class="step-num">Given:</span> 1000 uninfected people tested</div>
+<div class="step">TN = 999 (correctly negative), FP = 1 (false alarm)</div>
+<div class="calculation">Specificity = 999 / (999 + 1) = 999/1000 = <strong>99.9%</strong></div>
+<div class="result">Interpretation: Test correctly clears 999 of every 1000 healthy people</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">记忆法则</div>
+<div class="decision-tree animate delay-1">
+<h4>When to Use Which Test</h4>
+<div class="tree-row"><div class="tree-node question">你需要什么？</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">RULE OUT disease</div>
+<div class="tree-node action">Use HIGH SENSITIVITY</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node tp" style="font-size:0.6rem;">SnNout<small>Sensitive Negative = OUT</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">RULE IN disease</div>
+<div class="tree-node action">Use HIGH SPECIFICITY</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node tp" style="font-size:0.6rem;">SpPin<small>Specific Positive = IN</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  “敏感会传染疾病。<br/>
+                  特异性可以避免井井有条。<br/>
+                  But no test masters both perfectly—<br/>
+                  这是我们所承受的负担。”
+                </div>
+</div>
+</div>
+</div>
+ ====================== 模块 6：基本速率谬误==================== 
+<div class="module-slides" data-module="6">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  你没见过医生吗<br/>
+                  who saw <em>99% accurate</em><br/>
+                  and believed a positive result meant <em>99% certainty</em>?
+                  <br/><br/>
+<em>这是医学上最致命的错误。</em>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">基本利率谬误</div>
+<div class="story-card animate delay-1">
+<div class="place">THE PUZZLE</div>
+<div class="narrative">
+                    A disease affects 1 in 1000 people.<br/>
+                    测试的敏感性为 99%，特异性为 99%。<br/>
+                    A patient tests positive.
+                    <br/><br/>
+<strong>他们患有这种疾病的概率是多少？</strong>
+<br/><br/>
+                    Most doctors say ~99%. <em>真正的答案大约是9%。</em>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">数学揭晓</div>
+<div class="worked-example animate delay-1">
+<h4>Testing 100,000 People (Prevalence 1/1000)</h4>
+<div class="step"><span class="step-num">Step 1:</span> 100 have disease, 99,900 healthy</div>
+<div class="step"><span class="step-num">Step 2:</span> Of 100 sick: 99 test positive (TP), 1 negative (FN)</div>
+<div class="step"><span class="step-num">Step 3:</span> Of 99,900 healthy: 999 test positive (FP), 98,901 negative (TN)</div>
+<div class="step"><span class="step-num">Step 4:</span> Total positives = 99 + 999 = <strong>1,098</strong></div>
+<div class="calculation">PPV = TP / All Positives = 99 / 1,098 = <strong>9%</strong></div>
+<div class="result">91% 的阳性结果是假阳性！</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Interactive Base Rate Calculator</div>
+<div class="calculator animate delay-1">
+<h4>See How Prevalence Changes PPV</h4>
+<div class="calc-row">
+<div class="calc-label">Prevalence:</div>
+<input class="calc-slider" id="prevSlider" max="50" min="0.1" oninput="updateCalc()" step="0.1" type="range" value="1"/>
+<div class="calc-value" id="prevValue">1%</div>
+</div>
+<div class="calc-row">
+<div class="calc-label">Sensitivity:</div>
+<input class="calc-slider" id="sensSlider" max="100" min="50" oninput="updateCalc()" step="1" type="range" value="99"/>
+<div class="calc-value" id="sensValue">99%</div>
+</div>
+<div class="calc-row">
+<div class="calc-label">Specificity:</div>
+<input class="calc-slider" id="specSlider" max="100" min="50" oninput="updateCalc()" step="1" type="range" value="99"/>
+<div class="calc-value" id="specValue">99%</div>
+</div>
+<div class="calc-result">
+<div class="big" id="ppvResult">9%</div>
+<div class="label">Positive Predictive Value (PPV)</div>
+<div id="fpRate" style="font-size:0.7rem;color:rgba(255,255,255,0.6);margin-top:0.3rem;">91% 的阳性结果是误报</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">流行率决策树</div>
+<div class="decision-tree animate delay-1">
+<h4>Same Test, Different Settings</h4>
+<div class="tree-row"><div class="tree-node root">Test: 99% Sens, 99% Spec</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">Where Is Testing Done?</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">General Pop<br/>0.1%</div>
+<div class="tree-node warning">PPV = 9%<small>91% false +</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">High-Risk<br/>10%</div>
+<div class="tree-node action">PPV = 92%<small>8% false +</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">Confirmatory<br/>50%</div>
+<div class="tree-node tp">PPV = 99%<small>1% false +</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  “医生说‘99%准确’，<br/>
+                  病人听到“99%确定”<br/>
+                  两人都被骗了——<br/>
+                  因为他们忘了问：这种疾病有多罕见？”
+                </div>
+</div>
+</div>
+</div>
+<!-- ==================== MODULE 7: TB GeneXpert ==================== -->
+<div class="module-slides" data-module="7">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  您有没有听说过被称为<br/>
+                  that could find TB in two hours,<br/>
+                  但错过了 <em>revolutionary</em>—<br/>
+                  GeneXpert 故事的机器 <em>drug-resistant</em> strains?
+                </div>
+</div>
+</div>
+<div class="slide tb">
+<div class="content text-center">
+<div class="title gold animate">，南方非洲</div>
+<div class="story-card animate delay-1">
+<div class="place">CAPE TOWN, 2010</div>
+<div class="narrative">
+                    一个世纪以来，结核病诊断需要培养细菌数周。然后是 GeneXpert： <strong>2 hours</strong>.
+                    <br/><br/>
+                    South Africa deployed it nationwide. The WHO endorsed it.
+                    <br/><br/>
+                    的结果，但在 <strong>low bacterial loads</strong>—often HIV co-infected—
+                    sensitivity dropped to <strong>67%</strong>. One in three cases missed.
+                    <br/><br/>
+                    患者中，为了检测利福平耐药性，它错过了 <strong>5%</strong> 耐药病例。这些患者接受了错误的治疗。耐药结核病传播。
+                  </div>
+<div class="source">Steingart KR et al. Cochrane Database Syst Rev. 2014;1:CD009593</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">TB Diagnosis Decision Tree</div>
+<div class="decision-tree animate delay-1">
+<h4>当 GeneXpert 不够时</h4>
+<div class="tree-row"><div class="tree-node root">Suspected TB Patient</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node action">GeneXpert Test</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node tp">Positive</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node question">Rifampicin?</div>
+<div class="tree-branch" style="gap:0.3rem;">
+<div class="tree-branch-item">
+<div class="tree-node tp" style="font-size:0.55rem;">Sensitive<small>Standard Tx</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node fp" style="font-size:0.55rem;">Resistant<small>MDR-TB Tx</small></div>
+</div>
+</div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node warning">Negative</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node question">HIV+ or High Suspicion?</div>
+<div class="tree-branch" style="gap:0.3rem;">
+<div class="tree-branch-item">
+<div class="tree-node action" style="font-size:0.55rem;">Yes<small>Culture needed</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node tn" style="font-size:0.55rem;">No<small>Likely negative</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Sensitivity by Patient Type</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box" style="background:var(--green);">
+<div class="stat-value" style="color:white;">98%</div>
+<div class="stat-label">Smear-positive<br/>(high bacterial load)</div>
+</div>
+<div class="stat-box" style="background:var(--orange);">
+<div class="stat-value" style="color:white;">67%</div>
+<div class="stat-label">Smear-negative<br/>(low bacterial load)</div>
+</div>
+<div class="stat-box" style="background:var(--red);">
+<div class="stat-value" style="color:white;">61%</div>
+<div class="stat-label">HIV co-infected<br/>(immune suppressed)</div>
+</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">THE LESSON</div>
+<div class="simple-text">
+                    临床试验中的测试敏感性可能与您的患者的敏感性不匹配。
+                    <strong>了解您的人群。</strong>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  ”机器说“阴性”，<br/>
+                  医生相信了机器，<br/>
+                  病人带着肺结核回家了，<br/>
+                  咳嗽阻力进入了世界。”
+                </div>
+</div>
+</div>
+</div>
+ ==================== 模块 8：PSA 争议==================== 
+<div class="module-slides" data-module="8">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  你没听说过男性测试吗<br/>
+                  发现了癌症 <em>never kill</em>,<br/>
+                  并导致治疗 <em>destroyed lives</em>?
+                </div>
+</div>
+</div>
+<div class="slide blood">
+<div class="content text-center">
+<div class="title red animate">PSA 筛查悲剧</div>
+<div class="story-card animate delay-1">
+<div class="place">UNITED STATES, 1990s-2010s</div>
+<div class="narrative">
+                    PSA (Prostate-Specific Antigen) could detect prostate cancer early.
+                    <br/><br/>
+                    医生对数百万男性进行了筛查。发现了癌症。前列腺被切除。
+                    <br/><br/>
+                    但其中许多“癌症”永远不会引起症状。手术造成 <strong>阳痿和失禁</strong> in men who
+                    <strong>would have died of old age, not cancer</strong>.
+                  </div>
+<div class="source">Moyer VA. Ann Intern Med. 2012;157:120-134</div>
+</div>
+<div class="story-box animate delay-2" style="margin-top:1rem;">
+<div class="decision-tree">
+<div class="decision-tree-header">PSA筛查困境的敏感性：2012</div>
+<div class="decision-scenario">一位 60 岁的男性向他的医生询问有关 PSA 筛查的问题。 PSA 在 4.0 ng/mL 临界值时对高级别癌症的敏感性约为 21%，但可检测到许多惰性癌症。</div>
+<div class="decision-paths">
+<div class="decision-path path-a" role="button" tabindex="0">
+<div class="path-label">PATH A: Screen All Men</div>
+<div class="path-choice">对 50 岁以上的所有男性进行常规 PSA 筛查</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">13 年来每 1,000 名筛查者：预防了 1-2 例死亡，但误报了 100 多次30-40 名男性因治疗惰性癌症而导致阳痿或失禁</div>
+<div class="path-outcome">OUTCOME: Net harm exceeds benefit at population level</div>
+</div>
+<div class="decision-path path-b" role="button" tabindex="0">
+<div class="path-label">PATH B: Shared Decision-Making</div>
+<div class="path-choice">讨论危害与益处；根据风险因素、预期寿命和患者价值观进行个体化</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">High-risk men can choose screening; low-risk men can decline; active surveillance replaces immediate surgery for low-grade findings</div>
+<div class="path-outcome">OUTCOME: Fewer unnecessary treatments; patient autonomy preserved</div>
+</div>
+</div>
+</div>
+<div class="story-revelation">
+<div class="revelation-label">THE REVELATION</div>
+<div class="revelation-text">高检出率的测试在发现不需要发现的情况时可能弊大于利。过度诊断是惰性疾病高敏感性的隐性成本。</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">伤害的数字</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box" style="background:var(--green);">
+<div class="stat-value" style="color:white;">1</div>
+<div class="stat-label">生命被拯救<br/>prostate cancer<br/>per 1000 screened</div>
+</div>
+<div class="stat-box" style="background:var(--red);">
+<div class="stat-value" style="color:white;">30-40</div>
+<div class="stat-label">Men made impotent<br/>or incontinent<br/>per 1000 screened</div>
+</div>
+<div class="stat-box" style="background:var(--orange);">
+<div class="stat-value" style="color:white;">100+</div>
+<div class="stat-label">False positives<br/>(biopsies, anxiety)<br/>per 1000 screened</div>
+</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">THE REVERSAL</div>
+<div class="simple-text">
+                    In 2012, the US Preventive Services Task Force recommended <strong>against</strong>
+                    常规 PSA 筛查。测试发现了太多不需要发现的东西。
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Patient Decision Aid: PSA Screening</div>
+<div class="decision-aid animate delay-1">
+<h4>如果对 1,000 名 55-69 岁的男性进行 13 年筛查</h4>
+<div class="decision-aid-row">
+<div class="decision-aid-label">Deaths from prostate cancer prevented</div>
+<div class="decision-aid-value benefit">1-2 men</div>
+</div>
+<div class="decision-aid-row">
+<div class="decision-aid-label">Men who will have false positive requiring biopsy</div>
+<div class="decision-aid-value harm">100-120 men</div>
+</div>
+<div class="decision-aid-row">
+<div class="decision-aid-label">被诊断患有永远不会伤害他们的癌症的男性</div>
+<div class="decision-aid-value harm">20-50 men</div>
+</div>
+<div class="decision-aid-row">
+<div class="decision-aid-label">Men left impotent or incontinent from treatment</div>
+<div class="decision-aid-value harm">30-40 men</div>
+</div>
+<div class="decision-aid-question">您可以接受这种权衡吗？</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  “测试发现了影子，<br/>
+                  然后外科医生切开，<br/>
+                  那个人还活着——无能、大小便失禁——<br/>
+                  患有永远不会醒来的癌症。”
+                </div>
+</div>
+</div>
+</div>
+ ====================== 第 9 单元：肌钙蛋白和心脏病 ==================== 
+<div class="module-slides" data-module="9">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  您没有听说过那个有胸部的男人吗疼痛<br/>
+                  其第一个肌钙蛋白是 <em>normal</em>,<br/>
+                  被送回家-<br/>
+                  并在早上之前死亡？
+                </div>
+</div>
+</div>
+<div class="slide blood">
+<div class="content text-center">
+<div class="title red animate">肌钙蛋白计时问题</div>
+<div class="story-card animate delay-1">
+<div class="place">EMERGENCY DEPARTMENTS WORLDWIDE</div>
+<div class="narrative">
+                    肌钙蛋白是心脏病诊断的金标准。但需要 <strong>3-6 hours</strong> to rise after myocardial injury.
+                    <br/><br/>
+                    A patient arrives one hour after chest pain begins.
+                    Troponin is tested: <strong>normal</strong>.
+                    "You're fine. Go home."
+                    <br/><br/>
+                    心脏快要死了。蛋白质还没有泄漏。
+                    <br/><br/>
+                    Studies show <strong>2-5%</strong> of MI patients sent home from ED die within 30 days.
+                  </div>
+<div class="source">Pope JH et al. N Engl J Med. 2000;342:1163-1170</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Serial Testing Decision Tree</div>
+<div class="decision-tree animate delay-1">
+<h4>二肌钙蛋白协议</h4>
+<div class="tree-row"><div class="tree-node root">Chest Pain Patient</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node action">First Troponin</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node tp">Elevated</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node action">Treat as MI</div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node warning">Normal</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node question">When Did Pain Start?</div>
+<div class="tree-branch" style="gap:0.3rem;">
+<div class="tree-branch-item">
+<div class="tree-label">&lt;6 hrs</div>
+<div class="tree-node action" style="font-size:0.55rem;">Wait 3 hrs<small>Repeat troponin</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">&gt;6 hrs</div>
+<div class="tree-node tn" style="font-size:0.55rem;">Low risk<small>Consider d/c</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">High-Sensitivity Troponin</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box">
+<div class="stat-value" style="color:var(--orange);">~70%</div>
+<div class="stat-label">Conventional troponin<br/>sensitivity at 0 hrs</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--green);">~95%</div>
+<div class="stat-label">hs-Troponin<br/>sensitivity at 0 hrs</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--gold);">99%</div>
+<div class="stat-label">hs-Troponin<br/>at 3 hrs serial</div>
+</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">THE TRADE-OFF</div>
+<div class="simple-text">
+                    High-sensitivity troponin catches more heart attacks early.
+                    But it also has more false positives—elevated in kidney disease,
+                    heart failure, sepsis, and marathon runners.
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  “测试结果显示‘正常’，<br/>
+                  因为心脏刚刚开始死亡。<br/>
+                  病人是放心，<br/>
+                  and went home to finish dying."
+                </div>
+</div>
+</div>
+</div>
+ ==================== 模块 10：似然比 ==================== 
+<div class="module-slides" data-module="10">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  灵敏度描述了测试。<br/>
+                  特异性描述了测试。<br/>
+<br/>
+                  但病人问：<br/>
+<em>"I tested positive. What are MY chances?"</em>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<p class="story-opener">如果已发表的测试敏感性高于真实情况，并且您计算的似然比因此错误怎么办？</p>
+<div class="real-data-box">
+<h4>REAL DATA</h4>
+<p>Rapid strep tests (RADT) showed pooled sensitivity of approximately <span class="data-highlight">86%</span> 在 Cochrane 综述中已发表的研究中。然而，FDA 510(k) 监管提交文件（其中包括未发布的制造商数据）显示的敏感性估计仅为 <span class="data-highlight">70-75%</span>。已发表的敏感性较高的研究更有可能提交发表——典型的发表偏倚案例，夸大了表观准确性。</p>
+</div>
+<div class="decision-tree">
+<div class="decision-tree-header">The Rapid Strep Test Publication Gap</div>
+<div class="decision-scenario">临床医生根据已发表的数据计算 LR+（敏感性 86%，特异性 95%），以决定是否治疗儿童的喉咙痛。但真正的灵敏度可能只有 70%。</div>
+<div class="decision-paths">
+<div class="decision-path path-a" role="button" tabindex="0">
+<div class="path-label">PATH A: Trust Published Meta-Analysis</div>
+<div class="path-choice">使用已发表数据中的 LR+ (86/5 = 17.2)</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">高估 LR+ 会导致对阴性结果过于自信；患有链球菌的儿童在不使用抗生素的情况下被送回家</div>
+<div class="path-outcome">OUTCOME: Missed strep leads to rheumatic fever risk</div>
+</div>
+<div class="decision-path path-b" role="button" tabindex="0">
+<div class="path-label">路径 B：寻求监管数据</div>
+<div class="path-choice">使用 FDA 提交文件中的 LR+ (70/5 = 14)，并注意 LR- 更差（0.32 vs 0.15）</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">Recognize a negative RADT cannot confidently exclude strep; back up with throat culture when clinical suspicion is high</div>
+<div class="path-outcome">OUTCOME: Appropriate caution protects children</div>
+</div>
+</div>
+</div>
+<div class="story-revelation">
+<div class="revelation-label">THE REVELATION</div>
+<div class="revelation-text">似然比的真实性取决于产生它们的敏感性和特异性。发表偏见会抬高准确性，使 LR+ 过于乐观，而 LR- 过于令人安心。总是问：是否遗漏了未发表的研究？</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Likelihood Ratios</div>
+<div class="formula-box animate delay-1">
+<div class="label">POSITIVE LIKELIHOOD RATIO</div>
+<div class="formula">LR+ = Sensitivity / (1 - Specificity)</div>
+<div class="label">How much more likely is a + result in sick vs healthy?</div>
+</div>
+<div class="formula-box animate delay-2">
+<div class="label">NEGATIVE LIKELIHOOD RATIO</div>
+<div class="formula">LR- = (1 - Sensitivity) / Specificity</div>
+<div class="label">How much more likely is a - result in sick vs healthy?</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">费根列线图</div>
+<div class="fagan-container animate delay-1">
+<h4>从测试前到测试后的概率</h4>
+<div class="fagan-visual">
+<div class="fagan-scale">
+<div class="fagan-scale-title">Pre-Test<br/>Probability</div>
+<div>99%</div><div>50%</div><div>20%</div><div>5%</div><div>1%</div>
+</div>
+<div class="fagan-line"><div class="fagan-marker" style="top:70%;"></div></div>
+<div class="fagan-scale">
+<div class="fagan-scale-title">Likelihood<br/>Ratio</div>
+<div>100</div><div>10</div><div>1</div><div>0.1</div><div>0.01</div>
+</div>
+<div class="fagan-line"><div class="fagan-marker" style="top:30%;"></div></div>
+<div class="fagan-scale">
+<div class="fagan-scale-title">Post-Test<br/>Probability</div>
+<div>99%</div><div>80%</div><div>50%</div><div>20%</div><div>1%</div>
+</div>
+</div>
+<div class="fagan-result">
+                    Draw a line from pre-test through LR to find post-test probability
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Interpreting Likelihood Ratios</div>
+<div class="decision-tree animate delay-1">
+<h4>这个测试有多强大？</h4>
+<div class="tree-row"><div class="tree-node question">LR+ Value?</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node tp">LR+ &gt; 10<small>Strong rule-in</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node action">5-10<small>Moderate</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node warning">2-5<small>Weak</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node fn">1-2<small>Useless</small></div>
+</div>
+</div>
+<div style="margin-top:0.75rem;"></div>
+<div class="tree-row"><div class="tree-node question">LR- Value?</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node tp">&lt; 0.1<small>Strong rule-out</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node action">0.1-0.2<small>Moderate</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node warning">0.2-0.5<small>Weak</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node fn">0.5-1<small>Useless</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  “灵敏度告诉我们有病。<br/>
+                  特异性告诉我们健康。<br/>
+                  But the likelihood ratio answers:<br/>
+<em>什么这个结果对这位患者意味着什么吗？</em>"
+                </div>
+</div>
+</div>
+</div>
+ ====================== 模块 11：疟疾 RDT ==================== 
+<div class="module-slides" data-module="11">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  您没见过村里发烧的孩子吗，<br/>
+                  快速检测说 <em>negative</em>,<br/>
+                  and the <em>Plasmodium</em> 不断繁殖？
+                </div>
+</div>
+</div>
+<div class="slide blood">
+<div class="content text-center">
+<div class="title red animate">疟疾RDT问题</div>
+<div class="story-card animate delay-1">
+<div class="place">SUB-SAHARAN AFRICA</div>
+<div class="narrative">
+                    Malaria kills 600,000 people yearly, mostly children under 5.
+                    <br/><br/>
+                    Rapid Diagnostic Tests were meant to guide treatment in remote areas
+                    without microscopes or laboratories.
+                    <br/><br/>
+                    But when parasitemia is low—<strong>RDT漏掉病例</strong>.
+                    And when <em>P. falciparum</em> 删除HRP2基因—
+                    <strong>the RDT sees nothing at all</strong>.
+                  </div>
+<div class="source">WHO. Malaria RDT Performance. 2022</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">临床决策树</div>
+<div class="decision-tree animate delay-1">
+<h4>Child with Fever in Malaria-Endemic Area</h4>
+<div class="tree-row"><div class="tree-node root">Febrile Child</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node action">Perform RDT</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node tp">RDT Positive</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node action">治疗疟疾</div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node warning">RDT Negative</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">Clinical Suspicion?</div></div>
+<div class="tree-branch" style="gap:0.4rem;">
+<div class="tree-branch-item">
+<div class="tree-label">High</div>
+<div class="tree-node action" style="font-size:0.55rem;">Treat Anyway<small>or Microscopy</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">Low</div>
+<div class="tree-node tn" style="font-size:0.55rem;">Look for<small>Other Cause</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Sensitivity Varies by Parasitemia</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box" style="background:var(--green);">
+<div class="stat-value" style="color:white;">95%</div>
+<div class="stat-label">High parasitemia<br/>(&gt;200/μL)</div>
+</div>
+<div class="stat-box" style="background:var(--gold);">
+<div class="stat-value" style="color:var(--navy);">75%</div>
+<div class="stat-label">Low parasitemia<br/>(100-200/μL)</div>
+</div>
+<div class="stat-box" style="background:var(--red);">
+<div class="stat-value" style="color:white;">50%</div>
+<div class="stat-label">Very low<br/>(&lt;100/μL)</div>
+</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">临床教训</div>
+<div class="simple-text">
+                    A negative RDT does not rule out malaria in endemic areas.
+                    <strong>Clinical judgment must override the test</strong> when suspicion is high.
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  “测试结果显示‘阴性’，<br/>
+                  孩子被送回家，<br/>
+                  寄生虫在体内繁殖。天黑了，<br/>
+                  到了早上，孩子就醒不过来了。”
+                </div>
+</div>
+</div>
+</div>
+ ==================== 第 12 单元：新冠病毒快速测试 ==================== 
+<div class="module-slides" data-module="12">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  在瘟疫肆虐的那一年，<br/>
+                  世界需要一个测试 <em>fast</em>.
+                  <br/><br/>
+                  但快速与 <em>accurate</em>.
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<p class="story-opener">当新一代检测方法具有更高的灵敏度时，是否会自动使其变得更好？</p>
+<div class="real-data-box">
+<h4>REAL DATA</h4>
+<p>高灵敏度肌钙蛋白 (hs-cTn) 检测将急性心肌梗死的灵敏度从大约 <span class="data-highlight">70%</span> （就诊时的传统肌钙蛋白）提高到超过 <span class="data-highlight">95%</span>. But specificity dropped from approximately <span class="data-highlight">95%</span> to around <span class="data-highlight">80%</span> 因为hs-cTn可检测许多非MI原因（心力衰竭、脓毒症、肾脏疾病、肺栓塞）引起的心肌损伤。净临床效果需要通过多项研究进行 HSROC 建模来了解权衡。</p>
+</div>
+<div class="decision-tree">
+<div class="decision-tree-header">肌钙蛋白生成转变：2010 年代</div>
+<div class="decision-scenario">An emergency department adopts hs-troponin. More patients now test positive, but many do not have acute MI.</div>
+<div class="decision-paths">
+<div class="decision-path path-a" role="button" tabindex="0">
+<div class="path-label">PATH A: Adopt Based on Sensitivity Alone</div>
+<div class="path-choice">庆祝 MI 检测率从 70% 跃升至 95% 以上</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">更多假阳性导致不必要的导管插入、住院和患者对非心脏疾病的焦虑肌钙蛋白升高</div>
+<div class="path-outcome">OUTCOME: Overdiagnosis and wasted resources</div>
+</div>
+<div class="decision-path path-b" role="button" tabindex="0">
+<div class="path-label">路径 B：权衡建模</div>
+<div class="path-choice">Use serial measurements (0h/1h or 0h/3h protocols) and clinical context to maintain specificity</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">Rapid rule-out algorithms safely discharge low-risk patients; sensitivity remains high while managing the false positive rate</div>
+<div class="path-outcome">OUTCOME: Faster, safer triage of chest pain</div>
+</div>
+</div>
+</div>
+<div class="story-revelation">
+<div class="revelation-label">THE REVELATION</div>
+<div class="revelation-text">敏感性和特异性相互权衡。提高敏感性的新一代测试通常会降低特异性。 HSROC 曲线是揭示净权衡对患者有利还是有害的工具。</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Cochrane 判决</div>
+<div class="matrix-container animate delay-1">
+<h4>COVID-19 Rapid Antigen Tests (Dinnes 2022 Cochrane Review)</h4>
+<table class="matrix-table">
+<tr><th>Population</th><th>Sensitivity</th><th>Missed</th></tr>
+<tr><td>Symptomatic</td><td style="color:var(--gold);">73%</td><td style="color:var(--red);">27%</td></tr>
+<tr><td>Asymptomatic</td><td style="color:var(--orange);">55%</td><td style="color:var(--red);">45%</td></tr>
+<tr><td>First 7 days</td><td style="color:var(--green);">80%</td><td style="color:var(--orange);">20%</td></tr>
+</table>
+</div>
+<p class="animate delay-2" style="font-size:0.65rem;color:rgba(255,255,255,0.5);margin-top:0.4rem;">
+                  Dinnes J et al. Cochrane Database Syst Rev. 2022;7:CD013705
+                </p>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">The False Security Decision Tree</div>
+<div class="decision-tree animate delay-1">
+<h4>Thanksgiving 2020: What Happened</h4>
+<div class="tree-row"><div class="tree-node root">Family Member Tests Negative</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">Truly Negative?</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">55% if asymptomatic</div>
+<div class="tree-node tn">True Negative<small>Safe to gather</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">45% if asymptomatic</div>
+<div class="tree-node fn">FALSE Negative<small>Infectious!</small></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node fp" style="background:var(--blood-red);">与家人聚集<small>Grandparents infected</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  “测试结果显示‘阴性’，<br/>
+                  和家人拥抱，<br/>
+                  到冬天结束时，<br/>
+                  祖父被埋葬了。”
+                </div>
+</div>
+</div>
+</div>
+<!-- ==================== MODULE 13: MAMMOGRAPHY ==================== -->
+<div class="module-slides" data-module="13">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  你有没有听说过筛查<br/>
+                  发现癌症 <em>would never kill</em>,<br/>
+                  并导致治疗 <em>caused more harm than the disease</em>?
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<p class="story-opener">Can you trust a DTA meta-analysis done in a spreadsheet?</p>
+<div class="real-data-box">
+<h4>REAL DATA</h4>
+<p>DTA 荟萃分析需要双变量模型或 HSROC，两者都需要对 Logit 量表上的相关敏感性和特异性进行最大似然估计。研究表明，手动 Excel 计算经常会引入错误：Reinhart 和 Rogoff（2010 年，经济学）的一项具有里程碑意义的研究表明，一个简单的电子表格错误如何导致全球政策变化。在 DTA 中，在 Excel 中手动应用 logit 变换并单独汇总敏感性/特异性会忽略它们之间的相关性，并且可能会生成与软件（R mada/reitsma、Stata metandi、SAS NLMIXED）中经过验证的双变量模型显着不同的汇总估计值。</p>
+</div>
+<div class="decision-tree">
+<div class="decision-tree-header">QUADAS Excel 错误</div>
+<div class="decision-scenario">研究团队需要汇总敏感性和特异性来分析DTA 系统审查。他们有 12 项研究。一名团队成员构建 Excel 模型；</div>
+<div class="decision-paths">
+<div class="decision-path path-a" role="button" tabindex="0">
+<div class="path-label">路径A：使用电子表格</div>
+<div class="path-choice">Pool sensitivity and specificity separately in Excel using simple averages or fixed-effect formulas</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">忽略敏感性和特异性之间的相关性；另一个使用R的mada包。 Logit 变换误差复合；汇总敏感性降低约 12 个百分点</div>
+<div class="path-outcome">OUTCOME: Wrong numbers published; clinical guidelines misled</div>
+</div>
+<div class="decision-path path-b" role="button" tabindex="0">
+<div class="path-label">PATH B: Use Validated Software</div>
+<div class="path-choice">将 R (mada/reitsma)、Stata (metandi) 或 SAS (NLMIXED) 与双变量模型结合使用</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">正确的双变量 GLMM 考虑敏感性-特异性权衡，生成有效的置信区域，并处理研究间异质性</div>
+<div class="path-outcome">OUTCOME: Reproducible, auditable, correct results</div>
+</div>
+</div>
+</div>
+<div class="story-revelation">
+<div class="revelation-label">THE REVELATION</div>
+<div class="revelation-text">DTA 荟萃分析不是简单的合并。数据的双变量性质（配对敏感性和特异性）需要专门的统计软件。电子表格错误不仅带来不便，还可能改变临床实践。</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">过度诊断问题</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box" style="background:var(--green);">
+<div class="stat-value" style="color:white;">3-4</div>
+<div class="stat-label">Lives saved<br/>per 10,000 screened</div>
+</div>
+<div class="stat-box" style="background:var(--red);">
+<div class="stat-value" style="color:white;">50-130</div>
+<div class="stat-label">Overdiagnosed<br/>(treated unnecessarily)</div>
+</div>
+<div class="stat-box" style="background:var(--orange);">
+<div class="stat-value" style="color:white;">~500</div>
+<div class="stat-label">False alarms<br/>(anxiety, biopsies)</div>
+</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">THE QUESTION</div>
+<div class="simple-text">
+                    为了挽救 3-4 条生命，估计有 50-130 名女性接受了永远不会伤害她们的癌症手术、放疗或化疗。
+                    <br/><br/><strong>这种权衡值得吗？</strong>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Patient Decision Aid: Mammography</div>
+<div class="decision-aid animate delay-1">
+<h4>如果对 10,000 名 50-69 岁的女性进行为期 10 年的筛查</h4>
+<div class="decision-aid-row">
+<div class="decision-aid-label">Deaths from breast cancer prevented</div>
+<div class="decision-aid-value benefit">3-4 women</div>
+</div>
+<div class="decision-aid-row">
+<div class="decision-aid-label">Women called back for false alarms</div>
+<div class="decision-aid-value harm">~500 women</div>
+</div>
+<div class="decision-aid-row">
+<div class="decision-aid-label">Unnecessary biopsies</div>
+<div class="decision-aid-value harm">~200 women</div>
+</div>
+<div class="decision-aid-row">
+<div class="decision-aid-label">女性接受永远不会伤害他们的癌症治疗</div>
+<div class="decision-aid-value harm">~15 women</div>
+</div>
+<div class="decision-aid-question">筛查适合您吗？</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">The Screening Cascade Decision Tree</div>
+<div class="decision-tree animate delay-1">
+<h4>10,000 名女性经过 10 年的筛查</h4>
+<div class="tree-row"><div class="tree-node root">10,000 Women</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node warning">~1,000 Recalled<small>Abnormal</small></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-branch" style="gap:0.25rem;">
+<div class="tree-branch-item">
+<div class="tree-node fp" style="font-size:0.5rem;">~500 False<br/>Alarm</div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node warning" style="font-size:0.5rem;">~500 Biopsy<br/>~50 cancer</div>
+</div>
+</div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node tn">~9,000 Cleared</div>
+</div>
+</div>
+<div style="margin-top:0.4rem;">
+<div class="tree-row"><div class="tree-node question" style="font-size:0.6rem;">Of ~50 Cancers Found</div></div>
+<div class="tree-branch" style="gap:0.5rem;">
+<div class="tree-branch-item">
+<div class="tree-node tp" style="font-size:0.5rem;">~35 Would Kill<small>3-4 saved</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node fn" style="font-size:0.5rem;">~15 Would Never Kill<small>Overdiagnosed</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  “测试发现了影子，<br/>
+                  并将其称为癌症，<br/>
+                  而这位女士被割伤并被烧伤——<br/>
+                  为了一个永远不会让她的日子变得黑暗的阴影。”
+                </div>
+</div>
+</div>
+</div>
+ ====================== 第 14 单元：阿尔茨海默氏淀粉样蛋白 ==================== 
+<div class="module-slides" data-module="14">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  您没有听说过扫描<br/>
+                  发现大脑中的斑块，<br/>
+                  但无法告诉您<br/>
+                  大脑是否会 <em>fade</em>?
+                </div>
+</div>
+</div>
+<div class="slide gradient">
+<div class="content text-center">
+<div class="title gold animate">淀粉样蛋白悖论</div>
+<div class="story-card animate delay-1">
+<div class="place">ALZHEIMER'S RESEARCH, 2010s-2020s</div>
+<div class="narrative">
+                    PET scans can now detect amyloid plaques—the hallmark of Alzheimer's.
+                    <br/><br/>
+                    But <strong>30% of cognitively normal elderly</strong> have amyloid plaques.
+                    They may never develop dementia.
+                    <br/><br/>
+                    And <strong>10-20%的人患有痴呆</strong> have no amyloid.
+                    <br/><br/>
+                    测试发现了斑块。但斑块不是疾病。
+                    <strong>我们正在测试替代物，而不是结果。</strong>
+</div>
+<div class="source">Jack CR et al. Lancet Neurol. 2018;17:760-773</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Surrogate vs. Outcome Decision Tree</div>
+<div class="decision-tree animate delay-1">
+<h4>我们真正测试的是什么？</h4>
+<div class="tree-row"><div class="tree-node root">Diagnostic Test</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">What Does It Detect?</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">Outcome itself</div>
+<div class="tree-node tp">Direct Diagnosis<small>例如，活检癌症</small></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node action">High clinical value</div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">Surrogate marker</div>
+<div class="tree-node warning">Indirect Signal<small>例如，用于痴呆症的淀粉样蛋白</small></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node question">Validated link?</div>
+<div class="tree-branch" style="gap:0.3rem;">
+<div class="tree-branch-item">
+<div class="tree-node action" style="font-size:0.5rem;">Yes<small>Use cautiously</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node fn" style="font-size:0.5rem;">No<small>Limited value</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  “扫描发现了斑块，<br/>
+                  医生将其命名为阿尔茨海默病，<br/>
+                  患者居住在恐怖——<br/>
+                  of a forgetting that might never come."
+                </div>
+</div>
+</div>
+</div>
+ ====================模块15：QUADAS-2质量==================== 
+<div class="module-slides" data-module="15">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  并不是所有的研究都是平等的。
+                  <br/><br/>
+                  Some are <em>biased</em>.<br/>
+                  Some are <em>poorly designed</em>.<br/>
+                  有些不应该 <em>trusted</em>.
+                  <br/><br/>
+                  我们如何将小麦与小麦分开箔条？
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<p class="story-opener">如果大多数 DTA 研究甚至没有报告足够的信息来判断她们的情况该怎么办？</p>
+<div class="real-data-box">
+<h4>REAL DATA</h4>
+<p>在 2003 年 STARD 倡议发布之前，一项系统评估发现，只有不到 <span class="data-highlight">half</span> 的 DTA 研究报告了指标测试解释是否采用盲法，并且参考标准描述常常不充分。 STARD 之后，报告有所改进：多项元流行病学评估发现，对 STARD 项目的遵守率大幅上升，尽管许多研究在流程图和不确定结果处理等关键项目上仍存在不足。</p>
+</div>
+<div class="decision-tree">
+<div class="decision-tree-header">STARD 革命：2003 年</div>
+<div class="decision-scenario">一个团队完成了一项新的即时检测的 DTA 研究。他们渴望尽快出版。他们拥有 2x2 数据，但没有记录盲法、患者流程或不确定结果。</div>
+<div class="decision-paths">
+<div class="decision-path path-a" role="button" tabindex="0">
+<div class="path-label">PATH A: Publish Quickly</div>
+<div class="path-choice">在没有 STARD 流程图或完整方法报告的情况下提交</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">读者无法评估盲法、患者谱系或验证。 QUADAS-2 评估将每个领域评为“不清楚”。该研究可能会被排除在未来的系统评价之外，或者更糟糕的是，可能会被纳入夸大的体重中。</div>
+<div class="path-outcome">OUTCOME: Waste of research; uninterpretable results</div>
+</div>
+<div class="decision-path path-b" role="button" tabindex="0">
+<div class="path-label">PATH B: Follow STARD Guidelines</div>
+<div class="path-choice">完成 STARD 检查表，创建患者流程图，报告不确定的结果，并描述盲法</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">评价者可以全面评估质量。 QUADAS-2 域是负责任的。该研究对系统评价和临床指南做出了有意义的贡献。</div>
+<div class="path-outcome">结果：推进护理的可信证据</div>
+</div>
+</div>
+</div>
+<div class="story-revelation">
+<div class="revelation-label">THE REVELATION</div>
+<div class="revelation-text">如果研究未报告其方法，则无法评估质量。 STARD 确保 DTA 研究足够完整，可供 QUADAS-2 判断。不完整的报告不是中立的，它隐藏了偏见。</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">QUADAS-2：质量检查表</div>
+<div class="quadas-container animate delay-1">
+<h4>Four Domains of Risk of Bias</h4>
+<div class="quadas-domain">
+<div class="quadas-icon risk">1</div>
+<div class="quadas-content">
+<h5>Patient Selection</h5>
+<p>是连续样本还是随机样本入组？是否避免了病例对照设计？</p>
+</div>
+</div>
+<div class="quadas-domain">
+<div class="quadas-icon risk">2</div>
+<div class="quadas-content">
+<h5>Index Test</h5>
+<p>是否在不了解参考标准的情况下解释了测试？阈值是否预先指定？</p>
+</div>
+</div>
+<div class="quadas-domain">
+<div class="quadas-icon risk">3</div>
+<div class="quadas-content">
+<h5>Reference Standard</h5>
+<p>参考标准是否可能正确分类病情？是否盲目解释？</p>
+</div>
+</div>
+<div class="quadas-domain">
+<div class="quadas-icon concern">4</div>
+<div class="quadas-content">
+<h5>流程和时间</h5>
+<p>测试之间是否有适当的间隔？所有患者都接受相同的参考标准吗？</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">QUADAS-2 Decision Tree</div>
+<div class="decision-tree animate delay-1">
+<h4>您应该相信这项研究吗？</h4>
+<div class="tree-row"><div class="tree-node root">DTA Study</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">Check All 4 Domains</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">All Low Risk</div>
+<div class="tree-node tp">High Quality<small>Trust results</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">Some Unclear</div>
+<div class="tree-node warning">Moderate<small>谨慎使用</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">Any High Risk</div>
+<div class="tree-node fp">Low Quality<small>结果可能有偏差</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">DTA 研究中的常见偏差</div>
+<div class="lesson-item animate delay-1">
+<div class="lesson-number" style="background:var(--red);">!</div>
+<div class="lesson-content">
+<h4>Verification Bias</h4>
+<p>Only positive tests get the reference standard → inflates sensitivity</p>
+</div>
+</div>
+<div class="lesson-item animate delay-2">
+<div class="lesson-number" style="background:var(--red);">!</div>
+<div class="lesson-content">
+<h4>Spectrum Bias</h4>
+<p>研究人群与临床不同现实→结果不能一概而论</p>
+</div>
+</div>
+<div class="lesson-item animate delay-3">
+<div class="lesson-number" style="background:var(--orange);">!</div>
+<div class="lesson-content">
+<h4>Incorporation Bias</h4>
+<p>Index test is part of reference standard → artificially high accuracy</p>
+</div>
+</div>
+<div class="lesson-item animate delay-4">
+<div class="lesson-number" style="background:var(--orange);">!</div>
+<div class="lesson-content">
+<h4>Review Bias</h4>
+<p>Index test interpreted knowing reference result → inflates both metrics</p>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  “在您相信数字之前，<br/>
+                  ask: How were they gathered?<br/>
+                  一项有偏见的研究充满信心地说话—<br/>
+                  but its confidence is a lie."
+                </div>
+</div>
+</div>
+</div>
+ ==================== 模块 16：元分析和 SROC ==================== 
+<div class="module-slides" data-module="16">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  一项研究可能会欺骗。<br/>
+                  一项研究可能会让人满意。
+                  <br/><br/>
+                  但是当您收集 <em>所有证据</em>—<br/>
+                  the truth becomes harder to hide.
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<p class="story-opener">当不同的研究对同一测试使用不同的阈值并且您尝试将它们合并时会发生什么？</p>
+<div class="real-data-box">
+<h4>REAL DATA</h4>
+<p>D-dimer testing for pulmonary embolism (PE) traditionally used a fixed cutoff of <span class="data-highlight">500 µg/L</span>。 ADJUST-PE 试验（Righini 等人，JAMA 2014）表明，年龄调整截止值（<span class="data-highlight">age × 10 µg/L</span> 对于 50 岁以上的患者）增加了 <span class="data-highlight">~6% to ~30%</span>D-二聚体结果呈阴性的老年患者的比例，在年龄调整阴性组中，3 个月 VTE 风险仅为 0.3%。 D-二聚体研究的 DTA 荟萃分析必须使用双变量模型，因为不同的阈值会产生 SROC 曲线上可见的敏感性-特异性权衡。</p>
+</div>
+<div class="decision-tree">
+<div class="decision-tree-header">The D-dimer Threshold Dilemma: ADJUST-PE 2014</div>
+<div class="decision-scenario">一位老年患者（75 岁）向急诊科就诊，可能患有 PE。 D-二聚体为 620 µg/L。使用固定截止值，这是积极的。使用年龄调整临界值 (750 µg/L)，结果为阴性。</div>
+<div class="decision-paths">
+<div class="decision-path path-a" role="button" tabindex="0">
+<div class="path-label">PATH A: Use Fixed Cutoff (500 µg/L)</div>
+<div class="path-choice">Apply one threshold to all patients regardless of age</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">老年患者几乎总是超过 500 µg/L。 80 岁以上患者的特异性降至 10% 以下。几乎每位老年患者都会接受 CT 肺血管造影，包括对比染料、放射线和偶然发现。</div>
+<div class="path-outcome">OUTCOME: D-dimer becomes useless in the elderly</div>
+</div>
+<div class="decision-path path-b" role="button" tabindex="0">
+<div class="path-label">PATH B: Use Bivariate Model with Threshold Covariate</div>
+<div class="path-choice">应用年龄调整截止值；荟萃分析中的模型阈值变化</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">SROC 曲线显示，年龄调整阈值沿着曲线移动，用少量的敏感性换取了特异性的大幅提高。老年患者安全避免 CT 成像的比例增加了 30%。</div>
+<div class="path-outcome">OUTCOME: Fewer unnecessary scans; no missed PEs</div>
+</div>
+</div>
+</div>
+<div class="story-revelation">
+<div class="revelation-label">THE REVELATION</div>
+<div class="revelation-text">阈值变化是 DTA 荟萃分析需要双变量模型的原因。不同的研究使用不同的临界值，在敏感性和特异性之间进行权衡。 SROC 曲线就是这种权衡的图。</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Why DTA Meta-Analysis Is Different</div>
+<div class="simple-box animate delay-1">
+<div class="simple-title">THE PROBLEM</div>
+<div class="simple-text">
+                    敏感性和特异性是 <strong>correlated</strong>.
+                    When one goes up, the other tends to go down.
+                    <br/><br/>
+                    您不能像治疗效果那样将它们分开汇总。您需要 <strong>bivariate model</strong>.
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">SROC曲线</div>
+<div class="sroc-container animate delay-1">
+<h4>Summary Receiver Operating Characteristic</h4>
+<div class="sroc-plot">
+<div class="sroc-axis-label y">Sensitivity</div>
+<div class="sroc-axis-label x">1 - Specificity (False Positive Rate)</div>
+<svg class="sroc-curve" preserveaspectratio="none" viewbox="0 0 100 100">
+<!-- Diagonal line (useless test) -->
+<line stroke="rgba(255,255,255,0.2)" stroke-dasharray="4" stroke-width="1" x1="0" x2="100" y1="100" y2="0"></line>
+<!-- SROC curve -->
+<path d="M 5 5 Q 10 40, 30 60 Q 50 80, 95 95" fill="none" stroke="var(--gold)" stroke-width="3"></path>
+<!-- Confidence region (simplified ellipse) -->
+<ellipse cx="25" cy="25" fill="rgba(212,175,55,0.2)" rx="15" ry="10" stroke="var(--gold)" stroke-width="1"></ellipse>
+</svg>
+<!-- Study dots -->
+<div class="sroc-dot" style="left:15%;top:20%;"></div>
+<div class="sroc-dot" style="left:20%;top:25%;"></div>
+<div class="sroc-dot" style="left:25%;top:22%;"></div>
+<div class="sroc-dot" style="left:18%;top:28%;"></div>
+<div class="sroc-dot" style="left:30%;top:30%;"></div>
+</div>
+<div class="sroc-legend">
+<div class="sroc-legend-item"><div class="sroc-legend-dot" style="background:var(--gold);"></div>Individual studies</div>
+<div class="sroc-legend-item"><div class="sroc-legend-dot" style="background:rgba(212,175,55,0.5);"></div>Summary estimate</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">读取 SROC</div>
+<div class="decision-tree animate delay-1">
+<h4>曲线告诉您什么？</h4>
+<div class="tree-row"><div class="tree-node root">SROC Curve Position</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">Top-Left Corner</div>
+<div class="tree-node tp">Excellent Test<small>High sens + spec</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">Near Diagonal</div>
+<div class="tree-node fn">Useless Test<small>No better than chance</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">Points Scattered</div>
+<div class="tree-node warning">High Heterogeneity<small>Investigate sources</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain hope animate">
+                  “一项研究可能会欺骗。<br/>
+                  许多研究，权衡一起<br/>
+                  追踪真理之路——<br/>
+                  揭示测试真正作用的SROC曲线。”
+                </div>
+</div>
+</div>
+</div>
+<!-- ==================== MODULE 17: HETEROGENEITY ==================== -->
+<div class="module-slides" data-module="17">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  但是如果研究 <em>disagree</em>?
+                  <br/><br/>
+                  One says sensitivity is 95%.<br/>
+                  Another says 60%.
+                  <br/><br/>
+<em>你相信哪个真理？</em>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<p class="story-opener">如果一项测试在一般人群中效果良好，但在最需要的患者中失败怎么办？</p>
+<div class="real-data-box">
+<h4>REAL DATA</h4>
+<p>HRP2-based malaria rapid diagnostic tests (RDTs) achieve sensitivity of approximately <span class="data-highlight">95%</span> in the general population in endemic areas. However, in pregnant women, sensitivity can drop to as low as <span class="data-highlight">56-76%</span> 由于寄生虫的胎盘隔离 - 寄生虫隐藏在胎盘中，使外周血寄生虫血症保持较低水平并低于 RDT 检测阈值。 Cochrane 对疟疾 RDT 的综述发现，由于妊娠、5 岁以下儿童和 HIV 合并感染等人群亚组的影响，存在显着的异质性（I² 通常超过 80%）。</p>
+</div>
+<div class="decision-tree">
+<div class="decision-tree-header">妊娠期疟疾 RDT</div>
+<div class="decision-scenario">荟萃分析汇总了 25 项疟疾 RDT 研究，报告汇总敏感性为 93%。产前诊所的临床医生用它来安抚 RDT 阴性的孕妇。</div>
+<div class="decision-paths">
+<div class="decision-path path-a" role="button" tabindex="0">
+<div class="path-label">PATH A: Trust the Overall Pooled Estimate</div>
+<div class="path-choice">应用一般人群荟萃分析中的 93% 敏感性</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">在孕妇中，真正的敏感性可能低至 56-76%。很大一部分受感染的孕妇被错误地放心了。怀孕期间未经治疗的疟疾会导致严重的孕产妇贫血、低出生体重和死产。</div>
+<div class="path-outcome">OUTCOME: Preventable maternal and neonatal deaths</div>
+</div>
+<div class="decision-path path-b" role="button" tabindex="0">
+<div class="path-label">PATH B: Investigate Heterogeneity by Subgroup</div>
+<div class="path-choice">对孕妇进行亚组荟萃分析；探索 I² 和变化来源</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">发现怀孕是异质性的主要来源。建议对流行地区所有 RDT 阴性的孕妇进行显微镜确认。</div>
+<div class="path-outcome">OUTCOME: Targeted protocols save mothers and babies</div>
+</div>
+</div>
+</div>
+<div class="story-revelation">
+<div class="revelation-label">THE REVELATION</div>
+<div class="revelation-text">异质性不仅仅是统计噪音。它通常表明测试在不同人群中表现不同。忽略 I² 并将所有内容集中在一起对于弱势亚群来说可能是致命的。</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Sources of Heterogeneity</div>
+<div class="decision-tree animate delay-1">
+<h4>为什么研究不同意</h4>
+<div class="tree-row"><div class="tree-node question">相同的测试，不同的结果？</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node warning">Threshold<small>Different cutoffs</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node warning">Population<small>Severity, age</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node warning">Setting<small>Primary vs specialist</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node warning">Quality<small>Bias, blinding</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Measuring Disagreement: I²</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box" style="background:var(--green);">
+<div class="stat-value" style="color:white;">I² &lt; 25%</div>
+<div class="stat-label">Low<br/>Studies agree</div>
+</div>
+<div class="stat-box" style="background:var(--gold);">
+<div class="stat-value" style="color:var(--navy);">I² 25-75%</div>
+<div class="stat-label">Moderate<br/>Some variation</div>
+</div>
+<div class="stat-box" style="background:var(--red);">
+<div class="stat-value" style="color:white;">I² &gt; 75%</div>
+<div class="stat-label">High<br/>Major disagreement</div>
+</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">THE WARNING</div>
+<div class="simple-text">
+                    When I² &gt; 75%, the pooled estimate may be <strong>meaningless</strong>.
+                    Explain the disagreement before averaging.
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  “当研究存在分歧时，<br/>
+                  不要压制异议。<br/>
+                  Ask: Why do they see differently?<br/>
+                  分歧本身就说明了一切。”
+                </div>
+</div>
+</div>
+</div>
+ ==================== 模块 18：工具包==================== 
+<div class="module-slides" data-module="18">
+<div class="slide gradient active">
+<div class="content text-center">
+<div class="title gold animate">您的 DTA 工具包</div>
+<div class="subtitle animate delay-1">基本措施以及何时使用它们</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<p class="story-opener">当 AI 声称比医生诊断更好时，您应该相信整体 AUC 吗？</p>
+<div class="real-data-box">
+<h4>REAL DATA</h4>
+<p>Deep learning models for skin cancer detection have reported AUC values as high as <span class="data-highlight">0.91-0.94</span> in development datasets. However, external validation revealed alarming disparities: Daneshjou et al. (<span class="data-highlight">2022</span>，《自然医学》）发现商业 AI 皮肤病学工具在深色皮肤（Fitzpatrick V-VI 型）上以近乎偶然的水平执行，AUC 很低如 <span class="data-highlight">0.50-0.57</span> ——本质上是随机的。训练数据集严重偏向浅肤色，这意味着 2x2 表格永远无法正确填充所有人群。</p>
+</div>
+<div class="decision-tree">
+<div class="decision-tree-header">AI 皮肤科承诺：2020 年代</div>
+<div class="decision-scenario">一家医院考虑在为多元化城市人口服务的皮肤科诊所部署 AI 皮肤癌筛查工具。制造商报告的 AUC 为 0.94。</div>
+<div class="decision-paths">
+<div class="decision-path path-a" role="button" tabindex="0">
+<div class="path-label">PATH A: Deploy Based on Overall AUC</div>
+<div class="path-choice">相信标题 AUC 0.94，并将其部署到所有患者</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">深色皮肤上的黑色素瘤的漏诊率较高。总体敏感度数字隐藏着一个危险的差距。晚期诊断死亡率最高的患者是 AI 最失败的患者。</div>
+<div class="path-outcome">OUTCOME: Health disparity amplified by technology</div>
+</div>
+<div class="decision-path path-b" role="button" tabindex="0">
+<div class="path-label">PATH B: Demand Fairness-Stratified Evaluation</div>
+<div class="path-choice">需要按肤色（Fitzpatrick 量表）、年龄和病变位置细分的敏感性和特异性</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">发现性能差距。需要对不同的数据集进行再训练或限制对经过验证的人群的使用。将人工智能与皮肤科医生的监督结合起来，对代表性不足的群体进行监督。</div>
+<div class="path-outcome">OUTCOME: Equitable deployment; no one left behind</div>
+</div>
+</div>
+</div>
+<div class="story-revelation">
+<div class="revelation-label">THE REVELATION</div>
+<div class="revelation-text">单个 AUC 数字可能隐藏危险的差异。新兴的基于人工智能的诊断工具必须像任何诊断测试一样严格地进行评估：按人群分层，外部验证，并遵守 STARD 和 QUADAS-2 标准。</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">The Checklist</div>
+<div class="lesson-item animate delay-1">
+<div class="lesson-number" style="background:var(--green);">✓</div>
+<div class="lesson-content">
+<h4>Was there a valid reference standard?</h4>
+<p>Gold standard applied to ALL patients?</p>
+</div>
+</div>
+<div class="lesson-item animate delay-2">
+<div class="lesson-number" style="background:var(--green);">✓</div>
+<div class="lesson-content">
+<h4>口译员是否被蒙蔽了？</h4>
+<p>Test readers unaware of diagnosis?</p>
+</div>
+</div>
+<div class="lesson-item animate delay-3">
+<div class="lesson-number" style="background:var(--green);">✓</div>
+<div class="lesson-content">
+<h4>频谱是合适吗？</h4>
+<p>与您的人群相似的患者？</p>
+</div>
+</div>
+<div class="lesson-item animate delay-4">
+<div class="lesson-number" style="background:var(--green);">✓</div>
+<div class="lesson-content">
+<h4>阈值是否预先指定？</h4>
+<p>还是选择最大化结果？</p>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">When Results Don't Match Suspicion</div>
+<div class="decision-tree animate delay-1">
+<h4>The Clinical Override Decision Tree</h4>
+<div class="tree-row"><div class="tree-node warning">Test Negative, High Suspicion</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">What Is the LR-?</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">LR- &lt; 0.1</div>
+<div class="tree-node tp">Strong rule-out<small>Accept negative</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">LR- 0.1-0.5</div>
+<div class="tree-node action">Repeat test<small>Or different test</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">LR- &gt; 0.5</div>
+<div class="tree-node warning">Trust judgment<small>Test is weak</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Sequential Testing Decision Tree</div>
+<div class="decision-tree animate delay-1">
+<h4>When One Test Isn't Enough</h4>
+<div class="tree-row"><div class="tree-node root">Initial Screening Test</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node tp">Positive</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node action">Confirmatory Test<small>High specificity</small></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-branch" style="gap:0.3rem;">
+<div class="tree-branch-item">
+<div class="tree-node tp" style="font-size:0.5rem;">Positive<small>Diagnose</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node fn" style="font-size:0.5rem;">Negative<small>False alarm</small></div>
+</div>
+</div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node tn">Negative</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node action">Likely negative<small>If high sens screen</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide hope">
+<div class="content text-center">
+<div class="refrain hope animate">
+                  "Armed with sensitivity, specificity, likelihood,<br/>
+                  配备了 SROC 和一致性度量，<br/>
+                  您可以通过测试的谎言 -<br/>
+                  并自行判断其真实性。”
+                </div>
+</div>
+</div>
+</div>
+ ==================== 第 19 单元：输血错误 ==================== 
+<div class="module-slides" data-module="19">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  您是否听说过接受输血的患者<br/>
+                  谁收到了 <em>wrong blood</em>,<br/>
+                  不是因为测试错误，<br/>
+                  but because <em>no one performed it</em>?
+                </div>
+</div>
+</div>
+<div class="slide blood">
+<div class="content text-center">
+<div class="title red animate">未完成的测试</div>
+<div class="story-card animate delay-1">
+<div class="place">HOSPITALS WORLDWIDE</div>
+<div class="narrative">
+                    ABO blood typing is nearly 100% accurate when performed.
+                    <br/><br/>
+                    Yet <strong>transfusion reactions still kill</strong>——不是因为测试失败，而是因为 <strong>human failure</strong>:
+                    <br/><br/>
+                    • Wrong blood drawn from wrong patient<br/>
+                    •实验室中更换的标签<br/>
+                    • Bedside check skipped in emergency<br/>
+<br/>
+                    In the UK, <strong>1 in 13,000 transfusions</strong> 给了错误的患者。测试有效。系统失败。
+                  </div>
+<div class="source">Bolton-Maggs PHB. Transfus Med. 2016;26:303-311</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Test vs. System Decision Tree</div>
+<div class="decision-tree animate delay-1">
+<h4>Where Can Things Go Wrong?</h4>
+<div class="tree-row"><div class="tree-node root">Diagnostic Process</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">Error Source?</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">Test itself</div>
+<div class="tree-node warning">Analytical Error<small>Sens/Spec issue</small></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node action">Better test needed</div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">Pre-analytical</div>
+<div class="tree-node fp">Wrong sample<small>ID error</small></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node action">System fix needed</div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">Post-analytical</div>
+<div class="tree-node fp">Wrong action<small>Reporting error</small></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node action">Process fix needed</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  "The perfect test means nothing<br/>
+                  如果抽取了错误的血液，<br/>
+                  贴上了错误的标签，<br/>
+                  挂了错误的袋子。”
+                </div>
+<div class="gold-line animate delay-2"></div>
+<p class="animate delay-3" style="color:rgba(255,255,255,0.6);font-style:italic;font-size:0.8rem;">
+                  DTA 研究测量测试准确性。它们不测量系统准确性。
+                </p>
+</div>
+</div>
+</div>
+ ====================== 模块 20：测验和参考 ====================== 
+<div class="module-slides" data-module="20">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="title gold animate">References</div>
+<div class="references animate delay-1">
+<h4>Key Sources</h4>
+<ol>
+<li>Carreyrou J. Bad Blood. Knopf, 2018. [Theranos]</li>
+<li>CDC. MMWR. 1987;36(49):833-840. [HIV blood supply]</li>
+<li>Herbst AL et al. N Engl J Med. 1971;284:878-881. [DES]</li>
+<li>Moyer VA. Ann Intern Med. 2012;157:120-134. [PSA]</li>
+<li>Pope JH et al. N Engl J Med. 2000;342:1163-1170. [Troponin]</li>
+<li>Steingart KR et al. Cochrane 2014;1:CD009593. [GeneXpert]</li>
+<li>Dinnes J et al. Cochrane 2022;7:CD013705. [COVID RAT]</li>
+<li>UK Panel. Lancet. 2012;380:1778-1786. [Mammography]</li>
+<li>Jack CR et al. Lancet Neurol. 2018;17:760-773. [Amyloid]</li>
+<li>WHO. Malaria RDT Performance. 2022.</li>
+<li>Reitsma JB et al. J Clin Epidemiol. 2005;58:982-990. [Bivariate]</li>
+<li>Whiting PF et al. Ann Intern Med. 2011;155:529-536. [QUADAS-2]</li>
+<li>Bolton-Maggs PHB. Transfus Med. 2016;26:303-311.</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="quiz-container animate">
+<div class="quiz-question">测试的敏感性为 99%，特异性为 99%。 1/1000。患者感染该疾病的概率是多少？</div>
+<div class="quiz-options">
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">99%</div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">90%</div>
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">About 9%</div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">50%</div>
+</div>
+<div class="quiz-feedback"></div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="quiz-container animate">
+<div class="quiz-question">What does "SnNout" mean?</div>
+<div class="quiz-options">
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">A highly Sensitive test, when Negative, rules OUT disease</div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">A highly Specific test, when Negative, rules OUT disease</div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">Sensitivity should be used for screening</div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">Specificity should be above 90%</div>
+</div>
+<div class="quiz-feedback"></div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="quiz-container animate">
+<div class="quiz-question">为什么尽管进行了检测，血液供应仍被 HIV 污染？</div>
+<div class="quiz-options">
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">The tests had low specificity</div>
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">Tests had a window period with zero sensitivity in early infection</div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">检测未正确执行</div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">检测太差了。昂贵的</div>
+</div>
+<div class="quiz-feedback"></div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="quiz-container animate">
+<div class="quiz-question">哪个 QUADAS-2 域评估是否在不知道诊断的情况下解释了测试？</div>
+<div class="quiz-options">
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">Patient Selection</div>
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">Index Test</div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">Reference Standard</div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">流程和时间</div>
+</div>
+<div class="quiz-feedback"></div>
+</div>
+</div>
+</div>
+<div class="slide hope">
+<div class="content text-center">
+<div class="big-number green animate" style="font-size:3.5rem;">✔</div>
+<div class="title green animate delay-1">Course Complete</div>
+<div class="gold-line animate delay-2"></div>
+<div class="refrain hope animate delay-3">
+                  “现在你知道了四种结果，<br/>
+                  测试的两个优点，<br/>
+                  基本比率的谬误，<br/>
+                  池化的艺术证据，<br/>
+                  以及隐藏真相的偏见。<br/>
+<br/>
+                  当下一个测试对你不利时——<br/>
+<em>你会知道的。</em>"
+                </div>
+</div>
+</div>
+</div>
+<div class="slide-nav">
+<button class="nav-btn" onclick="prevSlide()">←</button>
+<div class="nav-center">
+<div class="slide-counter" id="slideCounter">1 / 4</div>
+<div class="progress" id="progressDots"></div>
+</div>
+<button class="nav-btn" onclick="nextSlide()">→</button>
+</div>
+</div>
+</div>
+</main>
+</div>
+<script>
+    function toggleSidebar() {
+      const sidebar = document.querySelector('.sidebar');
+      const overlay = document.querySelector('.sidebar-overlay');
+      const toggle = document.querySelector('.mobile-menu-toggle');
+      if (!sidebar) return;
+      const isOpen = sidebar.classList.toggle('open');
+      if (overlay) overlay.classList.toggle('show', isOpen);
+      if (toggle) toggle.setAttribute('aria-expanded', String(isOpen));
+    }
+
+    const modules = [
+      { id: 1, title: "The Fraud", subtitle: "Theranos", slides: 4 },
+      { id: 2, title: "Four Outcomes", subtitle: "TP/FP/FN/TN", slides: 5 },
+      { id: 3, title: "HIV Window", subtitle: "Blood supply crisis", slides: 5 },
+      { id: 4, title: "DES Tragedy", subtitle: "Cancer in daughters", slides: 5 },
+      { id: 5, title: "Sens & Spec", subtitle: "两种美德", slides: 6 },
+      { id: 6, title: "Base Rate Fallacy", subtitle: "最致命的错误", slides: 6 },
+      { id: 7, title: "TB GeneXpert", subtitle: "Missed resistance", slides: 5 },
+      { id: 8, title: "PSA Tragedy", subtitle: "Overdiagnosis", slides: 5 },
+      { id: 9, title: "Troponin", subtitle: "Timing matters", slides: 5 },
+      { id: 10, title: "Likelihood Ratios", subtitle: "结果意味着什么", slides: 6 },
+      { id: 11, title: "Malaria RDTs", subtitle: "When tests miss", slides: 5 },
+      { id: 12, title: "COVID Tests", subtitle: "False security", slides: 5 },
+      { id: 13, title: "Mammography", subtitle: "Finding too much", slides: 6 },
+      { id: 14, title: "Amyloid Testing", subtitle: "Surrogate markers", slides: 4 },
+      { id: 15, title: "QUADAS-2", subtitle: "Quality assessment", slides: 6 },
+      { id: 16, title: "Meta-Analysis", subtitle: "SROC curves", slides: 6 },
+      { id: 17, title: "Heterogeneity", subtitle: "当研究不一致时", slides: 5 },
+      { id: 18, title: "The Toolkit", subtitle: "Clinical decisions", slides: 6 },
+      { id: 19, title: "System Errors", subtitle: "超出测试", slides: 4 },
+      { id: 20, title: "Quiz & Sources", subtitle: "Test yourself", slides: 6 }
+    ];
+
+    let currentModule = 1;
+    let currentSlide = 1;
+    const completedModules = new Set();
+
+    function init() {
+      renderModuleList();
+      updateSlideNav();
+      document.addEventListener('keydown', (e) => {
+        const tag = document.activeElement?.tagName;
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || tag === 'BUTTON') return;
+        const role = document.activeElement?.getAttribute?.('role');
+        if (role === 'button' || role === 'radio' || role === 'option') {
+          if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); document.activeElement.click(); }
+          return;
+        }
+        if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextSlide(); }
+        else if (e.key === 'ArrowLeft') { e.preventDefault(); prevSlide(); }
+      });
+    }
+
+    function renderModuleList() {
+      const list = document.getElementById('moduleList');
+      list.innerHTML = modules.map(m => `
+        <div class="module-item ${m.id === currentModule ? 'active' : ''} ${completedModules.has(m.id) ? 'completed' : ''}" onclick="goToModule(${m.id})" tabindex="0" role="button" aria-label="Module ${m.id}: ${m.title}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();goToModule(${m.id});}">
+          <div class="module-number">${completedModules.has(m.id) ? '✓' : m.id}</div>
+          <div class="module-info">
+            <div class="module-title">${m.title}</div>
+            <div class="module-subtitle">${m.subtitle}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function goToModule(moduleId) {
+      if (moduleId > currentModule) completedModules.add(currentModule);
+      currentModule = moduleId;
+      currentSlide = 1;
+      document.querySelectorAll('.module-slides').forEach(el => el.classList.remove('active'));
+      document.querySelector(`.module-slides[data-module="${moduleId}"]`).classList.add('active');
+      updateSlideVisibility();
+      updateSlideNav();
+      renderModuleList();
+      document.getElementById('currentModule').textContent = modules[moduleId - 1].title;
+    }
+
+    function updateSlideVisibility() {
+      const moduleSlides = document.querySelector(`.module-slides[data-module="${currentModule}"]`);
+      const slides = moduleSlides.querySelectorAll('.slide');
+      slides.forEach((slide, index) => slide.classList.toggle('active', index + 1 === currentSlide));
+    }
+
+    function updateSlideNav() {
+      const module = modules[currentModule - 1];
+      document.getElementById('slideCounter').textContent = `${currentSlide} / ${module.slides}`;
+      document.getElementById('progressDots').innerHTML = Array.from({ length: module.slides }, (_, i) =>
+        `<div class="progress-dot ${i + 1 === currentSlide ? 'active' : ''}" onclick="goToSlide(${i + 1})"></div>`
+      ).join('');
+    }
+
+    function goToSlide(slideNum) { currentSlide = slideNum; updateSlideVisibility(); updateSlideNav(); }
+
+    function nextSlide() {
+      const module = modules[currentModule - 1];
+      if (currentSlide < module.slides) { currentSlide++; updateSlideVisibility(); updateSlideNav(); }
+      else if (currentModule < modules.length) { goToModule(currentModule + 1); }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 1) { currentSlide--; updateSlideVisibility(); updateSlideNav(); }
+      else if (currentModule > 1) {
+        const prevModuleSlides = modules[currentModule - 2].slides;
+        currentModule--;
+        currentSlide = prevModuleSlides;
+        document.querySelectorAll('.module-slides').forEach(el => el.classList.remove('active'));
+        document.querySelector(`.module-slides[data-module="${currentModule}"]`).classList.add('active');
+        updateSlideVisibility();
+        updateSlideNav();
+        renderModuleList();
+        document.getElementById('currentModule').textContent = modules[currentModule - 1].title;
+      }
+    }
+
+    function checkAnswer(element, isCorrect) {
+      const container = element.closest('.quiz-container');
+      const options = container.querySelectorAll('.quiz-option');
+      const feedback = container.querySelector('.quiz-feedback');
+      options.forEach(opt => {
+        opt.style.pointerEvents = 'none';
+        if (opt === element) opt.classList.add(isCorrect ? 'correct' : 'incorrect');
+        if (!isCorrect && opt.dataset.correct === 'true') opt.classList.add('correct');
+      });
+      feedback.classList.add('show', isCorrect ? 'correct' : 'incorrect');
+      feedback.textContent = isCorrect ? '正确。你已经明白了。' : '不完全是。回想一下你听过的故事。';
+    }
+
+    // Interactive Base Rate Calculator
+    function updateCalc() {
+      const prev = parseFloat(document.getElementById('prevSlider').value);
+      const sens = parseFloat(document.getElementById('sensSlider').value);
+      const spec = parseFloat(document.getElementById('specSlider').value);
+
+      document.getElementById('prevValue').textContent = prev.toFixed(1) + '%';
+      document.getElementById('sensValue').textContent = sens + '%';
+      document.getElementById('specValue').textContent = spec + '%';
+
+      // Calculate PPV
+      const prevDecimal = prev / 100;
+      const sensDecimal = sens / 100;
+      const specDecimal = spec / 100;
+
+      const tp = prevDecimal * sensDecimal;
+      const fp = (1 - prevDecimal) * (1 - specDecimal);
+      const ppv = (tp + fp === 0) ? 0 : tp / (tp + fp) * 100;
+
+      document.getElementById('ppvResult').textContent = ppv.toFixed(1) + '%';
+      document.getElementById('fpRate').textContent = (100 - ppv).toFixed(0) + '％的阳性结果是误报';
+    }
+
+    init();
+  </script>
+</body>
+</html>

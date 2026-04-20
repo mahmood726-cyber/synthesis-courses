@@ -1,0 +1,2224 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>メタ分析トピックの選択: 適切な質問</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&amp;family=Source+Sans+Pro:wght@300;400;600;700&amp;display=swap" rel="stylesheet"/>
+<style>
+    :root {
+      --navy: #1E2761;
+      --deep-navy: #141B3D;
+      --gold: #D4AF37;
+      --cream: #FAF8F5;
+      --light-cream: #FFFFFF;
+      --text: #2D3748;
+      --light-text: #718096;
+      --red: #C53030;
+      --green: #22c55e;
+      --teal: #0f766e;
+      --purple: #7c3aed;
+      --orange: #f59e0b;
+      --transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      height: 100%;
+      font-family: 'Source Sans Pro', sans-serif;
+      background: var(--deep-navy);
+      color: var(--cream);
+    }
+
+    .course-container { display: flex; height: 100vh; overflow: hidden; }
+
+    /* Skip Link */
+    .skip-link {
+      position: absolute;
+      top: -40px;
+      left: 0;
+      background: var(--gold);
+      color: var(--navy);
+      padding: 8px 16px;
+      z-index: 10000;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .skip-link:focus { top: 0; }
+
+    /* Sidebar */
+    .sidebar {
+      width: 300px;
+      background: linear-gradient(180deg, var(--deep-navy) 0%, #0a0f1a 100%);
+      border-right: 1px solid rgba(212,175,55,0.2);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    .sidebar-header {
+      padding: 1.25rem;
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+      text-align: center;
+    }
+    .sidebar-header h1 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--gold);
+    }
+    .sidebar-header p {
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.6);
+    }
+
+    .stats-panel {
+      padding: 1rem;
+      background: rgba(212,175,55,0.1);
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+    }
+    .level-display {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+    .level-badge {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, var(--gold), #f0c040);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      box-shadow: 0 2px 8px rgba(212,175,55,0.4);
+    }
+    .level-info { flex: 1; }
+    .level-title { font-weight: 700; font-size: 0.9rem; color: var(--gold); }
+    .level-subtitle { font-size: 0.7rem; color: rgba(255,255,255,0.6); }
+    .xp-bar {
+      height: 8px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 0.5rem;
+    }
+    .xp-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--gold), var(--orange));
+      border-radius: 4px;
+      transition: width 0.5s ease;
+    }
+    .xp-text {
+      font-size: 0.65rem;
+      color: rgba(255,255,255,0.5);
+      text-align: right;
+      margin-top: 0.25rem;
+    }
+    .quick-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+    }
+    .quick-stat {
+      background: rgba(0,0,0,0.2);
+      padding: 0.5rem;
+      border-radius: 6px;
+      text-align: center;
+    }
+    .quick-stat-value {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--gold);
+    }
+    .quick-stat-label {
+      font-size: 0.6rem;
+      color: rgba(255,255,255,0.5);
+    }
+
+    .course-progress {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+      background: rgba(0,0,0,0.2);
+    }
+    .course-progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.6);
+      margin-bottom: 0.35rem;
+    }
+    .course-progress-bar {
+      height: 6px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .course-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--green), #22d3ee);
+      border-radius: 3px;
+      transition: width 0.5s ease;
+    }
+
+    .module-list { flex: 1; overflow-y: auto; padding: 0.5rem 0; }
+    .module-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.6rem 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      border-left: 3px solid transparent;
+    }
+    .module-item:hover { background: rgba(212,175,55,0.1); }
+    .module-item.active { background: rgba(212,175,55,0.15); border-left-color: var(--gold); }
+    .module-item.completed .module-number { background: var(--green); color: white; }
+    .module-item.locked { opacity: 0.5; cursor: not-allowed; }
+    .module-number {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .module-item.active .module-number { background: var(--gold); color: var(--navy); }
+    .module-info { flex: 1; min-width: 0; }
+    .module-title { font-size: 0.8rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .module-subtitle { font-size: 0.65rem; color: rgba(255,255,255,0.5); }
+    .module-xp { font-size: 0.6rem; color: var(--gold); }
+    .module-time { font-size: 0.55rem; color: rgba(255,255,255,0.4); display: flex; align-items: center; gap: 0.25rem; margin-top: 0.15rem; }
+
+    .badges-panel {
+      padding: 1rem;
+      border-top: 1px solid rgba(212,175,55,0.2);
+    }
+    .badges-title { font-size: 0.75rem; font-weight: 600; color: var(--gold); margin-bottom: 0.5rem; }
+    .badges-grid { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+    .badge-item {
+      width: 32px;
+      height: 32px;
+      background: rgba(255,255,255,0.05);
+      border: 2px solid rgba(255,255,255,0.1);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      font-family: inherit;
+      color: inherit;
+      padding: 0;
+      opacity: 0.3;
+      transition: all 0.3s;
+      cursor: pointer;
+      position: relative;
+    }
+    .badge-item.earned { opacity: 1; background: rgba(212,175,55,0.2); border-color: var(--gold); }
+    .badge-item:hover::after,
+    .badge-item:focus::after,
+    .badge-item:focus-visible::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--navy);
+      color: white;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.6rem;
+      white-space: nowrap;
+      z-index: 100;
+    }
+    .badge-item:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+    /* Main Content */
+    .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .content-header {
+      padding: 0.75rem 1.5rem;
+      background: rgba(0,0,0,0.3);
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .breadcrumb { font-size: 0.85rem; color: rgba(255,255,255,0.6); }
+    .breadcrumb span { color: var(--gold); }
+    .header-actions { display: flex; gap: 0.5rem; align-items: center; }
+    .streak-display {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: rgba(239,68,68,0.2);
+      border: 1px solid rgba(239,68,68,0.4);
+      padding: 0.35rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+    }
+    .streak-display.active { background: rgba(249,115,22,0.2); border-color: var(--orange); }
+    .streak-flame { font-size: 1rem; }
+    .streak-count { font-weight: 700; color: var(--orange); }
+
+    .btn {
+      padding: 0.5rem 1rem;
+      border: 1px solid rgba(212,175,55,0.3);
+      border-radius: 6px;
+      background: rgba(255,255,255,0.05);
+      color: var(--cream);
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn:hover { background: rgba(212,175,55,0.2); border-color: var(--gold); }
+    .btn.primary { background: var(--gold); color: var(--navy); border-color: var(--gold); font-weight: 600; }
+
+    .content-body { flex: 1; overflow: hidden; display: flex; }
+
+    /* Slides */
+    .slides-container { flex: 1; position: relative; overflow: hidden; }
+    .module-slides { display: none; width: 100%; height: 100%; }
+    .module-slides.active { display: block; }
+
+    .slide {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      padding: 2rem 2rem 4rem;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity var(--transition), visibility var(--transition);
+      overflow-y: auto;
+    }
+    .slide.active { opacity: 1; visibility: visible; }
+    .slide.dark { background: var(--deep-navy); }
+    .slide.light { background: var(--cream); color: var(--text); }
+    .slide.black { background: #000; }
+    .slide.red-bg { background: linear-gradient(135deg, #7f1d1d, #450a0a); }
+    .slide.green-bg { background: linear-gradient(135deg, #14532d, #052e16); }
+    .slide.purple-bg { background: linear-gradient(135deg, #4c1d95, #2e1065); }
+    .slide.orange-bg { background: linear-gradient(135deg, #9a3412, #431407); }
+    .slide.teal-bg { background: linear-gradient(135deg, #0f766e, #042f2e); }
+
+    .slide-progress-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--gold), var(--orange));
+      transition: width 0.3s ease;
+      z-index: 50;
+    }
+
+    .serif { font-family: 'Cormorant Garamond', Georgia, serif; }
+    .title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      font-weight: 700;
+      margin-bottom: 1rem;
+      line-height: 1.2;
+      text-align: center;
+    }
+    .title.gold { color: var(--gold); }
+    .title.navy { color: var(--navy); }
+    .subtitle {
+      font-size: clamp(0.9rem, 2vw, 1.3rem);
+      color: rgba(255,255,255,0.7);
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .slide.light .subtitle { color: var(--light-text); }
+
+    .big-number {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(4rem, 12vw, 8rem);
+      font-weight: 700;
+      line-height: 1;
+    }
+    .big-number.gold { color: var(--gold); }
+    .big-number.red { color: var(--red); }
+
+    .refrain {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(1.3rem, 3vw, 2rem);
+      font-style: italic;
+      color: var(--gold);
+      text-align: center;
+      max-width: 700px;
+    }
+
+    .content { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 850px; }
+
+    /* Cards */
+    .card {
+      background: var(--light-cream);
+      border: 1px solid var(--gold);
+      padding: 1.25rem 1.5rem;
+      margin: 0.5rem 0;
+      max-width: 750px;
+      width: 100%;
+      border-radius: 8px;
+    }
+    .card.navy-bg { background: var(--navy); color: var(--cream); }
+    .card-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 0.05em;
+      margin-bottom: 0.4rem;
+      text-transform: uppercase;
+    }
+    .card-text { font-size: 0.95rem; line-height: 1.6; }
+    .card.navy-bg .card-text { color: var(--cream); }
+
+    /* Story box */
+    .story-box {
+      background: linear-gradient(135deg, rgba(197,48,48,0.15), rgba(30,39,97,0.2));
+      border-left: 4px solid var(--red);
+      padding: 1.25rem;
+      margin: 0.75rem 0;
+      max-width: 750px;
+      width: 100%;
+      border-radius: 0 8px 8px 0;
+    }
+    .story-box.success { background: linear-gradient(135deg, rgba(34,197,94,0.15), rgba(30,39,97,0.2)); border-left-color: var(--green); }
+    .story-box.warning { background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(30,39,97,0.2)); border-left-color: var(--orange); }
+    .story-box.teal { background: linear-gradient(135deg, rgba(15,118,110,0.15), rgba(30,39,97,0.2)); border-left-color: var(--teal); }
+    .story-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: var(--red);
+      margin-bottom: 0.4rem;
+      text-transform: uppercase;
+    }
+    .story-box.success .story-label { color: var(--green); }
+    .story-box.warning .story-label { color: var(--orange); }
+    .story-box.teal .story-label { color: var(--teal); }
+    .story-text { font-size: 0.95rem; line-height: 1.6; }
+
+    /* Confidence Colors */
+    .cerqual-high { background: linear-gradient(135deg, rgba(34,197,94,0.2), rgba(30,39,97,0.2)); border-color: var(--green); }
+    .cerqual-moderate { background: linear-gradient(135deg, rgba(59,130,246,0.2), rgba(30,39,97,0.2)); border-color: #3b82f6; }
+    .cerqual-low { background: linear-gradient(135deg, rgba(245,158,11,0.2), rgba(30,39,97,0.2)); border-color: var(--orange); }
+    .cerqual-very-low { background: linear-gradient(135deg, rgba(197,48,48,0.2), rgba(30,39,97,0.2)); border-color: var(--red); }
+
+    .cerqual-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .cerqual-badge.high { background: var(--green); color: white; }
+    .cerqual-badge.moderate { background: #3b82f6; color: white; }
+    .cerqual-badge.low { background: var(--orange); color: white; }
+    .cerqual-badge.very-low { background: var(--red); color: white; }
+
+    /* Stats */
+    .stats-grid {
+      display: flex;
+      gap: 0.75rem;
+      margin: 1rem 0;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .stat-box {
+      background: var(--navy);
+      color: var(--cream);
+      padding: 1rem 1.25rem;
+      text-align: center;
+      min-width: 120px;
+      border-radius: 8px;
+    }
+    .stat-value {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.3rem, 2.5vw, 2rem);
+      font-weight: 700;
+    }
+    .stat-value.gold { color: var(--gold); }
+    .stat-value.red { color: var(--red); }
+    .stat-value.green { color: var(--green); }
+    .stat-label { font-size: 0.75rem; opacity: 0.8; margin-top: 0.2rem; }
+
+    /* Timeline */
+    .timeline { display: flex; flex-direction: column; gap: 0.4rem; width: 100%; max-width: 650px; }
+    .timeline-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.6rem 0.75rem;
+      background: rgba(255,255,255,0.05);
+      border-radius: 6px;
+      border-left: 4px solid var(--gold);
+    }
+    .timeline-days { font-weight: 700; font-size: 0.8rem; min-width: 70px; color: var(--gold); }
+    .timeline-content { flex: 1; }
+    .timeline-title { font-weight: 600; font-size: 0.9rem; }
+    .timeline-desc { font-size: 0.75rem; opacity: 0.7; }
+
+    /* Checklist */
+    .checklist { display: flex; flex-direction: column; gap: 0.4rem; width: 100%; max-width: 650px; }
+    .checklist-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+      padding: 0.6rem 0.75rem;
+      background: rgba(255,255,255,0.05);
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .check-icon {
+      width: 20px;
+      height: 20px;
+      background: var(--green);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      color: white;
+      flex-shrink: 0;
+    }
+    .checklist-text { font-size: 0.9rem; }
+
+    /* Decision Tree */
+    .decision-tree {
+      background: linear-gradient(135deg, rgba(124,58,237,0.1), rgba(30,39,97,0.2));
+      border: 2px solid var(--purple);
+      border-radius: 12px;
+      padding: 1.25rem;
+      width: 100%;
+      max-width: 700px;
+    }
+    .decision-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    .decision-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--purple);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+    }
+    .decision-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+    .decision-xp {
+      margin-left: auto;
+      background: rgba(212,175,55,0.2);
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      color: var(--gold);
+      font-weight: 600;
+    }
+    .decision-scenario {
+      background: rgba(0,0,0,0.2);
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+    .decision-question {
+      font-weight: 600;
+      color: var(--gold);
+      margin-bottom: 0.75rem;
+      font-size: 1rem;
+    }
+    .decision-options { display: flex; flex-direction: column; gap: 0.5rem; }
+    .decision-option {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      background: rgba(255,255,255,0.05);
+      border: 2px solid rgba(255,255,255,0.15);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .decision-option:hover { background: rgba(124,58,237,0.2); border-color: var(--purple); }
+    .decision-option.selected { background: rgba(124,58,237,0.3); border-color: var(--purple); }
+    .decision-option.correct { background: rgba(34,197,94,0.2); border-color: var(--green); }
+    .decision-option.incorrect { background: rgba(239,68,68,0.15); border-color: var(--red); }
+    .decision-option.disabled { pointer-events: none; opacity: 0.7; }
+    .decision-option:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+    .option-letter {
+      width: 24px;
+      height: 24px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.8rem;
+      flex-shrink: 0;
+    }
+    .decision-option.correct .option-letter { background: var(--green); color: white; }
+    .decision-option.incorrect .option-letter { background: var(--red); color: white; }
+    .option-text { font-size: 0.9rem; }
+    .decision-feedback {
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: 8px;
+      display: none;
+    }
+    .decision-feedback.show { display: block; }
+    .decision-feedback.correct { background: rgba(34,197,94,0.2); border: 1px solid var(--green); }
+    .decision-feedback.incorrect { background: rgba(239,68,68,0.15); border: 1px solid var(--red); }
+    .feedback-title { font-weight: 700; margin-bottom: 0.5rem; }
+    .feedback-text { font-size: 0.9rem; line-height: 1.5; }
+
+    /* Quiz */
+    .quiz-container { width: 100%; max-width: 650px; }
+    .quiz-question {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.2rem;
+      margin-bottom: 1.25rem;
+      text-align: center;
+    }
+    .quiz-options { display: flex; flex-direction: column; gap: 0.5rem; }
+    .quiz-option {
+      padding: 0.75rem 1rem;
+      background: rgba(255,255,255,0.05);
+      border: 2px solid rgba(255,255,255,0.2);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+    .quiz-option:hover { background: rgba(212,175,55,0.15); border-color: var(--gold); }
+    .quiz-option.correct { background: rgba(34,197,94,0.2); border-color: var(--green); }
+    .quiz-option.incorrect { background: rgba(239,68,68,0.15); border-color: var(--red); }
+    .quiz-option.disabled { pointer-events: none; }
+    .quiz-option:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+    .quiz-feedback {
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: 8px;
+      display: none;
+      font-size: 0.9rem;
+    }
+    .quiz-feedback.show { display: block; }
+    .quiz-feedback.correct { background: rgba(34,197,94,0.2); border: 1px solid var(--green); }
+    .quiz-feedback.incorrect { background: rgba(239,68,68,0.15); border: 1px solid var(--red); }
+
+    /* Learning Objectives */
+    .objectives-box {
+      background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(30,39,97,0.25));
+      border: 2px solid #3b82f6;
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin: 0.75rem 0;
+      max-width: 700px;
+      width: 100%;
+    }
+    .objectives-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+    .objectives-icon {
+      width: 36px;
+      height: 36px;
+      background: #3b82f6;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+    }
+    .objectives-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #60a5fa;
+    }
+    .objectives-list { list-style: none; padding: 0; }
+    .objectives-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      padding: 0.4rem 0;
+      font-size: 0.9rem;
+    }
+    .objectives-list li::before { content: '○'; color: #3b82f6; font-weight: bold; }
+
+    /* Animation */
+    .slide.active .animate { animation: fadeUp 0.5s ease-out forwards; }
+    .slide.active .animate.delay-1 { animation-delay: 0.1s; }
+    .slide.active .animate.delay-2 { animation-delay: 0.2s; }
+    .slide.active .animate.delay-3 { animation-delay: 0.3s; }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate { opacity: 0; }
+
+    /* XP Popup */
+    .xp-popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      background: linear-gradient(135deg, var(--gold), #f0c040);
+      color: var(--navy);
+      padding: 1.5rem 2.5rem;
+      border-radius: 12px;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2rem;
+      font-weight: 700;
+      z-index: 1000;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+      transition: transform 0.3s ease;
+    }
+    .xp-popup.show { transform: translate(-50%, -50%) scale(1); }
+    .xp-popup .xp-amount { font-size: 3rem; display: block; }
+
+    /* Badge Modal */
+    .badge-modal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.85);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1001;
+    }
+    .badge-modal.show { display: flex; }
+    .badge-modal-content {
+      background: linear-gradient(135deg, var(--deep-navy), #0a0f1a);
+      border: 2px solid var(--gold);
+      border-radius: 16px;
+      padding: 2rem;
+      text-align: center;
+      max-width: 350px;
+    }
+    .badge-modal-icon { font-size: 4rem; margin-bottom: 1rem; }
+    .badge-modal-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.5rem;
+      color: var(--gold);
+      margin-bottom: 0.5rem;
+    }
+    .badge-modal-desc { font-size: 0.9rem; opacity: 0.8; margin-bottom: 1rem; }
+    .badge-modal-close {
+      padding: 0.5rem 1.5rem;
+      background: var(--gold);
+      color: var(--navy);
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* Confetti */
+    .confetti-container {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 999;
+      overflow: hidden;
+    }
+    .confetti {
+      position: absolute;
+      width: 10px; height: 10px;
+      opacity: 0;
+      animation: confetti-fall 3s ease-out forwards;
+    }
+    @keyframes confetti-fall {
+      0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .confetti { animation: none; display: none; }
+      .xp-popup { transition: none; }
+      .slide { transition: none; }
+    }
+
+    /* Nav */
+    .slide-nav {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      padding: 0.75rem 1rem 1.25rem;
+      z-index: 100;
+      pointer-events: none;
+    }
+    .nav-btn {
+      background: rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: white;
+      font-size: 1.1rem;
+      cursor: pointer;
+      opacity: 0.6;
+      transition: all 0.2s;
+      padding: 0.4rem 0.6rem;
+      border-radius: 6px;
+      pointer-events: auto;
+    }
+    .nav-btn:hover { opacity: 1; background: rgba(0,0,0,0.7); border-color: var(--gold); }
+    .nav-btn:disabled { opacity: 0.2; cursor: not-allowed; }
+    .nav-btn:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+    .nav-center { display: flex; flex-direction: column; align-items: center; gap: 0.2rem; pointer-events: auto; }
+    .slide-counter { font-size: 0.7rem; opacity: 0.5; }
+    .progress-dots { display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; max-width: 220px; }
+    .progress-dot {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: transparent;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+      padding: 0;
+      appearance: none;
+      position: relative;
+    }
+    .progress-dot::after {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.25);
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      transition: all 0.2s;
+    }
+    .progress-dot.active::after { background: var(--gold); transform: translate(-50%, -50%) scale(1.4); }
+    .progress-dot:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+    /* Mobile */
+    @media (max-width: 768px) {
+      .sidebar {
+        position: fixed;
+        left: -300px;
+        top: 0;
+        bottom: 0;
+        z-index: 1000;
+        transition: left 0.3s ease;
+      }
+      .sidebar.open { left: 0; }
+      .sidebar-toggle {
+        display: flex;
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        z-index: 1001;
+        width: 40px;
+        height: 40px;
+        background: var(--gold);
+        color: var(--navy);
+        border: none;
+        border-radius: 8px;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        cursor: pointer;
+      }
+      .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 999;
+      }
+      .sidebar-overlay.show { display: block; }
+    }
+    @media (min-width: 769px) {
+      .sidebar-toggle { display: none; }
+      .sidebar-overlay { display: none !important; }
+    }
+
+    /* Combo Counter */
+    .combo-display {
+      position: fixed;
+      top: 80px;
+      right: 20px;
+      background: linear-gradient(135deg, var(--orange), #ef4444);
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      z-index: 500;
+      transform: scale(0);
+      transition: transform 0.3s ease;
+      box-shadow: 0 4px 15px rgba(239,68,68,0.4);
+    }
+    .combo-display.show { transform: scale(1); }
+
+    /* Quote Block */
+    .quote-block {
+      background: linear-gradient(135deg, rgba(15,118,110,0.2), rgba(30,39,97,0.2));
+      border-left: 4px solid var(--teal);
+      padding: 1.25rem;
+      margin: 0.75rem 0;
+      max-width: 700px;
+      width: 100%;
+      border-radius: 0 8px 8px 0;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      font-style: italic;
+    }
+    .quote-attribution {
+      margin-top: 0.75rem;
+      font-size: 0.85rem;
+      font-style: normal;
+      color: var(--teal);
+    }
+  </style>
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<div class="course-container">
+<!-- Sidebar -->
+<nav aria-label="コースナビゲーション" class="sidebar" role="navigation">
+<div class="sidebar-header">
+<a href="index.html" onmouseout="this.style.color='rgba(212,175,55,0.7)'" onmouseover="this.style.color='#D4AF37'" style="display:block;font-size:0.7rem;color:rgba(212,175,55,0.7);text-decoration:none;margin-bottom:0.5rem;">← Course Library</a>
+<h1>Topic Selection</h1>
+<p>適切な質問の選択</p>
+</div>
+<div class="stats-panel">
+<div class="level-display">
+<div class="level-badge" id="levelIcon">QS</div>
+<div class="level-info">
+<div class="level-title" id="levelTitle">Question Seeker</div>
+<div class="level-subtitle">Level <span id="levelNum">1</span></div>
+</div>
+</div>
+<div class="xp-bar"><div class="xp-fill" id="xpFill" style="width: 0%"></div></div>
+<div class="xp-text"><span id="xpCurrent">0</span> / <span id="xpNeeded">100</span> XP</div>
+<div class="quick-stats">
+<div class="quick-stat">
+<div class="quick-stat-value" id="correctCount">0</div>
+<div class="quick-stat-label">Correct</div>
+</div>
+<div class="quick-stat">
+<div class="quick-stat-value" id="decisionCount">0</div>
+<div class="quick-stat-label">Decisions</div>
+</div>
+<div class="quick-stat">
+<div class="quick-stat-value" id="synthesisCount">0</div>
+<div class="quick-stat-label">Refined</div>
+</div>
+</div>
+</div>
+<div class="course-progress">
+<div class="course-progress-label">
+<span>Course Progress</span>
+<span id="courseProgressPct">0%</span>
+</div>
+<div class="course-progress-bar">
+<div class="course-progress-fill" id="courseProgressFill" style="width: 0%"></div>
+</div>
+</div>
+<div class="module-list" id="moduleList"></div>
+<div class="badges-panel">
+<div class="badges-title">Achievements</div>
+<div class="badges-grid" id="badgesGrid"></div>
+</div>
+</nav>
+<!-- Main Content -->
+<main class="main-content" id="main-content">
+<header class="content-header">
+<div class="breadcrumb">Topic Selection / <span id="currentModule">Module 1</span></div>
+<div class="header-actions">
+<div class="streak-display" id="streakDisplay">
+<span class="streak-flame">ST</span>
+<span class="streak-count" id="streakCount">0</span>
+<span>day streak</span>
+</div>
+<button class="btn" onclick="resetProgress()">Reset</button>
+</div>
+</header>
+<div class="content-body">
+<div class="slides-container" id="slidesContainer"></div>
+</div>
+</main>
+</div>
+<!-- XP Popup -->
+<div aria-atomic="true" aria-live="polite" class="xp-popup" id="xpPopup" role="status">
+<span class="xp-amount" id="xpAmount">+25</span>
+    XP
+  </div>
+<!-- Badge Modal -->
+<div aria-labelledby="badgeModalTitle" aria-modal="true" class="badge-modal" id="badgeModal" role="dialog">
+<div class="badge-modal-content">
+<div class="badge-modal-icon" id="badgeModalIcon">AW</div>
+<div class="badge-modal-title" id="badgeModalTitle">Badge Earned!</div>
+<div class="badge-modal-desc" id="badgeModalDesc">新しい実績のロックを解除しました</div>
+<button class="badge-modal-close" onclick="closeBadgeModal()">Awesome!</button>
+</div>
+</div>
+<!-- Confetti Container -->
+<div class="confetti-container" id="confettiContainer"></div>
+<!-- Combo Counter -->
+<div aria-live="polite" class="combo-display" id="comboDisplay" role="status">COMBO <span id="comboCount">0</span>x</div>
+<!-- Mobile Sidebar Toggle -->
+<button aria-expanded="false" aria-label="Toggle menu" class="sidebar-toggle" onclick="toggleSidebar()">MENU</button>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<script>
+// ===== GAMIFICATION STATE =====
+const DEFAULT_STATE = {
+  xp: 0,
+  level: 1,
+  streak: 0,
+  lastActive: null,
+  correctAnswers: 0,
+  decisionsCompleted: 0,
+  synthesisCount: 0,
+  badges: [],
+  completedModules: [],
+  answeredQuestions: {}
+};
+
+function safeGetStorage(key, fallback) {
+  try {
+    const item = localStorage.getItem(key);
+    return item ? JSON.parse(item) : fallback;
+  } catch (e) {
+    return fallback;
+  }
+}
+
+function safeSetStorage(key, value) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch (e) {}
+}
+
+let gameState = safeGetStorage('topicSelectionGame', DEFAULT_STATE);
+
+const LEVELS = [
+  { level: 1, title: "Question Seeker", icon: "QS", xp: 0 },
+  { level: 2, title: "Scope Shaper", icon: "SS", xp: 100 },
+  { level: 3, title: "Evidence Scout", icon: "ES", xp: 250 },
+  { level: 4, title: "Impact Interpreter", icon: "II", xp: 450 },
+  { level: 5, title: "Novelty Hunter", icon: "NH", xp: 700 },
+  { level: 6, title: "Bias Sentinel", icon: "BS", xp: 1000 },
+  { level: 7, title: "Protocol Forger", icon: "PF", xp: 1400 },
+  { level: 8, title: "Topic Architect", icon: "TA", xp: 1900 }
+];
+
+const BADGES = [
+  { id: "first_question", icon: "FQ", name: "First Question", desc: "最初の意思決定シナリオを完了" },
+  { id: "scope_shaper", icon: "SS", name: "Scope Shaper", desc: "フレームモジュールを完了" },
+  { id: "evidence_scout", icon: "ES", name: "Evidence Scout", desc: "証拠フィールドモジュールを完了" },
+  { id: "impact_guardian", icon: "IG", name: "Impact Guardian", desc: "ステークホルダーモジュールを完了" },
+  { id: "novelty_hawk", icon: "NH", name: "Novelty Hawk", desc: "エコーズモジュールを完了" },
+  { id: "bias_sentinel", icon: "BS", name: "Bias Sentinel", desc: "ミラーモジュールを完了" },
+  { id: "topic_forger", icon: "TF", name: "Topic Forger", desc: "トピックフォージを完了モジュール" },
+  { id: "perfect_5", icon: "5x", name: "Five Star", desc: "Get 5 correct answers in a row" },
+  { id: "decision_maker", icon: "DM", name: "Decision Maker", desc: "15 の決定を完了木" },
+  { id: "finisher", icon: "FN", name: "Course Complete", desc: "コース全体を完了する" },
+  { id: "streak_3", icon: "S3", name: "On Fire", desc: "Maintain a 3-day streak" },
+  { id: "streak_7", icon: "S7", name: "Weekly Warrior", desc: "Maintain a 7-day streak" }
+];
+
+// ===== MODULES DATA =====
+const MODULES = [
+  {
+    id: 1, title: "The Call", subtitle: "適切な質問が重要な理由", xp: 140,
+    slides: [
+      { type: "title", theme: "teal-bg", content: { title: "メタ分析のトピックの選択", subtitle: "時間を割く価値のある質問を見つける" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "トピックの選択が、分析において最も一か八かの決断である理由を認識するレビュー",
+          "Use the Three Gates: decision value, evidence readiness, and contribution",
+          "準備が整っていないトピックの早期警告サインを発見する",
+          "範囲と結果を一致させた物語フレームを構築する"
+        ],
+        tip: "すべてのコンセプトは、キャスト、HRT、減少などの実際の証拠の逆転に固定されています。なぜなら、判断は本物の専門家がそれをどのように理解したかを見ることから得られるからです。"
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "THE RUSH", title: "質問が証拠を上回ったとき",
+        text: "2020 年初頭、ある治療法が世界的な見出しになりました。数週間以内に、数十の小規模な研究とプレプリントが登場しました。メタ分析は試験が完了するよりも早く公開されました。研究デザイン、結果、患者の重症度が異なるため、結果は月ごとに反転しました。",
+        followup: "By late 2020, large randomized trials reported no meaningful benefit. The early reviews were not wrong in method; the topic itself was too immature and too fragmented. The question had not yet ripened."
+      }},
+      { type: "stats", theme: "dark", content: {
+        title: "Field Snapshot (Simplified)",
+        stats: [
+          { value: "70+", label: "4 か月以内の研究" },
+          { value: "3", label: "Design families" },
+          { value: "6", label: "Primary outcome definitions" },
+          { value: "1", label: "Shared protocol" }
+        ],
+        caption: "Illustrative counts from early-pandemic treatment literature; numbers simplified for teaching."
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "The Three Gates of a Good Topic",
+        subtitle: "If any gate is closed, do not enter",
+        text: "<strong>Decision value:</strong> Someone must act on the answer.<br><br><strong>Evidence readiness:</strong> Enough comparable studies with extractable data.<br><br><strong>Contribution:</strong> The review changes understanding, updates evidence, or resolves conflict.",
+        highlight: "A topic can be important but unripe, feasible but irrelevant, or novel but trivial. Pass all three gates."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "QS", title: "シナリオ: 見出しの罠", xp: 25,
+        scenario: "ニュースのいたるところでトピックが取り上げられています。スコーピング検索では、結果と期間が異なる 2 つの小規模な RCT、7 つのプレプリント、および 4 つの観察研究が見つかりました。病院のリーダーは、2 週間以内に統合された回答を求めています。",
+        question: "What is the most responsible response?",
+        options: [
+          { letter: "A", text: "Run a full meta-analysis now; speed matters most", correct: false },
+          { letter: "B", text: "迅速な範囲レビューを公開し、有効なプロトコルを登録します", correct: true },
+          { letter: "C", text: "Use only the preprints to move fast", correct: false },
+          { letter: "D", text: "Wait and provide no guidance at all", correct: false }
+        ],
+        feedback: {
+          correct: "正解です。証拠分野は未熟で一貫性がありません。スコーピングレビューは存在するものをマッピングし、生きているプロトコルはより強力な試験が到着したときに更新するためのパスを作成します。",
+          incorrect: "速度は比較可能性の代わりにはなりません。結果と設計が断片化されている場合、統合された推定値は不安定になり、意思決定者を誤解させる可能性があります。"
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "QS", title: "Scenario: Three Gates Check", xp: 30,
+        scenario: "You are choosing a topic for the next review cycle. Topic A: 15 RCTs, but five high-quality reviews were published last year. Topic B: 2 small trials in a rare disease, outcomes differ. Topic C: 6 RCTs on a guideline decision with new harms data and no recent meta-analysis.",
+        question: "Which topic passes all three gates?",
+        options: [
+          { letter: "A", text: "Topic A", correct: false },
+          { letter: "B", text: "Topic B", correct: false },
+          { letter: "C", text: "Topic C", correct: true },
+          { letter: "D", text: "None of them", correct: false }
+        ],
+        feedback: {
+          correct: "正解です。トピック C には、決定価値、実行可能な証拠、および明確な貢献があります (最近レビューされていない新しい害悪データ)。",
+          incorrect: "Topic A fails contribution due to redundancy; Topic B fails evidence readiness. Topic C is the only one that clears all three gates."
+        }
+      }},
+      { type: "refrain", theme: "black", content: { text: "熟していない質問を急ぐ必要はありません。" }},
+      { type: "quiz", theme: "dark", content: {
+        question: "Why did many early pandemic meta-analyses give unstable answers?",
+        options: [
+          { text: "統計手法が無効でした", correct: false },
+          { text: "証拠が未熟で、結果は一貫性がありません", correct: true },
+          { text: "Meta-analysis cannot be used for infectious diseases", correct: false },
+          { text: "ランダム化は不要でした", correct: false }
+        ],
+        xp: 20,
+        feedback: {
+          correct: "Correct. The topic was not ready: designs varied, outcomes differed, and many studies were underpowered. A stable answer requires a stable evidence field.",
+          incorrect: "メソッドは主な問題ではありませんでした。証拠分野は断片的で未熟であるため、統合された推定値は、より強力な試験が出現するにつれて変更される可能性があります。"
+        }
+      }}
+    ]
+  },
+  {
+    id: 2, title: "The Frame", subtitle: "範囲と境界", xp: 150,
+    slides: [
+      { type: "title", theme: "gold-bg", content: { title: "The Frame", subtitle: "範囲は最初の方法" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "PICO と時間、設計、設定で範囲を制御",
+          "Detect scope drift before it dilutes your findings",
+          "Separate what is interesting from what is answerable",
+          "Practice narrowing without biasing the outcome"
+        ],
+        tip: "The Cochrane exercise review asked 'Does exercise help depression?' 41 studies, no clear answer. A focused question on supervised aerobic exercise in major depression: 9 studies, actionable conclusion."
+      }},
+      { type: "story", theme: "gold-bg", content: {
+        label: "広いNET", title: "When breadth becomes fog",
+        text: "A team asked: 'Does exercise reduce depression?' They found 45 trials across aerobic, resistance, yoga, tai chi, dance, and mixed programs. Outcomes used 12 scales; follow-up ranged 2 to 52 weeks. The pooled estimate looked promising, but heterogeneity was extreme.",
+        followup: "They reframed: 'In adults with major depressive disorder, do supervised aerobic programs of 8-12 weeks improve standardized symptom scores vs usual care?' The evidence set shrank to 9 comparable trials and the conclusion became usable."
+      }},
+      { type: "stats", theme: "dark", content: {
+        title: "Scope Drift Signals",
+        stats: [
+          { value: "8", label: "Intervention types" },
+          { value: "12", label: "Outcome scales" },
+          { value: "2-52", label: "Weeks of follow-up" },
+          { value: "I2 > 70%", label: "Heterogeneity" }
+        ],
+        caption: "文献にある運動とうつ病の試験からの簡略化されたスナップショット。"
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "スコープ ダイヤル",
+        subtitle: "Turn it until it fits",
+        text: "Define <strong>Population</strong>, <strong>Intervention</strong>, <strong>Comparator</strong>, <strong>Outcome</strong>, <strong>Time</strong>, <strong>Design</strong>, and <strong>Setting</strong>. Each dial you leave loose widens uncertainty.",
+        highlight: "Broad questions create confusing answers. Narrow questions create usable answers."
+      }},
+      { type: "checklist", theme: "dark", content: {
+        title: "Boundary Checklist",
+        items: [
+          "Population is explicit (age, condition, severity, setting)",
+          "Intervention is defined (dose, format, supervision)",
+          "Comparator is realistic (usual care, placebo, active)",
+          "Primary outcome is chosen and measured consistently",
+          "タイム ウィンドウは決定と一致する",
+          "Design inclusion is justified (RCTs only or mixed)"
+        ]
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "SS", title: "シナリオ: タイム ウィンドウ", xp: 25,
+        scenario: "あなたのレビューは次のとおりです。手術後6か月間のリハビリテーションの決定を通知することを意味していました。試験では 2、6、および 12 か月後の結果が報告されます。",
+        question: "主要な時間枠を設定する最良の方法は何ですか?",
+        options: [
+          { letter: "A", text: "すべての研究で最も早い時点を使用します", correct: false },
+          { letter: "B", text: "Pre-specify 6 months as primary and treat other windows as secondary", correct: true },
+          { letter: "C", text: "Average all time points together", correct: false },
+          { letter: "D", text: "結果を確認した後、最大の効果が得られる時点を選択します", correct: false }
+        ],
+        feedback: {
+          correct: "正解です。時間枠は決定と一致する必要があります。 6 か月を事前に指定することで、チェリーピッキングを防止し、証拠を実際の選択と一致させておくことができます。",
+          incorrect: "時間ウィンドウは効果のサイズを変更します。主要な時点を事前に指定しないと、バイアスがかかり、レビューが通知する意思決定との不一致が生じる危険があります。"
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "SS", title: "シナリオ: 枠を狭める", xp: 25,
+        scenario: "質問草案は次のとおりです: 「メンタルヘルス アプリはメンタルヘルスを改善しますか?」",
+        question: "どの改訂が、評価に偏ることなく範囲を最も狭めることができますか?答え?",
+        options: [
+          { letter: "A", text: "Keep it broad to avoid missing anything", correct: false },
+          { letter: "B", text: "Adults with generalized anxiety using app-based CBT vs waitlist, 8-12 weeks", correct: true },
+          { letter: "C", text: "パイロット研究で効果が示されたアプリのみを含める", correct: false },
+          { letter: "D", text: "メンタルヘルスの成果を得るにはデジタルツールに限定する", correct: false }
+        ],
+        feedback: {
+          correct: "正解です。オプション B は、利益を事前に選択せずに、母集団、介入、比較対象、および時間を厳格化します。これにより、証拠が比較可能になり、答えが実用的になります。",
+          incorrect: "A tight frame does not bias results; it makes them interpretable. Options A and D are too broad, and C is biased because it preselects favorable evidence."
+        }
+      }},
+      { type: "refrain", theme: "black", content: { text: "フレームが物語を形作ります。" }},
+      { type: "quiz", theme: "dark", content: {
+        question: "試験全体で 6 つの異なるうつ病スケールが見つかりました。最善の次のステップは何ですか?",
+        options: [
+          { text: "Drop all trials using uncommon scales", correct: false },
+          { text: "Define a primary outcome scale or use standardized mean difference", correct: true },
+          { text: "Include all scales equally without adjustment", correct: false },
+          { text: "Switch the topic to anxiety instead", correct: false }
+        ],
+        xp: 20,
+        feedback: {
+          correct: "Correct. Define the primary outcome or use standardized mean differences to align scales. Scope is not just about topic; it is about outcome consistency.",
+          incorrect: "結果の不一致は範囲の問題です。ランダムな除外やトピックの切り替えではなく、調整のための戦略が必要です。"
+        }
+      }}
+    ]
+  },
+  {
+    id: 3, title: "証拠フィールド", subtitle: "実現可能性と収集", xp: 150,
+    slides: [
+      { type: "title", theme: "purple-bg", content: { title: "証拠フィールド", subtitle: "フィールドは収集する準備ができていますか?" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "Run a scoping search that reveals feasibility",
+          "研究が十分に比較可能かどうかを判断します。プール",
+          "メタアナリシス、スコーピングレビュー、またはリビングレビューのいずれかを決定する",
+          "薄い証拠による誤った精度を回避する"
+        ],
+        tip: "コクランマスクレビューの前に、スコーピング検索により 67 件の既存の研究が明らかになり、重複した作業を防止し、調査結果をより鮮明にすることができました。質問です。"
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "THE PROMISE", title: "希少疾患のジレンマ",
+        text: "A team wanted to meta-analyze a new therapy for a rare neuromuscular disease. Two small trials existed (n=38 and n=25). One measured a 6-minute walk test, the other used a functional rating scale. Follow-up windows differed.",
+        followup: "プールでは数値が得られましたが、意味のある答えは得られませんでした。チームはスコーピングレビューを公開し、生きたプロトコールを登録し、新しい試験が発表されたときに更新できるようにしました。"
+      }},
+      { type: "stats", theme: "dark", content: {
+        title: "Feasibility Snapshot",
+        stats: [
+          { value: "2", label: "Randomized trials" },
+          { value: "63", label: "Total participants" },
+          { value: "0", label: "Shared outcomes" },
+          { value: "18", label: "Months to next trial" }
+        ],
+        caption: "Simplified feasibility map from rare-disease trial registries."
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "Feasibility Triage",
+        subtitle: "プールする前に尋ねてください",
+        text: "A topic is feasible when you can answer: <br><br>1) At least 3 comparable studies? <br>2) Outcomes measured in compatible ways? <br>3) Effect sizes extractable? <br>4) Time windows similar enough to interpret?",
+        highlight: "A beautiful statistic built on thin evidence is still thin."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "ES", title: "Scenario: Mixing Designs", xp: 25,
+        scenario: "スコーピング検索により、同じ介入に関する異なる交絡リスクのある 3 件の RCT と 5 件の観察研究が見つかりました。",
+        question: "研究をどのように処理すべきか設計?",
+        options: [
+          { letter: "A", text: "Pool all studies together to maximize sample size", correct: false },
+          { letter: "B", text: "RCT を個別に分析し、観察結果と比較します", correct: true },
+          { letter: "C", text: "Exclude RCTs because they are fewer", correct: false },
+          { letter: "D", text: "Exclude observational studies without explanation", correct: false }
+        ],
+        feedback: {
+          correct: "Correct. Different designs carry different bias structures. Separate analyses preserve interpretability and allow comparison without false precision.",
+          incorrect: "互換性のない設計をプールすると、バイアスが隠蔽され、誤解を招く確実性が生じる可能性があります。設計を個別に処理し、差異を透過的に報告します。"
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "ES", title: "シナリオ: 適切なレビューを選択", xp: 30,
+        scenario: "スコープ検索により、1 件の RCT と 3 件の小規模な観察研究が見つかりました。結果が異なり、2 つの研究のデータが欠落しています。",
+        question: "What is the best next move?",
+        options: [
+          { letter: "A", text: "ランダム効果メタ分析を続行", correct: false },
+          { letter: "B", text: "スコーピングレビューを公開し、有効なプロトコルを登録", correct: true },
+          { letter: "C", text: "RCT を除外し、観察研究のみをメタ分析します", correct: false },
+          { letter: "D", text: "Change the outcome until pooling works", correct: false }
+        ],
+        feedback: {
+          correct: "正しい。証拠根拠が薄すぎて一貫性がありません。スコーピングレビューによってフィールドがマッピングされ、生きているプロトコルによって将来の試験に備えることができます。",
+          incorrect: "プーリングでは、不整合や欠落したデータは修正されません。実現可能性の基準が満たされない場合、正直な答えは、証拠をマッピングして待つことです。"
+        }
+      }},
+      { type: "checklist", theme: "dark", content: {
+        title: "Feasibility Checklist",
+        items: [
+          "同様の結果を持つ比較可能な研究が少なくとも 3 つあります",
+          "効果の大きさと分散が抽出可能です",
+          "研究デザインに根本的な互換性はありません",
+          "フォローアップウィンドウは質問と一致しています",
+          "主要なサブグループ データは必要に応じて利用可能です",
+          "抽出を完了するのに十分な時間とデータへのアクセス"
+        ]
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "ES", title: "シナリオ: 抽出可能なデータ", xp: 25,
+        scenario: "同じ結果を持つ 4 つの RCT が見つかりましたが、2 つは分散のない中央値のみを報告し、著者は応答しません。",
+        question: "What is the most defensible approach?",
+        options: [
+          { letter: "A", text: "Impute variances without documentation and pool all 4", correct: false },
+          { letter: "B", text: "抽出可能な 2 つの試験のみをプールし、制限を透過的に報告します。", correct: true },
+          { letter: "C", text: "Invent a conversion formula and proceed without sensitivity checks", correct: false },
+          { letter: "D", text: "トピックを完全に放棄します", correct: false }
+        ],
+        feedback: {
+          correct: "正解です。主要な統計が欠落している場合は、抽出可能なもののみをプールできるため、制限を報告する必要があります。代入を正当化すれば、感度分析が可能です。",
+          incorrect: "検証できない代入により、誤った精度が生じる可能性があります。データが欠落している場合、より大きなプールされた N よりも透明性と防御可能な選択肢が重要になります。"
+        }
+      }},
+      { type: "quiz", theme: "dark", content: {
+        question: "トピックがメタ分析の準備ができていないことを最も強く示唆する条件はどれですか?",
+        options: [
+          { text: "Three small trials with compatible outcomes", correct: false },
+          { text: "Multiple outcomes with a clear primary endpoint", correct: false },
+          { text: "結果ごとに 1 つの研究のみで、比較可能な測定値はありません", correct: true },
+          { text: "Two trials plus a large ongoing trial", correct: false }
+        ],
+        xp: 20,
+        feedback: {
+          correct: "正解です。比較可能な結果がなければ、統合された推定値は意味がありません。証拠を揃えることができない場合、実現可能性は失敗します。",
+          incorrect: "実現可能性とは、研究の数だけではなく、比較可能性と抽出可能なデータに関するものです。"
+        }
+      }}
+    ]
+  },
+  {
+    id: 4, title: "The Stakeholder", subtitle: "影響と意思決定の利用", xp: 160,
+    slides: [
+      { type: "title", theme: "green-bg", content: { title: "The Stakeholder", subtitle: "A topic must serve a decision" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "質問を実際の意思決定と対象者に合わせて調整します",
+          "Prioritize patient-important outcomes over surrogates",
+          "Recognize when trade-offs define the topic",
+          "証拠を実践的なものに変換しますしきい値"
+        ],
+        tip: "GRADE ガイドラインでは、次のことが指定されています。誰が証拠を使用するかを明記します。臨床医向けのレビューは政策立案者向けのレビューとは異なります。"
+      }},
+      { type: "story", theme: "green-bg", content: {
+        label: "THE DECISION", title: "一次予防のためのアスピリン",
+        text: "長年、アスピリンは最初の心臓発作を予防すると考えられてきました。その後の大規模な試験とメタ分析では、非致死的事象の絶対的な減少はわずかであったものの、大出血が増加したことが示されました。純利益は、ベースラインのリスクと患者の好みによって異なります。",
+        followup: "重要な質問は、「アスピリンはバイオマーカーを変化させるか?」ではありませんでした。しかし、「この人々にとって利益は害を上回りますか?」トピックの選択により、証拠が決定に変わりました。"
+      }},
+      { type: "stats", theme: "dark", content: {
+        title: "Benefit vs Harm (Illustrative)",
+        stats: [
+          { value: "0.5%", label: "Nonfatal MI reduction" },
+          { value: "0.4%", label: "Major bleeding increase" },
+          { value: "0.0%", label: "All-cause mortality change" },
+          { value: "Risk", label: "Depends on baseline" }
+        ],
+        caption: "Illustrative ranges from large primary-prevention trials; simplified for teaching."
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "Decision Map",
+        subtitle: "誰がその答えを必要としていますか?そしてなぜその答えが必要ですか?",
+        text: "Name the stakeholder, the decision point, and the threshold: <br><br>? Clinicians: prescribe or not? <br>? Patients: accept trade-offs? <br>? Policymakers: fund or restrict? <br><br>Then choose outcomes that reflect what they value.",
+        highlight: "誰も答えに基づいて別の行動をとらない場合、そのトピックは影響力が低いです。"
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "IG", title: "Scenario: Outcome Alignment", xp: 25,
+        scenario: "ガイドライン委員会は、条件 X のスクリーニングを推奨するかどうかを決定する必要があります。提案されたレビューは研究室での変更に焦点を当てています。バイオマーカー。",
+        question: "最適なリビジョンは何ですか?",
+        options: [
+          { letter: "A", text: "Keep biomarkers because they change quickly", correct: false },
+          { letter: "B", text: "Focus on patient-important outcomes (symptoms, hospitalization, mortality)", correct: true },
+          { letter: "C", text: "Limit to short-term outcomes only", correct: false },
+          { letter: "D", text: "レビューを簡素化するために有害な点を取り除いてください", correct: false }
+        ],
+        feedback: {
+          correct: "正解です。意思決定者には、検査室の信号だけでなく、患者やシステムにとって重要な結果が必要です。",
+          incorrect: "バイオマーカーは、人々が関心を寄せる結果に変換されない場合、誤解を招く可能性があります。影響の大きいトピックでは、患者にとって重要な結果と害を優先する必要があります。"
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "IG", title: "Scenario: Threshold Matters", xp: 25,
+        scenario: "A hospital system will adopt an intervention only if it prevents at least 1 hospitalization per 100 patients per year. Trials report relative risk reductions without absolute rates.",
+        question: "What should your topic framing prioritize?",
+        options: [
+          { letter: "A", text: "Only relative effect sizes to simplify reporting", correct: false },
+          { letter: "B", text: "Absolute risk differences or number needed to treat", correct: true },
+          { letter: "C", text: "Surrogate outcomes to increase precision", correct: false },
+          { letter: "D", text: "Exclude harms to keep focus on benefit", correct: false }
+        ],
+        feedback: {
+          correct: "正解です。決定閾値は絶対的なものです。ベースラインのリスクと絶対的な影響を含めるようにトピックを組み立てることで、レビューを意思決定に利用できるようになります。",
+          incorrect: "相対的な影響により、実際的な影響が隠蔽される可能性があります。決定にしきい値がある場合、トピックは絶対的な影響と害を把握する必要があります。"
+        }
+      }},
+      { type: "refrain", theme: "black", content: { text: "質問は決定に役立つ必要があります。" }},
+      { type: "quiz", theme: "dark", content: {
+        question: "What most strongly makes a topic high-impact?",
+        options: [
+          { text: "It is popular on social media", correct: false },
+          { text: "It informs a real decision with trade-offs", correct: true },
+          { text: "It has the highest effect size", correct: false },
+          { text: "すぐに完了するのは簡単です", correct: false }
+        ],
+        xp: 20,
+        feedback: {
+          correct: "正解です。影響力は人気ではなく、意思決定とトレードオフから生まれます。習慣を変えるなら、小さな効果でも大きな影響を与える可能性があります。",
+          incorrect: "人気と速度は影響しません。最良のトピックは、人々にとって重要な意思決定を変えたり、トレードオフを解決したりするものです。"
+        }
+      }}
+    ]
+  },
+  {
+    id: 5, title: "The Echoes", subtitle: "新規性と冗長性", xp: 150,
+    slides: [
+      { type: "title", theme: "red-bg", content: { title: "The Echoes", subtitle: "同じ答えの繰り返しを避ける" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "Detect when a topic is saturated with reviews",
+          "Differentiate between update, replication, and redundancy",
+          "Define a genuine contribution before you start",
+          "Use overlap checks to justify a new review"
+        ],
+        tip: "By 2020, there were 500+ systematic reviews on vitamin D. Most added nothing. PROSPERO registration now helps prevent such waste."
+      }},
+      { type: "story", theme: "gold-bg", content: {
+        label: "THE CROWD", title: "When reviews multiply but answers do not",
+        text: "2021 年までに、不安に対するマインドフルネスに関するメタ分析が大量に登場しました。多くは同じ小規模な試験セットをプールしましたが、異なる結論を報告しました。政策立案者は、包含基準と結果が異なるため、明確さではなく矛盾を認識しました。",
+        followup: "A new review only made sense when it added a clear contribution: updated trials, stricter bias assessment, or a different population."
+      }},
+      { type: "stats", theme: "dark", content: {
+        title: "Redundancy Snapshot",
+        stats: [
+          { value: "12", label: "Core trials" },
+          { value: "22", label: "Meta-analyses" },
+          { value: "90%", label: "Trial overlap" },
+          { value: "4", label: "Effect metrics used" }
+        ],
+        caption: "Simplified snapshot from heavily reviewed behavioral topics."
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "Contribution Types",
+        subtitle: "新しいレビューを正当化する方法",
+        text: "A review is justified when it provides: <br><br>? <strong>Update:</strong> new trials change the estimate <br>? <strong>Reframe:</strong> a new population or setting <br>? <strong>Method upgrade:</strong> better bias tools or models <br>? <strong>Living review:</strong> fast-changing evidence",
+        highlight: "貢献の名前を一文で挙げることができない場合、そのトピックはおそらく冗長です。"
+      }},
+      { type: "checklist", theme: "dark", content: {
+        title: "Novelty Test",
+        items: [
+          "は最新の質の高いレビューです。古いですか?",
+          "結論を変える可能性のある新しい試験はありますか?",
+          "あなたのレビューは異なる母集団または設定に答えていますか?",
+          "方法は以前のレビューから改善されていますか?",
+          "既存のレビューとの重複を確認しましたか?"
+        ]
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "NH", title: "Scenario: Overlap Check", xp: 25,
+        scenario: "あなたは、昨年の質の高いレビューを特定しました。提案されたレビューには、同じ 20 件の試験のうち 18 件が含まれ、同じ結果が使用されます。",
+        question: "What is the best next step?",
+        options: [
+          { letter: "A", text: "Proceed anyway; more reviews increase confidence", correct: false },
+          { letter: "B", text: "Stop unless you can define a new contribution", correct: true },
+          { letter: "C", text: "試験結果を確認した後で結果を変更します", correct: false },
+          { letter: "D", text: "Exclude the two overlapping trials to appear novel", correct: false }
+        ],
+        feedback: {
+          correct: "正解です。明確な貢献がなければ、重複に近いレビューはノイズを加えます。続行を正当化するには、新しい証拠、新しい母集団、またはメソッドのアップグレードが必要です。",
+          incorrect: "新しい寄与のない重複が多いと、冗長性が生じます。目標はボリュームではなく明確さです。"
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "NH", title: "Scenario: Update or Redo?", xp: 25,
+        scenario: "トピック Y に関する最後のレビューは 2019 年に公開されました (トライアル 15 件)。それ以来、6 つの新しい RCT と新しいバイアスリスクツールが登場しました。",
+        question: "What is the most defensible approach?",
+        options: [
+          { letter: "A", text: "古いレビューを参照せずに新しいレビューを公開します", correct: false },
+          { letter: "B", text: "以前の結果と明示的に比較して更新または継続的なレビューを実施します", correct: true },
+          { letter: "C", text: "Avoid reviewing the topic entirely", correct: false },
+          { letter: "D", text: "一貫性を保つために古い方法を繰り返します", correct: false }
+        ],
+        feedback: {
+          correct: "正解です。最良の貢献は、以前の結果を認識しながら、新しい試験と改善された方法を統合する更新です。",
+          incorrect: "新しいレビューは、その貢献を正当化するものでなければなりません。以前の研究を無視したり、古い方法を繰り返したりすると、明確さではなくノイズが追加されます。"
+        }
+      }},
+      { type: "quiz", theme: "dark", content: {
+        question: "Which situation most justifies a new meta-analysis?",
+        options: [
+          { text: "Many similar reviews exist and no new trials have appeared", correct: false },
+          { text: "質の高いレビューは最近のものであり、包括的です", correct: false },
+          { text: "新しい試験と改良された方法により結論が変わる可能性があります", correct: true },
+          { text: "このトピックはメディアで話題になっています", correct: false }
+        ],
+        xp: 20,
+        feedback: {
+          correct: "正解です。真の貢献は、答えを変える可能性のある新しい証拠や改善された方法論から生まれます。",
+          incorrect: "人気があるからといって冗長性が正当化されるわけではありません。新しい証拠やより良い方法がなければ、同じレビューは混乱を増大させるだけです。"
+        }
+      }}
+    ]
+  },
+  {
+    id: 6, title: "The Mirror", subtitle: "バイアスと枠組みの罠", xp: 160,
+    slides: [
+      { type: "title", theme: "purple-bg", content: { title: "The Mirror", subtitle: "Topic framing can hide as well as reveal" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "Recognize how framing choices can introduce bias",
+          "最初から害とトレードオフを含める",
+          "プロトコルと透明性で質問を保護する",
+          "Identify conflicts that shape topic selection"
+        ],
+        tip: "PRISMA チェックリストには、 「適格基準」セクション - 何が含まれ、何が除外されたのかを示す明確なミラー。"
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "THE FRAME", title: "COX-2 鎮痛剤と失われた結果",
+        text: "COX-2 鎮痛剤の初期のレビューでは、短期的な鎮痛が強調され、長期の追跡調査は除外されていました。統合された結果は明らかな利点を示しました。",
+        followup: "Later trials and surveillance revealed increased cardiovascular events, leading to withdrawals and warnings. The harm was not invisible; it was outside the chosen frame."
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "Framing Traps",
+        subtitle: "How bias enters before analysis",
+        text: "Common traps include: <br><br>? Excluding harms or long-term outcomes <br>? Choosing comparators that make the intervention look better <br>? Restricting populations to those most likely to benefit <br>? Shifting the primary outcome after seeing results",
+        highlight: "フレームに偏りがある場合、どの方法でも完全に修正することはできません。"
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "BS", title: "Scenario: Sponsor Pressure", xp: 30,
+        scenario: "治験依頼者は、重篤な有害事象は「レビューの焦点ではない」ため、報告する試験を除外することを提案しています。",
+        question: "どうすればよいですか?",
+        options: [
+          { letter: "A", text: "Accept to keep the scope tight", correct: false },
+          { letter: "B", text: "事前に指定された結果として危害を含め、報告書を文書化します。決定", correct: true },
+          { letter: "C", text: "Exclude harms but mention them in discussion", correct: false },
+          { letter: "D", text: "著者リストからスポンサーを削除", correct: false }
+        ],
+        feedback: {
+          correct: "修正します。害はフレーム内にあります。それらを事前に指定すると、レビューが選択的な報告から保護され、信頼が維持されます。",
+          incorrect: "危害を除外すると、偏ったフレームが作成されます。透明性と事前指定が唯一の防御可能な応答です。"
+        }
+      }},
+      { type: "checklist", theme: "dark", content: {
+        title: "Bias Guardrails",
+        items: [
+          "Declare funding and conflicts early",
+          "Pre-specify outcomes, including harms",
+          "Justify exclusions with transparent criteria",
+          "Register a protocol before extraction",
+          "Plan sensitivity analyses for risky assumptions"
+        ]
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "BS", title: "Scenario: Outcome Switch", xp: 25,
+        scenario: "抽出の途中で、事前に指定した主な結果よりも副次的な結果が大きな利点を示していることに気付きました。",
+        question: "What is the most defensible action?",
+        options: [
+          { letter: "A", text: "主な結果を切り替えて、より大きな効果を強調してください", correct: false },
+          { letter: "B", text: "Keep the pre-specified primary outcome; report the secondary transparently", correct: true },
+          { letter: "C", text: "Remove the original primary outcome entirely", correct: false },
+          { letter: "D", text: "Delay protocol registration until after analysis", correct: false }
+        ],
+        feedback: {
+          correct: "正解です。事前仕様により、選択的強調から保護されます。副次的な結果を報告することはできますが、データを確認した後で主な結果を切り替えることはフレーミング バイアスとなります。",
+          incorrect: "主な結果を事後的に変更すると、信頼が損なわれます。レビューの完全性は、事前に指定されたフレームを遵守するかどうかにかかっています。"
+        }
+      }},
+      { type: "refrain", theme: "black", content: { text: "A question can hide as well as reveal." }},
+      { type: "quiz", theme: "dark", content: {
+        question: "What is framing bias in topic selection?",
+        options: [
+          { text: "Using a random-effects model", correct: false },
+          { text: "Choosing a scope that systematically excludes harms or unfavorable outcomes", correct: true },
+          { text: "多くの研究が含まれすぎています", correct: false },
+          { text: "プロトコルの公開", correct: false }
+        ],
+        xp: 20,
+        feedback: {
+          correct: "正しいです。フレーミング バイアスは、多くの場合、危害や困難な結果を排除することによって、質問が結果に有利に構成される場合に発生します。",
+          incorrect: "フレーミング バイアスは、統計モデルやプロトコルの登録ではなく、質問の構築方法に関するものです。"
+        }
+      }}
+    ]
+  },
+  {
+    id: 7, title: "トピック フォージ", subtitle: "Capstone および合成", xp: 180,
+    slides: [
+      { type: "title", theme: "teal-bg", content: { title: "トピック フォージ", subtitle: "保持する質問を作成します" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "完全なトピックステートメントを組み立てます",
+          "Apply the Three Gates in one decision",
+          "Practice choosing among competing topics",
+          "再利用可能なテンプレートを使用して終了"
+        ],
+        tip: "This capstone uses contrast and return (ring structure) to complete the narrative."
+      }},
+      { type: "story", theme: "gold-bg", content: {
+        label: "THE STORY", title: "Two teams, two questions",
+        text: "2 つのレビュー チームが同じ日に開始されました。チーム A は、広く人気のあるトピックを選択し、1 週間でプロトコルを作成しました。チーム B は証拠をマッピングし、結果を定義し、意思決定者を特定するために一時停止しました。",
+        followup: "数か月後、チーム A は誰も使用できない統合された推定値を入手しました。チーム B は、ガイドラインを変える焦点を絞った回答を提供しました。違いは努力ではなく枠組みにありました。"
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "Topic Statement Template",
+        subtitle: "Fill every blank",
+        text: "In <strong>[population]</strong>, does <strong>[intervention]</strong> vs <strong>[comparator]</strong> improve <strong>[primary outcome]</strong> at <strong>[time window]</strong>, and what harms are tracked?",
+        highlight: "すべての空白を埋めることができない場合は、質問の準備ができていません。"
+      }},
+      { type: "checklist", theme: "dark", content: {
+        title: "Topic Readiness Test",
+        items: [
+          "Three Gates pass: decision value, evidence readiness, contribution",
+          "PICO + time + design + setting are explicit",
+          "主要な結果と害は事前に指定されています",
+          "Feasibility confirmed by scoping search",
+          "Contribution sentence is clear",
+          "Protocol can be registered without major unknowns"
+        ]
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "TF", title: "Scenario: Draft the Topic Statement", xp: 30,
+        scenario: "高齢者の高血圧管理に関するレビューのトピックステートメントを作成する必要があります。",
+        question: "Which statement is most ready to register?",
+        options: [
+          { letter: "A", text: "Do blood pressure drugs help older people?", correct: false },
+          { letter: "B", text: "In adults 65+, does thiazide therapy vs ACE inhibitors reduce stroke at 12 months, and what harms occur?", correct: true },
+          { letter: "C", text: "Which treatment is best for hypertension?", correct: false },
+          { letter: "D", text: "Do any antihypertensives improve blood pressure?", correct: false }
+        ],
+        feedback: {
+          correct: "正解です。このステートメントは、母集団、介入、比較対象、結果、時間枠、および害を指定します。プロトコルを登録する準備ができました。",
+          incorrect: "トピック ステートメントでは、母集団、介入、比較対象、結果、時間、害悪を指定する必要があります。曖昧な質問はプロトコールに対応できません。"
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "TF", title: "Scenario: Choose the Strongest Topic", xp: 40,
+        scenario: "証拠のスナップショットに基づいてメタ分析に最も適したトピックを選択してください。",
+        question: "Which topic passes all three gates?",
+        options: [
+          { letter: "A", text: "All digital health interventions for all chronic diseases", correct: false },
+          { letter: "B", text: "Telemonitoring in heart failure (RCTs, 12-month readmissions, harms pre-specified)", correct: true },
+          { letter: "C", text: "1 つの小規模な試験による希少疾患の新しい遺伝子治療", correct: false },
+          { letter: "D", text: "Any supplement for fatigue in any population", correct: false }
+        ],
+        feedback: {
+          correct: "正解です。トピック B は具体的で、実現可能で、意思決定に関連しています。証拠ベースはプールできるほど明確であり、結果は決定と一致します。",
+          incorrect: "最も強力なトピックは、具体的で、実行可能で、決定に関連するものです。広範なトピックや未熟なトピックは、少なくとも 1 つのゲートで不合格になります。"
+        }
+      }},
+      { type: "refrain", theme: "black", content: { text: "答えられる質問をしてください。" }},
+      { type: "quiz", theme: "dark", content: {
+        question: "Which gate is most likely to fail when a topic is popular but saturated with reviews?",
+        options: [
+          { text: "Decision value", correct: false },
+          { text: "Evidence readiness", correct: false },
+          { text: "Contribution", correct: true },
+          { text: "Comparator clarity", correct: false }
+        ],
+        xp: 30,
+        feedback: {
+          correct: "正解です。高品質のレビューがすでに多数存在する場合、新しい証拠や方法を追加しない限り、投稿ゲートは閉じられます。",
+          incorrect: "人気は投稿を保証するものではありません。既存のレビューがすでに質問に回答している場合、投稿ゲートは閉じられています。"
+        }
+      }}
+    ]
+  }
+];
+
+// ===== NAVIGATION STATE =====
+let currentModule = 0;
+let currentSlide = 0;
+let consecutiveCorrect = 0;
+
+// ===== SAVE/LOAD =====
+function saveGame() {
+  safeSetStorage('topicSelectionGame', gameState);
+}
+
+function resetProgress() {
+  if (confirm('Reset all progress and achievements?')) {
+    gameState = { ...DEFAULT_STATE, answeredQuestions: {}, badges: [], completedModules: [] };
+    saveGame();
+    currentModule = 0;
+    currentSlide = 0;
+    renderAll();
+  }
+}
+
+// ===== COURSE PROGRESS =====
+function updateCourseProgress() {
+  const totalModules = MODULES.length;
+  const completedCount = gameState.completedModules.length;
+  const pct = Math.round((completedCount / totalModules) * 100);
+  const fillEl = document.getElementById('courseProgressFill');
+  const pctEl = document.getElementById('courseProgressPct');
+  if (fillEl) fillEl.style.width = pct + '%';
+  if (pctEl) pctEl.textContent = pct + '%';
+}
+
+// ===== XP & LEVELING =====
+function addXP(amount) {
+  gameState.xp += amount;
+  checkLevelUp();
+  saveGame();
+  updateStatsDisplay();
+  showXPPopup(amount);
+}
+
+function checkLevelUp() {
+  for (let i = LEVELS.length - 1; i >= 0; i--) {
+    if (gameState.xp >= LEVELS[i].xp && gameState.level < LEVELS[i].level) {
+      gameState.level = LEVELS[i].level;
+      showLevelUp(LEVELS[i]);
+      break;
+    }
+  }
+}
+
+function showXPPopup(amount) {
+  const popup = document.getElementById('xpPopup');
+  document.getElementById('xpAmount').textContent = `+${amount}`;
+  popup.classList.add('show');
+  setTimeout(() => popup.classList.remove('show'), 1500);
+}
+
+function showLevelUp(levelData) {
+  triggerConfetti();
+}
+
+// ===== BADGES =====
+function awardBadge(badgeId) {
+  if (gameState.badges.includes(badgeId)) return;
+  gameState.badges.push(badgeId);
+  saveGame();
+  const badge = BADGES.find(b => b.id === badgeId);
+  if (badge) showBadgeModal(badge);
+  updateBadges();
+}
+
+function showBadgeModal(badge, celebrate = true) {
+  document.getElementById('badgeModalIcon').textContent = badge.icon;
+  document.getElementById('badgeModalTitle').textContent = badge.name;
+  document.getElementById('badgeModalDesc').textContent = badge.desc;
+  document.getElementById('badgeModal').classList.add('show');
+  if (celebrate) triggerConfetti();
+}
+
+function showBadgeDetails(badgeId) {
+  const badge = BADGES.find(b => b.id === badgeId);
+  if (!badge) return;
+  const earned = gameState.badges.includes(badgeId);
+  const desc = earned ? badge.desc : `${badge.desc} (Locked)`;
+  showBadgeModal({ ...badge, desc }, earned);
+}
+
+function closeBadgeModal() {
+  document.getElementById('badgeModal').classList.remove('show');
+}
+
+// ===== STREAK =====
+function updateStreak() {
+  const today = new Date().toDateString();
+  if (gameState.lastActive !== today) {
+    const yesterday = new Date(Date.now() - 86400000).toDateString();
+    if (gameState.lastActive === yesterday) {
+      gameState.streak++;
+      if (gameState.streak >= 3) awardBadge('streak_3');
+      if (gameState.streak >= 7) awardBadge('streak_7');
+    } else if (gameState.lastActive) {
+      gameState.streak = 1;
+    } else {
+      gameState.streak = 1;
+    }
+    gameState.lastActive = today;
+    saveGame();
+  }
+}
+
+// ===== CONFETTI =====
+function triggerConfetti() {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const container = document.getElementById('confettiContainer');
+  const colors = ['#D4AF37', '#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#0f766e'];
+  for (let i = 0; i < 50; i++) {
+    const confetti = document.createElement('div');
+    confetti.className = 'confetti';
+    confetti.style.left = Math.random() * 100 + '%';
+    confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+    confetti.style.animationDelay = Math.random() * 0.5 + 's';
+    container.appendChild(confetti);
+    setTimeout(() => confetti.remove(), 3500);
+  }
+}
+
+// ===== COMBO =====
+function updateComboDisplay() {
+  const comboEl = document.getElementById('comboDisplay');
+  const countEl = document.getElementById('comboCount');
+  if (consecutiveCorrect >= 2) {
+    countEl.textContent = consecutiveCorrect;
+    comboEl.classList.add('show');
+  } else {
+    comboEl.classList.remove('show');
+  }
+}
+
+// ===== MOBILE SIDEBAR =====
+function toggleSidebar() {
+  document.querySelector('.sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('show');
+  var btn = document.querySelector('.sidebar-toggle, .hamburger, .mobile-menu-btn'); if (btn) btn.setAttribute('aria-expanded', btn.getAttribute('aria-expanded') === 'true' ? 'false' : 'true');
+}
+
+// ===== RENDER =====
+function renderAll() {
+  updateStreak();
+  renderSidebar();
+  renderSlides();
+  updateStatsDisplay();
+  updateBadges();
+  updateCourseProgress();
+}
+
+function updateStatsDisplay() {
+  const levelData = LEVELS.find(l => l.level === gameState.level) || LEVELS[0];
+  const nextLevel = LEVELS.find(l => l.level === gameState.level + 1);
+
+  document.getElementById('levelIcon').textContent = levelData.icon;
+  document.getElementById('levelTitle').textContent = levelData.title;
+  document.getElementById('levelNum').textContent = gameState.level;
+
+  const currentXP = gameState.xp - levelData.xp;
+  const neededXP = nextLevel ? (nextLevel.xp - levelData.xp) : 500;
+  const pct = Math.min(100, (currentXP / neededXP) * 100);
+
+  document.getElementById('xpFill').style.width = pct + '%';
+  document.getElementById('xpCurrent').textContent = currentXP;
+  document.getElementById('xpNeeded').textContent = neededXP;
+
+  document.getElementById('correctCount').textContent = gameState.correctAnswers;
+  document.getElementById('decisionCount').textContent = gameState.decisionsCompleted;
+  document.getElementById('synthesisCount').textContent = gameState.synthesisCount || 0;
+  document.getElementById('streakCount').textContent = gameState.streak;
+
+  const streakEl = document.getElementById('streakDisplay');
+  streakEl.classList.toggle('active', gameState.streak > 0);
+}
+
+function updateBadges() {
+  const grid = document.getElementById('badgesGrid');
+  grid.innerHTML = BADGES.map(b => {
+    const earned = gameState.badges.includes(b.id);
+    const label = `${b.name}: ${b.desc}`;
+    return `<button class="badge-item ${earned ? 'earned' : ''}" type="button" data-tooltip="${label}" aria-label="${label}" title="${label}" onclick="showBadgeDetails('${b.id}')">${b.icon}</button>`;
+  }).join('');
+}
+
+function renderSidebar() {
+  const list = document.getElementById('moduleList');
+  list.innerHTML = MODULES.map((mod, i) => {
+    const completed = gameState.completedModules.includes(mod.id);
+    const locked = i > 0 && !gameState.completedModules.includes(MODULES[i-1].id);
+    const estMins = Math.round(mod.slides.length * 1.5);
+    return `
+      <div class="module-item ${i === currentModule ? 'active' : ''} ${completed ? 'completed' : ''} ${locked ? 'locked' : ''}"
+           onclick="${locked ? '' : `goToModule(${i})`}"
+           tabindex="${locked ? -1 : 0}"
+           role="button"
+           aria-disabled="${locked ? 'true' : 'false'}">
+        <div class="module-number">${completed ? 'OK' : (locked ? 'LK' : mod.id)}</div>
+        <div class="module-info">
+          <div class="module-title">${mod.title}</div>
+          <div class="module-subtitle">${mod.subtitle}</div>
+          <div class="module-xp">+${mod.xp} XP</div>
+          <div class="module-time">T ~${estMins} min</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderSlides() {
+  const container = document.getElementById('slidesContainer');
+  container.innerHTML = MODULES.map((mod, mi) => {
+    const progressPct = ((currentSlide + 1) / mod.slides.length) * 100;
+    return `
+    <div class="module-slides ${mi === currentModule ? 'active' : ''}" data-module="${mi}">
+      <div class="slide-progress-bar" style="width: ${mi === currentModule ? progressPct : 0}%"></div>
+      ${mod.slides.map((slide, si) => renderSlide(slide, si, mi)).join('')}
+      <div class="slide-nav">
+        <button class="nav-btn" onclick="prevSlide()" ${currentSlide === 0 ? 'disabled' : ''} aria-label="Previous slide">←</button>
+        <div class="nav-center">
+          <div class="slide-counter">${currentSlide + 1} / ${mod.slides.length}</div>
+          <div class="progress-dots">
+            ${mod.slides.map((_, i) => `<button class="progress-dot ${i === currentSlide ? 'active' : ''}" type="button" onclick="goToSlide(${i})" aria-label="Go to slide ${i + 1}" ${i === currentSlide ? 'aria-current="true"' : ''}></button>`).join('')}
+          </div>
+        </div>
+        <button class="nav-btn" onclick="nextSlide()" aria-label="Next slide">→</button>
+      </div>
+      <div class="keyboard-hint" style="position:absolute;bottom:5px;left:50%;transform:translateX(-50%);font-size:0.6rem;opacity:0.4;">← → arrows or swipe to navigate</div>
+    </div>
+  `;
+  }).join('');
+  document.getElementById('currentModule').textContent = MODULES[currentModule].title;
+  updateSlideVisibility();
+}
+
+function renderSlide(slide, index, moduleIndex) {
+  const theme = slide.theme || 'dark';
+  let html = `<div class="slide ${theme} ${index === currentSlide ? 'active' : ''}" data-slide="${index}">`;
+
+  switch(slide.type) {
+    case 'title':
+      html += `<div class="content"><h1 class="title gold animate">${slide.content.title}</h1><p class="subtitle animate delay-1">${slide.content.subtitle}</p></div>`;
+      break;
+
+    case 'objectives':
+      html += `<div class="content">
+        <div class="objectives-box animate">
+          <div class="objectives-header">
+            <div class="objectives-icon">GOAL</div>
+            <div class="objectives-title">Learning Objectives</div>
+          </div>
+          <ul class="objectives-list">
+            ${slide.content.objectives.map(obj => `<li>${obj}</li>`).join('')}
+          </ul>
+        </div>
+        ${slide.content.tip ? `<p class="subtitle animate delay-1" style="font-size:0.85rem;max-width:600px">${slide.content.tip}</p>` : ''}
+      </div>`;
+      break;
+
+    case 'story':
+      html += `<div class="content">
+        <article class="story-box ${slide.content.success ? 'success' : ''} ${slide.content.warning ? 'warning' : ''} ${slide.content.teal ? 'teal' : ''} animate" role="article">
+          <div class="story-label">${slide.content.label}</div>
+          ${slide.content.title ? `<h2 class="title gold" style="font-size:1.8rem;margin-bottom:0.75rem">${slide.content.title}</h2>` : ''}
+          <p class="story-text">${slide.content.text}</p>
+          ${slide.content.followup ? `<p class="story-text" style="margin-top:0.75rem;font-style:italic;opacity:0.9">${slide.content.followup}</p>` : ''}
+        </article>
+      </div>`;
+      break;
+
+    case 'stats':
+      html += `<div class="content">
+        ${slide.content.title ? `<h2 class="title gold animate">${slide.content.title}</h2>` : ''}
+        ${slide.content.subtitle ? `<p class="subtitle animate delay-1">${slide.content.subtitle}</p>` : ''}
+        <div class="stats-grid animate delay-2">
+          ${slide.content.stats.map(s => `<div class="stat-box"><div class="stat-value gold">${s.value}</div><div class="stat-label">${s.label}</div></div>`).join('')}
+        </div>
+        ${slide.content.caption ? `<p class="subtitle animate delay-3" style="font-size:0.85rem;margin-top:0.75rem">${slide.content.caption}</p>` : ''}
+      </div>`;
+      break;
+
+    case 'refrain':
+      html += `<div class="content" style="justify-content:center;height:100%"><p class="refrain animate">"${slide.content.text}"</p></div>`;
+      break;
+
+    case 'concept':
+      html += `<div class="content">
+        <h2 class="title ${theme === 'light' ? 'navy' : 'gold'} animate">${slide.content.title}</h2>
+        ${slide.content.subtitle ? `<p class="subtitle animate delay-1">${slide.content.subtitle}</p>` : ''}
+        ${slide.content.text ? `<div class="card ${theme === 'light' ? '' : 'navy-bg'} animate delay-2"><p class="card-text">${slide.content.text}</p></div>` : ''}
+        ${slide.content.highlight ? `<div class="story-box warning animate delay-3"><div class="story-label">Key Insight</div><p class="story-text">${slide.content.highlight}</p></div>` : ''}
+        ${slide.content.checkpoints ? `
+          <div class="timeline animate delay-2" style="margin-top:0.75rem">
+            ${slide.content.checkpoints.map(cp => `
+              <div class="timeline-item"><div class="timeline-days">${cp.day}</div><div class="timeline-content"><div class="timeline-title">${cp.event}</div></div></div>
+            `).join('')}
+          </div>
+        ` : ''}
+      </div>`;
+      break;
+
+    case 'checklist':
+      html += `<div class="content">
+        <h2 class="title gold animate">${slide.content.title}</h2>
+        <div class="checklist animate delay-1">
+          ${slide.content.items.map(item => `
+            <div class="checklist-item">
+              <div class="check-icon">OK</div>
+              <div class="checklist-text">${item}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>`;
+      break;
+
+    case 'decision':
+      const did = `dec_${moduleIndex}_${index}`;
+      const answered = gameState.answeredQuestions[did];
+      html += `<div class="content">
+        <div class="decision-tree animate">
+          <div class="decision-header">
+            <div class="decision-icon">${slide.content.icon}</div>
+            <div class="decision-title">${slide.content.title}</div>
+            <div class="decision-xp">+${slide.content.xp} XP</div>
+          </div>
+          <div class="decision-scenario">${slide.content.scenario}</div>
+          <div class="decision-question">${slide.content.question}</div>
+          <div class="decision-options">
+            ${slide.content.options.map(opt => {
+              const isSelected = answered === opt.letter;
+              const showCorrect = answered && opt.correct;
+              const showIncorrect = answered && isSelected && !opt.correct;
+              return `
+                <div class="decision-option ${isSelected ? 'selected' : ''} ${showCorrect ? 'correct' : ''} ${showIncorrect ? 'incorrect' : ''} ${answered ? 'disabled' : ''}"
+                     onclick="answerDecision('${did}', '${opt.letter}', ${opt.correct}, ${slide.content.xp})"
+                     tabindex="0"
+                     role="button"
+                     aria-pressed="${isSelected ? 'true' : 'false'}"
+                     aria-disabled="${answered ? 'true' : 'false'}">
+                  <div class="option-letter">${opt.letter}</div>
+                  <div class="option-text">${opt.text}</div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+          <div class="decision-feedback ${answered ? 'show' : ''} ${answered && slide.content.options.find(o => o.letter === answered)?.correct ? 'correct' : 'incorrect'}" role="alert" aria-live="polite">
+            <div class="feedback-title">${answered && slide.content.options.find(o => o.letter === answered)?.correct ? 'Correct!' : 'Not quite'}</div>
+            <div class="feedback-text">${answered && slide.content.options.find(o => o.letter === answered)?.correct ? slide.content.feedback.correct : slide.content.feedback.incorrect}</div>
+          </div>
+        </div>
+      </div>`;
+      break;
+
+    case 'quiz':
+      const qid = `quiz_${moduleIndex}_${index}`;
+      const qAnswered = gameState.answeredQuestions[qid];
+      html += `<div class="content">
+        <div class="quiz-container animate">
+          <div class="quiz-question">${slide.content.question}</div>
+          <div class="quiz-options">
+            ${slide.content.options.map((opt, oi) => {
+              const isSelected = qAnswered === oi;
+              const showCorrect = qAnswered !== undefined && opt.correct;
+              const showIncorrect = qAnswered !== undefined && isSelected && !opt.correct;
+              return `
+                <div class="quiz-option ${showCorrect ? 'correct' : ''} ${showIncorrect ? 'incorrect' : ''} ${qAnswered !== undefined ? 'disabled' : ''}"
+                     onclick="answerQuiz('${qid}', ${oi}, ${opt.correct}, ${slide.content.xp})"
+                     tabindex="0"
+                     role="button"
+                     aria-pressed="${isSelected ? 'true' : 'false'}"
+                     aria-disabled="${qAnswered !== undefined ? 'true' : 'false'}">
+                  ${opt.text}
+                </div>
+              `;
+            }).join('')}
+          </div>
+          <div class="quiz-feedback ${qAnswered !== undefined ? 'show' : ''} ${qAnswered !== undefined && slide.content.options[qAnswered]?.correct ? 'correct' : 'incorrect'}" role="alert" aria-live="polite">
+            ${qAnswered !== undefined && slide.content.options[qAnswered]?.correct ? slide.content.feedback.correct : slide.content.feedback.incorrect}
+          </div>
+        </div>
+      </div>`;
+      break;
+  }
+
+  html += '</div>';
+  return html;
+}
+
+function updateSlideVisibility() {
+  const container = document.querySelector('.module-slides.active');
+  if (!container) return;
+
+  container.querySelectorAll('.slide').forEach((slide, i) => {
+    slide.classList.toggle('active', i === currentSlide);
+  });
+
+  const progressBar = container.querySelector('.slide-progress-bar');
+  if (progressBar) {
+    const pct = ((currentSlide + 1) / MODULES[currentModule].slides.length) * 100;
+    progressBar.style.width = pct + '%';
+  }
+
+  container.querySelector('.slide-counter').textContent = `${currentSlide + 1} / ${MODULES[currentModule].slides.length}`;
+  container.querySelectorAll('.progress-dot').forEach((dot, i) => {
+    const isActive = i === currentSlide;
+    dot.classList.toggle('active', isActive);
+    if (isActive) {
+      dot.setAttribute('aria-current', 'true');
+    } else {
+      dot.removeAttribute('aria-current');
+    }
+  });
+  container.querySelector('.nav-btn').disabled = currentSlide === 0;
+}
+
+// ===== ANSWERS =====
+function answerDecision(did, letter, correct, xp) {
+  if (gameState.answeredQuestions[did] !== undefined) return;
+  gameState.answeredQuestions[did] = letter;
+  gameState.decisionsCompleted++;
+  gameState.synthesisCount = (gameState.synthesisCount || 0) + 1;
+
+  if (gameState.decisionsCompleted === 1) awardBadge('first_question');
+
+  if (correct) {
+    gameState.correctAnswers++;
+    consecutiveCorrect++;
+    addXP(xp);
+    if (consecutiveCorrect >= 5) awardBadge('perfect_5');
+    if (gameState.decisionsCompleted >= 15) awardBadge('decision_maker');
+  } else {
+    consecutiveCorrect = 0;
+  }
+  saveGame();
+  renderSlides();
+  updateComboDisplay();
+  updateStatsDisplay();
+}
+
+function answerQuiz(qid, choice, correct, xp) {
+  if (gameState.answeredQuestions[qid] !== undefined) return;
+  gameState.answeredQuestions[qid] = choice;
+
+  if (correct) {
+    gameState.correctAnswers++;
+    consecutiveCorrect++;
+    addXP(xp);
+    if (consecutiveCorrect >= 5) awardBadge('perfect_5');
+  } else {
+    consecutiveCorrect = 0;
+  }
+  saveGame();
+  renderSlides();
+  updateComboDisplay();
+}
+
+// ===== NAVIGATION =====
+function goToModule(index) {
+  if (index > 0 && !gameState.completedModules.includes(MODULES[index-1].id)) return;
+  currentModule = index;
+  currentSlide = 0;
+  renderSlides();
+  renderSidebar();
+}
+
+function goToSlide(index) {
+  currentSlide = index;
+  updateSlideVisibility();
+}
+
+function nextSlide() {
+  const mod = MODULES[currentModule];
+  if (currentSlide < mod.slides.length - 1) {
+    currentSlide++;
+    updateSlideVisibility();
+  } else {
+    completeModule();
+  }
+}
+
+function prevSlide() {
+  if (currentSlide > 0) {
+    currentSlide--;
+    updateSlideVisibility();
+  }
+}
+
+function completeModule() {
+  const mod = MODULES[currentModule];
+  if (!gameState.completedModules.includes(mod.id)) {
+    gameState.completedModules.push(mod.id);
+    addXP(mod.xp);
+
+    // Module-specific badges
+    if (mod.id === 2) awardBadge('scope_shaper');
+    if (mod.id === 3) awardBadge('evidence_scout');
+    if (mod.id === 4) awardBadge('impact_guardian');
+    if (mod.id === 5) awardBadge('novelty_hawk');
+    if (mod.id === 6) awardBadge('bias_sentinel');
+    if (mod.id === 7) awardBadge('topic_forger');
+    if (gameState.completedModules.length === MODULES.length) awardBadge('finisher');
+
+    saveGame();
+    triggerConfetti();
+    updateCourseProgress();
+  }
+
+  if (currentModule < MODULES.length - 1) {
+    goToModule(currentModule + 1);
+  }
+}
+
+// ===== KEYBOARD =====
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    document.getElementById('badgeModal').classList.remove('show');
+    document.querySelector('.sidebar').classList.remove('open');
+    document.getElementById('sidebarOverlay').classList.remove('show');
+    return;
+  }
+  const isRoleButton = e.target && e.target.getAttribute && e.target.getAttribute('role') === 'button';
+  const isFormControl = e.target && e.target.closest && e.target.closest('button, a, input, textarea, select');
+  if (isRoleButton || isFormControl) {
+    if (e.key === ' ' && isRoleButton) {
+      e.preventDefault();
+      e.target.click();
+    }
+    return;
+  }
+  if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextSlide(); }
+  else if (e.key === 'ArrowLeft') { e.preventDefault(); prevSlide(); }
+});
+
+document.addEventListener('keydown', (e) => {
+  if ((e.target.classList.contains('module-item') || e.target.classList.contains('decision-option') || e.target.classList.contains('quiz-option')) && e.key === 'Enter') {
+    e.target.click();
+  }
+});
+
+// ===== TOUCH =====
+let touchStartX = 0;
+document.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
+document.addEventListener('touchend', (e) => {
+  const diff = touchStartX - e.changedTouches[0].screenX;
+  if (Math.abs(diff) > 50) { diff > 0 ? nextSlide() : prevSlide(); }
+}, { passive: true });
+
+// ===== INIT =====
+renderAll();
+</script>
+</body>
+</html>

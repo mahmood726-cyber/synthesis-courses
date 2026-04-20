@@ -1,0 +1,2069 @@
+<!DOCTYPE html>
+
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>خطر إتقان التحيز: التهديدات الخفية</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&amp;family=Source+Sans+Pro:wght@300;400;600;700&amp;display=swap" rel="stylesheet"/>
+<style>
+    :root {
+      --navy: #1E2761;
+      --deep-navy: #141B3D;
+      --gold: #D4AF37;
+      --cream: #FAF8F5;
+      --light-cream: #FFFFFF;
+      --text: #2D3748;
+      --light-text: #718096;
+      --red: #C53030;
+      --green: #22c55e;
+      --teal: #0f766e;
+      --purple: #7c3aed;
+      --orange: #f59e0b;
+      --transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      height: 100%;
+      font-family: 'Source Sans Pro', sans-serif;
+      background: var(--deep-navy);
+      color: var(--cream);
+    }
+
+    .course-container { display: flex; height: 100vh; overflow: hidden; }
+
+    /* Skip Link */
+    .skip-link {
+      position: absolute;
+      top: -40px;
+      left: 0;
+      background: var(--gold);
+      color: var(--navy);
+      padding: 8px 16px;
+      z-index: 10000;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .skip-link:focus { top: 0; }
+
+    /* Sidebar */
+    .sidebar {
+      width: 300px;
+      background: linear-gradient(180deg, var(--deep-navy) 0%, #0a0f1a 100%);
+      border-left: 1px solid rgba(212,175,55,0.2);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    .sidebar-header {
+      padding: 1.25rem;
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+      text-align: center;
+    }
+    .sidebar-header h1 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--gold);
+    }
+    .sidebar-header p {
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.6);
+    }
+
+    .stats-panel {
+      padding: 1rem;
+      background: rgba(212,175,55,0.1);
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+    }
+    .level-display {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+    .level-badge {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, var(--gold), #f0c040);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      box-shadow: 0 2px 8px rgba(212,175,55,0.4);
+    }
+    .level-info { flex: 1; }
+    .level-title { font-weight: 700; font-size: 0.9rem; color: var(--gold); }
+    .level-subtitle { font-size: 0.7rem; color: rgba(255,255,255,0.6); }
+    .xp-bar {
+      height: 8px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 0.5rem;
+    }
+    .xp-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--gold), var(--orange));
+      border-radius: 4px;
+      transition: width 0.5s ease;
+    }
+    .xp-text {
+      font-size: 0.65rem;
+      color: rgba(255,255,255,0.5);
+      text-align: right;
+      margin-top: 0.25rem;
+    }
+    .quick-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+    }
+    .quick-stat {
+      background: rgba(0,0,0,0.2);
+      padding: 0.5rem;
+      border-radius: 6px;
+      text-align: center;
+    }
+    .quick-stat-value {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--gold);
+    }
+    .quick-stat-label {
+      font-size: 0.6rem;
+      color: rgba(255,255,255,0.5);
+    }
+
+    .course-progress {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+      background: rgba(0,0,0,0.2);
+    }
+    .course-progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.6);
+      margin-bottom: 0.35rem;
+    }
+    .course-progress-bar {
+      height: 6px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .course-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--green), #22d3ee);
+      border-radius: 3px;
+      transition: width 0.5s ease;
+    }
+
+    .module-list { flex: 1; overflow-y: auto; padding: 0.5rem 0; }
+    .module-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.6rem 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      border-right: 3px solid transparent;
+    }
+    .module-item:hover { background: rgba(212,175,55,0.1); }
+    .module-item.active { background: rgba(212,175,55,0.15); border-right-color: var(--gold); }
+    .module-item.completed .module-number { background: var(--green); color: white; }
+    .module-item.locked { opacity: 0.5; cursor: not-allowed; }
+    .module-number {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .module-item.active .module-number { background: var(--gold); color: var(--navy); }
+    .module-info { flex: 1; min-width: 0; }
+    .module-title { font-size: 0.8rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .module-subtitle { font-size: 0.65rem; color: rgba(255,255,255,0.5); }
+    .module-xp { font-size: 0.6rem; color: var(--gold); }
+    .module-time { font-size: 0.55rem; color: rgba(255,255,255,0.4); display: flex; align-items: center; gap: 0.25rem; margin-top: 0.15rem; }
+
+    .badges-panel {
+      padding: 1rem;
+      border-top: 1px solid rgba(212,175,55,0.2);
+    }
+    .badges-title { font-size: 0.75rem; font-weight: 600; color: var(--gold); margin-bottom: 0.5rem; }
+    .badges-grid { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+    .badge-item {
+      width: 32px;
+      height: 32px;
+      min-width: 44px;
+      min-height: 44px;
+      background: rgba(255,255,255,0.05);
+      border: 2px solid rgba(255,255,255,0.1);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      font-family: inherit;
+      color: inherit;
+      padding: 0;
+      opacity: 0.3;
+      transition: all 0.3s;
+      cursor: pointer;
+      position: relative;
+    }
+    .badge-item.earned { opacity: 1; background: rgba(212,175,55,0.2); border-color: var(--gold); }
+    .badge-item:hover::after,
+    .badge-item:focus::after,
+    .badge-item:focus-visible::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--navy);
+      color: white;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.6rem;
+      white-space: nowrap;
+      z-index: 100;
+    }
+    .badge-item:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+    /* Main Content */
+    .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .content-header {
+      padding: 0.75rem 1.5rem;
+      background: rgba(0,0,0,0.3);
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .breadcrumb { font-size: 0.85rem; color: rgba(255,255,255,0.6); }
+    .breadcrumb span { color: var(--gold); }
+    .header-actions { display: flex; gap: 0.5rem; align-items: center; }
+    .streak-display {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: rgba(239,68,68,0.2);
+      border: 1px solid rgba(239,68,68,0.4);
+      padding: 0.35rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+    }
+    .streak-display.active { background: rgba(249,115,22,0.2); border-color: var(--orange); }
+    .streak-flame { font-size: 1rem; }
+    .streak-count { font-weight: 700; color: var(--orange); }
+
+    .btn {
+      padding: 0.5rem 1rem;
+      border: 1px solid rgba(212,175,55,0.3);
+      border-radius: 6px;
+      background: rgba(255,255,255,0.05);
+      color: var(--cream);
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn:hover { background: rgba(212,175,55,0.2); border-color: var(--gold); }
+    .btn.primary { background: var(--gold); color: var(--navy); border-color: var(--gold); font-weight: 600; }
+
+    .content-body { flex: 1; overflow: hidden; display: flex; }
+
+    /* Slides */
+    .slides-container { flex: 1; position: relative; overflow: hidden; }
+    .module-slides { display: none; width: 100%; height: 100%; }
+    .module-slides.active { display: block; }
+
+    .slide {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      padding: 2rem 2rem 4rem;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity var(--transition), visibility var(--transition);
+      overflow-y: auto;
+    }
+    .slide.active { opacity: 1; visibility: visible; }
+    .slide.dark { background: var(--deep-navy); }
+    .slide.light { background: var(--cream); color: var(--text); }
+    .slide.black { background: #000; }
+    .slide.red-bg { background: linear-gradient(135deg, #7f1d1d, #450a0a); }
+    .slide.green-bg { background: linear-gradient(135deg, #14532d, #052e16); }
+    .slide.purple-bg { background: linear-gradient(135deg, #4c1d95, #2e1065); }
+    .slide.orange-bg { background: linear-gradient(135deg, #9a3412, #431407); }
+    .slide.teal-bg { background: linear-gradient(135deg, #0f766e, #042f2e); }
+
+    .slide-progress-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--gold), var(--orange));
+      transition: width 0.3s ease;
+      z-index: 50;
+    }
+
+    .serif { font-family: 'Cormorant Garamond', Georgia, serif; }
+    .title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      font-weight: 700;
+      margin-bottom: 1rem;
+      line-height: 1.2;
+      text-align: center;
+    }
+    .title.gold { color: var(--gold); }
+    .title.navy { color: var(--navy); }
+    .subtitle {
+      font-size: clamp(0.9rem, 2vw, 1.3rem);
+      color: rgba(255,255,255,0.7);
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .slide.light .subtitle { color: var(--light-text); }
+
+    .big-number {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(4rem, 12vw, 8rem);
+      font-weight: 700;
+      line-height: 1;
+    }
+    .big-number.gold { color: var(--gold); }
+    .big-number.red { color: var(--red); }
+
+    .refrain {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(1.3rem, 3vw, 2rem);
+      font-style: italic;
+      color: var(--gold);
+      text-align: center;
+      max-width: 700px;
+    }
+
+    .content { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 850px; }
+
+    /* Cards */
+    .card {
+      background: var(--light-cream);
+      border: 1px solid var(--gold);
+      padding: 1.25rem 1.5rem;
+      margin: 0.5rem 0;
+      max-width: 750px;
+      width: 100%;
+      border-radius: 8px;
+    }
+    .card.navy-bg { background: var(--navy); color: var(--cream); }
+    .card-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 0.05em;
+      margin-bottom: 0.4rem;
+      text-transform: uppercase;
+    }
+    .card-text { font-size: 0.95rem; line-height: 1.6; }
+    .card.navy-bg .card-text { color: var(--cream); }
+
+    /* Story box */
+    .story-box {
+      background: linear-gradient(135deg, rgba(197,48,48,0.15), rgba(30,39,97,0.2));
+      border-right: 4px solid var(--red);
+      padding: 1.25rem;
+      margin: 0.75rem 0;
+      max-width: 750px;
+      width: 100%;
+      border-radius: 0 8px 8px 0;
+    }
+    .story-box.success { background: linear-gradient(135deg, rgba(34,197,94,0.15), rgba(30,39,97,0.2)); border-right-color: var(--green); }
+    .story-box.warning { background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(30,39,97,0.2)); border-right-color: var(--orange); }
+    .story-box.teal { background: linear-gradient(135deg, rgba(15,118,110,0.15), rgba(30,39,97,0.2)); border-right-color: var(--teal); }
+    .story-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: var(--red);
+      margin-bottom: 0.4rem;
+      text-transform: uppercase;
+    }
+    .story-box.success .story-label { color: var(--green); }
+    .story-box.warning .story-label { color: var(--orange); }
+    .story-box.teal .story-label { color: var(--teal); }
+    .story-text { font-size: 0.95rem; line-height: 1.6; }
+
+    /* Confidence Colors */
+    .cerqual-high { background: linear-gradient(135deg, rgba(34,197,94,0.2), rgba(30,39,97,0.2)); border-color: var(--green); }
+    .cerqual-moderate { background: linear-gradient(135deg, rgba(59,130,246,0.2), rgba(30,39,97,0.2)); border-color: #3b82f6; }
+    .cerqual-low { background: linear-gradient(135deg, rgba(245,158,11,0.2), rgba(30,39,97,0.2)); border-color: var(--orange); }
+    .cerqual-very-low { background: linear-gradient(135deg, rgba(197,48,48,0.2), rgba(30,39,97,0.2)); border-color: var(--red); }
+
+    .cerqual-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .cerqual-badge.high { background: var(--green); color: white; }
+    .cerqual-badge.moderate { background: #3b82f6; color: white; }
+    .cerqual-badge.low { background: var(--orange); color: white; }
+    .cerqual-badge.very-low { background: var(--red); color: white; }
+
+    /* Stats */
+    .stats-grid {
+      display: flex;
+      gap: 0.75rem;
+      margin: 1rem 0;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .stat-box {
+      background: var(--navy);
+      color: var(--cream);
+      padding: 1rem 1.25rem;
+      text-align: center;
+      min-width: 120px;
+      border-radius: 8px;
+    }
+    .stat-value {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.3rem, 2.5vw, 2rem);
+      font-weight: 700;
+    }
+    .stat-value.gold { color: var(--gold); }
+    .stat-value.red { color: var(--red); }
+    .stat-value.green { color: var(--green); }
+    .stat-label { font-size: 0.75rem; opacity: 0.8; margin-top: 0.2rem; }
+
+    /* Timeline */
+    .timeline { display: flex; flex-direction: column; gap: 0.4rem; width: 100%; max-width: 650px; }
+    .timeline-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.6rem 0.75rem;
+      background: rgba(255,255,255,0.05);
+      border-radius: 6px;
+      border-right: 4px solid var(--gold);
+    }
+    .timeline-days { font-weight: 700; font-size: 0.8rem; min-width: 70px; color: var(--gold); }
+    .timeline-content { flex: 1; }
+    .timeline-title { font-weight: 600; font-size: 0.9rem; }
+    .timeline-desc { font-size: 0.75rem; opacity: 0.7; }
+
+    /* Checklist */
+    .checklist { display: flex; flex-direction: column; gap: 0.4rem; width: 100%; max-width: 650px; }
+    .checklist-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+      padding: 0.6rem 0.75rem;
+      background: rgba(255,255,255,0.05);
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .check-icon {
+      width: 20px;
+      height: 20px;
+      background: var(--green);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      color: white;
+      flex-shrink: 0;
+    }
+    .checklist-text { font-size: 0.9rem; }
+
+    /* Decision Tree */
+    .decision-tree {
+      background: linear-gradient(135deg, rgba(124,58,237,0.1), rgba(30,39,97,0.2));
+      border: 2px solid var(--purple);
+      border-radius: 12px;
+      padding: 1.25rem;
+      width: 100%;
+      max-width: 700px;
+    }
+    .decision-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    .decision-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--purple);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+    }
+    .decision-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+    .decision-xp {
+      margin-right: auto;
+      background: rgba(212,175,55,0.2);
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      color: var(--gold);
+      font-weight: 600;
+    }
+    .decision-scenario {
+      background: rgba(0,0,0,0.2);
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+    .decision-question {
+      font-weight: 600;
+      color: var(--gold);
+      margin-bottom: 0.75rem;
+      font-size: 1rem;
+    }
+    .decision-options { display: flex; flex-direction: column; gap: 0.5rem; }
+    .decision-option {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      background: rgba(255,255,255,0.05);
+      border: 2px solid rgba(255,255,255,0.15);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .decision-option:hover { background: rgba(124,58,237,0.2); border-color: var(--purple); }
+    .decision-option.selected { background: rgba(124,58,237,0.3); border-color: var(--purple); }
+    .decision-option.correct { background: rgba(34,197,94,0.2); border-color: var(--green); }
+    .decision-option.incorrect { background: rgba(239,68,68,0.15); border-color: var(--red); }
+    .decision-option.disabled { pointer-events: none; opacity: 0.7; }
+    .decision-option:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+    .option-letter {
+      width: 24px;
+      height: 24px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.8rem;
+      flex-shrink: 0;
+    }
+    .decision-option.correct .option-letter { background: var(--green); color: white; }
+    .decision-option.incorrect .option-letter { background: var(--red); color: white; }
+    .option-text { font-size: 0.9rem; }
+    .decision-feedback {
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: 8px;
+      display: none;
+    }
+    .decision-feedback.show { display: block; }
+    .decision-feedback.correct { background: rgba(34,197,94,0.2); border: 1px solid var(--green); }
+    .decision-feedback.incorrect { background: rgba(239,68,68,0.15); border: 1px solid var(--red); }
+    .feedback-title { font-weight: 700; margin-bottom: 0.5rem; }
+    .feedback-text { font-size: 0.9rem; line-height: 1.5; }
+
+    /* Quiz */
+    .quiz-container { width: 100%; max-width: 650px; }
+    .quiz-question {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.2rem;
+      margin-bottom: 1.25rem;
+      text-align: center;
+    }
+    .quiz-options { display: flex; flex-direction: column; gap: 0.5rem; }
+    .quiz-option {
+      padding: 0.75rem 1rem;
+      background: rgba(255,255,255,0.05);
+      border: 2px solid rgba(255,255,255,0.2);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: right;
+      font-size: 0.9rem;
+    }
+    .quiz-option:hover { background: rgba(212,175,55,0.15); border-color: var(--gold); }
+    .quiz-option.correct { background: rgba(34,197,94,0.2); border-color: var(--green); }
+    .quiz-option.incorrect { background: rgba(239,68,68,0.15); border-color: var(--red); }
+    .quiz-option.disabled { pointer-events: none; }
+    .quiz-option:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+    .quiz-feedback {
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: 8px;
+      display: none;
+      font-size: 0.9rem;
+    }
+    .quiz-feedback.show { display: block; }
+    .quiz-feedback.correct { background: rgba(34,197,94,0.2); border: 1px solid var(--green); }
+    .quiz-feedback.incorrect { background: rgba(239,68,68,0.15); border: 1px solid var(--red); }
+
+    /* Learning Objectives */
+    .objectives-box {
+      background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(30,39,97,0.25));
+      border: 2px solid #3b82f6;
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin: 0.75rem 0;
+      max-width: 700px;
+      width: 100%;
+    }
+    .objectives-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+    .objectives-icon {
+      width: 36px;
+      height: 36px;
+      background: #3b82f6;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+    }
+    .objectives-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #60a5fa;
+    }
+    .objectives-list { list-style: none; padding: 0; }
+    .objectives-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      padding: 0.4rem 0;
+      font-size: 0.9rem;
+    }
+    .objectives-list li::before { content: 'o'; color: #3b82f6; font-weight: bold; }
+
+    /* Animation */
+    .slide.active .animate { animation: fadeUp 0.5s ease-out forwards; }
+    .slide.active .animate.delay-1 { animation-delay: 0.1s; }
+    .slide.active .animate.delay-2 { animation-delay: 0.2s; }
+    .slide.active .animate.delay-3 { animation-delay: 0.3s; }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate { opacity: 0; }
+
+    /* XP Popup */
+    .xp-popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      background: linear-gradient(135deg, var(--gold), #f0c040);
+      color: var(--navy);
+      padding: 1.5rem 2.5rem;
+      border-radius: 12px;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2rem;
+      font-weight: 700;
+      z-index: 1000;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+      transition: transform 0.3s ease;
+    }
+    .xp-popup.show { transform: translate(-50%, -50%) scale(1); }
+    .xp-popup .xp-amount { font-size: 3rem; display: block; }
+
+    /* Badge Modal */
+    .badge-modal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.85);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1001;
+    }
+    .badge-modal.show { display: flex; }
+    .badge-modal-content {
+      background: linear-gradient(135deg, var(--deep-navy), #0a0f1a);
+      border: 2px solid var(--gold);
+      border-radius: 16px;
+      padding: 2rem;
+      text-align: center;
+      max-width: 350px;
+    }
+    .badge-modal-icon { font-size: 4rem; margin-bottom: 1rem; }
+    .badge-modal-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.5rem;
+      color: var(--gold);
+      margin-bottom: 0.5rem;
+    }
+    .badge-modal-desc { font-size: 0.9rem; opacity: 0.8; margin-bottom: 1rem; }
+    .badge-modal-close {
+      padding: 0.5rem 1.5rem;
+      background: var(--gold);
+      color: var(--navy);
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* Confetti */
+    .confetti-container {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 999;
+      overflow: hidden;
+    }
+    .confetti {
+      position: absolute;
+      width: 10px; height: 10px;
+      opacity: 0;
+      animation: confetti-fall 3s ease-out forwards;
+    }
+    @keyframes confetti-fall {
+      0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .confetti { animation: none; display: none; }
+      .xp-popup { transition: none; }
+      .slide { transition: none; }
+    }
+
+    /* Nav */
+    .slide-nav {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      padding: 0.75rem 1rem 1.25rem;
+      z-index: 100;
+      pointer-events: none;
+    }
+    .nav-btn {
+      background: rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: white;
+      font-size: 1.1rem;
+      cursor: pointer;
+      opacity: 0.6;
+      transition: all 0.2s;
+      padding: 0.4rem 0.6rem;
+      border-radius: 6px;
+      pointer-events: auto;
+    }
+    .nav-btn:hover { opacity: 1; background: rgba(0,0,0,0.7); border-color: var(--gold); }
+    .nav-btn:disabled { opacity: 0.2; cursor: not-allowed; }
+    .nav-btn:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+    .nav-center { display: flex; flex-direction: column; align-items: center; gap: 0.2rem; pointer-events: auto; }
+    .slide-counter { font-size: 0.7rem; opacity: 0.5; }
+    .progress-dots { display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; max-width: 220px; }
+    .progress-dot {
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border: none;
+      padding: 0;
+      appearance: none;
+      background: transparent;
+    }
+    .progress-dot::after {
+      content: '';
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--text-muted, #ccc);
+      transition: all 0.2s ease;
+    }
+    .progress-dot.active::after,
+    .progress-dot.completed::after {
+      background: var(--gold);
+      width: 14px;
+      height: 14px;
+    }
+    .progress-dot:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+    /* Mobile */
+    @media (max-width: 768px) {
+      .sidebar {
+        position: fixed;
+        left: -300px;
+        top: 0;
+        bottom: 0;
+        z-index: 1000;
+        transition: left 0.3s ease;
+      }
+      .sidebar.open { left: 0; }
+      .sidebar-toggle {
+        display: flex;
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        z-index: 1001;
+        width: 40px;
+        height: 40px;
+        background: var(--gold);
+        color: var(--navy);
+        border: none;
+        border-radius: 8px;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        cursor: pointer;
+      }
+      .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 999;
+      }
+      .sidebar-overlay.show { display: block; }
+    }
+    @media (min-width: 769px) {
+      .sidebar-toggle { display: none; }
+      .sidebar-overlay { display: none !important; }
+    }
+
+    /* Combo Counter */
+    .combo-display {
+      position: fixed;
+      top: 80px;
+      right: 20px;
+      background: linear-gradient(135deg, var(--orange), #ef4444);
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      z-index: 500;
+      transform: scale(0);
+      transition: transform 0.3s ease;
+      box-shadow: 0 4px 15px rgba(239,68,68,0.4);
+    }
+    .combo-display.show { transform: scale(1); }
+
+    /* Quote Block */
+    .quote-block {
+      background: linear-gradient(135deg, rgba(15,118,110,0.2), rgba(30,39,97,0.2));
+      border-right: 4px solid var(--teal);
+      padding: 1.25rem;
+      margin: 0.75rem 0;
+      max-width: 700px;
+      width: 100%;
+      border-radius: 0 8px 8px 0;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      font-style: italic;
+    }
+    .quote-attribution {
+      margin-top: 0.75rem;
+      font-size: 0.85rem;
+      font-style: normal;
+      color: var(--teal);
+    }
+  </style>
+</head>
+<body>
+<a class="skip-link" href="#main-content">انتقل إلى المحتوى الرئيسي</a>
+<div class="course-container">
+ الشريط الجانبي 
+<nav aria-label="الملاحة بالطبع" class="sidebar" role="navigation">
+<div class="sidebar-header">
+<a href="index-ar.html" onmouseout="this.style.color='rgba(212,175,55,0.7)'" onmouseover="this.style.color='#D4AF37'" style="display:block;font-size:0.7rem;color:rgba(212,175,55,0.7);text-decoration:none;margin-bottom:0.5rem;">← مكتبة الدورة</a>
+<h1>خطر التحيز</h1>
+<p>المهارات الأساسية لكل مراجعة</p>
+</div>
+<div class="stats-panel">
+<div class="level-display">
+<div class="level-badge" id="levelIcon">BS</div>
+<div class="level-info">
+<div class="level-title" id="levelTitle">الأحكام المتحيزة</div>
+<div class="level-subtitle">مستوى <span id="levelNum">1</span></div>
+</div>
+</div>
+<div class="xp-bar"><div class="xp-fill" id="xpFill" style="width: 0%"></div></div>
+<div class="xp-text"><span id="xpCurrent">0</span> / <span id="xpNeeded">100</span> XP</div>
+<div class="quick-stats">
+<div class="quick-stat">
+<div class="quick-stat-value" id="correctCount">0</div>
+<div class="quick-stat-label">صحيح</div>
+</div>
+<div class="quick-stat">
+<div class="quick-stat-value" id="decisionCount">0</div>
+<div class="quick-stat-label">القرارات</div>
+</div>
+<div class="quick-stat">
+<div class="quick-stat-value" id="synthesisCount">0</div>
+<div class="quick-stat-label">Judgments</div>
+</div>
+</div>
+</div>
+<div class="course-progress">
+<div class="course-progress-label">
+<span>تقدم الدورة</span>
+<span id="courseProgressPct">0%</span>
+</div>
+<div class="course-progress-bar">
+<div class="course-progress-fill" id="courseProgressFill" style="width: 0%"></div>
+</div>
+</div>
+<div class="module-list" id="moduleList"></div>
+<div class="badges-panel">
+<div class="badges-title">الإنجازات</div>
+<div class="badges-grid" id="badgesGrid"></div>
+</div>
+</nav>
+ المحتوى الرئيسي 
+<main class="main-content" id="main-content">
+<header class="content-header">
+<div class="breadcrumb">خطر التحيز / <span id="currentModule">الوحدة 1</span></div>
+<div class="header-actions">
+<div class="streak-display" id="streakDisplay">
+<span class="streak-flame">ST</span>
+<span class="streak-count" id="streakCount">0</span>
+<span>خط اليوم</span>
+</div>
+<button class="btn" onclick="resetProgress()">إعادة ضبط</button>
+</div>
+</header>
+<div class="content-body">
+<div class="slides-container" id="slidesContainer"></div>
+</div>
+</main>
+</div>
+ XP المنبثقة 
+<div aria-atomic="true" aria-live="polite" class="xp-popup" id="xpPopup" role="status">
+<span class="xp-amount" id="xpAmount">+25</span>
+    XP
+  </div>
+ شارة مشروطة 
+<div aria-labelledby="badgeModalTitle" aria-modal="true" class="badge-modal" id="badgeModal" role="dialog">
+<div class="badge-modal-content">
+<div class="badge-modal-icon" id="badgeModalIcon">AW</div>
+<div class="badge-modal-title" id="badgeModalTitle">تم الحصول على الشارة!</div>
+<div class="badge-modal-desc" id="badgeModalDesc">لقد فتحت إنجازًا جديدًا</div>
+<button class="badge-modal-close" onclick="closeBadgeModal()">مذهل!</button>
+</div>
+</div>
+ حاوية قصاصات الورق 
+<div class="confetti-container" id="confettiContainer"></div>
+ عداد التحرير والسرد 
+<div aria-live="polite" class="combo-display" id="comboDisplay" role="status">COMBO <span id="comboCount">0</span>x</div>
+ تبديل الشريط الجانبي المحمول 
+<button aria-expanded="false" aria-label="Toggle menu" class="sidebar-toggle" onclick="toggleSidebar()">MENU</button>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<script>
+// ===== GAMIFICATION STATE =====
+const DEFAULT_STATE = {
+  xp: 0,
+  level: 1,
+  streak: 0,
+  lastActive: null,
+  correctAnswers: 0,
+  decisionsCompleted: 0,
+  synthesisCount: 0,
+  badges: [],
+  completedModules: [],
+  answeredQuestions: {},
+  consecutiveCorrect: 0
+};
+
+function safeGetStorage(key, fallback) {
+  try {
+    const item = localStorage.getItem(key);
+    return item ? JSON.parse(item) : fallback;
+  } catch (e) {
+    return fallback;
+  }
+}
+
+function safeSetStorage(key, value) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch (e) {}
+}
+
+// Migration from old storage key to versioned key
+(function migrateStorage() {
+  try {
+    const oldData = localStorage.getItem('riskBiasMasteryGame');
+    if (oldData && !localStorage.getItem('riskBiasMasteryGame_v1')) {
+      localStorage.setItem('riskBiasMasteryGame_v1', oldData);
+      localStorage.removeItem('riskBiasMasteryGame');
+    }
+  } catch (e) {}
+})();
+
+let gameState = safeGetStorage('riskBiasMasteryGame_v1', DEFAULT_STATE);
+
+const LEVELS = [
+  { level: 1, title: "Bias Sentinel", icon: "BS", xp: 0 },
+  { level: 2, title: "Allocation Guard", icon: "AG", xp: 120 },
+  { level: 3, title: "Blinding Watch", icon: "BW", xp: 300 },
+  { level: 4, title: "Attrition Auditor", icon: "AA", xp: 520 },
+  { level: 5, title: "Reporting Tracker", icon: "RT", xp: 780 },
+  { level: 6, title: "Confounding Analyst", icon: "CA", xp: 1050 },
+  { level: 7, title: "RoB Judge", icon: "RJ", xp: 1350 },
+  { level: 8, title: "سيد التحيز", icon: "MB", xp: 1700 }
+];
+
+const BADGES = [
+  { id: "first_judgment", icon: "FJ", name: "First Judgment", desc: "أكمل سيناريو القرار الأول" },
+  { id: "allocation_guard", icon: "AG", name: "Allocation Guard", desc: "أكمل وحدة التخصيص" },
+  { id: "blinding_watch", icon: "BW", name: "Blinding Watch", desc: "أكمل وحدة الغمامة" },
+  { id: "attrition_auditor", icon: "AA", name: "Attrition Auditor", desc: "أكمل وحدة المسار المفقود" },
+  { id: "reporting_tracker", icon: "RT", name: "Reporting Tracker", desc: "أكمل وحدة النتيجة المخفية" },
+  { id: "confounding_analyst", icon: "CA", name: "Confounding Analyst", desc: "أكمل المسار المحير الوحدة" },
+  { id: "judgment_master", icon: "RJ", name: "Judgment Master", desc: "أكمل وحدة الحكم" },
+  { id: "perfect_5", icon: "5X", name: "Five Star", desc: "احصل على 5 إجابات صحيحة على التوالي" },
+  { id: "decision_maker", icon: "DM", name: "Decision Maker", desc: "أكمل 14 شجرة قرار" },
+  { id: "finisher", icon: "FN", name: "أكمل الدورة", desc: "أكمل الدورة التدريبية بأكملها" },
+  { id: "streak_3", icon: "S3", name: "On Fire", desc: "حافظ على سلسلة متتالية لمدة 3 أيام" },
+  { id: "streak_7", icon: "S7", name: "Weekly Warrior", desc: "حافظ على سلسلة متتالية لمدة 7 أيام" }
+];
+
+// ===== MODULES DATA =====
+const MODULES = [
+  {
+    id: 1, title: "الافتتاح", subtitle: "لماذا التحيز يغير كل شيء", xp: 140,
+    slides: [
+      { type: "title", theme: "teal-bg", content: { title: "خطر إتقان التحيز", subtitle: "شاهد التهديدات الخفية قبل أن تشكل الإجابة" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "تعريف خطر التحيز كتهديد للحقيقة السببية",
+          "تعرف على الحالات التي يتم فيها بناء النتائج المبهرة على نقاط ضعيفة الأسس",
+          "استخدم القصة والتباين والامتناع عن شحذ الأحكام",
+          "ممارسة أشجار القرار في الحالات الحقيقية"
+        ],
+        tip: "نحن نستخدم تقنيات السرد: التباين، والامتناع، والنهايات المتطابقة لتدريب الحكم المنضبط."
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "المرآة", title: "العلاج الهرموني والإجابة المصقولة",
+        text: "على مدى سنوات، أشارت الدراسات الرصدية إلى أن العلاج الهرموني يقلل من خطر الإصابة بأمراض القلب. وكانت القصة بسيطة وأنيقة. ثم سجلت تجربة مبادرة صحة المرأة حوالي 16000 امرأة وتم إيقافها مبكرًا بسبب الضرر. انقلب الاتجاه.",
+        followup: "لم يكن الدرس المستفاد هو أن التجارب تكون دائمًا صحيحة. وكان الدرس هو أن التحيز يمكن أن يصقل المرآة حتى تبدو وكأنها الحقيقة. خطر التحيز هو الذي يقرر ما إذا كانت المرآة تعكس الواقع أم الزخرفة."
+      }},
+      { type: "stats", theme: "dark", content: {
+        title: "Case Snapshot",
+        stats: [
+          { value: "16000", label: "المشاركون في WHI (تقريبًا)" },
+          { value: "1", label: "عكس اتجاه RCT كبير" },
+          { value: "2", label: "تتدفق الأدلة في الصراع" },
+          { value: "Early", label: "توقفت المحاكمة بسبب الضرر" }
+        ],
+        caption: "تم تبسيط الأرقام للتدريس."
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "ما هو خطر التحيز",
+        subtitle: "ليست أساليب سيئة، ولكنها مشوهة الحقيقة",
+        text: "خطر التحيز هو احتمال أن يؤدي تصميم الدراسة أو سلوكها أو إعداد تقاريرها إلى دفع النتائج بعيدًا عن الحقيقة. يتعلق الأمر بالصلاحية الداخلية، وليس بالهيبة أو حجم العينة.",
+        highlight: "يمكن لدراسة كبيرة متحيزة أن تضلل أكثر من دراسة صغيرة صادقة."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "BS", title: "السيناريو: أدلة متضاربة", xp: 25,
+        scenario: "لديك 6 دراسات رصدية تقترح فائدة وتجربة عشوائية واحدة كبيرة تظهر الضرر.",
+        question: "ما هو الحكم الذي يعكس بشكل أفضل خطر مبادئ التحيز؟",
+        options: [
+          { letter: "A", text: "متوسط جميع النتائج المراد قياسها عادل", correct: false },
+          { letter: "B", text: "إعطاء الأولوية للتجربة العشوائية للادعاءات السببية", correct: true },
+          { letter: "C", text: "استبعاد المحاكمة لأنها تتعارض", correct: false },
+          { letter: "D", text: "افترض أن الدراسات الرصدية أكثر واقعية", correct: false }
+        ],
+        feedback: {
+          correct: "صحيحة. عندما يكون الهدف هو الاستدلال السببي، فإن انخفاض خطر التصاميم المتحيزة يحمل وزنًا أكبر. يجب توضيح التضاربات، وليس حساب متوسطها.",
+          incorrect: "يتعلق خطر التحيز بالمصداقية السببية. عندما تختلف التصاميم، يجب أن تزن الأدلة حسب خطر التحيز، وليس فقط الحجم."
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "BS", title: "السيناريو: المرآة المصقولة", xp: 25,
+        scenario: "تُظهر مجموعة بيانات كبيرة جدًا ارتباطًا قويًا، ولكن يتم اختيار التعرض ذاتيًا ويتم الإبلاغ عن النتائج ذاتيًا.",
+        question: "ما هو الرد الأكثر دفاعية؟",
+        options: [
+          { letter: "A", text: "ثقة عالية لأن حجم العينة كبير", correct: false },
+          { letter: "B", text: "ضع علامة على خطر التحيز الجسيم من الإرباك و القياس", correct: true },
+          { letter: "C", text: "تجاهل التحيز إذا كان التأثير كبيرًا", correct: false },
+          { letter: "D", text: "افترض أن العشوائية غير ضرورية", correct: false }
+        ],
+        feedback: {
+          correct: "صحيح. الحجم الكبير لا يصلح الارتباك أو تحيز القياس. يجب تقييم خطر التحيز قبل الثقة في حجم التأثير.",
+          incorrect: "يمكن أن يؤدي حجم العينة إلى تقليل الخطأ العشوائي، لكنه لا يمكنه إصلاح التحيز المنهجي."
+        }
+      }},
+      { type: "refrain", theme: "black", content: { text: "يمكن للمرآة أن تتألق وتظل تكذب." }}
+    ]
+  },
+  {
+    id: 2, title: "التخصيص", subtitle: "تحيز الاختيار والإخفاء", xp: 150,
+    slides: [
+      { type: "title", theme: "gold-bg", content: { title: "التخصيص", subtitle: "من يدخل المسار ومن يتم إعاقته" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "افصل التسلسل العشوائي عن إخفاء التخصيص",
+          "كشف التعيين المتوقع وتحيز التوظيف",
+          "استخدم التوازن الأساسي كعلامة تحذير، وليس دليلًا",
+          "قم بإصدار حكم واضح منخفض أو مرتفع المخاطر"
+        ],
+        tip: "تضمن التخصيص العشوائي لتجربة CAST أن المجموعات قابلة للمقارنة - مما يسمح بالاستنتاج الصادم بأن الأدوية قتلت المرضى."
+      }},
+      { type: "story", theme: "gold-bg", content: {
+        label: "البوابة", title: "عندما تكون المهمة التالية معروفة",
+        text: "غالبًا ما استخدمت التجارب المبكرة التناوب أو تاريخ الميلاد. ويمكن للأطباء أن يخمنوا من سيحصل على العلاج الجديد ومن لن يحصل عليه. اتبعت اختيارات دقيقة.",
+        followup: "التسلسل العشوائي بدون إخفاء هو بوابة مفتوحة. الطريقة الصحيحة هي: عشوائية حقًا ومخفية حقًا."
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "قائمة التحقق من انحياز الاختيار",
+        subtitle: "سؤالان يجب أن يكون كلاهما بنعم",
+        text: "1) هل كان التسلسل عشوائيًا؟ <br><br>2) هل تم إخفاء التخصيص عن مسؤولي التوظيف؟",
+        highlight: "إذا كانت إحدى الإجابتين لا، فسيتم اختراق البوابة."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "AG", title: "السيناريو: مهمة يمكن التنبؤ بها", xp: 25,
+        scenario: "يتم تعيين المشاركين برقم سجل طبي فردي أو زوجي.",
+        question: "ما هي مخاطر التحيز للتوزيع العشوائي؟",
+        options: [
+          { letter: "A", text: "مخاطرة منخفضة لأنها بسيطة", correct: false },
+          { letter: "B", text: "مخاطرة عالية لأن المهمة يمكن التنبؤ بها", correct: true },
+          { letter: "C", text: "بعض الاهتمامات فقط", correct: false },
+          { letter: "D", text: "Cannot judge", correct: false }
+        ],
+        feedback: {
+          correct: "صحيح. تسمح المهمة المتوقعة بالتلاعب، حتى عن غير قصد. يعد هذا خطرًا كبيرًا للتحيز في الاختيار.",
+          incorrect: "البساطة ليست عشوائية. إذا تمكن الأطباء من التنبؤ بالتخصيص، فمن المرجح أن يكون هناك تحيز في الاختيار."
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "AG", title: "السيناريو: اختبار المغلف", xp: 25,
+        scenario: "تستخدم التجربة مظاريف مختومة، ولكنها ليست معتمة ويتم فتحها قبل الموافقة.",
+        question: "كيف ينبغي الحكم على إخفاء التخصيص؟",
+        options: [
+          { letter: "A", text: "خطر منخفض بسبب استخدام المظاريف", correct: false },
+          { letter: "B", text: "خطر كبير بسبب كسر الإخفاء", correct: true },
+          { letter: "C", text: "بعض الاهتمامات فقط", correct: false },
+          { letter: "D", text: "Unclear", correct: false }
+        ],
+        feedback: {
+          correct: "صحيح. إذا تمكن القائمون على التوظيف من رؤية المهمة التالية قبل الموافقة عليها، فسيفشل الإخفاء ومن المرجح أن يكون هناك تحيز في الاختيار.",
+          incorrect: "تكون المظاريف جيدة بقدر عتامةها وتوقيتها. القدرة على التنبؤ تعني مخاطر عالية."
+        }
+      }},
+      { type: "refrain", theme: "black", content: { text: "يتم إخفاء البوابة العادلة عن المختار." }}
+    ]
+  },
+  {
+    id: 3, title: "الغمامة", subtitle: "تحيز الأداء والكشف", xp: 160,
+    slides: [
+      { type: "title", theme: "purple-bg", content: { title: "الغمامة", subtitle: "عند معرفة تغير ما يُرى" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "التمييز بين تعمية المشاركين ومقدمي الخدمات والمقيمين",
+          "التعرف على الحالات التي تؤدي فيها النتائج الشخصية إلى تضخيم التأثيرات",
+          "استخدام النتائج الموضوعية لتقليل التحيز عند فشل التعمية",
+          "تحديد خطر التحيز للقياس" 
+        ],
+        tip: "في تجارب DECREASE، سمح عدم التعمية للمحققين بتفضيل العلاج دون وعي - مما يساهم في البيانات احتيال."
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "الشاهد", title: "تجارب الألم ورفع العلامة المفتوحة",
+        text: "غالبًا ما تشير تجارب الألم ذات العلامة المفتوحة إلى تأثيرات أكبر من التجارب المعماة. فعندما تكون التوقعات واضحة، تتغير النتائج، وخاصة عندما تكون المقاييس ذاتية.",
+        followup: "ولهذا السبب تكون الضوابط الزائفة والتقييم الأعمى مهمة. إن عصابة العينين لا تجعل الدراسة مثالية، ولكنها تحمي النتيجة من الأمل وخيبة الأمل."
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "Blinding Map",
+        subtitle: "من الذي يمكن أن يتأثر؟",
+        text: "يمكن لكل من المشاركين ومقدمي الخدمات ومقيمي النتائج تقديم التحيز. كلما كانت النتيجة أكثر ذاتية، كلما زادت أهمية التعمية.",
+        highlight: "لا تعتبر النتائج المسببة للعمى بالإضافة إلى النتائج الذاتية إشارة عالية الخطورة."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "BW", title: "السيناريو: النتيجة الذاتية", xp: 25,
+        scenario: "لم يتم تعمية المشاركين والنتيجة الأولية هي درجة الألم التي تم الإبلاغ عنها ذاتيًا.",
+        question: "كيف ينبغي الحكم على تحيز الاكتشاف؟",
+        options: [
+          { letter: "A", text: "خطر منخفض لأن الألم حقيقي", correct: false },
+          { letter: "B", text: "خطر مرتفع لأن النتيجة ذاتية وغير معماة", correct: true },
+          { letter: "C", text: "بعض المخاوف", correct: false },
+          { letter: "D", text: "لا ينطبق", correct: false }
+        ],
+        feedback: {
+          correct: "صحيح. النتائج الذاتية دون التعمية معرضة بشكل كبير لخطر تحيز الكشف.",
+          incorrect: "قد تكون النتيجة حقيقية، لكن التوقعات لا تزال قادرة على تضخيم النتائج."
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "BW", title: "السيناريو: النتيجة الموضوعية", xp: 25,
+        scenario: "لم يتم تعمية المشاركين، ولكن النتيجة هي جميع أسباب الوفيات التي تم التحقق منها عن طريق التسجيل.",
+        question: "ما هو الحكم الأكثر قابلية للدفاع عنه؟",
+        options: [
+          { letter: "A", text: "خطر منخفض لتحيز الكشف", correct: true },
+          { letter: "B", text: "خطر مرتفع لأنه لا يوجد تعمية", correct: false },
+          { letter: "C", text: "بعض المخاوف", correct: false },
+          { letter: "D", text: "Cannot judge", correct: false }
+        ],
+        feedback: {
+          correct: "صحيح. النتائج الموضوعية أقل عرضة لتحيز الكشف حتى بدون التعمية.",
+          incorrect: "التعمية مهمة، ولكن النتائج الموضوعية لا تزال منخفضة المخاطر لتحيز القياس."
+        }
+      }},
+      { type: "refrain", theme: "black", content: { text: "يعتمد ما تتم رؤيته على من يمكنه رؤيته." }}
+    ]
+  },
+  {
+    id: 4, title: "المفقودين المسار", subtitle: "الاستنزاف والبيانات غير المكتملة", xp: 160,
+    slides: [
+      { type: "title", theme: "green-bg", content: { title: "المفقودين المسار", subtitle: "عندما يفقد المسار المسافرين" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "حدد متى يمكن للبيانات المفقودة أن تغير الاستنتاجات",
+          "استخدم النية للتعامل معها كحماية ضد التحيز",
+          "اكتشف التسرب التفاضلي بين المجموعات",
+          "احكم على المخاطر عندما تكون الافتراضات غير مدعومة"
+        ],
+        tip: "في تجارب روزيجليتازون، كان المرضى الذين تركوا الدراسة أكثر مرضًا - مما جعل الدواء يبدو أكثر أمانًا مما كان عليه."
+      }},
+      { type: "story", theme: "gold-bg", content: {
+        label: "الثغرات", title: "برامج إنقاص الوزن والمخارج الهادئة",
+        text: "أفادت تجربة عن فقدان كبير في الوزن بين المكملين، ولكن 35 في المئة انسحبوا من مجموعة التدخل. تبدو النتيجة المنشورة قوية.",
+        followup: "عندما تكون البيانات المفقودة متفاوتة، يمكن كتابة النهاية بواسطة من بقي، وليس بواسطة من نجح."
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "Attrition Signals",
+        subtitle: "من غادر ولماذا",
+        text: "ابحث عن: التسرب الإجمالي، وعدم التوازن بين المجموعات، والأسباب المرتبطة بالنتائج.",
+        highlight: "يعد التسرب المرتفع أو غير المتكافئ بدون تحليل الحساسية علامة حمراء متحيزة."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "AA", title: "السيناريو: التسرب غير المتكافئ", xp: 25,
+        scenario: "يبلغ التسرب 10 بالمائة في السيطرة و35 بالمائة في التدخل، مع عدم وجود تحليل للمفقودين. النتائج.",
+        question: "كيف يجب تقييم تحيز الاستنزاف؟",
+        options: [
+          { letter: "A", text: "خطر منخفض لأن بعض البيانات تبقى", correct: false },
+          { letter: "B", text: "خطر مرتفع لأن الفقد غير متوازن", correct: true },
+          { letter: "C", text: "بعض المخاوف", correct: false },
+          { letter: "D", text: "Cannot judge", correct: false }
+        ],
+        feedback: {
+          correct: "صحيح. يعد التسرب الكبير وغير المتوازن بدون مبرر أو تحليل الحساسية أمرًا عالي الخطورة.",
+          incorrect: "عندما يختلف الاختفاء بين المجموعات، يمكن أن تكون النتيجة مشوهة."
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "AA", title: "السيناريو: نية العلاج", xp: 25,
+        scenario: "تقارير التجربة فقط وفقًا لتحليل البروتوكول، باستثناء 20 بالمائة من المشاركين العشوائيين.",
+        question: "ما هو الحكم الأفضل؟",
+        options: [
+          { letter: "A", text: "خطر منخفض إذا كانت النتائج كبيرة", correct: false },
+          { letter: "B", text: "بعض المخاوف أو المخاطر العالية اعتمادًا على الاستثناءات", correct: true },
+          { letter: "C", text: "لا يوجد خطر لأن الاستثناءات مسموح بها", correct: false },
+          { letter: "D", text: "Cannot judge", correct: false }
+        ],
+        feedback: {
+          correct: "صحيح. استبعاد المشاركين العشوائيين يمكن أن يؤدي إلى تحيز النتائج. إذا كانت الاستثناءات جوهرية أو مرتبطة بالنتائج، تكون المخاطرة عالية.",
+          incorrect: "يمكن أن يكون كل بروتوكول صالحًا لبعض الأسئلة، ولكنه يزيد من خطر التحيز لتقديرات الفعالية."
+        }
+      }},
+      { type: "refrain", theme: "black", content: { text: "لا يزال أولئك الذين غادروا يشكلون النتيجة." }}
+    ]
+  },
+  {
+    id: 5, title: "النتيجة المخفية", subtitle: "Selective reporting", xp: 160,
+    slides: [
+      { type: "title", theme: "red-bg", content: { title: "النتيجة المخفية", subtitle: "عندما يكون السجل تم تحريره" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "قارن النتائج المنشورة بالبروتوكول",
+          "كشف تبديل النتائج وإعداد التقارير الانتقائية",
+          "الحكم على المخاطر عندما تظهر النتائج الإيجابية فقط",
+          "فهم سبب أهمية السجلات"
+        ],
+        tip: "أخفت الدراسة رقم 329 محاولات الانتحار لدى المراهقين. ما تم الإبلاغ عنه بشكل انتقائي أدى إلى تغيير الوصفات العالمية."
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "التعديل", title: "الدراسة رقم 329 والنهاية المعاد كتابتها",
+        text: "اختبرت الدراسة رقم 329 الباروكستين لدى المراهقين. ذكرت الورقة المنشورة فائدة، لكن إعادة التحليل لاحقًا أظهرت أن النتائج الأولية كانت سلبية ولم يتم الإبلاغ عن الأضرار بشكل كافٍ.",
+        followup: "لم تكن هذه تفاصيل صغيرة. لقد كانت قصة مختلفة. يمكن أن يؤدي الإبلاغ الانتقائي إلى ظهور التجربة وكأنها تجيب على سؤال لم تجب عليه."
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "التحقق من تحيز الإبلاغ",
+        subtitle: "مقارنة الخطة والنشر",
+        text: "اسأل: هل تم الإبلاغ عن جميع النتائج المحددة مسبقًا؟ هل تم تغيير النقاط الزمنية؟ هل تم تقديم نتائج جديدة دون مبرر؟",
+        highlight: "عندما تختلف الخطة والورقة، ترتفع المخاطر."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "RT", title: "السيناريو: تبديل النتائج", xp: 25,
+        scenario: "يدرج سجل التجربة درجة الاكتئاب عند 12 أسبوعًا أساسي، لكن الصحيفة تشير إلى أن درجة القلق لمدة 6 أسابيع هي الأولية.",
+        question: "كيف ينبغي تقييم تحيز التقارير؟",
+        options: [
+          { letter: "A", text: "خطر منخفض لأنه تم العثور على نتيجة إيجابية", correct: false },
+          { letter: "B", text: "خطر مرتفع بسبب تبديل النتائج", correct: true },
+          { letter: "C", text: "بعض الاهتمامات فقط", correct: false },
+          { letter: "D", text: "Cannot judge", correct: false }
+        ],
+        feedback: {
+          correct: "صحيح. يعد تبديل النتائج الأولية بعد رؤية البيانات إشارة عالية المخاطر لإعداد التقارير الانتقائية.",
+          incorrect: "يؤدي تبديل النتائج إلى كسر العقد بين البروتوكول والنشر."
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "RT", title: "السيناريو: أضرار مفقودة", xp: 25,
+        scenario: "يسرد البروتوكول الأحداث السلبية، لكن الورقة لا تذكر أي شيء ولا تقدم أي جدول.",
+        question: "ما هو الحكم الأفضل؟",
+        options: [
+          { letter: "A", text: "خطر منخفض إذا كانت الفعالية قوية", correct: false },
+          { letter: "B", text: "خطر مرتفع لأن الأضرار تم حذفها بشكل انتقائي", correct: true },
+          { letter: "C", text: "بعض المخاوف", correct: false },
+          { letter: "D", text: "Cannot judge", correct: false }
+        ],
+        feedback: {
+          correct: "صحيح. الأضرار المحذوفة هي تقارير انتقائية. يزداد خطر التحيز عندما تكون الأضرار المحددة مسبقًا مفقودة.",
+          incorrect: "يمكن أن يؤدي الحذف الانتقائي للأضرار إلى قلب ميزان الفوائد والمخاطر."
+        }
+      }},
+      { type: "refrain", theme: "black", content: { text: "ما لم يتم الإبلاغ عنه لا يزال يتحدث." }}
+    ]
+  },
+  {
+    id: 6, title: "المسار المحير", subtitle: "التحيز في الأدلة الرصدية", xp: 170,
+    slides: [
+      { type: "title", theme: "green-bg", content: { title: "المسار المحير", subtitle: "عندما تختلط الأسباب بالاختيارات" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "تحديد التحيز المربك والدلالي",
+          "التعرف على التحيز المرتبط بالوقت والوقت الخالد",
+          "الحكم على الأدلة الرصدية بمعايير واضحة",
+          "قرر متى تكون النتائج ذات مصداقية كافية لتجميعها"
+        ],
+        tip: "بدت تجربة WHI واضحة ومباشرة حتى كشفت التحليلات اللاحقة عن فرضية التوقيت - التعقيد الخفي."
+      }},
+      { type: "story", theme: "gold-bg", content: {
+        label: "المنعطف", title: "بيتا كاروتين وسرطان الرئة",
+        text: "اقترحت الدراسات الرصدية أن البيتا كاروتين محمي ضد سرطان الرئة. أظهرت التجارب الكبيرة التي أجريت على المدخنين لاحقًا زيادة خطر الإصابة بسرطان الرئة وتم إيقافها مبكرًا.",
+        followup: "كانت الإرباكات قوية: فالأشخاص الذين يختارون المكملات الغذائية يختلفون في نواحٍ عديدة عن أولئك الذين لا يفعلون ذلك. عندما تؤدي الاختيارات إلى التعرض، يتبع ذلك التحيز."
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "Confounding Signals",
+        subtitle: "عندما يختلط السبب والاختيار",
+        text: "ابحث عن الاختلافات في المخاطر الأساسية، والحصول على الرعاية، والسلوك الصحي. تحقق من كيفية قياس الإرباك وتعديله.",
+        highlight: "يمكن أن يؤدي الإرباك غير المقاس إلى عكس التأثير الظاهر."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "CA", title: "السيناريو: تحيز الإشارة", xp: 25,
+        scenario: "المرضى الأكثر مرضًا هم أكثر عرضة لتلقي التدخل في دراسات الرعاية الروتينية.",
+        question: "كيف ينبغي الحكم على خطر التحيز؟",
+        options: [
+          { letter: "A", text: "تكون المخاطرة منخفضة إذا كان حجم العينة كبيرًا", correct: false },
+          { letter: "B", text: "مخاطر عالية ما لم تتم معالجة الإرباك بشكل مقنع", correct: true },
+          { letter: "C", text: "بعض المخاوف", correct: false },
+          { letter: "D", text: "لا ينطبق", correct: false }
+        ],
+        feedback: {
+          correct: "صحيح. يمكن لتحيز الإشارة أن يطغى على الإشارة. وبدون تعديل قوي، تكون المخاطر مرتفعة.",
+          incorrect: "الحجم الكبير لا يحل الإرباك. المفتاح هو ما إذا كان يتم قياس الإرباكات والتحكم فيها."
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "CA", title: "السيناريو: الزمن الخالد", xp: 25,
+        scenario: "يتم تعريف التعرض بعد فترة يجب خلالها على المرضى البقاء على قيد الحياة حتى يتم تصنيفهم على أنهم معالجين.",
+        question: "ماذا يعني ذلك؟",
+        options: [
+          { letter: "A", text: "منخفضة المخاطر لأنها شائعة", correct: false },
+          { letter: "B", text: "مخاطر عالية بسبب التحيز الزمني الخالد", correct: true },
+          { letter: "C", text: "بعض المخاوف", correct: false },
+          { letter: "D", text: "Cannot judge", correct: false }
+        ],
+        feedback: {
+          correct: "صحيح. يخلق الوقت الخالد ميزة بقاء زائفة ويشكل خطرًا تحيزًا خطيرًا.",
+          incorrect: "توقيت التعرض أمر بالغ الأهمية. يمكن أن يؤدي التصنيف الخاطئ لوقت الشخص إلى تحقيق فائدة مضللة."
+        }
+      }},
+      { type: "refrain", theme: "black", content: { text: "عندما يقود الاختيار الطريق، تتلاشى السببية." }}
+    ]
+  },
+  {
+    id: 7, title: "الحكم", subtitle: "تجميعها معًا", xp: 190,
+    slides: [
+      { type: "title", theme: "teal-bg", content: { title: "الحكم", subtitle: "تلخيص المخاطر دون خوف أو محاباة" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "تطبيق أحكام المجال على المخاطر الشاملة للتحيز",
+          "تبرير القرارات بأسباب واضحة",
+          "استخدام تحليل الحساسية لاختبار الاستنتاجات",
+          "اترك مع نص قرار قابل للتكرار"
+        ],
+        tip: "يُغلق الهيكل الحلقي الدرس من حيث بدأ: المرآة والحقيقة."
+      }},
+      { type: "story", theme: "green-bg", content: {
+        label: "العودة", title: "مراجعتان، واحدة صادقة",
+        text: "قام فريقان بمراجعة نفس التدخل. صنف أحدهم جميع التجارب على أنها منخفضة المخاطر لأن النتائج بدت نظيفة. أما باقي التخصيصات الموثقة فهي تسرب البيانات والبيانات المفقودة وتبديل النتائج. وكان استنتاجهم حذرا وغير المبدأ التوجيهي.",
+        followup: "الهدف ليس التشاؤم. إنها الدقة. المراجعة الأكثر فائدة هي تلك التي تحدد حالة عدم اليقين بشكل واضح."
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "Overall Judgment",
+        subtitle: "نص قرار بسيط",
+        text: "إذا كان أي مجال عالي المخاطر ويؤثر بشكل مباشر على النتيجة الأولية، فإن المخاطر الإجمالية تكون عالية. إذا كانت المخاوف معتدلة ومن غير المرجح أن تغير اتجاهها، فقد تكون المخاطر العامة هي بعض المخاوف.",
+        highlight: "يجب أن يكون الحكم مسببًا، وليس متوسطًا."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "RJ", title: "السيناريو: المخاطرة الشاملة", xp: 35,
+        scenario: "تتميز التجربة بمخاطر منخفضة في التوزيع العشوائي، ومخاطر عالية في فقدان البيانات، والنتيجة الأولية حساسة للفقدان.",
+        question: "ما هو الخطر الإجمالي للتحيز؟",
+        options: [
+          { letter: "A", text: "Low risk", correct: false },
+          { letter: "B", text: "بعض المخاوف", correct: false },
+          { letter: "C", text: "High risk", correct: true },
+          { letter: "D", text: "Cannot judge", correct: false }
+        ],
+        feedback: {
+          correct: "صحيح. إن المجال عالي المخاطر الذي يؤثر بشكل مباشر على النتيجة الأولية يؤدي إلى الحكم العام.",
+          incorrect: "الخطر الإجمالي ليس متوسطًا. إنه حكم حول ما إذا كان التحيز يمكن أن يغير الإجابة."
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "RJ", title: "السيناريو: التحقق من الحساسية", xp: 35,
+        scenario: "يتضمن تحليلك التعريفي 3 تجارب منخفضة المخاطر و4 تجارب عالية المخاطر. يختفي التأثير المجمع عند إزالة التجارب عالية المخاطر.",
+        question: "ما هو الاستنتاج الأكثر قابلية للدفاع؟",
+        options: [
+          { letter: "A", text: "الإبلاغ عن التأثير المجمع الكامل باعتباره نهائيًا", correct: false },
+          { letter: "B", text: "الإبلاغ عن الاستنتاج الأولي بناءً على تجارب منخفضة المخاطر", correct: true },
+          { letter: "C", text: "استبعاد التجارب منخفضة المخاطر للحفاظ على حجم العينة", correct: false },
+          { letter: "D", text: "تجاهل تحليل الحساسية", correct: false }
+        ],
+        feedback: {
+          correct: "صحيح. تحليلات الحساسية تختبر المتانة. إذا كان التأثير يعتمد على تجارب عالية المخاطر، فيجب أن تعكس الاستنتاجات عدم اليقين هذا.",
+          incorrect: "إذا تغيرت النتائج عند إزالة التجارب عالية المخاطر، فإن الاستنتاج الأكثر أمانًا يعتمد على أدلة أكثر مصداقية."
+        }
+      }},
+      { type: "refrain", theme: "black", content: { text: "قم بتسمية التحيز، وستصبح الإجابة واضحة." }}
+    ]
+  }
+];
+
+// ===== NAVIGATION STATE =====
+let currentModule = 0;
+let currentSlide = 0;
+let consecutiveCorrect = gameState.consecutiveCorrect || 0;
+
+// ===== SAVE/LOAD =====
+function saveGame() {
+  safeSetStorage('riskBiasMasteryGame_v1', gameState);
+}
+
+function resetProgress() {
+  if (confirm('هل تريد إعادة تعيين كل التقدم والإنجازات؟')) {
+    gameState = { ...DEFAULT_STATE, answeredQuestions: {}, badges: [], completedModules: [] };
+    saveGame();
+    currentModule = 0;
+    currentSlide = 0;
+    renderAll();
+  }
+}
+
+// ===== COURSE PROGRESS =====
+function updateCourseProgress() {
+  const totalModules = MODULES.length;
+  const completedCount = gameState.completedModules.length;
+  const pct = Math.round((completedCount / totalModules) * 100);
+  const fillEl = document.getElementById('courseProgressFill');
+  const pctEl = document.getElementById('courseProgressPct');
+  if (fillEl) fillEl.style.width = pct + '%';
+  if (pctEl) pctEl.textContent = pct + '%';
+}
+
+// ===== XP & LEVELING =====
+function addXP(amount) {
+  gameState.xp += amount;
+  checkLevelUp();
+  saveGame();
+  updateStatsDisplay();
+  showXPPopup(amount);
+}
+
+function checkLevelUp() {
+  for (let i = LEVELS.length - 1; i >= 0; i--) {
+    if (gameState.xp >= LEVELS[i].xp && gameState.level < LEVELS[i].level) {
+      gameState.level = LEVELS[i].level;
+      showLevelUp(LEVELS[i]);
+      break;
+    }
+  }
+}
+
+function showXPPopup(amount) {
+  const popup = document.getElementById('xpPopup');
+  document.getElementById('xpAmount').textContent = `+${amount}`;
+  popup.classList.add('show');
+  setTimeout(() => popup.classList.remove('show'), 1500);
+}
+
+function showLevelUp(levelData) {
+  triggerConfetti();
+}
+
+// ===== BADGES =====
+function awardBadge(badgeId) {
+  if (gameState.badges.includes(badgeId)) return;
+  gameState.badges.push(badgeId);
+  saveGame();
+  const badge = BADGES.find(b => b.id === badgeId);
+  if (badge) showBadgeModal(badge);
+  updateBadges();
+}
+
+function showBadgeModal(badge, celebrate = true) {
+  document.getElementById('badgeModalIcon').textContent = badge.icon;
+  document.getElementById('badgeModalTitle').textContent = badge.name;
+  document.getElementById('badgeModalDesc').textContent = badge.desc;
+  const modal = document.getElementById('badgeModal');
+  modal.classList.add('show');
+  if (celebrate) triggerConfetti();
+
+  // Focus trap
+  const focusableElements = modal.querySelectorAll('الزر، [tabindex]:not([tabindex="-1"])');
+  if (focusableElements.length > 0) {
+    const firstFocusable = focusableElements[0];
+    const lastFocusable = focusableElements[focusableElements.length - 1];
+    firstFocusable.focus();
+
+    // Remove any existing focus trap listener
+    if (modal._focusTrapHandler) {
+      modal.removeEventListener('keydown', modal._focusTrapHandler);
+    }
+
+    modal._focusTrapHandler = function(e) {
+      if (e.key === 'Tab') {
+        if (e.shiftKey && document.activeElement === firstFocusable) {
+          e.preventDefault();
+          lastFocusable.focus();
+        } else if (!e.shiftKey && document.activeElement === lastFocusable) {
+          e.preventDefault();
+          firstFocusable.focus();
+        }
+      }
+      if (e.key === 'Escape') {
+        closeBadgeModal();
+      }
+    };
+    modal.addEventListener('keydown', modal._focusTrapHandler);
+  }
+}
+
+function showBadgeDetails(badgeId) {
+  const badge = BADGES.find(b => b.id === badgeId);
+  if (!badge) return;
+  const earned = gameState.badges.includes(badgeId);
+  const desc = earned ? badge.desc : `${badge.desc} (Locked)`;
+  showBadgeModal({ ...badge, desc }, earned);
+}
+
+function closeBadgeModal() {
+  const modal = document.getElementById('badgeModal');
+  if (modal._focusTrapHandler) {
+    modal.removeEventListener('keydown', modal._focusTrapHandler);
+    modal._focusTrapHandler = null;
+  }
+  modal.classList.remove('show');
+}
+
+// ===== STREAK =====
+function updateStreak() {
+  const today = new Date().toDateString();
+  if (gameState.lastActive !== today) {
+    const yesterday = new Date(Date.now() - 86400000).toDateString();
+    if (gameState.lastActive === yesterday) {
+      gameState.streak++;
+      if (gameState.streak >= 3) awardBadge('streak_3');
+      if (gameState.streak >= 7) awardBadge('streak_7');
+    } else if (gameState.lastActive) {
+      gameState.streak = 1;
+    } else {
+      gameState.streak = 1;
+    }
+    gameState.lastActive = today;
+    saveGame();
+  }
+}
+
+// ===== CONFETTI =====
+function triggerConfetti() {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const container = document.getElementById('confettiContainer');
+  const colors = ['#D4AF37', '#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#0f766e'];
+  for (let i = 0; i < 50; i++) {
+    const confetti = document.createElement('div');
+    confetti.className = 'confetti';
+    confetti.style.left = Math.random() * 100 + '%';
+    confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+    confetti.style.animationDelay = Math.random() * 0.5 + 's';
+    container.appendChild(confetti);
+    setTimeout(() => confetti.remove(), 3500);
+  }
+}
+
+// ===== COMBO =====
+function updateComboDisplay() {
+  const comboEl = document.getElementById('comboDisplay');
+  const countEl = document.getElementById('comboCount');
+  if (consecutiveCorrect >= 2) {
+    countEl.textContent = consecutiveCorrect;
+    comboEl.classList.add('show');
+  } else {
+    comboEl.classList.remove('show');
+  }
+}
+
+// ===== MOBILE SIDEBAR =====
+function toggleSidebar() {
+  document.querySelector('.sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('show');
+  var btn = document.querySelector('.sidebar-toggle, .hamburger, .mobile-menu-btn'); if (btn) btn.setAttribute('aria-expanded', btn.getAttribute('aria-expanded') === 'true' ? 'false' : 'true');
+}
+
+// ===== RENDER =====
+function renderAll() {
+  updateStreak();
+  renderSidebar();
+  renderSlides();
+  updateStatsDisplay();
+  updateBadges();
+  updateCourseProgress();
+}
+
+function updateStatsDisplay() {
+  const levelData = LEVELS.find(l => l.level === gameState.level) || LEVELS[0];
+  const nextLevel = LEVELS.find(l => l.level === gameState.level + 1);
+
+  document.getElementById('levelIcon').textContent = levelData.icon;
+  document.getElementById('levelTitle').textContent = levelData.title;
+  document.getElementById('levelNum').textContent = gameState.level;
+
+  const currentXP = gameState.xp - levelData.xp;
+  const neededXP = nextLevel ? (nextLevel.xp - levelData.xp) : 500;
+  const pct = Math.min(100, (currentXP / neededXP) * 100);
+
+  document.getElementById('xpFill').style.width = pct + '%';
+  document.getElementById('xpCurrent').textContent = currentXP;
+  document.getElementById('xpNeeded').textContent = neededXP;
+
+  document.getElementById('correctCount').textContent = gameState.correctAnswers;
+  document.getElementById('decisionCount').textContent = gameState.decisionsCompleted;
+  document.getElementById('synthesisCount').textContent = gameState.synthesisCount || 0;
+  document.getElementById('streakCount').textContent = gameState.streak;
+
+  const streakEl = document.getElementById('streakDisplay');
+  streakEl.classList.toggle('active', gameState.streak > 0);
+}
+
+function updateBadges() {
+  const grid = document.getElementById('badgesGrid');
+  grid.innerHTML = BADGES.map(b => {
+    const earned = gameState.badges.includes(b.id);
+    const label = `${b.name}: ${b.desc}`;
+    return `<button class="عنصر الشارة ${حصلت عليه؟ 'كسب' : ''}" type="button" data-tooltip="${label}" aria-label="${label}" title="${label}" onclick="showBadgeDetails('${b.id}')">${b.icon}</button>`;
+  }).join('');
+}
+
+function renderSidebar() {
+  const list = document.getElementById('moduleList');
+  list.innerHTML = MODULES.map((mod, i) => {
+    const completed = gameState.completedModules.includes(mod.id);
+    const locked = i > 0 && !gameState.completedModules.includes(MODULES[i-1].id);
+    const estMins = Math.round(mod.slides.length * 1.5);
+    return `
+      <div class="عنصر الوحدة ${i === currentModule ? 'نشط' : ''} ${مكتمل؟ 'مكتمل' : ''} ${مقفل؟ 'مقفل' : ''}"
+           onclick="${locked ? '' : `goToModule(${i})`}"
+           tabindex="${locked ? -1 : 0}"
+           role="button"
+           aria-disabled="${مقفل؟ 'true' : 'false'}">
+        <div class="module-number">${completed ? 'OK' : (locked ? 'LK' : mod.id)}</div>
+        <div class="module-info">
+          <div class="module-title">${mod.title}</div>
+          <div class="module-subtitle">${mod.subtitle}</div>
+          <div class="module-xp">+${mod.xp} XP</div>
+          <div class="module-time">T ~${estMins} min</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderSlides() {
+  const container = document.getElementById('slidesContainer');
+  container.innerHTML = MODULES.map((mod, mi) => {
+    const progressPct = ((currentSlide + 1) / mod.slides.length) * 100;
+    return `
+    <div class="شرائح الوحدة ${mi === currentModule ? 'active' : ''}" data-module="${mi}">
+      <div class="slide-progress-bar" style="العرض: ${mi === currentModule ? progressPct : 0}%"></div>
+      ${mod.slides.map((slide, si) => renderSlide(slide, si, mi)).join('')}
+      <div class="slide-nav">
+        <button class="nav-btn" onclick="prevSlide()" ${currentSlide === 0 ? 'disabled' : ''} aria-label="الشريحة السابقة">&lt;</button>
+        <div class="nav-center">
+          <div class="slide-counter">${currentSlide + 1} / ${mod.slides.length}</div>
+          <div class="progress-dots">
+            ${mod.slides.map((_, i) => `<button class="progress-dot ${i ===currentSlide ? 'active' : ''}" type="button" onclick="goToSlide(${i})" aria-label="انتقل إلى الشريحة ${i + 1}" ${i === currentSlide ? 'aria-current="true"' : ''}></button>`).join('')}
+          </div>
+        </div>
+        <button class="nav-btn" onclick="nextSlide()" aria-label="الشريحة التالية">&gt;</button>
+      </div>
+      <div class="keyboard-hint" style="position:absolute;bottom:5px;left:50%;transform:translateX(-50%);font-size:0.6rem;opacity:0.4;">Left / Right arrows or swipe to navigate</div>
+    </div>
+  `;
+  }).join('');
+  document.getElementById('currentModule').textContent = MODULES[currentModule].title;
+  updateSlideVisibility();
+}
+
+function renderSlide(slide, index, moduleIndex) {
+  const theme = slide.theme || 'dark';
+  let html = `<div class="Slide ${theme} ${index ===currentSlide ? 'active' : ''}" data-slide="${index}">`;
+
+  switch(slide.type) {
+    case 'title':
+      html += `<div class="content"><h1 class="عنوان الرسوم المتحركة الذهبي">${slide.content.title}</h1><p class="تأخير الرسوم المتحركة للترجمة -1">${slide.content.subtitle}</p></div>`;
+      break;
+
+    case 'objectives':
+      html += `<div class="content">
+        <div class="objectives-box animate">
+          <div class="objectives-header">
+            <div class="objectives-icon">GOAL</div>
+            <div class="objectives-title">Learning Objectives</div>
+          </div>
+          <ul class="objectives-list">
+            ${slide.content.objectives.map(obj => `<li>${obj}</li>`).join('')}
+          </ul>
+        </div>
+        ${slide.content.tip ? `<p class="تأخير الرسوم المتحركة للترجمة -1" style="font-size:0.85rem;max-width:600px">${slide.content.tip}</p>` : ''}
+      </div>`;
+      break;
+
+    case 'story':
+      html += `<div class="content">
+        <article class="Story-box ${slide.content.success ? 'النجاح' : ''} ${slide.content.warning ؟ 'تحذير' : ''} ${slide.content.teal ؟ 'teal' : ''} تحريك" role="article">
+          <div class="story-label">${slide.content.label}</div>
+          ${slide.content.title ? `<h2 class="title gold" style="font-size:1.8rem;margin-bottom:0.75rem">${slide.content.title}</h2>` : ''}
+          <p class="story-text">${slide.content.text}</p>
+          ${slide.content.followup ? `<p class="story-text" style="margin-top:0.75rem;font-style:italic;opacity:0.9">${slide.content.followup}</p>` : ''}
+        </article>
+      </div>`;
+      break;
+
+    case 'stats':
+      html += `<div class="content">
+        ${slide.content.title ? `<h2 class="عنوان الرسوم المتحركة الذهبي">${slide.content.title}</h2>` : ''}
+        ${slide.content.subtitle ? `<p class="تأخير الرسوم المتحركة للترجمة -1">${slide.content.subtitle}</p>` : ''}
+        <div class="stats-grid تأخير الرسوم المتحركة-2">
+          ${slide.content.stats.map(s => `<div class="stat-box"><div class="stat-value gold">${s.value}</div><div class="stat-label">${s.label}</div></div>`).join('')}
+        </div>
+        ${slide.content.caption ? `<p class="العنوان الفرعي تأخير الرسوم المتحركة-3" style="font-size:0.85rem;margin-top:0.75rem">${slide.content.caption}</p>` : ''}
+      </div>`;
+      break;
+
+    case 'refrain':
+      html += `<div class="content" style="justify-content:center;height:100%"><p class="refrain animate">"${slide.content.text}"</p></div>`;
+      break;
+
+    case 'concept':
+      html += `<div class="content">
+        <h2 class="title ${theme === 'light' ? 'navy' : 'gold'} بطاقة الرسوم المتحركة">${slide.content.title}</h2>
+        ${slide.content.subtitle ? `<p class="تأخير الرسوم المتحركة للترجمة -1">${slide.content.subtitle}</p>` : ''}
+        ${slide.content.text ? `<div class="${theme === 'light' ? '' : 'navy-bg'} تأخير الرسوم المتحركة -2"><p class="card-text">${slide.content.text}</p></div>` : ''}
+        ${slide.content.highlight ? `<div class="تحذير مربع القصة تأخير الرسوم المتحركة -3"><div class="story-label">Key Insight</div><p class="story-text">${slide.content.highlight}</p></div>` : ''}
+        ${slide.content.checkpoints ? `
+          <div class="تأخير الرسوم المتحركة للجدول الزمني -2" style="margin-top:0.75rem">
+            ${slide.content.checkpoints.map(cp => `
+              <div class="timeline-item"><div class="timeline-days">${cp.day}</div><div class="timeline-content"><div class="timeline-title">${cp.event}</div></div></div>
+            `).join('')}
+          </div>
+        ` : ''}
+      </div>`;
+      break;
+
+    case 'checklist':
+      html += `<div class="content">
+        <h2 class="عنوان الرسوم المتحركة الذهبي">${slide.content.title}</h2>
+        <div class="قائمة التحقق من تأخير الرسوم المتحركة -1">
+          ${slide.content.items.map(item => `
+            <div class="checklist-item">
+              <div class="check-icon">OK</div>
+              <div class="checklist-text">${item}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>`;
+      break;
+
+    case 'decision':
+      const did = `dec_${moduleIndex}_${index}`;
+      const answered = gameState.answeredQuestions[did];
+      html += `<div class="content">
+        <div class="decision-tree animate">
+          <div class="decision-header">
+            <div class="decision-icon">${slide.content.icon}</div>
+            <div class="decision-title">${slide.content.title}</div>
+            <div class="decision-xp">+${slide.content.xp} XP</div>
+          </div>
+          <div class="decision-scenario">${slide.content.scenario}</div>
+          <div class="decision-question">${slide.content.question}</div>
+          <div class="decision-options">
+            ${slide.content.options.map(opt => {
+              const isSelected = answered === opt.letter;
+              const showCorrect = answered && opt.correct;
+              const showIncorrect = answered && isSelected && !opt.correct;
+              return `
+                <div class="خيار القرار ${isSelected ? 'محدد' : ''} ${showCorrect ? 'صحيح' : ''} ${showIncorrect ؟ \"غير صحيح\" : ''} ${إجابة ؟ 'عاجز' : ''}"
+                     onclick="AnswerDecision('${did}', '${opt.letter}', ${opt.correct}, ${slide.content.xp})"
+                     tabindex="0"
+                     role="button"
+                     aria-pressed="${isSelected ? 'صحيح' : 'خطأ'}"
+                     aria-disabled="${answered ? 'true' : 'false'}">
+                  <div class="option-letter">${opt.letter}</div>
+                  <div class="option-text">${opt.text}</div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+          <div class="decision-feedback ${answered ? 'show' : ''} ${answered && slide.content.options.find(o => o.letter === answered)?.correct ? 'correct' : 'incorrect'}" role="alert" aria-live="polite">
+            <div class="feedback-title">${answered && slide.content.options.find(o => o.letter === answered)?.correct ? 'صحيح!' : 'ليس تمامًا'}</div>
+            <div class="feedback-text">${answered && slide.content.options.find(o => o.letter === answered)?.correct ? slide.content.feedback.correct : slide.content.feedback.incorrect}</div>
+          </div>
+        </div>
+      </div>`;
+      break;
+
+    case 'quiz':
+      const qid = `quiz_${moduleIndex}_${index}`;
+      const qAnswered = gameState.answeredQuestions[qid];
+      html += `<div class="content">
+        <div class="quiz-container animate">
+          <div class="quiz-question">${slide.content.question}</div>
+          <div class="quiz-options">
+            ${slide.content.options.map((opt, oi) => {
+              const isSelected = qAnswered === oi;
+              const showCorrect = qAnswered !== undefined && opt.correct;
+              const showIncorrect = qAnswered !== undefined && isSelected && !opt.correct;
+              return `
+                <div class="خيار الاختبار ${showCorrect ? 'صحيح' : ''} ${showIncorrect ؟ 'غير صحيح' : ''} ${qAnswered !== غير محدد؟ 'disabled' : ''}"
+                     onclick="answerQuiz('${qid}', ${oi}, ${opt.correct}, ${slide.content.xp})"
+                     tabindex="0"
+                     role="button"
+                     aria-pressed="${isSelected ? 'صحيح' : 'خطأ'}"
+                     aria-disabled="${qAnswered !== غير محدد؟ \"صحيح\": \"كاذب\"}">
+                  ${opt.text}
+                </div>
+              `;
+            }).join('')}
+          </div>
+          <div class="تعليقات الاختبار ${qAnswered !== غير محدد ? 'show' : ''} ${qAnswered !== غير محدد && Slide.content.options[qAnswered]?.صحيح؟ 'صحيح' : 'غير صحيح'} زر" role="alert" aria-live="polite">
+            ${qAnswered !== undefined && slide.content.options[qAnswered]?.correct ? slide.content.feedback.correct : slide.content.feedback.incorrect}
+          </div>
+        </div>
+      </div>`;
+      break;
+  }
+
+  html += '</div>';
+  return html;
+}
+
+function updateSlideVisibility() {
+  const container = document.querySelector('.module-slides.active');
+  if (!container) return;
+
+  container.querySelectorAll('.slide').forEach((slide, i) => {
+    slide.classList.toggle('active', i === currentSlide);
+  });
+
+  const progressBar = container.querySelector('.slide-progress-bar');
+  if (progressBar) {
+    const pct = ((currentSlide + 1) / MODULES[currentModule].slides.length) * 100;
+    progressBar.style.width = pct + '%';
+  }
+
+  container.querySelector('.slide-counter').textContent = `${currentSlide + 1} / ${MODULES[currentModule].slides.length}`;
+  container.querySelectorAll('.progress-dot').forEach((dot, i) => {
+    const isActive = i === currentSlide;
+    dot.classList.toggle('active', isActive);
+    if (isActive) {
+      dot.setAttribute('aria-current', 'true');
+    } else {
+      dot.removeAttribute('aria-current');
+    }
+  });
+  container.querySelector('.nav-btn').disabled = currentSlide === 0;
+}
+
+// ===== ANSWERS =====
+function answerDecision(did, letter, correct, xp) {
+  if (gameState.answeredQuestions[did] !== undefined) return;
+  gameState.answeredQuestions[did] = letter;
+  gameState.decisionsCompleted++;
+  gameState.synthesisCount = (gameState.synthesisCount || 0) + 1;
+
+  if (gameState.decisionsCompleted === 1) awardBadge('first_judgment');
+
+  if (correct) {
+    gameState.correctAnswers++;
+    consecutiveCorrect++;
+    addXP(xp);
+    if (consecutiveCorrect >= 5) awardBadge('perfect_5');
+    if (gameState.decisionsCompleted >= 14) awardBadge('decision_maker');
+  } else {
+    consecutiveCorrect = 0;
+  }
+  gameState.consecutiveCorrect = consecutiveCorrect;
+  saveGame();
+  renderSlides();
+  updateComboDisplay();
+  updateStatsDisplay();
+}
+
+function answerQuiz(qid, choice, correct, xp) {
+  if (gameState.answeredQuestions[qid] !== undefined) return;
+  gameState.answeredQuestions[qid] = choice;
+
+  if (correct) {
+    gameState.correctAnswers++;
+    consecutiveCorrect++;
+    addXP(xp);
+    if (consecutiveCorrect >= 5) awardBadge('perfect_5');
+  } else {
+    consecutiveCorrect = 0;
+  }
+  gameState.consecutiveCorrect = consecutiveCorrect;
+  saveGame();
+  renderSlides();
+  updateComboDisplay();
+  updateStatsDisplay();
+}
+
+// ===== NAVIGATION =====
+function goToModule(index) {
+  if (index > 0 && !gameState.completedModules.includes(MODULES[index-1].id)) return;
+  currentModule = index;
+  currentSlide = 0;
+  renderSlides();
+  renderSidebar();
+}
+
+function goToSlide(index) {
+  currentSlide = index;
+  updateSlideVisibility();
+}
+
+function nextSlide() {
+  const mod = MODULES[currentModule];
+  if (currentSlide < mod.slides.length - 1) {
+    currentSlide++;
+    updateSlideVisibility();
+  } else {
+    completeModule();
+  }
+}
+
+function prevSlide() {
+  if (currentSlide > 0) {
+    currentSlide--;
+    updateSlideVisibility();
+  }
+}
+
+function completeModule() {
+  const mod = MODULES[currentModule];
+  if (!gameState.completedModules.includes(mod.id)) {
+    gameState.completedModules.push(mod.id);
+    addXP(mod.xp);
+
+    // Module-specific badges
+    if (mod.id === 2) awardBadge('allocation_guard');
+    if (mod.id === 3) awardBadge('blinding_watch');
+    if (mod.id === 4) awardBadge('attrition_auditor');
+    if (mod.id === 5) awardBadge('reporting_tracker');
+    if (mod.id === 6) awardBadge('confounding_analyst');
+    if (mod.id === 7) awardBadge('judgment_master');
+    if (gameState.completedModules.length === MODULES.length) awardBadge('finisher');
+
+    saveGame();
+    triggerConfetti();
+    updateCourseProgress();
+  }
+
+  if (currentModule < MODULES.length - 1) {
+    goToModule(currentModule + 1);
+  }
+}
+
+// ===== KEYBOARD =====
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    closeBadgeModal();
+    document.querySelector('.sidebar').classList.remove('open');
+    document.getElementById('sidebarOverlay').classList.remove('show');
+    return;
+  }
+  const isRoleButton = e.target && e.target.getAttribute && e.target.getAttribute('role') === 'button';
+  const isFormControl = e.target && e.target.closest && e.target.closest('، أ، الإدخال، منطقة النص، حدد');
+  if (isRoleButton || isFormControl) {
+    if (e.key === ' ' && isRoleButton) {
+      e.preventDefault();
+      e.target.click();
+    }
+    return;
+  }
+  if (e.key === 'ArrowLeft' || e.key === ' ') { e.preventDefault(); nextSlide(); }
+  else if (e.key === 'ArrowRight') { e.preventDefault(); prevSlide(); }
+});
+
+// Second keydown handler removed (first handler covers role="button" elements)
+
+// ===== TOUCH =====
+let touchStartX = 0;
+document.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
+document.addEventListener('touchend', (e) => {
+  const diff = touchStartX - e.changedTouches[0].screenX;
+  if (Math.abs(diff) > 50) { diff > 0 ? nextSlide() : prevSlide(); }
+}, { passive: true });
+
+// ===== INIT =====
+renderAll();
+</script>
+</body>
+</html>

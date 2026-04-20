@@ -1,0 +1,2050 @@
+HTML
+<html lang="fr">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>TruthCert Afrique : Quand les Chiffres Disent la Verite</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&amp;family=Source+Sans+Pro:wght@300;400;600;700&amp;display=swap" rel="stylesheet"/>
+<style>
+    :root {
+      --navy: #1E2761;
+      --deep-navy: #141B3D;
+      --gold: #D4AF37;
+      --cream: #FAF8F5;
+      --light-cream: #FFFFFF;
+      --text: #2D3748;
+      --light-text: #718096;
+      --red: #C53030;
+      --green: #22c55e;
+      --teal: #00D4AA;
+      --purple: #A855F7;
+      --orange: #F97316;
+      --transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      height: 100%;
+      font-family: 'Source Sans Pro', sans-serif;
+      background: var(--deep-navy);
+      color: var(--cream);
+    }
+
+    .course-container {
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 280px;
+      background: linear-gradient(180deg, var(--deep-navy) 0%, #0a0f1a 100%);
+      border-right: 1px solid rgba(212,175,55,0.2);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    /* mobile sidebar handled by hamburger toggle below */
+
+    .sidebar-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+    }
+
+    .sidebar-header h1 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--gold);
+      margin-bottom: 0.25rem;
+    }
+
+    .sidebar-header p {
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.6);
+    }
+
+    .module-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem 0;
+    }
+
+    .module-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      border-left: 3px solid transparent;
+    }
+
+    .module-item:hover { background: rgba(212,175,55,0.1); }
+    .module-item.active { background: rgba(212,175,55,0.15); border-left-color: var(--gold); }
+    .module-item.completed .module-number { background: var(--green); color: white; }
+
+    .module-number {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .module-item.active .module-number { background: var(--gold); color: var(--navy); }
+
+    .module-info { flex: 1; min-width: 0; }
+    .module-title { font-size: 0.85rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .module-subtitle { font-size: 0.7rem; color: rgba(255,255,255,0.7); }
+
+    .sidebar-footer {
+      padding: 1rem 1.5rem;
+      border-top: 1px solid rgba(212,175,55,0.2);
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.4);
+      line-height: 1.4;
+    }
+
+    /* Main Content */
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .content-header {
+      padding: 1rem 2rem;
+      background: rgba(0,0,0,0.3);
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .breadcrumb { font-size: 0.85rem; color: rgba(255,255,255,0.6); }
+    .breadcrumb span { color: var(--gold); }
+
+    .header-actions { display: flex; gap: 0.5rem; }
+
+    .btn {
+      padding: 0.5rem 1rem;
+      border: 1px solid rgba(212,175,55,0.3);
+      border-radius: 6px;
+      background: rgba(255,255,255,0.05);
+      color: var(--cream);
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn:hover { background: rgba(212,175,55,0.2); border-color: var(--gold); }
+    .btn.primary { background: var(--gold); color: var(--navy); border-color: var(--gold); font-weight: 600; }
+
+    .content-body { flex: 1; overflow: hidden; display: flex; }
+
+    /* Slides */
+    .slides-container { flex: 1; position: relative; overflow: hidden; }
+
+    .module-slides { display: none; width: 100%; height: 100%; }
+    .module-slides.active { display: block; }
+
+    .slide {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      padding: 2rem 2rem 4rem 2rem;
+      padding-top: 3rem;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity var(--transition), visibility var(--transition);
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .slide .content { margin-top: auto; margin-bottom: auto; }
+    .slide > * { max-width: 100%; word-wrap: break-word; }
+    .slide.active { opacity: 1; visibility: visible; }
+
+    .slide.dark { background: var(--deep-navy); color: var(--cream); }
+    .slide.light { background: var(--cream); color: var(--text); }
+    .slide.black { background: #000; color: var(--cream); }
+    .slide.gradient { background: linear-gradient(135deg, var(--deep-navy) 0%, #2a1a4a 100%); color: var(--cream); }
+    .slide.blood { background: linear-gradient(135deg, #1a0a0a 0%, #2d1515 100%); color: var(--cream); }
+    .slide.hope { background: linear-gradient(135deg, #0a1a0a 0%, #152d15 100%); color: var(--cream); }
+
+    /* Typography */
+    .serif { font-family: 'Cormorant Garamond', Georgia, serif; }
+
+    .title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(1.8rem, 5vw, 3.5rem);
+      font-weight: 700;
+      margin-bottom: 1rem;
+      line-height: 1.2;
+    }
+
+    .title.navy { color: var(--navy); }
+    .title.gold { color: var(--gold); }
+    .title.cream { color: var(--cream); }
+    .title.red { color: var(--red); }
+    .title.green { color: var(--green); }
+
+    .subtitle {
+      font-size: clamp(1rem, 2vw, 1.5rem);
+      color: var(--light-text);
+      margin-bottom: 2rem;
+    }
+
+    .slide.dark .subtitle { color: rgba(255,255,255,0.7); }
+
+    .big-number {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(4rem, 15vw, 10rem);
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .big-number.navy { color: var(--navy); }
+    .big-number.gold { color: var(--gold); }
+    .big-number.red { color: var(--red); }
+    .big-number.green { color: var(--green); }
+
+    /* Refrain */
+    .refrain {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(1.4rem, 4vw, 2.5rem);
+      font-style: italic;
+      color: var(--gold);
+      text-align: center;
+      max-width: 800px;
+      line-height: 1.4;
+    }
+
+    .refrain.warning {
+      color: var(--red);
+      border-left: 4px solid var(--red);
+      padding-left: 1.5rem;
+      text-align: left;
+    }
+
+    .refrain.hope { color: var(--green); }
+
+    /* Rhetorical */
+    .rhetorical {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(1.2rem, 3vw, 2rem);
+      color: rgba(255,255,255,0.9);
+      text-align: center;
+      max-width: 700px;
+      line-height: 1.5;
+    }
+
+    .rhetorical em { color: var(--gold); font-style: normal; }
+
+    /* Simple explanation box */
+    .simple-box {
+      background: linear-gradient(135deg, rgba(0,212,170,0.1), rgba(0,0,0,0.2));
+      border: 2px solid var(--teal);
+      border-radius: 12px;
+      padding: 1.5rem;
+      max-width: 600px;
+      margin: 1rem 0;
+    }
+
+    .simple-box .simple-title {
+      color: var(--teal);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.75rem;
+    }
+
+    .simple-box .simple-text {
+      font-size: 1.1rem;
+      line-height: 1.6;
+    }
+
+    .simple-box .simple-text strong { color: var(--gold); }
+
+    /* Story card */
+    .story-card {
+      background: rgba(0,0,0,0.3);
+      border-left: 4px solid var(--gold);
+      padding: 1.5rem 2rem;
+      max-width: 700px;
+      margin: 1rem 0;
+    }
+
+    .story-card .place {
+      font-size: 0.75rem;
+      color: var(--gold);
+      letter-spacing: 0.1em;
+      margin-bottom: 0.5rem;
+    }
+
+    .story-card .narrative {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      line-height: 1.6;
+      color: rgba(255,255,255,0.9);
+    }
+
+    .story-card .source {
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.5);
+      margin-top: 1rem;
+      font-style: italic;
+    }
+
+    /* Example output */
+    .example-output {
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 8px;
+      padding: 1.5rem;
+      max-width: 650px;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 0.8rem;
+      text-align: left;
+    }
+
+    .example-output .output-header {
+      color: var(--teal);
+      font-weight: 700;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid #30363d;
+    }
+
+    .example-output .output-line {
+      margin: 0.3rem 0;
+      color: rgba(255,255,255,0.8);
+    }
+
+    .example-output .output-key { color: var(--purple); }
+    .example-output .output-value { color: var(--gold); }
+    .example-output .output-stable { color: var(--green); font-weight: 700; }
+    .example-output .output-uncertain { color: var(--red); font-weight: 700; }
+    .example-output .output-comment { color: rgba(255,255,255,0.4); }
+
+    /* Cards */
+    .card {
+      background: var(--light-cream);
+      border: 1px solid var(--gold);
+      padding: 1.5rem 2rem;
+      margin: 0.75rem 0;
+      max-width: 800px;
+      width: 100%;
+    }
+
+    .card.navy-bg { background: var(--navy); color: var(--cream); }
+    .card.dark-bg { background: rgba(0,0,0,0.4); color: var(--cream); border-color: rgba(212,175,55,0.3); }
+    .card.teal-border { border: 2px solid var(--teal); }
+    .card.red-border { border: 2px solid var(--red); }
+    .card.green-border { border: 2px solid var(--green); }
+
+    .card-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+    }
+
+    .card-text { font-size: clamp(0.9rem, 1.8vw, 1.1rem); line-height: 1.6; }
+    .card.navy-bg .card-text { color: var(--cream); }
+
+    /* Stats */
+    .stats-grid {
+      display: flex;
+      gap: 1rem;
+      margin: 1.5rem 0;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .stat-box {
+      background: var(--navy);
+      color: var(--cream);
+      padding: 1rem 1.5rem;
+      text-align: center;
+      min-width: 130px;
+    }
+
+    .stat-value {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(1.4rem, 3vw, 2rem);
+      font-weight: 700;
+    }
+
+    .stat-label { font-size: 0.7rem; opacity: 0.8; margin-top: 0.25rem; }
+
+    /* Death toll */
+    .death-toll {
+      background: linear-gradient(135deg, rgba(197,48,48,0.3), rgba(0,0,0,0.5));
+      border: 2px solid var(--red);
+      padding: 2rem;
+      text-align: center;
+      max-width: 400px;
+    }
+
+    .death-toll .number {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 4rem;
+      font-weight: 700;
+      color: var(--red);
+    }
+
+    .death-toll .label {
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.8);
+      margin-top: 0.5rem;
+    }
+
+    /* Country grid */
+    .country-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.6rem;
+      max-width: 700px;
+      width: 100%;
+    }
+
+    @media (max-width: 768px) { .country-grid { grid-template-columns: repeat(2, 1fr); } }
+
+    .country-item {
+      background: rgba(255,255,255,0.1);
+      border-left: 3px solid var(--gold);
+      padding: 0.6rem;
+      text-align: center;
+      transition: all 0.2s;
+    }
+
+    .country-item:hover { background: rgba(212,175,55,0.2); }
+
+    .country-code {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--gold);
+    }
+
+    .country-name { font-size: 0.65rem; opacity: 0.8; }
+    .country-stat { font-size: 0.6rem; color: var(--teal); margin-top: 0.2rem; }
+
+    /* Lesson items */
+    .lesson-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      margin: 0.6rem 0;
+      max-width: 800px;
+      text-align: left;
+    }
+
+    .lesson-number {
+      background: var(--gold);
+      color: var(--navy);
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      flex-shrink: 0;
+      border-radius: 4px;
+    }
+
+    .lesson-content h4 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--cream);
+      margin-bottom: 0.2rem;
+    }
+
+    .lesson-content p { font-size: 0.85rem; color: rgba(255,255,255,0.7); }
+
+    /* Criteria table */
+    .criteria-table {
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(212,175,55,0.3);
+      border-radius: 8px;
+      overflow: hidden;
+      max-width: 700px;
+      width: 100%;
+      font-size: 0.85rem;
+    }
+
+    .criteria-row {
+      display: grid;
+      grid-template-columns: 100px 1fr 1fr;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .criteria-row:last-child { border-bottom: none; }
+
+    .criteria-row.header {
+      background: var(--navy);
+      font-weight: 700;
+      font-size: 0.75rem;
+    }
+
+    .criteria-cell {
+      padding: 0.75rem;
+      border-right: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .criteria-cell:last-child { border-right: none; }
+
+    .criteria-cell.grade-stable { background: rgba(34,197,94,0.2); color: var(--green); font-weight: 700; }
+    .criteria-cell.grade-moderate { background: rgba(212,175,55,0.2); color: var(--gold); font-weight: 700; }
+    .criteria-cell.grade-exposed { background: rgba(249,115,22,0.2); color: var(--orange); font-weight: 700; }
+    .criteria-cell.grade-uncertain { background: rgba(197,48,48,0.2); color: var(--red); font-weight: 700; }
+
+    /* Workflow steps */
+    .workflow-container {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      max-width: 650px;
+      width: 100%;
+    }
+
+    .workflow-step {
+      display: flex;
+      gap: 1rem;
+      background: rgba(255,255,255,0.05);
+      padding: 1rem;
+      border-radius: 8px;
+      border-left: 4px solid var(--gold);
+    }
+
+    .workflow-step .step-num {
+      background: var(--gold);
+      color: var(--navy);
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .workflow-step .step-content { flex: 1; }
+    .workflow-step .step-content h4 { font-size: 0.95rem; margin-bottom: 0.25rem; color: var(--gold); }
+    .workflow-step .step-content p { font-size: 0.8rem; opacity: 0.8; }
+    .workflow-step .step-content code {
+      background: rgba(0,0,0,0.3);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+    }
+
+    /* Decision matrix */
+    .decision-matrix {
+      background: rgba(0,0,0,0.3);
+      border: 2px solid var(--gold);
+      border-radius: 12px;
+      padding: 1.5rem;
+      max-width: 600px;
+    }
+
+    .decision-matrix h4 {
+      color: var(--gold);
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+
+    .decision-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .decision-row:last-child { border-bottom: none; }
+
+    .decision-grade {
+      width: 100px;
+      padding: 0.5rem;
+      border-radius: 6px;
+      text-align: center;
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+
+    .decision-grade.stable { background: var(--green); color: white; }
+    .decision-grade.moderate { background: var(--gold); color: var(--navy); }
+    .decision-grade.exposed { background: var(--orange); color: white; }
+    .decision-grade.uncertain { background: var(--red); color: white; }
+
+    .decision-action { flex: 1; font-size: 0.9rem; }
+
+    /* Gold line */
+    .gold-line { width: 150px; height: 2px; background: var(--gold); margin: 1.5rem auto; }
+
+    /* Content wrapper */
+    .content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: 1000px;
+    }
+
+    /* Animation */
+    .slide.active .animate { animation: fadeUp 0.6s ease-out forwards; }
+    .slide.active .animate.delay-1 { animation-delay: 0.1s; }
+    .slide.active .animate.delay-2 { animation-delay: 0.2s; }
+    .slide.active .animate.delay-3 { animation-delay: 0.3s; }
+    .slide.active .animate.delay-4 { animation-delay: 0.4s; }
+    .slide.active .animate.delay-5 { animation-delay: 0.5s; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate { opacity: 0; }
+
+    /* Slide Nav */
+    .slide-nav {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      padding: 1rem 1rem 1.5rem 1rem;
+      z-index: 100;
+      pointer-events: none;
+    }
+
+    .nav-btn {
+      background: rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: white;
+      font-size: 1.25rem;
+      cursor: pointer;
+      opacity: 0.6;
+      transition: all 0.2s;
+      padding: 0.5rem 0.75rem;
+      border-radius: 8px;
+      pointer-events: auto;
+    }
+
+    .nav-btn:hover { opacity: 1; background: rgba(0,0,0,0.7); border-color: var(--gold); }
+    .nav-btn:disabled { opacity: 0.2; cursor: not-allowed; }
+
+    .nav-center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.25rem;
+      pointer-events: auto;
+    }
+
+    .slide-counter { color: rgba(255,255,255,0.6); font-size: 0.85rem; min-width: 50px; text-align: center; }
+    .progress { display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; max-width: 200px; }
+
+    .progress-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.25);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .progress-dot.active { background: var(--gold); transform: scale(1.3); }
+    .progress-dot:hover { background: rgba(255,255,255,0.6); }
+
+    /* Certainty badges */
+    .certainty-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.75rem;
+      max-width: 700px;
+    }
+
+    @media (max-width: 600px) { .certainty-grid { grid-template-columns: 1fr; } }
+
+    .certainty-badge {
+      padding: 1rem;
+      text-align: center;
+      border-radius: 8px;
+    }
+
+    .certainty-badge.stable { background: linear-gradient(135deg, rgba(34,197,94,0.3), rgba(34,197,94,0.1)); border: 2px solid var(--green); }
+    .certainty-badge.moderate { background: linear-gradient(135deg, rgba(212,175,55,0.3), rgba(212,175,55,0.1)); border: 2px solid var(--gold); }
+    .certainty-badge.exposed { background: linear-gradient(135deg, rgba(249,115,22,0.3), rgba(249,115,22,0.1)); border: 2px solid var(--orange); }
+    .certainty-badge.uncertain { background: linear-gradient(135deg, rgba(197,48,48,0.3), rgba(197,48,48,0.1)); border: 2px solid var(--red); }
+
+    .certainty-badge h4 { font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; margin-bottom: 0.4rem; }
+    .certainty-badge p { font-size: 0.7rem; opacity: 0.9; }
+
+    /* Principle box */
+    .principle-box {
+      background: linear-gradient(135deg, rgba(212,175,55,0.15), rgba(0,0,0,0.2));
+      border: 2px solid var(--gold);
+      padding: 1.5rem 2rem;
+      max-width: 600px;
+      text-align: center;
+    }
+
+    .principle-box .icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+    .principle-box h3 { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; color: var(--gold); margin-bottom: 0.5rem; }
+    .principle-box p { font-size: 0.9rem; opacity: 0.9; line-height: 1.5; }
+
+    /* Quiz */
+    .quiz-container {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(212,175,55,0.3);
+      padding: 1.5rem;
+      max-width: 700px;
+      width: 100%;
+      border-radius: 8px;
+    }
+
+    .quiz-question {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+      color: var(--gold);
+      line-height: 1.4;
+    }
+
+    .quiz-options { display: flex; flex-direction: column; gap: 0.5rem; }
+
+    .quiz-option {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: left;
+      border-radius: 6px;
+      font-size: 0.9rem;
+    }
+
+    .quiz-option:hover { background: rgba(212,175,55,0.1); border-color: var(--gold); }
+    .quiz-option.correct { background: rgba(34,197,94,0.2); border-color: var(--green); }
+    .quiz-option.incorrect { background: rgba(197,48,48,0.2); border-color: var(--red); }
+
+    .quiz-feedback {
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: 8px;
+      display: none;
+      font-size: 0.9rem;
+    }
+
+    .quiz-feedback.show { display: block; }
+    .quiz-feedback.correct { background: rgba(34,197,94,0.2); border: 1px solid var(--green); }
+    .quiz-feedback.incorrect { background: rgba(197,48,48,0.2); border: 1px solid var(--red); }
+
+    /* References */
+    .references {
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(212,175,55,0.3);
+      border-radius: 8px;
+      padding: 1.5rem;
+      max-width: 700px;
+      text-align: left;
+      font-size: 0.75rem;
+      line-height: 1.8;
+    }
+
+    .references h4 {
+      color: var(--gold);
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+    }
+
+    .references ol { padding-left: 1.5rem; }
+    .references li { margin-bottom: 0.5rem; color: rgba(255,255,255,0.8); }
+    .references .journal { font-style: italic; }
+
+    /* Sustainability */
+    .sustainability-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      max-width: 700px;
+    }
+
+    @media (max-width: 600px) { .sustainability-grid { grid-template-columns: 1fr; } }
+
+    .sustainability-item {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(212,175,55,0.3);
+      border-radius: 8px;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    .sustainability-item .sus-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+    .sustainability-item h4 { color: var(--gold); font-size: 0.9rem; margin-bottom: 0.5rem; }
+    .sustainability-item p { font-size: 0.75rem; opacity: 0.8; }
+
+    /* Limitations */
+    .limitation-item {
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+      margin: 0.5rem 0;
+      max-width: 600px;
+      text-align: left;
+    }
+
+    .limitation-icon {
+      color: var(--orange);
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    .limitation-text { font-size: 0.9rem; line-height: 1.5; }
+
+    .text-center { text-align: center; }
+    .mb-1 { margin-bottom: 1rem; }
+    .mb-2 { margin-bottom: 2rem; }
+    .mt-1 { margin-top: 1rem; }
+    .mt-2 { margin-top: 2rem; }
+    .skip-link:focus { top: 0; }
+    .mobile-menu-toggle{display:none;position:fixed;top:12px;left:12px;z-index:1001;background:#1E2761;border:1px solid #D4AF37;color:#D4AF37;width:40px;height:40px;border-radius:8px;font-size:1.2rem;cursor:pointer;align-items:center;justify-content:center;}
+    @media(max-width:768px){.mobile-menu-toggle{display:flex;}.sidebar{transform:translateX(-100%);transition:transform 0.3s ease;position:fixed;z-index:1000;height:100vh;}.sidebar.open{transform:translateX(0);}.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:999;}.sidebar-overlay.show{display:block;}}
+
+    /* Focus-visible styles for keyboard navigation */
+    :focus-visible {
+      outline: 2px solid var(--gold, #D4AF37);
+      outline-offset: 2px;
+    }
+
+    :focus:not(:focus-visible) {
+      outline: none;
+    }
+
+    button:focus-visible,
+    a:focus-visible,
+    [role="button"]:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible {
+      outline: 2px solid var(--gold, #D4AF37);
+      outline-offset: 2px;
+      box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.3);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+<body>
+<a class="skip-link" href="#main-content" style="position:absolute;top:-40px;left:0;background:#D4AF37;color:#1E2761;padding:8px 16px;z-index:100;transition:top 0.3s;">Passer au contenu principal</a>
+<button aria-expanded="false" aria-label="Toggle navigation menu" class="mobile-menu-toggle" onclick="toggleSidebar()">☰</button>
+<div class="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show');"></div>
+<div class="course-container">
+<!-- Sidebar -->
+<nav aria-label="Navigation du cours" class="sidebar" role="navigation">
+<div class="sidebar-header">
+<a href="index.html" onmouseout="this.style.color='rgba(212,175,55,0.7)'" onmouseover="this.style.color='#D4AF37'" style="display:block;font-size:0.7rem;color:rgba(212,175,55,0.7);text-decoration:none;margin-bottom:0.5rem;">← Bibliothèque de cours</a>
+<h1>TruthCert Afrique</h1>
+<p>Quand les Chiffres Disent la Verite</p>
+</div>
+<div class="module-list" id="moduleList"></div>
+<div class="sidebar-footer">
+        "Un chiffre sans preuve est une promesse sans temoin."
+        <br/><br/>
+        Code source ouvert | Hors ligne | Mobile
+      </div>
+</nav>
+<!-- Main Content -->
+<main class="main-content" id="main-content">
+<header class="content-header">
+<div class="breadcrumb">
+          Certificat de vérité &gt; <span id="currentModule">L'Avertissement</span>
+</div>
+<div class="header-actions">
+<button class="btn" onclick="goToModule(9)">Références</button>
+<button class="btn primary" onclick="nextSlide()">Continuer</button>
+</div>
+</header>
+<div class="content-body">
+<div class="slides-container">
+<!-- ==================== MODULE 1: L'AVERTISSEMENT ==================== -->
+<div class="module-slides active" data-module="1">
+<!-- Slide 1.1: Ouverture -->
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  N'avez-vous pas entendu l'histoire des medecins<br/>
+                  qui, <em>certains de leur remede</em>,<br/>
+                  ont tue plus de patients que la maladie elle-meme ?
+                </div>
+</div>
+</div>
+<!-- Slide 1.2: L'histoire CAST -->
+<div class="slide blood">
+<div class="content text-center">
+<div class="title gold animate">L'Annee Etait 1989</div>
+<div class="story-card animate delay-1">
+<div class="place">ETATS-UNIS</div>
+<div class="narrative">
+                    Chaque cardiologue en Amerique connaissait la logique : les battements cardiaques
+                    irreguliers apres une crise cardiaque etaient dangereux. Les medicaments qui
+                    supprimaient ces arythmies sauveraient surement des vies.
+                    <br/><br/>
+                    Le raisonnement etait solide. Le mecanisme etait clair. Les medicaments etaient
+                    prescrits a <strong>200 000 Americains</strong> chaque annee.
+                    <br/><br/>
+                    Personne n'a exige de preuves. La logique suffisait.
+                  </div>
+<div class="source">EchtDS et al. NEJM 1991 ; Moore TJ. Médecine mortelle, 1995</div>
+</div>
+</div>
+</div>
+<!-- Slide 1.3: Le Bilan -->
+<div class="slide black">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  Et puis vint l'essai clinique appele <em>CASTING</em>...
+                </div>
+<div class="death-toll animate delay-2">
+<div class="number">50 000</div>
+<div class="label">Americains tues par "le remede" chaque annee</div>
+</div>
+<div class="simple-box animate delay-3">
+<div class="simple-title">EN TERMES SIMPLES</div>
+<div class="simple-text">
+                    Les medecins ont donne un medicament qui <strong>semblait logique</strong> mais
+                    qui n'avait <strong>jamais ete teste correctement</strong>.
+                    Ce medicament a tue plus de personnes que la guerre du Vietnam. Chaque annee.
+                  </div>
+</div>
+</div>
+</div>
+<!-- Slide 1.4: Le Refrain -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  "Et les chiffres etaient nus—<br/>
+                  sans temoin, sans preuve, sans certification.<br/>
+                  Et le peuple a peri."
+                </div>
+<div class="gold-line animate delay-2"></div>
+<p class="animate delay-3" style="color:rgba(255,255,255,0.6);font-style:italic;">
+                  C'est pourquoi TruthCert existe.
+                </p>
+</div>
+</div>
+<!-- Slide 1.5: La Question -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  Pensez-vous que de telles catastrophes n'arrivent qu'en Amerique ?
+                  <br/><br/>
+<em>Considerez l'Afrique.</em>
+</div>
+</div>
+</div>
+<!-- Slide 1.6: Le Defi de l'Afrique -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Le Fardeau des Preuves Empruntees</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box">
+<div class="stat-value" style="color:var(--red);">90%</div>
+<div class="stat-label">des essais cliniques<br/>hors d'Afrique</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--gold);">13%</div>
+<div class="stat-label">du fardeau mondial<br/>de maladie en Afrique</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--teal);">&lt;2%</div>
+<div class="stat-label">du financement mondial<br/>de recherche en sante</div>
+</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">EN TERMES SIMPLES</div>
+<div class="simple-text">
+                    L'Afrique a <strong>beaucoup de malades</strong> mais <strong>tres peu d'etudes</strong>
+                    sur comment les traiter. Les medecins doivent utiliser des traitements testes sur
+                    des gens d'autres pays.
+                    <strong>Mais ce qui marche a Londres peut ne pas marcher a Lagos.</strong>
+</div>
+</div>
+</div>
+</div>
+</div>
+ ==================== MODULE 2 : LES TERRES =============== 
+<div class="module-slides" data-module="2">
+<!-- Slide 2.1: Les Treize -->
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  N'avez-vous pas vu les treize nations<br/>
+                  ou <em>les meres meurent en donnant la vie</em>,<br/>
+                  ou <em>les enfants succombent a la fievre</em>,<br/>
+                  ou <em>les decisions sont prises dans l'obscurite</em> ?
+                </div>
+</div>
+</div>
+<!-- Slide 2.2: Les Pays -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Treize Nations</div>
+<div class="subtitle animate delay-1">Deces maternels pour 100 000 naissances vivantes (OMS 2020)</div>
+<div class="country-grid animate delay-2">
+<div class="country-item"><div class="country-code">NGA</div><div class="country-name">Nigeria</div><div class="country-stat">917</div></div>
+<div class="country-item"><div class="country-code">GHA</div><div class="country-name">Ghana</div><div class="country-stat">308</div></div>
+<div class="country-item"><div class="country-code">KEN</div><div class="country-name">Kenya</div><div class="country-stat">342</div></div>
+<div class="country-item"><div class="country-code">TZA</div><div class="country-name">Tanzanie</div><div class="country-stat">524</div></div>
+<div class="country-item"><div class="country-code">UGA</div><div class="country-name">Ouganda</div><div class="country-stat">284</div></div>
+<div class="country-item"><div class="country-code">ZAF</div><div class="country-name">Afrique du Sud</div><div class="country-stat">127</div></div>
+<div class="country-item"><div class="country-code">SLE</div><div class="country-name">Sierra Leone</div><div class="country-stat">1 120</div></div>
+<div class="country-item"><div class="country-code">LBR</div><div class="country-name">Libéria</div><div class="country-stat">652</div></div>
+<div class="country-item"><div class="country-code">CIV</div><div class="country-name">Cote d'Ivoire</div><div class="country-stat">617</div></div>
+<div class="country-item"><div class="country-code">BEN</div><div class="country-name">Bénin</div><div class="country-stat">523</div></div>
+<div class="country-item"><div class="country-code">BFA</div><div class="country-name">Burkina Faso</div><div class="country-stat">320</div></div>
+<div class="country-item"><div class="country-code">GMB</div><div class="country-name">Gambie</div><div class="country-stat">458</div></div>
+<div class="country-item"><div class="country-code">SWZ</div><div class="country-name">Eswatini</div><div class="country-stat">240</div></div>
+</div>
+<p class="animate delay-3" style="font-size:0.7rem;color:rgba(255,255,255,0.5);margin-top:0.75rem;">
+                  Comparaison : Royaume-Uni = 10, USA = 21, Suede = 4
+                </p>
+</div>
+</div>
+<!-- Slide 2.3: Sierra Leone -->
+<div class="slide blood">
+<div class="content text-center">
+<div class="story-card animate">
+<div class="place">SIERRA LEONE</div>
+<div class="narrative">
+                    A Freetown, une femme qui accouche a <strong>112 fois plus de chances de mourir</strong>
+                    qu'une femme a Londres.
+                    <br/><br/>
+                    La ministre de la Sante doit decider : Quelles interventions meritent le budget limite ?
+                    Quels traitements sauveront le plus de meres ?
+                    <br/><br/>
+                    Elle a des etudes d'Europe. Elle a des modeles d'Amerique.
+                    <br/><br/>
+<em>Mais a-t-elle des preuves qui s'appliquent a son peuple ?</em>
+</div>
+<div class="source">Rapport OMS sur la Mortalite Maternelle, 2023</div>
+</div>
+</div>
+</div>
+<!-- Slide 2.4: Les Sept Afflictions -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Sept Groupes de Maladies</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box" style="background:var(--red);">
+<div class="stat-value" style="color:white;font-size:1.3rem;">VIH</div>
+<div class="stat-label" style="color:rgba(255,255,255,0.9);">25,6M en Afrique</div>
+</div>
+<div class="stat-box" style="background:#8B4513;">
+<div class="stat-value" style="color:white;font-size:1.3rem;">PAL</div>
+<div class="stat-label" style="color:rgba(255,255,255,0.9);">95% des deces</div>
+</div>
+<div class="stat-box" style="background:var(--purple);">
+<div class="stat-value" style="color:white;font-size:1.3rem;">SME</div>
+<div class="stat-label" style="color:rgba(255,255,255,0.9);">Sante Mere-Enfant</div>
+</div>
+<div class="stat-box" style="background:var(--teal);">
+<div class="stat-value" style="color:var(--navy);font-size:1.3rem;">MNT</div>
+<div class="stat-label" style="color:var(--navy);">Maladies Chroniques</div>
+</div>
+</div>
+<div class="stats-grid animate delay-2">
+<div class="stat-box" style="background:#DC143C;">
+<div class="stat-value" style="color:white;font-size:1.3rem;">MCV</div>
+<div class="stat-label" style="color:rgba(255,255,255,0.9);">Maladies Cardiaques</div>
+</div>
+<div class="stat-box" style="background:#556B2F;">
+<div class="stat-value" style="color:white;font-size:1.3rem;">MTN</div>
+<div class="stat-label" style="color:rgba(255,255,255,0.9);">Maladies Tropicales</div>
+</div>
+<div class="stat-box" style="background:var(--gold);">
+<div class="stat-value" style="color:var(--navy);font-size:1.3rem;">SSS</div>
+<div class="stat-label" style="color:var(--navy);">Systemes de Sante</div>
+</div>
+</div>
+<p class="animate delay-3" style="margin-top:1rem;color:rgba(255,255,255,0.7);">
+                  13 pays x 7 groupes de maladies = <strong style="color:var(--gold);">91 packs de configuration</strong>
+</p>
+</div>
+</div>
+<!-- Slide 2.5: Le Refrain -->
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  "Et ils ont pris les preuves de loin,<br/>
+                  sans tester si elles convenaient a leur terre,<br/>
+                  sans certifier si elles convenaient a leur peuple.<br/>
+                  Et les chiffres etaient nus."
+                </div>
+</div>
+</div>
+</div>
+<!-- ==================== MODULE 3: LA SOLUTION ==================== -->
+<div class="module-slides" data-module="3">
+<!-- Slide 3.1: Et si -->
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  Mais et si chaque chiffre devait montrer son visage ?
+                  <br/><br/>
+                  Et si chaque statistique devait nommer son temoin ?
+                  <br/><br/>
+<em>Et si les chiffres nus etaient interdits ?</em>
+</div>
+</div>
+</div>
+<!-- Slide 3.2: TruthCert -->
+<div class="slide gradient">
+<div class="content text-center">
+<div class="title gold animate">VéritéCert</div>
+<div class="subtitle animate delay-1">Habiller les chiffres nus</div>
+<div class="principle-box animate delay-2">
+<div class="icon">🔒</div>
+<h3>La Regle Fondamentale</h3>
+<p>
+<strong>Aucun chiffre ne sera montre aux decideurs</strong><br/>
+                    sans qu'il porte la preuve de son origine,<br/>
+                    la preuve de sa transformation,<br/>
+                    et la preuve de sa validite pour ce contexte.
+                  </p>
+</div>
+<div class="simple-box animate delay-3">
+<div class="simple-title">EN TERMES SIMPLES</div>
+<div class="simple-text">
+                    Chaque chiffre doit repondre : <strong>"D'ou viens-tu ?"</strong> et <strong>"Puis-je te faire confiance ici ?"</strong>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 3.3: Ce que Preuve Signifie -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Qu'est-ce qu'une Preuve ?</div>
+<div class="lesson-item animate delay-1">
+<div class="lesson-number">1</div>
+<div class="lesson-content">
+<h4>Localisateur de Preuve</h4>
+<p>L'etude exacte, la base de donnees ou la source d'ou vient ce chiffre</p>
+</div>
+</div>
+<div class="lesson-item animate delay-2">
+<div class="lesson-number">2</div>
+<div class="lesson-content">
+<h4>Empreinte Numerique (Hash)</h4>
+<p>Une signature prouvant que les donnees n'ont pas ete modifiees</p>
+</div>
+</div>
+<div class="lesson-item animate delay-3">
+<div class="lesson-number">3</div>
+<div class="lesson-content">
+<h4>Trace de Transformation</h4>
+<p>Chaque etape de calcul des donnees brutes au chiffre final</p>
+</div>
+</div>
+<div class="lesson-item animate delay-4">
+<div class="lesson-number">4</div>
+<div class="lesson-content">
+<h4>Statut de Validation</h4>
+<p>Les verifications automatiques ont-elles reussi ? Quels etaient les avertissements ?</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 3.4: Exemple de Sortie -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">A Quoi Ressemble une Sortie TruthCert</div>
+<div class="example-output animate delay-1">
+<div class="output-header">AFFIRMATION CERTIFIEE TRUTHCERT</div>
+<div class="output-line"><span class="output-key">affirmation:</span> <span class="output-value">"Le misoprostol reduit l'HPP de 24%"</span></div>
+<div class="output-line"><span class="output-key">grade:</span> <span class="output-stable">ÉCURIE</span></div>
+<div class="output-line"><span class="output-key">contexte:</span> <span class="output-value">NGA (Nigeria)</span></div>
+<div class="output-line"><span class="output-key">etudes_africaines:</span> <span class="output-value">k = 6</span> <span class="output-comment"># atteint le seuil GO</span></div>
+<div class="output-line"><span class="output-key">taille_effet:</span> <span class="output-value">RR 0,76 [IC 95%: 0,68-0,84]</span></div>
+<div class="output-line"><span class="output-key">localisateur:</span> <span class="output-value">doi:10.1016/S0140-6736(10)60348-7</span></div>
+<div class="output-line"><span class="output-key">hacher:</span> <span class="output-value">sha256:a3f2c9...</span></div>
+<div class="output-line"><span class="output-key">cout_par_dose:</span> <span class="output-value">XOF 270</span> <span class="output-comment"># monnaie locale</span></div>
+<div class="output-line"><span class="output-key">glacer :</span> <span class="output-value">XOF 7 400 par AVCI evitee</span></div>
+<div class="output-line"><span class="output-key">valide:</span> <span class="output-stable">REUSSI</span> <span class="output-comment"># toutes verifications passees</span></div>
+</div>
+</div>
+</div>
+<!-- Slide 3.5: Les Quatre Grades -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Quatre Niveaux de Certitude</div>
+<div class="certainty-grid animate delay-1">
+<div class="certainty-badge stable">
+<h4>ÉCURIE</h4>
+<p>Preuves solides. Procedez avec confiance.</p>
+</div>
+<div class="certainty-badge moderate">
+<h4>MODERE</h4>
+<p>Bonnes preuves avec lacunes. Indiquez l'incertitude.</p>
+</div>
+<div class="certainty-badge exposed">
+<h4>EXPOSE</h4>
+<p>Incertitude structurelle. Scenarios seulement.</p>
+</div>
+<div class="certainty-badge uncertain">
+<h4>INCERTAIN</h4>
+<p>Refusez la fausse precision. Bornes seulement.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 3.6: Criteres de Grade -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Comment les Grades Sont Attribues</div>
+<div class="criteria-table animate delay-1">
+<div class="criteria-row header">
+<div class="criteria-cell">Grade</div>
+<div class="criteria-cell">Etudes Africaines (k)</div>
+<div class="criteria-cell">Ce Que Vous Pouvez Faire</div>
+</div>
+<div class="criteria-row">
+<div class="criteria-cell grade-stable">ÉCURIE</div>
+<div class="criteria-cell">k &gt;= 4 avec faible heterogeneite (I² &lt; 50%)</div>
+<div class="criteria-cell">ETS complet, ASP, VDI, estimations ponctuelles</div>
+</div>
+<div class="criteria-row">
+<div class="criteria-cell grade-moderate">MODERE</div>
+<div class="criteria-cell">k &gt;= 4 avec forte heterogeneite, OU k = 2-3</div>
+<div class="criteria-cell">ETS complet avec IC elargis, souligner l'incertitude</div>
+</div>
+<div class="criteria-row">
+<div class="criteria-cell grade-exposed">EXPOSE</div>
+<div class="criteria-cell">k = 1, OU problemes de transferabilite</div>
+<div class="criteria-cell">Analyse de scenarios uniquement, pas d'estimations</div>
+</div>
+<div class="criteria-row">
+<div class="criteria-cell grade-uncertain">INCERTAIN</div>
+<div class="criteria-cell">k = 0, OU preuves de memoire/non verifiees</div>
+<div class="criteria-cell">Bornes uniquement, pire cas, valeur de recherche</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 3.7: L'Interdit -->
+<div class="slide blood">
+<div class="content text-center">
+<div class="title red animate">Ce Qui Est Interdit</div>
+<div class="card dark-bg red-border animate delay-1">
+<div class="card-label" style="color:var(--red);">FUITE DE MEMOIRE = BLOCAGE</div>
+<div class="card-text">
+                    Si quelqu'un dit "Je me souviens que la statistique etait environ 30%"—<br/>
+                    cela <strong>ne peut pas</strong> etre certifie.
+                    <br/><br/>
+                    La memoire n'est pas une preuve. Le souvenir n'est pas une preuve.
+                  </div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">EN TERMES SIMPLES</div>
+<div class="simple-text">
+                    Vous ne pouvez pas dire <strong>"Je crois avoir entendu..."</strong> ou <strong>"Quelqu'un m'a dit..."</strong>
+                    Vous devez montrer <strong>exactement d'ou</strong> vient le chiffre.
+                  </div>
+</div>
+</div>
+</div>
+</div>
+<!-- ==================== MODULE 4: LA METHODE ==================== -->
+<div class="module-slides" data-module="4">
+ Diapositive 4.1 : La Question de la Valeur 
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  Quand un gouvernement n'a que <em>50 $ par personne par an</em> pour la sante,
+                  <br/><br/>
+                  comment decidez-vous quels traitements financer ?
+                </div>
+</div>
+</div>
+<!-- Slide 4.2: ETS -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Evaluation des Technologies de Sante</div>
+<div class="simple-box animate delay-1">
+<div class="simple-title">LA QUESTION CENTRALE</div>
+<div class="simple-text">
+                    Pour chaque <strong>Franc CFA, Cedi ou Shilling</strong> depense,
+                    combien de <strong>sante</strong> gagnons-nous ?
+                    Et qu'aurions-nous pu faire <strong>d'autre</strong> avec cet argent ?
+                  </div>
+</div>
+</div>
+</div>
+<!-- Slide 4.3: Le Piege du PIB -->
+<div class="slide blood">
+<div class="content text-center">
+<div class="title red animate">Le Piege du Seuil</div>
+<div class="story-card animate delay-1">
+<div class="place">UN AVERTISSEMENT DE L'HISTOIRE</div>
+<div class="narrative">
+                    Pendant des annees, les economistes disaient : "C'est rentable si ca coute moins de 3x le PIB par habitant."
+                    <br/><br/>
+                    Selon cette logique, un traitement a 3 000 $ serait "justifie" en Amerique (PIB 76 000 $)
+                    mais "pas justifie" en Sierra Leone (PIB 500 $).
+                    <br/><br/>
+<strong>Le meme traitement. Le meme benefice. Des verdicts differents selon le lieu de naissance.</strong>
+</div>
+<div class="source">Woods B et coll. Lancet Santé mondiale 2016 ; Revill P et coll. Plan de politique de santé 2018</div>
+</div>
+</div>
+</div>
+<!-- Slide 4.4: Une Meilleure Approche -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Une Meilleure Approche</div>
+<div class="lesson-item animate delay-1">
+<div class="lesson-number" style="background:var(--teal);">A</div>
+<div class="lesson-content">
+<h4>Analyse d'Accessibilite</h4>
+<p>Le systeme de sante peut-il vraiment payer ? Qu'est-ce qui sera coupe ?</p>
+</div>
+</div>
+<div class="lesson-item animate delay-2">
+<div class="lesson-number" style="background:var(--gold);">B</div>
+<div class="lesson-content">
+<h4>Benefice Net de Sante</h4>
+<p>Sante gagnee moins sante perdue en detournant les ressources</p>
+</div>
+</div>
+<div class="lesson-item animate delay-3">
+<div class="lesson-number" style="background:var(--purple);">V</div>
+<div class="lesson-content">
+<h4>Valeur de l'Information</h4>
+<p>Vaut-il la peine de faire plus de recherche avant de decider ?</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 4.5: Monnaie Locale -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Monnaie Locale. Toujours.</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box">
+<div class="stat-value" style="color:var(--gold);">XOF</div>
+<div class="stat-label">Franc CFA (UEMOA)</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--teal);">GHS</div>
+<div class="stat-label">Cedi Ghaneen</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--purple);">KES</div>
+<div class="stat-label">Shilling Kenyan</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--gold);">NGN</div>
+<div class="stat-label">Naira Nigerian</div>
+</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">POURQUOI C'EST IMPORTANT</div>
+<div class="simple-text">
+                    Un ministre a Dakar budgetise en <strong>Francs CFA</strong>.
+                    Il ne devrait pas avoir a convertir depuis les dollars.
+                    <strong>Son budget, sa monnaie, sa decision.</strong>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 4.6: Le Refrain -->
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain hope animate">
+                  "Et quand les chiffres furent habilles de preuves,<br/>
+                  quand chaque affirmation montra sa source,<br/>
+                  quand la monnaie correspondait a la terre—<br/>
+                  alors les decideurs purent voir clairement."
+                </div>
+</div>
+</div>
+</div>
+<!-- ==================== MODULE 5: LA DISCIPLINE ==================== -->
+<div class="module-slides" data-module="5">
+<!-- Slide 5.1: Reproductibilite -->
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  En 2012, des scientifiques d'Amgen ont essaye de reproduire<br/>
+<em>53 etudes phares sur le cancer</em>.
+                  <br/><br/>
+                  Combien ont-ils pu reproduire ?
+                </div>
+</div>
+</div>
+<!-- Slide 5.2: La Crise -->
+<div class="slide blood">
+<div class="content text-center">
+<div class="big-number red animate">6</div>
+<div class="subtitle animate delay-1" style="color:rgba(255,255,255,0.8);">
+                  Seulement 6 des 53 etudes phares ont pu etre reproduites.
+                </div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">EN TERMES SIMPLES</div>
+<div class="simple-text">
+<strong>89% des etudes "revolutionnaires" etaient fausses</strong> ou ne pouvaient pas etre repetees.
+                    Des traitements donnes aux patients. Bases sur des resultats qui ont echoue.
+                  </div>
+</div>
+<p class="animate delay-3" style="font-size:0.7rem;color:rgba(255,255,255,0.5);margin-top:0.5rem;">
+                  Begley CG et Ellis LM. Nature 2012 ; 483 : 531-533
+                </p>
+</div>
+</div>
+<!-- Slide 5.3: La Graine -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">La Discipline de la Graine</div>
+<div class="card dark-bg animate delay-1">
+<div class="card-label">L'EXIGENCE</div>
+<div class="card-text">
+                    Chaque analyse TruthCert doit etre <strong>exactement reproductible</strong>.
+                    Un analyste a Nairobi et un analyste a Geneve doivent obtenir <strong>des resultats identiques</strong>.
+                  </div>
+</div>
+<div class="stats-grid animate delay-2">
+<div class="stat-box">
+<div class="stat-value" style="color:var(--gold);">786888</div>
+<div class="stat-label">Graine Maitre</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--teal);">Fixe</div>
+<div class="stat-label">Tous Processus Aleatoires</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--purple);">Trace</div>
+<div class="stat-label">Chaque Etape</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 5.4: Performance -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Concu pour la Realite</div>
+<div class="simple-box animate delay-1">
+<div class="simple-title">LA CONTRAINTE</div>
+<div class="simple-text">
+                    Une economiste de la sante a Freetown a <strong>un ordinateur ordinaire</strong>, peut-etre une connexion internet peu fiable.
+                    TruthCert doit fonctionner sur <strong>ce qu'elle a reellement</strong>.
+                  </div>
+</div>
+<div class="stats-grid animate delay-2">
+<div class="stat-box">
+<div class="stat-value" style="color:var(--gold);">60s</div>
+<div class="stat-label">Analyse de Base</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--teal);">45s</div>
+<div class="stat-label">Incertitude (5K tirages)</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--purple);">Hors-ligne</div>
+<div class="stat-label">Fonctionne Sans Internet</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 5.5: Le Refrain -->
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain hope animate">
+                  "Et la meme graine fut plantee a Accra et a Geneve,<br/>
+                  et le meme fruit poussa dans les deux endroits.<br/>
+                  Et quiconque pouvait planter la graine a nouveau,<br/>
+                  et recolter la meme verite."
+                </div>
+</div>
+</div>
+</div>
+ ==================== MODULE 6 : POUR LES DÉCIDEURS ======================== 
+<div class="module-slides" data-module="6">
+<!-- Slide 6.1: Resume Executif -->
+<div class="slide gradient active">
+<div class="content text-center">
+<div class="title gold animate">Pour les Ministres et Directeurs</div>
+<div class="subtitle animate delay-1">Ce que vous devez savoir en 3 minutes</div>
+</div>
+</div>
+<!-- Slide 6.2: La Matrice de Decision -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Ce Que Chaque Grade Signifie Pour Vous</div>
+<div class="decision-matrix animate delay-1">
+<h4>Quand TruthCert Dit... Vous Devriez...</h4>
+<div class="decision-row">
+<div class="decision-grade stable">ÉCURIE</div>
+<div class="decision-action"><strong>Procedez avec confiance.</strong> Presentez des estimations ponctuelles. Defendez les chiffres.</div>
+</div>
+<div class="decision-row">
+<div class="decision-grade moderate">MODERE</div>
+<div class="decision-action"><strong>Procedez avec prudence.</strong> Montrez des fourchettes. Dites "entre X et Y."</div>
+</div>
+<div class="decision-row">
+<div class="decision-grade exposed">EXPOSE</div>
+<div class="decision-action"><strong>Montrez des scenarios.</strong> "Si A, alors X. Si B, alors Y." Pas de chiffre unique.</div>
+</div>
+<div class="decision-row">
+<div class="decision-grade uncertain">INCERTAIN</div>
+<div class="decision-action"><strong>Dites "nous ne savons pas."</strong> Demandez plus de recherche avant de s'engager.</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 6.3: Realite Politique -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Quand la Politique Contredit les Preuves</div>
+<div class="story-card animate delay-1">
+<div class="place">LA SITUATION DIFFICILE</div>
+<div class="narrative">
+                    Un programme populaire a des preuves INCERTAINES. Les electeurs le demandent. Que faites-vous ?
+                    <br/><br/>
+<strong>TruthCert vous donne un bouclier :</strong>
+<br/><br/>
+                    "Je veux aider notre peuple. Mais les preuves disent que nous ne savons pas si cela fonctionne ici.
+                    Laissez-moi financer une <strong>etude pilote</strong> d'abord—pour etre sur que nous aidons, pas que nous nuisons."
+                    <br/><br/>
+<em>Vous ne dites pas non. Vous dites "assurons-nous."</em>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 6.4: Le Resume d'Une Page -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Votre Resume en Une Page</div>
+<div class="lesson-item animate delay-1">
+<div class="lesson-number" style="background:var(--green);">1</div>
+<div class="lesson-content">
+<h4>Les chiffres doivent avoir des sources</h4>
+<p>Si le personnel ne peut pas montrer d'ou vient un chiffre, ne l'utilisez pas</p>
+</div>
+</div>
+<div class="lesson-item animate delay-2">
+<div class="lesson-number" style="background:var(--gold);">2</div>
+<div class="lesson-content">
+<h4>Cherchez des preuves africaines</h4>
+<p>Demandez "Combien d'etudes ont ete faites en Afrique ?" (il en faut 4+ pour la confiance)</p>
+</div>
+</div>
+<div class="lesson-item animate delay-3">
+<div class="lesson-number" style="background:var(--teal);">3</div>
+<div class="lesson-content">
+<h4>Exigez la monnaie locale</h4>
+<p>Les couts doivent etre en Francs CFA/Cedi/Shilling, pas en USD</p>
+</div>
+</div>
+<div class="lesson-item animate delay-4">
+<div class="lesson-number" style="background:var(--purple);">4</div>
+<div class="lesson-content">
+<h4>Acceptez l'incertitude</h4>
+<p>"Nous ne savons pas" est plus honnete qu'un faux chiffre precis</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+ ====================== MODULE 7 : TUTORIEL PRATIQUE ====================== 
+<div class="module-slides" data-module="7">
+<!-- Slide 7.1: Intro Tutoriel -->
+<div class="slide dark active">
+<div class="content text-center">
+<div class="title gold animate">Realiser Votre Premiere Analyse</div>
+<div class="subtitle animate delay-1">Un guide pratique</div>
+</div>
+</div>
+<!-- Slide 7.2: Ce Dont Vous Avez Besoin -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Ce Dont Vous Avez Besoin</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box">
+<div class="stat-value" style="color:var(--teal);font-size:1.5rem;">Navigateur</div>
+<div class="stat-label">Chrome/Firefox/Edge</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--gold);font-size:1.5rem;">Donnees</div>
+<div class="stat-label">Votre fichier YAML</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--purple);font-size:1.5rem;">~2 h</div>
+<div class="stat-label">Temps de formation</div>
+</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">AUCUN LOGICIEL SPECIAL REQUIS</div>
+<div class="simple-text">
+                    TruthCert fonctionne dans votre navigateur. Pas d'installation. Fonctionne hors-ligne apres le premier chargement.
+                  </div>
+</div>
+</div>
+</div>
+<!-- Slide 7.3: Les Etapes -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Cinq Etapes</div>
+<div class="workflow-container animate delay-1">
+<div class="workflow-step">
+<div class="step-num">1</div>
+<div class="step-content">
+<h4>Selectionnez Pays + Maladie</h4>
+<p>Choisissez parmi 13 pays, 7 groupes de maladies. Exemple : <code>CIV + SME</code></p>
+</div>
+</div>
+<div class="workflow-step">
+<div class="step-num">2</div>
+<div class="step-content">
+<h4>Entrez les Donnees Locales</h4>
+<p>Couts unitaires, population cible, budget. En <code>XOF</code> (monnaie locale).</p>
+</div>
+</div>
+<div class="workflow-step">
+<div class="step-num">3</div>
+<div class="step-content">
+<h4>Selectionnez les Preuves</h4>
+<p>Lien vers les etudes. Le systeme compte les etudes africaines (k) automatiquement.</p>
+</div>
+</div>
+<div class="workflow-step">
+<div class="step-num">4</div>
+<div class="step-content">
+<h4>Lancez l'Analyse</h4>
+<p>Cliquez sur "Certifier." Attendez ~60 secondes. Le systeme attribue un grade.</p>
+</div>
+</div>
+<div class="workflow-step">
+<div class="step-num">5</div>
+<div class="step-content">
+<h4>Exportez les Resultats</h4>
+<p>Telechargez le rapport PDF. Toutes les affirmations ont des localisateurs + empreintes.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 7.4: Sources de Donnees -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Ou Trouver les Donnees</div>
+<div class="lesson-item animate delay-1">
+<div class="lesson-number">1</div>
+<div class="lesson-content">
+<h4>Couts Unitaires</h4>
+<p>Base de donnees WHO-CHOICE, etudes de couts iDSI, listes de prix du Ministere</p>
+</div>
+</div>
+<div class="lesson-item animate delay-2">
+<div class="lesson-number">2</div>
+<div class="lesson-content">
+<h4>Fardeau de Maladie</h4>
+<p>GBD (Fardeau Mondial de Maladie), enquetes EDS, SNIS local</p>
+</div>
+</div>
+<div class="lesson-item animate delay-3">
+<div class="lesson-number">3</div>
+<div class="lesson-content">
+<h4>Tailles d'Effet</h4>
+<p>Revues Cochrane, meta-analyses publiees, directives OMS</p>
+</div>
+</div>
+<div class="lesson-item animate delay-4">
+<div class="lesson-number">4</div>
+<div class="lesson-content">
+<h4>Donnees Budgetaires</h4>
+<p>Comptes nationaux de sante, documents du Ministere des Finances, rapports des bailleurs</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 7.5: Quand k < 4 -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Quand les Preuves Africaines Sont Rares</div>
+<div class="simple-box animate delay-1">
+<div class="simple-title">SI k &lt; 4 (MOINS DE 4 ETUDES AFRICAINES)</div>
+<div class="simple-text">
+                    TruthCert ne vous donnera pas une fausse reponse confiante. A la place :
+                  </div>
+</div>
+<div class="lesson-item animate delay-2">
+<div class="lesson-number" style="background:var(--orange);">1</div>
+<div class="lesson-content">
+<h4>Pivotez vers un groupe plus large</h4>
+<p>Si "MCV au Ghana" a k=1, essayez "MNT en Afrique de l'Ouest"</p>
+</div>
+</div>
+<div class="lesson-item animate delay-3">
+<div class="lesson-number" style="background:var(--orange);">2</div>
+<div class="lesson-content">
+<h4>Utilisez l'analyse de scenarios</h4>
+<p>Montrez le meilleur cas, le pire cas, et le scenario moyen</p>
+</div>
+</div>
+<div class="lesson-item animate delay-4">
+<div class="lesson-number" style="background:var(--orange);">3</div>
+<div class="lesson-content">
+<h4>Calculez la Valeur de l'Information</h4>
+<p>Une nouvelle etude locale vaudrait-elle le financement ?</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+ =============== MODULE 8 : DURABILITE ET LIMITES ====================== 
+<div class="module-slides" data-module="8">
+<!-- Slide 8.1: Durabilite -->
+<div class="slide dark active">
+<div class="content text-center">
+<div class="title gold animate">Durabilite</div>
+<div class="subtitle animate delay-1">Comment TruthCert survit a long terme</div>
+<div class="sustainability-grid animate delay-2">
+<div class="sustainability-item">
+<div class="sus-icon">📁</div>
+<h4>Open Source</h4>
+<p>Le code est public. N'importe qui peut l'executer, le modifier, l'ameliorer.</p>
+</div>
+<div class="sustainability-item">
+<div class="sus-icon">🎓</div>
+<h4>Former les Locaux</h4>
+<p>Chaque pays developpe sa propre capacite ETS. Pas de dependance aux etrangers.</p>
+</div>
+<div class="sustainability-item">
+<div class="sus-icon">💻</div>
+<h4>Hors-ligne d'Abord</h4>
+<p>Fonctionne sans internet. Pas d'abonnement cloud necessaire.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 8.2: Limites -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Ce Que TruthCert Ne Peut Pas Faire</div>
+<div class="limitation-item animate delay-1">
+<div class="limitation-icon">⚠</div>
+<div class="limitation-text"><strong>Ne peut pas creer de preuves.</strong> S'il n'existe pas d'etudes, TruthCert ne peut pas les inventer.</div>
+</div>
+<div class="limitation-item animate delay-2">
+<div class="limitation-icon">⚠</div>
+<div class="limitation-text"><strong>Ne peut pas garantir l'acceptation politique.</strong> Les preuves sont necessaires mais pas suffisantes pour le changement de politique.</div>
+</div>
+<div class="limitation-item animate delay-3">
+<div class="limitation-icon">⚠</div>
+<div class="limitation-text"><strong>Ne peut pas remplacer le jugement.</strong> Il informe les decisions, il ne les prend pas.</div>
+</div>
+<div class="limitation-item animate delay-4">
+<div class="limitation-icon">⚠</div>
+<div class="limitation-text"><strong>Ne peut pas corriger les mauvaises donnees.</strong> Si vos couts d'entree sont faux, les sorties seront fausses.</div>
+</div>
+<div class="limitation-item animate delay-5">
+<div class="limitation-icon">⚠</div>
+<div class="limitation-text"><strong>Ne peut pas tenir compte de la mise en oeuvre.</strong> Une intervention rentable mal mise en oeuvre peut echouer.</div>
+</div>
+</div>
+</div>
+<!-- Slide 8.3: La Verite Honnete -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="refrain animate">
+                  "TruthCert ne promet pas la certitude.<br/>
+                  Il promet <em>l'honnetete sur l'incertitude</em>.<br/>
+                  Et cette honnetete sauve des vies."
+                </div>
+</div>
+</div>
+</div>
+ ==================== MODULE 9 : RÉFÉRENCES ET QUIZ ===================== 
+<div class="module-slides" data-module="9">
+<!-- Slide 9.1: References -->
+<div class="slide dark active">
+<div class="content text-center">
+<div class="title gold animate">Références</div>
+<div class="references animate delay-1">
+<h4>Sources Cles Citees dans ce Cours</h4>
+<ol>
+<li>Echt DS, Liebson PR, Mitchell LB et al. Mortalité et morbidité chez les patients recevant de l'encaïnide, du flécaïnide ou un placebo : le CAST. <span class="journal">NEJM</span> 1991;324:781-788.</li>
+<li>Moore TJ. <span class="journal">Médecine mortelle : pourquoi des dizaines de milliers de patients cardiaques sont morts dans la pire catastrophe médicamenteuse aux États-Unis.</span> Simon &amp; Schuster, 1995.</li>
+<li>Begley CG, Ellis LM. Développement de médicaments : élever les normes pour la recherche préclinique sur le cancer. <span class="journal">Nature</span> 2012;483:531-533.</li>
+<li>Woods B, Revill P, Sculpher M, Claxton K. Seuils de rentabilité au niveau national : estimations initiales et nécessité de recherches plus approfondies. <span class="journal">Lancet Santé mondiale</span> 2016;4:e594-e601.</li>
+<li>OMS. Tendances de la mortalite maternelle 2000-2020. Geneve: Organisation Mondiale de la Sante, 2023.</li>
+<li>OMS. Rapport mondial sur le paludisme 2022. Geneve: Organisation Mondiale de la Sante, 2022.</li>
+<li>ONUSIDA. Statistiques mondiales sur le VIH 2023. Geneve: ONUSIDA, 2023.</li>
+<li>Revill P, Ochalek J, Lomas J et al. Seuils de rapport coût-efficacité : orienter les dépenses de santé pour améliorer la santé de la population. <span class="journal">Plan de politique de santé</span> 2018;33:707-716.</li>
+</ol>
+</div>
+</div>
+</div>
+<!-- Slide 9.2: Quiz 1 -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="quiz-container animate">
+<div class="quiz-question">Dans l'histoire des medecins qui "savaient" que leur remede fonctionnerait, qu'a revele l'essai CAST ?</div>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkAnswer(this, false)">Les medicaments ont fonctionne comme prevu</div>
+<div class="quiz-option" onclick="checkAnswer(this, true)">Les medicaments ont tue plus de personnes qu'ils n'en ont sauve</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)">Les medicaments n'ont eu aucun effet</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)">L'essai n'etait pas concluant</div>
+</div>
+<div class="quiz-feedback"></div>
+</div>
+</div>
+</div>
+<!-- Slide 9.3: Quiz 2 -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="quiz-container animate">
+<div class="quiz-question">Quand les chiffres sont "nus", que signifie cela ?</div>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkAnswer(this, false)">Ils sont affiches sans formatage</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)">Ce sont des approximations</div>
+<div class="quiz-option" onclick="checkAnswer(this, true)">Ils n'ont pas de preuve de leur origine</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)">Ils sont dans la mauvaise monnaie</div>
+</div>
+<div class="quiz-feedback"></div>
+</div>
+</div>
+</div>
+<!-- Slide 9.4: Quiz 3 -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="quiz-container animate">
+<div class="quiz-question">Un ministre recoit un rapport TruthCert marque "EXPOSE." Que devrait-il faire ?</div>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkAnswer(this, false)">Rejeter completement le programme</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)">Proceder comme si les preuves etaient solides</div>
+<div class="quiz-option" onclick="checkAnswer(this, true)">Presenter des scenarios ("si A alors X, si B alors Y") et envisager un pilote</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)">Attendre plus d'etudes internationales</div>
+</div>
+<div class="quiz-feedback"></div>
+</div>
+</div>
+</div>
+<!-- Slide 9.5: Quiz 4 -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="quiz-container animate">
+<div class="quiz-question">Pourquoi TruthCert insiste-t-il sur la monnaie locale ?</div>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkAnswer(this, false)">Pour faciliter les calculs</div>
+<div class="quiz-option" onclick="checkAnswer(this, true)">Parce que les ministres budgetisent en monnaie locale et ne devraient pas avoir a convertir</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)">Pour eviter les fluctuations de taux de change</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)">C'est une exigence arbitraire</div>
+</div>
+<div class="quiz-feedback"></div>
+</div>
+</div>
+</div>
+<!-- Slide 9.6: Fin -->
+<div class="slide hope">
+<div class="content text-center">
+<div class="big-number green animate" style="font-size:5rem;">✔</div>
+<div class="title green animate delay-1">Cours Termine</div>
+<div class="gold-line animate delay-2"></div>
+<div class="refrain hope animate delay-3">
+                  "Et quand les chiffres furent habilles,<br/>
+                  quand chaque affirmation portait sa preuve,<br/>
+                  quand les preuves furent testees dans le pays ou elles seraient utilisees—<br/>
+<br/>
+                  alors les meres vecurent,<br/>
+                  et les enfants s'epanouirent,<br/>
+                  et les decideurs purent dormir la nuit."
+                </div>
+<p class="animate delay-4" style="color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:1.2rem;margin-top:1.5rem;">
+                  Ceci est TruthCert.
+                </p>
+</div>
+</div>
+</div>
+<!-- Navigation des Slides -->
+<div class="slide-nav">
+<button class="nav-btn" onclick="prevSlide()">←</button>
+<div class="nav-center">
+<div class="slide-counter" id="slideCounter">1 / 6</div>
+<div class="progress" id="progressDots"></div>
+</div>
+<button class="nav-btn" onclick="nextSlide()">→</button>
+</div>
+</div>
+</div>
+</main>
+</div>
+<script>
+    function toggleSidebar() {
+      document.querySelector('.sidebar').classList.toggle('open');
+      var overlay = document.querySelector('.sidebar-overlay');
+      if (overlay) overlay.classList.toggle('show');
+      var btn = document.querySelector('.mobile-menu-toggle, .sidebar-toggle, .hamburger');
+      if (btn) btn.setAttribute('aria-expanded', btn.getAttribute('aria-expanded') === 'true' ? 'false' : 'true');
+    }
+
+    const modules = [
+      { id: 1, title: "L'Avertissement", subtitle: "Quand la certitude tue", slides: 6 },
+      { id: 2, title: "Les Terres", subtitle: "Treize nations", slides: 5 },
+      { id: 3, title: "La Solution", subtitle: "Habiller les chiffres", slides: 7 },
+      { id: 4, title: "La Methode", subtitle: "Mesurer la valeur", slides: 6 },
+      { id: 5, title: "La Discipline", subtitle: "Reproductibilite", slides: 5 },
+      { id: 6, title: "Pour les Decideurs", subtitle: "Resume executif", slides: 4 },
+      { id: 7, title: "Pratique", subtitle: "Votre premiere analyse", slides: 5 },
+      { id: 8, title: "Durabilite", subtitle: "Limites et perennite", slides: 3 },
+      { id: 9, title: "Test et Sources", subtitle: "Quiz + references", slides: 6 }
+    ];
+
+    let currentModule = 1;
+    let currentSlide = 1;
+    const completedModules = new Set();
+
+    function init() {
+      renderModuleList();
+      updateSlideNav();
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === ' ') {
+          e.preventDefault();
+          nextSlide();
+        } else if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          prevSlide();
+        }
+      });
+    }
+
+    function renderModuleList() {
+      const list = document.getElementById('moduleList');
+      list.innerHTML = modules.map(m => `
+        <div class="module-item ${m.id === currentModule ? 'active' : ''} ${completedModules.has(m.id) ? 'completed' : ''}"
+             onclick="goToModule(${m.id})" tabindex="0" role="button" aria-label="Module ${m.id}: ${m.title}"
+             onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();goToModule(${m.id});}">
+          <div class="module-number">${completedModules.has(m.id) ? '&#10003;' : m.id}</div>
+          <div class="module-info">
+            <div class="module-title">${m.title}</div>
+            <div class="module-subtitle">${m.subtitle}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function goToModule(moduleId) {
+      if (moduleId > currentModule) completedModules.add(currentModule);
+      currentModule = moduleId;
+      currentSlide = 1;
+
+      document.querySelectorAll('.module-slides').forEach(el => el.classList.remove('active'));
+      document.querySelector(`.module-slides[data-module="${moduleId}"]`).classList.add('active');
+
+      updateSlideVisibility();
+      updateSlideNav();
+      renderModuleList();
+      document.getElementById('currentModule').textContent = modules[moduleId - 1].title;
+    }
+
+    function updateSlideVisibility() {
+      const moduleSlides = document.querySelector(`.module-slides[data-module="${currentModule}"]`);
+      const slides = moduleSlides.querySelectorAll('.slide');
+      slides.forEach((slide, index) => slide.classList.toggle('active', index + 1 === currentSlide));
+    }
+
+    function updateSlideNav() {
+      const module = modules[currentModule - 1];
+      document.getElementById('slideCounter').textContent = `${currentSlide} / ${module.slides}`;
+      document.getElementById('progressDots').innerHTML = Array.from({ length: module.slides }, (_, i) =>
+        `<div class="progress-dot ${i + 1 === currentSlide ? 'active' : ''}" onclick="goToSlide(${i + 1})"></div>`
+      ).join('');
+    }
+
+    function goToSlide(slideNum) {
+      currentSlide = slideNum;
+      updateSlideVisibility();
+      updateSlideNav();
+    }
+
+    function nextSlide() {
+      const module = modules[currentModule - 1];
+      if (currentSlide < module.slides) {
+        currentSlide++;
+        updateSlideVisibility();
+        updateSlideNav();
+      } else if (currentModule < modules.length) {
+        goToModule(currentModule + 1);
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 1) {
+        currentSlide--;
+        updateSlideVisibility();
+        updateSlideNav();
+      } else if (currentModule > 1) {
+        const prevModuleSlides = modules[currentModule - 2].slides;
+        currentModule--;
+        currentSlide = prevModuleSlides;
+
+        document.querySelectorAll('.module-slides').forEach(el => el.classList.remove('active'));
+        document.querySelector(`.module-slides[data-module="${currentModule}"]`).classList.add('active');
+
+        updateSlideVisibility();
+        updateSlideNav();
+        renderModuleList();
+        document.getElementById('currentModule').textContent = modules[currentModule - 1].title;
+      }
+    }
+
+    function checkAnswer(element, isCorrect) {
+      const container = element.closest('.quiz-container');
+      const options = container.querySelectorAll('.quiz-option');
+      const feedback = container.querySelector('.quiz-feedback');
+
+      options.forEach(opt => {
+        opt.style.pointerEvents = 'none';
+        if (opt === element) opt.classList.add(isCorrect ? 'correct' : 'incorrect');
+      });
+
+      feedback.classList.add('show', isCorrect ? 'correct' : 'incorrect');
+      feedback.textContent = isCorrect
+        ? 'Correct. Vous avez compris.'
+        : 'Pas tout a fait. Reflechissez aux histoires que vous avez entendues.';
+    }
+
+    init();
+  </script>
+</body>
+</html>

@@ -1,0 +1,2382 @@
+<!DOCTYPE html>
+
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>الكاتب السيليكون: الذكاء الاصطناعي في التحليل التلوي</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&amp;family=Source+Sans+Pro:wght@300;400;600;700&amp;display=swap" rel="stylesheet"/>
+<style>
+    :root {
+      --navy: #1E2761;
+      --deep-navy: #141B3D;
+      --gold: #D4AF37;
+      --cream: #FAF8F5;
+      --red: #C53030;
+      --green: #22c55e;
+      --teal: #00D4AA;
+      --purple: #A855F7;
+      --orange: #F97316;
+      --blue: #3B82F6;
+      --pink: #EC4899;
+      --cyber: #00FFFF;
+      --electric: #7B68EE;
+      --transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      height: 100%;
+      font-family: 'Source Sans Pro', sans-serif;
+      background: var(--deep-navy);
+      color: var(--cream);
+    }
+
+    .course-container { display: flex; height: 100vh; overflow: hidden; }
+
+    .sidebar {
+      width: 280px;
+      background: linear-gradient(180deg, var(--deep-navy) 0%, #0a0f1a 100%);
+      border-left: 1px solid rgba(0,255,255,0.2);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    /* mobile sidebar handled by hamburger toggle below */
+
+    .sidebar-header { padding: 1.25rem; border-bottom: 1px solid rgba(0,255,255,0.2); }
+    .sidebar-header h1 { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; font-weight: 700; color: var(--cyber); }
+    .sidebar-header p { font-size: 0.65rem; color: rgba(255,255,255,0.6); margin-top: 0.25rem; }
+
+    .module-list { flex: 1; overflow-y: auto; padding: 0.5rem 0; }
+
+    .module-item {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.45rem 0.75rem; cursor: pointer;
+      border-right: 3px solid transparent; transition: all 0.2s;
+    }
+    .module-item:hover { background: rgba(0,255,255,0.1); }
+    .module-item.active { background: rgba(0,255,255,0.15); border-right-color: var(--cyber); }
+    .module-item.completed .module-number { background: var(--green); color: white; }
+
+    .module-number {
+      width: 20px; height: 20px; border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.6rem; font-weight: 700; flex-shrink: 0;
+    }
+    .module-item.active .module-number { background: var(--cyber); color: var(--navy); }
+
+    .module-info { flex: 1; min-width: 0; }
+    .module-title { font-size: 0.7rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .module-subtitle { font-size: 0.55rem; color: rgba(255,255,255,0.5); }
+
+    .sidebar-footer {
+      padding: 0.6rem 0.75rem; border-top: 1px solid rgba(0,255,255,0.2);
+      font-size: 0.55rem; color: rgba(255,255,255,0.4); line-height: 1.4;
+    }
+
+    .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+    .content-header {
+      padding: 0.5rem 1rem;
+      background: rgba(0,0,0,0.3);
+      border-bottom: 1px solid rgba(0,255,255,0.2);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .breadcrumb { font-size: 0.7rem; color: rgba(255,255,255,0.6); }
+    .breadcrumb span { color: var(--cyber); }
+    .header-actions { display: flex; gap: 0.4rem; }
+
+    .btn {
+      padding: 0.3rem 0.6rem; border: 1px solid rgba(0,255,255,0.3);
+      border-radius: 6px; background: rgba(255,255,255,0.05);
+      color: var(--cream); font-size: 0.65rem; cursor: pointer; transition: all 0.2s;
+    }
+    .btn:hover { background: rgba(0,255,255,0.2); border-color: var(--cyber); }
+    .btn.primary { background: var(--cyber); color: var(--navy); border-color: var(--cyber); font-weight: 600; }
+
+    .content-body { flex: 1; overflow: hidden; display: flex; }
+    .slides-container { flex: 1; position: relative; overflow: hidden; }
+    .module-slides { display: none; width: 100%; height: 100%; }
+    .module-slides.active { display: block; }
+
+    .slide {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      display: flex; flex-direction: column; justify-content: flex-start; align-items: center;
+      padding: 1rem 1rem 2.5rem 1rem; padding-top: 1.25rem;
+      opacity: 0; visibility: hidden;
+      transition: opacity var(--transition), visibility var(--transition);
+      overflow-y: auto; overflow-x: hidden;
+    }
+    .slide .content { margin-top: auto; margin-bottom: auto; }
+    .slide.active { opacity: 1; visibility: visible; }
+    .slide.dark { background: var(--deep-navy); }
+    .slide.black { background: #000; }
+    .slide.gradient { background: linear-gradient(135deg, var(--deep-navy) 0%, #1a0a2e 100%); }
+    .slide.cyber { background: linear-gradient(135deg, #0a1a2a 0%, #0d2137 100%); }
+    .slide.warning { background: linear-gradient(135deg, #2a1a0a 0%, #3d2515 100%); }
+    .slide.danger { background: linear-gradient(135deg, #1a0a0a 0%, #2d1515 100%); }
+    .slide.hope { background: linear-gradient(135deg, #0a1a0a 0%, #152d15 100%); }
+    .slide.matrix { background: linear-gradient(135deg, #0a0a0a 0%, #0d1a0d 100%); }
+
+    .title { font-family: 'Cormorant Garamond', serif; font-size: clamp(1.3rem, 3vw, 2.2rem); font-weight: 700; margin-bottom: 0.5rem; line-height: 1.2; }
+    .title.gold { color: var(--gold); }
+    .title.cyber { color: var(--cyber); }
+    .title.red { color: var(--red); }
+    .title.green { color: var(--green); }
+    .title.purple { color: var(--purple); }
+
+    .subtitle { font-size: clamp(0.8rem, 1.6vw, 1rem); color: rgba(255,255,255,0.7); margin-bottom: 1rem; }
+
+    .big-number { font-family: 'Cormorant Garamond', serif; font-size: clamp(2rem, 8vw, 5rem); font-weight: 700; line-height: 1; }
+    .big-number.red { color: var(--red); }
+    .big-number.cyber { color: var(--cyber); }
+    .big-number.green { color: var(--green); }
+
+    .refrain {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1rem, 2.2vw, 1.5rem);
+      font-style: italic; color: var(--cyber);
+      text-align: center; max-width: 650px; line-height: 1.4;
+    }
+    .refrain.warning { color: var(--orange); border-right: 4px solid var(--orange); padding-right: 1rem; text-align: right; }
+    .refrain.danger { color: var(--red); }
+    .refrain.hope { color: var(--green); }
+    .refrain.gold { color: var(--gold); }
+
+    .rhetorical {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(0.95rem, 2vw, 1.4rem);
+      color: rgba(255,255,255,0.9);
+      text-align: center; max-width: 580px; line-height: 1.5;
+    }
+    .rhetorical em { color: var(--cyber); font-style: normal; }
+
+    .simple-box {
+      background: linear-gradient(135deg, rgba(0,255,255,0.1), rgba(0,0,0,0.2));
+      border: 2px solid var(--cyber); border-radius: 10px;
+      padding: 0.9rem; max-width: 500px; margin: 0.5rem 0;
+    }
+    .simple-box .simple-title { color: var(--cyber); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; margin-bottom: 0.35rem; }
+    .simple-box .simple-text { font-size: 0.85rem; line-height: 1.5; }
+    .simple-box .simple-text strong { color: var(--gold); }
+    .simple-box.warning { border-color: var(--orange); }
+    .simple-box.warning .simple-title { color: var(--orange); }
+    .simple-box.danger { border-color: var(--red); }
+    .simple-box.danger .simple-title { color: var(--red); }
+
+    .story-card {
+      background: rgba(0,0,0,0.3); border-right: 4px solid var(--cyber);
+      padding: 0.9rem 1.1rem; max-width: 580px; margin: 0.5rem 0;
+    }
+    .story-card .place { font-size: 0.6rem; color: var(--cyber); letter-spacing: 0.1em; margin-bottom: 0.3rem; }
+    .story-card .narrative { font-family: 'Cormorant Garamond', serif; font-size: 0.9rem; line-height: 1.5; color: rgba(255,255,255,0.9); }
+    .story-card .source { font-size: 0.55rem; color: rgba(255,255,255,0.5); margin-top: 0.5rem; font-style: italic; }
+    .story-card.red { border-right-color: var(--red); }
+    .story-card.red .place { color: var(--red); }
+    .story-card.gold { border-right-color: var(--gold); }
+    .story-card.gold .place { color: var(--gold); }
+
+    /* DECISION TREES */
+    .decision-tree {
+      background: rgba(0,0,0,0.4); border: 2px solid var(--cyber);
+      border-radius: 12px; padding: 0.9rem; max-width: 620px; width: 100%;
+    }
+    .decision-tree h4 { color: var(--cyber); font-family: 'Cormorant Garamond', serif; font-size: 0.85rem; margin-bottom: 0.6rem; text-align: center; }
+
+    .tree-row { display: flex; justify-content: center; gap: 0.35rem; margin: 0.25rem 0; flex-wrap: wrap; }
+    .tree-node {
+      background: var(--navy); border: 2px solid var(--cyber);
+      border-radius: 6px; padding: 0.35rem 0.5rem;
+      text-align: center; min-width: 65px; font-size: 0.65rem;
+    }
+    .tree-node.root { background: var(--cyber); color: var(--navy); font-weight: 700; }
+    .tree-node.question { background: var(--purple); color: white; border-color: var(--purple); }
+    .tree-node.positive { background: rgba(197,48,48,0.3); border-color: var(--red); }
+    .tree-node.negative { background: rgba(34,197,94,0.3); border-color: var(--green); }
+    .tree-node.action { background: var(--electric); color: white; border-color: var(--electric); }
+    .tree-node.warning { background: var(--orange); color: white; border-color: var(--orange); }
+    .tree-node.yes { background: var(--green); color: white; border-color: var(--green); }
+    .tree-node.no { background: var(--red); color: white; border-color: var(--red); }
+    .tree-node.blue { background: var(--blue); color: white; border-color: var(--blue); }
+    .tree-node.cyber { background: var(--cyber); color: var(--navy); border-color: var(--cyber); }
+    .tree-node small { display: block; font-size: 0.5rem; opacity: 0.85; margin-top: 0.1rem; }
+
+    .tree-arrow { color: var(--cyber); font-size: 0.9rem; text-align: center; margin: 0.1rem 0; }
+    .tree-branch { display: flex; gap: 1.2rem; justify-content: center; margin-top: 0.2rem; flex-wrap: wrap; }
+    .tree-branch-item { display: flex; flex-direction: column; align-items: center; }
+    .tree-label { font-size: 0.5rem; color: rgba(255,255,255,0.6); margin: 0.1rem 0; }
+
+    /* Checklist */
+    .checklist {
+      background: rgba(0,0,0,0.3); border: 2px solid var(--purple);
+      border-radius: 10px; padding: 0.9rem; max-width: 550px; width: 100%;
+    }
+    .checklist h4 { color: var(--purple); font-size: 0.8rem; margin-bottom: 0.6rem; }
+    .checklist-item { display: flex; align-items: flex-start; gap: 0.5rem; margin: 0.35rem 0; font-size: 0.75rem; }
+    .checklist-item .check { color: var(--green); font-weight: 700; }
+    .checklist-item .number { color: var(--cyber); font-weight: 700; min-width: 20px; }
+
+    .stats-grid { display: flex; gap: 0.5rem; margin: 0.6rem 0; flex-wrap: wrap; justify-content: center; }
+    .stat-box { background: var(--navy); padding: 0.5rem 0.7rem; text-align: center; min-width: 80px; border-radius: 8px; border: 1px solid rgba(0,255,255,0.3); }
+    .stat-value { font-family: 'Cormorant Garamond', serif; font-size: clamp(1rem, 2vw, 1.3rem); font-weight: 700; }
+    .stat-label { font-size: 0.55rem; opacity: 0.8; margin-top: 0.1rem; }
+
+    .comparison-table {
+      background: rgba(0,0,0,0.3); border: 2px solid var(--cyber);
+      border-radius: 10px; padding: 0.9rem; max-width: 580px; width: 100%;
+    }
+    .comparison-table h4 { color: var(--cyber); font-size: 0.8rem; margin-bottom: 0.6rem; text-align: center; }
+    .comparison-row { display: flex; justify-content: space-between; padding: 0.3rem 0; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 0.7rem; }
+    .comparison-row:last-child { border-bottom: none; }
+    .comparison-row .label { color: rgba(255,255,255,0.7); }
+    .comparison-row .value { font-weight: 600; }
+    .comparison-row .value.good { color: var(--green); }
+    .comparison-row .value.bad { color: var(--red); }
+    .comparison-row .value.warn { color: var(--orange); }
+
+    .code-box {
+      background: #0d1117; border: 1px solid rgba(0,255,255,0.3);
+      border-radius: 8px; padding: 0.7rem; max-width: 500px;
+      font-family: 'Courier New', monospace; font-size: 0.65rem;
+      color: var(--cyber); text-align: right; overflow-x: auto;
+    }
+    .code-box .comment { color: #6a737d; }
+    .code-box .keyword { color: var(--purple); }
+    .code-box .string { color: var(--green); }
+
+    .gold-line { width: 80px; height: 2px; background: var(--cyber); margin: 0.6rem auto; }
+
+    .content { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 800px; }
+
+    .slide.active .animate { animation: fadeUp 0.5s ease-out forwards; }
+    .slide.active .animate.delay-1 { animation-delay: 0.1s; }
+    .slide.active .animate.delay-2 { animation-delay: 0.2s; }
+    .slide.active .animate.delay-3 { animation-delay: 0.3s; }
+    .slide.active .animate.delay-4 { animation-delay: 0.4s; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .animate { opacity: 0; }
+
+    .slide-nav {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      display: flex; justify-content: space-between; align-items: flex-end;
+      padding: 0.5rem 0.6rem 0.6rem 0.6rem; z-index: 100; pointer-events: none;
+    }
+    .nav-btn {
+      background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2);
+      color: white; font-size: 0.9rem; cursor: pointer; opacity: 0.6;
+      padding: 0.3rem 0.45rem; border-radius: 6px; pointer-events: auto; transition: all 0.2s;
+    }
+    .nav-btn:hover { opacity: 1; border-color: var(--cyber); }
+    .nav-center { display: flex; flex-direction: column; align-items: center; gap: 0.1rem; pointer-events: auto; }
+    .slide-counter { color: rgba(255,255,255,0.6); font-size: 0.65rem; }
+    .progress { display: flex; gap: 2px; flex-wrap: wrap; justify-content: center; max-width: 140px; }
+    .progress-dot { width: 4px; height: 4px; border-radius: 50%; background: rgba(255,255,255,0.25); cursor: pointer; }
+    .progress-dot.active { background: var(--cyber); transform: scale(1.2); }
+
+    .quiz-container { background: rgba(255,255,255,0.05); border: 1px solid rgba(0,255,255,0.3); padding: 0.9rem; max-width: 580px; width: 100%; border-radius: 8px; }
+    .quiz-question { font-family: 'Cormorant Garamond', serif; font-size: 0.95rem; margin-bottom: 0.5rem; color: var(--cyber); line-height: 1.4; }
+    .quiz-options { display: flex; flex-direction: column; gap: 0.3rem; }
+    .quiz-option { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); padding: 0.45rem 0.7rem; cursor: pointer; border-radius: 6px; font-size: 0.75rem; text-align: right; }
+    .quiz-option:hover { background: rgba(0,255,255,0.1); border-color: var(--cyber); }
+    .quiz-option.correct { background: rgba(34,197,94,0.2); border-color: var(--green); }
+    .quiz-option.incorrect { background: rgba(197,48,48,0.2); border-color: var(--red); }
+    .quiz-feedback { margin-top: 0.5rem; padding: 0.5rem; border-radius: 6px; display: none; font-size: 0.75rem; }
+    .quiz-feedback.show { display: block; }
+    .quiz-feedback.correct { background: rgba(34,197,94,0.2); border: 1px solid var(--green); }
+    .quiz-feedback.incorrect { background: rgba(197,48,48,0.2); border: 1px solid var(--red); }
+
+    .references { background: rgba(0,0,0,0.3); border: 1px solid rgba(0,255,255,0.3); border-radius: 8px; padding: 0.9rem; max-width: 580px; text-align: right; font-size: 0.6rem; line-height: 1.5; }
+    .references h4 { color: var(--cyber); font-size: 0.75rem; margin-bottom: 0.5rem; }
+    .references ol { padding-right: 1rem; }
+    .references li { margin-bottom: 0.25rem; color: rgba(255,255,255,0.8); }
+
+    .text-center { text-align: center; }
+
+    /* AI-specific styling */
+    .ai-glow { text-shadow: 0 0 10px var(--cyber), 0 0 20px var(--cyber); }
+    .pulse { animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+
+    .tool-card {
+      background: rgba(0,0,0,0.4); border: 2px solid var(--electric);
+      border-radius: 10px; padding: 0.8rem; max-width: 180px; text-align: center;
+    }
+    .tool-card .tool-name { color: var(--cyber); font-weight: 700; font-size: 0.85rem; }
+    .tool-card .tool-desc { font-size: 0.6rem; color: rgba(255,255,255,0.7); margin-top: 0.3rem; }
+    .tool-card .tool-stat { font-size: 0.7rem; color: var(--gold); margin-top: 0.3rem; font-weight: 600; }
+
+    .accuracy-bar {
+      background: rgba(255,255,255,0.1); border-radius: 4px; height: 20px; width: 100%; max-width: 300px; position: relative; overflow: hidden;
+    }
+    .accuracy-fill {
+      height: 100%; border-radius: 4px; display: flex; align-items: center; justify-content: flex-end; padding-right: 0.5rem; font-size: 0.6rem; font-weight: 700;
+    }
+    .skip-link:focus { top: 0; }
+    .mobile-menu-toggle{display:none;position:fixed;top:12px;right: 12px;z-index:1001;background:#1E2761;border:1px solid #D4AF37;color:#D4AF37;width:40px;height:40px;border-radius:8px;font-size:1.2rem;cursor:pointer;align-items:center;justify-content:center;}
+    @media(max-width:768px){.mobile-menu-toggle{display:flex;}.sidebar{transform:translateX(100%);transition:transform 0.3s ease;position:fixed;z-index:1000;height:100vh;}.sidebar.open{transform:translateX(0);}.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:999;}.sidebar-overlay.show{display:block;}}
+
+    /* Focus-visible styles for keyboard navigation */
+    :focus-visible {
+      outline: 2px solid var(--gold, #D4AF37);
+      outline-offset: 2px;
+    }
+
+    :focus:not(:focus-visible) {
+      outline: none;
+    }
+
+    button:focus-visible,
+    a:focus-visible,
+    [role="button"]:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible {
+      outline: 2px solid var(--gold, #D4AF37);
+      outline-offset: 2px;
+      box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.3);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+<body>
+<a class="skip-link" href="#main-content" style="position:absolute;top:-40px;right: 0;background:#D4AF37;color:#1E2761;padding:8px 16px;z-index:100;transition:top 0.3s;">انتقل إلى المحتوى الرئيسي</a>
+<button aria-expanded="false" aria-label="Toggle navigation menu" class="mobile-menu-toggle" onclick="toggleSidebar()">☰</button>
+<div class="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show');"></div>
+<div class="course-container">
+<nav aria-label="الملاحة بالطبع" class="sidebar" role="navigation">
+<div class="sidebar-header">
+<a href="index-ar.html" onmouseout="this.style.color='rgba(212,175,55,0.7)'" onmouseover="this.style.color='#D4AF37'" style="display:block;font-size:0.7rem;color:rgba(212,175,55,0.7);text-decoration:none;margin-bottom:0.5rem;">← مكتبة الدورة</a>
+<h1>الكاتب السيليكون</h1>
+<p>الذكاء الاصطناعي في التحليل التلوي: متى يجب الثقة، متى يجب التحقق</p>
+</div>
+<div class="module-list" id="moduleList"></div>
+<div class="sidebar-footer">
+        "الآلة تتعلم من الماضي.<br/>
+        يجب أن تحكم إذا كان الماضي ينطبق."
+      </div>
+</nav>
+<main class="main-content" id="main-content">
+<header class="content-header">
+<div class="breadcrumb">AI &gt; <span id="currentModule">الوعد والخطر</span></div>
+<div class="header-actions">
+<button class="btn" onclick="goToModule(20)">مراجع</button>
+<button class="btn primary" onclick="nextSlide()">يكمل</button>
+</div>
+</header>
+<div class="content-body">
+<div class="slides-container">
+ ================================== الوحدة 1: الوعد والخطر 
+<div class="module-slides active" data-module="1">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  ألم تسمع عن الآلة التي تقرأ<br/>
+                  عشرة آلاف ملخص في ساعة واحدة،<br/>
+                  الذي يستخرج البيانات أثناء نومك،<br/>
+                  يعد <em>يحررك من الكدح</em>?
+                </div>
+</div>
+</div>
+<div class="slide cyber">
+<div class="content text-center">
+<div class="title cyber animate ai-glow">ثورة الذكاء الاصطناعي في تركيب الأدلة</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box">
+<div class="stat-value" style="color:var(--cyber);">67%</div>
+<div class="stat-label">بتقليل عبء العمل<br/>من خلال فحص الذكاء الاصطناعي</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--green);">95%</div>
+<div class="stat-label">استرجاع ما يمكن تحقيقه<br/>مع التعلم النشط</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--gold);">10x</div>
+<div class="stat-label">فحص أسرع<br/>من الفحص اليدوي</div>
+</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">الوعد</div>
+<div class="simple-text">
+                    يمكن للذكاء الاصطناعي فحص الملخصات واستخراج البيانات وتقييم مخاطر التحيز ومراقبة الأدلة الجديدة—<strong>إذا تم استخدامه بشكل صحيح</strong>.
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide danger">
+<div class="content text-center">
+<div class="title red animate">عند فشل الذكاء الاصطناعي في الرعاية الصحية</div>
+<div class="story-card red animate delay-1">
+<div class="place">آي بي إم واتسون للأورام، إم دي أندرسون، 2013-2017</div>
+<div class="narrative">
+                    في عام 2013، عقد مركز إم دي أندرسون للسرطان شراكة مع IBM Watson لإحداث ثورة في توصيات علاج السرطان. تكلفة المشروع <strong>62 مليون دولار</strong>.
+                    <br/><br/>
+                    وبحلول عام 2017، تم التخلي عن المشروع. تم العثور على توصيات واتسون <strong>"غير آمنة وغير صحيحة"</strong> في حالات متعددة.
+                    <br/><br/>
+                    في إحدى الحالات الموثقة، أوصى واتسون بعلاج من شأنه أن يسبب <strong>نزيفًا حادًا لدى مريض يستخدم مخففات الدم بالفعل</strong>.
+                    <br/><br/>
+                    المشكلة الأساسية: تم تدريب واتسون بشكل أساسي على <strong>الحالات الافتراضية التي أنشأها الأطباء</strong>، وليست بيانات مريض حقيقية. لقد تعلم الذكاء الاصطناعي تقليد آراء الخبراء بدلاً من التعلم من النتائج الفعلية.
+                  </div>
+<div class="source">Stat News, 2017؛ IEEE Spectrum، 2019</div>
+</div>
+<div class="simple-box danger animate delay-2">
+<div class="simple-title">الدرس</div>
+<div class="simple-text" style="color: var(--gold);">
+                    الذكاء الاصطناعي المدرب على البيانات الاصطناعية أو الافتراضية يفشل في التعامل مع المرضى الحقيقيين. يمكن أن تكون الفجوة بين بيانات التدريب والواقع قاتلة.
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide danger">
+<div class="content text-center">
+<div class="title red animate">مشكلة الهلوسة</div>
+<div class="story-card red animate delay-1">
+<div class="place">المحامون المعاقبون، نيويورك، 2023</div>
+<div class="narrative">
+                    استخدم المحامون ChatGPT للبحث في السوابق القضائية لملخص المحكمة الفيدرالية.
+                    <br/><br/>
+                    استشهد الذكاء الاصطناعي بست حالات مع الاستشهادات الكاملة والاقتباسات وأرقام الصفحات.
+                    <br/><br/>
+<strong>ولم تكن أي من الحالات موجودة.</strong>
+<br/><br/>
+                    ووجد القاضي أن الاستشهادات كانت "هراء" وعاقب المحامين.
+                    <br/><br/>
+                    هذه ليست علة. هذه هي الطريقة التي تعمل بها نماذج اللغة الكبيرة، فهي تتنبأ بالنص المعقول، وليس بالحقيقة المؤكدة.
+                  </div>
+<div class="source">ماتا ضد شركة Avianca, Inc.، 22-cv-1461 (S.D.N.Y. 2023)</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">السؤال الأساسي</div>
+<div class="decision-tree animate delay-1">
+<h4>متى يجب الوثوق بالذكاء الاصطناعي في التحليل التلوي</h4>
+<div class="tree-row"><div class="tree-node root">مخرجات أداة الذكاء الاصطناعي</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">نوع المهمة؟</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">التصنيف/تحديد الأولويات</div>
+<div class="tree-node yes">خطر أقل<small>المراجعات البشرية أعلى مرتبة</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">قرار ثنائي</div>
+<div class="tree-node warning">خطر متوسط<small>يحتاج إلى التحقق</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">إنشاء نص</div>
+<div class="tree-node no">خطر مرتفع<small>احتمالية الهلوسة</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">ما يمكن للذكاء الاصطناعي فعله وما لا يمكنه فعله</div>
+<div class="comparison-table animate delay-1">
+<h4>تقييم صادق</h4>
+<div class="comparison-row">
+<span class="label">تحديد أولويات الفحص</span>
+<span class="value good">✓ ممتاز</span>
+</div>
+<div class="comparison-row">
+<span class="label">اكتشاف التكرارات</span>
+<span class="value good">✓ ممتاز</span>
+</div>
+<div class="comparison-row">
+<span class="label">استخراج البيانات (منظم)</span>
+<span class="value warn">⚠ يحتاج إلى التحقق</span>
+</div>
+<div class="comparison-row">
+<span class="label">خطر تقييم التحيز</span>
+<span class="value warn">⚠ أولي فقط</span>
+</div>
+<div class="comparison-row">
+<span class="label">بروتوكول/طرق الكتابة</span>
+<span class="value warn">⚠ مسودة فقط</span>
+</div>
+<div class="comparison-row">
+<span class="label">تحليل إحصائي</span>
+<span class="value bad">✗ مطلوب بشري</span>
+</div>
+<div class="comparison-row">
+<span class="label">التفسير السريري</span>
+<span class="value bad">✗ مطلوب بشري</span>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  "الآلة تقرأ بسرعة ولكنها لا تفهم.<br/>
+                  إنه يتنبأ بالكلمة التالية، وليس الحقيقة.<br/>
+                  استخدمه للتسريع وليس الاستبدال.<br/>
+                  يجب أن يظل الحكم لك."
+                </div>
+</div>
+</div>
+</div>
+ ================================================================================================================ الوحدة 2: 
+<div class="module-slides" data-module="2">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  هل لم تشاهد المراجع<br/>
+                  الذي فحص عشرة آلاف عنوان يدويًا،<br/>
+                  الذي تعبت عيناه، وتشتت انتباهه،<br/>
+                  الذي غاب عن <em>دراسة واحدة مهمة</em>?
+                </div>
+</div>
+</div>
+<div class="slide cyber">
+<div class="content text-center">
+<div class="title cyber animate">أدوات الفرز</div>
+<div class="stats-grid animate delay-1">
+<div class="tool-card">
+<div class="tool-name">ASReview</div>
+<div class="tool-desc">التعلم النشط<br/>مفتوح المصدر</div>
+<div class="tool-stat">Free</div>
+</div>
+<div class="tool-card">
+<div class="tool-name">الريان</div>
+<div class="tool-desc">توصيات الذكاء الاصطناعي<br/>تعاون</div>
+<div class="tool-stat">فريميوم</div>
+</div>
+<div class="tool-card">
+<div class="tool-name">الملخص</div>
+<div class="tool-desc">شبه آلي<br/>على شبكة الإنترنت</div>
+<div class="tool-stat">Free</div>
+</div>
+<div class="tool-card">
+<div class="tool-name">EPPI-المراجع</div>
+<div class="tool-desc">فحص الأولوية<br/>سير العمل الكامل</div>
+<div class="tool-stat">الاشتراك</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">كيف يعمل التعلم النشط</div>
+<div class="decision-tree animate delay-1">
+<h4>مراجعة سير العمل</h4>
+<div class="tree-row"><div class="tree-node root">استيراد المراجع</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node action">فحص الأوراق الأولية<small>10-20 ذات صلة معروفة</small></div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node cyber">يتعلم الذكاء الاصطناعي الأنماط<small>تحديثات مع كل قرار</small></div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node action">يعطي الأولوية للمحتملة ذات الصلة<small>الأكثر واعدة أولاً</small></div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">التوقف القاعدة؟</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node yes">متتالية غير ذات صلة<small>على سبيل المثال، 100-200 على التوالي</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node warning">% تم فحصها<small>على سبيل المثال، 50% مع فحص الاستدعاء</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">بيانات الأداء الحقيقي</div>
+<div class="story-card gold animate delay-1">
+<div class="place">فان دي شوت وآخرون، 2021</div>
+<div class="narrative">
+                    التقييم المنهجي لـ ASReview عبر 4 مجموعات بيانات:
+                    <br/><br/>
+                    • <strong>مجموعة بيانات اضطراب ما بعد الصدمة:</strong> استدعاء 95% بعد فحص 40% من السجلات
+                    <br/>
+                    • <strong>التنبؤ بأخطاء البرنامج:</strong> 95% يتذكرون بعد 20%
+                    <br/>
+                    • <strong>ميتاجينوميات الفيروس:</strong> 95% يتذكرون بعد 10%
+                    <br/><br/>
+                    متوسط تقليل عبء العمل: <strong>67-95%</strong> اعتمادًا على الانتشار.
+                    <br/><br/>
+                    لكن: يختلف الأداء حسب الموضوع والانتشار. تظهر المواضيع ذات الانتشار المنخفض مكاسب أكبر في الكفاءة.
+                  </div>
+<div class="source">فان دي شوت آر وآخرون. نات ماخ إنتل. 2021;3:125-133</div>
+</div>
+</div>
+</div>
+<div class="slide hope">
+<div class="content text-center">
+<div class="title green animate">عندما يعمل الفحص بمساعدة الذكاء الاصطناعي</div>
+<div class="story-card gold animate delay-1">
+<div class="place">مراجعة واستجابة كوكرين لكوفيد-19، 2020</div>
+<div class="narrative">
+                    خلال جائحة كوفيد-19، احتاجت شركة Cochrane إلى فحص <strong>أكثر من 50000 استشهاد أسبوعيًا</strong> للإبقاء على المراجعات محدثة.
+                    <br/><br/>
+                    تم نشر نظام التعلم النشط الخاص بـ ASReview بإشراف بشري صارم:
+                    <br/><br/>
+                    • تقليل عبء عمل الفحص البشري بنسبة <strong>75%</strong>
+<br/>
+                    • تفويت أقل من <strong>من الدراسات ذات الصلة</strong>
+<br/>
+                    • يتم التحقق من صحتها في كل مرحلة من قبل المراجعين البشريين
+                    <br/><br/>
+                    مفتاح النجاح: <strong>التحقق من صحة الإنسان في الحلقة في كل مرحلة</strong>. أعطى الذكاء الاصطناعي الأولوية، لكن البشر اتخذوا قرارات نهائية وفحصوا عينات من السجلات المستبعدة من الذكاء الاصطناعي.
+                  </div>
+<div class="source">اتحاد كوكرين لكوفيد-NMA، 2020-2021</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">الدرس</div>
+<div class="simple-text" style="color: var(--gold);">
+                    الذكاء الاصطناعي يعزز الحكم البشري؛ لا يحل محله. النجاح يأتي من الشراكة، وليس الأتمتة.
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide danger">
+<div class="content text-center">
+<div class="title red animate">عند فشل التحقق الداخلي</div>
+<div class="story-card red animate delay-1">
+<div class="place">نموذج EPIC SEPSIS، JAMA INTERNAL MEDICINE، 2021</div>
+<div class="narrative">
+                    نشرت Epic Systems خوارزمية للتنبؤ بالإنتان في <strong>مئات المستشفيات</strong> في جميع أنحاء الولايات المتحدة.
+                    <br/><br/>
+                    أظهر التحقق الداخلي من Epic أداءً ممتازًا. المستشفيات وثقت به.
+                    <br/><br/>
+                    ثم جاءت دراسة التحقق الخارجي في JAMA Internal Medicine:
+                    <br/><br/>
+                    • النموذج <strong>أخطأ 67% من حالات الإنتان</strong>
+<br/>
+                    • أثار <strong>آلاف الإنذارات الكاذبة</strong>
+<br/>
+                    • أصيب الممرضون بحالة شديدة من <strong>"إرهاق التنبيه"</strong>
+<br/><br/>
+                    وقد تم التحقق من صحة النموذج بناءً على بيانات تاريخية من نفس النظام، ولم يتم اختباره مطلقًا في البيئة السريرية الحقيقية حيث سيتم نشره.
+                  </div>
+<div class="source">Wong A et al. جاما المتدرب ميد. 2021;181(8):1065-1070</div>
+</div>
+<div class="simple-box danger animate delay-2">
+<div class="simple-title">الدرس</div>
+<div class="simple-text" style="color: var(--gold);">
+                    التحقق الداخلي ليس التحقق الخارجي. النموذج الذي يعمل في التطوير قد يفشل في النشر. التحقق دائمًا من الصحة في سياق العالم الحقيقي.
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide warning">
+<div class="content text-center">
+<div class="title red animate">مشكلة التوقف</div>
+<div class="story-card red animate delay-1">
+<div class="place">الخطر الخفي</div>
+<div class="narrative">
+                    متى تتوقف عن الفحص بالتعلم النشط؟
+                    <br/><br/>
+                    إذا توقفت مبكرًا جدًا: <strong>تفتقد الدراسات ذات الصلة</strong>
+<br/>
+                    إذا توقفت بعد فوات الأوان: <strong>تفقد مكاسب الكفاءة</strong>
+<br/><br/>
+                    لا تستطيع الخوارزمية إخبارك عندما تجد كل شيء. ولا يصنف إلا ما بقي.
+                    <br/><br/>
+<strong>لا توجد قاعدة توقف مثالية.</strong>
+                    كل قاعدة تستبدل الاستدعاء بالكفاءة.
+                  </div>
+</div>
+<div class="simple-box danger animate delay-2">
+<div class="simple-title">نقطة حرجة</div>
+<div class="simple-text">
+                    يجب عليك <strong>التحقق من صحة قاعدة التوقف الخاصة بك</strong> عن طريق التحقق يدويًا من عينة عشوائية من السجلات التي لم يتم فحصها.
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">شجرة قرارات فحص الذكاء الاصطناعي</div>
+<div class="decision-tree animate delay-1">
+<h4>هل يجب عليك استخدام فحص الذكاء الاصطناعي؟</h4>
+<div class="tree-row"><div class="tree-node root">مجموعة مرجعية كبيرة؟</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">&lt;500 مرجع</div>
+<div class="tree-node action">دليل موافق<small>منظمة العفو الدولية النفقات العامة لا يستحق كل هذا العناء</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">500-2000 المرجع</div>
+<div class="tree-node yes">منظمة العفو الدولية مفيدة<small>زيادة متوسطة في الكفاءة</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">&gt; 2000 مرجع</div>
+<div class="tree-node cyber">الذكاء الاصطناعي ضروري<small>توفير كبير للوقت</small></div>
+</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node warning">التحقق دائمًا من خلال عينة عشوائية<small>منهجية التقرير ورقيًا</small></div></div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  "الآلة تجد الإبر بشكل أسرع،<br/>
+                  ولكن لا يمكن ضمان بقاء أي منها في كومة القش.<br/>
+                  ثق في الترتيب، تحقق من التوقف،<br/>
+                  وأبلغ دائمًا عما فعلته."
+                </div>
+</div>
+</div>
+</div>
+ ========================================================================================================= الوحدة 3: 
+<div class="module-slides" data-module="3">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  هل لم تحلم بالمساعد<br/>
+                  الذي يقرأ كل ورقة ويملأ كل خلية،<br/>
+                  الذي لا يتعب ولا يخطئ أبدًا،<br/>
+                  الذي يستخرج <em>تماما</em>?
+                  <br/><br/>
+                  هذا المساعد غير موجود.
+                </div>
+</div>
+</div>
+<div class="slide danger">
+<div class="content text-center">
+<div class="title red animate">مشكلة دقة الاستخراج</div>
+<div class="story-card red animate delay-1">
+<div class="place">دراسة استخراج البيانات GPT-4، 2024</div>
+<div class="narrative">
+                    اختبر الباحثون GPT-4 لاستخراج البيانات من 100 ورقة بحثية معشاة ذات شواهد.
+                    <br/><br/>
+<strong>نتائج:</strong>
+<br/>
+                    • أحجام العينات: دقيقة بنسبة 89%
+                    <br/>
+                    • تقديرات التأثير: دقيقة بنسبة 76%
+                    <br/>
+                    • فترات الثقة: دقيقة بنسبة 71%
+                    <br/>
+                    • خطر الأحكام المتحيزة: اتفاق مع البشر بنسبة 62%
+                    <br/><br/>
+                    A <strong>معدل خطأ 24%</strong> في الواقع، تعني التقديرات أن دراسة واحدة تقريبًا من كل 4 دراسات ستحتوي على بيانات خاطئة في تحليلك التلوي.
+                  </div>
+<div class="source">Guo Y et al. J كلين Epidemiol. 2024;165:111203</div>
+</div>
+</div>
+</div>
+<div class="slide danger">
+<div class="content text-center">
+<div class="title red animate">مشكلة التصنيع</div>
+<div class="story-card red animate delay-1">
+<div class="place">هلوسات GPT-4 في المراجعات المنهجية، 2023</div>
+<div class="narrative">
+                    اختبر الباحثون GPT-4 لاستخراج البيانات من أوراق المراجعة المنهجية. تم إعطاء النموذج ملفات PDF وطُلب منه استخراج أحجام العينات والقيم الاحتمالية وتقديرات التأثير.
+                    <br/><br/>
+                    قدم GPT-4 بثقة جميع الأرقام المطلوبة بتنسيق دقيق.
+                    <br/><br/>
+                    But <strong>23% من عمليات الاستخراج كانت "هلوسة"</strong>- أرقام ليس لها أساس في النص المصدر.
+                    <br/><br/>
+                    في إحدى الحالات، قام النموذج بتلفيق <strong>نتيجة ذات دلالة إحصائية (p=0.003)</strong> من دراسة وجدت فعلا <strong>لا يوجد تأثير كبير (p=0.42)</strong>.
+                    <br/><br/>
+                    وكان لا يمكن تمييز ثقة النموذج بين البيانات الحقيقية والملفقة.
+                  </div>
+<div class="source">دراسات التحقق من صحة الذكاء الاصطناعي للمراجعة المنهجية، 2023</div>
+</div>
+<div class="simple-box danger animate delay-2">
+<div class="simple-title">الدرس</div>
+<div class="simple-text" style="color: var(--gold);">
+                    تتطلب LLMs التحقق البشري بنسبة 100% من البيانات الكمية. لا يوجد اختصار. يجب التحقق من كل رقم مقابل المصدر.
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">سير عمل استخراج البيانات LLM</div>
+<div class="decision-tree animate delay-1">
+<h4>بروتوكول استخراج LLM الآمن</h4>
+<div class="tree-row"><div class="tree-node root">PDF/نص كامل</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node cyber">LLM يستخرج البيانات<small>موجه منظم</small></div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node warning">يتحقق الإنسان من 100%<small>لم يتم أخذ العينات</small></div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">تناقض؟</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">Yes</div>
+<div class="tree-node no">القيمة البشرية المستخدمة<small>خطأ في الوثيقة</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">No</div>
+<div class="tree-node yes">يتابع<small>سجل التحقق</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">الهندسة السريعة للاستخراج</div>
+<div class="code-box animate delay-1">
+<span class="comment"># مثال على استخراج عينة</span><br/><br/>
+<span class="keyword">يستخرج</span> ما يلي من هذا RCT:<br/><br/>
+                  1. حجم العينة (ذراع التدخل): [الرقم]<br/>
+                  2. حجم العينة (ذراع التحكم): [الرقم]<br/>
+                  3. تعريف النتيجة الأولية: [نص]<br/>
+                  4. تقدير التأثير: [الرقم مع الوحدة]<br/>
+                  5. 95% CI: [سفلي، علوي]<br/>
+                  6. القيمة p: [الرقم]<br/><br/>
+<span class="keyword">إذا لم يتم الإبلاغ عنه</span>، يكتب <span class="string">"NR"</span><br/>
+<span class="keyword">إذا كان غير واضح</span>، يكتب <span class="string">"غير واضح: [السبب]"</span><br/><br/>
+<span class="comment"># قدم اقتباسات دقيقة للتحقق</span>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">عندما تساعد LLMs مقابل الأذى</div>
+<div class="comparison-table animate delay-1">
+<h4>تقييم قيمة استخراج LLM</h4>
+<div class="comparison-row">
+<span class="label">الحقول القياسية (المؤلف، السنة)</span>
+<span class="value good">✓ دقة عالية</span>
+</div>
+<div class="comparison-row">
+<span class="label">عدد بسيط (حجم العينة)</span>
+<span class="value good">✓ موثوق عادة</span>
+</div>
+<div class="comparison-row">
+<span class="label">رقم مركب (معدل OR)</span>
+<span class="value warn">⚠ نموذج خاطئ غالبًا</span>
+</div>
+<div class="comparison-row">
+<span class="label">النتائج المركبة</span>
+<span class="value warn">⚠ المكونات المفقودة</span>
+</div>
+<div class="comparison-row">
+<span class="label">نية العلاج مقابل كل بروتوكول</span>
+<span class="value bad">✗ يتم الخلط بشكل متكرر</span>
+</div>
+<div class="comparison-row">
+<span class="label">بيانات المجموعة الفرعية</span>
+<span class="value bad">✗ معدل خطأ مرتفع</span>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  "يستخرج LLM أرقامًا معقولة،<br/>
+                  ليس بالضرورة الأرقام الصحيحة.<br/>
+                  إنها مسودة أولى سريعة، وليست إجابة نهائية.<br/>
+                  يجب التحقق من كل خلية بالعين البشرية."
+                </div>
+</div>
+</div>
+</div>
+ ========================================================================================== الوحدة 4: 
+<div class="module-slides" data-module="4">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  ألم تتمنوا قاضيا<br/>
+                  من يقرأ كل قسم من الأساليب،<br/>
+                  من يقيم التحيز دون تحيز،<br/>
+                  الذي لا يختلف معه أبدا <em>أنفسهم</em>?
+                </div>
+</div>
+</div>
+<div class="slide cyber">
+<div class="content text-center">
+<div class="title cyber animate">RobotReviewer</div>
+<div class="story-card gold animate delay-1">
+<div class="place">مارشال وآخرون، ذكاء الآلة في الطبيعة، 2019</div>
+<div class="narrative">
+                    يستخدم RobotReviewer التعلم الآلي لتقييم خطر التحيز في التجارب المعشاة ذات الشواهد.
+                    <br/><br/>
+<strong>التحقق من الصحة مقابل تقييمات كوكرين:</strong>
+<br/>
+                    • إنشاء تسلسل عشوائي: اتفاق بنسبة 71%
+                    <br/>
+                    • إخفاء التخصيص: اتفاق بنسبة 65%
+                    <br/>
+                    • تعمية المشاركين: اتفاق بنسبة 69%
+                    <br/>
+                    • تعمية تقييم النتائج: اتفاق بنسبة 62%
+                    <br/><br/>
+                    عادةً ما يكون الاتفاق البشري بين المُقيّمين 70-80%.
+                    <br/><br/>
+<strong>يقترب RobotReviewer من الأداء البشري ولكنه لا يتجاوزه.</strong>
+</div>
+<div class="source">مارشال آي جيه وآخرون. نات ماخ إنتل. 2019;1:115-117</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">شجرة قرارات أتمتة RoB</div>
+<div class="decision-tree animate delay-1">
+<h4>متى يتم استخدام RoB الآلي</h4>
+<div class="tree-row"><div class="tree-node root">خطر تقييم التحيز</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">نوع المراجعة؟</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">مراجعة سريعة</div>
+<div class="tree-node yes">موافق الآلي<small>إقرار القيود</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">مراجعة النطاق</div>
+<div class="tree-node yes">موافق الآلي<small>إذا تم تضمين RoB</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">مراجعة منهجية كاملة</div>
+<div class="tree-node warning">أولي فقط<small>مطلوب التحقق البشري</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">مراجعة كوكرين</div>
+<div class="tree-node no">مطلوب بشري<small>مسودة دعم فقط</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">قيود RoB الآلي</div>
+<div class="checklist animate delay-1">
+<h4>ما لا يمكن للآلات تقييمه</h4>
+<div class="checklist-item"><span class="check" style="color:var(--red);">✗</span> التحيز الخاص بالنتائج (نطاق RoB 2 4)</div>
+<div class="checklist-item"><span class="check" style="color:var(--red);">✗</span> يعتمد على التقارير الانتقائية في مقارنة البروتوكول</div>
+<div class="checklist-item"><span class="check" style="color:var(--red);">✗</span> الحكم السياقي (هل هذا التصميم مناسب؟)</div>
+<div class="checklist-item"><span class="check" style="color:var(--red);">✗</span> التناقضات بين الأوراق (تقارير متعددة)</div>
+<div class="checklist-item"><span class="check" style="color:var(--red);">✗</span> تأثير التمويل على تفسير النتائج</div>
+</div>
+<div class="simple-box warning animate delay-2">
+<div class="simple-title">الحد الأساسي</div>
+<div class="simple-text">
+                    يقرأ الذكاء الاصطناعي ما هو <strong>مكتوب</strong>. يتطلب تقييم التحيز في كثير من الأحيان الحكم على ما هو <strong>غير مكتوب</strong>.
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">سير العمل المختلط لـ RoB</div>
+<div class="decision-tree animate delay-1">
+<h4>بروتوكول أفضل الممارسات</h4>
+<div class="tree-row"><div class="tree-node root">ملفات نصية كاملة بصيغة PDF</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node cyber">فحص RobotReviewer<small>يضع علامات على المشكلات المحتملة</small></div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node action">يقيم المراجع 1<small>استخدام مخرجات الذكاء الاصطناعي كمرجع</small></div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node action">المراجع 2 بشكل مستقل<small>أعمى عن مخرجات الذكاء الاصطناعي</small></div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">اجتماع الإجماع</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node yes">التقييم النهائي<small>تم توثيق القرار البشري</small></div></div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  "يقرأ الروبوت قسم الأساليب<br/>
+                  ولكن لا يستطيع القراءة بين السطور<br/>
+                  استخدمها للإشارة، وليس للحكم.<br/>
+                  الحكم يجب أن يكون إنسانيا".
+                </div>
+</div>
+</div>
+</div>
+ ==================== الوحدة 5: GPT لكتابة البروتوكول =============== 
+<div class="module-slides" data-module="5">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  هل لم يتمنيت للكاتب<br/>
+                  من يصوغ البروتوكول الخاص بك في دقائق،<br/>
+                  من يعرف كل عنصر من عناصر PRISMA،<br/>
+                  من يكتب <em>نثرًا أكاديميًا مثاليًا</em>?
+                </div>
+</div>
+</div>
+<div class="slide cyber">
+<div class="content text-center">
+<div class="title cyber animate">ماجستير في صياغة البروتوكول</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box">
+<div class="stat-value" style="color:var(--green);">✓</div>
+<div class="stat-label">بناء<br/>جيل</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--green);">✓</div>
+<div class="stat-label">نموذجي<br/>text</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--orange);">⚠</div>
+<div class="stat-label">PICO<br/>صياغة</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--red);">✗</div>
+<div class="stat-label">يبحث<br/>استراتيجية</div>
+</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">عرض القيمة</div>
+<div class="simple-text">
+                    يمكن لـ LLMs صياغة <strong>البنية واللغة القياسية</strong>. يجب عليك تقديم <strong>قرارات علمية</strong>.
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide danger">
+<div class="content text-center">
+<div class="title red animate">خطر استراتيجية البحث</div>
+<div class="story-card red animate delay-1">
+<div class="place">تم اختباره عبر ماجستيرات متعددة، 2023-2024</div>
+<div class="narrative">
+                    طلب الباحثون من GPT-4 وكلود توليد استراتيجيات البحث MEDLINE.
+                    <br/><br/>
+<strong>الأخطاء الشائعة:</strong>
+<br/>
+                    • مصطلحات MeSH غير موجودة
+                    <br/>
+                    • رموز الحقول الخاطئة (على سبيل المثال، [tiab] مقابل [tw])
+                    <br/>
+                    • فقدان المفاهيم الأساسية من سؤال البحث
+                    <br/>
+                    • استراتيجيات ضيقة للغاية تفتقد الدراسات ذات الصلة
+                    <br/>
+                    • أخطاء في بناء الجملة لا يمكن تنفيذها
+                    <br/><br/>
+<strong>يجب على متخصص المعلومات كتابة جميع استراتيجيات البحث أو التحقق من صحتها.</strong>
+</div>
+<div class="source">دراسات التحقق المتعددة 2023-2024</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">شجرة قرار كتابة البروتوكول</div>
+<div class="decision-tree animate delay-1">
+<h4>استخدام LLM في تطوير البروتوكول</h4>
+<div class="tree-row"><div class="tree-node root">قسم البروتوكول</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">الخلفية/الأساس المنطقي</div>
+<div class="tree-node yes">LLM مفيدة<small>مسودة + التحقق من الحقائق</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">بنية الأساليب</div>
+<div class="tree-node yes">LLM مفيدة<small>إنشاء القالب</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">معايير PICO</div>
+<div class="tree-node warning">بشري يقرر<small>LLM يقوم بتحسين الصياغة</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">استراتيجية البحث</div>
+<div class="tree-node no">إنسان/متخصص<small>الذكاء الاصطناعي غير موثوق به للغاية</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">سير عمل بروتوكول LLM الآمن</div>
+<div class="checklist animate delay-1">
+<h4>خطوات ضمان الجودة</h4>
+<div class="checklist-item"><span class="number">1</span> حدد PICO بنفسك (قرار علمي بشري)</div>
+<div class="checklist-item"><span class="number">2</span> اطلب من LLM صياغة أقسام البروتوكول</div>
+<div class="checklist-item"><span class="number">3</span> تحقق من وجود جميع الإرشادات المذكورة (PRISMA، Cochrane)</div>
+<div class="checklist-item"><span class="number">4</span> اكتب استراتيجية البحث مع متخصص المعلومات</div>
+<div class="checklist-item"><span class="number">5</span> تحقق من إمكانية الدفاع عن جميع القرارات المنهجية</div>
+<div class="checklist-item"><span class="number">6</span> اكشف عن مساعدة الذكاء الاصطناعي في البروتوكول</div>
+<div class="checklist-item"><span class="number">7</span> قم بتسجيل النسخة التي تم التحقق منها بواسطة الإنسان</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  "الآلة يمكنها كتابة الكلمات،<br/>
+                  لكنه لا يستطيع اتخاذ القرارات.<br/>
+                  أنت تحدد السؤال. اخترت الأساليب.<br/>
+                  البروتوكول ملكك، والذكاء الاصطناعي هو الكاتب."
+                </div>
+</div>
+</div>
+</div>
+ =================================================================================================================== الوحدة 6: 
+<div class="module-slides" data-module="6">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  هل لم تشاهد المراجعة المنهجية<br/>
+                  والتي كانت قديمة قبل نشرها،<br/>
+                  بينما تراكمت التجارب الجديدة في الأدبيات،<br/>
+<em>غير مركبة وغير معروفة</em>?
+                </div>
+</div>
+</div>
+<div class="slide cyber">
+<div class="content text-center">
+<div class="title cyber animate">مشكلة مراجعة المعيشة</div>
+<div class="story-card gold animate delay-1">
+<div class="place">أدلة تسونامي كوفيد-19، 2020</div>
+<div class="narrative">
+                    في السنة الأولى للوباء:
+                    <br/><br/>
+                    • <strong>تم نشر أكثر من 100,000 بحث عن فيروس كورونا</strong>
+<br/>
+                    • أصبحت المراجعات التقليدية قديمة في غضون أسابيع
+                    <br/>
+                    • اتخذ الأطباء قرارات بناءً على أدلة غير كاملة
+                    <br/><br/>
+                    تم استخدام اتحاد COVID-NMA <strong>المراقبة بمساعدة الذكاء الاصطناعي</strong>
+                    لمراقبة التجارب الجديدة يوميًا وتحديثها التحليلات التلوية أسبوعيا.
+                    <br/><br/>
+                    ويتطلب ذلك: مراقبة البحث الآلي، وتحديد أولويات فحص الذكاء الاصطناعي، وسير عمل استخراج البيانات السريع، والتحديثات الإحصائية المستمرة.
+                  </div>
+<div class="source">محدد في إرشادات مراجعات Cochrane Living</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">مكونات الذكاء الاصطناعي للمراجعات الحية</div>
+<div class="decision-tree animate delay-1">
+<h4>حزمة المراقبة الآلية</h4>
+<div class="tree-row"><div class="tree-node root">نظام المراجعة الحية</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node cyber">البحث التلقائي<small>التشغيل اليومي/الأسبوعي</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node cyber">فرز الذكاء الاصطناعي<small>فحص الأولوية</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node action">الاستخراج السريع<small>بمساعدة LLM</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node action">التحديث التلقائي<small>الماجستير التراكمي</small></div>
+</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node warning">الإشراف البشري في كل مرحلة<small>المراجعة التحريرية قبل النشر</small></div></div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">أدوات للمراقبة المستمرة</div>
+<div class="stats-grid animate delay-1">
+<div class="tool-card">
+<div class="tool-name">تنبيهات PubMed</div>
+<div class="tool-desc">تنبيهات مجانية عبر البريد الإلكتروني<br/>عمليات البحث المحفوظة</div>
+<div class="tool-stat">أساسي</div>
+</div>
+<div class="tool-card">
+<div class="tool-name">إبستيمونيكوس</div>
+<div class="tool-desc">مراجعة منهجية<br/>قاعدة البيانات</div>
+<div class="tool-stat">برعاية الذكاء الاصطناعي</div>
+</div>
+<div class="tool-card">
+<div class="tool-name">كوفيدينس</div>
+<div class="tool-desc">الاستيراد التلقائي<br/>وضع المعيشة</div>
+<div class="tool-stat">الاشتراك</div>
+</div>
+<div class="tool-card">
+<div class="tool-name">المقطرSR</div>
+<div class="tool-desc">فحص الذكاء الاصطناعي<br/>+ المراقبة</div>
+<div class="tool-stat">مَشرُوع</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">إطار قرار المراجعة الحية</div>
+<div class="decision-tree animate delay-1">
+<h4>متى يجب إجراء مراجعة "المعيشة"</h4>
+<div class="tree-row"><div class="tree-node root">هل يجب أن يكون هذا حيًا؟</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">التحقق من المعايير</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node yes">سؤال الأولوية<small>الأهمية السريرية</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node yes">الأدلة المتطورة<small>مسار التجارب النشطة</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node yes">تأمين الموارد<small>التمويل لمدة 2+ سنوات</small></div>
+</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node cyber">الثلاثة مطلوبة للحالة المعيشية</div></div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  "الآلة تراقب الأدب<br/>
+                  أثناء نومك.<br/>
+                  ولكن يجب أن يستيقظ شخص ما ليحكم على<br/>
+                  ما إذا كانت الأدلة الجديدة تغير الحقيقة."
+                </div>
+</div>
+</div>
+</div>
+ ========================================================================================================================================= الوحدة 7: 
+<div class="module-slides" data-module="7">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  إذا كنت تستخدم الجهاز دون التحقق،<br/>
+                  أنت لا تعرف ما هي الأخطاء التي قمت بها.
+                  <br/><br/>
+                  إذا قمت بالتحقق من كل ما تنتجه الآلة،<br/>
+<em>ما هو الوقت الذي قمت بحفظه؟</em>
+<br/><br/>
+                  الجواب يكمن في <em>التحقق الاستراتيجي</em>.
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">مفارقة التحقق</div>
+<div class="simple-box animate delay-1">
+<div class="simple-title">المعضلة</div>
+<div class="simple-text">
+<strong>التحقق الكامل</strong> = لا يوجد توفير للوقت<br/>
+<strong>لا التحقق</strong> = معدل خطأ غير معروف<br/>
+<strong>التحقق الاستراتيجي</strong> = كفاءة تم التحقق منها
+                  </div>
+</div>
+<div class="decision-tree animate delay-2">
+<h4>استراتيجية التحقق حسب المخاطر</h4>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">المهام عالية المخاطر</div>
+<div class="tree-node no">مراجعة بشرية بنسبة 100%<small>استخراج البيانات، روب</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">المهام متوسطة الخطورة</div>
+<div class="tree-node warning">التحقق من صحة العينة<small>قرارات الفحص</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">المهام منخفضة المخاطر</div>
+<div class="tree-node yes">عمليات التفتيش المفاجئة<small>إلغاء البيانات المكررة</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide hope">
+<div class="content text-center">
+<div class="title green animate">عندما تكتشف الرقابة التحيز</div>
+<div class="story-card gold animate delay-1">
+<div class="place">COCHRANE MACHINE LEARNING PILOT، 2022</div>
+<div class="narrative">
+                    اختبرت كوكرين خطر تقييم التحيز بمساعدة التعلم الآلي لتسريع المراجعات المنهجية.
+                    <br/><br/>
+                    تم تحقيق الخوارزمية <strong>اتفاق بنسبة 85% مع المراجعين البشريين</strong>- يبدو مثيرًا للإعجاب.
+                    <br/><br/>
+                    لكن فريق ضمان الجودة قام بتحليل الخلافات بنسبة 15% ووجد نمطًا:
+                    <br/><br/>
+                    كان الذكاء الاصطناعي <strong>متحيزًا بشكل منهجي نحو تصنيف التجارب التي تمولها الصناعة على أنها منخفضة المخاطر</strong>.
+                    <br/><br/>
+                    تحتوي بيانات التدريب على المزيد من التصنيفات "منخفضة المخاطر" لتجارب شركات الأدوية، وقد تعلمت الخوارزمية هذا الارتباط دون فهم المخاوف المنهجية الأساسية.
+                    <br/><br/>
+                    وقد التقطت الرقابة البشرية هذا النمط <strong>قبل نشر أي مراجعات متحيزة</strong>.
+                  </div>
+<div class="source">دراسة تجريبية لمجموعة طرق كوكرين، 2022</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">الدرس</div>
+<div class="simple-text" style="color: var(--gold);">
+                    يكشف تحليل الخلاف عن التحيز المنهجي. الدقة الشاملة العالية يمكن أن تخفي الأنماط الخطيرة. قم دائمًا بتحليل أين وكيف يفشل الذكاء الاصطناعي، وليس فقط عدد المرات.
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">إطار ضمان الجودة للمراجعات المدعومة بالذكاء الاصطناعي</div>
+<div class="checklist animate delay-1">
+<h4>الحد الأدنى من معايير الجودة</h4>
+<div class="checklist-item"><span class="number">1</span> <strong>حدد مسبقًا استخدام الذكاء الاصطناعي</strong> في البروتوكول (أي الأدوات، أي المهام)</div>
+<div class="checklist-item"><span class="number">2</span> <strong>توثيق إعدادات الذكاء الاصطناعي</strong> (إصدار النموذج، والمطالبات، والمعلمات)</div>
+<div class="checklist-item"><span class="number">3</span> <strong>التحقق من صحة الفحص</strong> مع عينة عشوائية (حساب تقدير الاستدعاء)</div>
+<div class="checklist-item"><span class="number">4</span> <strong>التحقق من كافة البيانات المستخرجة</strong> مقابل المستندات المصدر</div>
+<div class="checklist-item"><span class="number">5</span> <strong>تقييم RoB البشري</strong> (الذكاء الاصطناعي كمبدئي فقط)</div>
+<div class="checklist-item"><span class="number">6</span> <strong>تتبع معدلات الخطأ</strong> لكل مهمة ذكاء اصطناعي</div>
+<div class="checklist-item"><span class="number">7</span> <strong>الإبلاغ بشفافية</strong> في قسم الأساليب</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">الإبلاغ عن استخدام الذكاء الاصطناعي (PRISMA-S)</div>
+<div class="simple-box animate delay-1">
+<div class="simple-title">ما الذي يجب الإبلاغ عنه في ورقتك؟</div>
+<div class="simple-text">
+                    • <strong>ما هي أدوات الذكاء الاصطناعي</strong> التي تم استخدامها (الاسم والإصدار والتاريخ)<br/>
+                    • <strong>ما هي المهام</strong> التي تمت بمساعدة الذكاء الاصطناعي<br/>
+                    • <strong>ما هي عمليات التحقق</strong> التي تم إجراؤها<br/>
+                    • <strong>ما هي معدلات الخطأ</strong> التي تمت ملاحظتها<br/>
+                    • <strong>ما هي الرقابة البشرية تمت المحافظة على</strong> تم الحفاظ عليه<br/>
+                    • <strong>أي انحرافات</strong> من البروتوكول بسبب قيود الذكاء الاصطناعي
+                  </div>
+</div>
+<div class="simple-box warning animate delay-2">
+<div class="simple-title">المعايير الناشئة</div>
+<div class="simple-text">
+                    تتطلب المجلات بشكل متزايد <strong>عبارات استخدام الذكاء الاصطناعي</strong>. يشتمل ملحق PRISMA-S لإعداد تقارير البحث على الأتمتة.
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">سير العمل الكامل لـ AI-MA</div>
+<div class="decision-tree animate delay-1">
+<h4>عملية متكاملة للذكاء الاصطناعي البشري</h4>
+<div class="tree-row"><div class="tree-node root">البروتوكول (بشري + مسودة ماجستير في القانون)</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node action">بحث (بشري/متخصص)</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node cyber">الفحص (أولوية الذكاء الاصطناعي + قرار بشري)</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node cyber">الاستخراج (مسودة ماجستير في القانون + التحقق البشري 100%)</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node warning">RoB (علم الذكاء الاصطناعي + تقييم الإنسان)</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node action">التحليل (إنسان)</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node yes">تفسير (إنسان)</div></div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain gold animate">
+                  "الآلة ليست زميلًا ولا بديلاً.<br/>
+                  إنها أداة قوية وسريعة وغير معصومة من الخطأ.<br/>
+                  قم بتوثيق ما استخدمته. التحقق من صحة ما أنتجته.<br/>
+                  المسؤولية تبقى على عاتقك".
+                </div>
+</div>
+</div>
+</div>
+ ================================== الوحدة 8: 
+<div class="module-slides" data-module="8">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  هل لم تعتبر<br/>
+                  الذي قام عماله بتدريب النموذج،<br/>
+                  الذي استهلكت بياناته دون موافقة،<br/>
+                  الذين قد <em>إزاحة</em>?
+                </div>
+</div>
+</div>
+<div class="slide warning">
+<div class="content text-center">
+<div class="title gold animate">العمل الخفي</div>
+<div class="story-card gold animate delay-1">
+<div class="place">صانعو البيانات الكينية، مجلة TIME 2023</div>
+<div class="narrative">
+                    لقد أصبح ChatGPT "آمنًا" من خلال عملية تسمى RLHF — التعلم المعزز من ردود الفعل البشرية.
+                    <br/><br/>
+                    البشر الذين قدموا تلك التعليقات كانوا عمالًا في كينيا، وكانوا يتقاضون رواتبهم <strong>أقل من 2 دولار في الساعة</strong> لقراءة وتصنيف المحتوى السام والعنيف والمزعج.
+                    <br/><br/>
+                    لقد أصيبوا بصدمة نفسية من العمل.
+                    <br/><br/>
+                    تعتمد كل أداة من أدوات الذكاء الاصطناعي التي تستخدمها على العمالة البشرية، والتي غالبًا ما تكون غير مرئية، وغالبًا ما تكون مدفوعة الأجر، وغالبًا ما تكون متضررة.
+                  </div>
+<div class="source">مجلة Perrigo B. Time. 18 يناير 2023.</div>
+</div>
+</div>
+</div>
+<div class="slide danger">
+<div class="content text-center">
+<div class="title red animate">أتمتة عدم المساواة</div>
+<div class="story-card red animate delay-1">
+<div class="place">فضيحة خوارزمية المستوى الأول في المملكة المتحدة، 2020</div>
+<div class="narrative">
+                    عندما ألغى فيروس كوفيد-19 اختبارات المستوى A في المملكة المتحدة، استخدمت الحكومة خوارزمية للتنبؤ بدرجات الطلاب بناءً على الأداء المدرسي التاريخي.
+                    <br/><br/>
+                    النتائج:
+                    <br/><br/>
+                    • تم تخفيض مستوى الطلاب من المدارس المحرومة <strong>بشكل منهجي</strong>
+<br/>
+                    • تم تخفيض مستوى الطلاب من المدارس المحرومة <strong>وتم تحديث المدارس الخاصة</strong>
+<br/>
+                    • تجاوزت الخوارزمية توقعات المعلم بأن الطلاب سينجحون
+                    <br/><br/>
+                    بعد احتجاج شعبي هائل، <strong>تمت مراجعة 40% من الدرجات</strong>.
+                    <br/><br/>
+                    تم تشفير الخوارزمية <strong>تاريخي عدم المساواة كتنبؤ</strong>. تمت معاقبة المدارس التي أرسلت تاريخيًا عددًا أقل من الطلاب إلى الجامعة، بغض النظر عن قدرة الطالب الفردية.
+                  </div>
+<div class="source">لائحة مكتب المؤهلات والامتحانات في المملكة المتحدة، 2020</div>
+</div>
+<div class="simple-box danger animate delay-2">
+<div class="simple-title">الدرس</div>
+<div class="simple-text" style="color: var(--gold);">
+                    يستطيع الذكاء الاصطناعي أتمتة التحيز على نطاق واسع. عندما تعكس البيانات التاريخية التفاوت النظامي، فإن الخوارزميات المدربة على تلك البيانات تعمل على إدامة هذه التفاوت وتضخيمه.
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">الإطار الأخلاقي للذكاء الاصطناعي في الأبحاث</div>
+<div class="checklist animate delay-1">
+<h4>أسئلة يجب طرحها</h4>
+<div class="checklist-item"><span class="number">1</span> <strong>الشفافية:</strong> هل يمكنني الكشف بشكل كامل عن كيفية استخدام الذكاء الاصطناعي؟</div>
+<div class="checklist-item"><span class="number">2</span> <strong>المساءلة:</strong> من المسؤول عن أخطاء الذكاء الاصطناعي؟</div>
+<div class="checklist-item"><span class="number">3</span> <strong>عدالة:</strong> هل يؤدي الوصول إلى الذكاء الاصطناعي إلى عدم المساواة في مجال البحث؟</div>
+<div class="checklist-item"><span class="number">4</span> <strong>تَعَب:</strong> من عمل الذي مكن هذه الأداة؟</div>
+<div class="checklist-item"><span class="number">5</span> <strong>بيئة:</strong> ما هي تكلفة الكربون للتدريب النموذجي؟</div>
+<div class="checklist-item"><span class="number">6</span> <strong>إمكانية تكرار نتائج:</strong> هل يمكن للآخرين تكرار عملي بمساعدة الذكاء الاصطناعي؟</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">التأليف والذكاء الاصطناعي</div>
+<div class="simple-box animate delay-1">
+<div class="simple-title">لا يمكن إدراج موقف ICMJE</div>
+<div class="simple-text">
+                    أدوات الذكاء الاصطناعي <strong>كمؤلفين</strong>.
+                    <br/><br/>
+                    يجب أن يتحمل المؤلفون المسؤولية عن المحتوى الناتج عن الذكاء الاصطناعي.
+                    <br/><br/>
+                    يجب الكشف عن استخدام الذكاء الاصطناعي في الأساليب أو الإقرارات.
+                  </div>
+</div>
+<div class="simple-box warning animate delay-2">
+<div class="simple-title">مسؤوليتك</div>
+<div class="simple-text">
+                    إذا كان الذكاء الاصطناعي يهلوس وقمت بنشره،
+                    <strong>أنت تتحمل المسؤولية</strong>- ليس OpenAI، وليس إنسانيًا، وليس الأداة.
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  "الآلة ليس لها ضمير.<br/>
+                  لا يهم إذا كانت البيانات صحيحة.<br/>
+                  ولا يعرف من تضرر لتدريبه.<br/>
+                  يجب أن تكون الضمير الذي يفتقر إليه."
+                </div>
+</div>
+</div>
+</div>
+ ================================== الوحدة 9: ============== 
+<div class="module-slides" data-module="9">
+<div class="slide gradient active">
+<div class="content text-center">
+<div class="title cyber animate ai-glow">الطريق إلى الأمام</div>
+<div class="subtitle animate delay-1">إلى أين يتجه الذكاء الاصطناعي في تركيب الأدلة؟</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">القدرات الناشئة</div>
+<div class="stats-grid animate delay-1">
+<div class="tool-card">
+<div class="tool-name">الذكاء الاصطناعي متعدد الوسائط</div>
+<div class="tool-desc">استخراج من<br/>الأرقام / الجداول</div>
+<div class="tool-stat">2024-2025</div>
+</div>
+<div class="tool-card">
+<div class="tool-name">أنظمة الوكيل</div>
+<div class="tool-desc">متعدد الخطوات<br/>سير العمل</div>
+<div class="tool-stat">الناشئة</div>
+</div>
+<div class="tool-card">
+<div class="tool-name">أنظمة RAG</div>
+<div class="tool-desc">زيادة الاسترجاع<br/>جيل</div>
+<div class="tool-stat">بحث نشط</div>
+</div>
+<div class="tool-card">
+<div class="tool-name">نماذج مضبوطة</div>
+<div class="tool-desc">خاص بـ MA<br/>تمرين</div>
+<div class="tool-stat">في التنمية</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">ما لن يتغير</div>
+<div class="checklist animate delay-1">
+<h4>متطلبات الإنسان الدائمة</h4>
+<div class="checklist-item"><span class="check" style="color:var(--gold);">★</span> تحديد سؤال البحث (الحكم السريري)</div>
+<div class="checklist-item"><span class="check" style="color:var(--gold);">★</span> تفسير الأهمية السريرية (خبرة المجال)</div>
+<div class="checklist-item"><span class="check" style="color:var(--gold);">★</span> تقييم قابلية التطبيق (المعرفة السياقية)</div>
+<div class="checklist-item"><span class="check" style="color:var(--gold);">★</span> تقديم التوصيات (أحكام القيمة)</div>
+<div class="checklist-item"><span class="check" style="color:var(--gold);">★</span> تحمل المسؤولية (المساءلة الأخلاقية)</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">الثابت</div>
+<div class="simple-text">
+                    سوف يقوم الذكاء الاصطناعي بتسريع الآليات.<br/>
+<strong>فالعلم يبقى إنسانيا.</strong>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">الاستعداد للمستقبل</div>
+<div class="decision-tree animate delay-1">
+<h4>مهارات للتطوير</h4>
+<div class="tree-row"><div class="tree-node root">باحث جاهز للمستقبل</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node cyber">هندسة عاجلة<small>الحصول على مخرجات جيدة للذكاء الاصطناعي</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node action">طرق التحقق من الصحة<small>معرفة متى يخطئ الذكاء الاصطناعي</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node yes">الأساليب الأساسية<small>لا يمكن للذكاء الاصطناعي أن يحل محله</small></div>
+</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node warning">أفضل مستخدمي الذكاء الاصطناعي هم أفضل المنهجيين<small>الفهم يتيح المراقبة</small></div></div>
+</div>
+</div>
+</div>
+<div class="slide hope">
+<div class="content text-center">
+<div class="refrain hope animate">
+                  "الآلة تزداد قوة كل عام.<br/>
+                  لكن يبقى السؤال هو نفسه:<br/>
+                  ما هو الصحيح؟ ما الذي يساعد المرضى؟<br/>
+                  الذكاء الاصطناعي يمكنه المساعدة في البحث.<br/>
+                  أنت فقط من يستطيع تقديم الجواب."
+                </div>
+</div>
+</div>
+</div>
+ ==================== الوحدة 10: الاختبار والمراجع ================ 
+<div class="module-slides" data-module="10">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="title cyber animate">اختبر معلوماتك</div>
+<div class="quiz-container animate delay-1">
+<div class="quiz-question">ما هو القيد الرئيسي لاستخدام LLMs لاستخراج البيانات؟</div>
+<div class="quiz-options">
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">إنهم بطيئون جدًا</div>
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">يمكنهم توليد بيانات معقولة ولكنها غير صحيحة (الهلوسة)</div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">لا يمكنهم قراءة ملفات PDF</div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">أنها مكلفة للغاية</div>
+</div>
+<div class="quiz-feedback"></div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="quiz-container animate">
+<div class="quiz-question">عند استخدام فحص الذكاء الاصطناعي (على سبيل المثال، ASReview)، ما الذي يجب عليك فعله دائمًا؟</div>
+<div class="quiz-options">
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">ثق بالذكاء الاصطناعي تمامًا بعد التدريب</div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">قم بفحص أعلى 10% فقط من السجلات المصنفة</div>
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">التحقق من صحة قاعدة التوقف مع عينة عشوائية</div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">استخدم أدوات الذكاء الاصطناعي المتعددة في وقت واحد</div>
+</div>
+<div class="quiz-feedback"></div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="quiz-container animate">
+<div class="quiz-question">ما هي المهمة التي لا يجب أن يكون الذكاء الاصطناعي هو صانع القرار النهائي فيها؟</div>
+<div class="quiz-options">
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">إلغاء البيانات المكررة</div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">تحديد أولويات الفحص</div>
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">التفسير السريري للنتائج</div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">تنسيق المرجع</div>
+</div>
+<div class="quiz-feedback"></div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">مراجع</div>
+<div class="references animate delay-1">
+<h4>المصادر الرئيسية</h4>
+<ol>
+<li>فان دي شوت آر وآخرون. نات ماخ إنتل. 2021;3:125-133. [مراجعة]</li>
+<li>مارشال IJ وآخرون. نات ماخ إنتل. 2019;1:115-117. [مراجع الروبوت]</li>
+<li>قوه واي وآخرون. J كلين Epidemiol. 2024;165:111203. [استخراج جي بي تي-4]</li>
+<li>ماتا ضد أفيانكا، 22-cv-1461 (S.D.N.Y. 2023). [حالة الهلوسة]</li>
+<li>بيريجو بي. مجلة تايم. 18 يناير 2023. [أخلاقيات العمل بالذكاء الاصطناعي]</li>
+<li>إليوت جه وآخرون. J كلين Epidemiol. 2017;91:23-30. [مراجعات المعيشة]</li>
+<li>دليل كوكرين 2023. فصل عن الأتمتة.</li>
+<li>ICMJE. توصيات بشأن تأليف الذكاء الاصطناعي. 2023.</li>
+<li>ريثلفسين مل وآخرون. مساعد J ميد ليبر. 2021. [بريسما-S]</li>
+<li>وانغ س وآخرون. القس النظام. 2023؛12:178. [التحقق من صحة فحص الذكاء الاصطناعي]</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="slide hope">
+<div class="content text-center">
+<div class="big-number green animate" style="font-size:3rem;">✔</div>
+<div class="title green animate delay-1">اكتملت الدورة</div>
+<div class="gold-line animate delay-2"></div>
+<div class="refrain hope animate delay-3">
+                  "أنت تعرف الآن كاتب السيليكون -<br/>
+                  صلاحياتها وحدودها.<br/>
+                  استخدمه للتسريع وليس الاستبدال.<br/>
+                  التحقق من صحة ما تنتجه.<br/>
+                  توثيق ما فعلته.<br/>
+                  وتذكر دائما:<br/>
+                  الآلة تتنبأ بالكلمة التالية<br/>
+                  يجب أن تحكم إذا كانت هذه الكلمة صحيحة."
+                </div>
+</div>
+</div>
+</div>
+ ==================== الوحدة 11: المراجعة خطوة بخطوة ============= 
+<div class="module-slides" data-module="11">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="title cyber animate ai-glow">ASReview: برنامج تعليمي خطوة بخطوة</div>
+<div class="subtitle animate delay-1">من التثبيت إلى قرار الإيقاف</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">الخطوة 1: التثبيت</div>
+<div class="code-box animate delay-1">
+<span class="comment"># الخيار أ: نقطة بايثون (مستحسن)</span><br/>
+                  تثبيت النقطة كمراجعة<br/><br/>
+<span class="comment"># الخيار ب: تنزيل تطبيق سطح المكتب</span><br/>
+<span class="comment"># https://asreview.nl/download/</span><br/><br/>
+<span class="comment"># إطلاق ASReview LAB</span><br/>
+                  كمختبر مراجعة
+                </div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">متطلبات</div>
+<div class="simple-text">
+                    • بايثون 3.8+ (لتثبيت النقطة)<br/>
+                    • أو: تطبيق Windows/Mac لسطح المكتب (لا حاجة إلى Python)<br/>
+                    • مراجعك بتنسيق RIS أو CSV أو EndNote XML
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">الخطوة 2: إنشاء المشروع والاستيراد</div>
+<div class="decision-tree animate delay-1">
+<h4>سير عمل إعداد المشروع</h4>
+<div class="tree-row"><div class="tree-node root">مشروع جديد</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node action">قم بتسمية مشروعك<small>وصفي، يتضمن التاريخ</small></div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node action">مراجع الاستيراد<small>ملف RIS/CSV/XML</small></div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node cyber">يقوم ASReview بإلغاء التكرارات<small>عدد مرات التحقق من التطابقات المتوقعة</small></div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node yes">جاهز للمعرفة المسبقة</div></div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">الخطوة 3: إضافة معرفة سابقة</div>
+<div class="simple-box animate delay-1">
+<div class="simple-title">خطوة حاسمة</div>
+<div class="simple-text">
+                    يتعلم النموذج من قراراتك الأولية.<br/>
+                    أنت بحاجة إلى <strong>ذات الصلة وغير ذات صلة</strong> أمثلة.
+                  </div>
+</div>
+<div class="checklist animate delay-2">
+<h4>استراتيجية المعرفة المسبقة</h4>
+<div class="checklist-item"><span class="number">1</span> أضف 5-10 <strong>معروف ذو صلة</strong> الدراسات (من نطاق البحث)</div>
+<div class="checklist-item"><span class="number">2</span> ابحث عن موضوعات غير ذات صلة بشكل واضح (عينة عشوائية)</div>
+<div class="checklist-item"><span class="number">3</span> مرقس 10-20 <strong>عَرَضِيّ</strong> كأمثلة سلبية</div>
+<div class="checklist-item"><span class="number">4</span> استهدف نسبة 1:2 تقريبًا (ذات صلة: غير ذات صلة) للبدء</div>
+</div>
+<div class="simple-box warning animate delay-3">
+<div class="simple-title">تحذير</div>
+<div class="simple-text">
+                    معرفة سابقة ضعيفة = أداء ضعيف للنموذج.<br/>
+<strong>القمامة داخل، القمامة خارج.</strong>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">الخطوة 4: الشاشة مع التعلم النشط</div>
+<div class="decision-tree animate delay-1">
+<h4>حلقة الفحص</h4>
+<div class="tree-row"><div class="tree-node root">يقدم ASReview السجل</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">قرارك</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node yes">مناسب<small>تضمين للنص الكامل</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node no">عَرَضِيّ<small>استبعاد</small></div>
+</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node cyber">تحديثات النموذج<small>إعادة الترتيب المتبقي</small></div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node action">التالي الأكثر صلة على الأرجح<small>كرر حتى إيقاف القاعدة</small></div></div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">الخطوة 5: قرار الإيقاف</div>
+<div class="comparison-table animate delay-1">
+<h4>مقارنة قواعد الإيقاف</h4>
+<div class="comparison-row">
+<span class="label">متتالية غير ذات صلة (50-200)</span>
+<span class="value warn">شائعة، ولكن لا يوجد ضمان للاستدعاء</span>
+</div>
+<div class="comparison-row">
+<span class="label">% من الإجمالي الذي تم فحصه (على سبيل المثال، 50%)</span>
+<span class="value warn">جهد يمكن التنبؤ به، استدعاء متغير</span>
+</div>
+<div class="comparison-row">
+<span class="label">تم فحص جميع السجلات</span>
+<span class="value good">تذكر بنسبة 100%، بدون توفير الوقت</span>
+</div>
+<div class="comparison-row">
+<span class="label">إيقاف إحصائي (Busfelder)</span>
+<span class="value good">قائم على الأدلة، يتطلب مكونًا إضافيًا</span>
+</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">التحقق المتطلبات</div>
+<div class="simple-text">
+                    بعد التوقف: <strong>فحص العينة العشوائية يدويًا</strong> من السجلات التي لم يتم فحصها.
+                    <br/>قم بالإبلاغ عن الاستدعاء المقدر بفاصل الثقة.
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  "الأداة بسيطة. والقرارات ليست كذلك.<br/>
+                  أعطه أمثلة جيدة. تحقق عند التوقف.<br/>
+                  قم بتصدير ملف المشروع الخاص بك - إنه مسار التدقيق الخاص بك."
+                </div>
+</div>
+</div>
+</div>
+ =============================================================================================================== الوحدة 12 
+<div class="module-slides" data-module="12">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="title cyber animate ai-glow">المكتبة الهندسية السريعة</div>
+<div class="subtitle animate delay-1">المطالبات التي تم التحقق منها لمهام التحليل التلوي</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">المبادئ السريعة</div>
+<div class="checklist animate delay-1">
+<h4>للحصول على مخرجات LLM موثوقة</h4>
+<div class="checklist-item"><span class="number">1</span> <strong>كن محددًا:</strong> تحديد الحقول والتنسيقات الدقيقة</div>
+<div class="checklist-item"><span class="number">2</span> <strong>قدم أمثلة:</strong> عرض تنسيق الإخراج المتوقع</div>
+<div class="checklist-item"><span class="number">3</span> <strong>عدم اليقين في الطلب:</strong> اطلب إشارات "NR" أو "UNCLEAR".</div>
+<div class="checklist-item"><span class="number">4</span> <strong>عروض أسعار الطلب:</strong> يتطلب النص المصدر للتحقق</div>
+<div class="checklist-item"><span class="number">5</span> <strong>نطاق الحد:</strong> مهمة واحدة لكل موجه، وليس كل شيء مرة واحدة</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">موجه 1: استخراج البيانات المعشاة ذات الشواهد</div>
+<div class="code-box animate delay-1" style="font-size:0.55rem;max-width:600px;">
+                  استخراج ما يلي من هذه المضبوطة. لكل حقل توفير:<br/>
+                  - القيمة<br/>
+                  - الاقتباس الدقيق من الورقة (في علامتي الاقتباس)<br/>
+                  - "NR" إذا لم يتم الإبلاغ عنه، "غير واضح" إذا كان غامضًا<br/><br/>
+<span class="keyword">الحقول:</span><br/>
+                  1. حجم عينة مجموعة التدخل (ITT): [n]<br/>
+                  2. مجموعة التحكم حجم العينة (ITT): [n]<br/>
+                  3. تعريف النتيجة الأولية: [نص]<br/>
+                  4. النتيجة الأولية: أحداث التدخل/الإجمالي: [x/n]<br/>
+                  5. النتيجة الأولية: أحداث التحكم/الإجمالي: [x/n]<br/>
+                  6. نسبة المخاطر (95% CI): [RR (أقل، أعلى)]<br/>
+                  7. مدة المتابعة: [أسابيع/أشهر]<br/><br/>
+<span class="keyword">تنسيق الإخراج:</span> JSON مع "قيمة" و"اقتباس" لكل حقل
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">موجه 2: خصائص الدراسة</div>
+<div class="code-box animate delay-1" style="font-size:0.55rem;max-width:600px;">
+                  استخراج خصائص الدراسة. تقديم اقتباسات دقيقة للتحقق.<br/><br/>
+<span class="keyword">الحقول:</span><br/>
+                  1. تصميم الدراسة: [RCT / Cluster RCT / Crossover / Other]<br/>
+                  2. البلد/البلدان: [قائمة]<br/>
+                  3. الإعداد: [المستشفى / الرعاية الأولية / المجتمع / أخرى]<br/>
+                  4. فترة التوظيف: [تاريخ البدء - تاريخ الانتهاء]<br/>
+                  5. مصدر التمويل: [text]<br/>
+                  6. تسجيل التجربة: [رقم الهوية أو "NR"]<br/>
+                  7. إعلان تضارب المصالح: [نعم/لا/NR]<br/><br/>
+                  إذا كانت المعلومات موجودة في مواد تكميلية، لاحظ "انظر الملحق".<br/>
+                  إذا لم يتم الإبلاغ عنه في أي مكان، ضع علامة "NR".
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">الموجه 3: الخصائص السكانية</div>
+<div class="code-box animate delay-1" style="font-size:0.55rem;max-width:600px;">
+                  استخرج الخصائص السكانية الأساسية.<br/>
+                  قم بالإبلاغ عن مجموعات التدخل والتحكم بشكل منفصل.<br/><br/>
+<span class="keyword">الحقول (لكل مجموعة):</span><br/>
+                  1. ن عشوائية: [ن]<br/>
+                  2. تم تحليل N: [n]<br/>
+                  3. العمر: [متوسط (SD) أو متوسط (IQR)]<br/>
+                  4. الجنس (% إناث): [%]<br/>
+                  5. معايير الاشتمال الرئيسية: [النص]<br/>
+                  6. معايير الاستبعاد الرئيسية: [النص]<br/>
+                  7. شدة المرض عند خط الأساس: [القياس والقيمة]<br/><br/>
+<span class="keyword">ملحوظة:</span> إذا تم دمج المجموعات فقط، يتم دمج التقرير مع الملاحظة.
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">موجه 4: خطر فحص التحيز</div>
+<div class="code-box animate delay-1" style="font-size:0.55rem;max-width:600px;">
+<span class="keyword">ملحوظة:</span> هذا مخصص لوضع العلامات الأولية فقط.<br/>
+                  التقييم البشري مطلوب للحكم النهائي.<br/><br/>
+                  لكل مجال RoB 2، حدد النص ذي الصلة:<br/><br/>
+<span class="keyword">التوزيع العشوائي D1:</span><br/>
+                  - طريقة توليد التسلسل: [اقتباس أو NR]<br/>
+                  - طريقة إخفاء التخصيص: [اقتباس أو NR]<br/><br/>
+<span class="keyword">انحرافات D2:</span><br/>
+                  - تعمية المشاركين: [اقتباس أو NR]<br/>
+                  - تعمية الموظفين: [اقتباس أو NR]<br/><br/>
+<span class="keyword">D3 البيانات المفقودة:</span><br/>
+                  - معدلات الاستنزاف: [التدخل: x%، التحكم: y%]<br/>
+                  - التعامل مع البيانات المفقودة: [اقتباس أو NR]<br/><br/>
+<span class="keyword">لا</span> إصدار الأحكام. استخراج الاقتباسات فقط.
+                </div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  "الموجه هو عقدك مع الآلة.<br/>
+                  كن دقيقًا فيما تطلبه.<br/>
+                  اطلب الدليل على كل إجابة.<br/>
+                  تحقق من كل مخرجات مقابل المصدر."
+                </div>
+</div>
+</div>
+</div>
+ ==================== الوحدة 13: قراءة المراجعات المدعومة بالذكاء الاصطناعي =============== 
+<div class="module-slides" data-module="13">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  لا يجوز لك أبدًا كتابة مراجعة منهجية.<br/>
+                  ولكنك سوف <em>read</em> هم.<br/>
+<br/>
+                  كيف يمكنك معرفة ما إذا كانت مساعدة الذكاء الاصطناعي<br/>
+                  تم <em>جيدا أو سيئا</em>?
+                </div>
+</div>
+</div>
+<div class="slide danger">
+<div class="content text-center">
+<div class="title red animate">فشل آي بي إم واتسون للأورام</div>
+<div class="story-card red animate delay-1">
+<div class="place">مركز إم دي أندرسون للسرطان، 2017</div>
+<div class="narrative">
+                    تم تدريب IBM Watson for Oncology على التوصية بعلاجات السرطان.
+                    <br/><br/>
+                    بعد الإنفاق <strong>62 مليون دولار</strong>ألغى إم دي أندرسون المشروع.
+                    <br/><br/>
+                    أظهرت الوثائق الداخلية أن واتسون صنع <strong>"غير آمنة وغير صحيحة"</strong>
+                    توصيات العلاج. تم تدريبه على الحالات الاصطناعية، وليس على بيانات المرضى الحقيقية.
+                    <br/><br/>
+                    بدا الذكاء الاصطناعي واثقًا. وكانت التوصيات خطيرة.
+                    <br/><br/>
+<strong>الدرس المستفاد: الثقة في الذكاء الاصطناعي ≠ صحة الذكاء الاصطناعي</strong>
+</div>
+<div class="source">تحقيق STAT News، 2017؛ IEEE الطيف 2019</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">أسئلة للمراجعات بمساعدة الذكاء الاصطناعي</div>
+<div class="checklist animate delay-1">
+<h4>ما الذي تبحث عنه في الأساليب</h4>
+<div class="checklist-item"><span class="number">1</span> هل فعلوا ذلك <strong>تسمية أدوات الذكاء الاصطناعي</strong> مستخدم؟ (الإصدار والتاريخ)</div>
+<div class="checklist-item"><span class="number">2</span> هل فعلوا ذلك <strong>تحديد المهام</strong> هل تمت مساعدتهم بالذكاء الاصطناعي؟</div>
+<div class="checklist-item"><span class="number">3</span> هل فعلوا ذلك <strong>التحقق من صحة مخرجات الذكاء الاصطناعي</strong>؟ كيف؟</div>
+<div class="checklist-item"><span class="number">4</span> لفحص الذكاء الاصطناعي: ماذا <strong>قاعدة التوقف</strong>؟ ماذا <strong>الاستدعاء المقدر</strong>?</div>
+<div class="checklist-item"><span class="number">5</span> لاستخراج الذكاء الاصطناعي: كان <strong>تم التحقق منه بشريًا بنسبة 100%</strong>?</div>
+<div class="checklist-item"><span class="number">6</span> كان هناك <strong>الرقابة البشرية</strong> من بين جميع قرارات الذكاء الاصطناعي؟</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">العلامات الحمراء في المراجعات المدعومة بالذكاء الاصطناعي</div>
+<div class="comparison-table animate delay-1">
+<h4>علامات التحذير</h4>
+<div class="comparison-row">
+<span class="label">"قامت منظمة العفو الدولية بفحص جميع العناوين"</span>
+<span class="value bad">لا يوجد تدخل بشري؟</span>
+</div>
+<div class="comparison-row">
+<span class="label">"بيانات GPT المستخرجة"</span>
+<span class="value bad">لم يذكر التحقق؟</span>
+</div>
+<div class="comparison-row">
+<span class="label">"توقف بعد 500 متتالية غير ذات صلة"</span>
+<span class="value warn">لا يوجد تقدير الاستدعاء؟</span>
+</div>
+<div class="comparison-row">
+<span class="label">"بروتوكول تم إنشاؤه بواسطة الذكاء الاصطناعي"</span>
+<span class="value warn">قرارات الإنسان غير واضحة؟</span>
+</div>
+<div class="comparison-row">
+<span class="label">لم يتم ذكر أدوات الذكاء الاصطناعي ولكن من الواضح أنها مكتوبة بالذكاء الاصطناعي</span>
+<span class="value bad">استخدام الذكاء الاصطناعي المخفي</span>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">للمرضى والأطباء</div>
+<div class="simple-box animate delay-1">
+<div class="simple-title">ما تحتاج إلى معرفته</div>
+<div class="simple-text">
+<strong>الاستخدام الجيد للذكاء الاصطناعي:</strong> يسرع العمل، ويتحقق الإنسان<br/>
+<strong>الاستخدام السيئ للذكاء الاصطناعي:</strong> يحل محل الحكم البشري، لا التحقق من صحة<br/><br/>
+<em>يمكن أن تكون المراجعة المدعومة بالذكاء الاصطناعي جديرة بالثقة، إذا تم إجراؤها بشكل صحيح.</em>
+</div>
+</div>
+<div class="checklist animate delay-2">
+<h4>أسئلة بسيطة يجب طرحها</h4>
+<div class="checklist-item"><span class="check" style="color:var(--cyber);">?</span> "هل تم استخدام الذكاء الاصطناعي في هذه المراجعة؟"</div>
+<div class="checklist-item"><span class="check" style="color:var(--cyber);">?</span> "هل تم فحص نتائج الذكاء الاصطناعي من قبل البشر؟"</div>
+<div class="checklist-item"><span class="check" style="color:var(--cyber);">?</span> "هل من الممكن أن يكون الذكاء الاصطناعي قد فاتته دراسات مهمة؟"</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  "مساعدة الذكاء الاصطناعي ليست عيبًا - إنها في كثير من الأحيان ميزة.<br/>
+                  ولكن فقط إذا تم التحقق من صحتها، فقط إذا تم الكشف عنها.<br/>
+                  سؤال: هل تم فحص الجهاز؟<br/>
+                  إذا كانت الإجابة غير واضحة، فالمراجعة كذلك."
+                </div>
+</div>
+</div>
+</div>
+ ==================== الوحدة 14: إعدادات الموارد المحدودة ================ 
+<div class="module-slides" data-module="14">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  ألم تعتبر الباحث<br/>
+                  مع إنترنت غير مستقر، وحوسبة محدودة،<br/>
+                  لا يوجد اشتراك مؤسسي،<br/>
+                  الذي لا يزال بحاجة إلى تجميع <em>دليل</em>?
+                </div>
+</div>
+</div>
+<div class="slide cyber">
+<div class="content text-center">
+<div class="title cyber animate">أدوات مجانية وغير متصلة بالإنترنت</div>
+<div class="stats-grid animate delay-1">
+<div class="tool-card">
+<div class="tool-name">ASReview</div>
+<div class="tool-desc">تطبيق سطح المكتب<br/>يعمل دون اتصال بالإنترنت</div>
+<div class="tool-stat">FREE</div>
+</div>
+<div class="tool-card">
+<div class="tool-name">الملخص</div>
+<div class="tool-desc">على شبكة الإنترنت<br/>حسابات مجانية</div>
+<div class="tool-stat">FREE</div>
+</div>
+<div class="tool-card">
+<div class="tool-name">الريان</div>
+<div class="tool-desc">الطبقة المجانية<br/>ذكاء اصطناعي محدود</div>
+<div class="tool-stat">FREEMIUM</div>
+</div>
+<div class="tool-card">
+<div class="tool-name">RevMan</div>
+<div class="tool-desc">أداة كوكرين<br/>برنامج MA الكامل</div>
+<div class="tool-stat">FREE</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">سير العمل دون اتصال</div>
+<div class="decision-tree animate delay-1">
+<h4>عندما لا يمكن الاعتماد على الإنترنت</h4>
+<div class="tree-row"><div class="tree-node root">مرحلة البحث</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node action">المكتبة/المقهى: قم بتنزيل جميع ملفات PDF<small>تحميل دفعة عند الاتصال</small></div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node root">مرحلة الفحص</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node cyber">ASReview سطح المكتب<small>يعمل دون اتصال بالكامل</small></div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node root">مرحلة الاستخراج</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node action">جدول البيانات + ملفات PDF المحلية<small>لا حاجة إلى ذكاء اصطناعي</small></div></div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">بدائل LLM منخفضة التكلفة</div>
+<div class="simple-box animate delay-1">
+<div class="simple-title">عندما تكون تكاليف API باهظة</div>
+<div class="simple-text">
+                    • <strong>المستويات المجانية لـ Claude/ChatGPT:</strong> محدودة ولكنها عملية<br/>
+                    • <strong>نماذج Ollama + المحلية:</strong> مجانية، تعمل على الكمبيوتر المحمول (يتطلب التنزيل)<br/>
+                    • <strong>استدلال وجه العناق:</strong> الطبقة المجانية متاحة<br/>
+                    • <strong>الاستخراج اليدوي:</strong> لا يزال المعيار الذهبي، أبطأ
+                  </div>
+</div>
+<div class="simple-box warning animate delay-2">
+<div class="simple-title">تقييم صادق</div>
+<div class="simple-text">
+                    الذكاء الاصطناعي هو وسيلة راحة وليس ضرورة.<br/>
+<strong>الكل تم إجراء مراجعات كوكرين بدون الذكاء الاصطناعي.</strong><br/>
+                    الجودة تأتي من الأساليب، وليس من الأدوات.
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">شجرة قرارات محدودة الموارد</div>
+<div class="decision-tree animate delay-1">
+<h4>اختيار النهج الخاص بك</h4>
+<div class="tree-row"><div class="tree-node root">مواردك</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">موثوقية الإنترنت؟</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">مستقر</div>
+<div class="tree-node yes">أدوات الويب موافق<small>الريان، كوفيدنس</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">غير موثوق به</div>
+<div class="tree-node action">أدوات سطح المكتب<small>ASReview دون اتصال</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">None</div>
+<div class="tree-node warning">دليل + جداول البيانات<small>لا تزال صالحة</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain gold animate">
+                  "الأدلة ملك للجميع،<br/>
+                  ليس فقط أولئك الذين لديهم إنترنت سريع واشتراكات مدفوعة.<br/>
+                  قد تختلف الأدوات. تبقى الأساليب.<br/>
+                  تركيب الجودة ممكن في أي مكان."
+                </div>
+</div>
+</div>
+</div>
+ ==================== الوحدة 15: حسابات التحقق ================ 
+<div class="module-slides" data-module="15">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="title cyber animate ai-glow">حسابات التحقق</div>
+<div class="subtitle animate delay-1">أحجام العينات للتحقق من الذكاء الاصطناعي</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">تقدير الاستدعاء بعد فحص الذكاء الاصطناعي</div>
+<div class="simple-box animate delay-1">
+<div class="simple-title">المشكلة</div>
+<div class="simple-text">
+                    لقد توقفت عن الفحص عند 1000 من 5000 سجل.<br/>
+                    ما مدى ثقتك في أنك وجدت جميع الدراسات ذات الصلة؟
+                  </div>
+</div>
+<div class="decision-tree animate delay-2">
+<h4>أخذ عينات التحقق</h4>
+<div class="tree-row"><div class="tree-node root">السجلات التي لم يتم فحصها (n=4000)</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node action">عينة عشوائية (n=400)<small>10% أو على الأقل 200</small></div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">الفحص اليدوي</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node yes">تم العثور على 0 ذات صلة<small>أذكر ≈ 95-100%</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node no">تم العثور على ذات صلة<small>فحص كل ما تبقى</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">معادلة حجم العينة</div>
+<div class="simple-box animate delay-1">
+<div class="simple-title">للحصول على ثقة بنسبة 95% عند الاسترجاع</div>
+<div class="simple-text" style="font-family:monospace;text-align:center;">
+                    n = ln(1 - الثقة) / ln(1 - الانتشار)<br/><br/>
+<strong>مثال:</strong><br/>
+                    إذا كان معدل الانتشار ذو الصلة = 1% (0.01)<br/>
+                    للحصول على ثقة 95% (0.95):<br/><br/>
+                    n = ln(1 - 0.95) / ln(1 - 0.01)<br/>
+                    n = ln(0.05) / ln(0.99)<br/>
+                    n ≈ <strong>299</strong> سجلات لعينة
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">جدول مرجعي سريع</div>
+<div class="comparison-table animate delay-1">
+<h4>أحجام العينات للتحقق من صحتها</h4>
+<div class="comparison-row">
+<span class="label">الانتشار 0.5%، 95% تأكيد</span>
+<span class="value">598 سجلًا</span>
+</div>
+<div class="comparison-row">
+<span class="label">الانتشار 1%، 95% تأكيد</span>
+<span class="value">299 سجلًا</span>
+</div>
+<div class="comparison-row">
+<span class="label">الانتشار 2%، 95% تأكيد</span>
+<span class="value">149 سجلًا</span>
+</div>
+<div class="comparison-row">
+<span class="label">الانتشار 5%، 95% تأكيد</span>
+<span class="value">59 سجلًا</span>
+</div>
+<div class="comparison-row">
+<span class="label">الحد الأدنى العملي</span>
+<span class="value good">200 سجل (محافظ)</span>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">الإبلاغ عن التحقق الخاص بك</div>
+<div class="code-box animate delay-1" style="font-size:0.6rem;max-width:600px;text-align: right;">
+<span class="keyword">نص طرق المثال:</span><br/><br/>
+                  "لقد استخدمنا ASReview LAB (الإصدار 1.2) لفحص العنوان/الملخص باستخدام<br/>
+                  التعلم النشط. توقف الفحص بعد 150 سجلًا متتاليًا<br/>
+                  غير ذي صلة، بعد فحص 1247 سجلًا من أصل 4892<br/>
+                  (25%). للتحقق من صحة الاستدعاء، قمنا يدويًا بفحص عينة عشوائية<br/>
+                  مكونة من 300 سجل لم يتم فحصها. لا توجد<br/>
+                  تم تحديد الدراسات، مما يشير إلى أن الاستدعاء المقدر ≥95%<br/>
+                  (ذات الحدين 95% CI: 91-100%)."
+                </div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  "التحقق ليس اختياريًا، بل هو ثمن الكفاءة.<br/>
+                  إضافية ذات صلة بحساب العينة الخاصة بك. قم بفحصها يدويًا.<br/>
+                  أبلغ عما وجدته. اعترف بما قد فاتك."
+                </div>
+</div>
+</div>
+</div>
+<div class="slide-nav">
+<button class="nav-btn" onclick="prevSlide()">←</button>
+<div class="nav-center">
+<div class="slide-counter" id="slideCounter">1 / 6</div>
+<div class="progress" id="progressDots"></div>
+</div>
+<button class="nav-btn" onclick="nextSlide()">→</button>
+</div>
+</div>
+</div>
+</main>
+</div>
+<script>
+    const modules = [
+      { id: 1, title: "Promise & Peril", subtitle: "ما يمكن أو لا يستطيع الذكاء الاصطناعي فعله", slides: 6 },
+      { id: 2, title: "AI Screening", subtitle: "ASReview, Rayyan, Abstrackr", slides: 7 },
+      { id: 3, title: "استخراج بيانات LLM", subtitle: "Validation requirements", slides: 6 },
+      { id: 4, title: "Automated RoB", subtitle: "RobotReviewer limits", slides: 6 },
+      { id: 5, title: "Protocol Writing", subtitle: "GPT كأداة صياغة", slides: 6 },
+      { id: 6, title: "المراجعات الحية + الذكاء الاصطناعي", subtitle: "Continuous surveillance", slides: 6 },
+      { id: 7, title: "Quality Assurance", subtitle: "Verification framework", slides: 6 },
+      { id: 8, title: "أخلاقيات الذكاء الاصطناعي", subtitle: "العمل والإنصاف والمساءلة", slides: 5 },
+      { id: 9, title: "Future Directions", subtitle: "What's coming", slides: 5 },
+      { id: 10, title: "الاختبار والمراجع", subtitle: "Test yourself", slides: 5 },
+      { id: 11, title: "ASReview Tutorial", subtitle: "Step-by-step guide", slides: 7 },
+      { id: 12, title: "Prompt Library", subtitle: "Validated prompts", slides: 6 },
+      { id: 13, title: "قراءة مراجعات الذكاء الاصطناعي", subtitle: "Consumer's guide", slides: 6 },
+      { id: 14, title: "Resource-Limited", subtitle: "أدوات مجانية وغير متصلة بالإنترنت", slides: 6 },
+      { id: 15, title: "Validation Calcs", subtitle: "Sample sizes", slides: 6 }
+    ];
+
+    let currentModule = 1;
+    let currentSlide = 1;
+    const completedModules = new Set();
+
+    function toggleSidebar() {
+      const sidebar = document.querySelector('.sidebar');
+      const overlay = document.querySelector('.sidebar-overlay');
+      if (!sidebar) return;
+      const isOpen = sidebar.classList.toggle('open');
+      if (overlay) overlay.classList.toggle('show', isOpen);
+    }
+
+    function init() {
+      renderModuleList();
+      updateSlideNav();
+      document.addEventListener('keydown', (e) => {
+        const tag = e.target.tagName;
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || e.target.isContentEditable) return;
+        if (e.target.matches('زر، أ، [role = "button"]، [role = "radio"]، [role = "option"]')) {
+            if (e.key === ' ' || e.key === 'Enter') return;
+        }
+        if (e.key === 'ArrowLeft' || e.key === ' ') { e.preventDefault(); nextSlide(); }
+        else if (e.key === 'ArrowRight') { e.preventDefault(); prevSlide(); }
+      });
+    }
+
+    function renderModuleList() {
+      const list = document.getElementById('moduleList');
+      list.innerHTML = modules.map(m => `
+        <div class="عنصر الوحدة ${m.id === currentModule ? 'active' : ''} ${CompletedModules.has(m.id) ؟ 'مكتمل' : ''}" onclick="goToModule(${m.id})" tabindex="0" role="button" aria-label="الوحدة النمطية ${m.id}: ${m.title}"
+             onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();goToModule(${m.id});}">
+          <div class="module-number">${completedModules.has(m.id) ? '✓' : m.id}</div>
+          <div class="module-info">
+            <div class="module-title">${m.title}</div>
+            <div class="module-subtitle">${m.subtitle}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function goToModule(moduleId) {
+      if (moduleId > currentModule) completedModules.add(currentModule);
+      currentModule = moduleId;
+      currentSlide = 1;
+      document.querySelectorAll('.module-slides').forEach(el => el.classList.remove('active'));
+      document.querySelector(`.module-slides[data-module="${moduleId}"]`).classList.add('active');
+      updateSlideVisibility();
+      updateSlideNav();
+      renderModuleList();
+      document.getElementById('currentModule').textContent = modules[moduleId - 1].title;
+    }
+
+    function updateSlideVisibility() {
+      const moduleSlides = document.querySelector(`.module-slides[data-module="${currentModule}"]`);
+      const slides = moduleSlides.querySelectorAll('.slide');
+      slides.forEach((slide, index) => slide.classList.toggle('active', index + 1 === currentSlide));
+    }
+
+    function updateSlideNav() {
+      const module = modules[currentModule - 1];
+      document.getElementById('slideCounter').textContent = `${currentSlide} / ${module.slides}`;
+      document.getElementById('progressDots').innerHTML = Array.from({ length: module.slides }, (_, i) =>
+        `<div class="progress-dot ${i + 1 === currentSlide ? 'active' : ''}" onclick="goToSlide(${i + 1})"></div>`
+      ).join('');
+    }
+
+    function goToSlide(slideNum) { currentSlide = slideNum; updateSlideVisibility(); updateSlideNav(); }
+
+    function nextSlide() {
+      const module = modules[currentModule - 1];
+      if (currentSlide < module.slides) { currentSlide++; updateSlideVisibility(); updateSlideNav(); }
+      else if (currentModule < modules.length) { goToModule(currentModule + 1); }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 1) { currentSlide--; updateSlideVisibility(); updateSlideNav(); }
+      else if (currentModule > 1) {
+        const prevModuleSlides = modules[currentModule - 2].slides;
+        currentModule--;
+        currentSlide = prevModuleSlides;
+        document.querySelectorAll('.module-slides').forEach(el => el.classList.remove('active'));
+        document.querySelector(`.module-slides[data-module="${currentModule}"]`).classList.add('active');
+        updateSlideVisibility();
+        updateSlideNav();
+        renderModuleList();
+        document.getElementById('currentModule').textContent = modules[currentModule - 1].title;
+      }
+    }
+
+    function checkAnswer(element, isCorrect) {
+      const container = element.closest('.quiz-container');
+      const options = container.querySelectorAll('.quiz-option');
+      const feedback = container.querySelector('.quiz-feedback');
+      options.forEach(opt => {
+        opt.style.pointerEvents = 'none';
+        if (opt === element) opt.classList.add(isCorrect ? 'correct' : 'incorrect');
+        if (!isCorrect && opt.dataset.correct === 'true') opt.classList.add('correct');
+      });
+      feedback.classList.add('show', isCorrect ? 'correct' : 'incorrect');
+      feedback.textContent = isCorrect ? 'صحيح. أنت تفهم متى يجب أن تثق، ومتى يجب التحقق.' : 'ليس تمامًا. تذكر: الآلة تتنبأ، لكنها لا تضمن الحقيقة.';
+    }
+
+    init();
+  </script>
+</body>
+</html>

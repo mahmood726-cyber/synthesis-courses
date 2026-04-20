@@ -1,0 +1,3325 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Der Bund der Beweise: Verfassen des Metaanalysepapiers</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&amp;family=Source+Sans+Pro:wght@300;400;600;700&amp;display=swap" rel="stylesheet"/>
+<style>
+    :root {
+      --navy: #1E2761;
+      --deep-navy: #141B3D;
+      --gold: #D4AF37;
+      --cream: #FAF8F5;
+      --red: #C53030;
+      --green: #22c55e;
+      --teal: #00D4AA;
+      --purple: #A855F7;
+      --orange: #F97316;
+      --blue: #3B82F6;
+      --pink: #EC4899;
+      --blood-red: #8B0000;
+      --transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      height: 100%;
+      font-family: 'Source Sans Pro', sans-serif;
+      background: var(--deep-navy);
+      color: var(--cream);
+    }
+
+    .course-container { display: flex; height: 100vh; overflow: hidden; }
+
+    .sidebar {
+      width: 280px;
+      background: linear-gradient(180deg, var(--deep-navy) 0%, #0a0f1a 100%);
+      border-right: 1px solid rgba(212,175,55,0.2);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    /* mobile sidebar handled by hamburger toggle below */
+
+    .sidebar-header { padding: 1.25rem; border-bottom: 1px solid rgba(212,175,55,0.2); }
+    .sidebar-header h1 { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; font-weight: 700; color: var(--gold); }
+    .sidebar-header p { font-size: 0.65rem; color: rgba(255,255,255,0.6); margin-top: 0.25rem; }
+
+    .module-list { flex: 1; overflow-y: auto; padding: 0.5rem 0; }
+
+    .module-item {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.45rem 0.75rem; cursor: pointer;
+      border-left: 3px solid transparent; transition: all 0.2s;
+    }
+    .module-item:hover { background: rgba(212,175,55,0.1); }
+    .module-item.active { background: rgba(212,175,55,0.15); border-left-color: var(--gold); }
+    .module-item.completed .module-number { background: var(--green); color: white; }
+
+    .module-number {
+      width: 20px; height: 20px; border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.6rem; font-weight: 700; flex-shrink: 0;
+    }
+    .module-item.active .module-number { background: var(--gold); color: var(--navy); }
+
+    .module-info { flex: 1; min-width: 0; }
+    .module-title { font-size: 0.7rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .module-subtitle { font-size: 0.55rem; color: rgba(255,255,255,0.5); }
+
+    .sidebar-footer {
+      padding: 0.6rem 0.75rem; border-top: 1px solid rgba(212,175,55,0.2);
+      font-size: 0.55rem; color: rgba(255,255,255,0.4); line-height: 1.4;
+    }
+
+    .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+    .content-header {
+      padding: 0.5rem 1rem;
+      background: rgba(0,0,0,0.3);
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .breadcrumb { font-size: 0.7rem; color: rgba(255,255,255,0.6); }
+    .breadcrumb span { color: var(--gold); }
+    .header-actions { display: flex; gap: 0.4rem; }
+
+    .btn {
+      padding: 0.3rem 0.6rem; border: 1px solid rgba(212,175,55,0.3);
+      border-radius: 6px; background: rgba(255,255,255,0.05);
+      color: var(--cream); font-size: 0.65rem; cursor: pointer; transition: all 0.2s;
+    }
+    .btn:hover { background: rgba(212,175,55,0.2); border-color: var(--gold); }
+    .btn.primary { background: var(--gold); color: var(--navy); border-color: var(--gold); font-weight: 600; }
+
+    .content-body { flex: 1; overflow: hidden; display: flex; }
+    .slides-container { flex: 1; position: relative; overflow: hidden; }
+    .module-slides { display: none; width: 100%; height: 100%; }
+    .module-slides.active { display: block; }
+
+    .slide {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      display: flex; flex-direction: column; justify-content: flex-start; align-items: center;
+      padding: 1rem 1rem 2.5rem 1rem; padding-top: 1.25rem;
+      opacity: 0; visibility: hidden;
+      transition: opacity var(--transition), visibility var(--transition);
+      overflow-y: auto; overflow-x: hidden;
+    }
+    .slide .content { margin-top: auto; margin-bottom: auto; }
+    .slide.active { opacity: 1; visibility: visible; }
+    .slide.dark { background: var(--deep-navy); }
+    .slide.black { background: #000; }
+    .slide.gradient { background: linear-gradient(135deg, var(--deep-navy) 0%, #2a1a4a 100%); }
+    .slide.blood { background: linear-gradient(135deg, #1a0a0a 0%, #2d1515 100%); }
+    .slide.hope { background: linear-gradient(135deg, #0a1a0a 0%, #152d15 100%); }
+    .slide.fraud { background: linear-gradient(135deg, #1a1a0a 0%, #2d2515 100%); }
+    .slide.blue { background: linear-gradient(135deg, #0a1a2a 0%, #152d4a 100%); }
+
+    .title { font-family: 'Cormorant Garamond', serif; font-size: clamp(1.3rem, 3vw, 2.2rem); font-weight: 700; margin-bottom: 0.5rem; line-height: 1.2; }
+    .title.gold { color: var(--gold); }
+    .title.red { color: var(--red); }
+    .title.green { color: var(--green); }
+    .title.blue { color: var(--blue); }
+
+    .subtitle { font-size: clamp(0.8rem, 1.6vw, 1rem); color: rgba(255,255,255,0.7); margin-bottom: 1rem; }
+
+    .big-number { font-family: 'Cormorant Garamond', serif; font-size: clamp(2rem, 8vw, 5rem); font-weight: 700; line-height: 1; }
+    .big-number.red { color: var(--red); }
+    .big-number.gold { color: var(--gold); }
+    .big-number.green { color: var(--green); }
+
+    .refrain {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1rem, 2.2vw, 1.5rem);
+      font-style: italic; color: var(--gold);
+      text-align: center; max-width: 650px; line-height: 1.4;
+    }
+    .refrain.warning { color: var(--red); border-left: 4px solid var(--red); padding-left: 1rem; text-align: left; }
+    .refrain.hope { color: var(--green); }
+
+    .rhetorical {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(0.95rem, 2vw, 1.4rem);
+      color: rgba(255,255,255,0.9);
+      text-align: center; max-width: 580px; line-height: 1.5;
+    }
+    .rhetorical em { color: var(--gold); font-style: normal; }
+
+    .simple-box {
+      background: linear-gradient(135deg, rgba(0,212,170,0.1), rgba(0,0,0,0.2));
+      border: 2px solid var(--teal); border-radius: 10px;
+      padding: 0.9rem; max-width: 500px; margin: 0.5rem 0;
+    }
+    .simple-box .simple-title { color: var(--teal); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; margin-bottom: 0.35rem; }
+    .simple-box .simple-text { font-size: 0.85rem; line-height: 1.5; }
+    .simple-box .simple-text strong { color: var(--gold); }
+
+    .story-card {
+      background: rgba(0,0,0,0.3); border-left: 4px solid var(--gold);
+      padding: 0.9rem 1.1rem; max-width: 580px; margin: 0.5rem 0;
+    }
+    .story-card .place { font-size: 0.6rem; color: var(--gold); letter-spacing: 0.1em; margin-bottom: 0.3rem; }
+    .story-card .narrative { font-family: 'Cormorant Garamond', serif; font-size: 0.9rem; line-height: 1.5; color: rgba(255,255,255,0.9); }
+    .story-card .source { font-size: 0.55rem; color: rgba(255,255,255,0.5); margin-top: 0.5rem; font-style: italic; }
+    .story-card.red { border-left-color: var(--red); }
+    .story-card.red .place { color: var(--red); }
+
+    /* DECISION TREES */
+    .decision-tree {
+      background: rgba(0,0,0,0.4); border: 2px solid var(--gold);
+      border-radius: 12px; padding: 0.9rem; max-width: 620px; width: 100%;
+    }
+    .decision-tree h4 { color: var(--gold); font-family: 'Cormorant Garamond', serif; font-size: 0.85rem; margin-bottom: 0.6rem; text-align: center; }
+
+    .tree-row { display: flex; justify-content: center; gap: 0.35rem; margin: 0.25rem 0; flex-wrap: wrap; }
+    .tree-node {
+      background: var(--navy); border: 2px solid var(--gold);
+      border-radius: 6px; padding: 0.35rem 0.5rem;
+      text-align: center; min-width: 65px; font-size: 0.65rem;
+    }
+    .tree-node.root { background: var(--gold); color: var(--navy); font-weight: 700; }
+    .tree-node.question { background: var(--purple); color: white; border-color: var(--purple); }
+    .tree-node.positive { background: rgba(197,48,48,0.3); border-color: var(--red); }
+    .tree-node.negative { background: rgba(34,197,94,0.3); border-color: var(--green); }
+    .tree-node.action { background: var(--teal); color: var(--navy); border-color: var(--teal); }
+    .tree-node.warning { background: var(--orange); color: white; border-color: var(--orange); }
+    .tree-node.yes { background: var(--green); color: white; border-color: var(--green); }
+    .tree-node.no { background: var(--red); color: white; border-color: var(--red); }
+    .tree-node.blue { background: var(--blue); color: white; border-color: var(--blue); }
+    .tree-node small { display: block; font-size: 0.5rem; opacity: 0.85; margin-top: 0.1rem; }
+
+    .tree-arrow { color: var(--gold); font-size: 0.9rem; text-align: center; margin: 0.1rem 0; }
+    .tree-branch { display: flex; gap: 1.2rem; justify-content: center; margin-top: 0.2rem; flex-wrap: wrap; }
+    .tree-branch-item { display: flex; flex-direction: column; align-items: center; }
+    .tree-label { font-size: 0.5rem; color: rgba(255,255,255,0.6); margin: 0.1rem 0; }
+
+    /* PRISMA Flow Diagram */
+    .prisma-flow {
+      background: rgba(0,0,0,0.4); border: 2px solid var(--blue);
+      border-radius: 12px; padding: 0.9rem; max-width: 600px; width: 100%;
+    }
+    .prisma-flow h4 { color: var(--blue); text-align: center; margin-bottom: 0.6rem; font-family: 'Cormorant Garamond', serif; font-size: 0.85rem; }
+    .prisma-box {
+      background: var(--navy); border: 2px solid var(--blue);
+      border-radius: 6px; padding: 0.4rem 0.6rem; margin: 0.25rem auto;
+      text-align: center; max-width: 280px; font-size: 0.65rem;
+    }
+    .prisma-box.id { border-color: var(--gold); }
+    .prisma-box.screen { border-color: var(--purple); }
+    .prisma-box.eligible { border-color: var(--orange); }
+    .prisma-box.included { border-color: var(--green); background: rgba(34,197,94,0.2); }
+    .prisma-box .label { font-size: 0.5rem; color: rgba(255,255,255,0.5); }
+    .prisma-box .number { font-size: 0.9rem; font-weight: 700; color: var(--gold); }
+    .prisma-exclude { font-size: 0.55rem; color: rgba(255,255,255,0.6); margin: 0.15rem 0; }
+
+    /* Checklist */
+    .checklist {
+      background: rgba(0,0,0,0.3); border: 2px solid var(--purple);
+      border-radius: 10px; padding: 0.9rem; max-width: 550px; width: 100%;
+    }
+    .checklist h4 { color: var(--purple); font-size: 0.8rem; margin-bottom: 0.6rem; }
+    .checklist-item { display: flex; align-items: flex-start; gap: 0.5rem; margin: 0.35rem 0; font-size: 0.75rem; }
+    .checklist-item .check { color: var(--green); font-weight: 700; }
+    .checklist-item .number { color: var(--gold); font-weight: 700; min-width: 20px; }
+
+    .stats-grid { display: flex; gap: 0.5rem; margin: 0.6rem 0; flex-wrap: wrap; justify-content: center; }
+    .stat-box { background: var(--navy); padding: 0.5rem 0.7rem; text-align: center; min-width: 80px; border-radius: 8px; }
+    .stat-value { font-family: 'Cormorant Garamond', serif; font-size: clamp(1rem, 2vw, 1.3rem); font-weight: 700; }
+    .stat-label { font-size: 0.55rem; opacity: 0.8; margin-top: 0.1rem; }
+
+    .lesson-item { display: flex; align-items: flex-start; gap: 0.5rem; margin: 0.35rem 0; max-width: 600px; text-align: left; }
+    .lesson-number {
+      background: var(--gold); color: var(--navy);
+      width: 22px; height: 22px; display: flex; align-items: center; justify-content: center;
+      font-weight: 700; flex-shrink: 0; border-radius: 4px; font-size: 0.65rem;
+    }
+    .lesson-content h4 { font-size: 0.8rem; font-weight: 700; color: var(--cream); margin-bottom: 0.05rem; }
+    .lesson-content p { font-size: 0.7rem; color: rgba(255,255,255,0.7); }
+
+    .formula-box {
+      background: rgba(0,0,0,0.4); border: 1px solid var(--purple);
+      border-radius: 8px; padding: 0.5rem 0.9rem;
+      font-family: 'Cormorant Garamond', serif; font-size: 0.95rem;
+      text-align: center; max-width: 400px; margin: 0.5rem 0;
+    }
+    .formula-box .formula { color: var(--gold); margin: 0.25rem 0; }
+    .formula-box .label { font-size: 0.65rem; color: rgba(255,255,255,0.6); font-family: 'Source Sans Pro', sans-serif; }
+
+    .gold-line { width: 80px; height: 2px; background: var(--gold); margin: 0.6rem auto; }
+
+    .content { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 800px; }
+
+    .slide.active .animate { animation: fadeUp 0.5s ease-out forwards; }
+    .slide.active .animate.delay-1 { animation-delay: 0.1s; }
+    .slide.active .animate.delay-2 { animation-delay: 0.2s; }
+    .slide.active .animate.delay-3 { animation-delay: 0.3s; }
+    .slide.active .animate.delay-4 { animation-delay: 0.4s; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .animate { opacity: 0; }
+
+    .slide-nav {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      display: flex; justify-content: space-between; align-items: flex-end;
+      padding: 0.5rem 0.6rem 0.6rem 0.6rem; z-index: 100; pointer-events: none;
+    }
+    .nav-btn {
+      background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2);
+      color: white; font-size: 0.9rem; cursor: pointer; opacity: 0.6;
+      padding: 0.3rem 0.45rem; border-radius: 6px; pointer-events: auto; transition: all 0.2s;
+    }
+    .nav-btn:hover { opacity: 1; border-color: var(--gold); }
+    .nav-center { display: flex; flex-direction: column; align-items: center; gap: 0.1rem; pointer-events: auto; }
+    .slide-counter { color: rgba(255,255,255,0.6); font-size: 0.65rem; }
+    .progress { display: flex; gap: 2px; flex-wrap: wrap; justify-content: center; max-width: 140px; }
+    .progress-dot { width: 4px; height: 4px; border-radius: 50%; background: rgba(255,255,255,0.25); cursor: pointer; }
+    .progress-dot.active { background: var(--gold); transform: scale(1.2); }
+
+    .quiz-container { background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); padding: 0.9rem; max-width: 580px; width: 100%; border-radius: 8px; }
+    .quiz-question { font-family: 'Cormorant Garamond', serif; font-size: 0.95rem; margin-bottom: 0.5rem; color: var(--gold); line-height: 1.4; }
+    .quiz-options { display: flex; flex-direction: column; gap: 0.3rem; }
+    .quiz-option { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); padding: 0.45rem 0.7rem; cursor: pointer; border-radius: 6px; font-size: 0.75rem; text-align: left; }
+    .quiz-option:hover { background: rgba(212,175,55,0.1); border-color: var(--gold); }
+    .quiz-option.correct { background: rgba(34,197,94,0.2); border-color: var(--green); }
+    .quiz-option.incorrect { background: rgba(197,48,48,0.2); border-color: var(--red); }
+    .quiz-feedback { margin-top: 0.5rem; padding: 0.5rem; border-radius: 6px; display: none; font-size: 0.75rem; }
+    .quiz-feedback.show { display: block; }
+    .quiz-feedback.correct { background: rgba(34,197,94,0.2); border: 1px solid var(--green); }
+    .quiz-feedback.incorrect { background: rgba(197,48,48,0.2); border: 1px solid var(--red); }
+
+    .references { background: rgba(0,0,0,0.3); border: 1px solid rgba(212,175,55,0.3); border-radius: 8px; padding: 0.9rem; max-width: 580px; text-align: left; font-size: 0.6rem; line-height: 1.5; }
+    .references h4 { color: var(--gold); font-size: 0.75rem; margin-bottom: 0.5rem; }
+    .references ol { padding-left: 1rem; }
+    .references li { margin-bottom: 0.25rem; color: rgba(255,255,255,0.8); }
+
+    .text-center { text-align: center; }
+
+    /* Timeline */
+    .timeline { max-width: 550px; width: 100%; }
+    .timeline-item { display: flex; gap: 0.6rem; margin: 0.4rem 0; }
+    .timeline-marker { width: 24px; height: 24px; border-radius: 50%; background: var(--gold); display: flex; align-items: center; justify-content: center; font-size: 0.6rem; font-weight: 700; color: var(--navy); flex-shrink: 0; }
+    .timeline-content { flex: 1; }
+    .timeline-content h5 { font-size: 0.75rem; color: var(--gold); }
+    .timeline-content p { font-size: 0.65rem; color: rgba(255,255,255,0.7); }
+    .mobile-menu-toggle{display:none;position:fixed;top:12px;left:12px;z-index:1001;background:#1E2761;border:1px solid #D4AF37;color:#D4AF37;width:40px;height:40px;border-radius:8px;font-size:1.2rem;cursor:pointer;align-items:center;justify-content:center;}
+    @media(max-width:768px){.mobile-menu-toggle{display:flex;}.sidebar{transform:translateX(-100%);transition:transform 0.3s ease;position:fixed;z-index:1000;height:100vh;}.sidebar.open{transform:translateX(0);}.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:999;}.sidebar-overlay.show{display:block;}}
+    .skip-link{position:absolute;top:-40px;left:0;background:#D4AF37;color:#1E2761;padding:8px 16px;z-index:100;transition:top 0.3s;font-family:'Source Sans Pro',sans-serif;text-decoration:none;font-weight:600;}.skip-link:focus{top:0;}
+
+    /* Focus-visible styles for keyboard navigation */
+    :focus-visible {
+      outline: 2px solid var(--gold, #D4AF37);
+      outline-offset: 2px;
+    }
+
+    :focus:not(:focus-visible) {
+      outline: none;
+    }
+
+    button:focus-visible,
+    a:focus-visible,
+    [role="button"]:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible {
+      outline: 2px solid var(--gold, #D4AF37);
+      outline-offset: 2px;
+      box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.3);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+
+    /* Story Box - Real-world cases with lessons */
+    .story-box {
+      background: linear-gradient(135deg, rgba(30,39,97,0.9) 0%, rgba(20,27,61,0.95) 100%);
+      border: 2px solid var(--gold);
+      border-radius: 12px;
+      padding: 1.1rem 1.3rem;
+      max-width: 600px;
+      margin: 0.6rem 0;
+      position: relative;
+      box-shadow: 0 4px 20px rgba(212,175,55,0.15);
+    }
+    .story-box::before {
+      content: "REAL CASE";
+      position: absolute;
+      top: -10px;
+      left: 20px;
+      background: var(--gold);
+      color: var(--navy);
+      font-size: 0.55rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      padding: 2px 10px;
+      border-radius: 3px;
+    }
+    .story-box .story-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--cream);
+      margin-bottom: 0.4rem;
+      margin-top: 0.3rem;
+    }
+    .story-box .story-period {
+      font-size: 0.6rem;
+      color: var(--gold);
+      letter-spacing: 0.08em;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+    .story-box .story-narrative {
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: rgba(255,255,255,0.9);
+      margin-bottom: 0.6rem;
+    }
+    .story-box .story-narrative strong {
+      color: var(--cream);
+    }
+    .story-box .story-lesson {
+      background: rgba(212,175,55,0.15);
+      border-left: 3px solid var(--gold);
+      padding: 0.5rem 0.8rem;
+      margin-top: 0.6rem;
+      border-radius: 0 6px 6px 0;
+    }
+    .story-box .story-lesson .lesson-label {
+      font-size: 0.55rem;
+      color: var(--gold);
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.2rem;
+    }
+    .story-box .story-lesson .lesson-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.85rem;
+      font-style: italic;
+      color: var(--gold);
+      line-height: 1.4;
+    }
+
+    /* Story-box enhanced pattern: opener + real-data + decision-paths + revelation */
+    .story-box .story-opener {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.05rem;
+      font-style: italic;
+      color: rgba(255,255,255,0.9);
+      margin-bottom: 0.7rem;
+      text-align: center;
+    }
+    .story-box .real-data-box {
+      background: rgba(0,0,0,0.35);
+      border-left: 3px solid var(--teal);
+      padding: 0.6rem 0.8rem;
+      margin: 0.5rem 0;
+      border-radius: 0 6px 6px 0;
+    }
+    .story-box .real-data-box h4 {
+      font-size: 0.55rem;
+      color: var(--teal);
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.25rem;
+    }
+    .story-box .real-data-box p {
+      font-size: 0.78rem;
+      line-height: 1.5;
+      color: rgba(255,255,255,0.85);
+    }
+    .data-highlight {
+      color: var(--gold);
+      font-weight: 700;
+    }
+    .story-box .decision-tree .decision-tree-header {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--gold);
+      text-align: center;
+      margin-bottom: 0.4rem;
+    }
+    .story-box .decision-tree .decision-scenario {
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.8);
+      text-align: center;
+      margin-bottom: 0.5rem;
+      line-height: 1.4;
+    }
+    .decision-paths {
+      display: flex;
+      gap: 0.6rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .decision-path {
+      flex: 1;
+      min-width: 200px;
+      max-width: 260px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 8px;
+      padding: 0.6rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      border: 2px solid transparent;
+      text-align: center;
+    }
+    .decision-path:hover, .decision-path:focus {
+      transform: translateY(-2px);
+      outline: none;
+    }
+    .decision-path.path-a {
+      border-color: var(--red);
+    }
+    .decision-path.path-a:hover, .decision-path.path-a:focus {
+      background: rgba(197,48,48,0.15);
+      box-shadow: 0 2px 12px rgba(197,48,48,0.3);
+    }
+    .decision-path.path-b {
+      border-color: var(--green);
+    }
+    .decision-path.path-b:hover, .decision-path.path-b:focus {
+      background: rgba(34,197,94,0.15);
+      box-shadow: 0 2px 12px rgba(34,197,94,0.3);
+    }
+    .path-label {
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.3rem;
+    }
+    .path-a .path-label { color: var(--red); }
+    .path-b .path-label { color: var(--green); }
+    .path-choice {
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.9);
+      margin-bottom: 0.2rem;
+      line-height: 1.4;
+    }
+    .path-arrow {
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.5);
+      margin: 0.15rem 0;
+    }
+    .path-consequence {
+      font-size: 0.65rem;
+      color: rgba(255,255,255,0.7);
+      line-height: 1.4;
+      margin-bottom: 0.3rem;
+    }
+    .path-outcome {
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      display: inline-block;
+    }
+    .path-a .path-outcome {
+      background: rgba(197,48,48,0.3);
+      color: var(--red);
+    }
+    .path-b .path-outcome {
+      background: rgba(34,197,94,0.3);
+      color: var(--green);
+    }
+    .story-revelation {
+      background: rgba(212,175,55,0.12);
+      border: 1px solid rgba(212,175,55,0.3);
+      border-radius: 6px;
+      padding: 0.5rem 0.8rem;
+      margin-top: 0.6rem;
+      text-align: center;
+    }
+    .revelation-label {
+      font-size: 0.5rem;
+      color: var(--gold);
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      margin-bottom: 0.2rem;
+    }
+    .revelation-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.82rem;
+      font-style: italic;
+      color: var(--gold);
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<button aria-expanded="false" aria-label="Toggle navigation menu" class="mobile-menu-toggle" onclick="toggleSidebar()">☰</button>
+<div class="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show');"></div>
+<div class="course-container">
+<nav aria-label="Kursnavigation" class="sidebar" role="navigation">
+<div class="sidebar-header">
+<a href="index.html" onmouseout="this.style.color='rgba(212,175,55,0.7)'" onmouseover="this.style.color='#D4AF37'" style="display:block;font-size:0.7rem;color:rgba(212,175,55,0.7);text-decoration:none;margin-bottom:0.5rem;">← Course Library</a>
+<h1>Der Beweisbund</h1>
+<p>Verfassen des Meta-Analysepapiers</p>
+</div>
+<div class="module-list" id="moduleList"></div>
+<div class="sidebar-footer">
+        "Write so that truth may be found,<br/>
+        und wiedergefunden von denen, die ihm folgen.“
+      </div>
+</nav>
+<main class="main-content" id="main-content">
+<header class="content-header">
+<div class="breadcrumb">Writing &gt; <span id="currentModule">Die verborgenen Daten</span></div>
+<div class="header-actions">
+<button class="btn" onclick="goToModule(20)">References</button>
+<button class="btn primary" onclick="nextSlide()">Continue</button>
+</div>
+</header>
+<div class="content-body">
+<div class="slides-container">
+ ==================== MODUL 1: DIE VERSTECKTEN DATEN ==================== 
+<div class="module-slides active" data-module="1">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  Hast du nicht von den Prüfungen gehört, die verborgen waren?<br/>
+                  die Daten, die vergraben waren,<br/>
+                  die Papiere, die es erzählten <em>nur die halbe Wahrheit</em>?
+                </div>
+</div>
+</div>
+<div class="slide blood">
+<div class="content text-center">
+<div class="title red animate">Der Tamiflu-Skandal</div>
+<div class="story-card red animate delay-1">
+<div class="place">COCHRANE COLLABORATION, 2009-2014</div>
+<div class="narrative">
+                    Governments stockpiled $9 billion worth of Tamiflu to fight pandemic flu.
+                    <br/><br/>
+                    Doch als Cochrane-Forscher versuchten, den Nutzen des Arzneimittels zu überprüfen, stellten sie Folgendes fest <strong>60% of trial data had never been published</strong>.
+                    <br/><br/>
+                    Nach einem fünfjährigen Kampf gelangten sie an die verborgenen Daten. Die Schlussfolgerung wurde geändert: <strong>Tamiflu shortened symptoms by less than a day</strong>
+                    und verhinderte keine Komplikationen.
+                    <br/><br/>
+                    9 Milliarden US-Dollar wurden für Beweise ausgegeben, die nie vollständig offengelegt wurden.
+                  </div>
+<div class="source">Jefferson T et al. Cochrane Database Syst Rev. 2014;4:CD008965</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Why We Write Meta-Analyses</div>
+<div class="decision-tree animate delay-1">
+<h4>Der Zweck der Synthese</h4>
+<div class="tree-row"><div class="tree-node root">Individual Studies</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">Problem?</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node warning">Small samples<small>Low power</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node warning">Conflicting results<small>Which to believe?</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node warning">Publication bias<small>Missing negatives</small></div>
+</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node action">Meta-Analysis<small>Systematic synthesis</small></div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node yes">More precise estimate + Bias detection</div></div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<div class="story-title">Die Tamiflu-Transparenzkampagne</div>
+<div class="story-period">2009-2014 | COCHRANE COLLABORATION vs. ROCHE</div>
+<div class="story-narrative">
+                    For years, governments worldwide stockpiled Tamiflu (oseltamivir) at a cost of <strong>billions of dollars</strong>, basierend auf Herstellerangaben, dass es Grippekomplikationen und Krankenhausaufenthalte verhindert habe.
+                    <br/><br/>
+                    Als Cochrane-Gutachter die vollständigen Studiendaten anforderten, um diese Behauptungen zu überprüfen, <strong>Roche weigerte sich 5 Jahre lang</strong>unter Berufung auf „Vertraulichkeit“. Das Unternehmen hatte 10 Behandlungsstudien durchgeführt, aber nur 2 wurden vollständig veröffentlicht.
+                    <br/><br/>
+                    Nach unerbittlichem Druck wurden 2014 schließlich klinische Studienberichte veröffentlicht. Das Bild änderte sich dramatisch: <strong>Tamiflu verkürzte die Symptome um weniger als einen Tag und zeigte keine Hinweise darauf, dass es Krankenhausaufenthalte oder schwerwiegende Komplikationen verhinderte.</strong>
+</div>
+<div class="story-lesson">
+<div class="lesson-label">THE LESSON</div>
+<div class="lesson-text">Eine Metaanalyse ist nur so gut wie die Daten, auf die sie zugreifen kann. Versteckte Studien können unwirksame Behandlungen wirksam aussehen lassen – und Milliarden an vergeudeten Ressourcen kosten.</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  „Und das Unternehmen wusste,<br/>
+                  und die Aufsichtsbehörden wussten,<br/>
+                  aber die veröffentlichten Artikel sagten nichts darüber –<br/>
+                  und Milliarden wurden für eine Halbwahrheit ausgegeben.“
+                </div>
+<div class="gold-line animate delay-2"></div>
+<p class="animate delay-3" style="color:rgba(255,255,255,0.6);font-style:italic;font-size:0.8rem;">
+                  Deshalb schreiben wir Metaanalysen – um die ganze Wahrheit herauszufinden.
+                </p>
+</div>
+</div>
+</div>
+ ==================== MODUL 2: DER BUND (PRISMA) ==================== 
+<div class="module-slides" data-module="2">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  Wenn Sie möchten, dass Ihre Arbeit so ist <em>trusted</em>,<br/>
+                  Sie müssen einen Vertrag mit Ihren Lesern eingehen.
+                  <br/><br/>
+                  Dieser Bund hat einen Namen:<br/>
+<em>PRISMA</em>.
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">PRISMA 2020</div>
+<div class="subtitle animate delay-1">Bevorzugte Berichtselemente für systematische Überprüfungen und Metaanalysen</div>
+<div class="stats-grid animate delay-2">
+<div class="stat-box" style="background:var(--blue);">
+<div class="stat-value" style="color:white;">27</div>
+<div class="stat-label">Checklist items</div>
+</div>
+<div class="stat-box" style="background:var(--purple);">
+<div class="stat-value" style="color:white;">2020</div>
+<div class="stat-label">Updated version</div>
+</div>
+<div class="stat-box" style="background:var(--green);">
+<div class="stat-value" style="color:white;">50K+</div>
+<div class="stat-label">Citations</div>
+</div>
+</div>
+<div class="simple-box animate delay-3">
+<div class="simple-title">THE COVENANT</div>
+<div class="simple-text">
+                    PRISMA ist keine Bürokratie. es ist ein <strong>versprechen Sie es Ihren Lesern</strong>
+                    dass Sie die Arbeit transparent und vollständig erledigt haben.
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Die sieben Abschnitte</div>
+<div class="timeline animate delay-1">
+<div class="timeline-item">
+<div class="timeline-marker">1</div>
+<div class="timeline-content">
+<h5>Title</h5>
+<p>Identify as systematic review, meta-analysis, or both</p>
+</div>
+</div>
+<div class="timeline-item">
+<div class="timeline-marker">2</div>
+<div class="timeline-content">
+<h5>Abstract</h5>
+<p>Strukturierte Zusammenfassung der gesamten Rezension</p>
+</div>
+</div>
+<div class="timeline-item">
+<div class="timeline-marker">3</div>
+<div class="timeline-content">
+<h5>Introduction</h5>
+<p>Begründung und Ziele mit PICO</p>
+</div>
+</div>
+<div class="timeline-item">
+<div class="timeline-marker">4</div>
+<div class="timeline-content">
+<h5>Methods</h5>
+<p>Protocol, search, selection, data, bias, synthesis</p>
+</div>
+</div>
+<div class="timeline-item">
+<div class="timeline-marker">5</div>
+<div class="timeline-content">
+<h5>Results</h5>
+<p>Flow diagram, characteristics, risk of bias, synthesis results</p>
+</div>
+</div>
+<div class="timeline-item">
+<div class="timeline-marker">6</div>
+<div class="timeline-content">
+<h5>Discussion</h5>
+<p>Summary, limitations, interpretation, implications</p>
+</div>
+</div>
+<div class="timeline-item">
+<div class="timeline-marker">7</div>
+<div class="timeline-content">
+<h5>Other</h5>
+<p>Registration, funding, conflicts of interest</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<div class="story-title">Die PRISMA-Revolution</div>
+<div class="story-period">2009-PRESENT | TRANSFORMING SYSTEMATIC REVIEW REPORTING</div>
+<div class="story-narrative">
+                    Vor PRISMA (2009) war die systematische Überprüfungsberichterstattung chaotisch. In einigen Rezensionen wurden die Suchstrategien überhaupt nicht angegeben. Andere ließen die Beurteilung des Risikos von Verzerrungen weg. Viele konnten nicht erklären, warum Studien ausgeschlossen wurden. <strong>Readers couldn't judge quality</strong>—they had to trust blindly.
+                    <br/><br/>
+                    Die 27 Punkte umfassende Checkliste von PRISMA hat alles verändert. Die Autoren mussten jeden Schritt dokumentieren: die vollständige Suchstrategie, Auswahlkriterien, Extraktionsmethoden und Syntheseentscheidungen.
+                    <br/><br/>
+                    Today, <strong>Über 10.000 Zeitschriften unterstützen PRISMA</strong>. Was einst außergewöhnliche Transparenz war, wurde zum erwarteten Standard.
+                  </div>
+<div class="story-lesson">
+<div class="lesson-label">THE LESSON</div>
+<div class="lesson-text">Eine einfache Checkliste hat ein ganzes Feld verändert. Transparente Berichterstattung wurde von der Ausnahme zur Norm – ein Beweis dafür, dass Standards wichtig sind.</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  „PRISMA ist der Bund zwischen Autor und Leser:<br/>
+                  Ich werde dir alles zeigen –<br/>
+                  how I searched, what I found, what I excluded, why.<br/>
+                  So können Sie meine Arbeit beurteilen und meinen Schlussfolgerungen vertrauen – oder sie in Frage stellen.“
+                </div>
+</div>
+</div>
+</div>
+ ==================== MODUL 3: DAS PROTOKOLL ==================== 
+<div class="module-slides" data-module="3">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  Haben Sie den Rezensenten nicht gesehen<br/>
+                  wer das Ergebnis geändert hat, nachdem er die Daten gesehen hat,<br/>
+                  der die Torpfosten bis zu den Ergebnissen verschoben hat <em>looked right</em>?
+                </div>
+</div>
+</div>
+<div class="slide fraud">
+<div class="content text-center">
+<div class="title gold animate">Die zurückgezogenen Metaanalysen</div>
+<div class="story-card red animate delay-1">
+<div class="place">MULTIPLE JOURNALS, 2010-2023</div>
+<div class="narrative">
+                    Das haben Forscher herausgefunden <strong>many retracted meta-analyses</strong> had no pre-registered protocol.
+                    <br/><br/>
+                    Without a protocol, reviewers could:<br/>
+                    • Change inclusion criteria after seeing results<br/>
+                    • Switch primary outcomes to show significance<br/>
+                    • Fügen Sie Studien hinzu oder entfernen Sie sie, um die Schlussfolgerung zu ändern<br/>
+<br/><br/>
+                    Das Protokoll liegt bei Ihnen <strong>pre-commitment device</strong>– es verhindert, dass Sie sich etwas vormachen.
+                  </div>
+<div class="source">Defined outcome switching: PROSPERO registration prevents bias</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Protocol Registration Decision Tree</div>
+<div class="decision-tree animate delay-1">
+<h4>Wo Sie Ihr Protokoll registrieren können</h4>
+<div class="tree-row"><div class="tree-node root">Neue systematische Überprüfung</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">Type of Review?</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">Health/Medical</div>
+<div class="tree-node action">PROSPERO<small>prospero.york.ac.uk</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">Any Field</div>
+<div class="tree-node action">OSF<small>osf.io/registries</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">Cochrane</div>
+<div class="tree-node action">Cochrane Library<small>Integrated protocol</small></div>
+</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node yes">Registration ID in Paper<small>Cite in Methods</small></div></div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">What the Protocol Must Contain</div>
+<div class="checklist animate delay-1">
+<h4>Essential Protocol Elements</h4>
+<div class="checklist-item"><span class="number">1.</span> Forschungsfrage (PICO-Format)</div>
+<div class="checklist-item"><span class="number">2.</span> Eligibility criteria (inclusion/exclusion)</div>
+<div class="checklist-item"><span class="number">3.</span> Information sources and search strategy</div>
+<div class="checklist-item"><span class="number">4.</span> Studienauswahlverfahren</div>
+<div class="checklist-item"><span class="number">5.</span> Datenextraktionselemente</div>
+<div class="checklist-item"><span class="number">6.</span> Tool zur Bewertung des Risikos einer Verzerrung</div>
+<div class="checklist-item"><span class="number">7.</span> Primäre und sekundäre Ergebnisse</div>
+<div class="checklist-item"><span class="number">8.</span> Synthesemethoden (Metaanalyseplan)</div>
+<div class="checklist-item"><span class="number">9.</span> Subgruppen- und Sensitivitätsanalysen</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  „Schreiben Sie das Protokoll, bevor Sie die Daten sehen.<br/>
+                  Lock it in a public registry.<br/>
+                  Then follow it—or explain why you deviated.<br/>
+                  So beweisen Sie, dass Sie nicht betrogen haben.
+                </div>
+</div>
+</div>
+</div>
+ ==================== MODUL 4: DER TITEL ==================== 
+<div class="module-slides" data-module="4">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  Der Titel ist das erste Versprechen, das Sie machen.
+                  <br/><br/>
+                  Es muss dem Leser sagen:<br/>
+<em>Was Sie studiert haben, wie Sie es studiert haben und um welche Art von Studium es sich handelt.</em>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Die Anatomie eines Titels</div>
+<div class="decision-tree animate delay-1">
+<h4>PRISMA Title Requirements</h4>
+<div class="tree-row"><div class="tree-node root">Title Must Include</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node action">Population<small>Wer wurde untersucht?</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node action">Intervention<small>Was wurde getan?</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node action">Outcome<small>Was wurde gemessen</small></div>
+</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node blue">+ „Systematische Überprüfung“ oder „Meta-Analyse“</div></div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Good vs. Bad Titles</div>
+<div class="story-card red animate delay-1">
+<div class="place">❌ BAD TITLE</div>
+<div class="narrative">
+                    „Ein Überblick über die Diabetes-Behandlung“
+                    <br/><br/>
+<em>Problems: No population specified, no intervention, no outcome, doesn't say systematic review</em>
+</div>
+</div>
+<div class="story-card animate delay-2">
+<div class="place">✓ GOOD TITLE</div>
+<div class="narrative">
+                    „Wirksamkeit von SGLT2-Inhibitoren auf die kardiovaskuläre Mortalität bei Erwachsenen mit Typ-2-Diabetes: Eine systematische Überprüfung und Metaanalyse“
+                    <br/><br/>
+<em>Population, Intervention, Ergebnis und Studientyp sind klar</em>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  „Der Titel ist Ihr erstes Wort an den Leser.<br/>
+                  Machen Sie es komplett. Machen Sie es ehrlich.<br/>
+                  Tell them exactly what they will find within."
+                </div>
+</div>
+</div>
+</div>
+ ==================== MODUL 5: DIE ZUSAMMENFASSUNG ==================== 
+<div class="module-slides" data-module="5">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  Most readers will only read your abstract.
+                  <br/><br/>
+                  If the abstract lies, or omits, or misleads—<br/>
+<em>most readers will never know.</em>
+</div>
+</div>
+</div>
+<div class="slide blood">
+<div class="content text-center">
+<div class="title red animate">Das Spinproblem</div>
+<div class="story-card red animate delay-1">
+<div class="place">BOUTRON ET AL., 2010</div>
+<div class="narrative">
+                    Researchers analyzed 72 RCTs with non-significant primary outcomes.
+                    <br/><br/>
+                    Das haben sie herausgefunden <strong>40% of abstracts contained "spin"</strong>– Berichterstattung, die sich auf sekundäre Ergebnisse, Untergruppen oder gruppeninterne Änderungen konzentrierte, um die Ergebnisse günstiger erscheinen zu lassen, als sie waren.
+                    <br/><br/>
+                    Die Zusammenfassung erzählte eine andere Geschichte als die Daten.
+                  </div>
+<div class="source">Boutron I et al. JAMA. 2010;303:2058-2064</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Structured Abstract Elements</div>
+<div class="checklist animate delay-1">
+<h4>PRISMA Abstract Checklist</h4>
+<div class="checklist-item"><span class="check">□</span> Hintergrund und Ziele</div>
+<div class="checklist-item"><span class="check">□</span> Eligibility criteria</div>
+<div class="checklist-item"><span class="check">□</span> Information sources</div>
+<div class="checklist-item"><span class="check">□</span> Risk of bias assessment</div>
+<div class="checklist-item"><span class="check">□</span> Synthesis methods</div>
+<div class="checklist-item"><span class="check">□</span> Ergebnisse (# Studien, # Teilnehmer, Effektschätzung mit CI)</div>
+<div class="checklist-item"><span class="check">□</span> Limitations</div>
+<div class="checklist-item"><span class="check">□</span> Schlussfolgerungen und Implikationen</div>
+<div class="checklist-item"><span class="check">□</span> Registration number</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<p class="story-opener">Was passiert, wenn die Zusammenfassung eine andere Geschichte erzählt als die Arbeit selbst?</p>
+<div class="real-data-box">
+<h4>REAL DATA</h4>
+<p>Pitkin et al. (1999, BMJ) untersuchten strukturierte Abstracts in sechs großen Fachzeitschriften und kamen zu dem Ergebnis <span class="data-highlight">18-68%</span> der Abstracts enthielten Daten, die nicht mit dem vollständigen Artikel übereinstimmten. Die Mängel reichten von numerischen Fehlern bis hin zu Schlussfolgerungen, die nicht durch die gemeldeten Ergebnisse gestützt wurden.</p>
+</div>
+<div class="decision-tree">
+<div class="decision-tree-header">Die irreführende Zusammenfassung: Pitkin 1999</div>
+<div class="decision-scenario">Ihre Metaanalyse ergab einen nicht signifikanten primären Endpunkt (RR 0,92, 95 %-KI 0,78–1,09). Wie schreibt man das Abstract?</div>
+<div class="decision-paths">
+<div class="decision-path path-a" role="button" tabindex="0">
+<div class="path-label">PFAD A: Drehen Sie die Zusammenfassung</div>
+<div class="path-choice">Emphasize a significant secondary outcome and use language like "trend toward benefit"</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">Leser, die nur die Zusammenfassung sehen, gewinnen einen irreführend positiven Eindruck von der Behandlung</div>
+<div class="path-outcome">OUTCOME: Misleading clinical decisions</div>
+</div>
+<div class="decision-path path-b" role="button" tabindex="0">
+<div class="path-label">PATH B: Report Faithfully</div>
+<div class="path-choice">Geben Sie das nicht signifikante primäre Ergebnis klar an und kennzeichnen Sie sekundäre Ergebnisse als explorativ</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">Leser erhalten eine genaue Zusammenfassung; Diejenigen, die Details benötigen, lesen den vollständigen Artikel</div>
+<div class="path-outcome">ERGEBNIS: Die Integrität der Beweise bleibt erhalten</div>
+</div>
+</div>
+</div>
+<div class="story-revelation">
+<div class="revelation-label">THE REVELATION</div>
+<div class="revelation-text">Die meisten Leser kommen nie über die Zusammenfassung hinaus. Wenn die Zusammenfassung irreführt, kann die Ehrlichkeit der vollständigen Arbeit den Schaden nicht wiedergutmachen.</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  „Spinnen Sie nicht. Verstecken Sie sich nicht.“<br/>
+                  Wenn das primäre Ergebnis null war, sagen Sie es.<br/>
+                  The abstract must be a faithful mirror—<br/>
+                  kein schmeichelhaftes Porträt.“
+                </div>
+</div>
+</div>
+</div>
+ ==================== MODUL 6: DIE FRAGE (PICO) ==================== 
+<div class="module-slides" data-module="6">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  A vague question yields vague answers.
+                  <br/><br/>
+                  Bevor Sie suchen, bevor Sie schreiben –<br/>
+                  Du musst es genau wissen <em>was du suchst</em>.
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Das PICO-Framework</div>
+<div class="decision-tree animate delay-1">
+<h4>Strukturierung der Forschungsfrage</h4>
+<div class="tree-row"><div class="tree-node root">Research Question</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node action">P<small>Population</small></div>
+<div class="tree-label">Who?</div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node action">I<small>Intervention</small></div>
+<div class="tree-label">What treatment?</div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node action">C<small>Comparator</small></div>
+<div class="tree-label">Vs. what?</div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node action">O<small>Outcome</small></div>
+<div class="tree-label">What measured?</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">PICO Example</div>
+<div class="story-card animate delay-1">
+<div class="place">Eine vage Frage transformieren</div>
+<div class="narrative">
+<strong>Vague:</strong> "Does exercise help depression?"
+                    <br/><br/>
+<strong>PICO:</strong><br/>
+                    • <strong>P:</strong> Adults diagnosed with major depressive disorder<br/>
+                    • <strong>I:</strong> Supervised aerobic exercise (≥3x/week for ≥8 weeks)<br/>
+                    • <strong>C:</strong> Usual care or waitlist control<br/>
+                    • <strong>O:</strong> Change in depression score (HAM-D or BDI)
+                    <br/><br/>
+                    Jetzt wissen Sie genau, wonach Sie suchen müssen.
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  „Formulieren Sie Ihre Frage präzise.<br/>
+                  Wer sind die Patienten? Was ist die Behandlung?<br/>
+                  Was ist der Komparator? Was werden Sie messen?<br/>
+                  PICO ist die Karte vor der Reise.“
+                </div>
+</div>
+</div>
+</div>
+ ==================== MODUL 7: DIE SUCHE ==================== 
+<div class="module-slides" data-module="7">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  Haben Sie noch nichts von der Metaanalyse gehört?<br/>
+                  that searched only one database,<br/>
+                  habe die Hälfte der Beweise verpasst,<br/>
+                  und zeichnete das <em>wrong conclusion</em>?
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">The Search Strategy Decision Tree</div>
+<div class="decision-tree animate delay-1">
+<h4>Where to Search</h4>
+<div class="tree-row"><div class="tree-node root">Comprehensive Search</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">Minimum Databases</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node action">MEDLINE<small>PubMed</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node action">Embase<small>European focus</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node action">CENTRAL<small>Cochrane trials</small></div>
+</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">Plus Additional Sources</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node blue">Trial registries<small>ClinicalTrials.gov</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node blue">Grey literature<small>Theses, reports</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node blue">Reference lists<small>Backward citation</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Dokumentation der Suche</div>
+<div class="simple-box animate delay-1">
+<div class="simple-title">WHAT TO REPORT</div>
+<div class="simple-text">
+                    • <strong>Full search strategy</strong> for at least one database (appendix)<br/>
+                    • <strong>Date of search</strong> für jede Datenbank<br/>
+                    • <strong>Any limits</strong> (language, date, publication type)<br/>
+                    • <strong>Hand-searching</strong> (journals, conference proceedings)<br/>
+                    • <strong>Kontakt zu Autoren</strong> für unveröffentlichte Daten
+                  </div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">DER REPRODUZIERBARKEITSTEST</div>
+<div class="simple-text">
+                    Another researcher should be able to <strong>Reproduzieren Sie Ihre Suche genau</strong>
+                    und finden Sie die gleiche Anzahl von Datensätzen.
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<div class="story-title">The Cochrane Search Strategy Discovery</div>
+<div class="story-period">2003 | COCHRANE-METHODOLOGIE-ÜBERPRÜFUNG</div>
+<div class="story-narrative">
+                    Cochrane researchers asked a simple question: What would happen if systematic reviewers only searched MEDLINE?
+                    <br/><br/>
+                    Die Antwort war alarmierend. Das hätten sie getan <strong>30 % der eingeschlossenen Studien verpasst</strong>– einschließlich einiger, die die Schlussfolgerungen der Metaanalyse völlig veränderten.
+                    <br/><br/>
+                    One striking example: an anti-depressant meta-analysis showed <strong>benefit when based on MEDLINE alone</strong>, but <strong>no benefit when all sources were included</strong>. Bei den fehlenden Studien handelte es sich um kleinere, negative Studien, die in Fachdatenbanken wie EMBASE und PsycINFO indexiert waren.
+                  </div>
+<div class="story-lesson">
+<div class="lesson-label">THE LESSON</div>
+<div class="lesson-text">Bei der Suche in einer einzigen Datenbank können negative Studien systematisch übersehen werden. Die Studien, die nicht in MEDLINE enthalten sind, könnten genau die Studien sein, die Ihre Schlussfolgerung ändern.</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  "Search wide. Search deep.<br/>
+                  Document every database, every date, every term.<br/>
+                  Die Beweise, die Sie übersehen, sind möglicherweise die Beweise, die am wichtigsten sind.
+                </div>
+</div>
+</div>
+</div>
+ ==================== MODUL 8: DIE AUSWAHL ==================== 
+<div class="module-slides" data-module="8">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  Sie müssen aus Tausenden von Datensätzen auswählen.
+                  <br/><br/>
+                  But choose by what rule?<br/>
+                  Und wer prüft Ihre Auswahl?
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Das PRISMA-Flussdiagramm</div>
+<div class="prisma-flow animate delay-1">
+<h4>PRISMA 2020 Flow Diagram</h4>
+<div class="prisma-box id">
+<div class="label">IDENTIFICATION</div>
+<div class="number">n = 3,847</div>
+                    Datensätze aus Datenbanken
+                  </div>
+<div class="tree-arrow">↓</div>
+<div class="prisma-exclude">Duplicates removed (n = 892)</div>
+<div class="prisma-box screen">
+<div class="label">SCREENING</div>
+<div class="number">n = 2,955</div>
+                    Titles/abstracts screened
+                  </div>
+<div class="tree-arrow">↓</div>
+<div class="prisma-exclude">Excluded (n = 2,680)</div>
+<div class="prisma-box eligible">
+<div class="label">ELIGIBILITY</div>
+<div class="number">n = 275</div>
+                    Full-text assessed
+                  </div>
+<div class="tree-arrow">↓</div>
+<div class="prisma-exclude">Mit Gründen ausgeschlossen (n = 247)</div>
+<div class="prisma-box included">
+<div class="label">INCLUDED</div>
+<div class="number">n = 28</div>
+                    Studies in synthesis
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Selection Process Decision Tree</div>
+<div class="decision-tree animate delay-1">
+<h4>Who Selects? How?</h4>
+<div class="tree-row"><div class="tree-node root">Study Selection</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node yes">Two independent reviewers<small>Gold standard</small></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node question">Disagreement?</div>
+<div class="tree-branch" style="gap:0.3rem;">
+<div class="tree-branch-item">
+<div class="tree-node action" style="font-size:0.5rem;">Consensus<small>Discussion</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node action" style="font-size:0.5rem;">Third reviewer<small>Arbiter</small></div>
+</div>
+</div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node warning">One reviewer only<small>Acknowledge limitation</small></div>
+</div>
+</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">REPORT AGREEMENT</div>
+<div class="simple-text">
+                    Berechnen und berichten <strong>inter-rater agreement</strong> (kappa statistic).
+                    Low agreement suggests unclear criteria.
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<p class="story-opener">Kann eine Post-hoc-Untergruppenanalyse aus einem einzigen Versuch ein ganzes Fachgebiet für ein Jahrzehnt umgestalten?</p>
+<div class="real-data-box">
+<h4>REAL DATA</h4>
+<p>Die Women's Health Initiative (WHI, 2002) stellte fest, dass HRT <span class="data-highlight">increased</span> cardiovascular risk overall. But post-hoc subgroup analysis suggested women aged <span class="data-highlight">&lt;60</span> oder innerhalb von 10 Jahren nach der Menopause könnten von Vorteil sein, während ältere Frauen geschädigt wurden. Diese „Timing-Hypothese“ löste jahrelange Debatten und weitere Studien aus.</p>
+</div>
+<div class="decision-tree">
+<div class="decision-tree-header">The HRT Timing Hypothesis: WHI 2002</div>
+<div class="decision-scenario">Ihre Metaanalyse der HRT zeigt insgesamt einen Schaden, eine explorative Untergruppe deutet jedoch auf einen Nutzen bei jüngeren Frauen hin. Wie schreibt man das?</div>
+<div class="decision-paths">
+<div class="decision-path path-a" role="button" tabindex="0">
+<div class="path-label">PFAD A: Überbewerten Sie die Untergruppe</div>
+<div class="path-choice">Überschreiben Sie das Ergebnis der Altersuntergruppe, als wäre es das primäre Ergebnis</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">Ärzte verschreiben eine HRT auf der Grundlage einer explorativen, leistungsschwachen Untergruppe; Der Befund kann möglicherweise nicht reproduziert werden</div>
+<div class="path-outcome">OUTCOME: Premature clinical change</div>
+</div>
+<div class="decision-path path-b" role="button" tabindex="0">
+<div class="path-label">PATH B: Report Honestly</div>
+<div class="path-choice">Present overall result as primary; label subgroup as exploratory and pre-specified or post-hoc</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">Readers understand the hypothesis needs confirmation; future trials can be designed to test it</div>
+<div class="path-outcome">OUTCOME: Responsible hypothesis generation</div>
+</div>
+</div>
+</div>
+<div class="story-revelation">
+<div class="revelation-label">THE REVELATION</div>
+<div class="revelation-text">Untergruppenanalysen generieren Hypothesen, keine Schlussfolgerungen. Kennzeichnen Sie sie immer als explorativ und berichten Sie zuerst über das Gesamtergebnis.</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  "Every exclusion must have a reason.<br/>
+                  Every reason must be documented.<br/>
+                  Two pairs of eyes are better than one—<br/>
+                  denn was der eine verpasst, kann der andere fangen.“
+                </div>
+</div>
+</div>
+</div>
+ ==================== MODUL 9: BIAS-RISIKO ==================== 
+<div class="module-slides" data-module="9">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  Haben Sie die Metaanalyse nicht gesehen?<br/>
+                  das gute Studien mit schlechten kombinierte,<br/>
+                  und nannte den Durchschnitt <em>truth</em>?
+                </div>
+</div>
+</div>
+<div class="slide blood">
+<div class="content text-center">
+<div class="title red animate">Die Gefahr, Voreingenommenheit zu ignorieren</div>
+<div class="story-card red animate delay-1">
+<div class="place">DER ANTIDEPRESSIVS-SKANDAL</div>
+<div class="narrative">
+                    Turner et al. (2008) obtained FDA data on 74 antidepressant trials.
+                    <br/><br/>
+                    In the <strong>published literature</strong>: 94 % der Studien waren positiv.
+                    <br/><br/>
+                    In the <strong>FDA database</strong>: Nur 51 % waren positiv.
+                    <br/><br/>
+                    Die veröffentlichten Metaanalysen hatten selektiv gemeldete Daten gebündelt. Die Effektgröße betrug <strong>inflated by 32%</strong>.
+                  </div>
+<div class="source">Turner EH et al. N Engl J Med. 2008;358:252-260</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Tools zur Bewertung des Verzerrungsrisikos</div>
+<div class="decision-tree animate delay-1">
+<h4>Welches Tool verwenden?</h4>
+<div class="tree-row"><div class="tree-node root">Study Design</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">RCTs</div>
+<div class="tree-node action">RoB 2<small>Cochrane tool</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">Non-randomized</div>
+<div class="tree-node action">ROBINS-I<small>Interventions</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">DTA studies</div>
+<div class="tree-node action">QUADAS-2<small>Diagnostic</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">Observational</div>
+<div class="tree-node action">NOS<small>Newcastle-Ottawa</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">RoB 2 Domains</div>
+<div class="checklist animate delay-1">
+<h4>Cochrane Risk of Bias 2.0 for RCTs</h4>
+<div class="checklist-item"><span class="number">D1</span> Randomization process</div>
+<div class="checklist-item"><span class="number">D2</span> Abweichungen von vorgesehenen Eingriffen</div>
+<div class="checklist-item"><span class="number">D3</span> Fehlende Ergebnisdaten</div>
+<div class="checklist-item"><span class="number">D4</span> Messung des Ergebnisses</div>
+<div class="checklist-item"><span class="number">D5</span> Auswahl des gemeldeten Ergebnisses</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">JUDGMENT OPTIONS</div>
+<div class="simple-text">
+                    Each domain: <strong style="color:var(--green);">Low risk</strong> /
+                    <strong style="color:var(--orange);">Some concerns</strong> /
+                    <strong style="color:var(--red);">High risk</strong>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  „Eine Metaanalyse voreingenommener Studien<br/>
+                  yields a biased conclusion—<br/>
+                  mit einem engeren Konfidenzintervall.<br/>
+                  Sie haben die Lüge präzisiert.“
+                </div>
+</div>
+</div>
+</div>
+ ==================== Modul 10: Datenextraktion ==================== 
+<div class="module-slides" data-module="10">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  Aus jeder Studie müssen Sie die Zahlen extrahieren.
+                  <br/><br/>
+                  Extrahieren Sie falsch und Ihre gesamte Analyse<br/>
+                  is built on <em>sand</em>.
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Datenextraktionsformular</div>
+<div class="checklist animate delay-1">
+<h4>Wesentliche Datenelemente</h4>
+<div class="checklist-item"><span class="number">1</span> Study identifiers (author, year, country)</div>
+<div class="checklist-item"><span class="number">2</span> Studiendesign und -setting</div>
+<div class="checklist-item"><span class="number">3</span> Participant characteristics (n, age, sex, severity)</div>
+<div class="checklist-item"><span class="number">4</span> Intervention details (dose, duration, delivery)</div>
+<div class="checklist-item"><span class="number">5</span> Comparator details</div>
+<div class="checklist-item"><span class="number">6</span> Ergebnisdefinitionen und -messung</div>
+<div class="checklist-item"><span class="number">7</span> Results (means, SDs, events, sample sizes)</div>
+<div class="checklist-item"><span class="number">8</span> Follow-up duration and loss to follow-up</div>
+<div class="checklist-item"><span class="number">9</span> Funding source and conflicts of interest</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Extraction Decision Tree</div>
+<div class="decision-tree animate delay-1">
+<h4>Umgang mit fehlenden Daten</h4>
+<div class="tree-row"><div class="tree-node root">Daten nicht gemeldet</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">What to Do?</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">First</div>
+<div class="tree-node action">Contact authors<small>E-Mail für Daten</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">If no response</div>
+<div class="tree-node warning">Calculate/impute<small>Document method</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">If impossible</div>
+<div class="tree-node no">Exclude from MA<small>Include in narrative</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<div class="story-title">Der Rosiglitazon-Datenextraktionsfehler</div>
+<div class="story-period">2007 | NEW ENGLAND JOURNAL OF MEDICINE</div>
+<div class="story-narrative">
+                    Nissen and Wolski's 2007 meta-analysis of rosiglitazone (Avandia) found a <strong>43% increased risk of heart attack</strong>. Der Befund löste Warnungen der FDA aus und führte zu einem weltweiten Rückgang der Verschreibungen.
+                    <br/><br/>
+                    But later scrutiny revealed complications. Some effect estimates had been <strong>extracted from secondary publications rather than primary trial reports</strong>. Kleine Unterschiede in der Art und Weise, wie Ereignisse gezählt wurden – extrahiert aus verschiedenen Quellen – veränderten die Ergebnisse erheblich.
+                    <br/><br/>
+                    Die Metaanalyse war einflussreich und weitgehend korrekt, aber die Kontroverse zeigte, wie <strong>small extraction decisions can have billion-dollar consequences</strong>. Merck's competing drug gained market share; GSK faced massive litigation.
+                  </div>
+<div class="story-lesson">
+<div class="lesson-label">THE LESSON</div>
+<div class="lesson-text">Extrahieren Sie immer aus Primärquellen. Dokumentieren Sie jede Entscheidung. Eine kleine Abweichung in den extrahierten Zahlen kann regulatorische Entscheidungen und das Marktgeschehen verändern.</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  "Extract in duplicate. Check each number.<br/>
+                  One digit wrong can change the conclusion.<br/>
+                  Das Extraktionsformular ist Ihr Hauptbuch –<br/>
+                  keep it meticulous, keep it true."
+                </div>
+</div>
+</div>
+</div>
+ ==================== MODUL 11: WIRKUNGSMASSNAHMEN ==================== 
+<div class="module-slides" data-module="11">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  Die Effektgröße ist das Herzstück Ihrer Metaanalyse.
+                  <br/><br/>
+                  Wählen Sie das falsche Maß,<br/>
+                  und Ihre zusammengefasste Schätzung wird sein <em>meaningless</em>.
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Effect Measure Decision Tree</div>
+<div class="decision-tree animate delay-1">
+<h4>Choosing the Right Effect Size</h4>
+<div class="tree-row"><div class="tree-node root">Outcome Type</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">Binary</div>
+<div class="tree-node action">RR, OR, RD<small>Events/no events</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">Continuous</div>
+<div class="tree-node question">Same scale?</div>
+<div class="tree-branch" style="gap:0.3rem;">
+<div class="tree-branch-item">
+<div class="tree-node action" style="font-size:0.5rem;">Yes<small>MD (mean diff)</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node action" style="font-size:0.5rem;">No<small>SMD (Hedge's g)</small></div>
+</div>
+</div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">Time-to-event</div>
+<div class="tree-node action">HR<small>Hazard ratio</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Common Effect Measures</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box">
+<div class="stat-value" style="color:var(--gold);">RR</div>
+<div class="stat-label">Risk Ratio<br/>Multiplicative</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--purple);">OR</div>
+<div class="stat-label">Odds Ratio<br/>Case-control</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--teal);">MD</div>
+<div class="stat-label">Mean Diff<br/>Same units</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--blue);">SMD</div>
+<div class="stat-label">Std Mean Diff<br/>Different scales</div>
+</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">THE PRINCIPLE</div>
+<div class="simple-text">
+                    Das Wirkungsmaß muss sein <strong>studienübergreifend vergleichbar</strong>.
+                    If studies used different scales, standardize.
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<p class="story-opener">Can a trial that transforms global practice still have serious limitations?</p>
+<div class="real-data-box">
+<h4>REAL DATA</h4>
+<p>Die RECOVERY-Studie (2020) zeigte, dass Dexamethason die 28-Tage-Mortalität bei hospitalisierten COVID-19-Patienten, die Sauerstoff benötigen, senkte: <span class="data-highlight">RR 0.83, 95% CI 0.75-0.93</span>. Dennoch war die Studie offen (keine Verblindung), wurde überwiegend in britischen Krankenhäusern durchgeführt und die Kontrollgruppe erhielt die übliche Pflege (die unterschiedlich war).</p>
+</div>
+<div class="decision-tree">
+<div class="decision-tree-header">Der RECOVERY-Prozess: 2020</div>
+<div class="decision-scenario">In Ihrer Metaanalyse ist RECOVERY die dominierende Studie. Wie gehen Sie mit den Einschränkungen einer ansonsten bahnbrechenden Studie um?</div>
+<div class="decision-paths">
+<div class="decision-path path-a" role="button" tabindex="0">
+<div class="path-label">PATH A: Minimize Limitations</div>
+<div class="path-choice">Open-Label-Design und geografische Konzentration herunterspielen; Konzentrieren Sie sich auf den auffälligen Sterblichkeitsvorteil</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">Readers cannot judge generalizability to other settings; potential detection bias is obscured</div>
+<div class="path-outcome">ERGEBNIS: Unvollständige Beweiswürdigung</div>
+</div>
+<div class="decision-path path-b" role="button" tabindex="0">
+<div class="path-label">PATH B: Honest Limitations</div>
+<div class="path-choice">Berücksichtigen Sie das Open-Label-Design und die geografischen Einschränkungen und geben Sie gleichzeitig den Sterblichkeitsvorteil klar an</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">Die Leser verstehen sowohl die Stärke des Ergebnisses als auch, wo noch Unsicherheit besteht</div>
+<div class="path-outcome">OUTCOME: Trustworthy, balanced reporting</div>
+</div>
+</div>
+</div>
+<div class="story-revelation">
+<div class="revelation-label">THE REVELATION</div>
+<div class="revelation-text">Selbst bahnbrechende Studien haben ihre Grenzen. Ihre Anerkennung untergräbt die Ergebnisse nicht; Es stärkt das Vertrauen der Leser und leitet zukünftige Forschungen.</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  „Wählen Sie das Maß, das zu den Daten passt.<br/>
+                  Risikoverhältnisse für häufige Ergebnisse, Quotenverhältnisse für seltene.<br/>
+                  Standardize when scales differ.<br/>
+                  Das falsche Maß bündelt Äpfel mit Birnen.“
+                </div>
+</div>
+</div>
+</div>
+ ==================== MODUL 12: DIE SYNTHESE ==================== 
+<div class="module-slides" data-module="12">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  Haben Sie das Waldgrundstück nicht gesehen?<br/>
+                  where studies pointed in opposite directions,<br/>
+                  yet the diamond declared a single <em>truth</em>?
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Fixed vs. Random Effects</div>
+<div class="decision-tree animate delay-1">
+<h4>Which Model to Use?</h4>
+<div class="tree-row"><div class="tree-node root">Meta-Analysis Model</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">Annahme über wahre Wirkung?</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">One true effect</div>
+<div class="tree-node blue">Fixed Effect<small>Alle Studien schätzen das gleiche θ</small></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node warning" style="font-size:0.5rem;">Rarely appropriate<small>Sehr ähnliche Studien</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">Effects vary</div>
+<div class="tree-node yes">Random Effects<small>Distribution of θᵢ</small></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node action" style="font-size:0.5rem;">Usually preferred<small>More conservative</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Wann man NICHT Poolen sollte</div>
+<div class="checklist animate delay-1">
+<h4>Do Not Meta-Analyze If...</h4>
+<div class="checklist-item"><span class="check" style="color:var(--red);">✗</span> Studien sind zu heterogen (klinisch oder methodisch)</div>
+<div class="checklist-item"><span class="check" style="color:var(--red);">✗</span> Ergebnisse werden unterschiedlich definiert</div>
+<div class="checklist-item"><span class="check" style="color:var(--red);">✗</span> Populationen sind grundsätzlich unterschiedlich</div>
+<div class="checklist-item"><span class="check" style="color:var(--red);">✗</span> Risk of bias is too high across studies</div>
+<div class="checklist-item"><span class="check" style="color:var(--red);">✗</span> Publication bias is severe</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">THE WISDOM</div>
+<div class="simple-text">
+                    Sometimes the most honest conclusion is:
+                    <strong>„Diese Studien sollten nicht zusammengefasst werden.“</strong>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<p class="story-opener">Was passiert, wenn eine methodische Kritik an einem Cochrane-Review zu einer Organisationskrise eskaliert?</p>
+<div class="real-data-box">
+<h4>REAL DATA</h4>
+<p>Im Jahr 2018 veröffentlichten Peter Gøtzsche und Kollegen eine Kritik an der Überprüfung des Cochrane-HPV-Impfstoffs und argumentierten, diese habe wichtige Studien ausgeschlossen und unangemessene Einschlusskriterien verwendet. Die Cochrane-Rezension hatte enthalten <span class="data-highlight">26 Studien mit über 73.000 Frauen</span>. Der Streit entwickelte sich zu einer Regierungskrise, die in Gøtzsches Ausschluss aus dem Vorstand von Cochrane gipfelte.</p>
+</div>
+<div class="decision-tree">
+<div class="decision-tree-header">Die Cochrane HPV-Kontroverse: 2018</div>
+<div class="decision-scenario">Sie erhalten eine methodische Kritik Ihrer veröffentlichten Synthese mit der Begründung, dass Sie zusätzliche Studien hätten einbeziehen sollen. Wie reagieren Sie?</div>
+<div class="decision-paths">
+<div class="decision-path path-a" role="button" tabindex="0">
+<div class="path-label">PFAD A: Kritik ablehnen</div>
+<div class="path-choice">Verteidigen Sie den ursprünglichen Ansatz, ohne sich auf die angesprochenen spezifischen methodischen Punkte einzulassen</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">Das Vertrauen der Öffentlichkeit schwindet; der Streit wird eher persönlich als wissenschaftlich; Die Evidenzbasis wird nicht verbessert</div>
+<div class="path-outcome">OUTCOME: Polarization and lost credibility</div>
+</div>
+<div class="decision-path path-b" role="button" tabindex="0">
+<div class="path-label">PATH B: Engage Transparently</div>
+<div class="path-choice">Durchführung von Sensitivitätsanalysen unter Einbeziehung der vorgeschlagenen Studien; Veröffentlichen Sie eine transparente Antwort, aus der hervorgeht, ob sich die Schlussfolgerungen ändern</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">Die Beweise werden gestärkt; Der methodologische Diskurs bringt das Fachgebiet voran. Vertrauen bleibt erhalten</div>
+<div class="path-outcome">OUTCOME: Science self-corrects publicly</div>
+</div>
+</div>
+</div>
+<div class="story-revelation">
+<div class="revelation-label">THE REVELATION</div>
+<div class="revelation-text">Methodenkritik ist der Weg, wie sich die Wissenschaft verbessert. Mit Daten zu reagieren und nicht mit Abwehrhaltung, stärkt sowohl die Überprüfung als auch das Feld.</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  „Zusammenlegen nicht um des Zusammenlegens willen.<br/>
+                  Eine Metaanalyse inkompatibler Studien<br/>
+                  ist keine Synthese – es ist Verwirrung.<br/>
+                  Know when to say: these cannot be combined."
+                </div>
+</div>
+</div>
+</div>
+<!-- ==================== MODULE 13: HETEROGENEITY ==================== -->
+<div class="module-slides" data-module="13">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  Wenn Studien anderer Meinung sind,<br/>
+                  die Meinungsverschiedenheit selbst ist <em>data</em>.
+                  <br/><br/>
+                  Do not hide it. <em>Explain it.</em>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Heterogeneity Measures</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box">
+<div class="stat-value" style="color:var(--gold);">Q</div>
+<div class="stat-label">Cochran's Q<br/>Significance test</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--purple);">I²</div>
+<div class="stat-label">Inconsistency<br/>% variation</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--teal);">τ²</div>
+<div class="stat-label">Tau-squared<br/>Between-study var</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--blue);">PI</div>
+<div class="stat-label">Prediction interval<br/>Future studies</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Investigating Heterogeneity</div>
+<div class="decision-tree animate delay-1">
+<h4>When I² &gt; 50%</h4>
+<div class="tree-row"><div class="tree-node root">High Heterogeneity</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">Investigation Methods</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node action">Subgroup analysis<small>Pre-specified</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node action">Meta-regression<small>If ≥10 studies</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node action">Sensitivity analysis<small>Exclude outliers</small></div>
+</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node warning">Report unexplained heterogeneity<small>Limitation</small></div></div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<p class="story-opener">What if a meta-analysis of small positive trials is overturned by a single mega-trial?</p>
+<div class="real-data-box">
+<h4>REAL DATA</h4>
+<p>In den frühen 1990er Jahren deuteten mehrere kleine Studien darauf hin, dass intravenöses Magnesium die Sterblichkeit nach einem akuten Myokardinfarkt senkte. Eine Metaanalyse (Teo et al., 1991) fasste diese zusammen und stellte einen signifikanten Nutzen fest: <span class="data-highlight">OR 0.44, 95% CI 0.27-0.71</span>. Dann ISIS-4 (1995), ein Mega-Prozess mit <span class="data-highlight">58,050 patients</span>, fand überhaupt keinen Nutzen. Die Auswirkungen kleiner Studien und die Heterogenität wurden ignoriert.</p>
+</div>
+<div class="decision-tree">
+<div class="decision-tree-header">Die Magnesium-Kontroverse: 1991-1995</div>
+<div class="decision-scenario">Ihre Metaanalyse kleiner Studien zeigt eine hohe Heterogenität (I² über 50 %), aber die gepoolte Schätzung ist signifikant. Wie präsentieren Sie das?</div>
+<div class="decision-paths">
+<div class="decision-path path-a" role="button" tabindex="0">
+<div class="path-label">PFAD A: Begraben Sie die Heterogenität</div>
+<div class="path-choice">Report the significant pooled estimate prominently; mention I² only in passing</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">Ärzte übernehmen die Behandlung; Eine zukünftige große Studie könnte der Metaanalyse widersprechen und das Vertrauen in die Methode untergraben</div>
+<div class="path-outcome">OUTCOME: Premature guideline changes</div>
+</div>
+<div class="decision-path path-b" role="button" tabindex="0">
+<div class="path-label">PATH B: Investigate Transparently</div>
+<div class="path-choice">Heterogenität hervorheben; Quellen untersuchen (Studienumfang, Qualität); Beachten Sie, dass die Auswirkungen kleiner Studien die Schätzung erhöhen können</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">Die Leser verstehen die Unsicherheit; Die Empfehlungen erfordern einen endgültigen großen Versuch, bevor die Praxis geändert wird</div>
+<div class="path-outcome">OUTCOME: Evidence-appropriate caution</div>
+</div>
+</div>
+</div>
+<div class="story-revelation">
+<div class="revelation-label">THE REVELATION</div>
+<div class="revelation-text">Heterogenität ist ein Warnsignal, keine Fußnote. Die Auswirkungen kleiner Studien können zu einer fälschlicherweise beruhigenden zusammengefassten Schätzung führen, die eine einzelne große Studie zum Scheitern bringen kann.</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  "I-squared is not just a number to report.<br/>
+                  Es stellt sich die Frage: Warum stimmen diese Studien nicht überein?<br/>
+                  Investigate. Explain. Or acknowledge ignorance."
+                </div>
+</div>
+</div>
+</div>
+ ==================== MODUL 14: PUBLIKATIONSBIAS ==================== 
+<div class="module-slides" data-module="14">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  Haben Sie noch nichts von der Aktenschublade gehört?<br/>
+                  wohin negative Studien gehen <em>die</em>,<br/>
+                  leaving only the positive survivors<br/>
+                  to tell a <em>distorted story</em>?
+                </div>
+</div>
+</div>
+<div class="slide blood">
+<div class="content text-center">
+<div class="title red animate">Die Vioxx-Katastrophe</div>
+<div class="story-card red animate delay-1">
+<div class="place">MERCK, 2004</div>
+<div class="narrative">
+                    Vioxx (rofecoxib) was a blockbuster painkiller earning $2.5 billion/year.
+                    <br/><br/>
+                    Internal company documents showed Merck knew of cardiovascular risks
+                    but <strong>ungünstige Daten unterdrückt</strong> and published only favorable analyses.
+                    <br/><br/>
+                    A meta-analysis using all available data revealed a <strong>2-fold increased risk of heart attack</strong>.
+                    <br/><br/>
+                    Vioxx was withdrawn. It had caused an estimated <strong>88,000-140,000 excess heart attacks</strong>.
+                  </div>
+<div class="source">Topol EJ. N Engl J Med. 2004;351:1707-1709</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Detecting Publication Bias</div>
+<div class="decision-tree animate delay-1">
+<h4>Assessment Methods</h4>
+<div class="tree-row"><div class="tree-node root">Publication Bias Assessment</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node action">Funnel plot<small>Visual inspection</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node action">Egger's test<small>Statistical asymmetry</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node action">Zuschneiden und füllen<small>Impute missing</small></div>
+</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node warning">Requires ≥10 studies<small>Low power otherwise</small></div></div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Preventing Bias: The AllTrials Campaign</div>
+<div class="simple-box animate delay-1">
+<div class="simple-title">ALLTRIALS.NET</div>
+<div class="simple-text">
+<strong>"All trials registered. All results reported."</strong>
+<br/><br/>
+                    • Search trial registries (ClinicalTrials.gov, WHO ICTRP)<br/>
+                    • Kontaktieren Sie Unternehmen für unveröffentlichte Daten<br/>
+                    • Geben Sie in Ihrer Bewertung Registrierungsnummern an<br/>
+                    • Melden Sie, welche registrierten Studien in Ihrer Analyse fehlen
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  „Die Aktenschublade ist nicht leer.<br/>
+                  Es enthält die Studien, die Unternehmen versteckt haben,<br/>
+                  die Ergebnisse, die Zeitschriften ablehnten.<br/>
+                  Ihre Aufgabe ist es, diese Schublade zu öffnen – oder zu sagen, dass Sie es nicht konnten.
+                </div>
+</div>
+</div>
+</div>
+ ==================== MODUL 15: DAS WALDGRUNDSTÜCK ==================== 
+<div class="module-slides" data-module="15">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  Das Waldgrundstück ist das Gesicht Ihrer Metaanalyse.
+                  <br/><br/>
+                  Es zeigt den Leser <em>everything</em>:<br/>
+                  each study, each weight, each confidence interval,<br/>
+                  und die endgültige gepoolte Schätzung.
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Lesen des Waldgrundstücks</div>
+<div class="decision-tree animate delay-1">
+<h4>Elemente des Waldgrundstücks</h4>
+<div class="tree-row"><div class="tree-node root">Forest Plot</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node blue">Study names<small>Left column</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node action">Squares<small>Point estimates</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node action">Lines<small>95% CI</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node yes">Diamond<small>Pooled estimate</small></div>
+</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node warning">Quadratgröße = Studiengewicht<small>Larger = more precise</small></div></div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Forest Plot Checklist</div>
+<div class="checklist animate delay-1">
+<h4>What to Include</h4>
+<div class="checklist-item"><span class="check">□</span> Studienidentifikatoren (Autor, Jahr)</div>
+<div class="checklist-item"><span class="check">□</span> Sample size per arm</div>
+<div class="checklist-item"><span class="check">□</span> Effektschätzung mit 95 %-KI</div>
+<div class="checklist-item"><span class="check">□</span> Weight (% contribution)</div>
+<div class="checklist-item"><span class="check">□</span> Line of no effect (RR=1 or MD=0)</div>
+<div class="checklist-item"><span class="check">□</span> Gepoolte Schätzung mit 95 %-KI</div>
+<div class="checklist-item"><span class="check">□</span> Heterogeneity statistics (I², τ², Q)</div>
+<div class="checklist-item"><span class="check">□</span> Test for overall effect (Z, p-value)</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<div class="story-title">Die Vioxx-Zahlen, die alles veränderten</div>
+<div class="story-period">2004 | DIE GENEHMIGUNG DES VERSUCHS UND DER MARKTZÜCKZUG</div>
+<div class="story-narrative">
+                    Jahrelang zeigte die Waldparzelle für die kardiovaskuläre Sicherheit von Vioxx (Rofecoxib) ein beruhigendes Muster. Punktschätzungen aus früheren Versuchen gruppierten sich um die Linie ohne Wirkung. Der Diamant deutete darauf hin, dass das Medikament sicher war.
+                    <br/><br/>
+                    Dann kam die APPROVe-Studie. Als seine Daten dem Waldgrundstück hinzugefügt wurden, <strong>Das Bild veränderte sich dramatisch</strong>. Das große Quadrat von APPROVe zog den gesammelten Diamanten endgültig in Richtung Schaden. Das Bild war unverkennbar.
+                    <br/><br/>
+                    Dieses Waldgrundstück <strong>ended Vioxx</strong>. Merck hat das Medikament freiwillig zurückgezogen. Der anschließende Rechtsstreit kostete das Unternehmen Kosten <strong>$4.85 billion in settlements</strong>. Tausende Patienten hatten einen Herzinfarkt erlitten, während die früheren, kleineren Studien unklare Ergebnisse lieferten.
+                  </div>
+<div class="story-lesson">
+<div class="lesson-label">THE LESSON</div>
+<div class="lesson-text">Ein gut durchgeführter Versuch mit ausreichender Leistung kann die gesamte gepoolte Schätzung verändern. Waldparzellen erzählen die Geschichte davon, wie sich Beweise ansammeln – und manchmal auch, wie sie den Kurs umkehren.</div>
+</div>
+<div class="decision-tree" style="margin-top:0.6rem;">
+<div class="decision-tree-header">Das irreführende Waldgrundstück</div>
+<div class="decision-scenario">Sie entwerfen ein Walddiagramm für Ihre Metaanalyse. Der Achsenmaßstab und die Studienreihenfolge können den visuellen Eindruck verändern. Wie gehen Sie vor?</div>
+<div class="decision-paths">
+<div class="decision-path path-a" role="button" tabindex="0">
+<div class="path-label">PFAD A: Design für Wirkung</div>
+<div class="path-choice">Use a compressed axis scale to make effect sizes look larger; order studies to build a visual narrative</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">Der Leser bildet sich übertriebene Eindrücke von der Wirkungsstärke; Die Handlung wird eher zu einem Instrument der Interessenvertretung als zu einer Datenanzeige</div>
+<div class="path-outcome">ERGEBNIS: Visuelle Verfälschung der Beweise</div>
+</div>
+<div class="decision-path path-b" role="button" tabindex="0">
+<div class="path-label">PFAD B: Design für Klarheit</div>
+<div class="path-choice">Use standard axis scaling; order studies by year or alphabetically; include all standard elements (weights, CIs, I²)</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">Der Leser kann sich sein eigenes Urteil bilden; Der Plot dient als transparente Datenvisualisierung</div>
+<div class="path-outcome">OUTCOME: Honest visual communication</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  "The forest plot hides nothing.<br/>
+                  Every study visible. Every weight transparent.<br/>
+                  Lassen Sie den Leser sehen, was Sie gesehen haben –<br/>
+                  und urteilen selbst.“
+                </div>
+</div>
+</div>
+</div>
+ ==================== MODUL 16: BEWEISSGEWISSHEIT ==================== 
+<div class="module-slides" data-module="16">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  Eine zusammengefasste Schätzung reicht nicht aus.
+                  <br/><br/>
+                  Sie müssen dem Leser auch sagen:<br/>
+<em>How confident should they be in this result?</em>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">GRADE Certainty Assessment</div>
+<div class="decision-tree animate delay-1">
+<h4>Bewertung der Beweise</h4>
+<div class="tree-row"><div class="tree-node root">Start: RCTs = High, Obs = Low</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">Reasons to Downgrade?</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node no">Risk of bias<small>-1 or -2</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node no">Inconsistency<small>-1 or -2</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node no">Indirectness<small>-1 or -2</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node no">Imprecision<small>-1 or -2</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node no">Pub. bias<small>-1 or -2</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">GRADE Certainty Levels</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box" style="background:var(--green);">
+<div class="stat-value" style="color:white;">⊕⊕⊕⊕</div>
+<div class="stat-label">HIGH<br/>Very confident</div>
+</div>
+<div class="stat-box" style="background:var(--gold);">
+<div class="stat-value" style="color:var(--navy);">⊕⊕⊕◯</div>
+<div class="stat-label">MODERATE<br/>Likely close</div>
+</div>
+<div class="stat-box" style="background:var(--orange);">
+<div class="stat-value" style="color:white;">⊕⊕◯◯</div>
+<div class="stat-label">LOW<br/>May differ</div>
+</div>
+<div class="stat-box" style="background:var(--red);">
+<div class="stat-value" style="color:white;">⊕◯◯◯</div>
+<div class="stat-label">VERY LOW<br/>Uncertain</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<p class="story-opener">What happens when a GRADE assessment of "low certainty" collides with a public health emergency?</p>
+<div class="real-data-box">
+<h4>REAL DATA</h4>
+<p>Der Cochrane-Review 2023 zu physischen Interventionen zur Reduzierung der Ausbreitung von Atemwegsviren (Jefferson et al.) ergab, dass die Evidenz für Masken in gemeinschaftlichen Einrichtungen lautete <span class="data-highlight">low certainty</span> pro GRADE, mit breiten Konfidenzintervallen. Es wurde weithin berichtet, dass die Überprüfung beweise, dass „Masken nicht funktionieren“, obwohl die Autoren erklärten, dass die Beweise nicht ausreichten, um eindeutige Schlussfolgerungen in die eine oder andere Richtung zu ziehen.</p>
+</div>
+<div class="decision-tree">
+<div class="decision-tree-header">Die Cochrane-Masken-Rezension: 2023</div>
+<div class="decision-scenario">Ihre systematische Überprüfung zu einem politisch sensiblen Thema erhält die GRADE-Bewertung „geringe Sicherheit“. Wie kommunizieren Sie das?</div>
+<div class="decision-paths">
+<div class="decision-path path-a" role="button" tabindex="0">
+<div class="path-label">PFAD A: Die Bewertung abschwächen</div>
+<div class="path-choice">Spielen Sie die GRADE-Bewertung herunter, um politische Kontroversen zu vermeiden. Betonen Sie die Punktschätzung gegenüber dem Sicherheitsniveau</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">Die Rezension verliert an methodischer Glaubwürdigkeit; GRADE wird eher als optional denn als streng angesehen</div>
+<div class="path-outcome">OUTCOME: Compromised methodology</div>
+</div>
+<div class="decision-path path-b" role="button" tabindex="0">
+<div class="path-label">PATH B: Report Faithfully</div>
+<div class="path-choice">Geben Sie die GRADE-Bewertung ehrlich an. Erklären Sie klar und deutlich, was „geringe Sicherheit“ bedeutet (und was nicht); Unterscheiden Sie das Fehlen von Beweisen vom Beweis des Fehlens</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">Die Öffentlichkeit mag es falsch interpretieren, aber die wissenschaftlichen Erkenntnisse sind korrekt; zukünftige Forschungsrichtungen werden klar</div>
+<div class="path-outcome">OUTCOME: Methodological integrity</div>
+</div>
+</div>
+</div>
+<div class="story-revelation">
+<div class="revelation-label">THE REVELATION</div>
+<div class="revelation-text">„Geringe Sicherheit“ bedeutet nicht „keine Wirkung“. GRADE-Bewertungen müssen wahrheitsgetreu angegeben werden, mit einer klaren Erläuterung ihrer Bedeutung, insbesondere bei politisch brisanten Themen.</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  „Die Effektgröße ist das Was.“<br/>
+                  GRADE certainty is the how sure.<br/>
+                  Report both—or the reader cannot judge<br/>
+                  how much to trust your conclusion."
+                </div>
+</div>
+</div>
+</div>
+ ==================== MODUL 17: DIE DISKUSSION ==================== 
+<div class="module-slides" data-module="17">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  Die Diskussion ist da, wo Sie sind <em>interpret</em>.
+                  <br/><br/>
+                  Nicht drehen. Nicht zu übertreiben.<br/>
+                  But to explain what your findings mean—<br/>
+                  und was sie tun <em>not</em> mean.
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Discussion Structure</div>
+<div class="timeline animate delay-1">
+<div class="timeline-item">
+<div class="timeline-marker">1</div>
+<div class="timeline-content">
+<h5>Summary of Findings</h5>
+<p>Wiederholen Sie die Hauptergebnisse mit der Bewertung „Sicherheit“.</p>
+</div>
+</div>
+<div class="timeline-item">
+<div class="timeline-marker">2</div>
+<div class="timeline-content">
+<h5>Vergleich mit vorhandener Literatur</h5>
+<p>How do your findings relate to prior reviews?</p>
+</div>
+</div>
+<div class="timeline-item">
+<div class="timeline-marker">3</div>
+<div class="timeline-content">
+<h5>Stärken und Grenzen</h5>
+<p>Sowohl der Review als auch die eingeschlossenen Studien</p>
+</div>
+</div>
+<div class="timeline-item">
+<div class="timeline-marker">4</div>
+<div class="timeline-content">
+<h5>Implikationen für die Praxis</h5>
+<p>What should clinicians/policymakers do?</p>
+</div>
+</div>
+<div class="timeline-item">
+<div class="timeline-marker">5</div>
+<div class="timeline-content">
+<h5>Implikationen für die Forschung</h5>
+<p>Welche Studien sind noch nötig?</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Common Mistakes in Discussion</div>
+<div class="checklist animate delay-1">
+<h4>What NOT to Do</h4>
+<div class="checklist-item"><span class="check" style="color:var(--red);">✗</span> Übertriebene Schlussfolgerungen, die über die Daten hinausgehen</div>
+<div class="checklist-item"><span class="check" style="color:var(--red);">✗</span> Ignoring limitations</div>
+<div class="checklist-item"><span class="check" style="color:var(--red);">✗</span> Treating statistical significance as clinical importance</div>
+<div class="checklist-item"><span class="check" style="color:var(--red);">✗</span> Failing to address heterogeneity</div>
+<div class="checklist-item"><span class="check" style="color:var(--red);">✗</span> Kausalbehauptungen aus Beobachtungsdaten aufstellen</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<p class="story-opener">Was wäre, wenn das meistzitierte methodische Papier, das jemals veröffentlicht wurde, davor warnt, dass die meisten Forschungsergebnisse falsch sind?</p>
+<div class="real-data-box">
+<h4>REAL DATA</h4>
+<p>John Ioannidis‘ Artikel aus dem Jahr 2005 in PLoS Medicine mit dem Titel „Why Most Published Research Findings Are False“ wurde bereits mehrfach zitiert <span class="data-highlight">10,000 times</span>. Unter Verwendung mathematischer Modelle argumentierte er, dass die Wahrscheinlichkeit, dass ein Forschungsergebnis wahr ist, von der Studienleistung, der Voreingenommenheit und der Anzahl der getesteten Beziehungen abhängt. Bei vielen Forschungsdesigns kann die Wahrscheinlichkeit eines echten Ergebnisses nach dem Studium unter 50 % liegen.</p>
+</div>
+<div class="decision-tree">
+<div class="decision-tree-header">Der Weckruf von Ioannidis: 2005</div>
+<div class="decision-scenario">Ihre Metaanalyse hat ein statistisch signifikantes Ergebnis, aber die eingeschlossenen Studien sind klein, heterogen und viele weisen ein hohes Risiko für Verzerrungen auf. Wie schreiben Sie die Diskussion?</div>
+<div class="decision-paths">
+<div class="decision-path path-a" role="button" tabindex="0">
+<div class="path-label">PFAD A: Überverkaufen Sie den Befund</div>
+<div class="path-choice">Führen Sie mit der signifikanten gepoolten Schätzung durch; Einschränkungen minimieren; starke Praxisempfehlungen abgeben</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">Der Befund geht vorzeitig in die Leitlinien ein; Wenn die Replikation fehlschlägt, wird die gesamte Metaanalysemethode dafür verantwortlich gemacht</div>
+<div class="path-outcome">OUTCOME: Eroded trust in evidence synthesis</div>
+</div>
+<div class="decision-path path-b" role="button" tabindex="0">
+<div class="path-label">PFAD B: Kalibrieren Sie die Interpretation</div>
+<div class="path-choice">Besprechen Sie das Ergebnis im Kontext von Studienqualität, Heterogenität und Sicherheit; Ordnen Sie die Empfehlungsstärke der Evidenzstärke zu</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">Readers understand the degree of confidence warranted; future research priorities become clear</div>
+<div class="path-outcome">OUTCOME: Proportionate, trustworthy conclusions</div>
+</div>
+</div>
+</div>
+<div class="story-revelation">
+<div class="revelation-label">THE REVELATION</div>
+<div class="revelation-text">Die Diskussion muss den Enthusiasmus auf die Qualität der Beweise abstimmen. Starke Behauptungen aufgrund schwacher Beweise schaden der Glaubwürdigkeit des gesamten Fachgebiets.</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  „Die Diskussion dient nicht der Interessenvertretung.<br/>
+                  Es dient der ehrlichen Interpretation.<br/>
+                  Sagen Sie, was die Beweise zeigen.<br/>
+                  Admit what it does not show."
+                </div>
+</div>
+</div>
+</div>
+<!-- ==================== MODULE 18: TRANSPARENCY ==================== -->
+<div class="module-slides" data-module="18">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  Haben Sie noch nichts von der Wakefield-Zeitung gehört?<br/>
+                  where conflicts of interest were hidden,<br/>
+                  wo Daten erfunden wurden,<br/>
+                  und Millionen von Kindern gingen <em>unvaccinated</em>?
+                </div>
+</div>
+</div>
+<div class="slide blood">
+<div class="content text-center">
+<div class="title red animate">Der MMR-Autismus-Betrug</div>
+<div class="story-card red animate delay-1">
+<div class="place">THE LANCET, 1998-2010</div>
+<div class="narrative">
+                    Andrew Wakefield published a study linking MMR vaccine to autism.
+                    <br/><br/>
+                    Er gab nicht bekannt, dass er es war <strong>paid £435,643 by lawyers</strong>
+                    seeking to sue vaccine manufacturers.
+                    <br/><br/>
+                    Er gab nicht bekannt, dass er es getan hatte <strong>filed a patent</strong>
+                    for a competing single-dose measles vaccine.
+                    <br/><br/>
+                    Die Studie wurde schließlich zurückgezogen. Wakefield wurde vom Platz gestellt. Aber der Schaden war angerichtet: <strong>vaccination rates plummeted</strong>, und Masernausbrüche kehrten zurück.
+                  </div>
+<div class="source">Deer B. BMJ. 2011;342:c5347</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Transparency Checklist</div>
+<div class="checklist animate delay-1">
+<h4>What to Declare</h4>
+<div class="checklist-item"><span class="check">□</span> Protocol registration number</div>
+<div class="checklist-item"><span class="check">□</span> Funding sources (all)</div>
+<div class="checklist-item"><span class="check">□</span> Rolle des Geldgebers bei der Überprüfung</div>
+<div class="checklist-item"><span class="check">□</span> Conflicts of interest (all authors)</div>
+<div class="checklist-item"><span class="check">□</span> Erklärung zur Datenverfügbarkeit</div>
+<div class="checklist-item"><span class="check">□</span> Abweichungen vom Protokoll (mit Begründung)</div>
+<div class="checklist-item"><span class="check">□</span> Author contributions</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<div class="story-title">Die AllTrials-Initiative</div>
+<div class="story-period">2013-PRESENT | A GRASSROOTS TRANSPARENCY MOVEMENT</div>
+<div class="story-narrative">
+                    Im Jahr 2013 starteten Ben Goldacre und Kollegen der Cochrane Collaboration AllTrials, nachdem sie eine beunruhigende Wahrheit entdeckt hatten: <strong>approximately half of all clinical trials were never published</strong>. Bei den fehlenden Studien handelte es sich überproportional um solche mit negativen oder unbequemen Ergebnissen.
+                    <br/><br/>
+                    Die Kampagne versammelte sich <strong>über 90.000 Einzelunterzeichner</strong> und über 700 Organisationen. Es verlangte, dass alle vergangenen und zukünftigen Versuche registriert und die vollständigen Methoden und Ergebnisse gemeldet werden.
+                    <br/><br/>
+                    Die Wirkung war transformativ. Der <strong>Die EU verlangt jetzt die Registrierung von Studien und die Berichterstattung über die Ergebnisse</strong>. The FDA strengthened its own requirements. Journals began demanding prospective registration. What started as advocacy became global policy.
+                  </div>
+<div class="story-lesson">
+<div class="lesson-label">THE LESSON</div>
+<div class="lesson-text">Anspruchsvoller Datenzugriff funktioniert. Eine Basisbewegung hat internationale Vorschriften geändert und damit bewiesen, dass Befürworter der Transparenz das Ökosystem der Beweise neu gestalten können.</div>
+</div>
+<div class="decision-tree" style="margin-top:0.6rem;">
+<div class="decision-tree-header">Die Hydroxychloroquin-Preprint-Kaskade: 2020</div>
+<div class="decision-scenario">Es ist Anfang 2020. Ihr Team verfügt über vorläufige Metaanalyseergebnisse zu einer COVID-19-Behandlung. Der Gautret-Preprint (nicht randomisiert, 42 Patienten) ist bereits viral gegangen. Der Surgisphere-Skandal wird bald gefälschte Daten in großen Fachzeitschriften zeigen. Beeilen Sie sich mit dem Vordruck oder warten Sie?</div>
+<div class="decision-paths">
+<div class="decision-path path-a" role="button" tabindex="0">
+<div class="path-label">PFAD A: Preprint für Geschwindigkeit</div>
+<div class="path-choice">Posten Sie sofort an medRxiv, um Einfluss auf die Richtlinien zu nehmen. Überspringen Sie die Peer-Review wegen Dringlichkeit</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">Wenn eingeschlossene Studien gefälschte Daten oder fehlerhafte Methoden enthalten, verstärkt Ihre Metaanalyse die Fehler. Ein Widerruf schadet der Glaubwürdigkeit</div>
+<div class="path-outcome">OUTCOME: Accelerated misinformation</div>
+</div>
+<div class="decision-path path-b" role="button" tabindex="0">
+<div class="path-label">PATH B: Verify, Then Publish</div>
+<div class="path-choice">Beurteilen Sie die Studienqualität sorgfältig; Kontaktieren Sie die Autoren für Rohdaten. vor der Veröffentlichung einem schnellen Peer-Review unterzogen werden</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">Langsamere Veröffentlichung, aber die Analyse ist robust; Schlussfolgerungen bleiben bestehen, wenn fehlerhafte Studien zurückgezogen werden</div>
+<div class="path-outcome">ERGEBNIS: Beständige, vertrauenswürdige Beweise</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  „Transparenz ist nicht optional.<br/>
+                  Erklären Sie Ihre Finanzierung. Erklären Sie Ihre Konflikte.<br/>
+                  The reader has a right to know<br/>
+                  Wer hat für diese Arbeit bezahlt – und warum?
+                </div>
+</div>
+</div>
+</div>
+ ==================== MODUL 19: DIE LETZTE ÜBERPRÜFUNG ==================== 
+<div class="module-slides" data-module="19">
+<div class="slide gradient active">
+<div class="content text-center">
+<div class="title gold animate">Bevor Sie absenden</div>
+<div class="subtitle animate delay-1">Die letzte Checkliste</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">PRISMA 2020 Final Check</div>
+<div class="checklist animate delay-1">
+<h4>Have You...</h4>
+<div class="checklist-item"><span class="check">□</span> Completed all 27 PRISMA checklist items?</div>
+<div class="checklist-item"><span class="check">□</span> Included the PRISMA flow diagram?</div>
+<div class="checklist-item"><span class="check">□</span> Provided full search strategy in appendix?</div>
+<div class="checklist-item"><span class="check">□</span> Ausgeschlossene Studien mit Begründung aufgelistet?</div>
+<div class="checklist-item"><span class="check">□</span> Gemeldetes Verzerrungsrisiko für jede Studie?</div>
+<div class="checklist-item"><span class="check">□</span> Provided forest plot(s)?</div>
+<div class="checklist-item"><span class="check">□</span> Bewerteter Publikationsbias (bei ≥10 Studien)?</div>
+<div class="checklist-item"><span class="check">□</span> Abgestufte Beweissicherheit (GRADE)?</div>
+<div class="checklist-item"><span class="check">□</span> Declared all conflicts of interest?</div>
+<div class="checklist-item"><span class="check">□</span> Cited protocol registration?</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Supplementary Materials</div>
+<div class="simple-box animate delay-1">
+<div class="simple-title">WHAT TO INCLUDE</div>
+<div class="simple-text">
+                    • <strong>Full search strategies</strong> für alle Datenbanken<br/>
+                    • <strong>Liste der ausgeschlossenen Studien</strong> with reasons<br/>
+                    • <strong>Formulare zur Datenextraktion</strong> (leer und ausgefüllt)<br/>
+                    • <strong>Risk of bias details</strong> für jede Studie<br/>
+                    • <strong>Additional forest plots</strong> (subgroups, sensitivity)<br/>
+                    • <strong>Funnel plot</strong> und statistische Tests<br/>
+                    • <strong>GRADE-Evidenzprofil</strong> tables
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<p class="story-opener">Wie lange kann ein betrügerisches Papier Peer-Review, redaktioneller Prüfung und öffentlicher Anfechtung standhalten?</p>
+<div class="real-data-box">
+<h4>REAL DATA</h4>
+<p>Andrew Wakefield's 1998 Lancet paper linking MMR vaccine to autism took <span class="data-highlight">12 years</span> vollständig zurückgezogen werden (2010). In dieser Zeit deckte der Journalist Brian Deer finanzielle Konflikte, ethische Verstöße und Datenmanipulationen auf. Mehrere große Studien (einschließlich einer dänischen Kohorte von <span class="data-highlight">over 650,000 children</span>) found no association, yet the original paper's influence persisted.</p>
+</div>
+<div class="decision-tree">
+<div class="decision-tree-header">Der Wakefield-Rückzug: 1998-2010</div>
+<div class="decision-scenario">Während des Peer-Reviews äußert ein Gutachter ernsthafte Bedenken hinsichtlich einer in Ihre Metaanalyse einbezogenen Studie und führt dabei Dateninkonsistenzen an. Wie reagieren Sie?</div>
+<div class="decision-paths">
+<div class="decision-path path-a" role="button" tabindex="0">
+<div class="path-label">PFAD A: Lenken Sie die Bedenken ab</div>
+<div class="path-choice">Die Bedenken des Rezensenten als übervorsichtig abtun; Behalten Sie die Studie bei, ohne weitere Untersuchungen durchzuführen</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">Wenn die Studie später zurückgezogen wird, ist Ihre Metaanalyse kontaminiert; die Schlussfolgerung muss möglicherweise zurückgezogen werden</div>
+<div class="path-outcome">ERGEBNIS: Synthese kontaminierter Beweise</div>
+</div>
+<div class="decision-path path-b" role="button" tabindex="0">
+<div class="path-label">PATH B: Investigate Thoroughly</div>
+<div class="path-choice">Kontaktieren Sie die Autoren der Studie für Rohdaten. Führen Sie eine Sensitivitätsanalyse unter Ausschluss der befragten Studie durch. Offenlegung des Anliegens transparent</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">Ihre Metaanalyse ist robust gegenüber dem Einschluss oder Ausschluss der verdächtigen Studie; die Sensitivitätsanalyse wird dokumentiert</div>
+<div class="path-outcome">ERGEBNIS: Belastbare, selbstkorrigierende Überprüfung</div>
+</div>
+</div>
+</div>
+<div class="story-revelation">
+<div class="revelation-label">THE REVELATION</div>
+<div class="revelation-text">Peer-Review ist Ihre letzte Verteidigung vor der Veröffentlichung. Betrachten Sie die Bedenken der Prüfer als Möglichkeiten zur Stärkung Ihrer Arbeit und nicht als Hindernisse, die es zu überwinden gilt.</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide hope">
+<div class="content text-center">
+<div class="refrain hope animate">
+                  „Sie haben die Beweise gesammelt.<br/>
+                  Du hast es fair abgewogen.<br/>
+                  Du hast es transparent geschrieben.<br/>
+<br/>
+                  Reichen Sie jetzt Ihre Arbeit ein –<br/>
+                  und lasst die Wahrheit gefunden und wiedergefunden werden.“
+                </div>
+</div>
+</div>
+</div>
+ ==================== MODUL 20: QUIZ &amp; REFERENZEN ==================== 
+<div class="module-slides" data-module="20">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="title gold animate">References</div>
+<div class="references animate delay-1">
+<h4>Key Sources</h4>
+<ol>
+<li>Page MJ et al. BMJ. 2021;372:n71. [PRISMA 2020]</li>
+<li>Jefferson T et al. Cochrane 2014;4:CD008965. [Tamiflu]</li>
+<li>Turner EH et al. N Engl J Med. 2008;358:252-260. [Antidepressants]</li>
+<li>Boutron I et al. JAMA. 2010;303:2058-2064. [Spin]</li>
+<li>Topol EJ. N Engl J Med. 2004;351:1707-1709. [Vioxx]</li>
+<li>Deer B. BMJ. 2011;342:c5347. [Wakefield]</li>
+<li>Sterne JAC et al. BMJ. 2019;366:l4898. [RoB 2]</li>
+<li>Higgins JPT et al. Cochrane Handbook. 2023.</li>
+<li>Schünemann HJ et al. GRADE Handbook. 2013.</li>
+<li>Ioannidis JPA. PLoS Med. 2005;2:e124. [Why most research is false]</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="quiz-container animate">
+<div class="quiz-question">What percentage of antidepressant trials appeared positive in published literature vs. FDA data?</div>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkAnswer(this, false)">Published 51%, FDA 94%</div>
+<div class="quiz-option" onclick="checkAnswer(this, true)">Published 94%, FDA 51%</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)">Both about 75%</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)">Published 80%, FDA 60%</div>
+</div>
+<div class="quiz-feedback"></div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="quiz-container animate">
+<div class="quiz-question">Welchen Zweck hat die Registrierung eines Protokolls vor der Durchführung einer systematischen Überprüfung?</div>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkAnswer(this, false)">To get funding</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)">To claim priority</div>
+<div class="quiz-option" onclick="checkAnswer(this, true)">To prevent outcome switching and data-driven decisions</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)">Um die Rezension veröffentlichbar zu machen</div>
+</div>
+<div class="quiz-feedback"></div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="quiz-container animate">
+<div class="quiz-question">Wann sollten Sie Studien NICHT in einer Metaanalyse zusammenfassen?</div>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkAnswer(this, false)">Wenn weniger als 10 Studien vorhanden sind</div>
+<div class="quiz-option" onclick="checkAnswer(this, true)">Wenn Studien klinisch oder methodisch zu heterogen sind</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)">Wenn der Effekt statistisch nicht signifikant ist</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)">Wenn Studien aus verschiedenen Ländern stammen</div>
+</div>
+<div class="quiz-feedback"></div>
+</div>
+</div>
+</div>
+<div class="slide hope">
+<div class="content text-center">
+<div class="big-number green animate" style="font-size:3rem;">✔</div>
+<div class="title green animate delay-1">Course Complete</div>
+<div class="gold-line animate delay-2"></div>
+<div class="refrain hope animate delay-3">
+                  „Sie kennen jetzt die Beweisvereinbarung:<br/>
+                  Registrieren Sie sich, bevor Sie suchen.<br/>
+                  Search comprehensively. Select transparently.<br/>
+                  Extract carefully. Assess bias honestly.<br/>
+                  Poolen Sie mit Bedacht – oder gar nicht.<br/>
+                  Write so that truth may be found,<br/>
+                  und wiedergefunden von denen, die ihm folgen.“
+                </div>
+</div>
+</div>
+</div>
+ ==================== MODUL 21: SOFTWARE-TOOLS ==================== 
+<div class="module-slides" data-module="21">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  Die Methoden sind nichts ohne die Werkzeuge, um sie auszuführen.
+                  <br/><br/>
+                  Welche Software führt Ihre Analyse durch?<br/>
+                  from protocol to <em>forest plot</em>?
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Software Decision Tree</div>
+<div class="decision-tree animate delay-1">
+<h4>Wählen Sie Ihre Werkzeuge</h4>
+<div class="tree-row"><div class="tree-node root">Meta-Analysis Software</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">Your Context?</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">Cochrane Review</div>
+<div class="tree-node action">RevMan<small>Free, official</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">Academic/Flexible</div>
+<div class="tree-node action">R metafor<small>Free, powerful</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">Institution License</div>
+<div class="tree-node action">Stata meta<small>Comprehensive</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">Point-and-Click</div>
+<div class="tree-node action">CMA<small>User-friendly</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Das unverzichtbare Toolkit</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box" style="background:var(--blue);">
+<div class="stat-value" style="color:white;font-size:1rem;">RevMan</div>
+<div class="stat-label">Cochrane official<br/>Free download</div>
+</div>
+<div class="stat-box" style="background:var(--purple);">
+<div class="stat-value" style="color:white;font-size:1rem;">R + metafor</div>
+<div class="stat-label">Most flexible<br/>Reproducible code</div>
+</div>
+<div class="stat-box" style="background:var(--teal);">
+<div class="stat-value" style="color:var(--navy);font-size:1rem;">GRADEpro</div>
+<div class="stat-label">Certainty tables<br/>SoF tables</div>
+</div>
+<div class="stat-box" style="background:var(--orange);">
+<div class="stat-value" style="color:white;font-size:1rem;">Rayyan</div>
+<div class="stat-label">Screening tool<br/>AI-assisted</div>
+</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">REPRODUCIBILITY</div>
+<div class="simple-text">
+                    Codebasierte Tools (R, Stata) erstellen <strong>reproducible analyses</strong>. Teilen Sie Ihren Code, damit andere Ihre Arbeit überprüfen können.
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">R metafor Example</div>
+<div class="simple-box animate delay-1" style="text-align:left;font-family:monospace;font-size:0.7rem;">
+<div class="simple-title">BASIC META-ANALYSIS IN R</div>
+<div class="simple-text">
+                    library(metafor)<br/><br/>
+                    # Calculate effect sizes<br/>
+                    dat &lt;- escalc(measure="RR", ai=events_tx, bi=noevents_tx,<br/>
+                        ci=events_ctrl, di=noevents_ctrl, data=mydata)<br/><br/>
+                    # Random effects model<br/>
+                    res &lt;- rma(yi, vi, data=dat, method="REML")<br/><br/>
+                    # Forest plot<br/>
+                    forest(res, slab=paste(author, year))
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<p class="story-opener">Wie koordinieren Sie das Schreiben, wenn eine systematische Rezension Dutzende von Autoren umfasst?</p>
+<div class="real-data-box">
+<h4>REAL DATA</h4>
+<p>Die oben aufgeführte SPRINT-Studie (2015). <span class="data-highlight">100 authors</span> von Dutzenden von Institutionen. Zur Schreibgruppe gehörten ein Lenkungsausschuss, Standortermittler und Statistiker. Für die Koordinierung von Beiträgen, die Verwaltung der Versionskontrolle und die Festlegung der Urheberanerkennung waren formale Strukturen erforderlich. ICMJE-Kriterien definieren Urheberschaft als einen wesentlichen Beitrag, einen Entwurf oder eine Überarbeitung, eine endgültige Genehmigung und Rechenschaftspflicht.</p>
+</div>
+<div class="decision-tree">
+<div class="decision-tree-header">Team Writing Challenges: Large Collaborative Reviews</div>
+<div class="decision-scenario">Ihr Team für systematische Überprüfung besteht aus 12 Mitgliedern in 4 Ländern. Wie managen Sie den Schreibprozess?</div>
+<div class="decision-paths">
+<div class="decision-path path-a" role="button" tabindex="0">
+<div class="path-label">PATH A: Informal Coordination</div>
+<div class="path-choice">Pass drafts via email; resolve authorship at the end; no writing plan or version control</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">Duplication of effort; authorship disputes at submission; inconsistent voice and formatting; lost contributions</div>
+<div class="path-outcome">ERGEBNIS: Verzögerungen und Konflikte</div>
+</div>
+<div class="decision-path path-b" role="button" tabindex="0">
+<div class="path-label">PATH B: Structured Process</div>
+<div class="path-choice">Weisen Sie Abschnittsleiter im Voraus zu. Verwenden Sie gemeinsam genutzte Plattformen mit Versionskontrolle. Vereinbaren Sie zu Beginn die ICMJE-Kriterien und die Autorenreihenfolge</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">Klare Verantwortlichkeit; konsistente Ausgabe; transparente Beiträge; Die Urheberschaft wird entschieden, bevor die Ergebnisse bekannt sind</div>
+<div class="path-outcome">OUTCOME: Efficient, fair collaboration</div>
+</div>
+</div>
+</div>
+<div class="story-revelation">
+<div class="revelation-label">THE REVELATION</div>
+<div class="revelation-text">Vereinbaren Sie vor Beginn der Arbeit die Kriterien für die Autorenschaft und die Schreibverantwortung. Streitigkeiten lassen sich am schwersten lösen, wenn die Ergebnisse bekannt sind.</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  „Das Tool führt die Analyse nicht durch.<br/>
+                  Der Analytiker tut es.<br/>
+                  Aber wählen Sie Ihr Werkzeug mit Bedacht aus –<br/>
+                  und teilen Sie Ihren Code mit, damit die Wahrheit überprüft werden kann.
+                </div>
+</div>
+</div>
+</div>
+ ==================== MODUL 22: META-ANALYSEN LESEN ==================== 
+<div class="module-slides" data-module="22">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  Nicht jeder schreibt Metaanalysen.
+                  <br/><br/>
+                  But every clinician, every policymaker, every patient<br/>
+                  must know how to <em>read</em> them.
+                </div>
+</div>
+</div>
+<div class="slide blood">
+<div class="content text-center">
+<div class="title red animate">Die HRT-Umkehr</div>
+<div class="story-card red animate delay-1">
+<div class="place">WOMEN'S HEALTH INITIATIVE, 2002</div>
+<div class="narrative">
+                    Beobachtungsstudien legten jahrzehntelang nahe, dass eine Hormonersatztherapie (HRT) Frauen vor Herzerkrankungen schützte.
+                    <br/><br/>
+                    Metaanalysen dieser Studien zeigten a <strong>35-50% reduction in cardiovascular risk</strong>.
+                    <br/><br/>
+                    Dann brachte die randomisierte WHI-Studie die Wahrheit ans Licht: HRT <strong>increased</strong> heart attack risk by 29%.
+                    <br/><br/>
+                    The observational meta-analyses had pooled <strong>confounded data</strong>– Gesündere Frauen entschieden sich für eine HRT, nicht umgekehrt.
+                  </div>
+<div class="source">Rossouw JE et al. JAMA. 2002;288:321-333</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">How to Read a Forest Plot</div>
+<div class="decision-tree animate delay-1">
+<h4>Consumer's Guide</h4>
+<div class="tree-row"><div class="tree-node root">Lesen des Waldgrundstücks</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node blue">Line of no effect<small>RR=1 or MD=0</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node action">Diamond position<small>Left=benefit, Right=harm</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node warning">Diamond width<small>Narrow=precise</small></div>
+</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">Does diamond cross the line?</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node yes">No<small>Statistically significant</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node no">Yes<small>Not significant</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Red Flags When Reading</div>
+<div class="checklist animate delay-1">
+<h4>Warning Signs in Published Meta-Analyses</h4>
+<div class="checklist-item"><span class="check" style="color:var(--red);">⚠</span> No protocol registration cited</div>
+<div class="checklist-item"><span class="check" style="color:var(--red);">⚠</span> Single database searched</div>
+<div class="checklist-item"><span class="check" style="color:var(--red);">⚠</span> No risk of bias assessment</div>
+<div class="checklist-item"><span class="check" style="color:var(--red);">⚠</span> High I² but no investigation</div>
+<div class="checklist-item"><span class="check" style="color:var(--red);">⚠</span> Asymmetric funnel plot ignored</div>
+<div class="checklist-item"><span class="check" style="color:var(--red);">⚠</span> Industriefinanzierung, keine Sensitivitätsanalyse</div>
+<div class="checklist-item"><span class="check" style="color:var(--red);">⚠</span> Schlussfolgerungen übertreffen die Beweise</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">What GRADE Ratings Mean</div>
+<div class="simple-box animate delay-1">
+<div class="simple-title">FÜR ÄRZTE UND PATIENTEN</div>
+<div class="simple-text">
+<strong style="color:var(--green);">HIGH:</strong> We are very confident. Future research unlikely to change.<br/><br/>
+<strong style="color:var(--gold);">MODERATE:</strong> Probably close to truth. Future research may change estimate.<br/><br/>
+<strong style="color:var(--orange);">LOW:</strong> Uncertain. Future research likely to change substantially.<br/><br/>
+<strong style="color:var(--red);">VERY LOW:</strong> Very uncertain. Any estimate is speculative.
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  „Lesen Sie den Wald, nicht nur den Diamanten.<br/>
+                  Suchen Sie nach dem Protokoll. Überprüfen Sie die Voreingenommenheit.<br/>
+                  Ask: Who funded this? What did they hide?<br/>
+                  Der informierte Leser ist der Hüter der Wahrheit.“
+                </div>
+</div>
+</div>
+</div>
+ ==================== MODUL 23: NETZWERK-META-ANALYSE ==================== 
+<div class="module-slides" data-module="23">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  What if you must compare treatments<br/>
+                  die nie im direkten Vergleich getestet wurden?
+                  <br/><br/>
+                  Dies ist das Reich von <em>network meta-analysis</em>.
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">When to Use Network MA</div>
+<div class="decision-tree animate delay-1">
+<h4>NMA Decision Tree</h4>
+<div class="tree-row"><div class="tree-node root">Multiple Treatments</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">Direct comparisons available?</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">All pairs directly compared</div>
+<div class="tree-node action">Pairwise MA<small>Standard approach</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">Some indirect only</div>
+<div class="tree-node yes">Network MA<small>Borrow strength</small></div>
+</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node warning">Check transitivity assumption<small>Similar populations across comparisons</small></div></div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Die Netzwerkgeometrie</div>
+<div class="simple-box animate delay-1">
+<div class="simple-title">VISUALISIERUNG DER BEWEISE</div>
+<div class="simple-text" style="text-align:center;">
+<svg style="max-width:300px;margin:0.5rem auto;" viewbox="0 0 200 150">
+<circle cx="100" cy="30" fill="var(--gold)" r="20" stroke="var(--cream)" stroke-width="2"></circle>
+<text fill="var(--navy)" font-size="10" font-weight="bold" text-anchor="middle" x="100" y="35">A</text>
+<circle cx="40" cy="120" fill="var(--blue)" r="15" stroke="var(--cream)" stroke-width="2"></circle>
+<text fill="white" font-size="10" font-weight="bold" text-anchor="middle" x="40" y="124">B</text>
+<circle cx="160" cy="120" fill="var(--purple)" r="18" stroke="var(--cream)" stroke-width="2"></circle>
+<text fill="white" font-size="10" font-weight="bold" text-anchor="middle" x="160" y="124">C</text>
+<line stroke="var(--cream)" stroke-width="4" x1="100" x2="40" y1="50" y2="105"></line>
+<line stroke="var(--cream)" stroke-width="6" x1="100" x2="160" y1="50" y2="102"></line>
+<line stroke="var(--cream)" stroke-dasharray="5,5" stroke-width="2" x1="55" x2="142" y1="120" y2="120"></line>
+</svg>
+<br/>
+<strong>Nodes</strong> = Treatments (size = sample)<br/>
+<strong>Edges</strong> = Direkte Vergleiche (Breite = Studien)<br/>
+<strong>Dashed</strong> = Nur indirekter Beweis
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">League Tables</div>
+<div class="simple-box animate delay-1">
+<div class="simple-title">NMA-ERGEBNISSE LESEN</div>
+<div class="simple-text">
+                    League tables show <strong>all pairwise comparisons</strong> aus dem Netzwerk.
+                    <br/><br/>
+                    • Each cell: effect estimate + 95% CI<br/>
+                    • Row vs. Column: Treatment A vs. Treatment B<br/>
+                    • <strong style="color:var(--green);">Green</strong> = Favors row treatment<br/>
+                    • <strong style="color:var(--red);">Red</strong> = Favors column treatment<br/>
+                    • Rankings (SUCRA/P-score) help identify best options
+                  </div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">CRITICAL ASSUMPTION</div>
+<div class="simple-text">
+<strong>Transitivity:</strong> Wenn A vs. B und B vs. C bei ähnlichen Patienten verglichen werden, können wir A vs. C indirekt schätzen.
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<p class="story-opener">What happens to meta-analyses when a prolific author's entire body of work is retracted?</p>
+<div class="real-data-box">
+<h4>REAL DATA</h4>
+<p>Joachim Boldt, a German anesthesiologist, had over <span class="data-highlight">220 papers retracted</span> zur Datenherstellung (entdeckt 2010-2011). Seine Studien zu Kolloidlösungen wurden in mehrere systematische Übersichten und Metaanalysen einbezogen. Als die Rücknahmen erfolgten, musste jede Metaanalyse, die seine Arbeit enthielt, neu bewertet werden. Einige Schlussfolgerungen änderten sich erheblich, als seine gefälschten Daten entfernt wurden.</p>
+</div>
+<div class="decision-tree">
+<div class="decision-tree-header">Die Boldt-Retraktionskaskade: 2010-2011</div>
+<div class="decision-scenario">Sie stellen fest, dass eine in Ihrer veröffentlichten Metaanalyse enthaltene Studie wegen Datenfälschung zurückgezogen wurde. Was machst du?</div>
+<div class="decision-paths">
+<div class="decision-path path-a" role="button" tabindex="0">
+<div class="path-label">PATH A: Hope No One Notices</div>
+<div class="path-choice">Ignorieren Sie den Widerruf; Die Metaanalyse ist bereits veröffentlicht und die zurückgezogene Studie war klein</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">Andere zitieren Ihre Metaanalyse; die erfundenen Daten verbreiten sich durch sekundäre Zitate; Entscheidungen zur Patientenversorgung basieren auf kontaminierten Beweisen</div>
+<div class="path-outcome">OUTCOME: Cascading harm from inaction</div>
+</div>
+<div class="decision-path path-b" role="button" tabindex="0">
+<div class="path-label">PATH B: Self-Correct Publicly</div>
+<div class="path-choice">Veröffentlichen Sie eine Korrektur oder aktualisierte Analyse mit Ausnahme der zurückgezogenen Studie. die Zeitschrift benachrichtigen; Geben Sie an, ob sich die Schlussfolgerungen ändern</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">Die wissenschaftliche Aufzeichnung wird korrigiert; Leser sehen die aktualisierte Analyse; Ihr Ruf für Integrität wird gestärkt</div>
+<div class="path-outcome">OUTCOME: Scientific self-correction</div>
+</div>
+</div>
+</div>
+<div class="story-revelation">
+<div class="revelation-label">THE REVELATION</div>
+<div class="revelation-text">Die Integrität der Beweissynthese hängt von ständiger Wachsamkeit ab. Wenn eingeschlossene Studien zurückgezogen werden, besteht die ethische Pflicht darin, sie zu aktualisieren und zu korrigieren und nicht zu schweigen.</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  "When treatments have never met,<br/>
+                  Das Netzwerk baut eine Brücke der Beweise.<br/>
+                  But the bridge rests on transitivity—<br/>
+                  Überprüfen Sie, ob die Populationen vergleichbar sind.
+                </div>
+</div>
+</div>
+</div>
+ ==================== MODUL 24: KI/ML-VORHERSAGEMODELLE ==================== 
+<div class="module-slides" data-module="24">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  Haben Sie nicht die KI gesehen, die Krebs vorhergesagt hat?<br/>
+                  mit 99 % Genauigkeit im Trainingssatz –<br/>
+                  und scheiterte katastrophal<br/>
+                  beim Einsatz in der <em>real world</em>?
+                </div>
+</div>
+</div>
+<div class="slide blood">
+<div class="content text-center">
+<div class="title red animate">Der Sepsis-Algorithmus-Fehler</div>
+<div class="story-card red animate delay-1">
+<div class="place">EPIC SEPSIS MODEL, 2021</div>
+<div class="narrative">
+                    Epic's sepsis prediction algorithm was deployed in <strong>hundreds of hospitals</strong>.
+                    <br/><br/>
+                    Internal validation showed excellent performance.
+                    <br/><br/>
+                    Doch eine unabhängige Studie von Michigan Medicine fand das Modell
+                    <strong>missed 67% of sepsis cases</strong> and generated excessive false alarms.
+                    <br/><br/>
+                    Der Algorithmus wurde am validiert <strong>dieselbe Bevölkerungsgruppe, an der es trainiert wurde</strong>– ein Rezept für Überanpassung und Scheitern.
+                  </div>
+<div class="source">Wong A et al. JAMA Intern Med. 2021;181:1065-1070</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">AI Validation Decision Tree</div>
+<div class="decision-tree animate delay-1">
+<h4>Evidenzgrade für KI/ML</h4>
+<div class="tree-row"><div class="tree-node root">AI Prediction Model</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">Validation Level?</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node no">Internal only<small>Gleiche Datenaufteilung</small></div>
+<div class="tree-label" style="color:var(--red);">HIGH RISK</div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node warning">Temporal<small>Different time</small></div>
+<div class="tree-label" style="color:var(--orange);">MODERATE</div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node action">External<small>Different site</small></div>
+<div class="tree-label" style="color:var(--gold);">BETTER</div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node yes">Impact RCT<small>Patient outcomes</small></div>
+<div class="tree-label" style="color:var(--green);">BEST</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">PROBAST &amp; TRIPOD</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box" style="background:var(--purple);">
+<div class="stat-value" style="color:white;font-size:0.9rem;">PROBAST</div>
+<div class="stat-label">Prediction model<br/>Risk of Bias</div>
+</div>
+<div class="stat-box" style="background:var(--blue);">
+<div class="stat-value" style="color:white;font-size:0.9rem;">TRIPOD</div>
+<div class="stat-label">Reporting<br/>guideline</div>
+</div>
+<div class="stat-box" style="background:var(--teal);">
+<div class="stat-value" style="color:var(--navy);font-size:0.9rem;">TRIPOD-AI</div>
+<div class="stat-label">AI-specific<br/>extension</div>
+</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">CALIBRATION VS. DISCRIMINATION</div>
+<div class="simple-text">
+<strong>AUC/c-statistic:</strong> Can the model rank patients? (discrimination)<br/>
+<strong>Calibration:</strong> Sind die vorhergesagten Wahrscheinlichkeiten korrekt?<br/><br/>
+<em>A model can have good AUC but poor calibration—and harm patients.</em>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  „Der Algorithmus hat aus den Daten gelernt,<br/>
+                  und die Daten waren verzerrt.<br/>
+                  It validated on itself,<br/>
+                  and called its reflection truth.<br/>
+                  External validation is not optional—it is survival."
+                </div>
+</div>
+</div>
+</div>
+ ==================== MODUL 25: PATIENTENKOMMUNIKATION ==================== 
+<div class="module-slides" data-module="25">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  Die Metaanalyse spricht in Zahlen.
+                  <br/><br/>
+                  Aber der Patient hört rein <em>Ängste und Hoffnungen</em>.
+                  <br/><br/>
+                  Wie werden Sie die Lücke schließen?
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Translating Numbers to Meaning</div>
+<div class="decision-tree animate delay-1">
+<h4>Communication Decision Tree</h4>
+<div class="tree-row"><div class="tree-node root">Meta-Analysis Result</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">Effect Size Type?</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">Relative (RR, OR)</div>
+<div class="tree-node action">Convert to NNT<small>More intuitive</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">Absolute (RD)</div>
+<div class="tree-node yes">Use directly<small>"X fewer per 1000"</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">Continuous (MD)</div>
+<div class="tree-node action">Contextualize<small>Minimal important diff</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Skripte für Patienten</div>
+<div class="story-card animate delay-1">
+<div class="place">EXPLAINING A POSITIVE RESULT</div>
+<div class="narrative">
+                    „Die Forschung fasste 15 Studien mit 8.000 Patienten zusammen.
+                    <br/><br/>
+                    Es wurde festgestellt, dass diese Behandlung das Risiko eines [Ergebnisses] um etwa 30 % senkt.
+                    <br/><br/>
+                    In der Praxis ausgedrückt: Wenn wir 100 Menschen wie Sie behandeln, werden im Vergleich zu keiner Behandlung etwa 5 weniger ein [Ergebnis] erzielen.
+                    <br/><br/>
+                    We're moderately confident in this—future research might change it slightly.
+                    <br/><br/>
+                    Welche Fragen haben Sie dazu?“
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Questions Patients Should Ask</div>
+<div class="checklist animate delay-1">
+<h4>Empowering Patients</h4>
+<div class="checklist-item"><span class="number">1</span> „Wie viele Studien und Patienten wurden eingeschlossen?“</div>
+<div class="checklist-item"><span class="number">2</span> „Wie zuversichtlich sind die Forscher in dieses Ergebnis?“</div>
+<div class="checklist-item"><span class="number">3</span> „Was sind die Vorteile UND Nachteile?“</div>
+<div class="checklist-item"><span class="number">4</span> „Wurden Menschen wie ich in diese Studien einbezogen?“</div>
+<div class="checklist-item"><span class="number">5</span> „Wer hat diese Forschung finanziert?“</div>
+<div class="checklist-item"><span class="number">6</span> „Was bedeutet das für meine konkrete Situation?“</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<p class="story-opener">Can a spreadsheet error in an academic paper directly shape the economic policy of entire nations?</p>
+<div class="real-data-box">
+<h4>REAL DATA</h4>
+<p>In ihrem Papier von Reinhart und Rogoff aus dem Jahr 2010 wurde behauptet, dass Länder mit einer Staatsverschuldung von mehr als 10 % haben <span class="data-highlight">90% of GDP</span> verzeichnete ein dramatisch geringeres Wachstum. Diese Feststellung wurde häufig zur Rechtfertigung der Sparpolitik in ganz Europa angeführt. Im Jahr 2013 entdeckten Herndon, Ash und Pollin einen Tabellenfehler: Mehrere Länder waren versehentlich von den Berechnungen ausgeschlossen worden. Nach der Korrektur verschwand die scharfe Schwelle von 90 %.</p>
+</div>
+<div class="decision-tree">
+<div class="decision-tree-header">Die Auswirkungen der Reinhart-Rogoff-Politik: 2010–2013</div>
+<div class="decision-scenario">Die Ergebnisse Ihrer Metaanalyse haben klare politische Implikationen. Die politischen Entscheidungsträger sind auf eine einfache Botschaft bedacht. Wie schreiben Sie das Policy Brief?</div>
+<div class="decision-paths">
+<div class="decision-path path-a" role="button" tabindex="0">
+<div class="path-label">PFAD A: Für Auswirkungen zu stark vereinfachen</div>
+<div class="path-choice">Geben Sie einen sauberen Schwellenwert oder eine Schlagzeilennummer an. Vorbehalte und Unsicherheitsbereiche weglassen, um maximalen politischen Einfluss zu erzielen</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">Die Richtlinie wird auf der Grundlage vereinfachter Erkenntnisse übernommen. Wenn Nuancen auftauchen oder Fehler gefunden werden, werden sowohl die Forschung als auch die daraus resultierende Politik diskreditiert</div>
+<div class="path-outcome">OUTCOME: Policy built on a fragile foundation</div>
+</div>
+<div class="decision-path path-b" role="button" tabindex="0">
+<div class="path-label">PFAD B: Kommunizieren Sie mit Integrität</div>
+<div class="path-choice">Präsentieren Sie die Beweise mit angemessener Unsicherheit; starke von suggestiven Befunden unterscheiden; Bereitstellung umsetzbarer Zusammenfassungen, die Nuancen wahren</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">Politische Entscheidungsträger verstehen, was die Beweise stützen und wo Unsicherheit bleibt; Entscheidungen werden mit angemessener Vorsicht getroffen</div>
+<div class="path-outcome">OUTCOME: Durable, evidence-informed policy</div>
+</div>
+</div>
+</div>
+<div class="story-revelation">
+<div class="revelation-label">THE REVELATION</div>
+<div class="revelation-text">Policy briefs must communicate uncertainty honestly. Oversimplified findings may gain influence quickly but collapse when scrutinized, damaging trust in research-policy relationships.</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  "Die Metaanalyse spricht in Zahlen.<br/>
+                  Der Patient hört Ängste und Hoffnungen.<br/>
+                  Ihre Aufgabe ist es, der Übersetzer zu sein –<br/>
+                  getreu gegenüber den Beweisen, mitfühlend gegenüber den Person.“
+                </div>
+</div>
+</div>
+</div>
+ =================== MODUL 26: LEBENDE BEWERTUNGEN &amp; ZUKUNFT ==================== 
+<div class="module-slides" data-module="26">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  Eine systematische Überprüfung erfasst Beweise zu einem bestimmten Zeitpunkt Zeit.
+                  <br/><br/>
+                  But science does not stop.<br/>
+                  Wie bewahren wir die Beweise auf? <em>alive</em>?
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Living Systematic Reviews</div>
+<div class="story-card animate delay-1">
+<div class="place">COVID-19 PANDEMIC, 2020-2023</div>
+<div class="narrative">
+                    Während der Pandemie tauchten Beweise schneller auf, als herkömmliche Überprüfungen synthetisieren konnten.
+                    <br/><br/>
+<strong>Living systematic reviews</strong> were continuously updated as new trials reported—
+                    sometimes within days of publication.
+                    <br/><br/>
+                    Das COVID-NMA-Konsortium erstellte lebende Überprüfungen zu Behandlungen, Impfstoffen und Diagnostika und aktualisierte Empfehlungen in <strong>real-time</strong> als Beweise weiterentwickelt.
+                    <br/><br/>
+                    Hydroxychloroquine went from "promising" to "ineffective" within months.
+                  </div>
+<div class="source">Defined by Cochrane: continual updates at ≤monthly intervals</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">When to Use Living Reviews</div>
+<div class="decision-tree animate delay-1">
+<h4>Living Review Decision Tree</h4>
+<div class="tree-row"><div class="tree-node root">Review Type Decision</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">Entwickeln sich Beweise schnell weiter?</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">Yes + High Priority</div>
+<div class="tree-node yes">Living Review<small>Continuous updates</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">No / Stable</div>
+<div class="tree-node action">Standard Review<small>Update every 2-5 years</small></div>
+</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node warning">Resource intensive<small>Requires ongoing funding</small></div></div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Die Zukunft der Evidenzsynthese</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box" style="background:var(--purple);">
+<div class="stat-value" style="color:white;font-size:0.8rem;">Automation</div>
+<div class="stat-label">ML-assisted<br/>screening</div>
+</div>
+<div class="stat-box" style="background:var(--blue);">
+<div class="stat-value" style="color:white;font-size:0.8rem;">IPD-MA</div>
+<div class="stat-label">Individual patient<br/>data pooling</div>
+</div>
+<div class="stat-box" style="background:var(--teal);">
+<div class="stat-value" style="color:var(--navy);font-size:0.8rem;">Real-World</div>
+<div class="stat-label">EHR-based<br/>evidence</div>
+</div>
+<div class="stat-box" style="background:var(--gold);">
+<div class="stat-value" style="color:var(--navy);font-size:0.8rem;">Adaptive</div>
+<div class="stat-label">Platform trials<br/>+ MA</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide hope">
+<div class="content text-center">
+<div class="refrain hope animate">
+                  "Der Bund der Beweise ist nicht statisch.<br/>
+                  Es wächst mit jeder neuen Studie, jeder neuen Frage.<br/>
+                  Halten Sie Ihre Bewertungen am Leben.<br/>
+                  Halten Sie Ihre Methoden transparent.<br/>
+                  Stellen Sie die Wahrheit in den Mittelpunkt Ihres Handelns.“
+                </div>
+</div>
+</div>
+</div>
+<div class="slide-nav">
+<button class="nav-btn" onclick="prevSlide()">←</button>
+<div class="nav-center">
+<div class="slide-counter" id="slideCounter">1 / 4</div>
+<div class="progress" id="progressDots"></div>
+</div>
+<button class="nav-btn" onclick="nextSlide()">→</button>
+</div>
+</div>
+</div>
+</main>
+</div>
+<script>
+    function toggleSidebar() {
+      document.querySelector('.sidebar').classList.toggle('open');
+      var overlay = document.querySelector('.sidebar-overlay');
+      if (overlay) overlay.classList.toggle('show');
+      var btn = document.querySelector('.mobile-menu-toggle, .sidebar-toggle, .hamburger');
+      if (btn) btn.setAttribute('aria-expanded', btn.getAttribute('aria-expanded') === 'true' ? 'false' : 'true');
+    }
+
+    const modules = [
+      { id: 1, title: "Die verborgenen Daten", subtitle: "Tamiflu scandal", slides: 5 },
+      { id: 2, title: "The Covenant", subtitle: "PRISMA 2020", slides: 5 },
+      { id: 3, title: "The Protocol", subtitle: "Pre-registration", slides: 5 },
+      { id: 4, title: "The Title", subtitle: "First promise", slides: 4 },
+      { id: 5, title: "The Abstract", subtitle: "No spin", slides: 5 },
+      { id: 6, title: "The Question", subtitle: "PICO framework", slides: 4 },
+      { id: 7, title: "The Search", subtitle: "Alle Beweise finden", slides: 5 },
+      { id: 8, title: "The Selection", subtitle: "PRISMA flow", slides: 5 },
+      { id: 9, title: "Risk of Bias", subtitle: "RoB 2 / ROBINS-I", slides: 5 },
+      { id: 10, title: "Data Extraction", subtitle: "Getting numbers", slides: 5 },
+      { id: 11, title: "Effect Measures", subtitle: "RR, OR, MD, SMD", slides: 5 },
+      { id: 12, title: "The Synthesis", subtitle: "Fixed vs. random", slides: 5 },
+      { id: 13, title: "Heterogeneity", subtitle: "Wenn Studien nicht übereinstimmen", slides: 5 },
+      { id: 14, title: "Publication Bias", subtitle: "Die Aktenschublade", slides: 5 },
+      { id: 15, title: "Forest Plot", subtitle: "Visualizing results", slides: 5 },
+      { id: 16, title: "GRADE Certainty", subtitle: "How confident?", slides: 5 },
+      { id: 17, title: "The Discussion", subtitle: "Interpretation", slides: 5 },
+      { id: 18, title: "Transparency", subtitle: "Conflicts & funding", slides: 5 },
+      { id: 19, title: "Final Check", subtitle: "Before submission", slides: 5 },
+      { id: 20, title: "Quiz & Sources", subtitle: "Test yourself", slides: 5 },
+      { id: 21, title: "Software Tools", subtitle: "RevMan, R, Stata", slides: 6 },
+      { id: 22, title: "Reading Meta-Analyses", subtitle: "Consumer's guide", slides: 6 },
+      { id: 23, title: "Network MA", subtitle: "Indirect comparisons", slides: 6 },
+      { id: 24, title: "AI/ML Validation", subtitle: "Prediction models", slides: 5 },
+      { id: 25, title: "Patient Communication", subtitle: "Translating evidence", slides: 6 },
+      { id: 26, title: "Living Reviews", subtitle: "Beweise am Leben halten", slides: 5 }
+    ];
+
+    let currentModule = 1;
+    let currentSlide = 1;
+    const completedModules = new Set();
+
+    function init() {
+      renderModuleList();
+      updateSlideNav();
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextSlide(); }
+        else if (e.key === 'ArrowLeft') { e.preventDefault(); prevSlide(); }
+      });
+    }
+
+    function renderModuleList() {
+      const list = document.getElementById('moduleList');
+      list.innerHTML = modules.map(m => `
+        <div class="module-item ${m.id === currentModule ? 'active' : ''} ${completedModules.has(m.id) ? 'completed' : ''}" onclick="goToModule(${m.id})">
+          <div class="module-number">${completedModules.has(m.id) ? '✓' : m.id}</div>
+          <div class="module-info">
+            <div class="module-title">${m.title}</div>
+            <div class="module-subtitle">${m.subtitle}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function goToModule(moduleId) {
+      if (moduleId > currentModule) completedModules.add(currentModule);
+      currentModule = moduleId;
+      currentSlide = 1;
+      document.querySelectorAll('.module-slides').forEach(el => el.classList.remove('active'));
+      document.querySelector(`.module-slides[data-module="${moduleId}"]`).classList.add('active');
+      updateSlideVisibility();
+      updateSlideNav();
+      renderModuleList();
+      document.getElementById('currentModule').textContent = modules[moduleId - 1].title;
+    }
+
+    function updateSlideVisibility() {
+      const moduleSlides = document.querySelector(`.module-slides[data-module="${currentModule}"]`);
+      const slides = moduleSlides.querySelectorAll('.slide');
+      slides.forEach((slide, index) => slide.classList.toggle('active', index + 1 === currentSlide));
+    }
+
+    function updateSlideNav() {
+      const module = modules[currentModule - 1];
+      document.getElementById('slideCounter').textContent = `${currentSlide} / ${module.slides}`;
+      document.getElementById('progressDots').innerHTML = Array.from({ length: module.slides }, (_, i) =>
+        `<div class="progress-dot ${i + 1 === currentSlide ? 'active' : ''}" onclick="goToSlide(${i + 1})"></div>`
+      ).join('');
+    }
+
+    function goToSlide(slideNum) { currentSlide = slideNum; updateSlideVisibility(); updateSlideNav(); }
+
+    function nextSlide() {
+      const module = modules[currentModule - 1];
+      if (currentSlide < module.slides) { currentSlide++; updateSlideVisibility(); updateSlideNav(); }
+      else if (currentModule < modules.length) { goToModule(currentModule + 1); }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 1) { currentSlide--; updateSlideVisibility(); updateSlideNav(); }
+      else if (currentModule > 1) {
+        const prevModuleSlides = modules[currentModule - 2].slides;
+        currentModule--;
+        currentSlide = prevModuleSlides;
+        document.querySelectorAll('.module-slides').forEach(el => el.classList.remove('active'));
+        document.querySelector(`.module-slides[data-module="${currentModule}"]`).classList.add('active');
+        updateSlideVisibility();
+        updateSlideNav();
+        renderModuleList();
+        document.getElementById('currentModule').textContent = modules[currentModule - 1].title;
+      }
+    }
+
+    function checkAnswer(element, isCorrect) {
+      const container = element.closest('.quiz-container');
+      const options = container.querySelectorAll('.quiz-option');
+      const feedback = container.querySelector('.quiz-feedback');
+      options.forEach(opt => { opt.style.pointerEvents = 'none'; if (opt === element) opt.classList.add(isCorrect ? 'correct' : 'incorrect'); });
+      feedback.classList.add('show', isCorrect ? 'correct' : 'incorrect');
+      feedback.textContent = isCorrect ? 'Correct. You have learned well.' : 'Nicht ganz. Denken Sie über die Geschichten nach, die Sie gehört haben.';
+    }
+
+    init();
+  </script>
+</body>
+</html>

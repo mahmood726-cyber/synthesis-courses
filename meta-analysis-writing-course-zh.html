@@ -1,0 +1,3325 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>证据之约：撰写元分析论文</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&amp;family=Source+Sans+Pro:wght@300;400;600;700&amp;display=swap" rel="stylesheet"/>
+<style>
+    :root {
+      --navy: #1E2761;
+      --deep-navy: #141B3D;
+      --gold: #D4AF37;
+      --cream: #FAF8F5;
+      --red: #C53030;
+      --green: #22c55e;
+      --teal: #00D4AA;
+      --purple: #A855F7;
+      --orange: #F97316;
+      --blue: #3B82F6;
+      --pink: #EC4899;
+      --blood-red: #8B0000;
+      --transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      height: 100%;
+      font-family: 'Source Sans Pro', sans-serif;
+      background: var(--deep-navy);
+      color: var(--cream);
+    }
+
+    .course-container { display: flex; height: 100vh; overflow: hidden; }
+
+    .sidebar {
+      width: 280px;
+      background: linear-gradient(180deg, var(--deep-navy) 0%, #0a0f1a 100%);
+      border-right: 1px solid rgba(212,175,55,0.2);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    /* mobile sidebar handled by hamburger toggle below */
+
+    .sidebar-header { padding: 1.25rem; border-bottom: 1px solid rgba(212,175,55,0.2); }
+    .sidebar-header h1 { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; font-weight: 700; color: var(--gold); }
+    .sidebar-header p { font-size: 0.65rem; color: rgba(255,255,255,0.6); margin-top: 0.25rem; }
+
+    .module-list { flex: 1; overflow-y: auto; padding: 0.5rem 0; }
+
+    .module-item {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.45rem 0.75rem; cursor: pointer;
+      border-left: 3px solid transparent; transition: all 0.2s;
+    }
+    .module-item:hover { background: rgba(212,175,55,0.1); }
+    .module-item.active { background: rgba(212,175,55,0.15); border-left-color: var(--gold); }
+    .module-item.completed .module-number { background: var(--green); color: white; }
+
+    .module-number {
+      width: 20px; height: 20px; border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.6rem; font-weight: 700; flex-shrink: 0;
+    }
+    .module-item.active .module-number { background: var(--gold); color: var(--navy); }
+
+    .module-info { flex: 1; min-width: 0; }
+    .module-title { font-size: 0.7rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .module-subtitle { font-size: 0.55rem; color: rgba(255,255,255,0.5); }
+
+    .sidebar-footer {
+      padding: 0.6rem 0.75rem; border-top: 1px solid rgba(212,175,55,0.2);
+      font-size: 0.55rem; color: rgba(255,255,255,0.4); line-height: 1.4;
+    }
+
+    .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+    .content-header {
+      padding: 0.5rem 1rem;
+      background: rgba(0,0,0,0.3);
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .breadcrumb { font-size: 0.7rem; color: rgba(255,255,255,0.6); }
+    .breadcrumb span { color: var(--gold); }
+    .header-actions { display: flex; gap: 0.4rem; }
+
+    .btn {
+      padding: 0.3rem 0.6rem; border: 1px solid rgba(212,175,55,0.3);
+      border-radius: 6px; background: rgba(255,255,255,0.05);
+      color: var(--cream); font-size: 0.65rem; cursor: pointer; transition: all 0.2s;
+    }
+    .btn:hover { background: rgba(212,175,55,0.2); border-color: var(--gold); }
+    .btn.primary { background: var(--gold); color: var(--navy); border-color: var(--gold); font-weight: 600; }
+
+    .content-body { flex: 1; overflow: hidden; display: flex; }
+    .slides-container { flex: 1; position: relative; overflow: hidden; }
+    .module-slides { display: none; width: 100%; height: 100%; }
+    .module-slides.active { display: block; }
+
+    .slide {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      display: flex; flex-direction: column; justify-content: flex-start; align-items: center;
+      padding: 1rem 1rem 2.5rem 1rem; padding-top: 1.25rem;
+      opacity: 0; visibility: hidden;
+      transition: opacity var(--transition), visibility var(--transition);
+      overflow-y: auto; overflow-x: hidden;
+    }
+    .slide .content { margin-top: auto; margin-bottom: auto; }
+    .slide.active { opacity: 1; visibility: visible; }
+    .slide.dark { background: var(--deep-navy); }
+    .slide.black { background: #000; }
+    .slide.gradient { background: linear-gradient(135deg, var(--deep-navy) 0%, #2a1a4a 100%); }
+    .slide.blood { background: linear-gradient(135deg, #1a0a0a 0%, #2d1515 100%); }
+    .slide.hope { background: linear-gradient(135deg, #0a1a0a 0%, #152d15 100%); }
+    .slide.fraud { background: linear-gradient(135deg, #1a1a0a 0%, #2d2515 100%); }
+    .slide.blue { background: linear-gradient(135deg, #0a1a2a 0%, #152d4a 100%); }
+
+    .title { font-family: 'Cormorant Garamond', serif; font-size: clamp(1.3rem, 3vw, 2.2rem); font-weight: 700; margin-bottom: 0.5rem; line-height: 1.2; }
+    .title.gold { color: var(--gold); }
+    .title.red { color: var(--red); }
+    .title.green { color: var(--green); }
+    .title.blue { color: var(--blue); }
+
+    .subtitle { font-size: clamp(0.8rem, 1.6vw, 1rem); color: rgba(255,255,255,0.7); margin-bottom: 1rem; }
+
+    .big-number { font-family: 'Cormorant Garamond', serif; font-size: clamp(2rem, 8vw, 5rem); font-weight: 700; line-height: 1; }
+    .big-number.red { color: var(--red); }
+    .big-number.gold { color: var(--gold); }
+    .big-number.green { color: var(--green); }
+
+    .refrain {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1rem, 2.2vw, 1.5rem);
+      font-style: italic; color: var(--gold);
+      text-align: center; max-width: 650px; line-height: 1.4;
+    }
+    .refrain.warning { color: var(--red); border-left: 4px solid var(--red); padding-left: 1rem; text-align: left; }
+    .refrain.hope { color: var(--green); }
+
+    .rhetorical {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(0.95rem, 2vw, 1.4rem);
+      color: rgba(255,255,255,0.9);
+      text-align: center; max-width: 580px; line-height: 1.5;
+    }
+    .rhetorical em { color: var(--gold); font-style: normal; }
+
+    .simple-box {
+      background: linear-gradient(135deg, rgba(0,212,170,0.1), rgba(0,0,0,0.2));
+      border: 2px solid var(--teal); border-radius: 10px;
+      padding: 0.9rem; max-width: 500px; margin: 0.5rem 0;
+    }
+    .simple-box .simple-title { color: var(--teal); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; margin-bottom: 0.35rem; }
+    .simple-box .simple-text { font-size: 0.85rem; line-height: 1.5; }
+    .simple-box .simple-text strong { color: var(--gold); }
+
+    .story-card {
+      background: rgba(0,0,0,0.3); border-left: 4px solid var(--gold);
+      padding: 0.9rem 1.1rem; max-width: 580px; margin: 0.5rem 0;
+    }
+    .story-card .place { font-size: 0.6rem; color: var(--gold); letter-spacing: 0.1em; margin-bottom: 0.3rem; }
+    .story-card .narrative { font-family: 'Cormorant Garamond', serif; font-size: 0.9rem; line-height: 1.5; color: rgba(255,255,255,0.9); }
+    .story-card .source { font-size: 0.55rem; color: rgba(255,255,255,0.5); margin-top: 0.5rem; font-style: italic; }
+    .story-card.red { border-left-color: var(--red); }
+    .story-card.red .place { color: var(--red); }
+
+    /* DECISION TREES */
+    .decision-tree {
+      background: rgba(0,0,0,0.4); border: 2px solid var(--gold);
+      border-radius: 12px; padding: 0.9rem; max-width: 620px; width: 100%;
+    }
+    .decision-tree h4 { color: var(--gold); font-family: 'Cormorant Garamond', serif; font-size: 0.85rem; margin-bottom: 0.6rem; text-align: center; }
+
+    .tree-row { display: flex; justify-content: center; gap: 0.35rem; margin: 0.25rem 0; flex-wrap: wrap; }
+    .tree-node {
+      background: var(--navy); border: 2px solid var(--gold);
+      border-radius: 6px; padding: 0.35rem 0.5rem;
+      text-align: center; min-width: 65px; font-size: 0.65rem;
+    }
+    .tree-node.root { background: var(--gold); color: var(--navy); font-weight: 700; }
+    .tree-node.question { background: var(--purple); color: white; border-color: var(--purple); }
+    .tree-node.positive { background: rgba(197,48,48,0.3); border-color: var(--red); }
+    .tree-node.negative { background: rgba(34,197,94,0.3); border-color: var(--green); }
+    .tree-node.action { background: var(--teal); color: var(--navy); border-color: var(--teal); }
+    .tree-node.warning { background: var(--orange); color: white; border-color: var(--orange); }
+    .tree-node.yes { background: var(--green); color: white; border-color: var(--green); }
+    .tree-node.no { background: var(--red); color: white; border-color: var(--red); }
+    .tree-node.blue { background: var(--blue); color: white; border-color: var(--blue); }
+    .tree-node small { display: block; font-size: 0.5rem; opacity: 0.85; margin-top: 0.1rem; }
+
+    .tree-arrow { color: var(--gold); font-size: 0.9rem; text-align: center; margin: 0.1rem 0; }
+    .tree-branch { display: flex; gap: 1.2rem; justify-content: center; margin-top: 0.2rem; flex-wrap: wrap; }
+    .tree-branch-item { display: flex; flex-direction: column; align-items: center; }
+    .tree-label { font-size: 0.5rem; color: rgba(255,255,255,0.6); margin: 0.1rem 0; }
+
+    /* PRISMA Flow Diagram */
+    .prisma-flow {
+      background: rgba(0,0,0,0.4); border: 2px solid var(--blue);
+      border-radius: 12px; padding: 0.9rem; max-width: 600px; width: 100%;
+    }
+    .prisma-flow h4 { color: var(--blue); text-align: center; margin-bottom: 0.6rem; font-family: 'Cormorant Garamond', serif; font-size: 0.85rem; }
+    .prisma-box {
+      background: var(--navy); border: 2px solid var(--blue);
+      border-radius: 6px; padding: 0.4rem 0.6rem; margin: 0.25rem auto;
+      text-align: center; max-width: 280px; font-size: 0.65rem;
+    }
+    .prisma-box.id { border-color: var(--gold); }
+    .prisma-box.screen { border-color: var(--purple); }
+    .prisma-box.eligible { border-color: var(--orange); }
+    .prisma-box.included { border-color: var(--green); background: rgba(34,197,94,0.2); }
+    .prisma-box .label { font-size: 0.5rem; color: rgba(255,255,255,0.5); }
+    .prisma-box .number { font-size: 0.9rem; font-weight: 700; color: var(--gold); }
+    .prisma-exclude { font-size: 0.55rem; color: rgba(255,255,255,0.6); margin: 0.15rem 0; }
+
+    /* Checklist */
+    .checklist {
+      background: rgba(0,0,0,0.3); border: 2px solid var(--purple);
+      border-radius: 10px; padding: 0.9rem; max-width: 550px; width: 100%;
+    }
+    .checklist h4 { color: var(--purple); font-size: 0.8rem; margin-bottom: 0.6rem; }
+    .checklist-item { display: flex; align-items: flex-start; gap: 0.5rem; margin: 0.35rem 0; font-size: 0.75rem; }
+    .checklist-item .check { color: var(--green); font-weight: 700; }
+    .checklist-item .number { color: var(--gold); font-weight: 700; min-width: 20px; }
+
+    .stats-grid { display: flex; gap: 0.5rem; margin: 0.6rem 0; flex-wrap: wrap; justify-content: center; }
+    .stat-box { background: var(--navy); padding: 0.5rem 0.7rem; text-align: center; min-width: 80px; border-radius: 8px; }
+    .stat-value { font-family: 'Cormorant Garamond', serif; font-size: clamp(1rem, 2vw, 1.3rem); font-weight: 700; }
+    .stat-label { font-size: 0.55rem; opacity: 0.8; margin-top: 0.1rem; }
+
+    .lesson-item { display: flex; align-items: flex-start; gap: 0.5rem; margin: 0.35rem 0; max-width: 600px; text-align: left; }
+    .lesson-number {
+      background: var(--gold); color: var(--navy);
+      width: 22px; height: 22px; display: flex; align-items: center; justify-content: center;
+      font-weight: 700; flex-shrink: 0; border-radius: 4px; font-size: 0.65rem;
+    }
+    .lesson-content h4 { font-size: 0.8rem; font-weight: 700; color: var(--cream); margin-bottom: 0.05rem; }
+    .lesson-content p { font-size: 0.7rem; color: rgba(255,255,255,0.7); }
+
+    .formula-box {
+      background: rgba(0,0,0,0.4); border: 1px solid var(--purple);
+      border-radius: 8px; padding: 0.5rem 0.9rem;
+      font-family: 'Cormorant Garamond', serif; font-size: 0.95rem;
+      text-align: center; max-width: 400px; margin: 0.5rem 0;
+    }
+    .formula-box .formula { color: var(--gold); margin: 0.25rem 0; }
+    .formula-box .label { font-size: 0.65rem; color: rgba(255,255,255,0.6); font-family: 'Source Sans Pro', sans-serif; }
+
+    .gold-line { width: 80px; height: 2px; background: var(--gold); margin: 0.6rem auto; }
+
+    .content { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 800px; }
+
+    .slide.active .animate { animation: fadeUp 0.5s ease-out forwards; }
+    .slide.active .animate.delay-1 { animation-delay: 0.1s; }
+    .slide.active .animate.delay-2 { animation-delay: 0.2s; }
+    .slide.active .animate.delay-3 { animation-delay: 0.3s; }
+    .slide.active .animate.delay-4 { animation-delay: 0.4s; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .animate { opacity: 0; }
+
+    .slide-nav {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      display: flex; justify-content: space-between; align-items: flex-end;
+      padding: 0.5rem 0.6rem 0.6rem 0.6rem; z-index: 100; pointer-events: none;
+    }
+    .nav-btn {
+      background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2);
+      color: white; font-size: 0.9rem; cursor: pointer; opacity: 0.6;
+      padding: 0.3rem 0.45rem; border-radius: 6px; pointer-events: auto; transition: all 0.2s;
+    }
+    .nav-btn:hover { opacity: 1; border-color: var(--gold); }
+    .nav-center { display: flex; flex-direction: column; align-items: center; gap: 0.1rem; pointer-events: auto; }
+    .slide-counter { color: rgba(255,255,255,0.6); font-size: 0.65rem; }
+    .progress { display: flex; gap: 2px; flex-wrap: wrap; justify-content: center; max-width: 140px; }
+    .progress-dot { width: 4px; height: 4px; border-radius: 50%; background: rgba(255,255,255,0.25); cursor: pointer; }
+    .progress-dot.active { background: var(--gold); transform: scale(1.2); }
+
+    .quiz-container { background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); padding: 0.9rem; max-width: 580px; width: 100%; border-radius: 8px; }
+    .quiz-question { font-family: 'Cormorant Garamond', serif; font-size: 0.95rem; margin-bottom: 0.5rem; color: var(--gold); line-height: 1.4; }
+    .quiz-options { display: flex; flex-direction: column; gap: 0.3rem; }
+    .quiz-option { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); padding: 0.45rem 0.7rem; cursor: pointer; border-radius: 6px; font-size: 0.75rem; text-align: left; }
+    .quiz-option:hover { background: rgba(212,175,55,0.1); border-color: var(--gold); }
+    .quiz-option.correct { background: rgba(34,197,94,0.2); border-color: var(--green); }
+    .quiz-option.incorrect { background: rgba(197,48,48,0.2); border-color: var(--red); }
+    .quiz-feedback { margin-top: 0.5rem; padding: 0.5rem; border-radius: 6px; display: none; font-size: 0.75rem; }
+    .quiz-feedback.show { display: block; }
+    .quiz-feedback.correct { background: rgba(34,197,94,0.2); border: 1px solid var(--green); }
+    .quiz-feedback.incorrect { background: rgba(197,48,48,0.2); border: 1px solid var(--red); }
+
+    .references { background: rgba(0,0,0,0.3); border: 1px solid rgba(212,175,55,0.3); border-radius: 8px; padding: 0.9rem; max-width: 580px; text-align: left; font-size: 0.6rem; line-height: 1.5; }
+    .references h4 { color: var(--gold); font-size: 0.75rem; margin-bottom: 0.5rem; }
+    .references ol { padding-left: 1rem; }
+    .references li { margin-bottom: 0.25rem; color: rgba(255,255,255,0.8); }
+
+    .text-center { text-align: center; }
+
+    /* Timeline */
+    .timeline { max-width: 550px; width: 100%; }
+    .timeline-item { display: flex; gap: 0.6rem; margin: 0.4rem 0; }
+    .timeline-marker { width: 24px; height: 24px; border-radius: 50%; background: var(--gold); display: flex; align-items: center; justify-content: center; font-size: 0.6rem; font-weight: 700; color: var(--navy); flex-shrink: 0; }
+    .timeline-content { flex: 1; }
+    .timeline-content h5 { font-size: 0.75rem; color: var(--gold); }
+    .timeline-content p { font-size: 0.65rem; color: rgba(255,255,255,0.7); }
+    .mobile-menu-toggle{display:none;position:fixed;top:12px;left:12px;z-index:1001;background:#1E2761;border:1px solid #D4AF37;color:#D4AF37;width:40px;height:40px;border-radius:8px;font-size:1.2rem;cursor:pointer;align-items:center;justify-content:center;}
+    @media(max-width:768px){.mobile-menu-toggle{display:flex;}.sidebar{transform:translateX(-100%);transition:transform 0.3s ease;position:fixed;z-index:1000;height:100vh;}.sidebar.open{transform:translateX(0);}.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:999;}.sidebar-overlay.show{display:block;}}
+    .skip-link{position:absolute;top:-40px;left:0;background:#D4AF37;color:#1E2761;padding:8px 16px;z-index:100;transition:top 0.3s;font-family:'Source Sans Pro',sans-serif;text-decoration:none;font-weight:600;}.skip-link:focus{top:0;}
+
+    /* Focus-visible styles for keyboard navigation */
+    :focus-visible {
+      outline: 2px solid var(--gold, #D4AF37);
+      outline-offset: 2px;
+    }
+
+    :focus:not(:focus-visible) {
+      outline: none;
+    }
+
+    button:focus-visible,
+    a:focus-visible,
+    [role="button"]:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible {
+      outline: 2px solid var(--gold, #D4AF37);
+      outline-offset: 2px;
+      box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.3);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+
+    /* Story Box - Real-world cases with lessons */
+    .story-box {
+      background: linear-gradient(135deg, rgba(30,39,97,0.9) 0%, rgba(20,27,61,0.95) 100%);
+      border: 2px solid var(--gold);
+      border-radius: 12px;
+      padding: 1.1rem 1.3rem;
+      max-width: 600px;
+      margin: 0.6rem 0;
+      position: relative;
+      box-shadow: 0 4px 20px rgba(212,175,55,0.15);
+    }
+    .story-box::before {
+      content: "REAL CASE";
+      position: absolute;
+      top: -10px;
+      left: 20px;
+      background: var(--gold);
+      color: var(--navy);
+      font-size: 0.55rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      padding: 2px 10px;
+      border-radius: 3px;
+    }
+    .story-box .story-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--cream);
+      margin-bottom: 0.4rem;
+      margin-top: 0.3rem;
+    }
+    .story-box .story-period {
+      font-size: 0.6rem;
+      color: var(--gold);
+      letter-spacing: 0.08em;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+    .story-box .story-narrative {
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: rgba(255,255,255,0.9);
+      margin-bottom: 0.6rem;
+    }
+    .story-box .story-narrative strong {
+      color: var(--cream);
+    }
+    .story-box .story-lesson {
+      background: rgba(212,175,55,0.15);
+      border-left: 3px solid var(--gold);
+      padding: 0.5rem 0.8rem;
+      margin-top: 0.6rem;
+      border-radius: 0 6px 6px 0;
+    }
+    .story-box .story-lesson .lesson-label {
+      font-size: 0.55rem;
+      color: var(--gold);
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.2rem;
+    }
+    .story-box .story-lesson .lesson-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.85rem;
+      font-style: italic;
+      color: var(--gold);
+      line-height: 1.4;
+    }
+
+    /* Story-box enhanced pattern: opener + real-data + decision-paths + revelation */
+    .story-box .story-opener {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.05rem;
+      font-style: italic;
+      color: rgba(255,255,255,0.9);
+      margin-bottom: 0.7rem;
+      text-align: center;
+    }
+    .story-box .real-data-box {
+      background: rgba(0,0,0,0.35);
+      border-left: 3px solid var(--teal);
+      padding: 0.6rem 0.8rem;
+      margin: 0.5rem 0;
+      border-radius: 0 6px 6px 0;
+    }
+    .story-box .real-data-box h4 {
+      font-size: 0.55rem;
+      color: var(--teal);
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.25rem;
+    }
+    .story-box .real-data-box p {
+      font-size: 0.78rem;
+      line-height: 1.5;
+      color: rgba(255,255,255,0.85);
+    }
+    .data-highlight {
+      color: var(--gold);
+      font-weight: 700;
+    }
+    .story-box .decision-tree .decision-tree-header {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--gold);
+      text-align: center;
+      margin-bottom: 0.4rem;
+    }
+    .story-box .decision-tree .decision-scenario {
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.8);
+      text-align: center;
+      margin-bottom: 0.5rem;
+      line-height: 1.4;
+    }
+    .decision-paths {
+      display: flex;
+      gap: 0.6rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .decision-path {
+      flex: 1;
+      min-width: 200px;
+      max-width: 260px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 8px;
+      padding: 0.6rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      border: 2px solid transparent;
+      text-align: center;
+    }
+    .decision-path:hover, .decision-path:focus {
+      transform: translateY(-2px);
+      outline: none;
+    }
+    .decision-path.path-a {
+      border-color: var(--red);
+    }
+    .decision-path.path-a:hover, .decision-path.path-a:focus {
+      background: rgba(197,48,48,0.15);
+      box-shadow: 0 2px 12px rgba(197,48,48,0.3);
+    }
+    .decision-path.path-b {
+      border-color: var(--green);
+    }
+    .decision-path.path-b:hover, .decision-path.path-b:focus {
+      background: rgba(34,197,94,0.15);
+      box-shadow: 0 2px 12px rgba(34,197,94,0.3);
+    }
+    .path-label {
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.3rem;
+    }
+    .path-a .path-label { color: var(--red); }
+    .path-b .path-label { color: var(--green); }
+    .path-choice {
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.9);
+      margin-bottom: 0.2rem;
+      line-height: 1.4;
+    }
+    .path-arrow {
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.5);
+      margin: 0.15rem 0;
+    }
+    .path-consequence {
+      font-size: 0.65rem;
+      color: rgba(255,255,255,0.7);
+      line-height: 1.4;
+      margin-bottom: 0.3rem;
+    }
+    .path-outcome {
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      display: inline-block;
+    }
+    .path-a .path-outcome {
+      background: rgba(197,48,48,0.3);
+      color: var(--red);
+    }
+    .path-b .path-outcome {
+      background: rgba(34,197,94,0.3);
+      color: var(--green);
+    }
+    .story-revelation {
+      background: rgba(212,175,55,0.12);
+      border: 1px solid rgba(212,175,55,0.3);
+      border-radius: 6px;
+      padding: 0.5rem 0.8rem;
+      margin-top: 0.6rem;
+      text-align: center;
+    }
+    .revelation-label {
+      font-size: 0.5rem;
+      color: var(--gold);
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      margin-bottom: 0.2rem;
+    }
+    .revelation-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.82rem;
+      font-style: italic;
+      color: var(--gold);
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<button aria-expanded="false" aria-label="Toggle navigation menu" class="mobile-menu-toggle" onclick="toggleSidebar()">☰</button>
+<div class="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show');"></div>
+<div class="course-container">
+<nav aria-label="课程导航" class="sidebar" role="navigation">
+<div class="sidebar-header">
+<a href="index.html" onmouseout="this.style.color='rgba(212,175,55,0.7)'" onmouseover="this.style.color='#D4AF37'" style="display:block;font-size:0.7rem;color:rgba(212,175,55,0.7);text-decoration:none;margin-bottom:0.5rem;">← Course Library</a>
+<h1>证据之约</h1>
+<p>撰写元分析论文</p>
+</div>
+<div class="module-list" id="moduleList"></div>
+<div class="sidebar-footer">
+        "Write so that truth may be found,<br/>
+        并被追随者再次发现。”
+      </div>
+</nav>
+<main class="main-content" id="main-content">
+<header class="content-header">
+<div class="breadcrumb">Writing &gt; <span id="currentModule">隐藏的数据</span></div>
+<div class="header-actions">
+<button class="btn" onclick="goToModule(20)">References</button>
+<button class="btn primary" onclick="nextSlide()">Continue</button>
+</div>
+</header>
+<div class="content-body">
+<div class="slides-container">
+ ====================模块1：隐藏数据==================== 
+<div class="module-slides active" data-module="1">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  你有没有听说过隐藏的试验，<br/>
+                  被埋藏的数据，<br/>
+                  那些被隐藏的论文告诉 <em>只说了一半真相</em>?
+                </div>
+</div>
+</div>
+<div class="slide blood">
+<div class="content text-center">
+<div class="title red animate">达菲丑闻</div>
+<div class="story-card red animate delay-1">
+<div class="place">COCHRANE COLLABORATION, 2009-2014</div>
+<div class="narrative">
+                    Governments stockpiled $9 billion worth of Tamiflu to fight pandemic flu.
+                    <br/><br/>
+                    但是当Cochrane研究人员试图验证该药物的益处时，他们发现 <strong>60% of trial data had never been published</strong>.
+                    <br/><br/>
+                    经过5年的战斗，他们得出了隐藏数据的结论。更改： <strong>Tamiflu shortened symptoms by less than a day</strong>
+                    并没有预防并发症。
+                    <br/><br/>
+                    花费了 90 亿美元用于从未完全披露的证据。
+                  </div>
+<div class="source">Jefferson T et al. Cochrane Database Syst Rev. 2014;4:CD008965</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Why We Write Meta-Analyses</div>
+<div class="decision-tree animate delay-1">
+<h4>合成的目的</h4>
+<div class="tree-row"><div class="tree-node root">Individual Studies</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">Problem?</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node warning">Small samples<small>Low power</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node warning">Conflicting results<small>Which to believe?</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node warning">Publication bias<small>Missing negatives</small></div>
+</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node action">Meta-Analysis<small>Systematic synthesis</small></div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node yes">More precise estimate + Bias detection</div></div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<div class="story-title">达菲透明度运动</div>
+<div class="story-period">2009-2014 | COCHRANE COLLABORATION vs. ROCHE</div>
+<div class="story-narrative">
+                    For years, governments worldwide stockpiled Tamiflu (oseltamivir) at a cost of <strong>billions of dollars</strong>，基于制造商声称它可以预防流感并发症
+                    <br/><br/>
+                    当 Cochrane 评审员要求提供完整的试验数据来验证这些说法时， <strong>罗氏以“保密”为由拒绝了 5 年</strong>。
+                    <br/><br/>
+                    在不懈的压力下，临床研究报告终于在 2014 年发布。情况发生了巨大的变化： <strong>达菲将症状缩短了不到一天，并且没有证据表明可以预防住院或严重并发症。</strong>
+</div>
+<div class="story-lesson">
+<div class="lesson-label">THE LESSON</div>
+<div class="lesson-text">荟萃分析的效果取决于它可以获取的隐藏试验的数据。无效的治疗看起来有效，并且浪费了数十亿美元的资源。</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  “公司知道，<br/>
+                  监管机构也知道，<br/>
+                  但已发表的论文没有说明这一点—<br/>
+                  数十亿美元被花费在半真半假。”
+                </div>
+<div class="gold-line animate delay-2"></div>
+<p class="animate delay-3" style="color:rgba(255,255,255,0.6);font-style:italic;font-size:0.8rem;">
+                  这就是我们编写荟萃分析的原因 - 寻找全部真相。
+                </p>
+</div>
+</div>
+</div>
+ ====================== 模块 2：契约（PRISMA）==================== 
+<div class="module-slides" data-module="2">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  如果您希望您的工作 <em>trusted</em>,<br/>
+                  您必须与读者签订契约。
+                  <br/><br/>
+                  该契约有一个名称：<br/>
+<em>PRISMA</em>.
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">PRISMA 2020</div>
+<div class="subtitle animate delay-1">系统审查和元分析的首选报告项目</div>
+<div class="stats-grid animate delay-2">
+<div class="stat-box" style="background:var(--blue);">
+<div class="stat-value" style="color:white;">27</div>
+<div class="stat-label">Checklist items</div>
+</div>
+<div class="stat-box" style="background:var(--purple);">
+<div class="stat-value" style="color:white;">2020</div>
+<div class="stat-label">Updated version</div>
+</div>
+<div class="stat-box" style="background:var(--green);">
+<div class="stat-value" style="color:white;">50K+</div>
+<div class="stat-label">Citations</div>
+</div>
+</div>
+<div class="simple-box animate delay-3">
+<div class="simple-title">THE COVENANT</div>
+<div class="simple-text">
+                    PRISMA 不是官僚机构。 <strong>向您的读者承诺</strong>
+                    您已透明、完整地完成工作。
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">七个部分</div>
+<div class="timeline animate delay-1">
+<div class="timeline-item">
+<div class="timeline-marker">1</div>
+<div class="timeline-content">
+<h5>Title</h5>
+<p>Identify as systematic review, meta-analysis, or both</p>
+</div>
+</div>
+<div class="timeline-item">
+<div class="timeline-marker">2</div>
+<div class="timeline-content">
+<h5>Abstract</h5>
+<p>整个审核的结构化摘要</p>
+</div>
+</div>
+<div class="timeline-item">
+<div class="timeline-marker">3</div>
+<div class="timeline-content">
+<h5>Introduction</h5>
+<p>PICO 的基本原理和目标</p>
+</div>
+</div>
+<div class="timeline-item">
+<div class="timeline-marker">4</div>
+<div class="timeline-content">
+<h5>Methods</h5>
+<p>Protocol, search, selection, data, bias, synthesis</p>
+</div>
+</div>
+<div class="timeline-item">
+<div class="timeline-marker">5</div>
+<div class="timeline-content">
+<h5>Results</h5>
+<p>Flow diagram, characteristics, risk of bias, synthesis results</p>
+</div>
+</div>
+<div class="timeline-item">
+<div class="timeline-marker">6</div>
+<div class="timeline-content">
+<h5>Discussion</h5>
+<p>Summary, limitations, interpretation, implications</p>
+</div>
+</div>
+<div class="timeline-item">
+<div class="timeline-marker">7</div>
+<div class="timeline-content">
+<h5>Other</h5>
+<p>Registration, funding, conflicts of interest</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<div class="story-title">PRISMA 革命</div>
+<div class="story-period">2009-PRESENT | TRANSFORMING SYSTEMATIC REVIEW REPORTING</div>
+<div class="story-narrative">
+                    在 PRISMA (2009) 之前，系统评价报告是混乱的。有些评论根本没有报告他们的搜索策略。其他人则忽略了偏见​​风险评估。许多人未能解释为什么研究被排除。 <strong>Readers couldn't judge quality</strong>—they had to trust blindly.
+                    <br/><br/>
+                    PRISMA 的 27 项清单改变了一切。它要求作者记录每一步：完整的搜索策略、选择标准、提取方法和综合决策。
+                    <br/><br/>
+                    Today, <strong>超过 10,000 种期刊认可 PRISMA</strong>。曾经卓越的透明度成为了预期的标准。
+                  </div>
+<div class="story-lesson">
+<div class="lesson-label">THE LESSON</div>
+<div class="lesson-text">一个简单的清单改变了整个领域。透明的报告从例外变成了常态——证明标准很重要。</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  “PRISMA 是作者和读者之间的契约：<br/>
+                  我将向您展示一切 —<br/>
+                  how I searched, what I found, what I excluded, why.<br/>
+                  所以您可以评判我的工作，并信任（或质疑）我的作品结论。”
+                </div>
+</div>
+</div>
+</div>
+ ==================== 第 3 模块：协议 ==================== 
+<div class="module-slides" data-module="3">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  您没有看到审阅者<br/>
+                  谁在看到数据后改变了结果，<br/>
+                  谁移动了球门柱直到结果 <em>looked right</em>?
+                </div>
+</div>
+</div>
+<div class="slide fraud">
+<div class="content text-center">
+<div class="title gold animate">撤回元分析</div>
+<div class="story-card red animate delay-1">
+<div class="place">MULTIPLE JOURNALS, 2010-2023</div>
+<div class="narrative">
+                    研究人员发现 <strong>many retracted meta-analyses</strong> had no pre-registered protocol.
+                    <br/><br/>
+                    Without a protocol, reviewers could:<br/>
+                    • Change inclusion criteria after seeing results<br/>
+                    • Switch primary outcomes to show significance<br/>
+                    •添加或删除研究以改变结论<br/>
+<br/><br/>
+                    协议是您的 <strong>pre-commitment device</strong>- 它可以防止您欺骗自己。
+                  </div>
+<div class="source">Defined outcome switching: PROSPERO registration prevents bias</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Protocol Registration Decision Tree</div>
+<div class="decision-tree animate delay-1">
+<h4>在哪里注册您的方案</h4>
+<div class="tree-row"><div class="tree-node root">新系统回顾</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">Type of Review?</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">Health/Medical</div>
+<div class="tree-node action">PROSPERO<small>prospero.york.ac.uk</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">Any Field</div>
+<div class="tree-node action">OSF<small>osf.io/registries</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">Cochrane</div>
+<div class="tree-node action">Cochrane Library<small>Integrated protocol</small></div>
+</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node yes">Registration ID in Paper<small>Cite in Methods</small></div></div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">What the Protocol Must Contain</div>
+<div class="checklist animate delay-1">
+<h4>Essential Protocol Elements</h4>
+<div class="checklist-item"><span class="number">1.</span> 研究问题（PICO格式）</div>
+<div class="checklist-item"><span class="number">2.</span> Eligibility criteria (inclusion/exclusion)</div>
+<div class="checklist-item"><span class="number">3.</span> Information sources and search strategy</div>
+<div class="checklist-item"><span class="number">4.</span> 研究选择过程</div>
+<div class="checklist-item"><span class="number">5.</span> 数据提取项目</div>
+<div class="checklist-item"><span class="number">6.</span> 偏倚评估风险工具</div>
+<div class="checklist-item"><span class="number">7.</span> 主要和次要结果</div>
+<div class="checklist-item"><span class="number">8.</span> 综合方法（荟萃分析计划）</div>
+<div class="checklist-item"><span class="number">9.</span> 亚组和敏感性分析</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  “在看到数据之前写下方案。<br/>
+                  Lock it in a public registry.<br/>
+                  Then follow it—or explain why you deviated.<br/>
+                  这就是您证明自己做到的方式”
+                </div>
+</div>
+</div>
+</div>
+ ====================模块4：标题==================== 
+<div class="module-slides" data-module="4">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  标题是你做出的第一个承诺。
+                  <br/><br/>
+                  它必须告诉读者：<br/>
+<em>你学习了什么，你是如何学习的</em>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">标题剖析</div>
+<div class="decision-tree animate delay-1">
+<h4>PRISMA Title Requirements</h4>
+<div class="tree-row"><div class="tree-node root">Title Must Include</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node action">Population<small>研究对象</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node action">Intervention<small>做了什么</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node action">Outcome<small>测量了什么</small></div>
+</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node blue">&gt;+“系统审查”或“荟萃分析”</div></div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Good vs. Bad Titles</div>
+<div class="story-card red animate delay-1">
+<div class="place">❌ BAD TITLE</div>
+<div class="narrative">
+                    “糖尿病治疗回顾”
+                    <br/><br/>
+<em>Problems: No population specified, no intervention, no outcome, doesn't say systematic review</em>
+</div>
+</div>
+<div class="story-card animate delay-2">
+<div class="place">✓ GOOD TITLE</div>
+<div class="narrative">
+                    “SGLT2 抑制剂对 2 型糖尿病成人心血管死亡率的功效：系统回顾和荟萃分析”
+                    <br/><br/>
+<em>人群、干预、结果和研究类型全部明确</em>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  “标题是你对读者说的第一句话。<br/>
+                  使其完整。使其诚实。<br/>
+                  Tell them exactly what they will find within."
+                </div>
+</div>
+</div>
+</div>
+ ====================== 第 5 单元：摘要 ==================== 
+<div class="module-slides" data-module="5">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  Most readers will only read your abstract.
+                  <br/><br/>
+                  If the abstract lies, or omits, or misleads—<br/>
+<em>most readers will never know.</em>
+</div>
+</div>
+</div>
+<div class="slide blood">
+<div class="content text-center">
+<div class="title red animate">旋转问题</div>
+<div class="story-card red animate delay-1">
+<div class="place">BOUTRON ET AL., 2010</div>
+<div class="narrative">
+                    Researchers analyzed 72 RCTs with non-significant primary outcomes.
+                    <br/><br/>
+                    他们发现 <strong>40% of abstracts contained "spin"</strong>— 侧重于次要结果、亚组或组内变化的报告，以使结果看起来比实际情况更有利。
+                    <br/><br/>
+                    摘要讲述的故事与数据不同。
+                  </div>
+<div class="source">Boutron I et al. JAMA. 2010;303:2058-2064</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Structured Abstract Elements</div>
+<div class="checklist animate delay-1">
+<h4>PRISMA Abstract Checklist</h4>
+<div class="checklist-item"><span class="check">□</span> 背景和目标</div>
+<div class="checklist-item"><span class="check">□</span> Eligibility criteria</div>
+<div class="checklist-item"><span class="check">□</span> Information sources</div>
+<div class="checklist-item"><span class="check">□</span> Risk of bias assessment</div>
+<div class="checklist-item"><span class="check">□</span> Synthesis methods</div>
+<div class="checklist-item"><span class="check">□</span> 结果（# 项研究，# 名参与者，效果估计CI)</div>
+<div class="checklist-item"><span class="check">□</span> Limitations</div>
+<div class="checklist-item"><span class="check">□</span> 结论和含义</div>
+<div class="checklist-item"><span class="check">□</span> Registration number</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<p class="story-opener">当摘要讲述的故事与论文本身不同时会发生什么？</p>
+<div class="real-data-box">
+<h4>REAL DATA</h4>
+<p>Pitkin 等人（1999，BMJ）检查了六种主要期刊的结构化摘要，发现 <span class="data-highlight">18-68%</span> 摘要包含与完整内容不一致的数据文章的缺陷包括数值错误和报告结果不支持的结论。</p>
+</div>
+<div class="decision-tree">
+<div class="decision-tree-header">误导性摘要：Pitkin 1999</div>
+<div class="decision-scenario">您的荟萃分析发现不显着的主要结果（RR 0.92，95% CI 0.78-1.09）。摘要？</div>
+<div class="decision-paths">
+<div class="decision-path path-a" role="button" tabindex="0">
+<div class="path-label">路径 A：旋转摘要</div>
+<div class="path-choice">Emphasize a significant secondary outcome and use language like "trend toward benefit"</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">只看到摘要的读者会对治疗产生误导性的积极印象</div>
+<div class="path-outcome">OUTCOME: Misleading clinical decisions</div>
+</div>
+<div class="decision-path path-b" role="button" tabindex="0">
+<div class="path-label">PATH B: Report Faithfully</div>
+<div class="path-choice">清楚地陈述不显着的主要结果，并注明探索性的次要结果</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">需要详细信息的读者可以阅读完整内容；论文</div>
+<div class="path-outcome">结果：保留证据完整性</div>
+</div>
+</div>
+</div>
+<div class="story-revelation">
+<div class="revelation-label">THE REVELATION</div>
+<div class="revelation-text">大多数读者永远不会忽略摘要。如果摘要产生误导，全文的诚实性无法消除损害。</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  “不要旋转。不要隐藏。<br/>
+                  如果主要结果为空，请这么说。<br/>
+                  The abstract must be a faithful mirror—<br/>
+                  不是一个讨人喜欢的肖像。”
+                </div>
+</div>
+</div>
+</div>
+ ==================== 模块 6：问题（PICO） ==================== 
+<div class="module-slides" data-module="6">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  A vague question yields vague answers.
+                  <br/><br/>
+                  在搜索之前，在写作之前—<br/>
+                  您必须确切地知道 <em>您要寻找的内容</em>.
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">PICO框架</div>
+<div class="decision-tree animate delay-1">
+<h4>构建研究问题</h4>
+<div class="tree-row"><div class="tree-node root">Research Question</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node action">P<small>Population</small></div>
+<div class="tree-label">Who?</div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node action">I<small>Intervention</small></div>
+<div class="tree-label">What treatment?</div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node action">C<small>Comparator</small></div>
+<div class="tree-label">Vs. what?</div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node action">O<small>Outcome</small></div>
+<div class="tree-label">What measured?</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">PICO Example</div>
+<div class="story-card animate delay-1">
+<div class="place">转换一个模糊的问题</div>
+<div class="narrative">
+<strong>Vague:</strong> "Does exercise help depression?"
+                    <br/><br/>
+<strong>PICO:</strong><br/>
+                    • <strong>P:</strong> Adults diagnosed with major depressive disorder<br/>
+                    • <strong>I:</strong> Supervised aerobic exercise (≥3x/week for ≥8 weeks)<br/>
+                    • <strong>C:</strong> Usual care or waitlist control<br/>
+                    • <strong>O:</strong> Change in depression score (HAM-D or BDI)
+                    <br/><br/>
+                    现在您确切地知道要搜索什么。
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  “精确定义您的问题。<br/>
+                  患者是谁？治疗方法是什么？<br/>
+                  比较器是什么？您将测量什么？<br/>
+                  PICO 是旅程之前的地图。”
+                </div>
+</div>
+</div>
+</div>
+ ====================== 第 7 单元：搜索 ==================== 
+<div class="module-slides" data-module="7">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  您没有听说过荟萃分析<br/>
+                  that searched only one database,<br/>
+                  错过了一半的证据，<br/>
+                  并得出了 <em>wrong conclusion</em>?
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">The Search Strategy Decision Tree</div>
+<div class="decision-tree animate delay-1">
+<h4>Where to Search</h4>
+<div class="tree-row"><div class="tree-node root">Comprehensive Search</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">Minimum Databases</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node action">MEDLINE<small>PubMed</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node action">Embase<small>European focus</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node action">CENTRAL<small>Cochrane trials</small></div>
+</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">Plus Additional Sources</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node blue">Trial registries<small>ClinicalTrials.gov</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node blue">Grey literature<small>Theses, reports</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node blue">Reference lists<small>Backward citation</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">记录搜索</div>
+<div class="simple-box animate delay-1">
+<div class="simple-title">WHAT TO REPORT</div>
+<div class="simple-text">
+                    • <strong>Full search strategy</strong> for at least one database (appendix)<br/>
+                    • <strong>Date of search</strong> 对于每个数据库<br/>
+                    • <strong>Any limits</strong> (language, date, publication type)<br/>
+                    • <strong>Hand-searching</strong> (journals, conference proceedings)<br/>
+                    • <strong>与作者联系</strong> 对于未发表的数据
+                  </div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">再现性测试</div>
+<div class="simple-text">
+                    Another researcher should be able to <strong>准确复制您的搜索</strong>
+                    并找到相同数量的记录。
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<div class="story-title">The Cochrane Search Strategy Discovery</div>
+<div class="story-period">2003 |科克伦方法论回顾</div>
+<div class="story-narrative">
+                    Cochrane researchers asked a simple question: What would happen if systematic reviewers only searched MEDLINE?
+                    <br/><br/>
+                    答案令人震惊。他们会有 <strong>错过了 30% 的纳入研究</strong>——包括一些完全改变荟萃分析结论的内容。
+                    <br/><br/>
+                    One striking example: an anti-depressant meta-analysis showed <strong>benefit when based on MEDLINE alone</strong>, but <strong>no benefit when all sources were included</strong>。缺失的研究是在 EMBASE 和 PsycINFO 等专业数据库中索引的较小的阴性试验。
+                  </div>
+<div class="story-lesson">
+<div class="lesson-label">THE LESSON</div>
+<div class="lesson-text">单一数据库搜索可能会系统性地错过阴性试验。 MEDLINE 中未包含的研究可能正是改变您结论的研究。</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  "Search wide. Search deep.<br/>
+                  Document every database, every date, every term.<br/>
+                  你错过的证据可能是最重要的证据。”
+                </div>
+</div>
+</div>
+</div>
+ ==================== 模块 8：选择 ====================== 
+<div class="module-slides" data-module="8">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  您必须从数千条记录中进行选择。
+                  <br/><br/>
+                  But choose by what rule?<br/>
+                  谁会检查你的选择？
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">PRISMA 流程图</div>
+<div class="prisma-flow animate delay-1">
+<h4>PRISMA 2020 Flow Diagram</h4>
+<div class="prisma-box id">
+<div class="label">IDENTIFICATION</div>
+<div class="number">n = 3,847</div>
+                    来自数据库的记录
+                  </div>
+<div class="tree-arrow">↓</div>
+<div class="prisma-exclude">Duplicates removed (n = 892)</div>
+<div class="prisma-box screen">
+<div class="label">SCREENING</div>
+<div class="number">n = 2,955</div>
+                    Titles/abstracts screened
+                  </div>
+<div class="tree-arrow">↓</div>
+<div class="prisma-exclude">Excluded (n = 2,680)</div>
+<div class="prisma-box eligible">
+<div class="label">ELIGIBILITY</div>
+<div class="number">n = 275</div>
+                    Full-text assessed
+                  </div>
+<div class="tree-arrow">↓</div>
+<div class="prisma-exclude">有理由排除 (n = 247)</div>
+<div class="prisma-box included">
+<div class="label">INCLUDED</div>
+<div class="number">n = 28</div>
+                    Studies in synthesis
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Selection Process Decision Tree</div>
+<div class="decision-tree animate delay-1">
+<h4>Who Selects? How?</h4>
+<div class="tree-row"><div class="tree-node root">Study Selection</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node yes">Two independent reviewers<small>Gold standard</small></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node question">Disagreement?</div>
+<div class="tree-branch" style="gap:0.3rem;">
+<div class="tree-branch-item">
+<div class="tree-node action" style="font-size:0.5rem;">Consensus<small>Discussion</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node action" style="font-size:0.5rem;">Third reviewer<small>Arbiter</small></div>
+</div>
+</div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node warning">One reviewer only<small>Acknowledge limitation</small></div>
+</div>
+</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">REPORT AGREEMENT</div>
+<div class="simple-text">
+                    计算并报告 <strong>inter-rater agreement</strong> (kappa statistic).
+                    Low agreement suggests unclear criteria.
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<p class="story-opener">一次试验的事后亚组分析能否在十年内重塑整个领域？</p>
+<div class="real-data-box">
+<h4>REAL DATA</h4>
+<p>妇女健康倡议（WHI，2002）发现 HRT <span class="data-highlight">increased</span> cardiovascular risk overall. But post-hoc subgroup analysis suggested women aged <span class="data-highlight">&lt;60</span> 或者10年内绝经的女性可能受益，而老年女性则受到伤害。这种“时间假说”引发了多年的争论和进一步的研究。</p>
+</div>
+<div class="decision-tree">
+<div class="decision-tree-header">The HRT Timing Hypothesis: WHI 2002</div>
+<div class="decision-scenario">您对 HRT 的荟萃分析显示总体有害，但探索性亚组表明对年轻女性有益。你怎么写这个？</div>
+<div class="decision-paths">
+<div class="decision-path path-a" role="button" tabindex="0">
+<div class="path-label">路径 A：夸大子群</div>
+<div class="path-choice">将年龄亚组结果作为主要发现作为标题</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">临床医生根据探索性、动力不足的亚组开出 HRT 处方；该发现可能无法重复</div>
+<div class="path-outcome">OUTCOME: Premature clinical change</div>
+</div>
+<div class="decision-path path-b" role="button" tabindex="0">
+<div class="path-label">PATH B: Report Honestly</div>
+<div class="path-choice">Present overall result as primary; label subgroup as exploratory and pre-specified or post-hoc</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">Readers understand the hypothesis needs confirmation; future trials can be designed to test it</div>
+<div class="path-outcome">OUTCOME: Responsible hypothesis generation</div>
+</div>
+</div>
+</div>
+<div class="story-revelation">
+<div class="revelation-label">THE REVELATION</div>
+<div class="revelation-text">亚组分析产生假设，而不是结论。始终将它们标记为探索性并首先报告总体结果。</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  "Every exclusion must have a reason.<br/>
+                  Every reason must be documented.<br/>
+                  Two pairs of eyes are better than one—<br/>
+                  一个人错过的东西，另一个人可能会抓住。”
+                </div>
+</div>
+</div>
+</div>
+ ==================== 模块 9：偏见风险 ==================== 
+<div class="module-slides" data-module="9">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  你没看过荟萃分析吗<br/>
+                  将好的研究与坏的研究汇集在一起​​，<br/>
+                  并称为平均值 <em>truth</em>?
+                </div>
+</div>
+</div>
+<div class="slide blood">
+<div class="content text-center">
+<div class="title red animate">忽视偏见的危险</div>
+<div class="story-card red animate delay-1">
+<div class="place">抗抑郁药丑闻</div>
+<div class="narrative">
+                    Turner et al. (2008) obtained FDA data on 74 antidepressant trials.
+                    <br/><br/>
+                    In the <strong>published literature</strong>：94% 的试验结果呈阳性。
+                    <br/><br/>
+                    In the <strong>FDA database</strong>：只有 51% 呈阳性。
+                    <br/><br/>
+                    已发表的荟萃分析汇集了选择性报告的数据。效应大小为 <strong>inflated by 32%</strong>.
+                  </div>
+<div class="source">Turner EH et al. N Engl J Med. 2008;358:252-260</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">偏见风险评估工具</div>
+<div class="decision-tree animate delay-1">
+<h4>使用哪种工具？</h4>
+<div class="tree-row"><div class="tree-node root">Study Design</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">RCTs</div>
+<div class="tree-node action">RoB 2<small>Cochrane tool</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">Non-randomized</div>
+<div class="tree-node action">ROBINS-I<small>Interventions</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">DTA studies</div>
+<div class="tree-node action">QUADAS-2<small>Diagnostic</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">Observational</div>
+<div class="tree-node action">NOS<small>Newcastle-Ottawa</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">RoB 2 Domains</div>
+<div class="checklist animate delay-1">
+<h4>Cochrane Risk of Bias 2.0 for RCTs</h4>
+<div class="checklist-item"><span class="number">D1</span> Randomization process</div>
+<div class="checklist-item"><span class="number">D2</span> 与预期干预措施的偏差</div>
+<div class="checklist-item"><span class="number">D3</span> 结果数据缺失</div>
+<div class="checklist-item"><span class="number">D4</span> 结果测量</div>
+<div class="checklist-item"><span class="number">D5</span> 报告结果的选择</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">JUDGMENT OPTIONS</div>
+<div class="simple-text">
+                    Each domain: <strong style="color:var(--green);">Low risk</strong> /
+                    <strong style="color:var(--orange);">Some concerns</strong> /
+                    <strong style="color:var(--red);">High risk</strong>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  “有偏差的荟萃分析研究<br/>
+                  yields a biased conclusion—<br/>
+                  具有更窄的置信区间。<br/>
+                  您已经使谎言更加精确。“
+                </div>
+</div>
+</div>
+</div>
+ ==================== 模块 10：数据提取 ==================== 
+<div class="module-slides" data-module="10">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  从每项研究中，您必须提取
+                  <br/><br/>
+                  提取错误，以及您的整个分析<br/>
+                  is built on <em>sand</em>.
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">数据提取表格</div>
+<div class="checklist animate delay-1">
+<h4>基本数据项</h4>
+<div class="checklist-item"><span class="number">1</span> Study identifiers (author, year, country)</div>
+<div class="checklist-item"><span class="number">2</span> 研究设计和设置</div>
+<div class="checklist-item"><span class="number">3</span> Participant characteristics (n, age, sex, severity)</div>
+<div class="checklist-item"><span class="number">4</span> Intervention details (dose, duration, delivery)</div>
+<div class="checklist-item"><span class="number">5</span> Comparator details</div>
+<div class="checklist-item"><span class="number">6</span> 结果定义和测量</div>
+<div class="checklist-item"><span class="number">7</span> Results (means, SDs, events, sample sizes)</div>
+<div class="checklist-item"><span class="number">8</span> Follow-up duration and loss to follow-up</div>
+<div class="checklist-item"><span class="number">9</span> Funding source and conflicts of interest</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Extraction Decision Tree</div>
+<div class="decision-tree animate delay-1">
+<h4>处理缺失数据</h4>
+<div class="tree-row"><div class="tree-node root">未报告数据</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">What to Do?</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">First</div>
+<div class="tree-node action">Contact authors<small>数据电子邮件</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">If no response</div>
+<div class="tree-node warning">Calculate/impute<small>Document method</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">If impossible</div>
+<div class="tree-node no">Exclude from MA<small>Include in narrative</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<div class="story-title">罗格列酮数据提取错误</div>
+<div class="story-period">2007 | NEW ENGLAND JOURNAL OF MEDICINE</div>
+<div class="story-narrative">
+                    Nissen and Wolski's 2007 meta-analysis of rosiglitazone (Avandia) found a <strong>43% increased risk of heart attack</strong>。这一发现引发了 FDA 的警告，并导致全球范围内的处方崩溃。
+                    <br/><br/>
+                    But later scrutiny revealed complications. Some effect estimates had been <strong>extracted from secondary publications rather than primary trial reports</strong>。事件计数方式的微小差异（从不同来源提取）显着改变了结果。
+                    <br/><br/>
+                    荟萃分析具有影响力并且基本正确，但争议强调了如何 <strong>small extraction decisions can have billion-dollar consequences</strong>. Merck's competing drug gained market share; GSK faced massive litigation.
+                  </div>
+<div class="story-lesson">
+<div class="lesson-label">THE LESSON</div>
+<div class="lesson-text">始终从主要来源提取。记录每一个选择。提取数据中的微小差异可能会改变监管决策和市场命运。</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  "Extract in duplicate. Check each number.<br/>
+                  One digit wrong can change the conclusion.<br/>
+                  提取表格就是您的分类账 —<br/>
+                  keep it meticulous, keep it true."
+                </div>
+</div>
+</div>
+</div>
+ ====================== 模块 11：效果测量 ==================== 
+<div class="module-slides" data-module="11">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  效果大小是您的核心荟萃分析。
+                  <br/><br/>
+                  选择错误的衡量标准，<br/>
+                  您的汇总估计值将是 <em>meaningless</em>.
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Effect Measure Decision Tree</div>
+<div class="decision-tree animate delay-1">
+<h4>Choosing the Right Effect Size</h4>
+<div class="tree-row"><div class="tree-node root">Outcome Type</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">Binary</div>
+<div class="tree-node action">RR, OR, RD<small>Events/no events</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">Continuous</div>
+<div class="tree-node question">Same scale?</div>
+<div class="tree-branch" style="gap:0.3rem;">
+<div class="tree-branch-item">
+<div class="tree-node action" style="font-size:0.5rem;">Yes<small>MD (mean diff)</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node action" style="font-size:0.5rem;">No<small>SMD (Hedge's g)</small></div>
+</div>
+</div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">Time-to-event</div>
+<div class="tree-node action">HR<small>Hazard ratio</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Common Effect Measures</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box">
+<div class="stat-value" style="color:var(--gold);">RR</div>
+<div class="stat-label">Risk Ratio<br/>Multiplicative</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--purple);">OR</div>
+<div class="stat-label">Odds Ratio<br/>Case-control</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--teal);">MD</div>
+<div class="stat-label">Mean Diff<br/>Same units</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--blue);">SMD</div>
+<div class="stat-label">Std Mean Diff<br/>Different scales</div>
+</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">THE PRINCIPLE</div>
+<div class="simple-text">
+                    效果衡量标准必须 <strong>跨研究具有可比性</strong>.
+                    If studies used different scales, standardize.
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<p class="story-opener">Can a trial that transforms global practice still have serious limitations?</p>
+<div class="real-data-box">
+<h4>REAL DATA</h4>
+<p>RECOVERY 试验 (2020) 证明地塞米松降低了需要吸氧的住院 COVID-19 患者的 28 天死亡率： <span class="data-highlight">RR 0.83, 95% CI 0.75-0.93</span>。然而，该试验是开放标签（无盲法），主要在英国医院进行，对照组接受常规护理（各不相同）。</p>
+</div>
+<div class="decision-tree">
+<div class="decision-tree-header">RECOVERY 试验：2020</div>
+<div class="decision-scenario">您的荟萃分析将 RECOVERY 视为主要研究。您如何处理具有里程碑意义的试验的局限性？</div>
+<div class="decision-paths">
+<div class="decision-path path-a" role="button" tabindex="0">
+<div class="path-label">PATH A: Minimize Limitations</div>
+<div class="path-choice">淡化开放标签设计和地理集中；重点关注显着的死亡率益处</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">Readers cannot judge generalizability to other settings; potential detection bias is obscured</div>
+<div class="path-outcome">结果：证据评估不完整</div>
+</div>
+<div class="decision-path path-b" role="button" tabindex="0">
+<div class="path-label">PATH B: Honest Limitations</div>
+<div class="path-choice">承认开放标签设计和地理限制，同时明确说明死亡率益处</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">读者了解研究结果的强度以及仍然存在的不确定性</div>
+<div class="path-outcome">OUTCOME: Trustworthy, balanced reporting</div>
+</div>
+</div>
+</div>
+<div class="story-revelation">
+<div class="revelation-label">THE REVELATION</div>
+<div class="revelation-text">即使是开创性的试验也有局限性。承认它们并不会削弱研究结果；它建立了读者的信任并指导未来的研究。</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  “选择适合数据的度量。<br/>
+                  常见结果的风险比，罕见结果的优势比。<br/>
+                  Standardize when scales differ.<br/>
+                  错误的做法是把苹果和橙子放在一起。”
+                </div>
+</div>
+</div>
+</div>
+ ==================== 第 12 单元：综合 ==================== 
+<div class="module-slides" data-module="12">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  你没看过森林图<br/>
+                  where studies pointed in opposite directions,<br/>
+                  yet the diamond declared a single <em>truth</em>?
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Fixed vs. Random Effects</div>
+<div class="decision-tree animate delay-1">
+<h4>Which Model to Use?</h4>
+<div class="tree-row"><div class="tree-node root">Meta-Analysis Model</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">关于真实的假设吗效果？</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">One true effect</div>
+<div class="tree-node blue">Fixed Effect<small>所有研究估计相同的 θ</small></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node warning" style="font-size:0.5rem;">Rarely appropriate<small>非常相似的研究</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">Effects vary</div>
+<div class="tree-node yes">Random Effects<small>Distribution of θᵢ</small></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node action" style="font-size:0.5rem;">Usually preferred<small>More conservative</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">何时不合并</div>
+<div class="checklist animate delay-1">
+<h4>Do Not Meta-Analyze If...</h4>
+<div class="checklist-item"><span class="check" style="color:var(--red);">✗</span> 研究过于异质（临床或方法）</div>
+<div class="checklist-item"><span class="check" style="color:var(--red);">✗</span> 结果已定义不同</div>
+<div class="checklist-item"><span class="check" style="color:var(--red);">✗</span> 人群根本不同</div>
+<div class="checklist-item"><span class="check" style="color:var(--red);">✗</span> Risk of bias is too high across studies</div>
+<div class="checklist-item"><span class="check" style="color:var(--red);">✗</span> Publication bias is severe</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">THE WISDOM</div>
+<div class="simple-text">
+                    Sometimes the most honest conclusion is:
+                    <strong>“这些研究不应该合并。”</strong>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<p class="story-opener">当对 Cochrane 综述的方法论批评升级为组织危机时会发生什么？</p>
+<div class="real-data-box">
+<h4>REAL DATA</h4>
+<p>2018 年，Peter Gøtzsche 及其同事发表了对 Cochrane HPV 疫苗审查的批评，认为该审查排除了关键试验并使用了不适当的纳入标准。该审查纳入了 <span class="data-highlight">涉及超过 73,000 名女性的 26 项研究</span>。这场争议最终导致 Gøtzsche 被 Cochrane 开除。</p>
+</div>
+<div class="decision-tree">
+<div class="decision-tree-header">Cochrane HPV 争议：2018</div>
+<div class="decision-scenario">您收到了对您已发表的综合报告的方法论批评，认为您应该纳入其他研究？</div>
+<div class="decision-paths">
+<div class="decision-path path-a" role="button" tabindex="0">
+<div class="path-label">路径 A：驳回。批评</div>
+<div class="path-choice">捍卫原始方法，但不涉及所提出的具体方法论观点</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">公众信任受到侵蚀；争议变得个人化而非科学化；证据基础没有得到改善</div>
+<div class="path-outcome">OUTCOME: Polarization and lost credibility</div>
+</div>
+<div class="decision-path path-b" role="button" tabindex="0">
+<div class="path-label">PATH B: Engage Transparently</div>
+<div class="path-choice">结合建议的研究进行敏感性分析；发布透明的回应，以表明结论是否发生变化</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">证据得到加强；方法论话语推动了该领域的发展；维持了信任</div>
+<div class="path-outcome">OUTCOME: Science self-corrects publicly</div>
+</div>
+</div>
+</div>
+<div class="story-revelation">
+<div class="revelation-label">THE REVELATION</div>
+<div class="revelation-text">科学的进步是通过方法论批评来加强评论和该领域的。</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  “不要为了汇集而汇集。<br/>
+                  不相容的荟萃分析。研究<br/>
+                  不是综合，而是混淆。<br/>
+                  Know when to say: these cannot be combined."
+                </div>
+</div>
+</div>
+</div>
+<!-- ==================== MODULE 13: HETEROGENEITY ==================== -->
+<div class="module-slides" data-module="13">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  当研究存在分歧时，<br/>
+                  分歧本身就是 <em>data</em>.
+                  <br/><br/>
+                  Do not hide it. <em>Explain it.</em>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Heterogeneity Measures</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box">
+<div class="stat-value" style="color:var(--gold);">Q</div>
+<div class="stat-label">Cochran's Q<br/>Significance test</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--purple);">I²</div>
+<div class="stat-label">Inconsistency<br/>% variation</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--teal);">τ²</div>
+<div class="stat-label">Tau-squared<br/>Between-study var</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--blue);">PI</div>
+<div class="stat-label">Prediction interval<br/>Future studies</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Investigating Heterogeneity</div>
+<div class="decision-tree animate delay-1">
+<h4>When I² &gt; 50%</h4>
+<div class="tree-row"><div class="tree-node root">High Heterogeneity</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">Investigation Methods</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node action">Subgroup analysis<small>Pre-specified</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node action">Meta-regression<small>If ≥10 studies</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node action">Sensitivity analysis<small>Exclude outliers</small></div>
+</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node warning">Report unexplained heterogeneity<small>Limitation</small></div></div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<p class="story-opener">What if a meta-analysis of small positive trials is overturned by a single mega-trial?</p>
+<div class="real-data-box">
+<h4>REAL DATA</h4>
+<p>到20世纪90年代初，几项小型试验表明静脉注射镁可降低急性心肌梗塞后的死亡率。荟萃分析（Teo 等人，1991）汇总了这些并发现了一个显着的好处： <span class="data-highlight">OR 0.44, 95% CI 0.27-0.71</span>。然后 ISIS-4 (1995)，一个使用 <span class="data-highlight">58,050 patients</span>的大型试验，没有发现任何好处。小规模研究的影响和异质性已被忽略。</p>
+</div>
+<div class="decision-tree">
+<div class="decision-tree-header">镁争议：1991-1995</div>
+<div class="decision-scenario">您对小规模试验的荟萃分析显示出很高的异质性（I²高于50%），但汇总估计值是显着的。您如何介绍这一点？</div>
+<div class="decision-paths">
+<div class="decision-path path-a" role="button" tabindex="0">
+<div class="path-label">路径 A：埋葬异质性</div>
+<div class="path-choice">Report the significant pooled estimate prominently; mention I² only in passing</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">临床医生采用治疗方法；未来的大型试验可能会与荟萃分析相矛盾，从而削弱对该方法的信任</div>
+<div class="path-outcome">OUTCOME: Premature guideline changes</div>
+</div>
+<div class="decision-path path-b" role="button" tabindex="0">
+<div class="path-label">PATH B: Investigate Transparently</div>
+<div class="path-choice">突出异质性；调查来源（研究规模、质量）；请注意，小规模研究的影响可能会夸大估计值</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">读者理解其中的不确定性；建议要求在改变实践之前进行明确的大型试验</div>
+<div class="path-outcome">OUTCOME: Evidence-appropriate caution</div>
+</div>
+</div>
+</div>
+<div class="story-revelation">
+<div class="revelation-label">THE REVELATION</div>
+<div class="revelation-text">异质性是一个警告信号，而不是脚注。小规模研究的影响可能会产生错误的令人放心的汇总估计，而单个大型试验就可以推翻。</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  "I-squared is not just a number to report.<br/>
+                  这是一个问题：为什么这些研究不同意？<br/>
+                  Investigate. Explain. Or acknowledge ignorance."
+                </div>
+</div>
+</div>
+</div>
+ ===================== 模块 14：发表偏差 ==================== 
+<div class="module-slides" data-module="14">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  你有没有听说过文件抽屉，<br/>
+                  负面研究进入 <em>die</em>,<br/>
+                  leaving only the positive survivors<br/>
+                  to tell a <em>distorted story</em>?
+                </div>
+</div>
+</div>
+<div class="slide blood">
+<div class="content text-center">
+<div class="title red animate">万络灾难</div>
+<div class="story-card red animate delay-1">
+<div class="place">MERCK, 2004</div>
+<div class="narrative">
+                    Vioxx (rofecoxib) was a blockbuster painkiller earning $2.5 billion/year.
+                    <br/><br/>
+                    Internal company documents showed Merck knew of cardiovascular risks
+                    but <strong>压制不利数据</strong> and published only favorable analyses.
+                    <br/><br/>
+                    A meta-analysis using all available data revealed a <strong>2-fold increased risk of heart attack</strong>.
+                    <br/><br/>
+                    Vioxx was withdrawn. It had caused an estimated <strong>88,000-140,000 excess heart attacks</strong>.
+                  </div>
+<div class="source">Topol EJ. N Engl J Med. 2004;351:1707-1709</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Detecting Publication Bias</div>
+<div class="decision-tree animate delay-1">
+<h4>Assessment Methods</h4>
+<div class="tree-row"><div class="tree-node root">Publication Bias Assessment</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node action">Funnel plot<small>Visual inspection</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node action">Egger's test<small>Statistical asymmetry</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node action">修剪和填充<small>Impute missing</small></div>
+</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node warning">Requires ≥10 studies<small>Low power otherwise</small></div></div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Preventing Bias: The AllTrials Campaign</div>
+<div class="simple-box animate delay-1">
+<div class="simple-title">ALLTRIALS.NET</div>
+<div class="simple-text">
+<strong>"All trials registered. All results reported."</strong>
+<br/><br/>
+                    • Search trial registries (ClinicalTrials.gov, WHO ICTRP)<br/>
+                    •联系公司获取未发表的信息数据<br/>
+                    • 在您的评论中引用注册号<br/>
+                    • 报告您的分析中缺少哪些注册试验
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  “文件抽屉不是空的。<br/>
+                  它保存着公司隐藏的研究，<br/>
+                  期刊记录的结果被拒绝了。<br/>
+                  你的任务就是打开那个抽屉——或者说你打不开。”
+                </div>
+</div>
+</div>
+</div>
+ ====================== 模块 15：森林图 ==================== 
+<div class="module-slides" data-module="15">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  森林图是你的脸面元分析。
+                  <br/><br/>
+                  它向读者显示 <em>everything</em>:<br/>
+                  each study, each weight, each confidence interval,<br/>
+                  和最终的汇总估计。
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">阅读森林图</div>
+<div class="decision-tree animate delay-1">
+<h4>森林图的元素</h4>
+<div class="tree-row"><div class="tree-node root">Forest Plot</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node blue">Study names<small>Left column</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node action">Squares<small>Point estimates</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node action">Lines<small>95% CI</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node yes">Diamond<small>Pooled estimate</small></div>
+</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node warning">方形大小 = 研究权重<small>Larger = more precise</small></div></div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Forest Plot Checklist</div>
+<div class="checklist animate delay-1">
+<h4>What to Include</h4>
+<div class="checklist-item"><span class="check">□</span> 研究标识符（作者、年份）</div>
+<div class="checklist-item"><span class="check">□</span> Sample size per arm</div>
+<div class="checklist-item"><span class="check">□</span> 95% CI 的效果估计</div>
+<div class="checklist-item"><span class="check">□</span> Weight (% contribution)</div>
+<div class="checklist-item"><span class="check">□</span> Line of no effect (RR=1 or MD=0)</div>
+<div class="checklist-item"><span class="check">□</span> 95% CI 的汇总估计</div>
+<div class="checklist-item"><span class="check">□</span> Heterogeneity statistics (I², τ², Q)</div>
+<div class="checklist-item"><span class="check">□</span> Test for overall effect (Z, p-value)</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<div class="story-title">改变的 Vioxx 数字一切</div>
+<div class="story-period">2004 |批准试验和撤回市场</div>
+<div class="story-narrative">
+                    多年来，Vioxx（罗非昔布）心血管安全性的森林图显示出令人放心的模式。早期试验的点估计集中在无效线周围。钻石表明该药物是安全的。
+                    <br/><br/>
+                    然后是 APPROVe 试验。当其数据添加到森林图中时， <strong>图片发生了巨大变化</strong>。 APPROVe 的大方块将汇集的钻石最终拉向了伤害。视觉效果是明确无误的。
+                    <br/><br/>
+                    那片森林 <strong>ended Vioxx</strong>。默克公司自愿撤回该药物。随后的诉讼使公司付出了代价 <strong>$4.85 billion in settlements</strong>。数千名患者曾遭受心脏病发作，而早期的小型试验却显示出不明确的结果。
+                  </div>
+<div class="story-lesson">
+<div class="lesson-label">THE LESSON</div>
+<div class="lesson-text">一项实施良好、动力充足的试验可以改变整个汇总估计。森林图讲述了证据如何积累的故事，有时，它如何逆转进程。</div>
+</div>
+<div class="decision-tree" style="margin-top:0.6rem;">
+<div class="decision-tree-header">误导性森林图</div>
+<div class="decision-scenario">您正在为荟萃分析设计一个森林图。轴尺度和研究顺序可以改变视觉印象。如何进行？</div>
+<div class="decision-paths">
+<div class="decision-path path-a" role="button" tabindex="0">
+<div class="path-label">路径 A：影响力设计</div>
+<div class="path-choice">Use a compressed axis scale to make effect sizes look larger; order studies to build a visual narrative</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">读者对影响程度形成夸大的印象；该图成为一种宣传工具，而不是数据显示</div>
+<div class="path-outcome">结果：证据的视觉扭曲</div>
+</div>
+<div class="decision-path path-b" role="button" tabindex="0">
+<div class="path-label">路径B：清晰设计</div>
+<div class="path-choice">Use standard axis scaling; order studies by year or alphabetically; include all standard elements (weights, CIs, I²)</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">读者可以做出自己的判断；该图作为透明的数据可视化</div>
+<div class="path-outcome">OUTCOME: Honest visual communication</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  "The forest plot hides nothing.<br/>
+                  Every study visible. Every weight transparent.<br/>
+                  让读者看到你所看到的——<br/>
+                  并自行判断。”
+                </div>
+</div>
+</div>
+</div>
+ ==================== 模块 16：证据的确定性 ==================== 
+<div class="module-slides" data-module="16">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  综合估计是不够的。
+                  <br/><br/>
+                  您还必须告诉读者：<br/>
+<em>How confident should they be in this result?</em>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">GRADE Certainty Assessment</div>
+<div class="decision-tree animate delay-1">
+<h4>对证据进行评级</h4>
+<div class="tree-row"><div class="tree-node root">Start: RCTs = High, Obs = Low</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">Reasons to Downgrade?</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node no">Risk of bias<small>-1 or -2</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node no">Inconsistency<small>-1 or -2</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node no">Indirectness<small>-1 or -2</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node no">Imprecision<small>-1 or -2</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node no">Pub. bias<small>-1 or -2</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">GRADE Certainty Levels</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box" style="background:var(--green);">
+<div class="stat-value" style="color:white;">⊕⊕⊕⊕</div>
+<div class="stat-label">HIGH<br/>Very confident</div>
+</div>
+<div class="stat-box" style="background:var(--gold);">
+<div class="stat-value" style="color:var(--navy);">⊕⊕⊕◯</div>
+<div class="stat-label">MODERATE<br/>Likely close</div>
+</div>
+<div class="stat-box" style="background:var(--orange);">
+<div class="stat-value" style="color:white;">⊕⊕◯◯</div>
+<div class="stat-label">LOW<br/>May differ</div>
+</div>
+<div class="stat-box" style="background:var(--red);">
+<div class="stat-value" style="color:white;">⊕◯◯◯</div>
+<div class="stat-label">VERY LOW<br/>Uncertain</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<p class="story-opener">What happens when a GRADE assessment of "low certainty" collides with a public health emergency?</p>
+<div class="real-data-box">
+<h4>REAL DATA</h4>
+<p>2023 年 Cochrane 对减少呼吸道病毒传播的物理干预措施的审查（Jefferson 等人）发现，在社区环境中佩戴口罩的证据是 <span class="data-highlight">low certainty</span> 每个等级，具有广泛的置信区间。该评论被广泛报道为证明“口罩不起作用”，尽管作者表示证据不足以在任一方向得出明确的结论。</p>
+</div>
+<div class="decision-tree">
+<div class="decision-tree-header">Cochrane 面罩评论：2023</div>
+<div class="decision-scenario">您对政治敏感主题的系统评价获得“低确定性”的 GRADE 评级。你如何传达这一点？</div>
+<div class="decision-paths">
+<div class="decision-path path-a" role="button" tabindex="0">
+<div class="path-label">路径A：软化评级</div>
+<div class="path-choice">淡化 GRADE 评估以避免政治争议；强调点估计而不是确定性水平</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">审查失去了方法论的可信度； GRADE 变得被视为可选而不是严格的</div>
+<div class="path-outcome">OUTCOME: Compromised methodology</div>
+</div>
+<div class="decision-path path-b" role="button" tabindex="0">
+<div class="path-label">PATH B: Report Faithfully</div>
+<div class="path-choice">如实报告 GRADE 等级；清楚地解释“低确定性”的含义（而不是含义）；区分缺席证据和缺席证据</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">公众可能会产生误解，但科学记录是准确的；未来的研究方向变得清晰</div>
+<div class="path-outcome">OUTCOME: Methodological integrity</div>
+</div>
+</div>
+</div>
+<div class="story-revelation">
+<div class="revelation-label">THE REVELATION</div>
+<div class="revelation-text">“低确定性”并不意味着“没有效果”。必须如实报告 GRADE 评级，并明确解释其含义，特别是对于政治性话题。</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  “效应大小是什么。<br/>
+                  GRADE certainty is the how sure.<br/>
+                  Report both—or the reader cannot judge<br/>
+                  how much to trust your conclusion."
+                </div>
+</div>
+</div>
+</div>
+ ==================== 第 17 单元：讨论 ==================== 
+<div class="module-slides" data-module="17">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  讨论是您的地方 <em>interpret</em>.
+                  <br/><br/>
+                  不旋转。不要夸大其词。<br/>
+                  But to explain what your findings mean—<br/>
+                  以及他们做什么 <em>not</em> mean.
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Discussion Structure</div>
+<div class="timeline animate delay-1">
+<div class="timeline-item">
+<div class="timeline-marker">1</div>
+<div class="timeline-content">
+<h5>Summary of Findings</h5>
+<p>重申主要结果和确定性评级</p>
+</div>
+</div>
+<div class="timeline-item">
+<div class="timeline-marker">2</div>
+<div class="timeline-content">
+<h5>与现有文献的比较</h5>
+<p>How do your findings relate to prior reviews?</p>
+</div>
+</div>
+<div class="timeline-item">
+<div class="timeline-marker">3</div>
+<div class="timeline-content">
+<h5>优点和局限性</h5>
+<p>纳入研究的综述和</p>
+</div>
+</div>
+<div class="timeline-item">
+<div class="timeline-marker">4</div>
+<div class="timeline-content">
+<h5>对实践的影响</h5>
+<p>What should clinicians/policymakers do?</p>
+</div>
+</div>
+<div class="timeline-item">
+<div class="timeline-marker">5</div>
+<div class="timeline-content">
+<h5>对研究的影响</h5>
+<p>还需要哪些研究？</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Common Mistakes in Discussion</div>
+<div class="checklist animate delay-1">
+<h4>What NOT to Do</h4>
+<div class="checklist-item"><span class="check" style="color:var(--red);">✗</span> 夸大数据之外的结论</div>
+<div class="checklist-item"><span class="check" style="color:var(--red);">✗</span> Ignoring limitations</div>
+<div class="checklist-item"><span class="check" style="color:var(--red);">✗</span> Treating statistical significance as clinical importance</div>
+<div class="checklist-item"><span class="check" style="color:var(--red);">✗</span> Failing to address heterogeneity</div>
+<div class="checklist-item"><span class="check" style="color:var(--red);">✗</span> 根据观察数据做出因果断言</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<p class="story-opener">如果有史以来被引用最多的方法论论文警告大多数研究结果都是错误的怎么办？</p>
+<div class="real-data-box">
+<h4>REAL DATA</h4>
+<p>John Ioannidis 2005 年在公共科学图书馆医学 (PLoS Medicine) 上发表的论文“为什么大多数发表的研究结果都是错误的”已被引用超过 <span class="data-highlight">10,000 times</span>。他利用数学模型认为，研究结果正确的概率取决于研究功效、偏见和测试关系的数量。对于许多研究设计来说，研究后获得真实结果的概率可能低于 50%。</p>
+</div>
+<div class="decision-tree">
+<div class="decision-tree-header">约安尼迪斯警钟：2005 年</div>
+<div class="decision-scenario">您的荟萃分析具有统计显着性结果，但纳入的研究规模较小、异质性高，而且许多研究存在较高的偏倚风险。你如何写讨论？</div>
+<div class="decision-paths">
+<div class="decision-path path-a" role="button" tabindex="0">
+<div class="path-label">路径A：过度宣扬发现的结果</div>
+<div class="path-choice">以显着的汇总估计为主导；尽量减少限制；提出强有力的实践建议</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">该发现过早地纳入指南；当复制失败时，整个荟萃分析方法都会受到指责</div>
+<div class="path-outcome">OUTCOME: Eroded trust in evidence synthesis</div>
+</div>
+<div class="decision-path path-b" role="button" tabindex="0">
+<div class="path-label">路径 B：校准解释</div>
+<div class="path-choice">在研究质量、异质性和确定性的背景下讨论结果；将推荐强度与证据强度相匹配</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">Readers understand the degree of confidence warranted; future research priorities become clear</div>
+<div class="path-outcome">OUTCOME: Proportionate, trustworthy conclusions</div>
+</div>
+</div>
+</div>
+<div class="story-revelation">
+<div class="revelation-label">THE REVELATION</div>
+<div class="revelation-text">讨论必须调整热情以证明质量。薄弱证据的强烈主张损害了整个领域的可信度。</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  “讨论不是为了宣传。<br/>
+                  这是为了诚实的解释。<br/>
+                  说出证据表明的内容。<br/>
+                  Admit what it does not show."
+                </div>
+</div>
+</div>
+</div>
+<!-- ==================== MODULE 18: TRANSPARENCY ==================== -->
+<div class="module-slides" data-module="18">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  您没有听说过韦克菲尔德论文<br/>
+                  where conflicts of interest were hidden,<br/>
+                  其中的数据捏造的，<br/>
+                  数以百万计的儿童 <em>unvaccinated</em>?
+                </div>
+</div>
+</div>
+<div class="slide blood">
+<div class="content text-center">
+<div class="title red animate">MMR-自闭症欺诈</div>
+<div class="story-card red animate delay-1">
+<div class="place">THE LANCET, 1998-2010</div>
+<div class="narrative">
+                    Andrew Wakefield published a study linking MMR vaccine to autism.
+                    <br/><br/>
+                    他没有透露他是 <strong>paid £435,643 by lawyers</strong>
+                    seeking to sue vaccine manufacturers.
+                    <br/><br/>
+                    他没有透露他 <strong>filed a patent</strong>
+                    for a competing single-dose measles vaccine.
+                    <br/><br/>
+                    该研究最终被撤回。但损害已经造成： <strong>vaccination rates plummeted</strong>，麻疹疫情卷土重来。
+                  </div>
+<div class="source">Deer B. BMJ. 2011;342:c5347</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Transparency Checklist</div>
+<div class="checklist animate delay-1">
+<h4>What to Declare</h4>
+<div class="checklist-item"><span class="check">□</span> Protocol registration number</div>
+<div class="checklist-item"><span class="check">□</span> Funding sources (all)</div>
+<div class="checklist-item"><span class="check">□</span> 资助者在审查中的作用</div>
+<div class="checklist-item"><span class="check">□</span> Conflicts of interest (all authors)</div>
+<div class="checklist-item"><span class="check">□</span> 数据可用性声明</div>
+<div class="checklist-item"><span class="check">□</span> 偏离协议（及其原因）</div>
+<div class="checklist-item"><span class="check">□</span> Author contributions</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<div class="story-title">AllTrials倡议</div>
+<div class="story-period">2013-PRESENT | A GRASSROOTS TRANSPARENCY MOVEMENT</div>
+<div class="story-narrative">
+                    2013 年，Ben Goldacre 和 Cochrane Collaboration 的同事在发现一个令人不安的事实后启动了 AllTrials： <strong>approximately half of all clinical trials were never published</strong>。缺失的试验中大部分是那些结果为负面或不方便的试验。
+                    <br/><br/>
+                    该活动聚集了 <strong>超过 90,000 个个人签署者</strong> 和 700 多个组织，要求注册所有过去和未来的试验，并报告完整的方法和结果。
+                    <br/><br/>
+                    影响是革命性的。 <strong>欧盟现在要求试验注册和结果。报告</strong>. The FDA strengthened its own requirements. Journals began demanding prospective registration. What started as advocacy became global policy.
+                  </div>
+<div class="story-lesson">
+<div class="lesson-label">THE LESSON</div>
+<div class="lesson-text">草根运动改变了国际法规——证明透明度倡导者可以重塑证据生态系统。</div>
+</div>
+<div class="decision-tree" style="margin-top:0.6rem;">
+<div class="decision-tree-header">羟氯喹预印本级联：2020年</div>
+<div class="decision-scenario">现在是 2020 年初。您的团队已经有了关于 COVID-19 治疗的初步荟萃分析结果。 Gautret 预印本（非随机，42 名患者）已经病毒式传播。Surgisphere 丑闻很快就会在主要期刊上显示捏造的数据。您是否急于预印本或等待？</div>
+<div class="decision-paths">
+<div class="decision-path path-a" role="button" tabindex="0">
+<div class="path-label">路径 A：预印本速度</div>
+<div class="path-choice">立即发布到 medRxiv 以影响政策</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">如果纳入的研究存在伪造数据或有缺陷的方法，您的荟萃分析会放大错误</div>
+<div class="path-outcome">OUTCOME: Accelerated misinformation</div>
+</div>
+<div class="decision-path path-b" role="button" tabindex="0">
+<div class="path-label">PATH B: Verify, Then Publish</div>
+<div class="path-choice">严格评估研究质量；在发布之前进行快速同行评审</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">发表较慢，但分析是可靠的；当有缺陷的研究被撤回时，结论仍然存在</div>
+<div class="path-outcome">结果：持久，值得信赖的证据</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  “透明度不是可选的。<br/>
+                  申报您的资金。声明您的冲突。<br/>
+                  The reader has a right to know<br/>
+                  谁为此工作付费 - 以及原因。”
+                </div>
+</div>
+</div>
+</div>
+ ===================== 第 19 单元：最终检查 ==================== 
+<div class="module-slides" data-module="19">
+<div class="slide gradient active">
+<div class="content text-center">
+<div class="title gold animate">提交之前</div>
+<div class="subtitle animate delay-1">最终清单</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">PRISMA 2020 Final Check</div>
+<div class="checklist animate delay-1">
+<h4>Have You...</h4>
+<div class="checklist-item"><span class="check">□</span> Completed all 27 PRISMA checklist items?</div>
+<div class="checklist-item"><span class="check">□</span> Included the PRISMA flow diagram?</div>
+<div class="checklist-item"><span class="check">□</span> Provided full search strategy in appendix?</div>
+<div class="checklist-item"><span class="check">□</span> 列出了排除的研究并说明原因？</div>
+<div class="checklist-item"><span class="check">□</span> 报告了每项研究的偏倚风险？</div>
+<div class="checklist-item"><span class="check">□</span> Provided forest plot(s)?</div>
+<div class="checklist-item"><span class="check">□</span> 评估了发表偏倚（如果≥10项研究）？</div>
+<div class="checklist-item"><span class="check">□</span> 证据质量分级 (GRADE)？</div>
+<div class="checklist-item"><span class="check">□</span> Declared all conflicts of interest?</div>
+<div class="checklist-item"><span class="check">□</span> Cited protocol registration?</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Supplementary Materials</div>
+<div class="simple-box animate delay-1">
+<div class="simple-title">WHAT TO INCLUDE</div>
+<div class="simple-text">
+                    • <strong>Full search strategies</strong> 所有数据库<br/>
+                    • <strong>排除的研究列表</strong> with reasons<br/>
+                    • <strong>数据提取表格</strong> （空白和填写）<br/>
+                    • <strong>Risk of bias details</strong> 每个研究<br/>
+                    • <strong>Additional forest plots</strong> (subgroups, sensitivity)<br/>
+                    • <strong>Funnel plot</strong> 和统计测试<br/>
+                    • <strong>GRADE证据简介</strong> tables
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<p class="story-opener">欺诈性论文可以在同行评审、编辑审查和公众质疑中存活多久？</p>
+<div class="real-data-box">
+<h4>REAL DATA</h4>
+<p>Andrew Wakefield's 1998 Lancet paper linking MMR vaccine to autism took <span class="data-highlight">12 years</span> 完全撤回（2010）。在此期间，记者布莱恩·迪尔 (Brian Deer) 揭露了财务冲突、道德违规和数据操纵等问题。多项大型研究（包括丹麦队列 <span class="data-highlight">over 650,000 children</span>) found no association, yet the original paper's influence persisted.</p>
+</div>
+<div class="decision-tree">
+<div class="decision-tree-header">韦克菲尔德撤回：1998-2010</div>
+<div class="decision-scenario">在同行评审期间，审稿人对您的荟萃分析中包含的一项研究提出了严重担忧，理由是数据不一致。您如何回应？</div>
+<div class="decision-paths">
+<div class="decision-path path-a" role="button" tabindex="0">
+<div class="path-label">路径 A：转移担忧</div>
+<div class="path-choice">驳回审稿人过于谨慎的担忧；保留该研究而不进行进一步调查</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">如果该研究后来被撤回，您的荟萃分析可能需要撤回</div>
+<div class="path-outcome">结果：污染的证据合成</div>
+</div>
+<div class="decision-path path-b" role="button" tabindex="0">
+<div class="path-label">PATH B: Investigate Thoroughly</div>
+<div class="path-choice">联系研究作者对原始数据进行敏感性分析，排除有疑问的研究；透明地披露问题</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">您的荟萃分析对于纳入或排除可疑研究是稳健的；</div>
+<div class="path-outcome">结果：有弹性、自我纠正的审查</div>
+</div>
+</div>
+</div>
+<div class="story-revelation">
+<div class="revelation-label">THE REVELATION</div>
+<div class="revelation-text">同行评审是您在发表之前的最后辩护。</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide hope">
+<div class="content text-center">
+<div class="refrain hope animate">
+                  “你已经收集了证据。<br/>
+                  你已经公平地权衡了它。<br/>
+                  你已经清楚地写下了它。<br/>
+<br/>
+                  现在提交你的工作 -<br/>
+                  让真相被发现，并再次发现。”
+                </div>
+</div>
+</div>
+</div>
+ ====================== 模块 20：测验和参考 ====================== 
+<div class="module-slides" data-module="20">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="title gold animate">References</div>
+<div class="references animate delay-1">
+<h4>Key Sources</h4>
+<ol>
+<li>Page MJ et al. BMJ. 2021;372:n71. [PRISMA 2020]</li>
+<li>Jefferson T et al. Cochrane 2014;4:CD008965. [Tamiflu]</li>
+<li>Turner EH et al. N Engl J Med. 2008;358:252-260. [Antidepressants]</li>
+<li>Boutron I et al. JAMA. 2010;303:2058-2064. [Spin]</li>
+<li>Topol EJ. N Engl J Med. 2004;351:1707-1709. [Vioxx]</li>
+<li>Deer B. BMJ. 2011;342:c5347. [Wakefield]</li>
+<li>Sterne JAC et al. BMJ. 2019;366:l4898. [RoB 2]</li>
+<li>Higgins JPT et al. Cochrane Handbook. 2023.</li>
+<li>Schünemann HJ et al. GRADE Handbook. 2013.</li>
+<li>Ioannidis JPA. PLoS Med. 2005;2:e124. [Why most research is false]</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="quiz-container animate">
+<div class="quiz-question">What percentage of antidepressant trials appeared positive in published literature vs. FDA data?</div>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkAnswer(this, false)">Published 51%, FDA 94%</div>
+<div class="quiz-option" onclick="checkAnswer(this, true)">Published 94%, FDA 51%</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)">Both about 75%</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)">Published 80%, FDA 60%</div>
+</div>
+<div class="quiz-feedback"></div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="quiz-container animate">
+<div class="quiz-question">在进行系统评价之前注册方案的目的是什么？</div>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkAnswer(this, false)">To get funding</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)">To claim priority</div>
+<div class="quiz-option" onclick="checkAnswer(this, true)">To prevent outcome switching and data-driven decisions</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)">为了使评价可发表</div>
+</div>
+<div class="quiz-feedback"></div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="quiz-container animate">
+<div class="quiz-question">什么时候不应该在荟萃分析中汇集研究？</div>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkAnswer(this, false)">当少于 10 个时研究</div>
+<div class="quiz-option" onclick="checkAnswer(this, true)">当研究在临床或方法上过于异质时</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)">当效果不具有统计显着性时</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)">当研究来自不同国家</div>
+</div>
+<div class="quiz-feedback"></div>
+</div>
+</div>
+</div>
+<div class="slide hope">
+<div class="content text-center">
+<div class="big-number green animate" style="font-size:3rem;">✔</div>
+<div class="title green animate delay-1">Course Complete</div>
+<div class="gold-line animate delay-2"></div>
+<div class="refrain hope animate delay-3">
+                  “您现在知道证据契约：<br/>
+                  在您之前注册搜索。<br/>
+                  Search comprehensively. Select transparently.<br/>
+                  Extract carefully. Assess bias honestly.<br/>
+                  明智地池化，或者根本不池化。<br/>
+                  Write so that truth may be found,<br/>
+                  并被追随者再次发现。”
+                </div>
+</div>
+</div>
+</div>
+ ====================== 第 21 单元：软件工具 ==================== 
+<div class="module-slides" data-module="21">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  如果没有执行工具，这些方法就毫无意义。
+                  <br/><br/>
+                  哪些软件将进行您的分析<br/>
+                  from protocol to <em>forest plot</em>?
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Software Decision Tree</div>
+<div class="decision-tree animate delay-1">
+<h4>选择您的工具</h4>
+<div class="tree-row"><div class="tree-node root">Meta-Analysis Software</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">Your Context?</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">Cochrane Review</div>
+<div class="tree-node action">RevMan<small>Free, official</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">Academic/Flexible</div>
+<div class="tree-node action">R metafor<small>Free, powerful</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">Institution License</div>
+<div class="tree-node action">Stata meta<small>Comprehensive</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">Point-and-Click</div>
+<div class="tree-node action">CMA<small>User-friendly</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">基本工具包</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box" style="background:var(--blue);">
+<div class="stat-value" style="color:white;font-size:1rem;">RevMan</div>
+<div class="stat-label">Cochrane official<br/>Free download</div>
+</div>
+<div class="stat-box" style="background:var(--purple);">
+<div class="stat-value" style="color:white;font-size:1rem;">R + metafor</div>
+<div class="stat-label">Most flexible<br/>Reproducible code</div>
+</div>
+<div class="stat-box" style="background:var(--teal);">
+<div class="stat-value" style="color:var(--navy);font-size:1rem;">GRADEpro</div>
+<div class="stat-label">Certainty tables<br/>SoF tables</div>
+</div>
+<div class="stat-box" style="background:var(--orange);">
+<div class="stat-value" style="color:white;font-size:1rem;">Rayyan</div>
+<div class="stat-label">Screening tool<br/>AI-assisted</div>
+</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">REPRODUCIBILITY</div>
+<div class="simple-text">
+                    基于代码的工具（R、Stata）创建 <strong>reproducible analyses</strong>。分享您的代码，以便其他人验证您的工作。
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">R metafor Example</div>
+<div class="simple-box animate delay-1" style="text-align:left;font-family:monospace;font-size:0.7rem;">
+<div class="simple-title">BASIC META-ANALYSIS IN R</div>
+<div class="simple-text">
+                    library(metafor)<br/><br/>
+                    # Calculate effect sizes<br/>
+                    dat &lt;- escalc(measure="RR", ai=events_tx, bi=noevents_tx,<br/>
+                        ci=events_ctrl, di=noevents_ctrl, data=mydata)<br/><br/>
+                    # Random effects model<br/>
+                    res &lt;- rma(yi, vi, 数据=dat, 方法=“REML”)<br/><br/>
+                    # Forest plot<br/>
+                    forest(res, slab=paste(author, year))
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<p class="story-opener">当系统评价有数十名作者时，您如何协调写作？</p>
+<div class="real-data-box">
+<h4>REAL DATA</h4>
+<p>列出了 SPRINT 试验 (2015)来自数十家机构的 <span class="data-highlight">100 authors</span> 。写作小组包括指导委员会、现场调查员和统计学家。协调贡献、管理版本控制和确定作者信用需要正式的结构。 ICMJE 标准将作者身份定义为需要大量贡献、起草或修订、最终批准和问责。</p>
+</div>
+<div class="decision-tree">
+<div class="decision-tree-header">Team Writing Challenges: Large Collaborative Reviews</div>
+<div class="decision-scenario">您的系统审核团队有来自 4 个国家/地区的 12 名成员。您如何管理写入过程？</div>
+<div class="decision-paths">
+<div class="decision-path path-a" role="button" tabindex="0">
+<div class="path-label">PATH A: Informal Coordination</div>
+<div class="path-choice">Pass drafts via email; resolve authorship at the end; no writing plan or version control</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">Duplication of effort; authorship disputes at submission; inconsistent voice and formatting; lost contributions</div>
+<div class="path-outcome">结果：延迟和冲突</div>
+</div>
+<div class="decision-path path-b" role="button" tabindex="0">
+<div class="path-label">PATH B: Structured Process</div>
+<div class="path-choice">预先分配部分线索；使用具有版本控制的共享平台；从一开始就同意 ICMJE 标准和作者顺序</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">明确的责任；一致的输出；透明的贡献；在知道结果之前确定作者身份</div>
+<div class="path-outcome">OUTCOME: Efficient, fair collaboration</div>
+</div>
+</div>
+</div>
+<div class="story-revelation">
+<div class="revelation-label">THE REVELATION</div>
+<div class="revelation-text">在工作开始之前就作者身份标准和写作责任达成一致。知道结果后，争议是最难解决的。</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  “该工具不会进行分析。<br/>
+                  分析人员会进行分析。<br/>
+                  但请明智地选择您的工具 -<br/>
+                  并分享您的代码，以便真相可以被了解已验证。"
+                </div>
+</div>
+</div>
+</div>
+ ====================模块 22：读取元分析 ==================== 
+<div class="module-slides" data-module="22">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  不是每个人都会写元分析。
+                  <br/><br/>
+                  But every clinician, every policymaker, every patient<br/>
+                  must know how to <em>read</em> them.
+                </div>
+</div>
+</div>
+<div class="slide blood">
+<div class="content text-center">
+<div class="title red animate">HRT 逆转</div>
+<div class="story-card red animate delay-1">
+<div class="place">WOMEN'S HEALTH INITIATIVE, 2002</div>
+<div class="narrative">
+                    对于几十年来，观察性研究表明激素替代疗法 (HRT) 可以保护女性免受心脏病的侵害。
+                    <br/><br/>
+                    这些研究的荟萃分析显示 <strong>35-50% reduction in cardiovascular risk</strong>.
+                    <br/><br/>
+                    然后 WHI 随机试验揭示了真相：HRT <strong>increased</strong> heart attack risk by 29%.
+                    <br/><br/>
+                    The observational meta-analyses had pooled <strong>confounded data</strong>— 更健康的女性选择了 HRT，而不是相反。
+                  </div>
+<div class="source">Rossouw JE et al. JAMA. 2002;288:321-333</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">How to Read a Forest Plot</div>
+<div class="decision-tree animate delay-1">
+<h4>Consumer's Guide</h4>
+<div class="tree-row"><div class="tree-node root">阅读森林图</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node blue">Line of no effect<small>RR=1 or MD=0</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node action">Diamond position<small>Left=benefit, Right=harm</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node warning">Diamond width<small>Narrow=precise</small></div>
+</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">Does diamond cross the line?</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node yes">No<small>Statistically significant</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node no">Yes<small>Not significant</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Red Flags When Reading</div>
+<div class="checklist animate delay-1">
+<h4>Warning Signs in Published Meta-Analyses</h4>
+<div class="checklist-item"><span class="check" style="color:var(--red);">⚠</span> No protocol registration cited</div>
+<div class="checklist-item"><span class="check" style="color:var(--red);">⚠</span> Single database searched</div>
+<div class="checklist-item"><span class="check" style="color:var(--red);">⚠</span> No risk of bias assessment</div>
+<div class="checklist-item"><span class="check" style="color:var(--red);">⚠</span> High I² but no investigation</div>
+<div class="checklist-item"><span class="check" style="color:var(--red);">⚠</span> Asymmetric funnel plot ignored</div>
+<div class="checklist-item"><span class="check" style="color:var(--red);">⚠</span> 行业资助，无敏感性分析</div>
+<div class="checklist-item"><span class="check" style="color:var(--red);">⚠</span> 结论超越证据</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">What GRADE Ratings Mean</div>
+<div class="simple-box animate delay-1">
+<div class="simple-title">针对临床医生和患者</div>
+<div class="simple-text">
+<strong style="color:var(--green);">HIGH:</strong> We are very confident. Future research unlikely to change.<br/><br/>
+<strong style="color:var(--gold);">MODERATE:</strong> Probably close to truth. Future research may change estimate.<br/><br/>
+<strong style="color:var(--orange);">LOW:</strong> Uncertain. Future research likely to change substantially.<br/><br/>
+<strong style="color:var(--red);">VERY LOW:</strong> Very uncertain. Any estimate is speculative.
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  “阅读森林，而不仅仅是钻石。<br/>
+                  寻找协议。检查偏差。<br/>
+                  Ask: Who funded this? What did they hide?<br/>
+                  知情的读者是真理的守护者。”
+                </div>
+</div>
+</div>
+</div>
+ ====================模块 23：网络元分析==================== 
+<div class="module-slides" data-module="23">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  What if you must compare treatments<br/>
+                  从未进行过正面测试？
+                  <br/><br/>
+                  这是 <em>network meta-analysis</em>.
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">When to Use Network MA</div>
+<div class="decision-tree animate delay-1">
+<h4>NMA Decision Tree</h4>
+<div class="tree-row"><div class="tree-node root">Multiple Treatments</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">Direct comparisons available?</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">All pairs directly compared</div>
+<div class="tree-node action">Pairwise MA<small>Standard approach</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">Some indirect only</div>
+<div class="tree-node yes">Network MA<small>Borrow strength</small></div>
+</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node warning">Check transitivity assumption<small>Similar populations across comparisons</small></div></div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">的领域网络几何</div>
+<div class="simple-box animate delay-1">
+<div class="simple-title">可视化证据</div>
+<div class="simple-text" style="text-align:center;">
+<svg style="max-width:300px;margin:0.5rem auto;" viewbox="0 0 200 150">
+<circle cx="100" cy="30" fill="var(--gold)" r="20" stroke="var(--cream)" stroke-width="2"></circle>
+<text fill="var(--navy)" font-size="10" font-weight="bold" text-anchor="middle" x="100" y="35">A</text>
+<circle cx="40" cy="120" fill="var(--blue)" r="15" stroke="var(--cream)" stroke-width="2"></circle>
+<text fill="white" font-size="10" font-weight="bold" text-anchor="middle" x="40" y="124">B</text>
+<circle cx="160" cy="120" fill="var(--purple)" r="18" stroke="var(--cream)" stroke-width="2"></circle>
+<text fill="white" font-size="10" font-weight="bold" text-anchor="middle" x="160" y="124">C</text>
+<line stroke="var(--cream)" stroke-width="4" x1="100" x2="40" y1="50" y2="105"></line>
+<line stroke="var(--cream)" stroke-width="6" x1="100" x2="160" y1="50" y2="102"></line>
+<line stroke="var(--cream)" stroke-dasharray="5,5" stroke-width="2" x1="55" x2="142" y1="120" y2="120"></line>
+</svg>
+<br/>
+<strong>Nodes</strong> = Treatments (size = sample)<br/>
+<strong>Edges</strong> =直接比较（宽度=研究）<br/>
+<strong>Dashed</strong> =仅间接证据
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">League Tables</div>
+<div class="simple-box animate delay-1">
+<div class="simple-title">读取NMA结果</div>
+<div class="simple-text">
+                    League tables show <strong>all pairwise comparisons</strong> 来自网络。
+                    <br/><br/>
+                    • Each cell: effect estimate + 95% CI<br/>
+                    • Row vs. Column: Treatment A vs. Treatment B<br/>
+                    • <strong style="color:var(--green);">Green</strong> = Favors row treatment<br/>
+                    • <strong style="color:var(--red);">Red</strong> = Favors column treatment<br/>
+                    • Rankings (SUCRA/P-score) help identify best options
+                  </div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">CRITICAL ASSUMPTION</div>
+<div class="simple-text">
+<strong>Transitivity:</strong> 如果在类似患者中比较 A 与 B、B 与 C，我们可以间接估计 A 与 C。
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<p class="story-opener">What happens to meta-analyses when a prolific author's entire body of work is retracted?</p>
+<div class="real-data-box">
+<h4>REAL DATA</h4>
+<p>Joachim Boldt, a German anesthesiologist, had over <span class="data-highlight">220 papers retracted</span> 用于数据制作（2010-2011 年发现）。他对胶体溶液的研究已被纳入多项系统评价和荟萃分析中。当撤稿到来时，每一项包含他的作品的荟萃分析都必须重新评估。当他捏造的数据被删除后，一些结论发生了重大变化。</p>
+</div>
+<div class="decision-tree">
+<div class="decision-tree-header">Boldt 撤回级联：2010-2011</div>
+<div class="decision-scenario">您发现您发表的荟萃分析中包含的一项研究已因数据伪造而被撤回。你会做什么？</div>
+<div class="decision-paths">
+<div class="decision-path path-a" role="button" tabindex="0">
+<div class="path-label">PATH A: Hope No One Notices</div>
+<div class="path-choice">忽略撤回；荟萃分析已经发表，撤回的研究规模很小</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">其他人引用了你的荟萃分析；捏造的数据通过二次引用传播；患者护理决策基于受污染的证据</div>
+<div class="path-outcome">OUTCOME: Cascading harm from inaction</div>
+</div>
+<div class="decision-path path-b" role="button" tabindex="0">
+<div class="path-label">PATH B: Self-Correct Publicly</div>
+<div class="path-choice">发布更正或更新的分析，不包括撤回的研究；通知期刊；说明结论是否改变</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">科学记录是否被更正；读者可以看到更新的分析；您的诚信声誉得到提升</div>
+<div class="path-outcome">OUTCOME: Scientific self-correction</div>
+</div>
+</div>
+</div>
+<div class="story-revelation">
+<div class="revelation-label">THE REVELATION</div>
+<div class="revelation-text">证据合成的完整性取决于持续的警惕。当纳入的研究被撤回时，道德义务是更新和纠正，而不是保持沉默。</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  "When treatments have never met,<br/>
+                  网络搭建证据桥梁。<br/>
+                  But the bridge rests on transitivity—<br/>
+                  验证人群是否具有可比性。”
+                </div>
+</div>
+</div>
+</div>
+ ====================模块 24：AI/ML 预测模型==================== 
+<div class="module-slides" data-module="24">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  你有没有见过在训练集中预测癌症<br/>
+                  准确率高达 99% 的 AI —<br/>
+                  ，但在部署在<br/>
+                  中时却发生了灾难性的失败 <em>real world</em>?
+                </div>
+</div>
+</div>
+<div class="slide blood">
+<div class="content text-center">
+<div class="title red animate">脓毒症算法失败</div>
+<div class="story-card red animate delay-1">
+<div class="place">EPIC SEPSIS MODEL, 2021</div>
+<div class="narrative">
+                    Epic's sepsis prediction algorithm was deployed in <strong>hundreds of hospitals</strong>.
+                    <br/><br/>
+                    Internal validation showed excellent performance.
+                    <br/><br/>
+                    但是密歇根医学院的一项独立研究发现该模型
+                    <strong>missed 67% of sepsis cases</strong> and generated excessive false alarms.
+                    <br/><br/>
+                    该算法已在 <strong>训练的同一人群上得到验证</strong>——这是过度拟合和失败的原因。
+                  </div>
+<div class="source">Wong A et al. JAMA Intern Med. 2021;181:1065-1070</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">AI Validation Decision Tree</div>
+<div class="decision-tree animate delay-1">
+<h4>AI/ML 的证据</h4>
+<div class="tree-row"><div class="tree-node root">AI Prediction Model</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">Validation Level?</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node no">Internal only<small>相同的数据分割</small></div>
+<div class="tree-label" style="color:var(--red);">HIGH RISK</div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node warning">Temporal<small>Different time</small></div>
+<div class="tree-label" style="color:var(--orange);">MODERATE</div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node action">External<small>Different site</small></div>
+<div class="tree-label" style="color:var(--gold);">BETTER</div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node yes">Impact RCT<small>Patient outcomes</small></div>
+<div class="tree-label" style="color:var(--green);">BEST</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">PROBAST &amp; TRIPOD</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box" style="background:var(--purple);">
+<div class="stat-value" style="color:white;font-size:0.9rem;">PROBAST</div>
+<div class="stat-label">Prediction model<br/>Risk of Bias</div>
+</div>
+<div class="stat-box" style="background:var(--blue);">
+<div class="stat-value" style="color:white;font-size:0.9rem;">TRIPOD</div>
+<div class="stat-label">Reporting<br/>guideline</div>
+</div>
+<div class="stat-box" style="background:var(--teal);">
+<div class="stat-value" style="color:var(--navy);font-size:0.9rem;">TRIPOD-AI</div>
+<div class="stat-label">AI-specific<br/>extension</div>
+</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">CALIBRATION VS. DISCRIMINATION</div>
+<div class="simple-text">
+<strong>AUC/c-statistic:</strong> Can the model rank patients? (discrimination)<br/>
+<strong>Calibration:</strong> 预测概率准确吗？<br/><br/>
+<em>A model can have good AUC but poor calibration—and harm patients.</em>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  “算法从数据中学习，<br/>
+                  并且数据是<br/>
+                  It validated on itself,<br/>
+                  and called its reflection truth.<br/>
+                  External validation is not optional—it is survival."
+                </div>
+</div>
+</div>
+</div>
+ ==================== 第 25 模块：患者沟通 ==================== 
+<div class="module-slides" data-module="25">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  荟萃分析用数字说话。
+                  <br/><br/>
+                  但是患者听到了 <em>恐惧和恐惧希望</em>.
+                  <br/><br/>
+                  您将如何弥合差距？
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Translating Numbers to Meaning</div>
+<div class="decision-tree animate delay-1">
+<h4>Communication Decision Tree</h4>
+<div class="tree-row"><div class="tree-node root">Meta-Analysis Result</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">Effect Size Type?</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">Relative (RR, OR)</div>
+<div class="tree-node action">Convert to NNT<small>More intuitive</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">Absolute (RD)</div>
+<div class="tree-node yes">Use directly<small>"X fewer per 1000"</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">Continuous (MD)</div>
+<div class="tree-node action">Contextualize<small>Minimal important diff</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">患者脚本</div>
+<div class="story-card animate delay-1">
+<div class="place">EXPLAINING A POSITIVE RESULT</div>
+<div class="narrative">
+                    “该研究汇集了 15 项研究，涉及 8,000 名患者。
+                    <br/><br/>
+                    发现这种治疗将[结果]的风险降低了约30%。
+                    <br/><br/>
+                    实际上：如果我们治疗 100 个像您一样的人，与不治疗相比，大约会减少 5 人获得[结果]。
+                    <br/><br/>
+                    We're moderately confident in this—future research might change it slightly.
+                    <br/><br/>
+                    您对此有什么疑问？"
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Questions Patients Should Ask</div>
+<div class="checklist animate delay-1">
+<h4>Empowering Patients</h4>
+<div class="checklist-item"><span class="number">1</span> "纳入了多少研究和患者？"</div>
+<div class="checklist-item"><span class="number">2</span> "有多自信研究人员参与了这个结果吗？”</div>
+<div class="checklist-item"><span class="number">3</span> “有什么好处和坏处？”</div>
+<div class="checklist-item"><span class="number">4</span> “这些研究中包括像我这样的人吗？”</div>
+<div class="checklist-item"><span class="number">5</span> “谁资助了这项研究？”</div>
+<div class="checklist-item"><span class="number">6</span> “这对我的具体情况意味着什么？情况如何？”</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<p class="story-opener">Can a spreadsheet error in an academic paper directly shape the economic policy of entire nations?</p>
+<div class="real-data-box">
+<h4>REAL DATA</h4>
+<p>莱因哈特和罗格夫 2010 年的论文声称，公共债务超过 <span class="data-highlight">90% of GDP</span> 增长速度显着下降。这一发现被广泛引用来证明整个欧洲的紧缩政策是合理的。 2013 年，赫恩登、阿什和波林发现了一个电子表格错误：几个国家被意外排除在计算之外。修正后，90% 的阈值消失了。</p>
+</div>
+<div class="decision-tree">
+<div class="decision-tree-header">Reinhart-Rogoff 政策影响：2010-2013</div>
+<div class="decision-scenario">您的荟萃分析结果具有明确的政策含义。政策制定者渴望得到一个简单的信息。如何撰写政策简介？</div>
+<div class="decision-paths">
+<div class="decision-path path-a" role="button" tabindex="0">
+<div class="path-label">路径 A：过度简化影响</div>
+<div class="path-choice">提供清晰的阈值或标题数字；省略警告和不确定性范围以实现最大的政策影响</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">根据简化的调查结果采用政策；当出现细微差别或发现错误时，研究和由此产生的政策都会受到质疑</div>
+<div class="path-outcome">OUTCOME: Policy built on a fragile foundation</div>
+</div>
+<div class="decision-path path-b" role="button" tabindex="0">
+<div class="path-label">路径B：诚信沟通</div>
+<div class="path-choice">以适当的不确定性提供证据；区分强烈的和暗示性的发现；提供可操作的摘要，保留细微差别</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">政策制定者了解证据支持什么以及哪里仍然存在不确定性；做出决定时要谨慎</div>
+<div class="path-outcome">OUTCOME: Durable, evidence-informed policy</div>
+</div>
+</div>
+</div>
+<div class="story-revelation">
+<div class="revelation-label">THE REVELATION</div>
+<div class="revelation-text">Policy briefs must communicate uncertainty honestly. Oversimplified findings may gain influence quickly but collapse when scrutinized, damaging trust in research-policy relationships.</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  “荟萃分析用数字说话。<br/>
+                  患者听到恐惧和希望。<br/>
+                  你的工作是翻译——<br/>
+                  忠实于证据，富有同情心。”
+                </div>
+</div>
+</div>
+</div>
+ ====================== 模块 26：实时评论与未来==================== 
+<div class="module-slides" data-module="26">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  系统性评论及时捕捉证据。
+                  <br/><br/>
+                  But science does not stop.<br/>
+                  我们如何保存证据 <em>alive</em>?
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Living Systematic Reviews</div>
+<div class="story-card animate delay-1">
+<div class="place">COVID-19 PANDEMIC, 2020-2023</div>
+<div class="narrative">
+                    在大流行期间，证据的出现速度比传统评论的综合速度要快。
+                    <br/><br/>
+<strong>Living systematic reviews</strong> were continuously updated as new trials reported—
+                    sometimes within days of publication.
+                    <br/><br/>
+                    COVID-NMA 联盟对治疗、疫苗和诊断进行了实时回顾，并随着证据的发展更新了 <strong>real-time</strong> 中的建议。
+                    <br/><br/>
+                    Hydroxychloroquine went from "promising" to "ineffective" within months.
+                  </div>
+<div class="source">Defined by Cochrane: continual updates at ≤monthly intervals</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">When to Use Living Reviews</div>
+<div class="decision-tree animate delay-1">
+<h4>实时回顾决策树</h4>
+<div class="tree-row"><div class="tree-node root">回顾类型决策</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">快速成为证据不断发展？</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">Yes + High Priority</div>
+<div class="tree-node yes">Living Review<small>Continuous updates</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">No / Stable</div>
+<div class="tree-node action">Standard Review<small>Update every 2-5 years</small></div>
+</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node warning">Resource intensive<small>Requires ongoing funding</small></div></div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">证据合成的未来</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box" style="background:var(--purple);">
+<div class="stat-value" style="color:white;font-size:0.8rem;">Automation</div>
+<div class="stat-label">ML-assisted<br/>screening</div>
+</div>
+<div class="stat-box" style="background:var(--blue);">
+<div class="stat-value" style="color:white;font-size:0.8rem;">IPD-MA</div>
+<div class="stat-label">Individual patient<br/>data pooling</div>
+</div>
+<div class="stat-box" style="background:var(--teal);">
+<div class="stat-value" style="color:var(--navy);font-size:0.8rem;">Real-World</div>
+<div class="stat-label">EHR-based<br/>evidence</div>
+</div>
+<div class="stat-box" style="background:var(--gold);">
+<div class="stat-value" style="color:var(--navy);font-size:0.8rem;">Adaptive</div>
+<div class="stat-label">Platform trials<br/>+ MA</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide hope">
+<div class="content text-center">
+<div class="refrain hope animate">
+                  “证据之约不是静态的。<br/>
+                  它随着每一项新研究、每一个新问题而不断发展。<br/>
+                  让您的评论保持活力。<br/>
+                  让您的评论保持活力。方法透明。<br/>
+                  将真相置于您所做的一切的中心。”
+                </div>
+</div>
+</div>
+</div>
+<div class="slide-nav">
+<button class="nav-btn" onclick="prevSlide()">←</button>
+<div class="nav-center">
+<div class="slide-counter" id="slideCounter">1 / 4</div>
+<div class="progress" id="progressDots"></div>
+</div>
+<button class="nav-btn" onclick="nextSlide()">→</button>
+</div>
+</div>
+</div>
+</main>
+</div>
+<script>
+    function toggleSidebar() {
+      document.querySelector('.sidebar').classList.toggle('open');
+      var overlay = document.querySelector('.sidebar-overlay');
+      if (overlay) overlay.classList.toggle('show');
+      var btn = document.querySelector('.mobile-menu-toggle, .sidebar-toggle, .hamburger');
+      if (btn) btn.setAttribute('aria-expanded', btn.getAttribute('aria-expanded') === 'true' ? 'false' : 'true');
+    }
+
+    const modules = [
+      { id: 1, title: "隐藏的数据", subtitle: "Tamiflu scandal", slides: 5 },
+      { id: 2, title: "The Covenant", subtitle: "PRISMA 2020", slides: 5 },
+      { id: 3, title: "The Protocol", subtitle: "Pre-registration", slides: 5 },
+      { id: 4, title: "The Title", subtitle: "First promise", slides: 4 },
+      { id: 5, title: "The Abstract", subtitle: "No spin", slides: 5 },
+      { id: 6, title: "The Question", subtitle: "PICO framework", slides: 4 },
+      { id: 7, title: "The Search", subtitle: "找到所有证据", slides: 5 },
+      { id: 8, title: "The Selection", subtitle: "PRISMA flow", slides: 5 },
+      { id: 9, title: "Risk of Bias", subtitle: "RoB 2 / ROBINS-I", slides: 5 },
+      { id: 10, title: "Data Extraction", subtitle: "Getting numbers", slides: 5 },
+      { id: 11, title: "Effect Measures", subtitle: "RR, OR, MD, SMD", slides: 5 },
+      { id: 12, title: "The Synthesis", subtitle: "Fixed vs. random", slides: 5 },
+      { id: 13, title: "Heterogeneity", subtitle: "当研究不一致时", slides: 5 },
+      { id: 14, title: "Publication Bias", subtitle: "文件抽屉", slides: 5 },
+      { id: 15, title: "Forest Plot", subtitle: "Visualizing results", slides: 5 },
+      { id: 16, title: "GRADE Certainty", subtitle: "How confident?", slides: 5 },
+      { id: 17, title: "The Discussion", subtitle: "Interpretation", slides: 5 },
+      { id: 18, title: "Transparency", subtitle: "Conflicts & funding", slides: 5 },
+      { id: 19, title: "Final Check", subtitle: "Before submission", slides: 5 },
+      { id: 20, title: "Quiz & Sources", subtitle: "Test yourself", slides: 5 },
+      { id: 21, title: "Software Tools", subtitle: "RevMan, R, Stata", slides: 6 },
+      { id: 22, title: "Reading Meta-Analyses", subtitle: "Consumer's guide", slides: 6 },
+      { id: 23, title: "Network MA", subtitle: "Indirect comparisons", slides: 6 },
+      { id: 24, title: "AI/ML Validation", subtitle: "Prediction models", slides: 5 },
+      { id: 25, title: "Patient Communication", subtitle: "Translating evidence", slides: 6 },
+      { id: 26, title: "Living Reviews", subtitle: "保持证据有效", slides: 5 }
+    ];
+
+    let currentModule = 1;
+    let currentSlide = 1;
+    const completedModules = new Set();
+
+    function init() {
+      renderModuleList();
+      updateSlideNav();
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextSlide(); }
+        else if (e.key === 'ArrowLeft') { e.preventDefault(); prevSlide(); }
+      });
+    }
+
+    function renderModuleList() {
+      const list = document.getElementById('moduleList');
+      list.innerHTML = modules.map(m => `
+        <div class="module-item ${m.id === currentModule ? 'active' : ''} ${completedModules.has(m.id) ? 'completed' : ''}" onclick="goToModule(${m.id})">
+          <div class="module-number">${completedModules.has(m.id) ? '✓' : m.id}</div>
+          <div class="module-info">
+            <div class="module-title">${m.title}</div>
+            <div class="module-subtitle">${m.subtitle}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function goToModule(moduleId) {
+      if (moduleId > currentModule) completedModules.add(currentModule);
+      currentModule = moduleId;
+      currentSlide = 1;
+      document.querySelectorAll('.module-slides').forEach(el => el.classList.remove('active'));
+      document.querySelector(`.module-slides[data-module="${moduleId}"]`).classList.add('active');
+      updateSlideVisibility();
+      updateSlideNav();
+      renderModuleList();
+      document.getElementById('currentModule').textContent = modules[moduleId - 1].title;
+    }
+
+    function updateSlideVisibility() {
+      const moduleSlides = document.querySelector(`.module-slides[data-module="${currentModule}"]`);
+      const slides = moduleSlides.querySelectorAll('.slide');
+      slides.forEach((slide, index) => slide.classList.toggle('active', index + 1 === currentSlide));
+    }
+
+    function updateSlideNav() {
+      const module = modules[currentModule - 1];
+      document.getElementById('slideCounter').textContent = `${currentSlide} / ${module.slides}`;
+      document.getElementById('progressDots').innerHTML = Array.from({ length: module.slides }, (_, i) =>
+        `<div class="progress-dot ${i + 1 === currentSlide ? 'active' : ''}" onclick="goToSlide(${i + 1})"></div>`
+      ).join('');
+    }
+
+    function goToSlide(slideNum) { currentSlide = slideNum; updateSlideVisibility(); updateSlideNav(); }
+
+    function nextSlide() {
+      const module = modules[currentModule - 1];
+      if (currentSlide < module.slides) { currentSlide++; updateSlideVisibility(); updateSlideNav(); }
+      else if (currentModule < modules.length) { goToModule(currentModule + 1); }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 1) { currentSlide--; updateSlideVisibility(); updateSlideNav(); }
+      else if (currentModule > 1) {
+        const prevModuleSlides = modules[currentModule - 2].slides;
+        currentModule--;
+        currentSlide = prevModuleSlides;
+        document.querySelectorAll('.module-slides').forEach(el => el.classList.remove('active'));
+        document.querySelector(`.module-slides[data-module="${currentModule}"]`).classList.add('active');
+        updateSlideVisibility();
+        updateSlideNav();
+        renderModuleList();
+        document.getElementById('currentModule').textContent = modules[currentModule - 1].title;
+      }
+    }
+
+    function checkAnswer(element, isCorrect) {
+      const container = element.closest('.quiz-container');
+      const options = container.querySelectorAll('.quiz-option');
+      const feedback = container.querySelector('.quiz-feedback');
+      options.forEach(opt => { opt.style.pointerEvents = 'none'; if (opt === element) opt.classList.add(isCorrect ? 'correct' : 'incorrect'); });
+      feedback.classList.add('show', isCorrect ? 'correct' : 'incorrect');
+      feedback.textContent = isCorrect ? 'Correct. You have learned well.' : '不完全是。回想一下你听过的故事。';
+    }
+
+    init();
+  </script>
+</body>
+</html>

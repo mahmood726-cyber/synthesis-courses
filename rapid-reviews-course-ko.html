@@ -1,0 +1,4362 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>위기 상황에서의 신속한 검토 및 증거 종합: 40일이 아닌 40시간</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&amp;family=Source+Sans+Pro:wght@300;400;600;700&amp;display=swap" rel="stylesheet"/>
+<style>
+    :root {
+      --navy: #1E2761;
+      --deep-navy: #141B3D;
+      --gold: #D4AF37;
+      --cream: #FAF8F5;
+      --light-cream: #FFFFFF;
+      --text: #2D3748;
+      --light-text: #718096;
+      --red: #C53030;
+      --green: #22c55e;
+      --teal: #0d9488;
+      --orange: #ea580c;
+      --purple: #7c3aed;
+      --transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      height: 100%;
+      font-family: 'Source Sans Pro', sans-serif;
+      background: var(--deep-navy);
+      color: var(--cream);
+    }
+
+    .course-container {
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 280px;
+      background: linear-gradient(180deg, var(--deep-navy) 0%, #0a0f1a 100%);
+      border-right: 1px solid rgba(212,175,55,0.2);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    .sidebar-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+    }
+
+    .sidebar-header h1 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--gold);
+      margin-bottom: 0.25rem;
+    }
+
+    .sidebar-header p {
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.6);
+    }
+
+    .module-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem 0;
+    }
+
+    .module-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      border-left: 3px solid transparent;
+    }
+
+    .module-item:hover { background: rgba(212,175,55,0.1); }
+    .module-item.active {
+      background: rgba(212,175,55,0.15);
+      border-left-color: var(--gold);
+    }
+    .module-item.completed .module-number {
+      background: var(--green);
+      color: white;
+    }
+
+    .module-number {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .module-item.active .module-number {
+      background: var(--gold);
+      color: var(--navy);
+    }
+
+    .module-info { flex: 1; min-width: 0; }
+    .module-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .module-subtitle {
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.7);
+    }
+
+    .sidebar-footer {
+      padding: 1rem 1.5rem;
+      border-top: 1px solid rgba(212,175,55,0.2);
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.4);
+    }
+
+    /* Main Content */
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .content-header {
+      padding: 1rem 2rem;
+      background: rgba(0,0,0,0.3);
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .breadcrumb {
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.6);
+    }
+    .breadcrumb span { color: var(--gold); }
+    .header-actions { display: flex; gap: 0.5rem; }
+
+    .btn {
+      padding: 0.5rem 1rem;
+      border: 1px solid rgba(212,175,55,0.3);
+      border-radius: 6px;
+      background: rgba(255,255,255,0.05);
+      color: var(--cream);
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn:hover {
+      background: rgba(212,175,55,0.2);
+      border-color: var(--gold);
+    }
+    .btn.primary {
+      background: var(--gold);
+      color: var(--navy);
+      border-color: var(--gold);
+      font-weight: 600;
+    }
+
+    .content-body {
+      flex: 1;
+      overflow: hidden;
+      display: flex;
+    }
+
+    /* Slides */
+    .slides-container {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .module-slides {
+      display: none;
+      width: 100%;
+      height: 100%;
+    }
+    .module-slides.active { display: block; }
+
+    .slide {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      padding: 2rem 2rem 4rem 2rem;
+      padding-top: 3rem;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity var(--transition), visibility var(--transition);
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .slide .content, .slide .refrain, .slide .title {
+      margin-top: auto;
+      margin-bottom: auto;
+    }
+
+    .slide > * { max-width: 100%; word-wrap: break-word; }
+    .slide.active { opacity: 1; visibility: visible; }
+    .slide.dark { background: var(--deep-navy); color: var(--cream); }
+    .slide.light { background: var(--cream); color: var(--text); }
+    .slide.black { background: #000; color: var(--cream); }
+    .slide.red { background: linear-gradient(135deg, #7f1d1d 0%, #450a0a 100%); color: var(--cream); }
+    .slide.green { background: linear-gradient(135deg, #14532d 0%, #052e16 100%); color: var(--cream); }
+
+    /* Typography */
+    .serif { font-family: 'Cormorant Garamond', Georgia, serif; }
+
+    .title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 700;
+      margin-bottom: 1rem;
+      line-height: 1.2;
+    }
+    .title.navy { color: var(--navy); }
+    .title.gold { color: var(--gold); }
+    .title.cream { color: var(--cream); }
+
+    .subtitle {
+      font-size: clamp(1rem, 2vw, 1.5rem);
+      color: var(--light-text);
+      margin-bottom: 2rem;
+    }
+    .slide.dark .subtitle { color: rgba(255,255,255,0.7); }
+
+    .big-number {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(4rem, 15vw, 10rem);
+      font-weight: 700;
+      line-height: 1;
+    }
+    .big-number.navy { color: var(--navy); }
+    .big-number.gold { color: var(--gold); }
+    .big-number.red { color: var(--red); }
+
+    .refrain {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(1.5rem, 4vw, 2.5rem);
+      font-style: italic;
+      color: var(--gold);
+      text-align: center;
+      max-width: 800px;
+    }
+
+    /* Storytelling elements */
+    .direct-address {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(1.2rem, 2.5vw, 1.6rem);
+      color: var(--gold);
+      text-align: center;
+      margin: 1rem 0;
+      font-style: italic;
+    }
+
+    .rhetorical {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(1.3rem, 3vw, 1.8rem);
+      font-style: italic;
+      color: rgba(255,255,255,0.9);
+      text-align: center;
+      max-width: 700px;
+      margin: 0.5rem 0;
+    }
+
+    .story-box {
+      background: linear-gradient(135deg, rgba(212,175,55,0.15), rgba(30,39,97,0.2));
+      border-left: 4px solid var(--gold);
+      padding: 1.5rem 2rem;
+      margin: 1.5rem 0;
+      max-width: 700px;
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.1rem;
+      line-height: 1.7;
+      font-style: italic;
+    }
+
+    .warning-box {
+      background: linear-gradient(135deg, rgba(197,48,48,0.2), rgba(127,29,29,0.3));
+      border-left: 4px solid var(--red);
+      padding: 1.5rem 2rem;
+      margin: 1.5rem 0;
+      max-width: 700px;
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.1rem;
+      line-height: 1.7;
+    }
+
+    .success-box {
+      background: linear-gradient(135deg, rgba(34,197,94,0.15), rgba(20,83,45,0.3));
+      border-left: 4px solid var(--green);
+      padding: 1.5rem 2rem;
+      margin: 1.5rem 0;
+      max-width: 700px;
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.1rem;
+      line-height: 1.7;
+    }
+
+    .witness-statement {
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(212,175,55,0.3);
+      border-radius: 8px;
+      padding: 1.25rem 1.5rem;
+      margin: 1rem 0;
+      max-width: 600px;
+    }
+    .witness-statement .source {
+      font-size: 0.8rem;
+      color: var(--gold);
+      margin-bottom: 0.5rem;
+    }
+    .witness-statement .quote {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.1rem;
+      font-style: italic;
+      line-height: 1.6;
+    }
+
+    /* Timeline */
+    .timeline-horizontal {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      max-width: 900px;
+      margin: 2rem 0;
+      position: relative;
+    }
+    .timeline-horizontal::before {
+      content: '';
+      position: absolute;
+      top: 20px;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--gold);
+    }
+    .timeline-point {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      flex: 1;
+      position: relative;
+    }
+    .timeline-dot {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--gold);
+      color: var(--navy);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.8rem;
+      z-index: 1;
+    }
+    .timeline-dot.danger { background: var(--red); color: white; }
+    .timeline-dot.success { background: var(--green); color: white; }
+    .timeline-label {
+      margin-top: 0.75rem;
+      font-size: 0.85rem;
+      max-width: 120px;
+    }
+    .timeline-date {
+      font-size: 0.7rem;
+      color: var(--gold);
+      margin-top: 0.25rem;
+    }
+
+    /* Contrast boxes */
+    .contrast-container {
+      display: flex;
+      gap: 2rem;
+      max-width: 900px;
+      margin: 1.5rem 0;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .contrast-box {
+      flex: 1;
+      min-width: 280px;
+      padding: 1.5rem;
+      border-radius: 8px;
+      text-align: center;
+    }
+    .contrast-box.before {
+      background: rgba(197,48,48,0.15);
+      border: 1px solid rgba(197,48,48,0.4);
+    }
+    .contrast-box.before h4 { color: var(--red); }
+    .contrast-box.after {
+      background: rgba(34,197,94,0.15);
+      border: 1px solid rgba(34,197,94,0.4);
+    }
+    .contrast-box.after h4 { color: var(--green); }
+    .contrast-box h4 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+    }
+    .contrast-box .stat {
+      font-size: 2.5rem;
+      font-weight: 700;
+      font-family: 'Cormorant Garamond', Georgia, serif;
+    }
+    .contrast-box .label {
+      font-size: 0.85rem;
+      opacity: 0.8;
+      margin-top: 0.25rem;
+    }
+
+    /* Decision Tree */
+    .decision-tree {
+      max-width: 800px;
+      margin: 1rem 0;
+    }
+
+    .decision-node {
+      background: var(--navy);
+      color: var(--cream);
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      text-align: center;
+      margin: 0.5rem auto;
+      max-width: 400px;
+      position: relative;
+    }
+    .decision-node.question {
+      background: linear-gradient(135deg, var(--navy), #2a3a7d);
+      border: 2px solid var(--gold);
+    }
+    .decision-node.question::after {
+      content: '?';
+      position: absolute;
+      top: -10px;
+      right: -10px;
+      background: var(--gold);
+      color: var(--navy);
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+    }
+    .decision-node.outcome-yes {
+      background: rgba(34,197,94,0.2);
+      border: 1px solid var(--green);
+      color: var(--cream);
+    }
+    .decision-node.outcome-no {
+      background: rgba(197,48,48,0.2);
+      border: 1px solid var(--red);
+      color: var(--cream);
+    }
+    .decision-node.warning {
+      background: rgba(234,88,12,0.2);
+      border: 1px solid var(--orange);
+      color: var(--cream);
+    }
+
+    .decision-branches {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin: 0.5rem 0;
+    }
+
+    .decision-branch {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .branch-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      margin-bottom: 0.5rem;
+    }
+    .branch-label.yes {
+      background: var(--green);
+      color: white;
+    }
+    .branch-label.no {
+      background: var(--red);
+      color: white;
+    }
+    .branch-label.maybe {
+      background: var(--orange);
+      color: white;
+    }
+
+    .arrow-down {
+      width: 2px;
+      height: 30px;
+      background: rgba(255,255,255,0.3);
+      margin: 0.25rem auto;
+    }
+
+    /* Story Decision Trees - Interactive choice format */
+    .story-decision-tree {
+      background: linear-gradient(135deg, rgba(30,39,97,0.3), rgba(20,30,80,0.4));
+      border: 1px solid rgba(212,175,55,0.3);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-top: 1.5rem;
+      max-width: 700px;
+    }
+    .decision-prompt {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.1rem;
+      font-style: italic;
+      color: var(--gold);
+      text-align: center;
+      margin-bottom: 1.25rem;
+      line-height: 1.5;
+    }
+    .decision-options {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .decision-option {
+      background: rgba(0,0,0,0.2);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      border-left: 4px solid transparent;
+      transition: all 0.3s ease;
+      min-height: 44px;
+    }
+    .decision-option[data-path="wrong"] {
+      border-left-color: var(--red);
+    }
+    .decision-option[data-path="wrong"]:hover {
+      background: rgba(197,48,48,0.15);
+    }
+    .decision-option[data-path="right"] {
+      border-left-color: var(--green);
+    }
+    .decision-option[data-path="right"]:hover {
+      background: rgba(34,197,94,0.15);
+    }
+    .decision-option strong {
+      color: var(--cream);
+      font-size: 0.95rem;
+    }
+    .decision-option .consequence {
+      margin-top: 0.5rem;
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.8);
+      padding-left: 0.5rem;
+    }
+    .decision-option[data-path="wrong"] .consequence {
+      color: rgba(197,48,48,0.9);
+    }
+    .decision-option[data-path="right"] .consequence {
+      color: rgba(34,197,94,0.9);
+    }
+    .slide.light .story-decision-tree {
+      background: linear-gradient(135deg, rgba(30,39,97,0.08), rgba(20,30,80,0.12));
+      border-color: rgba(30,39,97,0.2);
+    }
+    .slide.light .decision-prompt {
+      color: var(--navy);
+    }
+    .slide.light .decision-option {
+      background: rgba(30,39,97,0.05);
+    }
+    .slide.light .decision-option strong {
+      color: var(--navy);
+    }
+    .slide.light .decision-option .consequence {
+      color: var(--text);
+    }
+    .slide.light .decision-option[data-path="wrong"] .consequence {
+      color: var(--red);
+    }
+    .slide.light .decision-option[data-path="right"] .consequence {
+      color: var(--green);
+    }
+
+    .decision-option:focus-visible {
+      outline: 3px solid var(--gold);
+      outline-offset: 2px;
+    }
+
+    /* Stats grid */
+    .stats-grid {
+      display: flex;
+      gap: 1rem;
+      margin: 1.5rem 0;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .stat-box {
+      background: var(--navy);
+      color: var(--cream);
+      padding: 1rem 1.5rem;
+      text-align: center;
+      min-width: 140px;
+      border-radius: 8px;
+    }
+    .stat-box.danger {
+      background: rgba(197,48,48,0.3);
+      border: 1px solid var(--red);
+    }
+    .stat-box.success {
+      background: rgba(34,197,94,0.2);
+      border: 1px solid var(--green);
+    }
+    .stat-value {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(1.5rem, 3vw, 2rem);
+      font-weight: 700;
+    }
+    .stat-label {
+      font-size: 0.75rem;
+      opacity: 0.8;
+      margin-top: 0.25rem;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--light-cream);
+      border: 1px solid var(--gold);
+      padding: 1.5rem 2rem;
+      margin: 0.75rem 0;
+      max-width: 800px;
+      width: 100%;
+      border-radius: 8px;
+    }
+    .card.navy-bg {
+      background: var(--navy);
+      color: var(--cream);
+    }
+    .card-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+    }
+    .card-text { font-size: clamp(0.9rem, 1.8vw, 1.1rem); }
+
+    /* Case study */
+    .case-study {
+      background: linear-gradient(135deg, rgba(212,175,55,0.1), rgba(30,39,97,0.2));
+      border: 1px solid var(--gold);
+      border-radius: 12px;
+      padding: 1.5rem;
+      max-width: 800px;
+      margin: 1rem 0;
+    }
+    .case-study h4 {
+      color: var(--gold);
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+    }
+    .case-study p {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      margin-bottom: 0.75rem;
+    }
+    .case-study.danger {
+      background: linear-gradient(135deg, rgba(197,48,48,0.1), rgba(127,29,29,0.2));
+      border-color: var(--red);
+    }
+    .case-study.danger h4 { color: var(--red); }
+    .case-study.success {
+      background: linear-gradient(135deg, rgba(34,197,94,0.1), rgba(20,83,45,0.2));
+      border-color: var(--green);
+    }
+    .case-study.success h4 { color: var(--green); }
+
+    /* Results table */
+    .results-table {
+      width: 100%;
+      max-width: 700px;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      font-size: 0.9rem;
+    }
+    .results-table th {
+      background: var(--navy);
+      color: var(--cream);
+      padding: 0.75rem 1rem;
+      text-align: left;
+      font-weight: 600;
+    }
+    .results-table td {
+      padding: 0.6rem 1rem;
+      border-bottom: 1px solid #E2E8F0;
+    }
+    .results-table .highlight { font-weight: 700; }
+    .results-table .danger { color: var(--red); }
+    .results-table .success { color: var(--green); }
+
+    /* Comparison */
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      max-width: 800px;
+      margin: 1rem 0;
+    }
+    .comparison-panel {
+      background: rgba(255,255,255,0.05);
+      border-radius: 8px;
+      padding: 1rem;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .comparison-panel h4 {
+      color: var(--gold);
+      margin-bottom: 0.75rem;
+      font-size: 0.9rem;
+    }
+    .comparison-panel.highlight {
+      border-color: var(--gold);
+      background: rgba(212,175,55,0.1);
+    }
+    .comparison-panel.danger {
+      border-color: var(--red);
+      background: rgba(197,48,48,0.1);
+    }
+
+    /* Learning objectives */
+    .learning-objectives {
+      background: rgba(212,175,55,0.1);
+      border: 1px solid var(--gold);
+      border-radius: 8px;
+      padding: 1rem 1.5rem;
+      margin: 1rem 0;
+      max-width: 700px;
+    }
+    .learning-objectives h4 {
+      color: var(--gold);
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      margin-bottom: 0.75rem;
+    }
+    .learning-objectives ul {
+      margin: 0;
+      padding-left: 1.25rem;
+    }
+    .learning-objectives li {
+      margin-bottom: 0.5rem;
+      font-size: 0.95rem;
+      line-height: 1.4;
+    }
+
+    /* Gold line */
+    .gold-line {
+      width: 150px;
+      height: 2px;
+      background: var(--gold);
+      margin: 1.5rem auto;
+    }
+
+    /* Quiz */
+    .quiz-container { max-width: 700px; width: 100%; }
+    .quiz-question h4 {
+      color: var(--text);
+      margin-bottom: 1rem;
+      font-size: 1rem;
+    }
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .quiz-option {
+      padding: 0.75rem 1rem;
+      background: rgba(30,39,97,0.05);
+      border: 1px solid rgba(30,39,97,0.2);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.9rem;
+    }
+    .quiz-option:hover {
+      background: rgba(212,175,55,0.1);
+      border-color: var(--gold);
+    }
+    .quiz-option.correct {
+      background: rgba(34,197,94,0.15);
+      border-color: var(--green);
+    }
+    .quiz-option.incorrect {
+      background: rgba(197,48,48,0.1);
+      border-color: var(--red);
+    }
+    .quiz-option span {
+      font-weight: 700;
+      color: var(--gold);
+      margin-right: 0.5rem;
+    }
+
+    /* Animation */
+    .slide.active .animate { animation: fadeUp 0.6s ease-out forwards; }
+    .slide.active .animate.delay-1 { animation-delay: 0.1s; }
+    .slide.active .animate.delay-2 { animation-delay: 0.2s; }
+    .slide.active .animate.delay-3 { animation-delay: 0.3s; }
+    .slide.active .animate.delay-4 { animation-delay: 0.4s; }
+    .slide.active .animate.delay-5 { animation-delay: 0.5s; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate { opacity: 0; }
+
+    /* Slide nav */
+    .slide-nav {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      padding: 1rem 1rem 1.5rem 1rem;
+      z-index: 100;
+      pointer-events: none;
+    }
+    .nav-btn {
+      background: rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: white;
+      font-size: 1.25rem;
+      cursor: pointer;
+      opacity: 0.6;
+      transition: all 0.2s;
+      padding: 0.5rem 0.75rem;
+      border-radius: 8px;
+      pointer-events: auto;
+    }
+    .nav-btn:hover {
+      opacity: 1;
+      background: rgba(0,0,0,0.7);
+      border-color: var(--gold);
+    }
+    .nav-btn:disabled { opacity: 0.2; cursor: not-allowed; }
+    .nav-center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.25rem;
+      pointer-events: auto;
+    }
+    .slide-counter {
+      font-size: 0.75rem;
+      opacity: 0.6;
+      color: rgba(255,255,255,0.6);
+    }
+    .progress { display: flex; gap: 2px; }
+    .progress-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.25);
+      cursor: pointer;
+      transition: all 0.2s;
+      /* 44px minimum touch target for accessibility (WCAG 2.5.5) */
+      padding: 18px;
+      margin: -18px;
+      background-clip: content-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .progress-dot:focus {
+      outline: 2px solid var(--gold);
+      outline-offset: 2px;
+    }
+    .progress-dot.active {
+      background: var(--gold);
+      background-clip: content-box;
+      transform: scale(1.3);
+    }
+    /* Enhanced touch targets for mobile (coarse pointer) */
+    @media (pointer: coarse) {
+      .progress { gap: 8px; }
+      .progress-dot {
+        width: 12px;
+        height: 12px;
+        padding: 16px;
+        margin: -16px;
+      }
+    }
+
+    /* Utilities */
+    .text-center { text-align: center; }
+    .mb-1 { margin-bottom: 1rem; }
+    .mb-2 { margin-bottom: 2rem; }
+    .mt-1 { margin-top: 1rem; }
+    .mt-2 { margin-top: 2rem; }
+
+    .content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: 1000px;
+    }
+
+    /* Mobile */
+    @media (max-width: 768px) {
+      .sidebar {
+        position: fixed;
+        left: -280px;
+        top: 0;
+        height: 100vh;
+        z-index: 1000;
+        transition: left 0.3s ease;
+      }
+      .sidebar.open { left: 0; }
+      .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 999;
+      }
+      .sidebar-overlay.open { display: block; }
+      .hamburger {
+        display: flex !important;
+        position: fixed;
+        top: 1rem;
+        left: 1rem;
+        z-index: 998;
+        background: var(--navy);
+        border: 1px solid var(--gold);
+        color: var(--gold);
+        padding: 0.5rem 0.75rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 1.25rem;
+      }
+      .comparison-grid { grid-template-columns: 1fr; }
+      .stats-grid { flex-direction: column; }
+      .contrast-container { flex-direction: column; }
+      .decision-branches { flex-direction: column; gap: 1rem; }
+      .content-header { padding-left: 4rem; }
+      .timeline-horizontal { flex-direction: column; gap: 1rem; }
+      .timeline-horizontal::before { display: none; }
+    }
+
+    .hamburger { display: none; }
+
+    .skip-link:focus {
+      left: 1rem !important;
+      top: 1rem !important;
+      outline: 2px solid var(--navy);
+    }
+
+    /* Print stylesheet */
+    @media print {
+      .sidebar, .slide-nav, .hamburger, .content-header { display: none !important; }
+      .course-container { display: block; }
+      .main-content { display: block; }
+      .slides-container { display: block; height: auto; }
+      .module-slides { display: block !important; }
+      .slide {
+        position: relative !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        page-break-inside: avoid;
+        padding: 2rem;
+        border-bottom: 1px solid #ccc;
+        margin-bottom: 1rem;
+      }
+      .slide.dark, .slide.black, .slide.red, .slide.green { background: white !important; color: black !important; }
+      .refrain, .direct-address, .rhetorical { color: var(--navy) !important; }
+    }
+
+    /* Focus-visible styles for keyboard navigation */
+    :focus-visible {
+      outline: 2px solid var(--gold, #D4AF37);
+      outline-offset: 2px;
+    }
+
+    :focus:not(:focus-visible) {
+      outline: none;
+    }
+
+    button:focus-visible,
+    a:focus-visible,
+    [role="button"]:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible {
+      outline: 2px solid var(--gold, #D4AF37);
+      outline-offset: 2px;
+      box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.3);
+    }
+
+    /* Reduced motion for accessibility */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      .slide { transition: none; }
+      .animate { opacity: 1; transform: none; }
+    }
+
+    /* Accessible decision tree linear descriptions */
+    .decision-tree-sr {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    /* Focus indicators for keyboard navigation */
+    .quiz-option:focus {
+      outline: 3px solid var(--gold);
+      outline-offset: 2px;
+    }
+    .nav-btn:focus, .btn:focus, .module-item:focus {
+      outline: 3px solid var(--gold);
+      outline-offset: 2px;
+    }
+
+    /* Citation box styling */
+    .citation-box {
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(212,175,55,0.3);
+      border-radius: 6px;
+      padding: 0.75rem 1rem;
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.7);
+      margin-top: 1rem;
+      max-width: 600px;
+    }
+    .citation-box a { color: var(--gold); }
+
+    /* Scenario quiz styling */
+    .scenario-box {
+      background: linear-gradient(135deg, rgba(124,58,237,0.15), rgba(30,39,97,0.2));
+      border: 1px solid var(--purple);
+      border-radius: 8px;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+    .scenario-box .scenario-label {
+      color: var(--purple);
+      font-weight: 700;
+      font-size: 0.8rem;
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* Spaced Retrieval System */
+    .spaced-retrieval-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      padding: 1rem;
+    }
+    .spaced-retrieval-modal {
+      background: linear-gradient(135deg, var(--deep-navy) 0%, #0a0f1a 100%);
+      border: 2px solid var(--gold);
+      border-radius: 12px;
+      padding: 2rem;
+      max-width: 500px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+    .retrieval-header {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.5rem;
+      color: var(--gold);
+      margin-bottom: 1rem;
+    }
+    .retrieval-question {
+      font-size: 1.1rem;
+      line-height: 1.6;
+      color: var(--cream);
+      margin-bottom: 1.5rem;
+      font-style: italic;
+    }
+    .retrieval-btn {
+      background: var(--gold);
+      color: var(--navy);
+      border: none;
+      padding: 0.75rem 1.5rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-bottom: 1rem;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .retrieval-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(212,175,55,0.4);
+    }
+    .retrieval-answer {
+      background: rgba(212,175,55,0.1);
+      border-left: 3px solid var(--gold);
+      padding: 1rem;
+      margin: 1rem 0;
+      text-align: left;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      color: var(--cream);
+    }
+    .retrieval-close {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.3);
+      color: var(--cream);
+      padding: 0.5rem 1rem;
+      font-size: 0.85rem;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .retrieval-close:hover {
+      background: rgba(255,255,255,0.1);
+      border-color: var(--gold);
+    }
+  </style>
+</head>
+<body>
+<a class="skip-link" href="#main-content" style="position: absolute; left: -9999px; top: 0; z-index: 9999; padding: 1rem; background: var(--gold); color: var(--navy);">Skip to content</a>
+<button aria-expanded="false" aria-label="Open navigation menu" class="hamburger" onclick="toggleSidebar()">☰</button>
+<div aria-hidden="true" class="sidebar-overlay" onclick="toggleSidebar()"></div>
+<div aria-label="신속한 검토 과정" class="course-container">
+<!-- Sidebar -->
+<nav aria-label="과정 모듈" class="sidebar" role="navigation">
+<div class="sidebar-header">
+<a href="index.html" onmouseout="this.style.color='rgba(212,175,55,0.7)'" onmouseover="this.style.color='#D4AF37'" style="display:block;font-size:0.7rem;color:rgba(212,175,55,0.7);text-decoration:none;margin-bottom:0.5rem;">← Course Library</a>
+<h1>40일이 아닌 40시간</h1>
+<p>Rapid Reviews in Crisis</p>
+</div>
+<div class="module-list" id="moduleList"></div>
+<div class="sidebar-footer">
+<p style="text-align: center;">Progress: <span id="progressPercent">0%</span></p>
+<button aria-label="과정 진행 상황 재설정" class="btn" onclick="resetProgress()" style="width: 100%; margin-top: 0.5rem; font-size: 0.7rem;">Reset Progress</button>
+</div>
+</nav>
+<!-- Main Content -->
+<main aria-label="과정 내용" class="main-content">
+<header class="content-header">
+<div class="breadcrumb">
+          Module <span id="currentModuleNum">0</span>: <span id="currentModuleName">The Reckoning</span>
+</div>
+<div class="header-actions">
+<button class="btn primary" onclick="nextModule()">Next Module</button>
+</div>
+</header>
+<div class="content-body">
+<div class="slides-container" id="main-content">
+ MODULE 0: 계산 
+<div class="module-slides active" data-module="0">
+<div class="slide dark active" data-index="0">
+<p class="refrain animate">In the hour of crisis, speed saves lives.</p>
+<p class="refrain animate delay-1">But haste without wisdom takes them.</p>
+</div>
+<div class="slide dark" data-index="1">
+<p class="direct-address animate">O 치료자 여러분,</p>
+<p class="direct-address animate delay-1">증거가 너무 느리게 움직일 때 무슨 일이 일어나는지 보셨나요?</p>
+<div class="gold-line animate delay-2"></div>
+<p class="animate delay-3" style="font-size: 1rem; text-align: center; max-width: 500px; opacity: 0.8;">
+                그리고 너무 빠르게 움직일 때 어떤 일이 일어나는지 보셨나요?
+              </p>
+</div>
+<div class="slide black" data-index="2">
+<p class="title cream animate text-center">January 2020</p>
+<p class="animate delay-1" style="font-size: 1.3rem; text-align: center;">A novel coronavirus emerges in Wuhan.</p>
+<div class="gold-line animate delay-2"></div>
+<p class="animate delay-3" style="font-size: 1.1rem; text-align: center; max-width: 600px;">
+                Patients are dying. There is no treatment.<br/>
+<span style="color: var(--gold);">세상은 답을 요구합니다.</span>
+</p>
+</div>
+<div class="slide dark" data-index="3">
+<p class="rhetorical animate">How long does a systematic review take?</p>
+<div class="gold-line animate delay-1"></div>
+<div class="contrast-container animate delay-2">
+<div class="contrast-box before">
+<h4>전통적인 체계적 검토</h4>
+<div class="stat">12-24</div>
+<div class="label">Months to complete</div>
+<div class="stat" style="margin-top: 1rem;">6-12</div>
+<div class="label">Months until publication</div>
+</div>
+<div class="contrast-box after">
+<h4>Pandemic Timeline</h4>
+<div class="stat">7</div>
+<div class="label">Days to double cases</div>
+<div class="stat" style="margin-top: 1rem;">Now</div>
+<div class="label">답변이 필요한 경우</div>
+</div>
+</div>
+</div>
+<div class="slide dark" data-index="4">
+<p class="direct-address animate">세계가 어떻게 반응하는지 확인하지 못하셨나요?</p>
+<div class="gold-line animate delay-1"></div>
+<div class="stats-grid animate delay-2">
+<div class="stat-box">
+<div class="stat-value">200,000+</div>
+<div class="stat-label">COVID papers in 2020 alone</div>
+</div>
+<div class="stat-box">
+<div class="stat-value">30,000+</div>
+<div class="stat-label">동료 검토 없이 사전 인쇄</div>
+</div>
+<div class="stat-box danger">
+<div class="stat-value">33+</div>
+<div class="stat-label">Major retractions</div>
+</div>
+</div>
+<p class="animate delay-3" style="font-size: 1rem; text-align: center; margin-top: 1rem;">
+                Speed created a flood. <span style="color: var(--gold);">Who would separate truth from noise?</span>
+</p>
+</div>
+<div class="slide dark" data-index="5">
+<p class="title cream animate">우리를 괴롭히는 질문</p>
+<div class="story-box animate delay-1">
+<strong>두 가지 전염병 이야기 답변:</strong><br/><br/>
+                2020년 3월 프랑스는 하나의 소규모 결함이 있는 연구를 기반으로 코로나19에 대한 하이드록시클로로퀸을 승인했습니다. 더 큰 규모의 임상시험에서 아무런 유익도 얻지 못하고 심장에 해를 끼칠 수도 있다는 사실이 밝혀지기 전에 수백만 명이 이 약을 복용했습니다. 한편 영국의 RECOVERY 시험에서는 덱사메타손을 신속하면서도 엄격하게 테스트했습니다. 3개월 이내에 심각한 경우의 사망자가 1/3로 감소했다는 사실이 입증되었습니다.<br/><br/>
+                두 국가 모두 동일한 긴급 상황에 직면했습니다. 하나는 약한 증거에 따라 조치를 취했고 다른 하나는 빠르게 강력한 증거를 생성했습니다.<br/><br/>
+<span style="color: var(--gold);">Speed without rigor cost lives. Rapid rigor saved them.</span>
+</div>
+<div class="story-decision-tree animate delay-2">
+<p class="decision-prompt">당신은 2020년 3월 보건부 장관입니다. 소규모 연구에 따르면 일반적인 약물이 코로나19를 치료한다고 주장합니다. 어떻게 하시나요?</p>
+<div class="decision-options">
+<div class="decision-option" data-path="wrong" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();}" role="button" tabindex="0">
+<strong>Path A:</strong> 이 유망한 연구를 바탕으로 하이드록시클로로퀸을 즉시 승인하세요
+                    <div class="consequence">→ Millions take an ineffective drug with cardiac risks; lupus patients lose access to their medication</div>
+</div>
+<div class="decision-option" data-path="right" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();}" role="button" tabindex="0">
+<strong>Path B:</strong> Fund a rapid but rigorous trial (like RECOVERY) to generate definitive evidence
+                    <div class="consequence">→ Within 3 months, prove dexamethasone works—saving over 1 million lives globally</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide light" data-index="6">
+<div class="content">
+<h2 class="title navy animate">이 과정에서 배울 수 있습니다</h2>
+<div class="learning-objectives animate delay-1">
+<h4>마지막에는 다음을 수행할 수 있습니다.</h4>
+<ul>
+<li>40시간이 아닌 40시간 안에 빠른 검토 수행 일</li>
+<li>Know when "good enough" is actually good enough</li>
+<li>빠르게 변하는 증거에서 사기와 편견 식별</li>
+<li>Use decision trees for methodological trade-offs</li>
+<li>Understand living systematic reviews</li>
+<li>하이드록시클로로퀸과 이버멕틴 참사로부터 배우기</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="slide dark" data-index="7">
+<p class="direct-address animate">신속한 증거의 5가지 원칙을 확인하세요:</p>
+<div class="gold-line animate delay-1"></div>
+<div class="animate delay-2" style="text-align: left; max-width: 700px;">
+<p style="margin: 0.75rem 0; color: var(--gold);">1. Speed without rigor is recklessness.</p>
+<p style="margin: 0.75rem 0; color: var(--gold);">2. Rigor without speed is abandonment.</p>
+<p style="margin: 0.75rem 0; color: var(--gold);">3. A flawed study in a meta-analysis poisons all.</p>
+<p style="margin: 0.75rem 0; color: var(--gold);">4. Transparency reveals; concealment deceives.</p>
+<p style="margin: 0.75rem 0; color: var(--gold);">5. 살아있는 증거는 살아있는 사람에게 도움이 됩니다.</p>
+</div>
+</div>
+<div class="slide dark" data-index="8">
+<p class="title cream animate">서지스피어 재앙</p>
+<div class="story-box animate delay-1">
+<strong>팬텀 데이터베이스 이야기:</strong><br/><br/>
+                2020년 5월, The Lancet은 6개 대륙에 걸쳐 671개 병원에서 96,000명의 환자를 대상으로 한 연구를 발표했습니다. 하이드록시클로로퀸이 나와 있었습니다 <em>increased</em> death rates. The WHO halted trials worldwide.<br/><br/>
+                그러나 데이터는 SF 작가와 성인 콘텐츠 모델을 포함해 직원 11명을 보유한 회사인 Surgisphere에서 나온 것입니다. <strong>데이터베이스가 존재하지 않았습니다.</strong><br/><br/>
+<span style="color: var(--gold);">13일 이내에 논문이 철회되었습니다. 그러나 재판은 이미 중단됐다. 시간이 낭비되었습니다. 신뢰가 깨졌습니다.</span>
+</div>
+<div class="citation-box animate delay-2">
+                Source: Mehra MR et al. Lancet 2020 (RETRACTED). Retraction: Lancet 2020;395:1820.
+              </div>
+</div>
+<div class="slide dark" data-index="9">
+<p class="rhetorical animate">How did two of medicine's most prestigious journals—</p>
+<p class="rhetorical animate delay-1">Lancet과 NEJM—위조된 데이터를 게시합니까?</p>
+<div class="gold-line animate delay-2"></div>
+<div class="stats-grid animate delay-3">
+<div class="stat-box danger">
+<div class="stat-value">13</div>
+<div class="stat-label">Days until retraction</div>
+</div>
+<div class="stat-box danger">
+<div class="stat-value">0</div>
+<div class="stat-label">감사자에게 데이터 액세스 권한 부여</div>
+</div>
+<div class="stat-box danger">
+<div class="stat-value">100+</div>
+<div class="stat-label">Trials affected</div>
+</div>
+</div>
+<p class="animate delay-4" style="font-size: 1rem; text-align: center; margin-top: 1rem; color: var(--gold);">
+                Speed pressure broke the gatekeepers.
+              </p>
+</div>
+<div class="slide light" data-index="10">
+<div class="content">
+<h2 class="title navy animate">의사결정 트리: 이 연구를 신뢰해야 합니까?</h2>
+<div aria-label="연구 신뢰성 평가를 위한 결정 트리" class="decision-tree animate delay-1" role="img">
+<div class="decision-node question">
+                    독립적인 연구자가 원시 데이터에 액세스할 수 있습니까? 데이터?
+                  </div>
+<div class="decision-branches">
+<div class="decision-branch">
+<div class="branch-label yes">YES</div>
+<div class="arrow-down"></div>
+<div class="decision-node question" style="font-size: 0.85rem;">
+                        연구가 사전 등록되어 있습니까?
+                      </div>
+<div class="decision-branches" style="margin-top: 0.5rem;">
+<div class="decision-branch">
+<div class="branch-label yes" style="font-size: 0.7rem;">YES</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node outcome-yes" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>HIGHER TRUST</strong><br/>표준 평가 진행
+                          </div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no" style="font-size: 0.7rem;">NO</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node warning" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>MODERATE TRUST</strong><br/>결과 전환 확인
+                          </div>
+</div>
+</div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no">NO</div>
+<div class="arrow-down"></div>
+<div class="decision-node outcome-no" style="font-size: 0.85rem;">
+<strong>LOW TRUST</strong><br/>포함 전 데이터 요청
+                      </div>
+</div>
+</div>
+</div>
+<!-- Screen reader accessible version -->
+<div aria-hidden="false" class="decision-tree-sr">
+                  결정 트리: 독립적인 연구자가 원시에 액세스할 수 있습니까? 데이터? '예'인 경우 연구가 사전 등록되어 있는지 확인하세요. 사전등록된 경우 신뢰도가 높아지며 표준평가를 진행합니다. 사전 등록되지 않은 경우 중간 정도의 신뢰 - 결과 전환을 확인하세요. 데이터 액세스가 없으면 신뢰도가 낮습니다. 포함하기 전에 데이터를 요청하세요.
+                </div>
+</div>
+</div>
+<div class="slide light" data-index="11">
+<div class="content">
+<h2 class="title navy animate">Module 0 Quiz</h2>
+<div class="quiz-container">
+<div class="scenario-box animate delay-1">
+<div class="scenario-label">Scenario</div>
+                    2020년 3월입니다. 사전 인쇄에서는 일반적인 약물이 환자의 100%에서 코로나19를 치료한다고 주장합니다. 이 연구에는 36명의 환자가 있었고 대조군은 없었으며 2일 전에 게시되었습니다. 병원장은 약을 비축해야 하는지 묻습니다.
+                  </div>
+<div class="quiz-question">
+<h4>무엇을 조언해야 합니까?</h4>
+<div class="quiz-options" role="radiogroup">
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>A.</span> Yes—patients are dying, we must act
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>B.</span> 아니요—18개월 후 Cochrane 검토를 기다립니다
+                      </div>
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" onkeydown="handleQuizKey(event, this, true)" role="radio" tabindex="0">
+<span>C.</span> 검증을 기다립니다—데이터 요청, 복제 확인
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>D.</span> It doesn't matter—any action is better than none
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark" data-index="12">
+<p class="direct-address animate">2020년의 세 증인을 고려하십시오:</p>
+<div class="gold-line animate delay-1"></div>
+<div class="witness-statement animate delay-2">
+<div class="source">Dr. Anthony Fauci, March 2020</div>
+<div class="quote">"증거 바이러스 확산이 크게 감소했다는 것은 정말 명백합니다."</div>
+</div>
+<div class="witness-statement animate delay-3">
+<div class="source">WHO Director-General, May 2020</div>
+<div class="quote">"우리는 연대 재판의 하이드록시클로로퀸 부문을 일시적으로 중단했습니다."</div>
+</div>
+<div class="witness-statement animate delay-4">
+<div class="source">Cochrane, December 2020</div>
+<div class="quote">"Hydroxychloroquine probably has little or no effect on mortality and progression to mechanical ventilation."</div>
+</div>
+<p class="animate delay-5" style="font-size: 0.95rem; margin-top: 1rem; text-align: center; color: var(--gold);">
+                희망에서 판결까지 9개월이 걸렸습니다. 그 사이에 얼마나 많은 결정이 내려졌습니까?
+              </p>
+</div>
+<div class="slide dark" data-index="13">
+<p class="title cream animate">클로로퀸 중독</p>
+<div class="warning-box animate delay-1">
+<strong>Nigeria, March 2020:</strong><br/><br/>
+                히드록시클로로퀸이 발표된 지 며칠 만에 나이지리아인들은 관련이 있지만 독성이 더 강한 약물인 클로로퀸으로 자가 치료를 시작했습니다.<br/><br/>
+<strong>Three deaths.</strong> 과다복용으로 인해 여러 차례 입원했습니다. 라고스 주립 독극물 센터는 압도당했습니다.<br/><br/>
+                In Arizona, a man died after drinking fish tank cleaner containing chloroquine phosphate. His wife survived but was hospitalized.<br/><br/>
+<span style="color: var(--red);">Premature evidence claims killed people who never had COVID-19.</span>
+</div>
+<div class="citation-box animate delay-2">
+                Sources: Nigeria Centre for Disease Control, March 2020; Banner Health, Arizona, March 2020.
+              </div>
+</div>
+<div class="slide dark" data-index="14">
+<p class="story-box animate">
+<strong>탈리도마이드 이야기:</strong><br/><br/>
+                1957년에 탈리도마이드가 임산부를 위한 안전한 진정제로 판매되었습니다. 제조업체는 불완전한 안전성 데이터를 공유했습니다. 동물 연구는 제한적이었고 인간 실험은 간략했습니다. 회사의 명성을 신뢰한 의사들은 이를 널리 처방했습니다.<br/><br/>
+                1961년까지 10,000명이 넘는 어린이가 심각한 사지 기형을 안고 태어났습니다. 안전의 "지도"에는 누구도 공개하지 않은 치명적인 격차가 있었습니다.<br/><br/>
+<span style="color: var(--gold);">완전한 것으로 제시된 불완전한 증거는 약물 규제를 영원히 재편하는 비극을 초래했습니다.</span>
+</p>
+<div class="story-decision-tree animate delay-1">
+<p class="decision-prompt">당신은 1957년의 약물 규제 기관입니다. 제약 회사는 제한된 안전 데이터를 가지고 승인을 위해 탈리도마이드를 제출했습니다. 어떻게 하시나요?</p>
+<div class="decision-options">
+<div class="decision-option" data-path="wrong" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();}" role="button" tabindex="0">
+<strong>Path A:</strong> 제한된 안전 데이터를 수용하고 신속하게 승인하십시오. 임산부는 입덧 완화가 필요합니다
+                    <div class="consequence">→ 10,000명이 넘는 심각한 선천적 결함을 안고 태어난 어린이; 비극으로 인해 약물 규제가 영원히 바뀌었습니다</div>
+</div>
+<div class="decision-option" data-path="right" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();}" role="button" tabindex="0">
+<strong>Path B:</strong> 승인 전에 생식 독성을 포함한 완전한 안전성 연구 필요
+                    <div class="consequence">→ FDA의 Frances Kelsey가 미국을 위해 이 길을 택했습니다. 미국 어린이들은 비극을 면했습니다</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide light" data-index="15">
+<div class="content">
+<h2 class="title navy animate">Decision Tree: When to Share Preliminary Findings</h2>
+<div aria-label="Decision tree for sharing preliminary findings" class="decision-tree animate delay-1" role="img">
+<div class="decision-node question">
+                    Could acting on this finding cause direct harm?
+                  </div>
+<div class="decision-branches">
+<div class="decision-branch">
+<div class="branch-label yes">YES</div>
+<div class="arrow-down"></div>
+<div class="decision-node outcome-no" style="font-size: 0.85rem;">
+<strong>DO NOT SHARE</strong><br/>확인을 기다리세요
+                      </div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no">NO</div>
+<div class="arrow-down"></div>
+<div class="decision-node question" style="font-size: 0.85rem;">
+                        Could NOT acting cause greater harm?
+                      </div>
+<div class="decision-branches" style="margin-top: 0.5rem;">
+<div class="decision-branch">
+<div class="branch-label yes" style="font-size: 0.7rem;">YES</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node warning" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>공유 경고</strong><br/>"Preliminary—may change"
+                          </div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no" style="font-size: 0.7rem;">NO</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node outcome-yes" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>WAIT</strong><br/>분석 완료
+                          </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="decision-tree-sr">
+                  결정 트리: 이 결과에 따라 조치를 취하면 직접적인 피해가 발생할 수 있습니까? 그렇다면 공유하지 말고 확인을 기다리세요. 그렇지 않다면 조치를 취하지 않으면 더 큰 해를 끼칠 수 있는지 확인하십시오. 그렇다면 명확한 사전 주의 사항을 공유하세요. 긴급하지 않은 경우 분석이 완료될 때까지 기다리세요.
+                </div>
+</div>
+</div>
+<div class="slide black" data-index="16">
+<p class="refrain animate">In the hour of crisis, speed saves lives.</p>
+<p class="animate delay-1" style="font-size: 1.25rem; margin-top: 1.5rem;">모듈 1: 절충</p>
+</div>
+</div>
+ 모듈 1: 절충 
+<div class="module-slides" data-module="1">
+<div class="slide dark active" data-index="0">
+<p class="refrain animate">Speed without rigor is recklessness.</p>
+<p class="refrain animate delay-1">Rigor without speed is abandonment.</p>
+</div>
+<div class="slide dark" data-index="1">
+<p class="direct-address animate">속도를 위해 무엇을 희생하는지 생각해 보셨나요?</p>
+<div class="gold-line animate delay-1"></div>
+<p class="animate delay-2" style="font-size: 1.1rem; text-align: center; max-width: 600px;">
+                A systematic review is thorough because it is slow.<br/>
+                A rapid review is fast because it makes trade-offs.<br/>
+<span style="color: var(--gold);">이게 무엇인가요? 절충점?</span>
+</p>
+</div>
+<div class="slide light" data-index="2">
+<div class="content">
+<h2 class="title navy animate">체계적 vs. 신속: 차이점</h2>
+<table class="results-table animate delay-1">
+<tr>
+<th>Element</th>
+<th>Systematic Review</th>
+<th>Rapid Review</th>
+</tr>
+<tr>
+<td>Databases searched</td>
+<td>5-10+</td>
+<td class="highlight">1-3</td>
+</tr>
+<tr>
+<td>Grey literature</td>
+<td>Extensive</td>
+<td class="highlight">Limited or none</td>
+</tr>
+<tr>
+<td>Screening</td>
+<td>Dual independent</td>
+<td class="highlight">Single + verification</td>
+</tr>
+<tr>
+<td>Quality assessment</td>
+<td>Full tool</td>
+<td class="highlight">Abbreviated</td>
+</tr>
+<tr>
+<td>Timeline</td>
+<td>12-24 months</td>
+<td class="success">1-6 weeks</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="slide dark" data-index="3">
+<p class="title cream animate">코크란 응답</p>
+<div class="witness-statement animate delay-1">
+<div class="source">March 2020, Geneva</div>
+<div class="quote">
+                  "2020년 3월, Cochrane Methods Rapid Reviews 그룹은 신속한 검토를 수행하는 방법에 대한 지침을 시작하여 고품질 검토를 생성하기 위한 프로세스를 매우 간소화했습니다. "
+                </div>
+</div>
+<p class="animate delay-2" style="font-size: 1rem; margin-top: 1rem; text-align: center;">
+                The guardians of rigor themselves said: <span style="color: var(--gold);">"We must move faster."</span>
+</p>
+</div>
+<div class="slide light" data-index="4">
+<div class="content">
+<h2 class="title navy animate">Decision Tree: When to Use Rapid Review</h2>
+<div class="decision-tree animate delay-1">
+<div class="decision-node question">
+                    Is the decision urgent (lives at stake NOW)?
+                  </div>
+<div class="decision-branches">
+<div class="decision-branch">
+<div class="branch-label yes">YES</div>
+<div class="arrow-down"></div>
+<div class="decision-node question" style="font-size: 0.85rem;">
+                        기존 증거가 희박하거나 충돌합니까?
+                      </div>
+<div class="decision-branches" style="margin-top: 0.5rem;">
+<div class="decision-branch">
+<div class="branch-label yes" style="font-size: 0.7rem;">YES</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node outcome-yes" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>RAPID REVIEW</strong><br/>40 hours
+                          </div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no" style="font-size: 0.7rem;">NO</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node" style="font-size: 0.75rem; padding: 0.5rem; background: var(--teal);">
+<strong>UPDATE EXISTING</strong><br/>SR
+                          </div>
+</div>
+</div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no">NO</div>
+<div class="arrow-down"></div>
+<div class="decision-node" style="font-size: 0.85rem;">
+<strong>FULL SYSTEMATIC</strong><br/>Standard timeline
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark" data-index="5">
+<p class="rhetorical animate">What risks do we accept?</p>
+<div class="gold-line animate delay-1"></div>
+<div class="animate delay-2" style="text-align: left; max-width: 600px;">
+<p style="margin: 0.75rem 0;"><span style="color: var(--red); font-weight: 700;">Missing studies:</span> Limited search may miss relevant evidence</p>
+<p style="margin: 0.75rem 0;"><span style="color: var(--red); font-weight: 700;">Selection bias:</span> Single screener may have systematic blind spots</p>
+<p style="margin: 0.75rem 0;"><span style="color: var(--red); font-weight: 700;">Quality gaps:</span> Abbreviated assessment may miss fatal flaws</p>
+<p style="margin: 0.75rem 0;"><span style="color: var(--red); font-weight: 700;">Publication bias:</span> Less grey literature means more bias</p>
+</div>
+<p class="animate delay-3" style="font-size: 0.95rem; margin-top: 1rem; text-align: center; color: var(--gold);">
+                모든 신속한 검토에서는 이러한 위험을 명시적으로 언급해야 합니다.
+              </p>
+</div>
+<div class="slide dark" data-index="6">
+<p class="direct-address animate">그러나 다음 사항을 고려하십시오.</p>
+<div class="story-box animate delay-1">
+<strong>D-Day 이야기 날씨:</strong><br/><br/>
+                1944년 6월 4일, 아이젠하워는 불가능한 결정에 직면했습니다. 그의 기상학자인 그룹 대장 스태그(Stagg)는 좋은 날씨를 보장할 수 없었습니다. 6월 6일에 잠깐 동안 날씨가 맑아졌다는 신뢰도는 80%에 불과했습니다. 확실성을 기다리는 것은 침공을 몇 주씩 지연시키고 발견의 위험을 감수하는 것을 의미했습니다.<br/><br/>
+                아이젠하워는 "좋아, 가자"고 결정했습니다. 80% 예측이 맞았다. 침공은 성공했습니다.<br/><br/>
+<span style="color: var(--gold);">Stagg는 나중에 완벽한 예측은 불가능하지만 실행 가능한 예측이 전쟁을 구했다고 말했습니다. 때때로 오늘의 80% 확실성이 95% 확실성을 능가합니다.</span>
+</div>
+<div class="story-decision-tree animate delay-2">
+<p class="decision-prompt">당신은 1944년 6월 4일의 아이젠하워 장군입니다. 기상학자는 6월 6일의 짧은 기상 기간에 대해 80% 신뢰를 제공합니다. 확실성을 기다리는 것은 몇 주를 지연시키고 침공군의 발견 위험을 감수한다는 것을 의미합니다.</p>
+<div class="decision-options">
+<div class="decision-option" data-path="wrong" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();}" role="button" tabindex="0">
+<strong>Path A:</strong> 침공을 시작하기 전에 95%의 확실성을 기다리세요
+                    <div class="consequence">→ Delay of weeks; risk of German discovery; next favorable tide not until late June; potential failure of entire operation</div>
+</div>
+<div class="decision-option" data-path="right" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();}" role="button" tabindex="0">
+<strong>Path B:</strong> Act on the 80% forecast—launch on June 6
+                    <div class="consequence">→ 예측이 맞았습니다. 침공은 성공했다. 전쟁의 흐름이 바뀌었습니다. 실행 가능한 증거가 완벽한 증거를 능가합니다.</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark" data-index="7">
+<p class="title cream animate">두 가지 메타 분석 이야기</p>
+<div class="story-box animate delay-1">
+<strong>2020년 7월: 마스크 패러독스</strong><br/><br/>
+                같은 질문에 대한 두 가지 메타 분석: "마스크가 코로나19를 예방합니까?" 전송?"<br/><br/>
+                첫 번째로 통합된 14개의 관찰 연구: <strong>OR 0.35</strong>—masks reduce risk by 65%!<br/>
+                The second included only 3 RCTs: <strong>OR 0.91</strong>—no significant effect.<br/><br/>
+<span style="color: var(--gold);">Same question. Same year. Opposite answers. Why?</span>
+</div>
+</div>
+<div class="slide dark" data-index="8">
+<p class="rhetorical animate">어떤 연구를 포함시키느냐에 따라 어떤 진실이 발견되는지가 결정됩니다.</p>
+<div class="gold-line animate delay-1"></div>
+<div class="contrast-container animate delay-2">
+<div class="contrast-box before">
+<h4>Observational Studies</h4>
+<div class="stat">65%</div>
+<div class="label">Risk reduction</div>
+<p style="font-size: 0.8rem; margin-top: 0.5rem;">Higher confounding risk</p>
+</div>
+<div class="contrast-box after" style="background: rgba(234,88,12,0.15); border-color: var(--orange);">
+<h4 style="color: var(--orange);">RCTs Only</h4>
+<div class="stat">9%</div>
+<div class="label">Risk reduction (NS)</div>
+<p style="font-size: 0.8rem; margin-top: 0.5rem;">Lower power, higher validity</p>
+</div>
+</div>
+<p class="animate delay-3" style="font-size: 0.95rem; margin-top: 1rem; text-align: center; color: var(--gold);">
+                신속한 검토에서는 포함 기준이 결론입니다.
+              </p>
+</div>
+<div class="slide light" data-index="9">
+<div class="content">
+<h2 class="title navy animate">Decision Tree: Observational vs. RCT Evidence</h2>
+<div aria-label="관찰 증거와 RCT 증거 중 선택을 위한 결정 트리" class="decision-tree animate delay-1" role="img">
+<div class="decision-node question">
+                    이 항목에 대한 RCT를 사용할 수 있습니까? 질문이 있습니까?
+                  </div>
+<div class="decision-branches">
+<div class="decision-branch">
+<div class="branch-label yes">YES</div>
+<div class="arrow-down"></div>
+<div class="decision-node question" style="font-size: 0.85rem;">
+                        RCT가 적절한 전력을 공급할 만큼 충분히 큽니까?
+                      </div>
+<div class="decision-branches" style="margin-top: 0.5rem;">
+<div class="decision-branch">
+<div class="branch-label yes" style="font-size: 0.7rem;">YES</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node outcome-yes" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>PREFER RCTs</strong><br/>Higher certainty
+                          </div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no" style="font-size: 0.7rem;">NO</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node warning" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>PRESENT BOTH</strong><br/>State uncertainty clearly
+                          </div>
+</div>
+</div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no">NO</div>
+<div class="arrow-down"></div>
+<div class="decision-node warning" style="font-size: 0.85rem;">
+<strong>USE OBSERVATIONAL</strong><br/>But downgrade certainty
+                      </div>
+</div>
+</div>
+</div>
+<div class="decision-tree-sr">
+                  결정 트리: RCT를 사용할 수 있습니까? 그렇다면 크기가 충분히 큰지 확인하세요. 충분히 큰 경우 더 높은 확실성을 위해 RCT를 선호합니다. 충분히 크지 않은 경우 두 가지를 모두 제시하고 불확실성을 명시합니다. RCT가 없는 경우 관찰을 사용하되 확실성은 낮춥니다.
+                </div>
+</div>
+</div>
+<div class="slide light" data-index="10">
+<div class="content">
+<h2 class="title navy animate">Module 1 Quiz</h2>
+<div class="quiz-container">
+<div class="scenario-box animate delay-1">
+<div class="scenario-label">Scenario</div>
+                    귀하의 사역에는 72시간 이내에 코로나19 예방을 위한 비타민 D 보충에 대한 증거가 필요합니다. 2019년부터 비타민 D 및 호흡기 감염에 대한 전체 Cochrane 리뷰가 존재하지만, 코로나19와 관련된 내용은 없습니다.
+                  </div>
+<div class="quiz-question">
+<h4>What is the most appropriate approach?</h4>
+<div class="quiz-options" role="radiogroup">
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>A.</span> 2019년 코크란 리뷰를 있는 그대로 사용하세요
+                      </div>
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" onkeydown="handleQuizKey(event, this, true)" role="radio" tabindex="0">
+<span>B.</span> 빠른 검토: 코로나19 관련 연구에 대한 Cochrane 검색 업데이트
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>C.</span> Commission a new 18-month systematic review
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>D.</span> Tell them evidence-based medicine is impossible in 72 hours
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark" data-index="11">
+<p class="story-box animate">
+<strong>두 도시 이야기 1918년:</strong><br/><br/>
+                1918년 9월 필라델피아와 세인트루이스는 모두 인플루엔자 사례를 발견했습니다. 필라델피아 보건국장은 조치를 취하기 전에 더 많은 데이터를 기다렸습니다. 9월 28일 그는 20만명에 달하는 대규모 퍼레이드를 허용했다. 며칠 만에 병원이 넘쳐났습니다. 몇 주 만에 12,000명이 사망했습니다.<br/><br/>
+                St. 루이는 동일한 불완전한 데이터를 가지고 즉시 학교를 폐쇄하고 모임을 금지했습니다. 사망률은 필라델피아의 절반이었습니다.<br/><br/>
+<span style="color: var(--gold);">초기 조치의 희미한 빛이 너무 늦게 나타난 밝은 빛을 능가했습니다.</span>
+</p>
+<div class="story-decision-tree animate delay-1">
+<p class="decision-prompt">당신은 1918년 9월 필라델피아의 보건 국장입니다. 치명적인 독감 사례가 나타나고 있습니다. 대규모 자유 대출 퍼레이드가 9월 28일에 예정되어 있으며 예상 참석자는 200,000명입니다. 어떻게 하시나요?</p>
+<div class="decision-options">
+<div class="decision-option" data-path="wrong" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();}" role="button" tabindex="0">
+<strong>Path A:</strong> 행동에 앞서 더 많은 데이터를 기다리십시오. 퍼레이드는 전쟁 노력에 대한 사기를 북돋울 것입니다.
+                    <div class="consequence">→ 12,000 dead in Philadelphia within weeks; hospitals overflow; bodies pile in morgues</div>
+</div>
+<div class="decision-option" data-path="right" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();}" role="button" tabindex="0">
+<strong>Path B:</strong> Act on incomplete data like St. Louis—cancel public gatherings immediately
+                    <div class="consequence">→ St. Louis had half the death rate of Philadelphia; early action saved thousands of lives</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark" data-index="12">
+<p class="title cream animate">토실리주맙의 전환점</p>
+<div class="story-box animate delay-1">
+<strong>너무 빨리 판정된 약물에 대한 이야기:</strong><br/><br/>
+                February 2021: Multiple small trials of tocilizumab (an IL-6 inhibitor) showed no benefit. Headlines declared it useless. Some hospitals stopped using it.<br/><br/>
+                June 2021: RECOVERY trial reports 4,116 patients. <strong>Mortality reduced by 14%.</strong> WHO immediately recommends it.<br/><br/>
+<span style="color: var(--gold);">작은 시험은 힘이 부족했습니다. 그들은 "효과가 없다는 증거"를 발견했습니다. 이는 "효과가 없다는 증거"가 아닙니다. 대규모 실험에서 진실이 밝혀졌습니다.</span>
+</div>
+<div class="citation-box animate delay-2">
+                Source: RECOVERY Collaborative. Lancet 2021;397:1637-1645. REMAP-CAP confirmed similar results.
+              </div>
+</div>
+<div class="slide dark" data-index="13">
+<p class="rhetorical animate">이 두 진술의 차이점은 무엇입니까?</p>
+<div class="gold-line animate delay-1"></div>
+<div class="contrast-container animate delay-2">
+<div class="contrast-box before">
+<h4>"No evidence of effect"</h4>
+<div class="stat" style="font-size: 1.8rem;">p = 0.08</div>
+<div class="label">200 patients, underpowered</div>
+<p style="font-size: 0.8rem; margin-top: 0.5rem;">Cannot rule out benefit</p>
+</div>
+<div class="contrast-box after" style="background: rgba(197,48,48,0.15); border-color: var(--red);">
+<h4 style="color: var(--red);">"Evidence of no effect"</h4>
+<div class="stat" style="font-size: 1.8rem;">p = 0.92</div>
+<div class="label">4,000 patients, adequate power</div>
+<p style="font-size: 0.8rem; margin-top: 0.5rem;">Confidently excludes benefit</p>
+</div>
+</div>
+<p class="animate delay-3" style="font-size: 1rem; margin-top: 1rem; text-align: center; color: var(--gold);">
+                증거가 없다고 해서 부재의 증거는 아닙니다. 단, 연구 규모가 이를 감지할 만큼 크지 않은 한은 아닙니다.
+              </p>
+</div>
+<div class="slide light" data-index="14">
+<div class="content">
+<h2 class="title navy animate">의사결정 트리: 이 연구가 충분히 큽니까?</h2>
+<div aria-label="연구력 평가를 위한 결정 트리" class="decision-tree animate delay-1" role="img">
+<div class="decision-node question">
+                    연구가 제대로 진행되었나요? 검정력 계산을 보고하시겠습니까?
+                  </div>
+<div class="decision-branches">
+<div class="decision-branch">
+<div class="branch-label yes">YES</div>
+<div class="arrow-down"></div>
+<div class="decision-node question" style="font-size: 0.85rem;">
+                        Did they achieve target enrollment?
+                      </div>
+<div class="decision-branches" style="margin-top: 0.5rem;">
+<div class="decision-branch">
+<div class="branch-label yes" style="font-size: 0.7rem;">YES</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node outcome-yes" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>ADEQUATELY POWERED</strong><br/>부정적인 결과를 신뢰하세요
+                          </div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no" style="font-size: 0.7rem;">NO</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node warning" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>UNDERPOWERED</strong><br/>"No effect" may be false negative
+                          </div>
+</div>
+</div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no">NO</div>
+<div class="arrow-down"></div>
+<div class="decision-node warning" style="font-size: 0.85rem;">
+<strong>ASSUME UNDERPOWERED</strong><br/>Calculate post-hoc power
+                      </div>
+</div>
+</div>
+</div>
+<div class="decision-tree-sr">
+                  결정 트리: 연구에서 검정력 계산을 보고했습니까? 그렇다면 목표 등록을 달성했는지 확인하세요. 달성되면 연구가 적절하게 강화되고 부정적인 결과를 신뢰할 수 있습니다. 달성되지 않으면 연구의 힘이 약해지고 "효과 없음"이 위음성이 될 수 있습니다. 전력 계산이 보고되지 않은 경우 전력이 부족하다고 가정하고 사후 전력을 계산합니다.
+                </div>
+</div>
+</div>
+<div class="slide dark" data-index="15">
+<p class="title cream animate">인공호흡기 역전</p>
+<div class="warning-box animate delay-1">
+<strong>March 2020: "Intubate Early"</strong><br/>
+                Initial guidance: patients with low oxygen should be intubated quickly to prevent deterioration.<br/><br/>
+<strong>April 2020: "Intubate Later"</strong><br/>
+                임상의는 많은 환자가 저산소증("행복한 저산소증")을 견딜 수 있음을 관찰했습니다. 엎드린 자세로 인해 환기가 필요하지 않은 경우가 많았습니다.<br/><br/>
+<strong>Result:</strong> Practice changed mid-pandemic based on real-world observation, not RCTs. Early intubation may have caused avoidable deaths.
+              </div>
+<p class="animate delay-2" style="font-size: 0.95rem; margin-top: 1rem; text-align: center; color: var(--gold);">
+                When RCTs are impossible, observe carefully. Document systematically. Share transparently.
+              </p>
+</div>
+<div class="slide black" data-index="16">
+<p class="refrain animate">Speed without rigor is recklessness.</p>
+<p class="refrain animate delay-1">Rigor without speed is abandonment.</p>
+<p class="animate delay-2" style="font-size: 1.25rem; margin-top: 1.5rem;">모듈 2: 방법</p>
+</div>
+</div>
+ MODULE 2: 방법 
+<div class="module-slides" data-module="2">
+<div class="slide dark active" data-index="0">
+<p class="refrain animate">진행 경로를 알고 있는 경우 40시간이 소요됩니다.</p>
+</div>
+<div class="slide dark" data-index="1">
+<p class="title cream animate">40시간 고속 검토</p>
+<div class="timeline-horizontal animate delay-1">
+<div class="timeline-point">
+<div class="timeline-dot">1</div>
+<div class="timeline-label">Define Question</div>
+<div class="timeline-date">2 hours</div>
+</div>
+<div class="timeline-point">
+<div class="timeline-dot">2</div>
+<div class="timeline-label">Search Strategy</div>
+<div class="timeline-date">4 hours</div>
+</div>
+<div class="timeline-point">
+<div class="timeline-dot">3</div>
+<div class="timeline-label">Screen &amp; Select</div>
+<div class="timeline-date">12 hours</div>
+</div>
+<div class="timeline-point">
+<div class="timeline-dot">4</div>
+<div class="timeline-label">Extract &amp; Assess</div>
+<div class="timeline-date">14 hours</div>
+</div>
+<div class="timeline-point">
+<div class="timeline-dot">5</div>
+<div class="timeline-label">Synthesize</div>
+<div class="timeline-date">8 hours</div>
+</div>
+</div>
+</div>
+<div class="slide light" data-index="2">
+<div class="content">
+<h2 class="title navy animate">1단계: 질문 정의(2시간)</h2>
+<div class="case-study animate delay-1">
+<h4>The PICO Framework—Sharper Than Ever</h4>
+<p><strong>Population:</strong> Adults hospitalized with COVID-19 (narrow!)</p>
+<p><strong>Intervention:</strong> Dexamethasone 6mg daily</p>
+<p><strong>Comparator:</strong> Standard care / placebo</p>
+<p><strong>Outcome:</strong> 28-day mortality (primary only)</p>
+</div>
+<div class="story-box animate delay-2" style="background: rgba(30,39,97,0.1); border-color: var(--navy);">
+                  빠른 검토에서 질문은 <strong>surgical</strong>. Broad questions create endless searches. Narrow questions enable speed.
+                </div>
+</div>
+</div>
+<div class="slide light" data-index="3">
+<div class="content">
+<h2 class="title navy animate">Step 2: Search Strategy (4 hours)</h2>
+<div class="comparison-grid animate delay-1">
+<div class="comparison-panel danger">
+<h4 style="color: var(--red);">DON'T: Systematic Search</h4>
+<p style="font-size: 0.85rem;">MEDLINE + EMBASE + Cochrane + CINAHL + PsycINFO + Web of Science + grey literature + hand searching</p>
+<p style="font-size: 0.8rem; color: var(--light-text); margin-top: 0.5rem;">Time: 40+ hours</p>
+</div>
+<div class="comparison-panel highlight">
+<h4 style="color: var(--green);">DO: Focused Search</h4>
+<p style="font-size: 0.85rem;">PubMed + Cochrane Library + one preprint server (medRxiv)</p>
+<p style="font-size: 0.8rem; color: var(--gold); margin-top: 0.5rem;">Time: 4 hours</p>
+</div>
+</div>
+<p class="animate delay-2" style="font-size: 0.9rem; margin-top: 1rem; text-align: center; color: var(--light-text);">
+                  검색한 내용과 의도적으로 제외한 내용을 기록해야 합니다.
+                </p>
+</div>
+</div>
+<div class="slide dark" data-index="4">
+<p class="direct-address animate">중요한 지름길:</p>
+<p class="direct-address animate delay-1">검증을 통한 단일 스크리닝.</p>
+<div class="gold-line animate delay-2"></div>
+<div class="stats-grid animate delay-3">
+<div class="stat-box">
+<div class="stat-value">1</div>
+<div class="stat-label">Primary screener</div>
+</div>
+<div class="stat-box">
+<div class="stat-value">20%</div>
+<div class="stat-label">Verified by second reviewer</div>
+</div>
+<div class="stat-box">
+<div class="stat-value">100%</div>
+<div class="stat-label">Of exclusions verified</div>
+</div>
+</div>
+<p class="animate delay-4" style="font-size: 0.95rem; margin-top: 1rem; text-align: center;">
+                This saves 50% of screening time while catching most errors.
+              </p>
+</div>
+<div class="slide light" data-index="5">
+<div class="content">
+<h2 class="title navy animate">Decision Tree: Quality Assessment Shortcuts</h2>
+<div class="decision-tree animate delay-1">
+<div class="decision-node question">
+                    몇 개의 연구를 포함할 것인가?
+                  </div>
+<div class="decision-branches">
+<div class="decision-branch">
+<div class="branch-label" style="background: var(--teal); color: white;">≤10</div>
+<div class="arrow-down"></div>
+<div class="decision-node outcome-yes" style="font-size: 0.85rem;">
+<strong>Full quality assessment</strong><br/>
+                        Use standard tool (RoB 2, ROBINS-I)
+                      </div>
+</div>
+<div class="decision-branch">
+<div class="branch-label maybe">&gt;10</div>
+<div class="arrow-down"></div>
+<div class="decision-node warning" style="font-size: 0.85rem;">
+<strong>Abbreviated assessment</strong><br/>
+                        Key domains only
+                      </div>
+</div>
+</div>
+</div>
+<p class="animate delay-2" style="font-size: 0.85rem; margin-top: 1rem; text-align: center; color: var(--light-text);">
+                  Key domains: randomization, blinding, missing data, selective reporting
+                </p>
+</div>
+</div>
+<div class="slide dark" data-index="6">
+<p class="title cream animate">마지막 단계: 합성</p>
+<div class="story-box animate delay-1">
+<strong>Warning:</strong> Meta-analysis in rapid reviews is dangerous territory.<br/><br/>
+                포괄적으로 검색하지 않았을 수도 있습니다. 공부를 놓쳤을 수도 있습니다. 불완전한 검색에서 얻은 통합 추정치는 잘못된 신뢰도를 생성할 수 있습니다.<br/><br/>
+<span style="color: var(--gold);">서술적 합성을 선호합니다. 풀링해야 하는 경우 제한 사항을 큰 소리로 명시하세요.</span>
+</div>
+</div>
+<div class="slide light" data-index="7">
+<div class="content">
+<h2 class="title navy animate">PRISMA-RR: 보고 체크리스트</h2>
+<div class="case-study animate delay-1">
+<h4>PRISMA for Rapid Reviews Extension (2024)</h4>
+<p>When reporting rapid reviews, you MUST include:</p>
+<ul style="margin-top: 0.75rem; margin-left: 1rem; font-size: 0.9rem;">
+<li><strong>Shortcuts taken:</strong> 간소화와 전체 SR은 무엇입니까?</li>
+<li><strong>Time constraints:</strong> 신속한 검토가 필요한 이유는 무엇입니까?</li>
+<li><strong>Databases searched:</strong> 그리고 다른 사람들은 왜 제외됨</li>
+<li><strong>Screener count:</strong> Single vs. dual screening</li>
+<li><strong>Date of search:</strong> [날짜] 기준 최신 증거</li>
+<li><strong>Limitations section:</strong> What may have been missed</li>
+</ul>
+</div>
+<div class="citation-box animate delay-2">
+                  Source: Stevens A et al. PRISMA-RR Extension. J Clin Epidemiol 2024. DOI: 10.1016/j.jclinepi.2024.01.015
+                </div>
+</div>
+</div>
+<div class="slide dark" data-index="8">
+<p class="title cream animate">렘데시비르 반전 이야기</p>
+<div class="story-box animate delay-1">
+<strong>November 2020: Two Giants Disagree</strong><br/><br/>
+                The FDA granted Emergency Use Authorization: "Remdesivir shortens recovery time."<br/>
+                The WHO recommended against it: "No mortality benefit, high cost."<br/><br/>
+                Same drug. Same evidence base. <strong>Opposite conclusions.</strong><br/><br/>
+<span style="color: var(--gold);">차이는? FDA는 대리 결과(회복 시간)를 우선시했습니다. WHO는 환자 중심의 결과(사망률)를 우선시했습니다.</span>
+</div>
+<div class="citation-box animate delay-2">
+                Sources: FDA EUA Oct 2020; WHO Solidarity Trial Consortium, NEJM 2021.
+              </div>
+</div>
+<div class="slide light" data-index="9">
+<div class="content">
+<h2 class="title navy animate">Decision Tree: Choosing Outcomes in Rapid Reviews</h2>
+<div aria-label="검토 선택을 위한 결정 트리 결과" class="decision-tree animate delay-1" role="img">
+<div class="decision-node question">
+                    사용 가능한 연구에서 확실한 결과(사망률/중증 이병률)를 측정할 수 있습니까?
+                  </div>
+<div class="decision-branches">
+<div class="decision-branch">
+<div class="branch-label yes">YES</div>
+<div class="arrow-down"></div>
+<div class="decision-node outcome-yes" style="font-size: 0.85rem;">
+<strong>USE HARD OUTCOMES</strong><br/>Highest certainty
+                      </div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no">NO</div>
+<div class="arrow-down"></div>
+<div class="decision-node question" style="font-size: 0.85rem;">
+                        대리모가 이 질환에 대해 검증되었습니까?
+                      </div>
+<div class="decision-branches" style="margin-top: 0.5rem;">
+<div class="decision-branch">
+<div class="branch-label yes" style="font-size: 0.7rem;">YES</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node warning" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>함께 사용 주의</strong><br/>Note indirectness
+                          </div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no" style="font-size: 0.7rem;">NO</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node outcome-no" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>MAJOR UNCERTAINTY</strong><br/>State explicitly
+                          </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="decision-tree-sr">
+                  결정 트리: 어려운 결과를 측정할 수 있습니까? 그렇다면 가장 높은 확실성을 위해 확실한 결과를 사용하십시오. 아니요인 경우 서로게이트의 유효성이 검사되었는지 확인하세요. 서로게이트가 검증된 경우 주의해서 사용하고 간접적임을 기록하십시오. 대리가 검증되지 않은 경우 주요 불확실성 - 명시적으로 기술하십시오.
+                </div>
+</div>
+</div>
+<div class="slide light" data-index="10">
+<div class="content">
+<h2 class="title navy animate">Module 2 Quiz</h2>
+<div class="quiz-container">
+<div class="scenario-box animate delay-1">
+<div class="scenario-label">Scenario</div>
+                    새로운 항바이러스제에 대해 신속한 검토를 수행하고 있습니다. 잠재적으로 관련성이 있는 47개의 초록을 찾았습니다. 귀하의 타임라인: 총 40시간, 선별 검사에 12시간 할당.
+                  </div>
+<div class="quiz-question">
+<h4>What screening approach is appropriate?</h4>
+<div class="quiz-options" role="radiogroup">
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>A.</span> Dual independent screening of all 47 abstracts
+                      </div>
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" onkeydown="handleQuizKey(event, this, true)" role="radio" tabindex="0">
+<span>B.</span> 20% 검증 및 100% 배제 검토를 통한 단일 선별
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>C.</span> Include all 47 studies without screening
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>D.</span> Ask a colleague to pick the 10 best-looking titles
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide light" data-index="11">
+<div class="content">
+<h2 class="title navy animate">Module 2 Quiz (2)</h2>
+<div class="quiz-container">
+<div class="quiz-question">
+<h4>PRISMA-RR에 따르면, 신속 검토 보고서에는 필요하지 않은 것이 있습니까?</h4>
+<div class="quiz-options" role="radiogroup">
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>A.</span> Description of shortcuts taken
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>B.</span> Date of search completion
+                      </div>
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" onkeydown="handleQuizKey(event, this, true)" role="radio" tabindex="0">
+<span>C.</span> Names and qualifications of all peer reviewers
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>D.</span> Explicit limitations section
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark" data-index="12">
+<p class="title cream animate">복와 자세 발견</p>
+<div class="success-box animate delay-1">
+<strong>간단한 해결책 이야기:</strong><br/><br/>
+                수십 년 동안 호흡 부전을 앓고 있는 ICU 환자들은 누워 있었습니다. 코로나19에서 임상의들은 놀라운 사실을 발견했습니다.<br/><br/>
+<strong>Turning patients onto their stomachs</strong>—proning—dramatically improved oxygen levels. No drug required. No cost. Available everywhere.<br/><br/>
+                Meta-analysis of 6 RCTs: <strong>Mortality reduced by 25%</strong> in severe ARDS patients.<br/><br/>
+<span style="color: var(--green);">때때로 돌파구는 분자가 아닙니다. 때로는 입장이 되기도 합니다.</span>
+</div>
+<div class="citation-box animate delay-2">
+                Source: Munshi L et al. Lancet Respir Med 2017;5:627-38. COVID-19 proning: Ehrmann S et al. Lancet Respir Med 2021.
+              </div>
+</div>
+<div class="slide dark" data-index="13">
+<p class="story-box animate">
+<strong>Excel 오류 이야기:</strong><br/><br/>
+                2010년 하버드 경제학자 Reinhart와 Rogoff는 영향력 있는 연구를 발표했습니다. 부채가 GDP의 90%를 넘는 국가는 마이너스 성장을 보였습니다. 전 세계 정부는 긴축을 정당화하기 위해 이를 인용했습니다.<br/><br/>
+                Three years later, a graduate student found their Excel spreadsheet excluded five countries due to a coding error. When corrected, the 90% threshold disappeared.<br/><br/>
+<span style="color: var(--gold);">확인되지 않은 스프레드시트 오류 하나가 수백만 명의 정책에 영향을 미쳤습니다. 검증하는 연구원은 계산하는 연구원만큼 중요합니다.</span>
+</p>
+<div class="story-decision-tree animate delay-1">
+<p class="decision-prompt">당신은 정부가 긴축정책을 정당화하기 위해 사용하는 유명한 라인하르트-로고프 논문을 검토하고 있는 대학원생입니다. 하버드 교수들의 스프레드시트를 확인하시나요?</p>
+<div class="decision-options">
+<div class="decision-option" data-path="wrong" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();}" role="button" tabindex="0">
+<strong>Path A:</strong> 유명한 경제학자들을 믿으세요. 그들은 기본적인 오류를 범하지 않을 것입니다.
+                    <div class="consequence">→ Excel 오류는 3년 동안 발견되지 않습니다. 결함이 있는 데이터를 기반으로 한 긴축 정책은 수백만 달러에 영향을 미칩니다.</div>
+</div>
+<div class="decision-option" data-path="right" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();}" role="button" tabindex="0">
+<strong>Path B:</strong> 원본 데이터를 요청하고 모든 계산을 직접 확인하세요
+                    <div class="consequence">→ Thomas Herndon이 정확히 이렇게 했습니다. 오류를 발견하고, 과학 기록을 수정하고, 정책 토론을 변경했습니다.</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide light" data-index="14">
+<div class="content">
+<h2 class="title navy animate">Decision Tree: Narrative vs. Meta-Analysis</h2>
+<div aria-label="Decision tree for choosing narrative synthesis versus meta-analysis" class="decision-tree animate delay-1" role="img">
+<div class="decision-node question">
+                    임상 연구가 포함되어 있습니다 동종인가요?
+                  </div>
+<div class="decision-branches">
+<div class="decision-branch">
+<div class="branch-label yes">YES</div>
+<div class="arrow-down"></div>
+<div class="decision-node question" style="font-size: 0.85rem;">
+                        포괄적으로 검색하셨나요?
+                      </div>
+<div class="decision-branches" style="margin-top: 0.5rem;">
+<div class="decision-branch">
+<div class="branch-label yes" style="font-size: 0.7rem;">YES</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node outcome-yes" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>META-ANALYSIS OK</strong><br/>자신있게 풀
+                          </div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no" style="font-size: 0.7rem;">RAPID</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node warning" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>META-ANALYSIS + CAVEAT</strong><br/>"연구를 놓칠 수 있음"
+                          </div>
+</div>
+</div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no">NO</div>
+<div class="arrow-down"></div>
+<div class="decision-node" style="font-size: 0.85rem; background: var(--teal);">
+<strong>NARRATIVE SYNTHESIS</strong><br/>Don't pool apples and oranges
+                      </div>
+</div>
+</div>
+</div>
+<div class="decision-tree-sr">
+                  결정 트리: 포함된 연구가 임상적으로 동종입니까? 그렇다면, 종합적으로 검색했는지 확인해 보세요. 종합적으로 검색한다면 메타분석이 적합하다. 신속한 검색의 경우 메타 분석을 수행하되 한계를 명확하게 명시합니다. 연구가 이질적이라면 서술형 합성을 사용하세요. 사과와 오렌지를 합치지 마세요.
+                </div>
+</div>
+</div>
+<div class="slide black" data-index="15">
+<p class="refrain animate">진행 경로를 알고 있는 경우 40시간이 소요됩니다.</p>
+<p class="animate delay-1" style="font-size: 1.25rem; margin-top: 1.5rem;">모듈 3: 재난</p>
+</div>
+</div>
+ MODULE 3: 재난(하이드록시클로로퀸) 
+<div class="module-slides" data-module="3">
+<div class="slide red active" data-index="0">
+<p class="refrain animate">A flawed study in a meta-analysis poisons all.</p>
+</div>
+<div class="slide dark" data-index="1">
+<p class="direct-address animate">마르세유?</p>
+<p class="direct-address animate delay-1">세상을 변화시킨 신문 중, 그렇게 해서는 안 됩니까?</p>
+<div class="gold-line animate delay-2"></div>
+</div>
+<div class="slide dark" data-index="2">
+<p class="title cream animate">2020년 3월 17일: The Paper</p>
+<div class="case-study danger animate delay-1">
+<h4>Gautret et al. — International Journal of Antimicrobial Agents</h4>
+<p><strong>Claim:</strong> Hydroxychloroquine + azithromycin clears COVID-19 virus in 100% of patients</p>
+<p><strong>Submitted:</strong> March 16, 2020</p>
+<p><strong>Accepted:</strong> March 17, 2020</p>
+<p style="color: var(--red); font-weight: 700; margin-top: 0.5rem;">Peer review time: ONE DAY</p>
+</div>
+<p class="animate delay-2" style="font-size: 0.95rem; margin-top: 1rem; text-align: center;">
+                편집장은 저자와 같은 연구소 동료였습니다.
+              </p>
+</div>
+<div class="slide dark" data-index="3">
+<p class="rhetorical animate">어떤 결점이 있었습니까?</p>
+<div class="gold-line animate delay-1"></div>
+<div class="stats-grid animate delay-2">
+<div class="stat-box danger">
+<div class="stat-value">36</div>
+<div class="stat-label">Total patients</div>
+</div>
+<div class="stat-box danger">
+<div class="stat-value">6</div>
+<div class="stat-label">분석에서 제외</div>
+</div>
+<div class="stat-box danger">
+<div class="stat-value">1</div>
+<div class="stat-label">Died (excluded)</div>
+</div>
+<div class="stat-box danger">
+<div class="stat-value">3</div>
+<div class="stat-label">To ICU (excluded)</div>
+</div>
+</div>
+<p class="animate delay-3" style="font-size: 1.1rem; margin-top: 1rem; text-align: center; color: var(--red);">
+                심각한 환자는 간단히 제외되었습니다. 분석.
+              </p>
+</div>
+<div class="slide dark" data-index="4">
+<p class="direct-address animate">And yet, consider what followed:</p>
+<div class="warning-box animate delay-1">
+<strong>March 19:</strong> 트럼프 대통령은 하이드록시클로로퀸을 "의학 역사상 가장 큰 게임 체인저 중 하나"라고 트윗했습니다.<br/><br/>
+<strong>March 28:</strong> FDA issues Emergency Use Authorization.<br/><br/>
+<strong>April 2020:</strong> Countries worldwide stockpile the drug. India bans exports.<br/><br/>
+<strong>Result:</strong> 살기 위해 하이드록시클로로퀸이 필요한 루푸스 및 류마티스 관절염 환자는 약을 받을 수 없습니다.
+              </div>
+</div>
+<div class="slide light" data-index="5">
+<div class="content">
+<h2 class="title navy animate">일곱 개의 죽음 결점</h2>
+<div class="animate delay-1" style="text-align: left; max-width: 700px;">
+<p style="margin: 0.6rem 0;"><span style="color: var(--red); font-weight: 700;">1.</span> Non-randomized, open-label design</p>
+<p style="margin: 0.6rem 0;"><span style="color: var(--red); font-weight: 700;">2.</span> Convenience control group from different hospitals</p>
+<p style="margin: 0.6rem 0;"><span style="color: var(--red); font-weight: 700;">3.</span> 심각한 환자는 분석에서 제외</p>
+<p style="margin: 0.6rem 0;"><span style="color: var(--red); font-weight: 700;">4.</span> Different PCR thresholds for treatment vs. control</p>
+<p style="margin: 0.6rem 0;"><span style="color: var(--red); font-weight: 700;">5.</span> Ethics approval granted AFTER trial started</p>
+<p style="margin: 0.6rem 0;"><span style="color: var(--red); font-weight: 700;">6.</span> Children included despite exclusion criteria</p>
+<p style="margin: 0.6rem 0;"><span style="color: var(--red); font-weight: 700;">7.</span> One-day peer review by conflicted editor</p>
+</div>
+</div>
+</div>
+<div class="slide dark" data-index="6">
+<p class="title cream animate">심판: 2023년 12월</p>
+<div class="witness-statement animate delay-1">
+<div class="source">International Journal of Antimicrobial Agents</div>
+<div class="quote">
+                  "거의 4년 동안 과학계의 지속적인 압력 끝에 저널은 윤리, 방법론 및 데이터에 대한 우려를 이유로 Gautret 연구를 공식적으로 철회했습니다. 무결성."
+                </div>
+</div>
+<p class="animate delay-2" style="font-size: 1rem; margin-top: 1rem; text-align: center;">
+                It remains the most-cited COVID-19 paper to be retracted.<br/>
+<span style="color: var(--gold);">손상은 며칠 만에 발생했습니다. 수정에는 수년이 걸렸습니다.</span>
+</p>
+</div>
+<div class="slide light" data-index="7">
+<div class="content">
+<h2 class="title navy animate">Decision Tree: Red Flags in Rapid Evidence</h2>
+<div class="decision-tree animate delay-1">
+<div class="decision-node question">
+                    Is the result too good to be true?
+                  </div>
+<div class="decision-branches">
+<div class="decision-branch">
+<div class="branch-label yes">YES</div>
+<div class="arrow-down"></div>
+<div class="decision-node outcome-no" style="font-size: 0.85rem;">
+<strong>STOP</strong><br/>
+                        Verify before sharing
+                      </div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no">NO</div>
+<div class="arrow-down"></div>
+<div class="decision-node question" style="font-size: 0.85rem;">
+                        동료 검토 &lt; 1주?
+                      </div>
+<div class="arrow-down"></div>
+<div class="decision-node warning" style="font-size: 0.8rem;">
+<strong>CAUTION</strong><br/>
+                        Check author/editor affiliations
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark" data-index="8">
+<p class="title cream animate">회복기 혈장 붕괴</p>
+<div class="story-box animate delay-1">
+<strong>FDA의 서둘러 이야기:</strong><br/><br/>
+                2020년 8월: FDA는 다음에 대한 긴급 사용 승인을 부여합니다. 회복기 혈장, 사망률 35% 감소<br/><br/>
+                데이터는 35,000명의 환자를 대상으로 한 비무작위 연구에서 나온 것입니다. 통제 그룹이 없습니다. 과거 비교만 가능합니다.<br/><br/>
+<span style="color: var(--gold);">2021년 2월까지 7개의 RCT에서 사망률 혜택이 나타나지 않았습니다. EUA가 개정되었습니다. 이미 500,000번 이상의 용량이 투여되었습니다.</span>
+</div>
+<div class="citation-box animate delay-2">
+                Sources: FDA EUA Aug 2020; Janiaud P et al. JAMA 2021;325:1185-1195.
+              </div>
+</div>
+<div class="slide dark" data-index="9">
+<p class="direct-address animate">Consider the social media amplification:</p>
+<div class="gold-line animate delay-1"></div>
+<div class="stats-grid animate delay-2">
+<div class="stat-box danger">
+<div class="stat-value">3.1M</div>
+<div class="stat-label">Twitter engagements on Gautret paper (first week)</div>
+</div>
+<div class="stat-box danger">
+<div class="stat-value">15,000</div>
+<div class="stat-label">News articles citing it</div>
+</div>
+<div class="stat-box">
+<div class="stat-value">83</div>
+<div class="stat-label">Engagements on retraction notice</div>
+</div>
+</div>
+<p class="animate delay-3" style="font-size: 1rem; margin-top: 1rem; text-align: center; color: var(--gold);">
+                잘못된 정보는 수정보다 빠르게 퍼집니다. 이것이 바로 비대칭성에 맞서 싸우는 것입니다.
+              </p>
+</div>
+<div class="slide dark" data-index="10">
+<p class="title cream animate">접종: 벙킹 전 방어</p>
+<div class="direct-address animate delay-1">What if you could vaccinate minds against misinformation?</div>
+<div class="gold-line animate delay-2"></div>
+<div class="animate delay-3" style="text-align: left; max-width: 700px;">
+<p style="margin: 0.6rem 0; font-size: 0.95rem;"><span style="color: var(--gold);">Prebunking &gt; Debunking:</span> Warn people about manipulation tactics <em>before</em> they encounter false claims.</p>
+<p style="margin: 0.6rem 0; font-size: 0.95rem;"><span style="color: var(--gold);">The technique:</span> "소규모 연구가 X의 효과를 입증했다는 주장을 들을 수도 있습니다. 소규모 연구가 종종 오해를 불러일으키는 이유는 다음과 같습니다..."</p>
+<p style="margin: 0.6rem 0; font-size: 0.95rem;"><span style="color: var(--gold);">The evidence:</span> Inoculation reduces susceptibility to misinformation by 20-30% (van der Linden et al., 2020).</p>
+</div>
+</div>
+<div class="slide light" data-index="11">
+<div class="content">
+<h2 class="title navy animate">Inoculation Messaging: Practical Templates</h2>
+<div class="case-study animate delay-1">
+<h4>Three Prebunking Approaches</h4>
+<div style="font-size: 0.85rem;">
+<p style="margin: 0.75rem 0;"><strong>1. Logic-Based:</strong> "누군가가 100% 효과를 주장한다면 다음과 같이 질문하십시오: 대조군이 있었습니까? 비교 없는 연구 아무 것도 증명하지 못합니다."</p>
+<p style="margin: 0.75rem 0;"><strong>2. Source-Based:</strong> "동료 검토 전에 온라인에 게시된 연구를 주의하십시오. 아직 독립적인 전문가의 확인을 받지 않았습니다."</p>
+<p style="margin: 0.75rem 0;"><strong>3. Emotional-Based:</strong> "기적의 치료 주장은 우리의 희망을 활용합니다. 실제 치료법은 정직한 한계와 함께 어느 정도의 이점을 보여줍니다."</p>
+</div>
+</div>
+<p class="animate delay-2" style="font-size: 0.8rem; color: var(--light-text); text-align: center; margin-top: 1rem;">
+                  이 템플릿을 공중 보건 커뮤니케이션, 임상의 교육 및 언론에 사용하십시오.
+                </p>
+</div>
+</div>
+<div class="slide light" data-index="12">
+<div class="content">
+<h2 class="title navy animate">Decision Tree: Evaluating Preprint Claims</h2>
+<div aria-label="출판 전 연구 평가를 위한 결정 트리" class="decision-tree animate delay-1" role="img">
+<div class="decision-node question">
+                    연구가 동료 검토를 받았습니까?
+                  </div>
+<div class="decision-branches">
+<div class="decision-branch">
+<div class="branch-label yes">YES</div>
+<div class="arrow-down"></div>
+<div class="decision-node question" style="font-size: 0.85rem;">
+                        동료 검토가 2주 이상 진행되었습니까?
+                      </div>
+<div class="decision-branches" style="margin-top: 0.5rem;">
+<div class="decision-branch">
+<div class="branch-label yes" style="font-size: 0.7rem;">YES</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node outcome-yes" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>STANDARD APPRAISAL</strong>
+</div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no" style="font-size: 0.7rem;">NO</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node warning" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>CHECK CONFLICTS</strong><br/>Author-editor relationship?
+                          </div>
+</div>
+</div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no">PREPRINT</div>
+<div class="arrow-down"></div>
+<div class="decision-node outcome-no" style="font-size: 0.85rem;">
+<strong>TREAT AS PRELIMINARY</strong><br/>Never cite as definitive
+                      </div>
+</div>
+</div>
+</div>
+<div class="decision-tree-sr">
+                  결정 트리: 연구가 동료 검토를 받았습니까? 그렇다면 검토에 2주 이상 소요되었는지 확인하세요. 검토 시간이 적절하다면 표준 평가를 사용하십시오. 빠른 검토의 경우 작성자-편집자 충돌을 확인하세요. 사전 인쇄된 경우에만 예비로 치료하고 확정적인 것으로 인용하지 마십시오.
+                </div>
+</div>
+</div>
+<div class="slide light" data-index="11">
+<div class="content">
+<h2 class="title navy animate">Module 3 Quiz</h2>
+<div class="quiz-container">
+<div class="scenario-box animate delay-1">
+<div class="scenario-label">Scenario</div>
+                    한 연구에 따르면 질병 치료율은 100%입니다. 36명의 환자가 있으며 하루 만에 출판이 승인되었으며 악화된 6명의 환자는 분석에서 제외되었습니다.
+                  </div>
+<div class="quiz-question">
+<h4>이 연구에는 몇 개의 위험 신호가 있습니까?</h4>
+<div class="quiz-options" role="radiogroup">
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>A.</span> 1—small sample size
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>B.</span> 2—소량 표본 및 빠른 동료 검토
+                      </div>
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" onkeydown="handleQuizKey(event, this, true)" role="radio" tabindex="0">
+<span>C.</span> 4—too-good result, small sample, fast review, selective exclusion
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>D.</span> 0—동료 검토 연구는 신뢰할 수 있음
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide light" data-index="12">
+<div class="content">
+<h2 class="title navy animate">Module 3 Quiz (2)</h2>
+<div class="quiz-container">
+<div class="quiz-question">
+<h4>Gautret 하이드록시클로로퀸 연구는 310만 명의 트위터 참여를 받았습니다. 철회 통지는 83을 받았습니다. 이는 다음을 설명합니다.</h4>
+<div class="quiz-options" role="radiogroup">
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" onkeydown="handleQuizKey(event, this, true)" role="radio" tabindex="0">
+<span>A.</span> Misinformation asymmetry—false claims spread faster than corrections
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>B.</span> 철회는 뉴스 가치가 없었습니다
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>C.</span> Social media users lost interest in COVID-19
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>D.</span> Twitter's algorithm favors positive news
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black" data-index="13">
+<p class="refrain animate">A flawed study in a meta-analysis poisons all.</p>
+<p class="animate delay-1" style="font-size: 1.25rem; margin-top: 1.5rem;">모듈 4: 사기</p>
+</div>
+</div>
+ 모듈 4: 사기(Ivermectin) 
+<div class="module-slides" data-module="4">
+<div class="slide red active" data-index="0">
+<p class="refrain animate">Beware the meta-analysis built on sand.</p>
+</div>
+<div class="slide dark" data-index="1">
+<p class="direct-address animate">어떻게 사기가 발생하는지 목격하셨습니까? 증거를 통해 확산됩니까?</p>
+<p class="direct-address animate delay-1">How one lie becomes the foundation of many truths?</p>
+<div class="gold-line animate delay-2"></div>
+</div>
+<div class="slide dark" data-index="2">
+<p class="title cream animate">이버멕틴 현상</p>
+<div class="story-box animate delay-1">
+<strong>2020-2021:</strong> 구충제인 이버멕틴이 코로나19를 치료한다고 주장하는 여러 연구가 전 세계에서 나타났습니다. 메타 분석 결과를 종합하면 사망률이 51% 감소했습니다!<br/><br/>
+                Governments in Latin America, Africa, and India distribute millions of doses. Patients demand prescriptions. Some take veterinary formulations.<br/><br/>
+<span style="color: var(--gold);">하지만 데이터에 심각한 오류가 있었습니다.</span>
+</div>
+</div>
+<div class="slide dark" data-index="3">
+<p class="title cream animate">Elgazzar 연구: 사기 분석</p>
+<div class="case-study danger animate delay-1">
+<h4>Egypt, 2020: The Largest Ivermectin Trial</h4>
+<p>Dr. Ahmed Elgazzar posted a preprint claiming ivermectin reduced COVID-19 mortality by 90%.</p>
+<p>이는 여러 메타 분석에 포함되었으며 <strong>12.6%</strong> 사망률에 대한 전반적인 효과 추정에 기여했습니다.</p>
+<p style="color: var(--red); font-weight: 700; margin-top: 0.5rem;">그런 다음 대학원생이 데이터를 확인하기 시작했습니다.</p>
+</div>
+</div>
+<div class="slide dark" data-index="4">
+<p class="rhetorical animate">What did they find?</p>
+<div class="gold-line animate delay-1"></div>
+<div class="stats-grid animate delay-2">
+<div class="stat-box danger">
+<div class="stat-value">79</div>
+<div class="stat-label">환자 데이터 중복</div>
+</div>
+<div class="stat-box danger">
+<div class="stat-value">4+</div>
+<div class="stat-label">Deaths before trial started</div>
+</div>
+<div class="stat-box danger">
+<div class="stat-value">~50%</div>
+<div class="stat-label">Text plagiarized</div>
+</div>
+</div>
+<p class="animate delay-3" style="font-size: 1.1rem; margin-top: 1rem; text-align: center;">
+<span style="color: var(--red);">July 15, 2021:</span> 연구는 "윤리적 문제"로 인해 철회되었습니다.
+              </p>
+</div>
+<div class="slide light" data-index="5">
+<div class="content">
+<h2 class="title navy animate">폭발 효과</h2>
+<table class="results-table animate delay-1">
+<tr>
+<th>Studies Included</th>
+<th>Survival Benefit</th>
+<th>Significance</th>
+</tr>
+<tr>
+<td>All 12 studies</td>
+<td class="success">51% reduction</td>
+<td class="success">Significant</td>
+</tr>
+<tr>
+<td>Without Elgazzar</td>
+<td>38% reduction</td>
+<td style="color: var(--orange);">Borderline</td>
+</tr>
+<tr>
+<td>고편향 연구 없음</td>
+<td>10% reduction</td>
+<td class="danger">Not significant</td>
+</tr>
+<tr>
+<td>저편향 연구만</td>
+<td class="danger">4% reduction</td>
+<td class="danger">Not significant</td>
+</tr>
+</table>
+<p class="animate delay-2" style="font-size: 0.9rem; margin-top: 1rem; text-align: center; color: var(--light-text);">
+                  1개의 사기 연구 결론을 "효과 없음"에서 "기적의 치료법"으로 변경했습니다.
+                </p>
+</div>
+</div>
+<div class="slide dark" data-index="6">
+<p class="direct-address animate">그리고 Nature Medicine은 다음과 같이 경고했습니다.</p>
+<div class="witness-statement animate delay-1">
+<div class="source">Nature Medicine, October 2021</div>
+<div class="quote">
+                  "잘 조사되지 않은 증거 기반은 전 세계적으로 잠재적으로 효과가 없는 수백만 용량의 약물 투여를 뒷받침했지만 이 증거가 매우 기본적인 수치 조사를 받았을 때 다음과 같은 문제로 무너졌습니다. "
+                </div>
+</div>
+<p class="animate delay-2" style="font-size: 1rem; margin-top: 1rem; text-align: center; color: var(--gold);">
+                요약 데이터만을 기반으로 한 메타 분석은 본질적으로 신뢰할 수 없습니다.
+              </p>
+</div>
+<div class="slide light" data-index="7">
+<div class="content">
+<h2 class="title navy animate">Decision Tree: Detecting Problematic Studies</h2>
+<div class="decision-tree animate delay-1">
+<div class="decision-node question">
+                    원시 데이터에 액세스할 수 있습니까?
+                  </div>
+<div class="decision-branches">
+<div class="decision-branch">
+<div class="branch-label yes">YES</div>
+<div class="arrow-down"></div>
+<div class="decision-node question" style="font-size: 0.85rem;">
+                        Do baseline characteristics make sense?
+                      </div>
+<div class="arrow-down"></div>
+<div class="decision-node outcome-yes" style="font-size: 0.8rem;">
+                        주의해서 진행하십시오.
+                      </div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no">NO</div>
+<div class="arrow-down"></div>
+<div class="decision-node warning" style="font-size: 0.85rem;">
+<strong>HIGH RISK</strong><br/>
+                        감도 분석을 실행하지 않고 그것
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark" data-index="8">
+<p class="story-box animate">
+<strong>이버멕틴의 교훈:</strong><br/><br/>
+                Always run your meta-analysis twice:<br/>
+                모든 연구와 함께 한 번. 일단 가장 영향력 있는 사람은 없었습니다.<br/><br/>
+<span style="color: var(--gold);">한 연구에서 결론이 바뀌면 결론은 깨지기 쉽습니다.</span>
+</p>
+</div>
+<div class="slide dark" data-index="9">
+<p class="title cream animate">잭 로렌스 이야기</p>
+<div class="story-box animate delay-1">
+<strong>The Graduate Student Who Changed Everything:</strong><br/><br/>
+                Jack Lawrence was a master's student in London. He knew no Arabic. But he could spot duplicate rows in a spreadsheet.<br/><br/>
+                그는 Elgazzar의 데이터 보충 자료를 다운로드했습니다. 148행은 11행과 동일했습니다. 228행은 79행과 일치했습니다. <strong>79 patients appeared twice.</strong><br/><br/>
+                그는 자신이 발견한 내용을 트윗했습니다. 며칠 내에 사전 인쇄 서버가 해당 논문을 철회했습니다. 메타 분석이 수정되었습니다. 정책이 변경되었습니다.<br/><br/>
+<span style="color: var(--gold);">기본 데이터 기술을 갖춘 한 학생이 동료 검토가 할 수 없는 작업을 수행했습니다.</span>
+</div>
+</div>
+<div class="slide light" data-index="10">
+<div class="content">
+<h2 class="title navy animate">Decision Tree: Fraud Detection Checklist</h2>
+<div aria-label="연구에서 잠재적 사기 탐지를 위한 결정 트리" class="decision-tree animate delay-1" role="img">
+<div class="decision-node question">
+                    Are baseline characteristics "too balanced"?<br/>
+<span style="font-size: 0.7rem; opacity: 0.8;">(Identical means across groups)</span>
+</div>
+<div class="decision-branches">
+<div class="decision-branch">
+<div class="branch-label yes">YES</div>
+<div class="arrow-down"></div>
+<div class="decision-node outcome-no" style="font-size: 0.85rem;">
+<strong>RED FLAG</strong><br/>May indicate fabrication
+                      </div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no">NO</div>
+<div class="arrow-down"></div>
+<div class="decision-node question" style="font-size: 0.85rem;">
+                        Do event dates precede enrollment?
+                      </div>
+<div class="decision-branches" style="margin-top: 0.5rem;">
+<div class="decision-branch">
+<div class="branch-label yes" style="font-size: 0.7rem;">YES</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node outcome-no" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>FABRICATION</strong><br/>Deaths before trial = impossible
+                          </div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no" style="font-size: 0.7rem;">NO</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node outcome-yes" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>PROCEED</strong><br/>Check other signals
+                          </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="decision-tree-sr">
+                  의사결정 트리: 기본 특성이 너무 완벽하게 균형을 이루고 있습니까? 그렇다면 잠재적인 조작에 대한 위험 신호입니다. 아니요인 경우 이벤트 날짜가 등록보다 앞선지 확인하세요. 재판이 시작되기 전의 사망은 불가능하며 조작을 의미합니다. 날짜가 유효한 경우 다른 사기 신호를 확인하세요.
+                </div>
+</div>
+</div>
+<div class="slide light" data-index="11">
+<div class="content">
+<h2 class="title navy animate">Module 4 Quiz</h2>
+<div class="quiz-container">
+<div class="scenario-box animate delay-1">
+<div class="scenario-label">Scenario</div>
+                    메타 분석을 수행 중입니다. 한 연구는 통합 효과의 40%를 기여합니다. 이것이 없으면 결과는 유의미함(p=0.02)에서 유의미하지 않음(p=0.31)으로 변경됩니다.
+                  </div>
+<div class="quiz-question">
+<h4>어떻게 해야 합니까?</h4>
+<div class="quiz-options" role="radiogroup">
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>A.</span> Keep it—all studies meeting criteria should be included
+                      </div>
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" onkeydown="handleQuizKey(event, this, true)" role="radio" tabindex="0">
+<span>B.</span> 두 분석을 눈에 띄게 보고합니다. 확인을 위해 원시 데이터 요청
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>C.</span> Exclude it—large effects are suspicious
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>D.</span> 모든 연구를 포함하는 분석만 보고
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide light" data-index="12">
+<div class="content">
+<h2 class="title navy animate">Module 4 Quiz (2)</h2>
+<div class="quiz-container">
+<div class="quiz-question">
+<h4>Elgazzar ivermectin 연구는 다음과 같은 이유로 사기로 감지되었습니다.</h4>
+<div class="quiz-options" role="radiogroup">
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>A.</span> Peer reviewers found statistical errors
+                      </div>
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" onkeydown="handleQuizKey(event, this, true)" role="radio" tabindex="0">
+<span>B.</span> A graduate student found duplicate patient rows and impossible death dates
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>C.</span> The journal's plagiarism detector flagged it
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>D.</span> FDA가 임상시험 사이트를 감사했습니다
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark" data-index="13">
+<p class="title cream animate">TOGETHER 임상시험 실망감</p>
+<div class="story-box animate delay-1">
+<strong>희망을 끝낸 대규모 임상시험 이야기:</strong><br/><br/>
+                플루복사민(항우울제)이 중증 코로나19를 예방할 수 있다는 소규모 임상시험 이후 전 세계는 확실한 답을 기다렸습니다.<br/><br/>
+                The TOGETHER trial enrolled 1,497 patients in Brazil. <strong>Initial interim: 32% reduction in hospitalization!</strong><br/><br/>
+                최종 결과: 위약 환자 중 5.1%만이 입원했고, 플루복사민 환자의 4.0%. 효과는 기대했던 것보다 작았으며 절대적인 이점도 작았습니다.<br/><br/>
+<span style="color: var(--gold);">Small absolute differences require enormous trials to detect. Most promising treatments fade when tested properly.</span>
+</div>
+<div class="citation-box animate delay-2">
+                Source: Reis G et al. Lancet Glob Health 2022. TOGETHER trial platform.
+              </div>
+</div>
+<div class="slide dark" data-index="14">
+<p class="story-box animate">
+<strong>파워 포즈 이야기:</strong><br/><br/>
+                2010년 연구자들은 "파워 포즈"(슈퍼맨처럼 서 있는 자세)가 테스토스테론과 위험 감수를 증가시킨다고 주장했습니다. 이 연구는 TED 강연, 비즈니스 서적, 수백만 명의 신자 등 입소문을 타고 퍼졌습니다. 여러 연구에서 이를 복제한 것으로 보입니다.<br/><br/>
+                그런 다음 더 큰 규모의 사전 등록된 복제가 실패했습니다. 원래 공동 저자는 연구 결과를 공개적으로 부인했습니다. 많은 소규모의 유연한 연구에서 원하는 것을 찾았습니다.<br/><br/>
+<span style="color: var(--gold);">약한 증거의 곱셈은 강력한 증거처럼 느껴졌습니다. 엄격한 반복을 통해 그것이 잡음이라는 것이 밝혀지기 전까지는 말입니다.</span>
+</p>
+<div class="story-decision-tree animate delay-1">
+<p class="decision-prompt">당신은 대중적인 강력한 효과를 재현하지 못하는 사전 등록된 대규모 복제 연구를 받는 저널 편집자입니다. 원본 연구에는 수백만 명의 신자들과 유명한 TED 강연이 있습니다.</p>
+<div class="decision-options">
+<div class="decision-option" data-path="wrong" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();}" role="button" tabindex="0">
+<strong>Path A:</strong> 확립되고 대중적인 연구 결과와 모순되므로 복제를 거부하십시오.
+                    <div class="consequence">→ False belief persists; millions continue to be misled; science fails to self-correct</div>
+</div>
+<div class="decision-option" data-path="right" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();}" role="button" tabindex="0">
+<strong>Path B:</strong> 실패한 복제 게시 - 증거를 통해 말해보세요
+                    <div class="consequence">→ 과학이 자체 수정합니다. 원본 공동 저자는 결과를 공개적으로 부인합니다. 인기보다 진실이 드러난다</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide light" data-index="15">
+<div class="content">
+<h2 class="title navy animate">Decision Tree: Reading a Forest Plot</h2>
+<div aria-label="삼림 도표 결과 해석을 위한 결정 트리" class="decision-tree animate delay-1" role="img">
+<div class="decision-node question">
+                    합동 추정치가 1(또는 평균 차이의 경우 0)을 넘나요?
+                  </div>
+<div class="decision-branches">
+<div class="decision-branch">
+<div class="branch-label yes">YES</div>
+<div class="arrow-down"></div>
+<div class="decision-node outcome-no" style="font-size: 0.85rem;">
+<strong>NOT SIGNIFICANT</strong><br/>Cannot exclude no effect
+                      </div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no">NO</div>
+<div class="arrow-down"></div>
+<div class="decision-node question" style="font-size: 0.85rem;">
+                        Is I² &lt; 50%?
+                      </div>
+<div class="decision-branches" style="margin-top: 0.5rem;">
+<div class="decision-branch">
+<div class="branch-label yes" style="font-size: 0.7rem;">LOW</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node outcome-yes" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>CONSISTENT EFFECT</strong><br/>Higher confidence
+                          </div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no" style="font-size: 0.7rem;">HIGH</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node warning" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>HETEROGENEITY</strong><br/>True effect varies—explore why
+                          </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="decision-tree-sr">
+                  의사결정 트리: 합동 추정 신뢰 구간이 효과가 없는 선을 넘나요? 그렇다면 결과는 통계적으로 유의하지 않습니다. 그렇지 않은 경우 이질성을 확인하십시오. I-제곱이 50% 미만이면 효과는 더 높은 신뢰도와 일치합니다. I-제곱이 높으면 이질성이 있고 실제 효과는 연구마다 다릅니다. 이유를 알아보세요.
+                </div>
+</div>
+</div>
+<div class="slide black" data-index="16">
+<p class="refrain animate">Beware the meta-analysis built on sand.</p>
+<p class="animate delay-1" style="font-size: 1.25rem; margin-top: 1.5rem;">모듈 5: 승리</p>
+</div>
+</div>
+ MODULE 5: 승리(복구 실험) 
+<div class="module-slides" data-module="5">
+<div class="slide green active" data-index="0">
+<p class="refrain animate">From protocol to saving lives: 100 days.</p>
+</div>
+<div class="slide dark" data-index="1">
+<p class="direct-address animate">이제 어떻게 되어야 하는지 이야기를 들어보세요. 완료.</p>
+<p class="direct-address animate delay-1">Of how speed and rigor found harmony.</p>
+<div class="gold-line animate delay-2"></div>
+</div>
+<div class="slide dark" data-index="2">
+<p class="title cream animate">복구 실험</p>
+<div class="success-box animate delay-1">
+<strong>March 2020, United Kingdom:</strong><br/><br/>
+                하이드록시클로로퀸 혼란이 확산됨에 따라 영국 연구자들은 세계 최대 규모의 코로나19 치료 실험을 시작했습니다. 빠르고 엄격하게 설계되었습니다.<br/><br/>
+<span style="color: var(--green);">Within 6 weeks of funding, patients were being enrolled.</span>
+</div>
+</div>
+<div class="slide dark" data-index="3">
+<p class="rhetorical animate">How did they achieve speed without sacrificing quality?</p>
+<div class="gold-line animate delay-1"></div>
+<div class="stats-grid animate delay-2">
+<div class="stat-box success">
+<div class="stat-value">176</div>
+<div class="stat-label">Hospitals enrolled</div>
+</div>
+<div class="stat-box success">
+<div class="stat-value">11,500</div>
+<div class="stat-label">Patients (dexamethasone arm)</div>
+</div>
+<div class="stat-box success">
+<div class="stat-value">100</div>
+<div class="stat-label">일수: 결과에 대한 프로토콜</div>
+</div>
+</div>
+<p class="animate delay-3" style="font-size: 1rem; margin-top: 1rem; text-align: center;">
+                An adaptive platform trial: multiple treatments tested simultaneously.
+              </p>
+</div>
+<div class="slide light" data-index="4">
+<div class="content">
+<h2 class="title navy animate">2020년 6월 16일: 발표</h2>
+<div class="case-study success animate delay-1">
+<h4>Dexamethasone Results</h4>
+<p><strong>Ventilated patients:</strong> 29% mortality reduction (NNT = 8)</p>
+<p><strong>Oxygen therapy:</strong> 20% mortality reduction (NNT = 25)</p>
+<p><strong>No oxygen needed:</strong> No benefit (possible harm)</p>
+<p style="color: var(--green); font-weight: 700; margin-top: 0.5rem;">
+                    Cost per treatment: ~$6 for a common steroid.
+                  </p>
+</div>
+</div>
+</div>
+<div class="slide dark" data-index="5">
+<p class="direct-address animate">그리고 전 세계는 이번에 정확하게 응답했습니다.</p>
+<div class="gold-line animate delay-1"></div>
+<div class="timeline-horizontal animate delay-2">
+<div class="timeline-point">
+<div class="timeline-dot success">1</div>
+<div class="timeline-label">Results announced</div>
+<div class="timeline-date">June 16</div>
+</div>
+<div class="timeline-point">
+<div class="timeline-dot success">2</div>
+<div class="timeline-label">UK practice changed</div>
+<div class="timeline-date">Same day</div>
+</div>
+<div class="timeline-point">
+<div class="timeline-dot success">3</div>
+<div class="timeline-label">NIH guidelines updated</div>
+<div class="timeline-date">Within days</div>
+</div>
+<div class="timeline-point">
+<div class="timeline-dot success">4</div>
+<div class="timeline-label">WHO recommendation</div>
+<div class="timeline-date">September</div>
+</div>
+</div>
+</div>
+<div class="slide dark" data-index="6">
+<p class="big-number gold animate">1,000,000</p>
+<p class="animate delay-1" style="font-size: 1.5rem; margin-top: 1rem;">Lives saved globally by March 2021</p>
+<div class="gold-line animate delay-2"></div>
+<p class="animate delay-3" style="font-size: 1rem; text-align: center; max-width: 600px;">
+                영국에서 22,000명 혼자. 60년 동안 판매되었던 6달러짜리 약품에서.<br/>
+<span style="color: var(--gold);">차이점은 엄격한 증거, 신속하게 생성되었습니다.</span>
+</p>
+</div>
+<div class="slide light" data-index="7">
+<div class="content">
+<h2 class="title navy animate">What Made RECOVERY Different?</h2>
+<div class="animate delay-1" style="text-align: left; max-width: 700px;">
+<p style="margin: 0.6rem 0;"><span style="color: var(--green); font-weight: 700;">1.</span> Randomized controlled design (not observational)</p>
+<p style="margin: 0.6rem 0;"><span style="color: var(--green); font-weight: 700;">2.</span> 사전 지정된 결과 및 분석 계획</p>
+<p style="margin: 0.6rem 0;"><span style="color: var(--green); font-weight: 700;">3.</span> Massive scale (statistical power)</p>
+<p style="margin: 0.6rem 0;"><span style="color: var(--green); font-weight: 700;">4.</span> Adaptive platform (dropped arms early if no signal)</p>
+<p style="margin: 0.6rem 0;"><span style="color: var(--green); font-weight: 700;">5.</span> Simplified enrollment (one-page consent in emergency)</p>
+<p style="margin: 0.6rem 0;"><span style="color: var(--green); font-weight: 700;">6.</span> 독립 데이터 모니터링 위원회</p>
+</div>
+</div>
+</div>
+<div class="slide dark" data-index="8">
+<p class="story-box animate">
+<strong>의 교훈 복구:</strong><br/><br/>
+                Speed does not require cutting corners. It requires cutting waste.<br/><br/>
+                Simplified consent forms. Adaptive designs. Platform trials that test multiple treatments at once.<br/><br/>
+<span style="color: var(--gold);">엄격함과 속도는 적이 아닙니다. 이들은 소개를 기다리는 파트너입니다.</span>
+</p>
+</div>
+<div class="slide dark" data-index="9">
+<p class="title cream animate">SOLIDARITY 대조</p>
+<div class="contrast-container animate delay-1">
+<div class="contrast-box before">
+<h4>소규모 연구 결합</h4>
+<div class="stat" style="color: var(--red);">Chaos</div>
+<div class="label">여러 모순된 결과</div>
+<p style="font-size: 0.8rem; margin-top: 0.5rem;">Gautret: 36 patients<br/>Elgazzar: ~400 patients (fraud)</p>
+</div>
+<div class="contrast-box after">
+<h4>RECOVERY/SOLIDARITY</h4>
+<div class="stat" style="color: var(--green);">Clarity</div>
+<div class="label">Definitive answers</div>
+<p style="font-size: 0.8rem; margin-top: 0.5rem;">RECOVERY: 11,500 patients<br/>SOLIDARITY: 11,330 patients</p>
+</div>
+</div>
+<p class="animate delay-2" style="font-size: 0.95rem; margin-top: 1rem; text-align: center; color: var(--gold);">
+                플랫폼 시험은 많은 소규모 연구의 소음을 하나의 대규모 연구 신호로 대체합니다. 하나.
+              </p>
+</div>
+<div class="slide light" data-index="10">
+<div class="content">
+<h2 class="title navy animate">결정 트리: 대규모 시험을 기다려야 합니까?</h2>
+<div aria-label="대규모 대기 여부 결정 트리 시도" class="decision-tree animate delay-1" role="img">
+<div class="decision-node question">
+                    Is a large platform trial (&gt;1000 patients) underway?
+                  </div>
+<div class="decision-branches">
+<div class="decision-branch">
+<div class="branch-label yes">YES</div>
+<div class="arrow-down"></div>
+<div class="decision-node question" style="font-size: 0.85rem;">
+                        Will results be available within decision timeline?
+                      </div>
+<div class="decision-branches" style="margin-top: 0.5rem;">
+<div class="decision-branch">
+<div class="branch-label yes" style="font-size: 0.7rem;">YES</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node outcome-yes" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>WAIT</strong><br/>더 높은 품질의 증거 제공 예정
+                          </div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no" style="font-size: 0.7rem;">NO</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node warning" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>지금 빠른 검토</strong><br/>Update when trial reports
+                          </div>
+</div>
+</div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no">NO</div>
+<div class="arrow-down"></div>
+<div class="decision-node" style="font-size: 0.85rem; background: var(--teal);">
+<strong>RAPID REVIEW</strong><br/>가용 가능한 최상의 증거
+                      </div>
+</div>
+</div>
+</div>
+<div class="decision-tree-sr">
+                  결정 트리: 대규모 플랫폼입니다. 재판이 진행 중인가요? 그렇다면 결과가 제때에 나올지 확인하세요. 결과가 곧 나올 경우 더 높은 품질의 증거를 기다리십시오. 제때에 오지 않는다면 지금 신속하게 검토하고 임상시험 보고서가 나오면 업데이트하세요. 대규모 임상시험이 없으면 이용 가능한 최선의 증거를 신속하게 검토하십시오.
+                </div>
+</div>
+</div>
+<div class="slide light" data-index="11">
+<div class="content">
+<h2 class="title navy animate">Module 5 Quiz</h2>
+<div class="quiz-container">
+<div class="quiz-question">
+<h4>RECOVERY 임상시험에는 덱사메타손군에 11,500명의 환자가 등록되었습니다. 이것이 가능했던 주된 이유는 무엇입니까?</h4>
+<div class="quiz-options" role="radiogroup">
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>A.</span> Unlimited government funding
+                      </div>
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" onkeydown="handleQuizKey(event, this, true)" role="radio" tabindex="0">
+<span>B.</span> Simplified one-page consent and adaptive platform design
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>C.</span> Patients were enrolled without consent
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>D.</span> Lower ethical standards during pandemics
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide light" data-index="12">
+<div class="content">
+<h2 class="title navy animate">Module 5 Quiz (2)</h2>
+<div class="quiz-container">
+<div class="quiz-question">
+<h4>COVID-19용 덱사메타손은 전 세계적으로 약 100만 명의 생명을 구했습니다. 치료당 약품 비용은 다음과 같습니다.</h4>
+<div class="quiz-options" role="radiogroup">
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" onkeydown="handleQuizKey(event, this, true)" role="radio" tabindex="0">
+<span>A.</span> ~$6
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>B.</span> ~$600
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>C.</span> ~$6,000
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>D.</span> 이 약은 특허를 받았고 비쌌습니다
+                      </div>
+</div>
+</div>
+</div>
+<div class="citation-box animate delay-1">
+                  Source: RECOVERY Collaborative Group. N Engl J Med 2021;384:693-704. Lives saved estimate: Horby &amp; Landray, Science 2021.
+                </div>
+</div>
+</div>
+<div class="slide dark" data-index="13">
+<p class="title cream animate">아지스로마이신 포기</p>
+<div class="warning-box animate delay-1">
+<strong>모든 것에 추가된 약에 대한 이야기:</strong><br/><br/>
+                Gautret 연구에서는 하이드록시클로로퀸과 아지스로마이신을 결합했습니다. 갑자기 아지스로마이신이 전 세계적으로 치료 프로토콜에 추가되었습니다.<br/><br/>
+                그러나 아지스로마이신은 단독으로 테스트된 적이 없습니다. 그 조합은 입증된 적이 없습니다. 그리고 아지스로마이신은 심장 부정맥을 유발합니다.<br/><br/>
+<strong>July 2020:</strong> RECOVERY randomizes 7,763 patients. Result: <span style="color: var(--red);">No benefit. Median hospital stay identical. Mortality identical.</span><br/><br/>
+<span style="color: var(--gold);">원래 연구에는 의문의 여지가 없었기 때문에 몇 달 동안 심장 위험에 노출해도 아무런 유익이 없었습니다.</span>
+</div>
+<div class="citation-box animate delay-2">
+                Source: RECOVERY Collaborative. Lancet 2021;397:605-612. Azithromycin arm.
+              </div>
+</div>
+<div class="slide dark" data-index="14">
+<p class="story-box animate">
+<strong>Tacoma Narrows 이야기:</strong><br/><br/>
+                1940년에 Tacoma Narrows Bridge는 신속하게 건설되었으며 싸게. 엔지니어들은 시간을 절약하기 위해 풍동 테스트를 건너뛰었습니다. 개통 4개월 후 적당한 바람으로 인해 다리가 진동했습니다. 그것은 심하게 비틀리고 무너졌습니다. 공대생들이 아직도 공부하고 있는 영상에 포착되었습니다.<br/><br/>
+                광범위한 테스트를 거쳐 천천히 건설된 근처의 오래된 다리가 여전히 서 있습니다. 세 번째 교훈은 나중에 나왔습니다. 현대 교량은 검증을 건너뛰지 않는 빠른 방법인 신속한 계산 테스트를 사용합니다.<br/><br/>
+<span style="color: var(--gold);">Speed without testing destroys. Testing without speed delays. Rapid testing saves.</span>
+</p>
+<div class="story-decision-tree animate delay-1">
+<p class="decision-prompt">당신은 1940년에 Tacoma Narrows Bridge를 설계한 엔지니어였습니다. 예산은 부족하고 마감일은 확실합니다. 풍동 테스트에는 몇 주와 비용이 추가됩니다. 무엇을 하시나요?</p>
+<div class="decision-options">
+<div class="decision-option" data-path="wrong" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();}" role="button" tabindex="0">
+<strong>Path A:</strong> 시간과 비용을 절약하기 위해 풍동 테스트를 건너뛰세요. 설계가 서류상으로는 견고해 보입니다.
+                    <div class="consequence">→ Bridge collapses 4 months after opening; "Galloping Gertie" becomes a cautionary tale studied by every engineering student</div>
+</div>
+<div class="decision-option" data-path="right" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();}" role="button" tabindex="0">
+<strong>Path B:</strong> Insist on proper wind tunnel testing despite the delay
+                    <div class="consequence">→ 적절한 테스트를 거쳐 건설된 인근의 오래된 교량은 오늘날에도 여전히 건재합니다. 최신 교량은 신속하고 검증된 신속한 계산 테스트를 사용합니다.</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide light" data-index="15">
+<div class="content">
+<h2 class="title navy animate">Decision Tree: Evaluating Platform Trial Arms</h2>
+<div aria-label="Decision tree for platform trial arm evaluation" class="decision-tree animate delay-1" role="img">
+<div class="decision-node question">
+                    DSMB가 이 단계를 조기에 중지했습니까?
+                  </div>
+<div class="decision-branches">
+<div class="decision-branch">
+<div class="branch-label yes">STOPPED</div>
+<div class="arrow-down"></div>
+<div class="decision-node question" style="font-size: 0.85rem;">
+                        무익하거나 해를 끼치기 위해 중지했습니까?
+                      </div>
+<div class="decision-branches" style="margin-top: 0.5rem;">
+<div class="decision-branch">
+<div class="branch-label" style="background: var(--orange); color: white; font-size: 0.7rem;">FUTILITY</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node warning" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>NO BENEFIT</strong><br/>이 치료법을 사용하지 마십시오
+                          </div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no" style="font-size: 0.7rem;">HARM</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node outcome-no" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>DANGEROUS</strong><br/>Contraindicated
+                          </div>
+</div>
+</div>
+</div>
+<div class="decision-branch">
+<div class="branch-label" style="background: var(--green); color: white;">STOPPED BENEFIT</div>
+<div class="arrow-down"></div>
+<div class="decision-node outcome-yes" style="font-size: 0.85rem;">
+<strong>EFFECTIVE</strong><br/>Update guidelines
+                      </div>
+</div>
+</div>
+</div>
+<div class="decision-tree-sr">
+                  결정 트리: 데이터 안전 모니터링 위원회(Data Safety Monitoring Board)가 이 시험 단계를 중지했습니까? 일찍? 무용지물로 인해 치료를 중단하면 치료에 아무런 이점이 없으므로 사용해서는 안 됩니다. 해를 입힐 목적으로 치료를 중단하면 치료는 위험하며 금기입니다. 명확한 이점으로 인해 치료를 조기에 중단하면 치료가 효과적이며 지침을 업데이트해야 합니다.
+                </div>
+</div>
+</div>
+<div class="slide black" data-index="16">
+<p class="refrain animate">From protocol to saving lives: 100 days.</p>
+<p class="animate delay-1" style="font-size: 1.25rem; margin-top: 1.5rem;">모듈 6: 생활</p>
+</div>
+</div>
+ 모듈 6: 생활 체계적 검토 
+<div class="module-slides" data-module="6">
+<div class="slide dark active" data-index="0">
+<p class="refrain animate">살아 있는 증거가 생활에 도움이 됩니다.</p>
+</div>
+<div class="slide dark" data-index="1">
+<p class="direct-address animate">고려해 보셨나요? 끊임없이 늘어나는 증거?</p>
+<p class="direct-address animate delay-1">전염병 자체와 호흡하는 리뷰?</p>
+<div class="gold-line animate delay-2"></div>
+</div>
+<div class="slide dark" data-index="2">
+<p class="title cream animate">살아있는 체계적 검토</p>
+<div class="story-box animate delay-1">
+                A traditional review is a photograph: frozen in time.<br/><br/>
+                리빙 리뷰는 동영상입니다. 새로운 증거가 나올 때마다 지속적으로 업데이트됩니다.<br/><br/>
+<span style="color: var(--gold);">In a pandemic, the photograph is obsolete before it's printed.</span>
+</div>
+</div>
+<div class="slide light" data-index="3">
+<div class="content">
+<h2 class="title navy animate">PAHO의 리빙 리뷰: 사례 연구</h2>
+<div class="case-study animate delay-1">
+<h4>Pan American Health Organization, April 2020 - Present</h4>
+<p><strong>Launched:</strong> April 2020</p>
+<p><strong>Interventions assessed:</strong> 305 treatments</p>
+<p><strong>RCTs included:</strong> 924 randomized controlled trials</p>
+<p><strong>Updates:</strong> 48 updates published</p>
+<p><strong>Sources monitored:</strong> 40+ databases including preprint servers</p>
+</div>
+</div>
+</div>
+<div class="slide dark" data-index="4">
+<p class="rhetorical animate">When should a review become "living"?</p>
+<div class="gold-line animate delay-1"></div>
+<div class="animate delay-2" style="text-align: left; max-width: 600px;">
+<p style="margin: 0.75rem 0;"><span style="color: var(--gold);">1.</span> The topic is a <strong>priority</strong> for decision-making</p>
+<p style="margin: 0.75rem 0;"><span style="color: var(--gold);">2.</span> 새로운 증거가 등장합니다 <strong>rapidly</strong></p>
+<p style="margin: 0.75rem 0;"><span style="color: var(--gold);">3.</span> Current certainty is <strong>low</strong></p>
+<p style="margin: 0.75rem 0;"><span style="color: var(--gold);">4.</span> 새로운 증거가 나올 가능성이 높습니다 <strong>change conclusions</strong></p>
+</div>
+<p class="animate delay-3" style="font-size: 0.95rem; margin-top: 1rem; text-align: center; color: var(--gold);">
+                If all four are true, a living approach is warranted.
+              </p>
+</div>
+<div class="slide light" data-index="5">
+<div class="content">
+<h2 class="title navy animate">The Challenge: Keeping Reviews Alive</h2>
+<div class="stats-grid animate delay-1">
+<div class="stat-box">
+<div class="stat-value">97</div>
+<div class="stat-label">Living SRs on COVID-19</div>
+</div>
+<div class="stat-box danger">
+<div class="stat-value">35%</div>
+<div class="stat-label">Updated at least once</div>
+</div>
+<div class="stat-box danger">
+<div class="stat-value">65%</div>
+<div class="stat-label">Never updated (dormant)</div>
+</div>
+</div>
+<div class="story-box animate delay-2" style="background: rgba(30,39,97,0.1); border-color: var(--navy);">
+                  업데이트되지 않는 "살아있는" 리뷰는 기존 리뷰보다 나쁩니다. 이는 증거가 최신이라는 잘못된 확신을 조성합니다.
+                </div>
+</div>
+</div>
+<div class="slide dark" data-index="6">
+<p class="title cream animate">Decision Tree: When to Update a Living Review</p>
+<div class="decision-tree animate delay-1">
+<div class="decision-node question">
+                  New RCT(s) identified since last update?
+                </div>
+<div class="decision-branches">
+<div class="decision-branch">
+<div class="branch-label yes">YES</div>
+<div class="arrow-down"></div>
+<div class="decision-node question" style="font-size: 0.85rem;">
+                      Likely to change conclusions or certainty?
+                    </div>
+<div class="decision-branches" style="margin-top: 0.5rem;">
+<div class="decision-branch">
+<div class="branch-label yes" style="font-size: 0.7rem;">YES</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node outcome-yes" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>UPDATE NOW</strong>
+</div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no" style="font-size: 0.7rem;">NO</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node" style="font-size: 0.75rem; padding: 0.5rem; background: var(--teal);">
+<strong>Queue for next scheduled update</strong>
+</div>
+</div>
+</div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no">NO</div>
+<div class="arrow-down"></div>
+<div class="decision-node" style="font-size: 0.85rem;">
+<strong>No update needed</strong><br/>
+                      Note: "No new evidence" is still information
+                    </div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark" data-index="7">
+<p class="title cream animate">몰누피라비르 모멘텀 이야기</p>
+<div class="story-box animate delay-1">
+<strong>중간 분석의 위험:</strong><br/><br/>
+                October 2021: Merck announces interim results—50% reduction in hospitalization!<br/>
+                Stock prices soar. Countries pre-order millions of courses. Headlines celebrate.<br/><br/>
+                November 2021: Final results published—30% reduction. Still significant, but...<br/>
+                2021년 12월: 업데이트된 분석에 따르면 대조군의 6.8%만 입원했지만 입원하지 않은 것으로 나타났습니다. 14.1%.<br/><br/>
+<span style="color: var(--gold);">분모가 변경되었습니다. 마법이 사라졌습니다. 교훈: 중간 ≠ 최종.</span>
+</div>
+<div class="citation-box animate delay-2">
+                Source: Jayk Bernal A et al. N Engl J Med 2022;386:509-520. MOVe-OUT trial.
+              </div>
+</div>
+<div class="slide dark" data-index="8">
+<p class="direct-address animate">그리고 나서 Paxlovid가 나왔습니다.</p>
+<div class="gold-line animate delay-1"></div>
+<div class="contrast-container animate delay-2">
+<div class="contrast-box" style="background: rgba(234,88,12,0.15); border-color: var(--orange);">
+<h4 style="color: var(--orange);">Molnupiravir</h4>
+<div class="stat">30%</div>
+<div class="label">Reduction (final)</div>
+<p style="font-size: 0.8rem; margin-top: 0.5rem;">Low-risk patients<br/>Mutagenic concerns</p>
+</div>
+<div class="contrast-box after">
+<h4>Paxlovid</h4>
+<div class="stat">89%</div>
+<div class="label">Reduction (consistent)</div>
+<p style="font-size: 0.8rem; margin-top: 0.5rem;">High-risk patients<br/>Drug interactions</p>
+</div>
+</div>
+<p class="animate delay-3" style="font-size: 0.95rem; margin-top: 1rem; text-align: center; color: var(--gold);">
+                실시간 검토는 중간과 최종, 예비와 확인을 구별해야 합니다.
+              </p>
+</div>
+<div class="slide light" data-index="9">
+<div class="content">
+<h2 class="title navy animate">Decision Tree: Retiring a Living Review</h2>
+<div aria-label="리빙 리뷰 중단 시기 결정 트리" class="decision-tree animate delay-1" role="img">
+<div class="decision-node question">
+                    Has evidence stabilized? (No new significant trials in 6 months)
+                  </div>
+<div class="decision-branches">
+<div class="decision-branch">
+<div class="branch-label yes">YES</div>
+<div class="arrow-down"></div>
+<div class="decision-node question" style="font-size: 0.85rem;">
+                        Is certainty now moderate/high?
+                      </div>
+<div class="decision-branches" style="margin-top: 0.5rem;">
+<div class="decision-branch">
+<div class="branch-label yes" style="font-size: 0.7rem;">YES</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node outcome-yes" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>RETIRE TO STATIC</strong><br/>최종 날짜로 보관
+                          </div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no" style="font-size: 0.7rem;">NO</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node warning" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>KEEP LIVING</strong><br/>Low certainty needs monitoring
+                          </div>
+</div>
+</div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no">NO</div>
+<div class="arrow-down"></div>
+<div class="decision-node" style="font-size: 0.85rem; background: var(--teal);">
+<strong>KEEP LIVING</strong><br/>활성 증거 field
+                      </div>
+</div>
+</div>
+</div>
+<div class="decision-tree-sr">
+                  의사결정 트리: 6개월 동안 새로운 임상시험이 없어 근거가 안정화되었습니까? 그렇다면 현재 확실성이 보통인지 아니면 높은지 확인하세요. 확실성이 적절하다면 최종 날짜를 정하여 정적 검토로 전환합니다. 확실성이 여전히 낮으면 계속 살아서 새로운 증거를 모니터링하세요. 근거가 아직 안정화되지 않은 경우 생활 검토를 활성화하세요.
+                </div>
+</div>
+</div>
+<div class="slide light" data-index="10">
+<div class="content">
+<h2 class="title navy animate">Module 6 Quiz</h2>
+<div class="quiz-container">
+<div class="quiz-question">
+<h4>한 연구에 따르면 코로나19에 대한 "살아있는" 체계적 검토의 65%가 업데이트되지 않은 것으로 나타났습니다. 이는 다음과 같은 이유로 문제가 됩니다.</h4>
+<div class="quiz-options" role="radiogroup">
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" onkeydown="handleQuizKey(event, this, true)" role="radio" tabindex="0">
+<span>A.</span> "살아있는" 라벨은 증거가 최신이라는 잘못된 확신을 만듭니다.
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>B.</span> Living reviews must be updated daily by definition
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>C.</span> Authors should have completed them as traditional reviews instead
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>D.</span> Living reviews are always inferior to static reviews
+                      </div>
+</div>
+</div>
+</div>
+<div class="citation-box animate delay-1">
+                  Source: Stable et al. J Clin Epidemiol 2022;142:66-73. Survey of 97 COVID-19 living SRs.
+                </div>
+</div>
+</div>
+<div class="slide light" data-index="11">
+<div class="content">
+<h2 class="title navy animate">Module 6 Quiz (2)</h2>
+<div class="quiz-container">
+<div class="scenario-box animate delay-1">
+<div class="scenario-label">Scenario</div>
+                    귀하가 항바이러스 치료에 대한 살아있는 검토를 관리하고 있습니다. 8개월 동안 새로운 RCT가 발표되지 않았으며 1차 결과에 대한 GRADE 확실성은 "보통"입니다.
+                  </div>
+<div class="quiz-question">
+<h4>어떻게 해야 합니까?</h4>
+<div class="quiz-options" role="radiogroup">
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>A.</span> Keep searching weekly—living reviews never stop
+                      </div>
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" onkeydown="handleQuizKey(event, this, true)" role="radio" tabindex="0">
+<span>B.</span> 명확한 날짜 스탬프와 재활성화 기준을 사용하여 정적 검토로 전환
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>C.</span> 검토 삭제—오래됨
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>D.</span> Publish an update saying "no changes" every month
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark" data-index="12">
+<p class="title cream animate">Bamlanivimab 철회</p>
+<div class="warning-box animate delay-1">
+<strong>작동을 멈춘 단클론 항체 이야기:</strong><br/><br/>
+                2020년 11월: FDA는 단클론 항체인 bamlanivimab에 대해 EUA를 승인합니다. 초기 데이터는 가능성을 보여주었습니다.<br/><br/>
+                March 2021: EUA revoked. Why? <strong>Variant escape.</strong> 바이러스가 돌연변이를 일으켰습니다. 항체는 더 이상 결합되지 않습니다.<br/><br/>
+                단클론 항체를 추적하는 살아있는 검토에서는 몇 주 안에 이 사실을 알렸을 것입니다. 정적 지침을 변경하는 데 몇 달이 걸렸습니다.<br/><br/>
+<span style="color: var(--gold);">팬데믹 상황에서는 적이 진화합니다. 증거는 더욱 빠르게 발전해야 합니다.</span>
+</div>
+<div class="citation-box animate delay-2">
+                Source: FDA revocation of bamlanivimab EUA, April 2021. Variant surveillance: CDC SARS-CoV-2 Variants.
+              </div>
+</div>
+<div class="slide dark" data-index="13">
+<p class="story-box animate">
+<strong>독감 감시 이야기:</strong><br/><br/>
+                CDC는 감시 감시를 통해 인플루엔자를 모니터링합니다. 초기 시스템은 매주 병원을 점검했는데 급증을 포착하기에는 너무 느렸습니다. 지속적인 실시간 모니터링으로 인해 분석가들은 소음으로 인해 어려움을 겪었습니다.<br/><br/>
+                해결책: 임계값 기반 감시. 지속적으로 추적하지만 사례가 계절적 기준을 초과하는 경우에만 알림을 트리거합니다. 이 "실시간 검토" 접근 방식은 기존 방법보다 2009주 전에 H1N1을 포착했습니다.<br/><br/>
+<span style="color: var(--gold);">임계값을 모니터링하는 감시자는 연간 검사관과 지친 시간별 검사관 모두보다 성능이 뛰어납니다.</span>
+</p>
+<div class="story-decision-tree animate delay-1">
+<p class="decision-prompt">질병 감시 시스템을 설계하고 있습니다. 증거를 얼마나 자주 검토하고 경고를 트리거해야 합니까?</p>
+<div class="decision-options">
+<div class="decision-option" data-path="wrong" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();}" role="button" tabindex="0">
+<strong>Path A:</strong> 매년 효율성을 확인하세요. 포괄적인 연간 검토가 철저합니다.
+                    <div class="consequence">→ 급증을 놓치세요. H1N1은 발견되기까지 몇 주 동안 확산됩니다. 지연된 대응은 생명을 위협합니다</div>
+</div>
+<div class="decision-option" data-path="right" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();}" role="button" tabindex="0">
+<strong>Path B:</strong> 임계값 기반 모니터링 구현 - 기준선 초과 시 경고를 통한 지속적인 추적
+                    <div class="consequence">→ 기존 방법보다 몇 주 먼저 H1N1을 발견합니다. 조기 경고로 더 빠른 대응이 가능합니다. "실시간 검토" 접근 방식으로 생명을 구합니다</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide light" data-index="14">
+<div class="content">
+<h2 class="title navy animate">결정 트리: 이 새로운 연구는 업데이트를 실행할 만큼 충분히 의미가 있습니까?</h2>
+<div aria-label="리빙 리뷰 업데이트 여부 결정 결정 트리" class="decision-tree animate delay-1" role="img">
+<div class="decision-node question">
+                    이 연구를 추가하면 확실성 등급이 변경됩니까?
+                  </div>
+<div class="decision-branches">
+<div class="decision-branch">
+<div class="branch-label yes">YES</div>
+<div class="arrow-down"></div>
+<div class="decision-node outcome-yes" style="font-size: 0.85rem;">
+<strong>UPDATE IMMEDIATELY</strong><br/>Certainty change = guideline change
+                      </div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no">NO</div>
+<div class="arrow-down"></div>
+<div class="decision-node question" style="font-size: 0.85rem;">
+                        Does it change the point estimate direction?
+                      </div>
+<div class="decision-branches" style="margin-top: 0.5rem;">
+<div class="decision-branch">
+<div class="branch-label yes" style="font-size: 0.7rem;">YES</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node warning" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>UPDATE SOON</strong><br/>Direction change is major
+                          </div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no" style="font-size: 0.7rem;">NO</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node" style="font-size: 0.75rem; padding: 0.5rem; background: var(--teal);">
+<strong>배치 대기열</strong><br/>Update at next scheduled
+                          </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="decision-tree-sr">
+                  결정 트리: 이를 추가하시겠습니까? 연구를 통해 확실성 등급을 변경하시겠습니까? 그렇다면 확실성 변경이 지침에 영향을 미치므로 즉시 업데이트하십시오. 그렇지 않은 경우 점 추정 방향이 변경되는지 확인하십시오. 방향이 바뀌면 중요한 결과이므로 곧 업데이트하세요. 방향 변경이 없으면 다음 일괄 업데이트를 위해 대기열에 넣습니다.
+                </div>
+</div>
+</div>
+<div class="slide black" data-index="15">
+<p class="refrain animate">살아 있는 증거가 생활에 도움이 됩니다.</p>
+<p class="animate delay-1" style="font-size: 1.25rem; margin-top: 1.5rem;">모듈 7: 품질</p>
+</div>
+</div>
+ MODULE 7: 빠른 검토의 품질 
+<div class="module-slides" data-module="7">
+<div class="slide dark active" data-index="0">
+<p class="refrain animate">Transparency reveals; concealment deceives.</p>
+</div>
+<div class="slide dark" data-index="1">
+<p class="direct-address animate">신속한 검토를 어떻게 판단합니까?</p>
+<p class="direct-address animate delay-1">When time prevents perfection, what is "good enough"?</p>
+<div class="gold-line animate delay-2"></div>
+</div>
+<div class="slide light" data-index="2">
+<div class="content">
+<h2 class="title navy animate">GRADE in 40 Hours: Is It Possible?</h2>
+<div class="comparison-grid animate delay-1">
+<div class="comparison-panel">
+<h4>Full GRADE Assessment</h4>
+<p style="font-size: 0.85rem;">Risk of bias + Inconsistency + Indirectness + Imprecision + Publication bias</p>
+<p style="font-size: 0.8rem; color: var(--light-text); margin-top: 0.5rem;">Time: 8-16 hours per outcome</p>
+</div>
+<div class="comparison-panel highlight">
+<h4>Rapid GRADE</h4>
+<p style="font-size: 0.85rem;">Risk of bias + Imprecision + Major concerns only</p>
+<p style="font-size: 0.8rem; color: var(--gold); margin-top: 0.5rem;">Time: 2-4 hours per outcome</p>
+</div>
+</div>
+<p class="animate delay-2" style="font-size: 0.85rem; margin-top: 1rem; text-align: center; color: var(--light-text);">
+                  Focus on the domains most likely to affect certainty.
+                </p>
+</div>
+</div>
+<div class="slide dark" data-index="3">
+<p class="title cream animate">The Non-Negotiables</p>
+<div class="gold-line animate delay-1"></div>
+<div class="animate delay-2" style="text-align: left; max-width: 600px;">
+<p style="margin: 0.75rem 0;"><span style="color: var(--gold); font-weight: 700;">1. Document everything:</span> 검색한 내용과 검색한 내용 제외됨, 왜</p>
+<p style="margin: 0.75rem 0;"><span style="color: var(--gold); font-weight: 700;">2. State limitations explicitly:</span> 텍스트에 묻혀 있지 않은지—앞과 가운데</p>
+<p style="margin: 0.75rem 0;"><span style="color: var(--gold); font-weight: 700;">3. 신속한 것과 체계적인 것을 구별하십시오:</span> Never pretend comprehensiveness</p>
+<p style="margin: 0.75rem 0;"><span style="color: var(--gold); font-weight: 700;">4. Date-stamp everything:</span> [날짜] 기준 최신 증거</p>
+<p style="margin: 0.75rem 0;"><span style="color: var(--gold); font-weight: 700;">5. 업데이트 계획:</span> 신속한 검토가 최종 결정은 아닙니다</p>
+</div>
+</div>
+<div class="slide dark" data-index="4">
+<p class="story-box animate">
+<strong>기후 불확실성 이야기:</strong><br/><br/>
+                IPCC climate reports could claim certainty to seem authoritative. Instead, they explicitly quantify uncertainty: "likely (66-100%)", "very likely (90-100%)", "virtually certain (99-100%)".<br/><br/>
+                2021년 보고서에서 온난화가 "명확"하지만 빙상 붕괴 시기는 "낮은 신뢰도"라고 밝혔을 때 정책 입안자들은 지도를 신뢰할 수 있는 위치와 용이 이동할 수 있는 위치를 정확히 알고 있었습니다. 숨어 있습니다.<br/><br/>
+<span style="color: var(--gold);">이러한 투명성은 보고서의 신뢰성과 정책 영향을 감소시키는 것이 아니라 증가시킵니다.</span>
+</p>
+<div class="story-decision-tree animate delay-1">
+<p class="decision-prompt">귀하께서는 IPCC 기후 보고서를 작성하고 계십니다. 더 권위 있는 것처럼 보이기 위해 확실성을 주장해야 할까요, 아니면 존재하는 불확실성을 인정해야 할까요?</p>
+<div class="decision-options">
+<div class="decision-option" data-path="wrong" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();}" role="button" tabindex="0">
+<strong>Path A:</strong> 신뢰성에 대한 확실성을 주장해야 합니다. 헤징을 하면 보고서가 약해 보일 수 있습니다.
+                    <div class="consequence">→ Lose trust when predictions vary; critics seize on any uncertainty as proof the science is unreliable; credibility undermined</div>
+</div>
+<div class="decision-option" data-path="right" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();}" role="button" tabindex="0">
+<strong>Path B:</strong> Quantify uncertainty explicitly—"likely," "very likely," "virtually certain"
+                    <div class="consequence">→ 정책 입안자들은 증거를 신뢰할 수 있는 위치를 정확히 알고 있습니다. 투명성은 신뢰성과 정책 영향력을 증가시킵니다. 과학은 정직하다고 여겨집니다</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide light" data-index="5">
+<div class="content">
+<h2 class="title navy animate">How to READ a Rapid Review (Consumer Guide)</h2>
+<div class="case-study animate delay-1">
+<h4>Five Questions to Ask Before Trusting</h4>
+<ol style="margin-left: 1rem; font-size: 0.9rem;">
+<li style="margin: 0.5rem 0;"><strong>검색은 언제 이루어졌습니까?</strong> — If &gt;3 months old in a fast-moving field, it's outdated</li>
+<li style="margin: 0.5rem 0;"><strong>어떤 데이터베이스가 검색되었습니까?</strong> — PubMed alone may miss 30% of relevant studies</li>
+<li style="margin: 0.5rem 0;"><strong>스크리닝은 단일 또는 이중으로 이루어졌습니까?</strong> — Single screening may miss 5-10% of relevant studies</li>
+<li style="margin: 0.5rem 0;"><strong>제한 사항이 명시적으로 명시되어 있습니까?</strong> — Hidden limitations = hidden agendas</li>
+<li style="margin: 0.5rem 0;"><strong>다음에 대한 계획이 있습니까? 업데이트하시겠습니까?</strong> — Rapid reviews should be living or have update triggers</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="slide dark" data-index="6">
+<p class="title cream animate">불확실한 상황에서 공유된 의사결정</p>
+<div class="direct-address animate delay-1">근거가 불확실하다는 것을 환자에게 어떻게 알릴 수 있습니까?</div>
+<div class="gold-line animate delay-2"></div>
+<div class="animate delay-3" style="text-align: left; max-width: 650px;">
+<p style="margin: 0.6rem 0; font-size: 0.95rem;"><span style="color: var(--gold);">1. 불확실성의 이름을 지정하세요.</span> "We have <em>some</em> evidence, but it's early/limited/conflicting."</p>
+<p style="margin: 0.6rem 0; font-size: 0.95rem;"><span style="color: var(--gold);">2. Quantify when possible:</span> "연구에 따르면 20~40%가 도움이 될 수 있다고 제안하지만 확실하지 않습니다."</p>
+<p style="margin: 0.6rem 0; font-size: 0.95rem;"><span style="color: var(--gold);">3. Explain what we're watching:</span> "A larger trial reports next month."</p>
+<p style="margin: 0.6rem 0; font-size: 0.95rem;"><span style="color: var(--gold);">4. Offer structured choice:</span> "이러한 불확실성을 감안할 때 시도하거나 기다릴 수 있습니다. 귀하에게 가장 중요한 것은 무엇입니까?"</p>
+</div>
+</div>
+<div class="slide light" data-index="7">
+<div class="content">
+<h2 class="title navy animate">대화 스크립트</h2>
+<div class="story-box animate delay-1" style="background: rgba(30,39,97,0.08); border-left-color: var(--navy);">
+<strong>Clinician to Patient:</strong><br/><br/>
+                  "최신 증거를 살펴봤습니다. 우리가 알고 있는 것은 다음과 같습니다. 이 치료법은 <em>may</em> 도움이 됩니다. 일부 연구에서는 30% 개선을 보여줍니다. 그러나 연구 규모가 작고 일부에서는 아무런 이점도 보이지 않습니다.<br/><br/>
+                  "솔직하게 말씀드리고 싶습니다. 2개월을 기다리면 더 큰 규모의 임상시험에서 더 나은 데이터를 얻을 수 있습니다. 하지만 지금 어려움을 겪고 계시다는 것도 이해합니다.<br/><br/>
+                  "이 결정을 내리는 데 무엇이 도움이 될까요? 불확실성을 알고 지금 시도해 보시겠습니까, 아니면 더 강력한 증거를 기다리시겠습니까?"
+                </div>
+<p class="animate delay-2" style="font-size: 0.85rem; color: var(--light-text); text-align: center; margin-top: 1rem;">
+                  공유된 의사결정은 모든 답을 얻는 것이 아닙니다. <em>don't</em> know honestly.
+                </p>
+</div>
+</div>
+<div class="slide dark" data-index="8">
+<p class="title cream animate">Network Meta-Analysis: A Word of Caution</p>
+<div class="warning-box animate delay-1">
+<strong>What It Promises:</strong> 시험에서 직접 비교한 적이 없는 치료법을 비교하는 것입니다(A 대 B, B 대 C → A 대 C → 추론 A 대 C).<br/><br/>
+<strong>What Can Go Wrong:</strong><br/>
+                • <span style="color: var(--gold);">Transitivity violation:</span> Populations in A-vs-B trials differ from B-vs-C trials<br/>
+                • <span style="color: var(--gold);">Inconsistency:</span> 직간접적 증거가 모순됩니다<br/>
+                • <span style="color: var(--gold);">Sparse networks:</span> Single-study connections carry entire inference<br/><br/>
+<strong>In Rapid Reviews:</strong> Network meta-analysis typically requires more time and expertise than available. When used, state transitivity assumptions explicitly. When skipped, explain why indirect comparisons weren't attempted.
+              </div>
+<div class="citation-box animate delay-2">
+                Cochrane Training: Network Meta-analysis. Cipriani et al., BMJ 2013.
+              </div>
+</div>
+<div class="slide light" data-index="9">
+<div class="content">
+<h2 class="title navy animate">의사결정 트리: 이 신속한 검토를 신뢰해야 합니까?</h2>
+<div aria-label="신속 리뷰 신뢰성 평가 결정 트리" class="decision-tree animate delay-1" role="img">
+<div class="decision-node question">
+                    그렇습니까 "빠른 검토"를 명시적으로 명시합니까(체계적인 척하지 않음)?
+                  </div>
+<div class="decision-branches">
+<div class="decision-branch">
+<div class="branch-label yes">YES</div>
+<div class="arrow-down"></div>
+<div class="decision-node question" style="font-size: 0.85rem;">
+                        검색 날짜와 데이터베이스가 명확하게 명시되어 있습니까?
+                      </div>
+<div class="decision-branches" style="margin-top: 0.5rem;">
+<div class="decision-branch">
+<div class="branch-label yes" style="font-size: 0.7rem;">YES</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node outcome-yes" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>USABLE</strong><br/>주의 사항을 명시하고 적용하세요
+                          </div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no" style="font-size: 0.7rem;">NO</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node warning" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>CAUTION</strong><br/>Cannot assess currency
+                          </div>
+</div>
+</div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no">NO</div>
+<div class="arrow-down"></div>
+<div class="decision-node outcome-no" style="font-size: 0.85rem;">
+<strong>DISTRUST</strong><br/>Pretending comprehensiveness
+                      </div>
+</div>
+</div>
+</div>
+<div class="decision-tree-sr">
+                  결정 트리: 검토가 빠른 검토라고 명시적으로 명시합니까? 그렇다면 검색 날짜와 데이터베이스가 명확하게 명시되어 있는지 확인하세요. 명시된 경우 명시된 주의사항과 함께 리뷰를 사용할 수 있습니다. 명시되지 않은 경우 통화를 평가할 수 없으므로 주의하시기 바랍니다. 리뷰에 속도가 빠르지 않다고 명시되어 있으면 포괄적인 척하는 것에 대해 불신하십시오.
+                </div>
+</div>
+</div>
+<div class="slide dark" data-index="7">
+<p class="title cream animate">비타민 D 망상 이야기</p>
+<div class="story-box animate delay-1">
+<strong>Correlation Posing as Causation:</strong><br/><br/>
+                Dozens of observational studies showed: low vitamin D → worse COVID outcomes.<br/>
+                이러한 연구에 대한 메타 분석에서는 "보충제를 사용하면 사망률이 40% 감소합니다!"<br/><br/>
+                Then came the RCTs. One after another: no benefit. No benefit. No benefit.<br/><br/>
+<span style="color: var(--gold);">관찰자들은 상관 관계를 발견했습니다. 아픈 사람들은 실내에 머물게 됩니다 → 비타민 D가 부족하고 결과가 더 나빠집니다. 태양은 치료법이 아니라 혼란스러운 요소였습니다.</span>
+</div>
+<div class="citation-box animate delay-2">
+                출처: 코로나19용 비타민 D Cochrane Review 2023. 11개의 RCT, 3,968명의 참가자. 사망률 혜택은 없습니다.
+              </div>
+</div>
+<div class="slide light" data-index="8">
+<div class="content">
+<h2 class="title navy animate">Module 7 Quiz</h2>
+<div class="quiz-container">
+<div class="quiz-question">
+<h4>A rapid review should ALWAYS include:</h4>
+<div class="quiz-options" role="radiogroup">
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>A.</span> All databases ever created
+                      </div>
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" onkeydown="handleQuizKey(event, this, true)" role="radio" tabindex="0">
+<span>B.</span> Explicit statement of limitations and search date
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>C.</span> Dual screening of all abstracts
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>D.</span> Full GRADE for every outcome
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide light" data-index="9">
+<div class="content">
+<h2 class="title navy animate">Module 7 Quiz (2)</h2>
+<div class="quiz-container">
+<div class="scenario-box animate delay-1">
+<div class="scenario-label">Scenario</div>
+                    동료는 보충제가 코로나19 사망률을 40% 감소시킨다고 주장하는 "체계적인 검토"를 공유합니다. 리뷰에는 검색 날짜가 언급되지 않고, 검색된 데이터베이스가 하나만 나열되어 있으며, 제한 사항에 대해 논의하지 않습니다.
+                  </div>
+<div class="quiz-question">
+<h4>어떤 결론을 내려야 할까요?</h4>
+<div class="quiz-options" role="radiogroup">
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>A.</span> Trust it—"systematic review" means rigorous
+                      </div>
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" onkeydown="handleQuizKey(event, this, true)" role="radio" tabindex="0">
+<span>B.</span> Distrust it—missing transparency markers suggest hidden limitations
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>C.</span> Share it immediately—40% is a big effect
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>D.</span> It doesn't matter—all reviews have flaws
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide light" data-index="10">
+<div class="content">
+<h2 class="title navy animate">Module 7 Quiz (3)</h2>
+<div class="quiz-container">
+<div class="quiz-question">
+<h4>비타민 D 관찰 연구에 따르면 사망률이 40% 감소한 것으로 나타났습니다. RCT는 아무런 이점도 보이지 않았습니다. 이러한 불일치는 다음으로 가장 잘 설명됩니다.</h4>
+<div class="quiz-options" role="radiogroup">
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>A.</span> RCTs used the wrong dose
+                      </div>
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" onkeydown="handleQuizKey(event, this, true)" role="radio" tabindex="0">
+<span>B.</span> Confounding—sicker patients have lower vitamin D AND worse outcomes
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>C.</span> Pharmaceutical companies suppressed positive results
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>D.</span> 관찰 연구는 항상 틀립니다.
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide light" data-index="11">
+<div class="content">
+<h2 class="title navy animate">Module 7 Quiz (4)</h2>
+<div class="quiz-container">
+<div class="quiz-question">
+<h4>Inoculation messaging (prebunking) is effective because it:</h4>
+<div class="quiz-options" role="radiogroup">
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>A.</span> Censors false information before people see it
+                      </div>
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" onkeydown="handleQuizKey(event, this, true)" role="radio" tabindex="0">
+<span>B.</span> Warns about manipulation tactics before exposure to false claims
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>C.</span> Relies on correcting misinformation after it spreads
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>D.</span> Only works for highly educated audiences
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide light" data-index="12">
+<div class="content">
+<h2 class="title navy animate">Module 7 Quiz (5)</h2>
+<div class="quiz-container">
+<div class="scenario-box animate delay-1">
+<div class="scenario-label">Scenario</div>
+                    환자가 소셜 미디어에서 본 치료법에 대해 질문합니다. 귀하의 신속한 검토에서는 초기 근거가 불확실한 것으로 나타났습니다(3개의 소규모 임상시험, 상충되는 결과). 이 문제에 대해 어떻게 논의해야 합니까?
+                  </div>
+<div class="quiz-question">
+<h4>가장 좋은 접근 방식은 다음과 같습니다.</h4>
+<div class="quiz-options" role="radiogroup">
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>A.</span> Say "there's no evidence it works" to discourage use
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>B.</span> Recommend trying it since some studies showed benefit
+                      </div>
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" onkeydown="handleQuizKey(event, this, true)" role="radio" tabindex="0">
+<span>C.</span> Name the uncertainty, quantify if possible, offer structured choice
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>D.</span> Refuse to discuss until full systematic review is published
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark" data-index="13">
+<p class="title cream animate">요양원의 비극</p>
+<div class="warning-box animate delay-1">
+<strong>2020년 12월: 우선순위 논쟁</strong><br/><br/>
+                백신이 도착했습니다. 누가 먼저 받아야 할까요? 증거는 분명했습니다. 요양원 거주자의 사망률이 가장 높았습니다.<br/><br/>
+                그러나 일부는 필수 근로자를 주장했습니다. 의료 직원을 위한 기타. 논쟁으로 인해 출시가 지연되었습니다.<br/><br/>
+<strong>Result:</strong> 60,000+ US nursing home deaths occurred <em>after</em> 백신을 사용할 수 있었지만 <em>before</em> rollout completed.<br/><br/>
+<span style="color: var(--gold);">Rapid evidence synthesis on prioritization could have saved weeks. Weeks meant thousands of lives.</span>
+</div>
+<div class="citation-box animate delay-2">
+                출처: CDC 코로나19 요양원 데이터. 분석: AARP 공공 정책 연구소, 2021.
+              </div>
+</div>
+<div class="slide dark" data-index="12">
+<p class="story-box animate">
+<strong>챌린저 이야기:</strong><br/><br/>
+                1986년 1월 27일 엔지니어들은 NASA에 챌린저의 O-링이 추운 날씨에 고장날 수 있다고 말했습니다. 그러나 데이터가 불완전했습니다. 일부 초기 출시 기록과 모호한 실패 패턴만 있었습니다. Larry Mulloy 감독은 위험에 대한 증거를 요청했습니다. 엔지니어들은 불확실성만 보여줄 수 있었습니다.<br/><br/>
+                Mulloy가 출시되었습니다. O-링은 73초에 고장났습니다. 이후 분석에서는 데이터가 고장을 명확하게 예측한 것으로 나타났습니다. 그러나 분석가가 무엇을 찾아야 할지 알고 있는 경우에만 가능했습니다.<br/><br/>
+<span style="color: var(--gold);">불충분하다고 무시된 부분적인 증거에는 7명의 생명을 구할 수 있는 경고가 포함되어 있었습니다.</span>
+</p>
+<div class="story-decision-tree animate delay-1">
+<p class="decision-prompt">당신은 1986년 1월 27일 NASA의 엔지니어입니다. 당신은 추운 날씨에 O-링이 고장날 수 있음을 암시하는 불완전한 데이터를 가지고 있습니다. 발사는 내일 영하의 날씨로 예정되어 있습니다. 관리자가 위험 증거를 요구합니다.</p>
+<div class="decision-options">
+<div class="decision-option" data-path="wrong" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();}" role="button" tabindex="0">
+<strong>Path A:</strong> 불완전한 데이터로는 위험을 증명할 수 없다는 점을 인정하세요. 발사를 진행하도록 허용하세요
+                    <div class="consequence">→ 발사 후 73초가 지나면 Challenger가 폭발합니다. 7명의 우주비행사가 사망합니다. 이후 분석에 따르면 데이터는 DID가 실패를 예측합니다</div>
+</div>
+<div class="decision-option" data-path="right" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();}" role="button" tabindex="0">
+<strong>Path B:</strong> 불완전한 데이터에도 불구하고 지연을 주장합니다. 입증 책임은 위험이 아닌 안전에 있어야 합니다
+                    <div class="consequence">→ 7명의 생명을 구합니다. 판돈이 되돌릴 수 없을 때 "안전하다는 것을 증명하라"는 원칙이 "위험하다는 것을 증명하라"는 원칙보다</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide light" data-index="13">
+<div class="content">
+<h2 class="title navy animate">Decision Tree: Assessing Funding Source Bias</h2>
+<div aria-label="Decision tree for evaluating funding source bias" class="decision-tree animate delay-1" role="img">
+<div class="decision-node question">
+                    결과에 금전적 이해관계가 있는 당사자가 연구 자금을 지원합니까?
+                  </div>
+<div class="decision-branches">
+<div class="decision-branch">
+<div class="branch-label yes">YES</div>
+<div class="arrow-down"></div>
+<div class="decision-node question" style="font-size: 0.85rem;">
+                        등록 전에 임상시험이 등록되었습니까?
+                      </div>
+<div class="decision-branches" style="margin-top: 0.5rem;">
+<div class="decision-branch">
+<div class="branch-label yes" style="font-size: 0.7rem;">YES</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node warning" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>MODERATE CONCERN</strong><br/>Outcome switching limited
+                          </div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no" style="font-size: 0.7rem;">NO</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node outcome-no" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>HIGH CONCERN</strong><br/>Selective reporting possible
+                          </div>
+</div>
+</div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no">INDEPENDENT</div>
+<div class="arrow-down"></div>
+<div class="decision-node outcome-yes" style="font-size: 0.85rem;">
+<strong>LOWER CONCERN</strong><br/>But still assess RoB
+                      </div>
+</div>
+</div>
+</div>
+<div class="decision-tree-sr">
+                  결정 트리: 금전적 이해관계가 있는 당사자가 연구 자금을 지원합니까? 그렇다면 체험판이 사전 등록되었는지 확인하세요. 사전 등록된 경우 결과 전환이 제한되어 있으므로 우려가 중간 정도입니다. 사전등록을 하지 않을 경우 선별신고가 가능하여 우려가 높습니다. 독립적으로 자금을 지원받는 경우 우려는 낮아지지만 여전히 편견의 위험은 평가됩니다.
+                </div>
+</div>
+</div>
+<div class="slide dark" data-index="14">
+<p class="title cream animate">인쇄 전의 역설</p>
+<div class="story-box animate delay-1">
+<strong>양날의 검:</strong><br/><br/>
+<span style="color: var(--green);">December 2020:</span> 화이자 백신 효능 데이터는 출판 전에 medRxiv에 나타났습니다. 몇 시간 내에 규제 당국은 검토를 시작했습니다. 전 세계가 계획을 세울 수 있습니다.<br/><br/>
+<span style="color: var(--red);">January 2021:</span> A preprint claimed vaccines caused deaths in nursing homes. It was methodologically flawed. It went viral. Vaccine hesitancy increased.<br/><br/>
+<span style="color: var(--gold);">동일한 플랫폼. 다른 결과. 시험판은 진실과 거짓을 모두 가속화합니다. 판단 책임은 독자에게 있습니다.</span>
+</div>
+</div>
+<div class="slide light" data-index="15">
+<div class="content">
+<h2 class="title navy animate">Decision Tree: When Is a Preprint Acceptable to Cite?</h2>
+<div aria-label="Decision tree for when to cite preprints" class="decision-tree animate delay-1" role="img">
+<div class="decision-node question">
+                    Is this a rapidly evolving emergency situation?
+                  </div>
+<div class="decision-branches">
+<div class="decision-branch">
+<div class="branch-label yes">URGENT</div>
+<div class="arrow-down"></div>
+<div class="decision-node question" style="font-size: 0.85rem;">
+                        Is it from a known, credible research group?
+                      </div>
+<div class="decision-branches" style="margin-top: 0.5rem;">
+<div class="decision-branch">
+<div class="branch-label yes" style="font-size: 0.7rem;">YES</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node warning" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>주의 사항 인용</strong><br/>"동료 검토가 아닌 사전 인쇄"
+                          </div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no" style="font-size: 0.7rem;">NO</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node outcome-no" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>DO NOT CITE</strong><br/>검증을 기다립니다
+                          </div>
+</div>
+</div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no">NOT URGENT</div>
+<div class="arrow-down"></div>
+<div class="decision-node" style="font-size: 0.85rem; background: var(--teal);">
+<strong>기다립니다 출판물</strong><br/>사전 인쇄에 대한 타당성이 없음
+                      </div>
+</div>
+</div>
+</div>
+<div class="decision-tree-sr">
+                  결정 트리: 이것은 빠르게 진화하는 긴급 상황입니까? 긴급한 경우 알려진 신뢰할 수 있는 연구 그룹에서 나온 것인지 확인하세요. 신뢰할 수 있는 그룹이라면 명확한 사전 인쇄 경고와 함께 인용하세요. 알 수 없는 그룹인 경우 인용하지 말고 확인을 기다립니다. 상황이 긴급하지 않은 경우 동료 검토 출판을 기다리십시오.
+                </div>
+</div>
+</div>
+<div class="slide dark" data-index="16">
+<p class="title cream animate">Regional Adaptation: MENA Context</p>
+<div class="story-box animate delay-1">
+<strong>걸프만 및 중동 지역의 역량 구축:</strong><br/><br/>
+                COVID-19 기간 동안 걸프협력회의(GCC) 국가는 심각한 격차에 직면했습니다. 제한된 지역의 신속한 검토 역량으로 인해 라마단 단식, 다세대 가구, 의료 종사자 비율 및 다양한 인구와 같은 지역적 요인을 놓친 서구의 증거에 의존해야 했습니다. 인구통계.<br/><br/>
+<span style="color: var(--gold);">강의: 40시간 프로토콜을 상황에 맞게 조정하세요. 지역 데이터베이스의 아랍어 검색어. 로컬 구현 고려 사항. 교육을 위한 지역 사례 연구.</span>
+</div>
+<div class="animate delay-2" style="text-align: left; max-width: 650px; margin-top: 1rem;">
+<p style="margin: 0.5rem 0; font-size: 0.9rem;"><strong>Key Adaptations:</strong></p>
+<p style="margin: 0.3rem 0; font-size: 0.85rem; color: rgba(255,255,255,0.8);">• Include regional databases (IMEMR, EMBASE Arabic)</p>
+<p style="margin: 0.3rem 0; font-size: 0.85rem; color: rgba(255,255,255,0.8);">• Consider local healthcare infrastructure capacity</p>
+<p style="margin: 0.3rem 0; font-size: 0.85rem; color: rgba(255,255,255,0.8);">• Adapt communication for local stakeholders</p>
+</div>
+</div>
+<div class="slide black" data-index="17">
+<p class="refrain animate">Transparency reveals; concealment deceives.</p>
+<p class="animate delay-1" style="font-size: 1.25rem; margin-top: 1.5rem;">Final Assessment</p>
+</div>
+</div>
+ 모듈 8: 최종 평가 
+<div class="module-slides" data-module="8">
+<div class="slide dark active" data-index="0">
+<p class="refrain animate">귀하께서는 위기와 진실을 헤쳐 나가셨습니다.</p>
+</div>
+<div class="slide dark" data-index="1">
+<p class="title cream animate">5가지 원칙</p>
+<div class="gold-line animate delay-1"></div>
+<div class="animate delay-2" style="text-align: left; max-width: 700px;">
+<p style="margin: 0.6rem 0; color: var(--gold); font-size: 1.1rem;">1. Speed without rigor is recklessness.</p>
+<p style="margin: 0.6rem 0; color: var(--gold); font-size: 1.1rem;">2. Rigor without speed is abandonment.</p>
+<p style="margin: 0.6rem 0; color: var(--gold); font-size: 1.1rem;">3. A flawed study in a meta-analysis poisons all.</p>
+<p style="margin: 0.6rem 0; color: var(--gold); font-size: 1.1rem;">4. Transparency reveals; concealment deceives.</p>
+<p style="margin: 0.6rem 0; color: var(--gold); font-size: 1.1rem;">5. 살아있는 증거는 살아있는 사람에게 도움이 됩니다.</p>
+</div>
+</div>
+<div class="slide light" data-index="2">
+<div class="content">
+<h2 class="title navy animate">Final Quiz (1/5)</h2>
+<div class="quiz-container">
+<div class="quiz-question">
+<h4>Gautret 하이드록시클로로퀸 연구가 철회된 주요 이유는 다음과 같습니다.</h4>
+<div class="quiz-options" role="radiogroup">
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" role="radio">
+<span>A.</span> The drug didn't work at all
+                      </div>
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" role="radio">
+<span>B.</span> Major methodological flaws and ethics concerns
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" role="radio">
+<span>C.</span> 샘플 크기가 너무 컸습니다. 대형
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide light" data-index="3">
+<div class="content">
+<h2 class="title navy animate">Final Quiz (2/5)</h2>
+<div class="quiz-container">
+<div class="quiz-question">
+<h4>사기성 Elgazzar 이버멕틴 연구가 삭제되었을 때 사망률 이점은 다음과 같습니다.</h4>
+<div class="quiz-options" role="radiogroup">
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" role="radio">
+<span>A.</span> Increased significantly
+                      </div>
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" role="radio">
+<span>B.</span> 51%에서 중요하지 않은 수준으로 감소
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" role="radio">
+<span>C.</span> Remained unchanged
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide light" data-index="4">
+<div class="content">
+<h2 class="title navy animate">Final Quiz (3/5)</h2>
+<div class="quiz-container">
+<div class="quiz-question">
+<h4>RECOVERY 임상시험의 결과는 약:</h4>
+<div class="quiz-options" role="radiogroup">
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" role="radio">
+<span>A.</span> 프로토콜 시작 후 100일 발표
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" role="radio">
+<span>B.</span> 2년간의 신중한 연구
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" role="radio">
+<span>C.</span> One week of observation
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide light" data-index="5">
+<div class="content">
+<h2 class="title navy animate">Final Quiz (4/5)</h2>
+<div class="quiz-container">
+<div class="quiz-question">
+<h4>Of 97 "living" systematic reviews on COVID-19, what percentage were never updated?</h4>
+<div class="quiz-options" role="radiogroup">
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" role="radio">
+<span>A.</span> 10%
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" role="radio">
+<span>B.</span> 35%
+                      </div>
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" role="radio">
+<span>C.</span> 65%
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide light" data-index="6">
+<div class="content">
+<h2 class="title navy animate">Final Quiz (5/5)</h2>
+<div class="quiz-container">
+<div class="quiz-question">
+<h4>신속한 검토에서 가장 중요한 품질 요구 사항은 다음과 같습니다.</h4>
+<div class="quiz-options" role="radiogroup">
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" role="radio">
+<span>A.</span> Searching all possible databases
+                      </div>
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" role="radio">
+<span>B.</span> 방법 및 제한 사항에 대한 투명성
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" role="radio">
+<span>C.</span> Having a famous author
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black" data-index="7">
+<p class="refrain animate">여정을 완료했습니다.</p>
+<div class="gold-line animate delay-1"></div>
+<p class="animate delay-2" style="font-size: 1.2rem; margin-top: 1rem;">
+                진행하고 지혜롭게 종합하세요.
+              </p>
+<p class="animate delay-3" style="font-size: 0.9rem; margin-top: 2rem; color: rgba(255,255,255,0.6);">
+                다음을 기억하세요. 2020년 교훈:<br/>
+                Speed without truth killed. Truth without speed abandoned.<br/>
+<span style="color: var(--gold);">균형이 곧 예술입니다.</span>
+</p>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<script>
+    const modules = [
+      { title: 'The Reckoning', subtitle: 'Why Speed Matters' },
+      { title: 'The Trade-Off', subtitle: 'Speed vs. Rigor' },
+      { title: 'The Method', subtitle: '40-Hour Protocol' },
+      { title: 'The Disaster', subtitle: 'Hydroxychloroquine' },
+      { title: 'The Fraud', subtitle: 'Ivermectin' },
+      { title: 'The Triumph', subtitle: 'RECOVERY Trial' },
+      { title: 'The Living', subtitle: 'Living Reviews' },
+      { title: 'The Quality', subtitle: 'Standards' },
+      { title: 'Final Assessment', subtitle: '지식 테스트' }
+    ];
+
+    let currentModule = 0;
+    let currentSlide = 0;
+    let completedModules = new Set();
+
+    // localStorage persistence
+    function saveProgress() {
+      localStorage.setItem('rapidReviewsProgress', JSON.stringify({
+        currentModule,
+        currentSlide,
+        completedModules: Array.from(completedModules)
+      }));
+    }
+
+    function loadProgress() {
+      const saved = localStorage.getItem('rapidReviewsProgress');
+      if (saved) {
+        let data;
+        try {
+          data = JSON.parse(saved);
+        } catch (e) {
+          localStorage.removeItem('rapidReviewsProgress');
+          return;
+        }
+        currentModule = data.currentModule || 0;
+        currentSlide = data.currentSlide || 0;
+        completedModules = new Set(data.completedModules || []);
+        // Bounds checking on restored indices
+        const moduleSlides = document.querySelectorAll('.module-slides');
+        if (currentModule < 0 || currentModule >= modules.length || currentModule >= moduleSlides.length) {
+          currentModule = 0;
+          currentSlide = 0;
+        } else {
+          const slides = moduleSlides[currentModule]?.querySelectorAll('.slide');
+          if (!slides || currentSlide < 0 || currentSlide >= slides.length) {
+            currentSlide = 0;
+          }
+        }
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadProgress();
+      renderModuleList();
+      setupSlideNavigation();
+      updateProgressBar();
+      if (currentModule > 0 || currentSlide > 0) {
+        document.querySelectorAll('.module-slides').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.module-slides')[currentModule].classList.add('active');
+        goToSlide(currentSlide);
+        updateHeader();
+      }
+    });
+
+    function renderModuleList() {
+      const list = document.getElementById('moduleList');
+      list.innerHTML = modules.map((m, i) => `
+        <div class="module-item ${i === currentModule ? 'active' : ''} ${completedModules.has(i) ? 'completed' : ''}"
+             onclick="goToModule(${i})" tabindex="0" role="button"
+             aria-label="Module ${i}: ${m.title} – ${m.subtitle}${completedModules.has(i) ? ' (completed)' : ''}"
+             onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();goToModule(${i});}">
+          <div class="module-number">${completedModules.has(i) ? '✓' : i}</div>
+          <div class="module-info">
+            <div class="module-title">${m.title}</div>
+            <div class="module-subtitle">${m.subtitle}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function setupSlideNavigation() {
+      document.querySelectorAll('.module-slides').forEach(moduleEl => {
+        const slides = moduleEl.querySelectorAll('.slide');
+        const nav = document.createElement('div');
+        nav.className = 'slide-nav';
+        nav.innerHTML = `
+          <button class="nav-btn" onclick="prevSlide()" aria-label="Previous slide" title="Previous slide (←)">←</button>
+          <div class="nav-center">
+            <div class="slide-counter" aria-live="polite"><span class="current">1</span> / <span class="total">${slides.length}</span></div>
+            <div class="progress" role="tablist" aria-label="Slide navigation">
+              ${Array.from(slides).map((_, i) => `<div class="progress-dot ${i === 0 ? 'active' : ''}" role="tab" aria-label="Go to slide ${i + 1}" onclick="goToSlide(${i})"></div>`).join('')}
+            </div>
+          </div>
+          <button class="nav-btn" onclick="nextSlide()" aria-label="Next slide" title="Next slide (→)">→</button>
+        `;
+        moduleEl.appendChild(nav);
+      });
+    }
+
+    function goToModule(index) {
+      if (currentModule !== index) {
+        document.querySelectorAll('.module-slides').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.module-slides')[index].classList.add('active');
+        currentModule = index;
+        currentSlide = 0;
+        updateSlideDisplay();
+        renderModuleList();
+        updateHeader();
+        updateProgressBar();
+      }
+    }
+
+    function goToSlide(index) {
+      const moduleEl = document.querySelectorAll('.module-slides')[currentModule];
+      const slides = moduleEl.querySelectorAll('.slide');
+      slides.forEach(s => s.classList.remove('active'));
+      slides[index].classList.add('active');
+      currentSlide = index;
+      updateSlideDisplay();
+      saveProgress();
+    }
+
+    function nextSlide() {
+      const moduleEl = document.querySelectorAll('.module-slides')[currentModule];
+      const slides = moduleEl.querySelectorAll('.slide');
+      if (currentSlide < slides.length - 1) goToSlide(currentSlide + 1);
+    }
+
+    function prevSlide() {
+      if (currentSlide > 0) goToSlide(currentSlide - 1);
+    }
+
+    function nextModule() {
+      if (currentModule < modules.length - 1) goToModule(currentModule + 1);
+    }
+
+    function updateSlideDisplay() {
+      const moduleEl = document.querySelectorAll('.module-slides')[currentModule];
+      const nav = moduleEl.querySelector('.slide-nav');
+      if (nav) {
+        nav.querySelector('.current').textContent = currentSlide + 1;
+        nav.querySelectorAll('.progress-dot').forEach((dot, i) => {
+          dot.classList.toggle('active', i === currentSlide);
+        });
+      }
+    }
+
+    function updateHeader() {
+      document.getElementById('currentModuleNum').textContent = currentModule;
+      document.getElementById('currentModuleName').textContent = modules[currentModule].title;
+    }
+
+    function updateProgressBar() {
+      const percent = Math.round((completedModules.size / modules.length) * 100);
+      document.getElementById('progressPercent').textContent = percent + '%';
+      saveProgress();
+    }
+
+    function checkAnswer(element, isCorrect) {
+      const options = element.parentElement.querySelectorAll('.quiz-option');
+      options.forEach(opt => {
+        opt.style.pointerEvents = 'none';
+        opt.setAttribute('tabindex', '-1');
+      });
+      element.setAttribute('aria-selected', 'true');
+      if (isCorrect) {
+        element.classList.add('correct');
+        element.setAttribute('aria-label', 'Correct answer');
+      } else {
+        element.classList.add('incorrect');
+        element.setAttribute('aria-label', 'Incorrect answer');
+        options.forEach(opt => {
+          if (opt.dataset.correct === 'true') {
+            opt.classList.add('correct');
+            opt.setAttribute('aria-label', '정답이었습니다');
+          }
+        });
+      }
+    }
+
+    // Keyboard handler for quiz accessibility
+    function handleQuizKey(event, element, isCorrect) {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        checkAnswer(element, isCorrect);
+      }
+    }
+
+    // ============================================
+    // SPACED RETRIEVAL SYSTEM
+    // ============================================
+    const spacedRetrievalQuestions = [
+      { q: "40시간 신속 검토 프로토콜에서 스크리닝에 할당된 시간은 얼마나 됩니까?", a: "12 hours (single screening with 20% verification)" },
+      { q: "Elgazzar ivermectin 연구가 메타 분석에서 제외되었을 때 무슨 일이 일어났습니까?", a: "Mortality benefit dropped from 51% to non-significant" },
+      { q: "RECOVERY 시험의 프로토콜에서 덱사메타손 발표까지 걸린 시간은 얼마나 됩니까?", a: "Approximately 100 days" },
+      { q: "사이의 주요 차이점은 무엇입니까? '효과 없음 증거' 및 '효과 없음 증거'?", a: "Small underpowered trials show 'no evidence of effect'; large trials can show 'evidence of no effect'" },
+      { q: "실시간 체계적 검토 업데이트의 세 가지 트리거 유형은 무엇입니까?", a: "시간 기반, 신호 기반 및 리소스 기반" },
+      { q: "In prebunking/inoculation messaging, what is more effective than debunking?", a: "Warning people about manipulation tactics BEFORE they encounter false claims" },
+      { q: "What 5 non-negotiable elements must a rapid review include?", a: "1) 모든 것을 문서화하고, 2) 상태 제한을 명시적으로, 3) 체계적 검토와 구별, 4) 날짜 스탬프, 5) 업데이트 계획" },
+      { q: "고트레 하이드록시클로로퀸 논문의 소셜미디어 참여 비대칭성은 어떠했나요?", a: "3.1M engagements on original vs 83 on retraction" }
+    ];
+
+    function showSpacedRetrievalPrompt() {
+      const lastPrompt = localStorage.getItem('rapidReviewsLastRetrieval');
+      const now = Date.now();
+      const oneDay = 24 * 60 * 60 * 1000;
+
+      // Show prompt once per day if user has completed at least 2 modules
+      if (completedModules.size >= 2 && (!lastPrompt || (now - parseInt(lastPrompt)) > oneDay)) {
+        const randomQ = spacedRetrievalQuestions[Math.floor(Math.random() * spacedRetrievalQuestions.length)];
+
+        const promptHTML = `
+          <div class="spaced-retrieval-overlay" id="spacedRetrievalOverlay">
+            <div class="spaced-retrieval-modal">
+              <div class="retrieval-header">📚 Quick Review</div>
+              <div class="retrieval-question">${randomQ.q}</div>
+              <button class="retrieval-btn" onclick="revealRetrievalAnswer()">Reveal Answer</button>
+              <div class="retrieval-answer" id="retrievalAnswer" style="display:none;">
+                <strong>Answer:</strong> ${randomQ.a}
+              </div>
+              <button class="retrieval-close" onclick="closeRetrievalPrompt()">Continue to Course</button>
+            </div>
+          </div>
+        `;
+
+        document.body.insertAdjacentHTML('beforeend', promptHTML);
+        localStorage.setItem('rapidReviewsLastRetrieval', now.toString());
+      }
+    }
+
+    function revealRetrievalAnswer() {
+      document.getElementById('retrievalAnswer').style.display = 'block';
+    }
+
+    function closeRetrievalPrompt() {
+      const overlay = document.getElementById('spacedRetrievalOverlay');
+      if (overlay) overlay.remove();
+    }
+
+    // Show spaced retrieval prompt when returning to course
+    setTimeout(() => {
+      if (completedModules.size >= 2) showSpacedRetrievalPrompt();
+    }, 2000);
+
+    document.addEventListener('keydown', (e) => {
+      const tag = document.activeElement?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || tag === 'BUTTON') return;
+      const role = document.activeElement?.getAttribute?.('role');
+      if (role === 'button' || role === 'radio') {
+        if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); document.activeElement.click(); }
+        return;
+      }
+      if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextSlide(); }
+      else if (e.key === 'ArrowLeft') { e.preventDefault(); prevSlide(); }
+      else if (e.key === 'ArrowDown') { e.preventDefault(); nextModule(); }
+      else if (e.key === 'Escape') { closeSidebar(); }
+    });
+
+    function toggleSidebar() {
+      document.querySelector('.sidebar').classList.toggle('open');
+      document.querySelector('.sidebar-overlay').classList.toggle('open');
+      var btn = document.querySelector('.sidebar-toggle, .hamburger, .mobile-menu-btn'); if (btn) btn.setAttribute('aria-expanded', btn.getAttribute('aria-expanded') === 'true' ? 'false' : 'true');
+    }
+
+    function closeSidebar() {
+      document.querySelector('.sidebar').classList.remove('open');
+      document.querySelector('.sidebar-overlay').classList.remove('open');
+    }
+
+    function resetProgress() {
+      if (confirm('Reset all progress? This cannot be undone.')) {
+        localStorage.removeItem('rapidReviewsProgress');
+        currentModule = 0;
+        currentSlide = 0;
+        completedModules = new Set();
+        document.querySelectorAll('.module-slides').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.module-slides')[0].classList.add('active');
+        goToSlide(0);
+        renderModuleList();
+        updateHeader();
+        updateProgressBar();
+      }
+    }
+
+    // Close sidebar when selecting a module on mobile
+    const originalGoToModule = goToModule;
+    goToModule = function(index) {
+      closeSidebar();
+      originalGoToModule(index);
+    };
+  </script>
+</body>
+</html>

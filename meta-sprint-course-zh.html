@@ -1,0 +1,4155 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>META-SPRINT：40 天获得可信证据</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&amp;family=Source+Sans+Pro:wght@300;400;600;700&amp;display=swap" rel="stylesheet"/>
+<style>
+    :root {
+      --navy: #1E2761;
+      --deep-navy: #141B3D;
+      --gold: #D4AF37;
+      --cream: #FAF8F5;
+      --light-cream: #FFFFFF;
+      --text: #2D3748;
+      --light-text: #718096;
+      --red: #C53030;
+      --green: #22c55e;
+      --teal: #0f766e;
+      --purple: #7c3aed;
+      --orange: #f59e0b;
+      --transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      height: 100%;
+      font-family: 'Source Sans Pro', sans-serif;
+      background: var(--deep-navy);
+      color: var(--cream);
+    }
+
+    .course-container { display: flex; height: 100vh; overflow: hidden; }
+
+    /* ====== SIDEBAR ====== */
+    .sidebar {
+      width: 300px;
+      background: linear-gradient(180deg, var(--deep-navy) 0%, #0a0f1a 100%);
+      border-right: 1px solid rgba(212,175,55,0.2);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    .sidebar-header {
+      padding: 1.25rem;
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+      text-align: center;
+    }
+    .sidebar-header h1 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--gold);
+    }
+    .sidebar-header p {
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.6);
+    }
+
+    /* Gamification Stats Panel */
+    .stats-panel {
+      padding: 1rem;
+      background: rgba(212,175,55,0.1);
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+    }
+    .level-display {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+    .level-badge {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, var(--gold), #f0c040);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      box-shadow: 0 2px 8px rgba(212,175,55,0.4);
+    }
+    .level-info { flex: 1; }
+    .level-title { font-weight: 700; font-size: 0.9rem; color: var(--gold); }
+    .level-subtitle { font-size: 0.7rem; color: rgba(255,255,255,0.6); }
+    .xp-bar {
+      height: 8px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 0.5rem;
+    }
+    .xp-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--gold), var(--orange));
+      border-radius: 4px;
+      transition: width 0.5s ease;
+    }
+    .xp-text {
+      font-size: 0.65rem;
+      color: rgba(255,255,255,0.5);
+      text-align: right;
+      margin-top: 0.25rem;
+    }
+    .quick-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+    }
+    .quick-stat {
+      background: rgba(0,0,0,0.2);
+      padding: 0.5rem;
+      border-radius: 6px;
+      text-align: center;
+    }
+    .quick-stat-value {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--gold);
+    }
+    .quick-stat-label {
+      font-size: 0.6rem;
+      color: rgba(255,255,255,0.5);
+    }
+
+    .module-list { flex: 1; overflow-y: auto; padding: 0.5rem 0; }
+    .module-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.6rem 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      border-left: 3px solid transparent;
+    }
+    .module-item:hover { background: rgba(212,175,55,0.1); }
+    .module-item.active { background: rgba(212,175,55,0.15); border-left-color: var(--gold); }
+    .module-item.completed .module-number { background: var(--green); color: white; }
+    .module-item.locked { opacity: 0.5; cursor: not-allowed; }
+    .module-number {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .module-item.active .module-number { background: var(--gold); color: var(--navy); }
+    .module-info { flex: 1; min-width: 0; }
+    .module-title { font-size: 0.8rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .module-subtitle { font-size: 0.65rem; color: rgba(255,255,255,0.5); }
+    .module-xp { font-size: 0.6rem; color: var(--gold); }
+
+    /* Badges Panel */
+    .badges-panel {
+      padding: 1rem;
+      border-top: 1px solid rgba(212,175,55,0.2);
+    }
+    .badges-title { font-size: 0.75rem; font-weight: 600; color: var(--gold); margin-bottom: 0.5rem; }
+    .badges-grid { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+    .badge-item {
+      width: 32px;
+      height: 32px;
+      min-width: 44px;
+      min-height: 44px;
+      background: rgba(255,255,255,0.05);
+      border: 2px solid rgba(255,255,255,0.1);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      font-family: inherit;
+      color: inherit;
+      padding: 0;
+      opacity: 0.3;
+      transition: all 0.3s;
+      cursor: help;
+      position: relative;
+    }
+    .badge-item.earned { opacity: 1; background: rgba(212,175,55,0.2); border-color: var(--gold); }
+    .badge-item:hover::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--navy);
+      color: white;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.6rem;
+      white-space: nowrap;
+      z-index: 100;
+    }
+
+    /* ====== MAIN CONTENT ====== */
+    .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .content-header {
+      padding: 0.75rem 1.5rem;
+      background: rgba(0,0,0,0.3);
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .breadcrumb { font-size: 0.85rem; color: rgba(255,255,255,0.6); }
+    .breadcrumb span { color: var(--gold); }
+    .header-actions { display: flex; gap: 0.5rem; align-items: center; }
+    .streak-display {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: rgba(239,68,68,0.2);
+      border: 1px solid rgba(239,68,68,0.4);
+      padding: 0.35rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+    }
+    .streak-display.active { background: rgba(249,115,22,0.2); border-color: var(--orange); }
+    .streak-flame { font-size: 1rem; }
+    .streak-count { font-weight: 700; color: var(--orange); }
+
+    .btn {
+      padding: 0.5rem 1rem;
+      border: 1px solid rgba(212,175,55,0.3);
+      border-radius: 6px;
+      background: rgba(255,255,255,0.05);
+      color: var(--cream);
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn:hover { background: rgba(212,175,55,0.2); border-color: var(--gold); }
+    .btn.primary { background: var(--gold); color: var(--navy); border-color: var(--gold); font-weight: 600; }
+
+    .content-body { flex: 1; overflow: hidden; display: flex; }
+
+    /* ====== SLIDES ====== */
+    .slides-container { flex: 1; position: relative; overflow: hidden; touch-action: pan-y pinch-zoom; }
+    .module-slides { display: none; width: 100%; height: 100%; }
+    .module-slides.active { display: block; }
+
+    .slide {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      padding: 2rem 2rem 4rem;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity var(--transition), visibility var(--transition);
+      overflow-y: auto;
+    }
+    .slide.active { opacity: 1; visibility: visible; }
+    .slide.dark { background: var(--deep-navy); }
+    .slide.light { background: var(--cream); color: var(--text); }
+    .slide.black { background: #000; }
+    .slide.red-bg { background: linear-gradient(135deg, #7f1d1d, #450a0a); }
+    .slide.green-bg { background: linear-gradient(135deg, #14532d, #052e16); }
+    .slide.purple-bg { background: linear-gradient(135deg, #4c1d95, #2e1065); }
+
+    .serif { font-family: 'Cormorant Garamond', Georgia, serif; }
+    .title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      font-weight: 700;
+      margin-bottom: 1rem;
+      line-height: 1.2;
+      text-align: center;
+    }
+    .title.gold { color: var(--gold); }
+    .title.navy { color: var(--navy); }
+    .subtitle {
+      font-size: clamp(0.9rem, 2vw, 1.3rem);
+      color: rgba(255,255,255,0.7);
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .slide.light .subtitle { color: var(--light-text); }
+
+    .big-number {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(4rem, 12vw, 8rem);
+      font-weight: 700;
+      line-height: 1;
+    }
+    .big-number.gold { color: var(--gold); }
+    .big-number.red { color: var(--red); }
+
+    .refrain {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(1.3rem, 3vw, 2rem);
+      font-style: italic;
+      color: var(--gold);
+      text-align: center;
+      max-width: 700px;
+    }
+
+    .content { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 850px; }
+
+    /* Cards */
+    .card {
+      background: var(--light-cream);
+      border: 1px solid var(--gold);
+      padding: 1.25rem 1.5rem;
+      margin: 0.5rem 0;
+      max-width: 750px;
+      width: 100%;
+      border-radius: 8px;
+    }
+    .card.navy-bg { background: var(--navy); color: var(--cream); }
+    .card.red-border { border: 2px solid var(--red); }
+    .card.green-border { border: 2px solid var(--green); }
+    .card-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 0.05em;
+      margin-bottom: 0.4rem;
+      text-transform: uppercase;
+    }
+    .card-text { font-size: 0.95rem; line-height: 1.6; }
+    .card.navy-bg .card-text { color: var(--cream); }
+
+    /* Story box */
+    .story-box {
+      background: linear-gradient(135deg, rgba(197,48,48,0.15), rgba(30,39,97,0.2));
+      border-left: 4px solid var(--red);
+      padding: 1.25rem;
+      margin: 0.75rem 0;
+      max-width: 750px;
+      width: 100%;
+      border-radius: 0 8px 8px 0;
+    }
+    .story-box.success { background: linear-gradient(135deg, rgba(34,197,94,0.15), rgba(30,39,97,0.2)); border-left-color: var(--green); }
+    .story-box.warning { background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(30,39,97,0.2)); border-left-color: var(--orange); }
+    .story-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: var(--red);
+      margin-bottom: 0.4rem;
+      text-transform: uppercase;
+    }
+    .story-box.success .story-label { color: var(--green); }
+    .story-box.warning .story-label { color: var(--orange); }
+    .story-text { font-size: 0.95rem; line-height: 1.6; }
+
+    /* Epic Story Box */
+    .story-box.epic {
+      background: linear-gradient(135deg, rgba(20,27,61,0.95), rgba(0,0,0,0.9));
+      border-left: 4px solid var(--gold);
+      border-top: 1px solid rgba(212,175,55,0.3);
+      border-right: 1px solid rgba(212,175,55,0.2);
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+      padding: 1.5rem;
+      position: relative;
+    }
+    .story-box.epic::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--gold), transparent);
+    }
+    .story-box.epic .story-label { color: var(--gold); font-size: 0.65rem; letter-spacing: 0.15em; }
+    .story-box.epic .story-text { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.05rem; line-height: 1.7; }
+    .story-box.epic .story-moral {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid rgba(212,175,55,0.2);
+      font-style: italic;
+      color: var(--gold);
+      font-size: 0.95rem;
+    }
+
+    /* Stats */
+    .stats-grid {
+      display: flex;
+      gap: 0.75rem;
+      margin: 1rem 0;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .stat-box {
+      background: var(--navy);
+      color: var(--cream);
+      padding: 1rem 1.25rem;
+      text-align: center;
+      min-width: 120px;
+      border-radius: 8px;
+    }
+    .stat-box.light { background: var(--light-cream); color: var(--navy); border: 1px solid var(--gold); }
+    .stat-value {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.3rem, 2.5vw, 2rem);
+      font-weight: 700;
+    }
+    .stat-value.gold { color: var(--gold); }
+    .stat-value.red { color: var(--red); }
+    .stat-label { font-size: 0.75rem; opacity: 0.8; margin-top: 0.2rem; }
+
+    /* Timeline */
+    .timeline { display: flex; flex-direction: column; gap: 0.4rem; width: 100%; max-width: 650px; }
+    .timeline-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.6rem 0.75rem;
+      background: rgba(255,255,255,0.05);
+      border-radius: 6px;
+      border-left: 4px solid var(--gold);
+    }
+    .timeline-item.phase-a { border-left-color: var(--purple); }
+    .timeline-item.phase-b { border-left-color: #3b82f6; }
+    .timeline-item.phase-c { border-left-color: var(--orange); }
+    .timeline-item.phase-d { border-left-color: var(--green); }
+    .timeline-item.phase-e { border-left-color: var(--red); }
+    .timeline-days { font-weight: 700; font-size: 0.8rem; min-width: 70px; color: var(--gold); }
+    .timeline-content { flex: 1; }
+    .timeline-title { font-weight: 600; font-size: 0.9rem; }
+    .timeline-desc { font-size: 0.75rem; opacity: 0.7; }
+
+    /* Checklist */
+    .checklist { display: flex; flex-direction: column; gap: 0.4rem; width: 100%; max-width: 650px; }
+    .checklist-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+      padding: 0.6rem 0.75rem;
+      background: rgba(255,255,255,0.05);
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .check-icon {
+      width: 22px;
+      height: 22px;
+      background: var(--gold);
+      color: var(--navy);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.75rem;
+      flex-shrink: 0;
+    }
+    .checklist-text { font-size: 0.9rem; line-height: 1.4; }
+
+    /* Lessons */
+    .lesson-item { display: flex; align-items: flex-start; gap: 0.75rem; margin: 0.5rem 0; max-width: 700px; }
+    .lesson-number {
+      background: var(--gold);
+      color: var(--navy);
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+    .lesson-content h4 { font-size: 1rem; font-weight: 700; margin-bottom: 0.2rem; }
+    .lesson-content p { font-size: 0.85rem; opacity: 0.8; }
+
+    /* ====== DECISION TREE ====== */
+    .decision-tree {
+      width: 100%;
+      max-width: 700px;
+      background: linear-gradient(135deg, rgba(124,58,237,0.15), rgba(30,39,97,0.25));
+      border: 2px solid var(--purple);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 0.75rem 0;
+    }
+    .decision-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    .decision-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--purple);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+    }
+    .decision-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+    .decision-xp {
+      margin-left: auto;
+      background: rgba(212,175,55,0.2);
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      color: var(--gold);
+      font-weight: 600;
+    }
+    .decision-scenario {
+      background: rgba(0,0,0,0.2);
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+    .decision-question {
+      font-weight: 600;
+      color: var(--gold);
+      margin-bottom: 0.75rem;
+      font-size: 1rem;
+    }
+    .decision-options { display: flex; flex-direction: column; gap: 0.5rem; }
+    .decision-option {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      background: rgba(255,255,255,0.05);
+      border: 2px solid rgba(255,255,255,0.15);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .decision-option:hover { background: rgba(124,58,237,0.2); border-color: var(--purple); }
+    .decision-option.selected { background: rgba(124,58,237,0.3); border-color: var(--purple); }
+    .decision-option.correct { background: rgba(34,197,94,0.2); border-color: var(--green); }
+    .decision-option.incorrect { background: rgba(239,68,68,0.15); border-color: var(--red); }
+    .decision-option.disabled { pointer-events: none; opacity: 0.7; }
+    .option-letter {
+      width: 24px;
+      height: 24px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.8rem;
+      flex-shrink: 0;
+    }
+    .decision-option.correct .option-letter { background: var(--green); color: white; }
+    .decision-option.incorrect .option-letter { background: var(--red); color: white; }
+    .option-text { font-size: 0.9rem; }
+    .decision-feedback {
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: 8px;
+      display: none;
+    }
+    .decision-feedback.show { display: block; }
+    .decision-feedback.correct { background: rgba(34,197,94,0.2); border: 1px solid var(--green); }
+    .decision-feedback.incorrect { background: rgba(239,68,68,0.15); border: 1px solid var(--red); }
+    .feedback-title { font-weight: 700; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
+    .feedback-text { font-size: 0.9rem; line-height: 1.5; }
+
+    /* ====== PREDICTION ====== */
+    .prediction-panel {
+      width: 100%;
+      max-width: 700px;
+      background: linear-gradient(135deg, rgba(212,175,55,0.15), rgba(30,39,97,0.25));
+      border: 2px solid var(--gold);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 0.75rem 0;
+      text-align: center;
+    }
+    .prediction-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+    .prediction-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.3rem;
+      color: var(--gold);
+      margin-bottom: 0.5rem;
+    }
+    .prediction-subtitle { font-size: 0.9rem; opacity: 0.8; margin-bottom: 1rem; }
+    .prediction-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .predict-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1rem;
+      border: 2px solid;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: rgba(0,0,0,0.2);
+    }
+    .predict-btn.benefit { border-color: var(--green); color: var(--green); }
+    .predict-btn.benefit:hover { background: rgba(34,197,94,0.2); }
+    .predict-btn.neutral { border-color: var(--light-text); color: var(--light-text); }
+    .predict-btn.neutral:hover { background: rgba(148,163,184,0.2); }
+    .predict-btn.harm { border-color: var(--red); color: var(--red); }
+    .predict-btn.harm:hover { background: rgba(239,68,68,0.2); }
+    .predict-btn.selected { transform: scale(1.02); box-shadow: 0 0 15px rgba(255,255,255,0.1); }
+    .prediction-result {
+      margin-top: 1rem;
+      padding: 0.75rem;
+      border-radius: 8px;
+      display: none;
+    }
+    .prediction-result.show { display: block; }
+    .prediction-result.correct { background: rgba(34,197,94,0.2); border: 1px solid var(--green); }
+    .prediction-result.incorrect { background: rgba(239,68,68,0.15); border: 1px solid var(--red); }
+
+    /* ====== QUIZ ====== */
+    .quiz-container { width: 100%; max-width: 650px; }
+    .quiz-question {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.2rem;
+      margin-bottom: 1.25rem;
+      text-align: center;
+    }
+    .quiz-options { display: flex; flex-direction: column; gap: 0.5rem; }
+    .quiz-option {
+      padding: 0.75rem 1rem;
+      background: rgba(255,255,255,0.05);
+      border: 2px solid rgba(255,255,255,0.2);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+    .quiz-option:hover { background: rgba(212,175,55,0.15); border-color: var(--gold); }
+    .quiz-option.correct { background: rgba(34,197,94,0.2); border-color: var(--green); }
+    .quiz-option.incorrect { background: rgba(239,68,68,0.15); border-color: var(--red); }
+    .quiz-option.disabled { pointer-events: none; }
+    .quiz-feedback {
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: 8px;
+      display: none;
+      font-size: 0.9rem;
+    }
+    .quiz-feedback.show { display: block; }
+    .quiz-feedback.correct { background: rgba(34,197,94,0.2); border: 1px solid var(--green); }
+    .quiz-feedback.incorrect { background: rgba(239,68,68,0.15); border: 1px solid var(--red); }
+
+    /* Crisis box */
+    .crisis-box {
+      background: linear-gradient(135deg, rgba(124,58,237,0.2), rgba(30,39,97,0.3));
+      border: 2px solid var(--purple);
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin: 0.75rem 0;
+      max-width: 750px;
+      width: 100%;
+    }
+    .crisis-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem; }
+    .crisis-number {
+      width: 36px;
+      height: 36px;
+      background: var(--purple);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+    .crisis-title { font-family: 'Cormorant Garamond', serif; font-size: 1.15rem; font-weight: 700; }
+    .crisis-day { font-size: 0.75rem; color: var(--purple); }
+
+    /* Animation */
+    .slide.active .animate { animation: fadeUp 0.5s ease-out forwards; }
+    .slide.active .animate.delay-1 { animation-delay: 0.1s; }
+    .slide.active .animate.delay-2 { animation-delay: 0.2s; }
+    .slide.active .animate.delay-3 { animation-delay: 0.3s; }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate { opacity: 0; }
+
+    /* XP Popup */
+    .xp-popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      background: linear-gradient(135deg, var(--gold), #f0c040);
+      color: var(--navy);
+      padding: 1.5rem 2.5rem;
+      border-radius: 12px;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2rem;
+      font-weight: 700;
+      z-index: 1000;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+      transition: transform 0.3s ease;
+    }
+    .xp-popup.show { transform: translate(-50%, -50%) scale(1); }
+    .xp-popup .xp-amount { font-size: 3rem; display: block; }
+
+    /* Badge Earned Modal */
+    .badge-modal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.85);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1001;
+    }
+    .badge-modal.show { display: flex; }
+    .badge-modal-content {
+      background: linear-gradient(135deg, var(--deep-navy), #0a0f1a);
+      border: 2px solid var(--gold);
+      border-radius: 16px;
+      padding: 2rem;
+      text-align: center;
+      max-width: 350px;
+    }
+    .badge-modal-icon { font-size: 4rem; margin-bottom: 1rem; }
+    .badge-modal-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.5rem;
+      color: var(--gold);
+      margin-bottom: 0.5rem;
+    }
+    .badge-modal-desc { font-size: 0.9rem; opacity: 0.8; margin-bottom: 1rem; }
+    .badge-modal-close {
+      padding: 0.5rem 1.5rem;
+      background: var(--gold);
+      color: var(--navy);
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* Confetti - respects reduced motion */
+    .confetti-container {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 999;
+      overflow: hidden;
+    }
+    .confetti {
+      position: absolute;
+      width: 10px; height: 10px;
+      opacity: 0;
+      animation: confetti-fall 3s ease-out forwards;
+    }
+    @keyframes confetti-fall {
+      0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      .confetti { display: none; }
+    }
+
+    /* Combo Counter */
+    .combo-display {
+      position: fixed;
+      top: 80px;
+      right: 20px;
+      background: linear-gradient(135deg, var(--orange), #ef4444);
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      z-index: 500;
+      transform: scale(0);
+      transition: transform 0.3s ease;
+      box-shadow: 0 4px 15px rgba(239,68,68,0.4);
+    }
+    .combo-display.show { transform: scale(1); }
+    .combo-display.big { transform: scale(1.2); }
+
+    /* Key Takeaway Card */
+    .takeaway-card {
+      background: linear-gradient(135deg, rgba(34,197,94,0.15), rgba(30,39,97,0.2));
+      border: 1px solid var(--green);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      margin: 0.75rem 0;
+      max-width: 700px;
+      width: 100%;
+    }
+    .takeaway-card .takeaway-icon {
+      display: inline-block;
+      background: var(--green);
+      color: white;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      text-align: center;
+      line-height: 24px;
+      font-size: 0.8rem;
+      margin-right: 0.5rem;
+    }
+    .takeaway-card .takeaway-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--green);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.35rem;
+    }
+    .takeaway-card .takeaway-text {
+      font-size: 0.9rem;
+      line-height: 1.5;
+      font-style: italic;
+    }
+
+    /* Module Time Estimate */
+    .module-time {
+      font-size: 0.55rem;
+      color: rgba(255,255,255,0.4);
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      margin-top: 0.15rem;
+    }
+
+    /* Enhanced Focus States for Keyboard Navigation */
+    .decision-option:focus-visible,
+    .quiz-option:focus-visible,
+    .predict-btn:focus-visible {
+      outline: 3px solid var(--gold);
+      outline-offset: 2px;
+    }
+    .nav-btn:focus-visible,
+    .btn:focus-visible {
+      outline: 3px solid var(--gold);
+      outline-offset: 2px;
+    }
+
+    /* Progress within module */
+    .slide-progress-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--gold), var(--orange));
+      transition: width 0.3s ease;
+      z-index: 50;
+    }
+
+    /* Citation Link Style */
+    .citation-link {
+      font-size: 0.7rem;
+      color: var(--gold);
+      opacity: 0.7;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      margin-top: 0.5rem;
+    }
+    .citation-link:hover { opacity: 1; text-decoration: underline; }
+
+    /* Mobile Sidebar Toggle */
+    @media (max-width: 768px) {
+      .sidebar {
+        position: fixed;
+        left: -300px;
+        top: 0;
+        bottom: 0;
+        z-index: 1000;
+        transition: left 0.3s ease;
+      }
+      .sidebar.open { left: 0; }
+      .sidebar-toggle {
+        display: flex;
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        z-index: 1001;
+        width: 40px;
+        height: 40px;
+        background: var(--gold);
+        color: var(--navy);
+        border: none;
+        border-radius: 8px;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        cursor: pointer;
+      }
+      .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 999;
+      }
+      .sidebar-overlay.show { display: block; }
+    }
+    @media (min-width: 769px) {
+      .sidebar-toggle { display: none; }
+      .sidebar-overlay { display: none !important; }
+    }
+
+    /* Nav */
+    .slide-nav {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      padding: 0.75rem 1rem 1.25rem;
+      z-index: 100;
+      pointer-events: none;
+    }
+    .nav-btn {
+      background: rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: white;
+      font-size: 1.1rem;
+      cursor: pointer;
+      opacity: 0.6;
+      transition: all 0.2s;
+      padding: 0.4rem 0.6rem;
+      border-radius: 6px;
+      pointer-events: auto;
+    }
+    .nav-btn:hover { opacity: 1; background: rgba(0,0,0,0.7); border-color: var(--gold); }
+    .nav-btn:disabled { opacity: 0.2; cursor: not-allowed; }
+    .nav-center { display: flex; flex-direction: column; align-items: center; gap: 0.2rem; pointer-events: auto; }
+    .slide-counter { font-size: 0.7rem; opacity: 0.5; }
+    .progress-dots { display: flex; gap: 3px; flex-wrap: wrap; max-width: 220px; }
+    .progress-dot {
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 0;
+    }
+    .progress-dot::after {
+      content: '';
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--text-muted, rgba(255,255,255,0.25));
+      transition: all 0.2s ease;
+    }
+    .progress-dot.active::after,
+    .progress-dot.completed::after {
+      background: var(--gold);
+      width: 14px;
+      height: 14px;
+    }
+
+    /* Course Progress Bar */
+    .course-progress {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+      background: rgba(0,0,0,0.2);
+    }
+    .course-progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.6);
+      margin-bottom: 0.35rem;
+    }
+    .course-progress-bar {
+      height: 6px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .course-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--green), #22d3ee);
+      border-radius: 3px;
+      transition: width 0.5s ease;
+    }
+
+    /* Learning Objectives */
+    .objectives-box {
+      background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(30,39,97,0.25));
+      border: 2px solid #3b82f6;
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin: 0.75rem 0;
+      max-width: 700px;
+      width: 100%;
+    }
+    .objectives-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+    .objectives-icon {
+      width: 36px;
+      height: 36px;
+      background: #3b82f6;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+    }
+    .objectives-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #60a5fa;
+    }
+    .objectives-list {
+      list-style: none;
+      padding: 0;
+    }
+    .objectives-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      padding: 0.4rem 0;
+      font-size: 0.9rem;
+    }
+    .objectives-list li::before {
+      content: '○';
+      color: #3b82f6;
+      font-weight: bold;
+    }
+    .objectives-list li.completed::before {
+      content: '●';
+      color: var(--green);
+    }
+
+    /* Module Summary */
+    .summary-box {
+      background: linear-gradient(135deg, rgba(34,197,94,0.15), rgba(30,39,97,0.25));
+      border: 2px solid var(--green);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 0.75rem 0;
+      max-width: 700px;
+      width: 100%;
+      text-align: center;
+    }
+    .summary-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+    .summary-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.4rem;
+      color: var(--green);
+      margin-bottom: 0.5rem;
+    }
+    .summary-stats {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      margin: 1rem 0;
+    }
+    .summary-stat {
+      text-align: center;
+    }
+    .summary-stat-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--gold);
+    }
+    .summary-stat-label {
+      font-size: 0.75rem;
+      opacity: 0.7;
+    }
+    .summary-next {
+      margin-top: 1rem;
+      padding: 0.75rem 1.5rem;
+      background: var(--green);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .summary-next:hover { transform: scale(1.05); }
+
+    /* Badge Progress Tooltip */
+    .badge-progress {
+      font-size: 0.55rem;
+      color: rgba(255,255,255,0.4);
+      position: absolute;
+      bottom: -2px;
+      right: -2px;
+      background: var(--deep-navy);
+      padding: 0 3px;
+      border-radius: 3px;
+    }
+    .badge-item { position: relative; }
+
+    /* Glossary Panel */
+    .glossary-toggle {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      width: 50px;
+      height: 50px;
+      background: var(--gold);
+      color: var(--navy);
+      border: none;
+      border-radius: 50%;
+      font-size: 1.3rem;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      z-index: 500;
+      transition: all 0.2s;
+    }
+    .glossary-toggle:hover { transform: scale(1.1); }
+    .glossary-panel {
+      position: fixed;
+      bottom: 0;
+      right: 0;
+      width: 350px;
+      max-height: 70vh;
+      background: var(--deep-navy);
+      border: 1px solid var(--gold);
+      border-radius: 12px 0 0 0;
+      transform: translateY(100%);
+      transition: transform 0.3s ease;
+      z-index: 501;
+      display: flex;
+      flex-direction: column;
+    }
+    .glossary-panel.open { transform: translateY(0); }
+    .glossary-header {
+      padding: 1rem;
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .glossary-header h3 {
+      font-family: 'Cormorant Garamond', serif;
+      color: var(--gold);
+      margin: 0;
+    }
+    .glossary-close {
+      background: none;
+      border: none;
+      color: var(--cream);
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+    .glossary-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem;
+    }
+    .glossary-item {
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .glossary-term {
+      font-weight: 700;
+      color: var(--gold);
+      font-size: 0.9rem;
+    }
+    .glossary-def {
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.8);
+      margin-top: 0.25rem;
+    }
+
+    /* Streak Warning */
+    .streak-warning {
+      background: rgba(239,68,68,0.2);
+      border: 1px solid var(--red);
+      color: var(--red);
+      animation: pulse-warning 2s infinite;
+    }
+    @keyframes pulse-warning {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
+    /* Perfect Module Bonus */
+    .perfect-bonus {
+      background: linear-gradient(135deg, var(--gold), #fbbf24);
+      color: var(--navy);
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+      animation: shine 2s infinite;
+    }
+    @keyframes shine {
+      0%, 100% { box-shadow: 0 0 10px rgba(212,175,55,0.5); }
+      50% { box-shadow: 0 0 20px rgba(212,175,55,0.8); }
+    }
+
+    /* Focus States for Accessibility */
+    .decision-option:focus,
+    .quiz-option:focus,
+    .predict-btn:focus,
+    .btn:focus,
+    .nav-btn:focus {
+      outline: 2px solid var(--gold);
+      outline-offset: 2px;
+    }
+
+    /* Print Stylesheet */
+    @media print {
+      .sidebar, .slide-nav, .stats-panel, .badges-panel, .glossary-toggle, .glossary-panel, .header-actions { display: none !important; }
+      .main-content { width: 100%; }
+      .slide { position: relative !important; page-break-inside: avoid; padding: 1rem; }
+      .slide.active, .slide { opacity: 1 !important; visibility: visible !important; display: block !important; }
+      .module-slides { display: block !important; }
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .sidebar { width: 70px; }
+      .sidebar-header h1, .sidebar-header p, .module-title, .module-subtitle, .module-xp,
+      .stats-panel, .badges-panel, .course-progress { display: none; }
+      .module-item { padding: 0.6rem; justify-content: center; }
+      .glossary-panel { width: 100%; border-radius: 12px 12px 0 0; }
+      .progress-dot { width: 44px; height: 44px; }
+      .progress-dot::after { width: 8px; height: 8px; }
+      .progress-dot.active::after,
+      .progress-dot.completed::after { width: 10px; height: 10px; }
+    }
+
+    /* Touch feedback */
+    @media (hover: none) {
+      .decision-option:active { background: rgba(124,58,237,0.3); }
+      .quiz-option:active { background: rgba(212,175,55,0.2); }
+    }
+
+    /* Reduced motion support */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      .confetti { display: none; }
+    }
+
+    /* Skip to content link */
+    .skip-link {
+      position: absolute;
+      top: -40px;
+      left: 0;
+      background: var(--gold);
+      color: var(--navy);
+      padding: 0.5rem 1rem;
+      z-index: 10000;
+      font-weight: 600;
+      text-decoration: none;
+      border-radius: 0 0 8px 0;
+    }
+    .skip-link:focus {
+      top: 0;
+    }
+
+    /* Course completion modal */
+    .completion-modal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.95);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1002;
+    }
+    .completion-modal.show { display: flex; }
+    .completion-content {
+      background: linear-gradient(135deg, var(--deep-navy), #0a0f1a);
+      border: 3px solid var(--gold);
+      border-radius: 20px;
+      padding: 2.5rem;
+      text-align: center;
+      max-width: 450px;
+      animation: completion-pop 0.5s ease;
+    }
+    @keyframes completion-pop {
+      0% { transform: scale(0.5); opacity: 0; }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .completion-trophy { font-size: 5rem; margin-bottom: 1rem; }
+    .completion-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2rem;
+      color: var(--gold);
+      margin-bottom: 0.5rem;
+    }
+    .completion-subtitle { font-size: 1rem; opacity: 0.8; margin-bottom: 1.5rem; }
+    .completion-stats {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .completion-stat { text-align: center; }
+    .completion-stat-value {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--gold);
+    }
+    .completion-stat-label { font-size: 0.75rem; opacity: 0.7; }
+    .completion-close {
+      padding: 0.75rem 2rem;
+      background: var(--gold);
+      color: var(--navy);
+      border: none;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    /* Review mistakes button */
+    .review-mistakes-btn {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 1.5rem;
+      padding: 0.6rem 1rem;
+      background: rgba(239,68,68,0.2);
+      border: 1px solid var(--red);
+      color: var(--red);
+      border-radius: 8px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      z-index: 500;
+      display: none;
+    }
+    .review-mistakes-btn.show { display: block; }
+    .review-mistakes-btn:hover { background: rgba(239,68,68,0.3); }
+
+    /* Review panel */
+    .review-panel {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.9);
+      display: none;
+      z-index: 1003;
+      overflow-y: auto;
+      padding: 2rem;
+    }
+    .review-panel.show { display: block; }
+    .review-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .review-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.5rem;
+      color: var(--red);
+    }
+    .review-close {
+      background: none;
+      border: 1px solid var(--cream);
+      color: var(--cream);
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .review-item {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(239,68,68,0.3);
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .review-module { font-size: 0.75rem; color: var(--gold); margin-bottom: 0.5rem; }
+    .review-question { font-weight: 600; margin-bottom: 0.75rem; }
+    .review-your-answer { color: var(--red); font-size: 0.9rem; margin-bottom: 0.5rem; }
+    .review-correct-answer { color: var(--green); font-size: 0.9rem; margin-bottom: 0.75rem; }
+    .review-explanation { font-size: 0.85rem; opacity: 0.8; padding: 0.75rem; background: rgba(0,0,0,0.2); border-radius: 6px; }
+  </style>
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to content</a>
+<div class="course-container">
+<!-- SIDEBAR -->
+<nav aria-label="课程导航" class="sidebar">
+<div class="sidebar-header">
+<a href="index.html" onmouseout="this.style.color='rgba(212,175,55,0.7)'" onmouseover="this.style.color='#D4AF37'" style="display:block;font-size:0.7rem;color:rgba(212,175,55,0.7);text-decoration:none;margin-bottom:0.5rem;">← Course Library</a>
+<h1>META-SPRINT</h1>
+<p>40 天获得可信证据</p>
+</div>
+<!-- Course Progress -->
+<div class="course-progress">
+<div class="course-progress-label">
+<span>Course Progress</span>
+<span id="courseProgressPct">0%</span>
+</div>
+<div class="course-progress-bar">
+<div class="course-progress-fill" id="courseProgressFill" style="width: 0%"></div>
+</div>
+</div>
+<!-- Gamification Stats -->
+<div class="stats-panel">
+<div class="level-display">
+<div aria-label="Level icon" class="level-badge" id="levelIcon" role="img">📊</div>
+<div class="level-info">
+<div class="level-title" id="levelTitle">Novice Analyst</div>
+<div class="level-subtitle">Level <span id="levelNum">1</span></div>
+</div>
+</div>
+<div aria-label="XP progress" class="xp-bar" role="progressbar">
+<div class="xp-fill" id="xpFill" style="width: 0%"></div>
+</div>
+<div class="xp-text"><span id="xpCurrent">0</span> / <span id="xpNeeded">100</span> XP</div>
+<div class="quick-stats">
+<div class="quick-stat">
+<div class="quick-stat-value" id="correctCount">0</div>
+<div class="quick-stat-label">Correct</div>
+</div>
+<div class="quick-stat">
+<div class="quick-stat-value" id="decisionCount">0</div>
+<div class="quick-stat-label">Decisions</div>
+</div>
+<div class="quick-stat">
+<div class="quick-stat-value" id="predictCount">0</div>
+<div class="quick-stat-label">Predictions</div>
+</div>
+</div>
+</div>
+<div class="module-list" id="moduleList" role="list"></div>
+<!-- Badges -->
+<div class="badges-panel">
+<div class="badges-title">Achievements</div>
+<div class="badges-grid" id="badgesGrid"></div>
+</div>
+</nav>
+<!-- MAIN -->
+<div class="main-content">
+<div class="content-header">
+<div class="breadcrumb">META-SPRINT / <span id="currentModule">Introduction</span></div>
+<div class="header-actions">
+<div class="streak-display" id="streakDisplay">
+<span class="streak-flame">🔥</span>
+<span class="streak-count" id="streakCount">0</span>
+<span style="font-size:0.7rem;opacity:0.7">streak</span>
+</div>
+<button class="btn" onclick="resetProgress()">Reset</button>
+<button class="btn primary" onclick="nextSlide()">Continue →</button>
+</div>
+</div>
+<div class="content-body">
+<div class="slides-container" id="main-content"></div>
+</div>
+</div>
+</div>
+<!-- XP Popup -->
+<div class="xp-popup" id="xpPopup">
+<span class="xp-amount" id="xpAmount">+25</span>
+    XP
+  </div>
+<!-- Badge Modal -->
+<div aria-labelledby="badgeModalTitle" aria-modal="true" class="badge-modal" id="badgeModal" role="dialog">
+<div class="badge-modal-content">
+<div class="badge-modal-icon" id="badgeModalIcon">🏆</div>
+<div class="badge-modal-title" id="badgeModalTitle">Badge Earned!</div>
+<div class="badge-modal-desc" id="badgeModalDesc">您解锁了一项新成就</div>
+<button class="badge-modal-close" onclick="closeBadgeModal()">Awesome!</button>
+</div>
+</div>
+<!-- Confetti Container -->
+<div class="confetti-container" id="confettiContainer"></div>
+<!-- Combo Counter -->
+<div class="combo-display" id="comboDisplay">🔥 <span id="comboCount">0</span>x Combo!</div>
+<!-- Mobile Sidebar Toggle -->
+<button aria-expanded="false" aria-label="Toggle menu" class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<!-- Glossary Toggle -->
+<button aria-label="Open glossary" class="glossary-toggle" onclick="toggleGlossary()" title="Quick Reference">📖</button>
+<!-- Glossary Panel -->
+<div aria-label="Glossary" class="glossary-panel" id="glossaryPanel" role="dialog">
+<div class="glossary-header">
+<h3>Quick Reference</h3>
+<button aria-label="Close glossary" class="glossary-close" onclick="toggleGlossary()">×</button>
+</div>
+<div class="glossary-content">
+<div class="glossary-item">
+<div class="glossary-term">DoD (Definition of Done)</div>
+<div class="glossary-def">Binary gate checklist. All items must pass before proceeding to next phase.</div>
+</div>
+<div class="glossary-item">
+<div class="glossary-term">PICOS</div>
+<div class="glossary-def">人群、干预、比较器、结果、研究设计 - 研究问题框架。</div>
+</div>
+<div class="glossary-item">
+<div class="glossary-term">Provenance</div>
+<div class="glossary-def">准确显示数字来源的审计跟踪（例如，“表” 2，第 1234 页”）。</div>
+</div>
+<div class="glossary-item">
+<div class="glossary-term">Red-Team</div>
+<div class="glossary-def">Daily adversarial checking by 2 rotating members to catch errors in extraction.</div>
+</div>
+<div class="glossary-item">
+<div class="glossary-term">CondGO</div>
+<div class="glossary-def">Emergency protocol: 72 hours to fix a failed DoD gate or terminate with documented reasons.</div>
+</div>
+<div class="glossary-item">
+<div class="glossary-term">Surrogate Outcome</div>
+<div class="glossary-def">A measurable marker (e.g., cholesterol) used as proxy for patient-important outcomes (e.g., death).</div>
+</div>
+<div class="glossary-item">
+<div class="glossary-term">FREEZE (Day 34)</div>
+<div class="glossary-def">范围锁定 - 此后不能添加新的研究。</div>
+</div>
+<div class="glossary-item">
+<div class="glossary-term">I² (I-squared)</div>
+<div class="glossary-def">Heterogeneity statistic. Low &lt;30%, Moderate 30-60%, High &gt;60%.</div>
+</div>
+<div class="glossary-item">
+<div class="glossary-term">Analysis Capsule</div>
+<div class="glossary-def">完整的可重现包：代码、数据、指令。任何人都可以运行并获得相同的结果。</div>
+</div>
+<div class="glossary-item">
+<div class="glossary-term">Consult Pack</div>
+<div class="glossary-def">包含选项、证据和团队决策权衡的结构化文档。</div>
+</div>
+<div class="glossary-item">
+<div class="glossary-term">PROSPERO</div>
+<div class="glossary-def">系统审查协议的国际注册中心。为您预先指定的方法添加时间戳。</div>
+</div>
+<div class="glossary-item">
+<div class="glossary-term">PRISMA</div>
+<div class="glossary-def">系统评价报告指南。包括显示研究选择的流程图。</div>
+</div>
+</div>
+</div>
+ 课程完成模式 
+<div aria-label="课程已完成" class="completion-modal" id="completionModal" role="dialog">
+<div class="completion-content">
+<div class="completion-trophy">🏆</div>
+<div class="completion-title">Course Complete!</div>
+<div class="completion-subtitle">You've mastered the META-SPRINT methodology</div>
+<div class="completion-stats">
+<div class="completion-stat">
+<div class="completion-stat-value" id="finalXP">0</div>
+<div class="completion-stat-label">Total XP</div>
+</div>
+<div class="completion-stat">
+<div class="completion-stat-value" id="finalCorrect">0</div>
+<div class="completion-stat-label">Correct Answers</div>
+</div>
+<div class="completion-stat">
+<div class="completion-stat-value" id="finalBadges">0</div>
+<div class="completion-stat-label">Badges Earned</div>
+</div>
+</div>
+<p style="font-size:0.9rem;opacity:0.7;margin-bottom:1rem">继续提供可靠的证据！</p>
+<div class="completion-actions" style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap;">
+<button class="btn primary" onclick="downloadCertificate()">Download Certificate</button>
+<button class="completion-close" onclick="closeCompletionModal()">Continue</button>
+</div>
+</div>
+</div>
+ 审核错误按钮 
+<button aria-label="查看不正确的答案" class="review-mistakes-btn" id="reviewMistakesBtn" onclick="showReviewPanel()">
+    📝 Review Mistakes
+  </button>
+<!-- Review Panel -->
+<div aria-label="查看不正确的答案" class="review-panel" id="reviewPanel" role="dialog">
+<div class="review-header">
+<div class="review-title">📝审核您的错误</div>
+<button class="review-close" onclick="closeReviewPanel()">Close</button>
+</div>
+<div id="reviewContent"></div>
+</div>
+<script>
+// ===== GAMIFICATION STATE =====
+const DEFAULT_STATE = {
+  xp: 0,
+  level: 1,
+  streak: 0,
+  lastActive: null,
+  correctAnswers: 0,
+  decisionsCompleted: 0,
+  predictionsCorrect: 0,
+  predictionsTotal: 0,
+  badges: [],
+  completedModules: [],
+  perfectModules: [],
+  answeredQuestions: {},
+  consecutiveCorrect: 0
+};
+
+// Safe localStorage with fallback
+function safeGetStorage(key, fallback) {
+  try {
+    const item = localStorage.getItem(key);
+    return item ? JSON.parse(item) : fallback;
+  } catch (e) {
+    console.warn('localStorage unavailable, using session storage');
+    return fallback;
+  }
+}
+
+function safeSetStorage(key, value) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch (e) {
+    console.warn('Could not save to localStorage');
+  }
+}
+
+// Migration from old storage key to versioned key
+(function migrateStorage() {
+  try {
+    const oldData = localStorage.getItem('metasprintGame');
+    if (oldData && !localStorage.getItem('metasprintGame_v1')) {
+      localStorage.setItem('metasprintGame_v1', oldData);
+      localStorage.removeItem('metasprintGame');
+    }
+  } catch (e) {}
+})();
+
+let gameState = safeGetStorage('metasprintGame_v1', DEFAULT_STATE);
+
+const LEVELS = [
+  { level: 1, title: "Novice Analyst", icon: "📊", xp: 0 },
+  { level: 2, title: "Protocol Apprentice", icon: "📋", xp: 100 },
+  { level: 3, title: "Search Specialist", icon: "🔍", xp: 250 },
+  { level: 4, title: "Extraction Expert", icon: "📝", xp: 450 },
+  { level: 5, title: "Analysis Adept", icon: "📈", xp: 700 },
+  { level: 6, title: "Quality Guardian", icon: "🛡️", xp: 1000 },
+  { level: 7, title: "Evidence Master", icon: "🏆", xp: 1400 },
+  { level: 8, title: "Meta-Analysis Sage", icon: "👑", xp: 1900 }
+];
+
+const BADGES = [
+  { id: "first_blood", icon: "🎯", name: "First Blood", desc: "正确回答第一个问题" },
+  { id: "perfect_5", icon: "⭐", name: "Five Star", desc: "Get 5 correct answers in a row" },
+  { id: "decision_maker", icon: "⚖️", name: "Decision Maker", desc: "完成10个决策树" },
+  { id: "oracle", icon: "🔮", name: "The Oracle", desc: "Predict 5 outcomes correctly" },
+  { id: "protocol_pro", icon: "📋", name: "Protocol Pro", desc: "完成A阶段模块" },
+  { id: "search_savant", icon: "🔍", name: "Search Savant", desc: "完成B阶段模块" },
+  { id: "data_detective", icon: "🕵️", name: "Data Detective", desc: "完成C阶段模块" },
+  { id: "stats_wizard", icon: "🧙", name: "Stats Wizard", desc: "完成D阶段模块" },
+  { id: "finisher", icon: "🏁", name: "Finisher", desc: "完成整个课程" },
+  { id: "streak_3", icon: "🔥", name: "On Fire", desc: "Maintain a 3-day streak" },
+  { id: "streak_7", icon: "💫", name: "Weekly Warrior", desc: "Maintain a 7-day streak" },
+  { id: "colchicine_hero", icon: "💊", name: "Colchicine Hero", desc: "完成案例研究" }
+];
+
+// ===== MODULES DATA =====
+const MODULES = [
+  {
+    id: 1, title: "Why META-SPRINT?", subtitle: "不良证据的成本", xp: 150,
+    slides: [
+      { type: "title", theme: "dark", content: { title: "Why META-SPRINT?", subtitle: "错误的成本" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "Understand why bad evidence causes real harm",
+          "从CAST悲剧和Poldermans中学习欺诈",
+          "Recognize surrogate outcome traps",
+          "Understand what provenance verification means"
+        ],
+        tip: "此模块为接下来的一切奠定了基础。"
+      }},
+      { type: "prediction", theme: "dark", content: {
+        icon: "🔮", title: "做出您的预测",
+        subtitle: "在 20 世纪 80 年代，人们开发了药物来抑制心脏病发作后的不规则心跳 (PVC)。这些药物成功修复了心电图读数。您认为死亡率发生了什么变化？",
+        options: [
+          { id: "benefit", label: "💚 Deaths decreased", text: "药物挽救了生命" },
+          { id: "neutral", label: "⚪ No change", text: "死亡人数保持不变" },
+          { id: "harm", label: "❤️ Deaths increased", text: "药物造成伤害" }
+        ],
+        answer: "harm",
+        xp: 30
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "CAST 悲剧", title: "50,000 Deaths",
+        text: "The drugs that 'fixed' the ECG <strong>tripled</strong> death rates. 50,000 Americans died from drugs that made their monitors look better.",
+        followup: "Suppressing PVCs was a surrogate outcome—it looked like benefit but masked real harm."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "📊", title: "场景：令人印象深刻数字",
+        xp: 25,
+        scenario: "一种新的糖尿病药物显示，它比标准治疗方法可将 HbA1c（血糖标志物）降低 40%。制造商希望根据这一“令人印象深刻的功效数据”快速获得批准。",
+        question: "What should regulators demand?",
+        options: [
+          { letter: "A", text: "Approve it—40% better HbA1c is significant", correct: false },
+          { letter: "B", text: "Require trials showing reduced heart attacks, strokes, or death", correct: true },
+          { letter: "C", text: "通过上市后监控进行批准", correct: false },
+          { letter: "D", text: "Request larger HbA1c trials for confirmation", correct: false }
+        ],
+        feedback: {
+          correct: "Correct! HbA1c is a surrogate like PVCs. The CAST tragedy taught us: surrogates can improve while patients die. Demand patient-important outcomes.",
+          incorrect: "HbA1c is a surrogate marker. CAST showed us that 'fixing' lab values can mask fatal harm. Always demand patient-important outcomes: death, heart attack, stroke."
+        }
+      }},
+      { type: "stats", theme: "dark", content: {
+        title: "证据失败的规模",
+        stats: [
+          { value: "50,000", label: "CAST drug deaths" },
+          { value: "800,000", label: "Poldermans fraud deaths" },
+          { value: "70%", label: "Studies unreproducible" }
+        ],
+        caption: "这些并不是罕见的灾难。它们是损坏过程的可预测结果。"
+      }},
+      { type: "story", theme: "dark", content: {
+        label: "万络清算", title: "The Memo They Tried to Hide",
+        text: "In 1996, Merck scientists discovered their painkiller Vioxx caused heart attacks. They wrote internal memos. They calculated the excess deaths. They did <strong>nothing</strong>. For eight years, doctors prescribed Vioxx while Merck executives debated how to spin the data.",
+        followup: "When the truth emerged in 2004: 88,000 Americans had suffered heart attacks. 38,000 died. One internal email read: 'The cardiovascular events are clearly there.' They knew. They waited. People died."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "📧", title: "场景：内部信号",
+        xp: 25,
+        scenario: "您是一家制药公司的研究员。您的分析显示您的重磅药物会使心脏事件增加 31%。您的经理建议在升级之前“等待更多数据”并“探索替代解释”。",
+        question: "你应该做什么？",
+        options: [
+          { letter: "A", text: "按照建议等待更多数据", correct: false },
+          { letter: "B", text: "立即向安全委员会报告结果", correct: true },
+          { letter: "C", text: "Run alternative analyses to see if the signal disappears", correct: false },
+          { letter: "D", text: "Document your concerns in an email but take no action", correct: false }
+        ],
+        feedback: {
+          correct: "Correct! The Vioxx lesson: 'waiting for more data' while people die is a decision that kills. Safety signals require immediate escalation.",
+          incorrect: "每一天的延误都会有一个死亡人数统计。 Vioxx 的内部备忘录显示他们知道，但“等待更多数据”导致 38,000 人死亡。立即报告安全信号。"
+        }
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "达菲欺骗", title: "隐藏数据价值 4.73 亿英镑",
+        text: "In 2009, governments stockpiled Tamiflu for pandemic flu. The UK spent £473 million. The evidence? Manufacturer-funded trials showing 'reduced complications.' The catch? Roche refused to release the full trial data for <strong>five years</strong>.",
+        followup: "When researchers finally obtained the raw data, they found: No evidence Tamiflu reduced hospitalizations. No evidence it prevented complications. Half a billion pounds spent on a promise that couldn't be verified."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "⚠️", title: "场景：Poldermans 数据",
+        xp: 25,
+        scenario: "您正在查看一项荟萃分析，并注意到一位研究人员贡献了 40 项纳入研究中的 15 项。他的数据显示结果比其他人好得多。没有人验证他的原始数据是否存在。",
+        question: "你应该做什么？",
+        options: [
+          { letter: "A", text: "包括所有研究 - 它们通过了同行评审", correct: false },
+          { letter: "B", text: "请求对其研究进行出处验证", correct: true },
+          { letter: "C", text: "Exclude his studies without explanation", correct: false },
+          { letter: "D", text: "将他的结果与其他人进行平均以减少影响", correct: false }
+        ],
+        feedback: {
+          correct: "正确！来源验证询问“我可以追踪这个号码的来源吗？” Poldermans 的欺诈行为导致 80 万人死亡，因为没有人问这个问题。",
+          incorrect: "Not quite. Peer review doesn't verify raw data exists. You need provenance—the trail from number to source document."
+        }
+      }},
+      { type: "story", theme: "dark", content: {
+        label: "Theranos 欺骗", title: "One Drop of Blood, Billions in Lies",
+        text: "In 2003, a 19-year-old Stanford dropout named <strong>Elizabeth Holmes</strong> made a promise that captivated the world: revolutionary blood tests from a single drop. No more needles. No more vials. Investors poured in $700 million. Walgreens signed a deal to put Theranos machines in 8,200 stores. Holmes graced magazine covers. Her company was valued at $9 billion.",
+        followup: "The technology never worked. Not once. Theranos ran patient samples on competitors' machines, then hid the results. When the lies unraveled in 2015, the damage was done: <strong>thousands of patients received incorrect diagnoses</strong>. Cancer missed. HIV false positives. Treatment decisions based on fabricated data. Holmes is now serving 11 years in federal prison. The lesson: extraordinary claims without verifiable evidence aren't innovation—they're fraud."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "🩸", title: "场景：革命性技术",
+        xp: 25,
+        scenario: "一家初创公司声称他们的人工智能可以通过单次抽血检测出 50 种癌症，准确率高达 99%。他们已经筹集了 5 亿美元。名人代言比比皆是。但他们以“商业秘密”为由拒绝公布验证数据。医院系统希望立即部署它。",
+        question: "What should the hospital demand before deployment?",
+        options: [
+          { letter: "A", text: "相信 FDA 的批准并部署", correct: false },
+          { letter: "B", text: "Require independent validation on their own patient population", correct: true },
+          { letter: "C", text: "从基于公司数据的小型试点开始", correct: false },
+          { letter: "D", text: "等待同行评审的出版物", correct: false }
+        ],
+        feedback: {
+          correct: "正确！ Theranos 的一项测试获得了 FDA 的批准，但对其他数十项测试却撒了谎。对您的患者进行独立验证是不容协商的。隐藏验证数据的商业秘密是危险信号。",
+          incorrect: "Theranos fooled Walgreens, investors, and patients. The lesson: no independent validation, no deployment. 'Trust us' is not evidence."
+        }
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "奥施康定灾难", title: "导致流行的药物",
+        text: "In 1996, Purdue Pharma launched OxyContin with a bold claim: their new opioid was <strong>'less than 1% addictive.'</strong> They cited a brief letter to the editor in a 1980 New England Journal of Medicine—five sentences about hospital patients, not outpatient prescriptions. Sales reps repeated the claim 500,000 times to doctors. Purdue spent $200 million marketing it as safe.",
+        followup: "The Sackler family knew. Internal documents showed they tracked addiction reports. They knew their 12-hour pill was wearing off early, driving patients to take more. They did the math: more pills, more profit. By 2021: <strong>500,000 Americans dead from opioid overdoses</strong>. Purdue pleaded guilty to federal charges—twice. The Sacklers paid $6 billion but admitted no personal wrongdoing. One misrepresented paragraph. Half a million graves."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "💊", title: "场景：引文追逐",
+        xp: 25,
+        scenario: "药品代表声称他们的新止痛药“已证明成瘾风险最小”在文献中。他们会给你一份参考资料。您发现这是一封 1980 年写给编辑的 5 句话信，研究住院患者，而不是您治疗的门诊患者。",
+        question: "你应该做什么？",
+        options: [
+          { letter: "A", text: "It's in NEJM, so it's credible enough", correct: false },
+          { letter: "B", text: "Demand RCTs with addiction as a pre-specified outcome in relevant populations", correct: true },
+          { letter: "C", text: "Prescribe cautiously and monitor patients yourself", correct: false },
+          { letter: "D", text: "Wait for colleagues to report problems first", correct: false }
+        ],
+        feedback: {
+          correct: "正确！奥施康定悲剧始于一封被歪曲为证据的五句话信。信件不是证据。要求在相关人群中进行真正的试验并取得相关结果。",
+          incorrect: "普渡大学靠一封五句话的信建立了一个帝国。 “它已发布”并不意味着“它是证据”。人群、设计和结果必须符合您的临床问题。"
+        }
+      }},
+      { type: "story", theme: "dark", content: {
+        label: "Surgisphere 丑闻", title: "从未存在的数据库",
+        text: "In May 2020, the world was desperate for COVID-19 answers. Then <strong>The Lancet</strong> published a bombshell: hydroxychloroquine increased deaths in COVID patients. The study claimed data from 96,000 patients across 671 hospitals on six continents. The WHO halted trials. Countries banned the drug. The paper had one problem: <strong>the data was fabricated</strong>.",
+        followup: "Surgisphere, a tiny company with 11 employees, claimed to have a global hospital database larger than any healthcare system on Earth. One employee was a science fiction author. Another was an adult content model. When journalists asked for verification, the company couldn't produce a single hospital contract. Both The Lancet and NEJM retracted their Surgisphere papers within weeks. During a pandemic, fabricated data hijacked global health policy. The peer reviewers never asked: 'Can we see proof this database exists?'"
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "🏥", title: "Scenario: The Impossibly Large Dataset",
+        xp: 25,
+        scenario: "一篇论文声称要分析来自 47 个国家 1,500 家医院的 200,000 名患者，这些患者是由一家您从未听说过的公司（拥有 6 名员工）收集的。结果将改变治疗指南。同行评审员批准了它。",
+        question: "在系统评价中引用此内容之前，您应该验证什么？",
+        options: [
+          { letter: "A", text: "如果是顶级期刊，则同行评审就足够了", correct: false },
+          { letter: "B", text: "联系数据公司并索取医院合作伙伴关系的文档", correct: true },
+          { letter: "C", text: "Check if other researchers have cited it positively", correct: false },
+          { letter: "D", text: "在数据中查找统计异常情况发布的表", correct: false }
+        ],
+        feedback: {
+          correct: "正确！ Surgisphere 在大流行期间愚弄了《柳叶刀》和《新英格兰医学杂志》。出处验证——“证明该数据存在”——会发现它。著名期刊并非出处。",
+          incorrect: "《柳叶刀》和《新英格兰医学杂志》被愚弄了。同行评审并不验证数据库是否存在。在相信非凡数据之前，请验证来源以证明其真实性。"
+        }
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "芬芬灾难", title: "摧毁心脏的减肥药",
+        text: "In 1992, a researcher combined two FDA-approved drugs—fenfluramine and phentermine—for weight loss. The combination was never tested together. The results seemed miraculous: patients lost weight effortlessly. Doctors prescribed it to <strong>6 million Americans</strong>. Weight loss clinics sprouted everywhere. Women's magazines celebrated the breakthrough.",
+        followup: "Then the Mayo Clinic noticed something terrifying. Young, healthy women were developing a rare heart valve disease. One cardiologist saw 24 cases in a single year—he'd seen only a handful in his entire career. The FDA investigated: <strong>30% of fen-phen users had abnormal heart valves</strong>. The combination was destroying hearts. By the time it was pulled in 1997, the damage was catastrophic. American Home Products paid $13 billion in settlements. The lesson: combining 'safe' drugs without testing the combination is not science—it's an uncontrolled experiment on patients."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "💔", title: "场景：标签外组合",
+        xp: 25,
+        scenario: "一位同事向您展示了令人印象深刻的减肥效果以从未在试验中测试过的方式组合两种已批准的药物。 “它们都获得了 FDA 批准，因此这种组合一定是安全的。”他们想要发布一个案例系列并推荐该协议。",
+        question: "这个推理的关键缺陷是什么？",
+        options: [
+          { letter: "A", text: "案例系列太小，无法发布", correct: false },
+          { letter: "B", text: "Drug interactions can create harms not present in either drug alone", correct: true },
+          { letter: "C", text: "Off-label use requires special FDA permission", correct: false },
+          { letter: "D", text: "Weight loss drugs are too controversial", correct: false }
+        ],
+        feedback: {
+          correct: "正确！ Fen-phen 将两种“安全”药物组合成一种破坏心脏的组合。药物相互作用无法从个人资料中预测。未经测试的组合需要自己进行试验。",
+          incorrect: "芬氟拉明是“安全的”。芬特明是“安全的”。它们总共损坏了 30% 使用者的心脏瓣膜。组合需要自己的证据——假设致命。"
+        }
+      }},
+      { type: "story", theme: "dark", content: {
+        label: "DES 悲剧", title: "困扰了三代人的药物",
+        text: "In 1938, scientists synthesized DES—a synthetic estrogen. By 1941, doctors were prescribing it to pregnant women to prevent miscarriages. It seemed logical: estrogen supports pregnancy. <strong>5 million American women</strong> took it between 1940 and 1971. Nobody ran a controlled trial. Nobody tracked the babies.",
+        followup: "In 1971, a physician noticed something impossible: <strong>young women in their teens and twenties were developing a rare vaginal cancer</strong> that typically struck women over 50. He traced it back: their mothers had all taken DES during pregnancy. The drug hadn't caused immediate harm—it had planted a time bomb in the womb. DES daughters had higher rates of infertility, miscarriage, and cancer. DES granddaughters—the third generation—showed elevated cancer risks too. One untested assumption. Three generations of harm. The first controlled trial of DES, run in 1953, showed it <strong>didn't even prevent miscarriages</strong>—the original indication was worthless."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "🤰", title: "场景：逻辑治疗",
+        xp: 25,
+        scenario: "一种生物学上合理的妊娠并发症治疗方法已经使用了 15 年，没有明显的直接危害。不存在对照试验。一位同事说，“我们已经在数千名患者身上使用了它，如果它引起了问题，我们现在就知道了。”",
+        question: "What critical assumption does this reasoning miss?",
+        options: [
+          { letter: "A", text: "15 years isn't long enough to judge safety", correct: false },
+          { letter: "B", text: "Pregnancy exposures can cause harms that only appear decades later in offspring", correct: true },
+          { letter: "C", text: "Observational experience is never valid", correct: false },
+          { letter: "D", text: "Colleagues might be hiding adverse events", correct: false }
+        ],
+        feedback: {
+          correct: "Correct! DES taught us the cruelest lesson: pregnancy exposures can cause cancers that appear 20-30 years later in children and grandchildren. 'No immediate harm' is not 'no harm.'",
+          incorrect: "DES 看起来安全了 30 年，直到他们的女儿在青少年时期开始患上癌症。有些危害需要几十年才能显现出来。对后代进行长期随访对于妊娠暴露至关重要。"
+        }
+      }},
+      { type: "refrain", theme: "black", content: { text: "不良证据会致命。 META-SPRINT 的存在是为了提供您可以信任的证据。" }},
+      { type: "quiz", theme: "dark", content: {
+        question: "Why did the CAST drugs increase deaths despite 'working' on ECGs?",
+        options: [
+          { text: "心电图读数测量不正确", correct: false },
+          { text: "抑制 PVC 是一种替代方法，而不是真正的结果", correct: true },
+          { text: "样本量太小", correct: false },
+          { text: "药物被污染", correct: false }
+        ],
+        xp: 20,
+        feedback: {
+          correct: "Exactly. PVC suppression was a surrogate outcome—it looked like benefit but masked real harm.",
+          incorrect: "药物在心电图上的作用与预期完全一致。问题是“修复”心电图并不意味着挽救生命。"
+        }
+      }}
+    ]
+  },
+  {
+    id: 2, title: "40 天框架", subtitle: "Five phases, five gates", xp: 120,
+    slides: [
+      { type: "title", theme: "dark", content: { title: "40 Days, 5 Gates", subtitle: "结构化冲刺以获得可靠证据" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "Learn the five phases of META-SPRINT",
+          "Understand Definition of Done (DoD) gates",
+          "了解团队结构和每日时间承诺"
+        ],
+        tip: "The framework overview - you'll learn each phase in detail later."
+      }},
+      { type: "timeline", theme: "dark", content: {
+        title: "五个阶段",
+        items: [
+          { days: "Days 1-3", title: "Phase A: Protocol", desc: "锁定您的问题和方法", phase: "a" },
+          { days: "Days 4-10", title: "Phase B: Search", desc: "查找并筛选文献", phase: "b" },
+          { days: "Days 11-28", title: "Phase C: Extraction", desc: "提取数据并进行验证", phase: "c" },
+          { days: "Days 29-33", title: "Phase D: Analysis", desc: "运行并验证分析", phase: "d" },
+          { days: "Days 34-40", title: "Phase E: Submit", desc: "Write, audit, submit", phase: "e" }
+        ]
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "🚪", title: "Scenario: The 'Almost Done' Gate",
+        xp: 25,
+        scenario: "这是第 3 天。您的团队已完成 8 项 DoD-A 中的 7 项检查清单项目。缺少的项目：PROSPERO 上的协议注册处于“等待审核”状态（通常需要 24-48 小时）。",
+        question: "您应该通过 DoD-A 吗？",
+        options: [
+          { letter: "A", text: "Yes—7/8 is close enough, proceed to search", correct: false },
+          { letter: "B", text: "No—wait for registration before passing gate", correct: true },
+          { letter: "C", text: "是 — 稍后注册并回溯协议", correct: false },
+          { letter: "D", text: "Skip registration—it's just bureaucracy", correct: false }
+        ],
+        feedback: {
+          correct: "Correct! Gates are binary: pass or fail. 'Almost done' with protocol isn't done. Incomplete PICOS led to 50,000 CAST deaths.",
+          incorrect: "门是二进制的。没有部分信用。注册会为您的承诺打上时间戳——没有它，您就无法证明您在看到数据后没有改变结果。"
+        }
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "Definition of Done (DoD)",
+        subtitle: "Binary gates: Pass or Fail",
+        text: "每个阶段都以 DoD 门结束——一份必须 100% 完成的清单。没有部分信用。没有“即将完成”。",
+        highlight: "The CAST lesson: 'Almost done' with protocol isn't done."
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "导致一名欺诈者死亡", title: "800,000人死亡的指南",
+        text: "多年来，临床指南建议在手术前使用β受体阻滞剂来预防心脏病发作。证据？主要来自 Don Poldermans，这位研究人员为荟萃分析贡献了 15 项研究。他的数据显示出巨大的好处。他的数据是捏造的。",
+        followup: "When the fraud was discovered and his studies removed, the math changed. Beta-blockers didn't prevent heart attacks during surgery—they caused them. Researchers calculated: following guidelines based on Poldermans' fraud may have killed <strong>800,000 patients</strong> over a decade. One man's lies. Global guidelines. Mass harm."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "📋", title: "场景：主要贡献者",
+        xp: 25,
+        scenario: "您正在更新临床指南。您的系统评价包括 40 项研究。一位研究人员贡献了其中 15 个，而且他的研究显示，其影响比其他人的要大得多。他的工作从未被独立复制。",
+        question: "What should the guideline committee do?",
+        options: [
+          { letter: "A", text: "包括所有研究 - 同行评审确保质量", correct: false },
+          { letter: "B", text: "在有或没有他的研究的情况下进行敏感性分析", correct: true },
+          { letter: "C", text: "Exclude his studies as obvious outliers", correct: false },
+          { letter: "D", text: "Weight his studies lower due to 'heterogeneity'", correct: false }
+        ],
+        feedback: {
+          correct: "Correct! Sensitivity analysis would have shown Poldermans' outsized influence. When one researcher dominates a field, verify their work independently before basing guidelines on it.",
+          incorrect: "The Poldermans lesson: one dominant contributor can corrupt an entire field. Sensitivity analysis (with/without their studies) reveals dangerous dependencies."
+        }
+      }},
+      { type: "stats", theme: "light", content: {
+        title: "META-SPRINT 数字",
+        stats: [
+          { value: "40", label: "Days total" },
+          { value: "5", label: "Quality gates" },
+          { value: "12", label: "Team members" },
+          { value: "2h", label: "Max daily work" }
+        ]
+      }},
+      { type: "quiz", theme: "dark", content: {
+        question: "What happens if a DoD gate fails?",
+        options: [
+          { text: "无论如何，您都可以继续警告", correct: false },
+          { text: "You must fix all items before proceeding", correct: true },
+          { text: "You skip to the next phase and return later", correct: false },
+          { text: "项目自动取消", correct: false }
+        ],
+        xp: 15,
+        feedback: {
+          correct: "Right! Gates are non-negotiable. All items must pass before moving forward.",
+          incorrect: "门是二进制的——在所有项目完成之前，您无法继续。这样可以防止错误复合。"
+        }
+      }}
+    ]
+  },
+  {
+    id: 3, title: "Phase A: Protocol", subtitle: "第 1-3 天：锁定您的承诺", xp: 180,
+    slides: [
+      { type: "title", theme: "purple-bg", content: { title: "Phase A: Protocol", subtitle: "第 1-3 天：在看到数据之前锁定您的承诺" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "Understand why protocol registration prevents outcome switching",
+          "Learn to write unambiguous PICOS criteria",
+          "Master the DoD-A checklist requirements",
+          "Recognize the danger of surrogate outcomes"
+        ],
+        tip: "完成所有决策场景以获得 Protocol Pro 徽章！"
+      }},
+      { type: "story", theme: "dark", content: {
+        label: "结果切换流行病", title: "31% of Trials Cheat",
+        text: "PLOS 研究发现，31% 的试验在注册和发表之间改变了其主要结局——始终朝着使结果看起来更好的方向变化。"
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "🔄", title: "场景：诱人的开关",
+        xp: 25,
+        scenario: "您的荟萃分析协议将“全因死亡率”指定为主要结局。提取后，您会发现只有 4 项研究报告了死亡率，但 12 项研究报告了“心血管事件”。您的顾问建议切换主要结果，“因为数据更好地支持它”。",
+        question: "你应该做什么？",
+        options: [
+          { letter: "A", text: "Switch to cardiovascular events—more data is better", correct: false },
+          { letter: "B", text: "Keep mortality as primary, add CV events as secondary", correct: true },
+          { letter: "C", text: "Report both as co-primary outcomes", correct: false },
+          { letter: "D", text: "在继续之前修改协议并重新注册", correct: false }
+        ],
+        feedback: {
+          correct: "正确！协议保护您免受自己的伤害。 31% 的试验会改变结果——这就是阴性试验变成“阳性”的方式。保留原来的主要内容。",
+          incorrect: "看到数据后改变结果正是 31% 的试验作弊的方式。您的协议就是您的承诺。心血管事件可以进行二次分析。"
+        }
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "HRT 逆转", title: "Two Million Women",
+        text: "四十年来，医生开出激素替代疗法来预防更年期妇女的心脏病。观察性研究显示心脏病发作率降低 50%。这似乎是显而易见的。这是错误的。",
+        followup: "In 2002, the Women's Health Initiative RCT was stopped early. HRT <strong>increased</strong> heart attacks by 29%. Increased strokes by 41%. Increased breast cancer by 26%. Two million women had been taking a drug that harmed them, prescribed based on evidence that looked good but wasn't."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "🔬", title: "场景：观察诱惑",
+        xp: 25,
+        scenario: "您正在编写一份对新干预措施进行系统审查的方案。 50 项观察性研究显示出巨大的益处。只有 3 项小型随机对照试验的结果好坏参半。您的团队建议只关注“数据更强”的观察性研究。",
+        question: "您应该如何构建方案？",
+        options: [
+          { letter: "A", text: "Include only observational studies—larger sample sizes", correct: false },
+          { letter: "B", text: "Analyze RCTs and observational separately, RCTs primary", correct: true },
+          { letter: "C", text: "将 RCT 和观察性研究结合在一起", correct: false },
+          { letter: "D", text: "完全排除观察性研究", correct: false }
+        ],
+        feedback: {
+          correct: "Correct! HRT observational studies showed 50% benefit; the RCT showed 29% harm. Confounding bias in observational studies can create illusions. RCTs must be primary.",
+          incorrect: "The HRT reversal: observational studies said 'benefit,' the RCT said 'harm.' Healthy women chose HRT—confounding created an illusion. RCTs break confounding."
+        }
+      }},
+      { type: "story", theme: "dark", content: {
+        label: "研究的故事329", title: "Ghostwritten Lies",
+        text: "In 2001, SmithKline Beecham published Study 329: paroxetine was 'safe and effective' for adolescent depression. Doctors prescribed it to millions of teenagers. But the published paper was ghostwritten. The actual data showed something else entirely.",
+        followup: "The raw data: paroxetine was <strong>no better than placebo</strong> for depression. Worse: it increased suicidal thinking in adolescents by 200%. The ghostwriters had cherry-picked outcomes, hidden adverse events, and turned failure into success. It took 14 years to get the truth published."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "📋", title: "场景：时间点困境",
+        xp: 30,
+        scenario: "You're writing the protocol for a colchicine meta-analysis. Trials report MACE at 30 days, 90 days, 1 year, and 3 years. Two team members disagree: one wants 'longest follow-up,' another wants 'fixed 1-year for all.'",
+        question: "最好的方法是什么？",
+        options: [
+          { letter: "A", text: "Use longest follow-up per trial (maximizes data)", correct: false },
+          { letter: "B", text: "Use fixed 1-year for all (cleaner comparison)", correct: false },
+          { letter: "C", text: "Write a specific rule: 'Longest ≥1 year, else longest available'", correct: true },
+          { letter: "D", text: "稍后当您看到存在哪些数据时再决定", correct: false }
+        ],
+        feedback: {
+          correct: "非常好！特定的、预先指定的规则可以防止歧义。选项 C 平衡数据最大化与可解释性。",
+          incorrect: "Both A and B have merit, but they're still ambiguous. A specific rule like 'longest ≥1 year where available, else longest available' prevents disagreement during extraction."
+        }
+      }},
+      { type: "checklist", theme: "dark", content: {
+        title: "DoD-A Checklist",
+        items: [
+          "PICOS + inclusion/exclusion defined",
+          "Primary outcome specified",
+          "Timepoint rule documented",
+          "Model choice (fixed/random)",
+          "Sensitivity set defined",
+          "Secondary outcomes labelled exploratory",
+          "Protocol registered (PROSPERO/protocols.io)",
+          "Signed by Integrator + non-integrator"
+        ]
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "🔬", title: "场景：替代陷阱",
+        xp: 25,
+        scenario: "您的临床顾问建议使用“胆固醇降低”作为主要结果，因为更多试验报告了这一点。但你最初的问题是关于“心血管死亡”。",
+        question: "你应该做什么？",
+        options: [
+          { letter: "A", text: "Switch to cholesterol—more data is better", correct: false },
+          { letter: "B", text: "Keep cardiovascular death as primary", correct: true },
+          { letter: "C", text: "Use both as co-primary outcomes", correct: false },
+          { letter: "D", text: "Add cholesterol as exploratory sensitivity", correct: false }
+        ],
+        feedback: {
+          correct: "Correct! The CAST tragedy taught us: surrogate outcomes (like cholesterol) can mask real harm. Keep patient-important outcomes primary.",
+          incorrect: "Cholesterol is a surrogate—it can improve while patients die (as in CAST). The Vioxx lesson: stick to patient-important outcomes."
+        }
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "马基亚里尼丑闻", title: "The Surgeon Who Implanted Death",
+        text: "Paolo Macchiarini was called a miracle worker. The Italian surgeon claimed he could grow synthetic tracheas and implant them in dying patients. <strong>The Lancet</strong> published his 'breakthroughs.' The Karolinska Institute—home of the Nobel Prize—hired him. Patients flew from around the world seeking his revolutionary procedure.",
+        followup: "One by one, his patients died. Of the eight who received his synthetic tracheas, <strong>seven died</strong>—most within two years, suffocating as the plastic scaffolds disintegrated inside their throats. Karolinska's own doctors raised alarms. They were ignored. When a documentary exposed the truth, investigators found: falsified ethics approvals, fabricated patient outcomes, and co-authors who had never seen the data. The prestigious institute that awards the Nobel Prize had harbored a fraud who killed patients for fame. The Lancet retracted multiple papers. Macchiarini was convicted of assault. The lesson: prestige protects nothing. Only verification protects patients."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "🏛️", title: "场景：著名的创新者",
+        xp: 25,
+        scenario: "世界著名机构的一位著名外科医生在顶级期刊上发表了革命性的成果。他的技术可以挽救数千人的生命。下级同事对患者的治疗结果表示担忧，但高层领导却认为他们出于嫉妒而不予理睬。纪录片摄制组请求采访。",
+        question: "机构应该做什么？",
+        options: [
+          { letter: "A", text: "Protect the surgeon's reputation—bad press harms everyone", correct: false },
+          { letter: "B", text: "Immediately audit all patient outcomes with independent reviewers", correct: true },
+          { letter: "C", text: "Wait for peer-reviewed rebuttals before acting", correct: false },
+          { letter: "D", text: "Let the surgeon respond to critics in his own publications", correct: false }
+        ],
+        feedback: {
+          correct: "正确！卡罗林斯卡最大的失败是无视内部警告以保护声誉。独立的结果审核（而非声誉管理）可以保护患者。初级同事经常看到领导者看不到的东西。",
+          incorrect: "卡罗林斯卡学院选择声誉而不是患者。七人死亡。当内部人员提出疑虑时，立即进行审计。声望并不是安全的证据。"
+        }
+      }},
+      { type: "story", theme: "dark", content: {
+        label: "黄宇硕欺诈案", title: "The Pride of a Nation, Built on Lies",
+        text: "In 2004, South Korean scientist <strong>Hwang Woo-suk</strong> announced he had cloned human embryos and created patient-specific stem cells—a breakthrough that could cure Parkinson's, diabetes, and paralysis. He was a national hero. The government issued postage stamps in his honor. Schools taught his achievements. His papers in <strong>Science</strong> were celebrated as Nobel-worthy.",
+        followup: "A junior researcher noticed the photos looked wrong. The same cells appeared in multiple images, supposedly from different experiments. When Science investigated, the façade crumbled: the breakthrough data was fabricated. Hwang had pressured junior researchers—mostly women—to donate eggs under ethically questionable conditions. He had fabricated results to meet impossible expectations. The 'cloned' stem cells never existed. South Korea's national pride evaporated overnight. Hwang was convicted of embezzlement and bioethics violations. He had spent $40 million in government funds on research that produced nothing but lies."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "🔬", title: "场景：国家优先事项",
+        xp: 25,
+        scenario: "贵国的领先科学家声称取得了革命性突破。政府正在资助大规模扩建。国际竞争对手正在竞相复制。一名初级实验室成员悄悄地告诉您图像数据看起来被操纵，但担心因直言不讳而遭到报复。",
+        question: "What is the correct first step?",
+        options: [
+          { letter: "A", text: "在请求独立图像分析时保护举报者的身份", correct: true },
+          { letter: "B", text: "直接与资深科学家面对问题", correct: false },
+          { letter: "C", text: "Wait for international labs to attempt replication", correct: false },
+          { letter: "D", text: "Report to government funders immediately", correct: false }
+        ],
+        feedback: {
+          correct: "正确！由独立分析师进行图像取证——在不揭露举报人的情况下——是安全的途径。图像分析发现了黄某的欺诈行为。敢于发声的初级研究人员需要保护。",
+          incorrect: "直接对抗会危及举报人并导致证据被销毁。通过显示重复细胞的图像分析，发现了黄先生的欺诈行为。独立取证，然后升级。"
+        }
+      }},
+      { type: "concept", theme: "light", content: {
+        title: "双重签名规则",
+        subtitle: "Why two people must sign",
+        text: "The Poldermans fraud succeeded because one researcher controlled everything. Single points of authority enable fraud.",
+        highlight: "Two signatures means two people verified."
+      }},
+      { type: "quiz", theme: "dark", content: {
+        question: "Why must the protocol be registered BEFORE DoD-A passes?",
+        options: [
+          { text: "It's a journal requirement only", correct: false },
+          { text: "它在查看数据之前为您的承诺添加时间戳", correct: true },
+          { text: "它使审核看起来更专业", correct: false },
+          { text: "It's optional for non-Cochrane reviews", correct: false }
+        ],
+        xp: 20,
+        feedback: {
+          correct: "完全正确！注册会创建一个时间戳。没有它，您就无法证明在看到有效方法后您没有改变结果。",
+          incorrect: "注册时间戳会为您预先指定的方法添加时间戳。 31% 的试验会改变结果 - 注册证明您没有改变结果。"
+        }
+      }}
+    ]
+  },
+  {
+    id: 4, title: "Phase B: Search", subtitle: "Days 4-10: Document everything", xp: 150,
+    slides: [
+      { type: "title", theme: "dark", content: { title: "Phase B: Search & Screen", subtitle: "Days 4-10: Systematic, documented, reproducible" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "Understand why search strings must be saved verbatim",
+          "Learn calibration requirements for dual screening",
+          "Master PRISMA reporting requirements",
+          "Know when exclusion reasons are required"
+        ],
+        tip: "完成此模块即可获得搜索专家徽章！"
+      }},
+      { type: "story", theme: "dark", content: {
+        label: "Cochrane 撤回", title: "Every Character Matters",
+        text: "当审核员无法重现搜索时，Cochrane 审查被撤回。 “我们使用 PubMed”不是一种方法。"
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "💾", title: "场景：重建搜索",
+        xp: 25,
+        scenario: "You're at Day 8. A team member admits they didn't save the exact search string from last week—but they 'remember most of it' and have reconstructed it. The search yielded 2,400 results then; the reconstructed search yields 2,380.",
+        question: "你应该做什么？",
+        options: [
+          { letter: "A", text: "Accept it—20 missing records won't matter", correct: false },
+          { letter: "B", text: "重新运行新搜索并将其记录为官方搜索", correct: true },
+          { letter: "C", text: "使用重建搜索并在限制中注明它", correct: false },
+          { letter: "D", text: "Contact the database to get search history", correct: false }
+        ],
+        feedback: {
+          correct: "正确！无法复制的搜索不是证据。将新的搜索记录为官方文件，记下偏差，并以透明的方法继续进行。",
+          incorrect: "The Cochrane retraction: 'We used PubMed' isn't a method. You need the exact string, exact date, exact filters. Start fresh with documented methods."
+        }
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "埋藏的审判", title: "74 项研究去哪儿了？",
+        text: "2008 年，研究人员搜索了所有注册的抗抑郁药试验。他们发现了 74 项试验。然后他们寻找出版物。仅出版了 38 篇。另外36个？埋了。隐。消失了。",
+        followup: "Every single buried trial showed negative results. Every published trial showed positive results. The published literature told doctors: 'Antidepressants work 94% of the time.' The truth: they worked 51% of the time. Half the evidence had simply vanished."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "🔎", title: "场景：缺失的注册",
+        xp: 25,
+        scenario: "您对已发表文献的搜索发现了 12 项新药试验——全部呈阳性。您检查试验登记处，发现另外 8 个从未发表的已注册试验。该公司表示，未发表的试验存在“数据质量问题”。",
+        question: "你应该做什么？",
+        options: [
+          { letter: "A", text: "仅包含 12 项已发表的试验，它们具有可用数据", correct: false },
+          { letter: "B", text: "向注册联系人和 FDA 请求未发表的数据", correct: true },
+          { letter: "C", text: "Note the 8 missing trials as a limitation", correct: false },
+          { letter: "D", text: "由于存在偏见问题，将该药物从您的审查中排除", correct: false }
+        ],
+        feedback: {
+          correct: "Correct! The buried trials lesson: 48% of antidepressant data was hidden. Request unpublished data from registries, FDA, authors. Half the truth is a lie.",
+          incorrect: "36 of 74 antidepressant trials were buried—all negative. Published-only evidence showed 94% efficacy; true efficacy was 51%. Always hunt for unpublished data."
+        }
+      }},
+      { type: "story", theme: "dark", content: {
+        label: "瑞波西汀丑闻", title: "该药物那从来没有起作用",
+        text: "Reboxetine was approved in Europe for depression. Published trials showed it worked. Doctors prescribed it. Then researchers obtained the unpublished data. <strong>74% of the patient data had never been published.</strong>",
+        followup: "隐藏的数据显示：瑞波西汀并不比安慰剂更好。它比其他抗抑郁药更糟糕。它有更多的副作用。患者多年来一直服用监管机构根据精心挑选的证据批准的药物。"
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "🔍", title: "场景：筛选分歧",
+        xp: 25,
+        scenario: "您的两位筛选员独立审查了 50 个标题/摘要以进行校准。他们只同意 28 条（56% 同意）。目标≥80%。",
+        question: "What should happen next?",
+        options: [
+          { letter: "A", text: "Proceed anyway—56% is acceptable for complex topics", correct: false },
+          { letter: "B", text: "Discuss disagreements, revise criteria, re-calibrate on new 25", correct: true },
+          { letter: "C", text: "Have a third person break all ties", correct: false },
+          { letter: "D", text: "Switch to single-screener with random verification", correct: false }
+        ],
+        feedback: {
+          correct: "对！一致性低意味着您的标准不明确。讨论、修改、重复，直到达到 ≥80%。",
+          incorrect: "56% 的一致性意味着您的标准不明确。你本质上是随机筛选。讨论、修改、重新校准。"
+        }
+      }},
+      { type: "checklist", theme: "dark", content: {
+        title: "DoD-B Checklist",
+        items: [
+          "Search strings saved verbatim",
+          "Search dates + limits recorded",
+          "记录的重复数据删除方法",
+          "Screening calibration (≥80%)",
+          "PRISMA counts live",
+          "Screening log exportable"
+        ]
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "📊", title: "场景：PRISMA 谜题",
+        xp: 25,
+        scenario: "Your PRISMA shows: Identified: 2,400 | After dedup: 1,800 | Screened: 1,800 | Full-text: 150 | Included: 45. A peer reviewer asks: 'What happened to the 1,650 excluded at screening?'",
+        question: "正确答案是什么？",
+        options: [
+          { letter: "A", text: "'They didn't meet criteria'—no need for details", correct: false },
+          { letter: "B", text: "Provide counts by exclusion reason", correct: false },
+          { letter: "C", text: "Explain that screening exclusions don't need reasons", correct: true },
+          { letter: "D", text: "Go back and document each exclusion reason", correct: false }
+        ],
+        feedback: {
+          correct: "Correct! Title/abstract screening exclusions don't require individual reasons (too many). Full-text exclusions DO need documented reasons.",
+          incorrect: "Screening exclusions (title/abstract) don't require individual reasons—there are too many. But FULL-TEXT exclusions must have documented reasons."
+        }
+      }},
+      { type: "stats", theme: "dark", content: {
+        title: "PRISMA Requirements",
+        stats: [
+          { value: "100%", label: "Numbers add up" },
+          { value: "Every", label: "Full-text exclusion documented" },
+          { value: "Zero", label: "Black boxes" }
+        ]
+      }},
+      { type: "story", theme: "dark", content: {
+        label: "缺失的内容一半", title: "Neurontin 的秘密研究",
+        text: "辉瑞公司推广 Neurontin 治疗双相情感障碍、偏头痛和疼痛，但 FDA 从未批准其用途。内部文件显示他们已委托进行研究。当结果为阴性时，这些研究就……消失了。",
+        followup: "已发表的文献显示 Neurontin 可用于标签外用途。未发表的文献表明事实并非如此。医生只看到了一半的证据，就得出了明显的错误结论。辉瑞公司支付了 4.3 亿美元的罚款。但那些接受治疗无效的患者呢？他们支付了更多。"
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "📁", title: "场景：公司报价",
+        xp: 25,
+        scenario: "一家制药公司愿意分享他们的“完整内部数据库”供您进行系统审查。他们承诺所有试验数据，但前提是您签署保密协议，禁止您在未经他们批准的情况下发布任何单独的试验结果。",
+        question: "你应该做什么？",
+        options: [
+          { letter: "A", text: "接受 - 获取数据才是最重要的", correct: false },
+          { letter: "B", text: "接受，但请注意方法中的限制", correct: false },
+          { letter: "C", text: "拒绝并通过官方渠道请求数据", correct: true },
+          { letter: "D", text: "接受对于这次审查，稍后争取透明度", correct: false }
+        ],
+        feedback: {
+          correct: "Correct! Neurontin's lesson: companies hide what they don't want seen. Confidentiality agreements can be weaponized. Request data through FDA, EMA, or AllTrials instead.",
+          incorrect: "Neurontin 丑闻：公司压制负面试验。保密协议赋予他们对您报告的内容的否决权。保持独立性。"
+        }
+      }},
+      { type: "quiz", theme: "dark", content: {
+        question: "Why must search dates be recorded?",
+        options: [
+          { text: "用于期刊记录", correct: false },
+          { text: "数据库每天更新 - 您的日期就是您的时间戳", correct: true },
+          { text: "To calculate how long the search took", correct: false },
+          { text: "It's optional metadata", correct: false }
+        ],
+        xp: 15,
+        feedback: {
+          correct: "完全正确！周一的搜索发现了与周二不同的研究。您的日期定义了您搜索的宇宙。",
+          incorrect: "数据库不断更新。您的搜索日期是您搜索的文献宇宙的时间戳。"
+        }
+      }}
+    ]
+  },
+  {
+    id: 5, title: "Phase C: Extraction", subtitle: "Days 11-28: Provenance for every number", xp: 200,
+    slides: [
+      { type: "title", theme: "dark", content: { title: "Phase C: Extraction", subtitle: "Days 11-28: Every number needs a source" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "Understand what provenance means and why it matters",
+          "Learn the Red-Team daily checking system",
+          "Handle conflicting numbers with pre-specified rules",
+          "Recognize the COLCOT near-disaster pattern"
+        ],
+        tip: "COLCOT 案例研究展示了一个交换手臂如何几乎推翻了结论。"
+      }},
+      { type: "prediction", theme: "dark", content: {
+        icon: "🔮", title: "COLCOT 试验",
+        subtitle: "The largest trial (n=4,745) in a colchicine meta-analysis. The extractor pulls data from Figure 3 showing colchicine vs placebo events. Quick forest plot shows colchicine INCREASES events, while all other trials show benefit. What happened?",
+        options: [
+          { id: "benefit", label: "📊 Statistical fluke", text: "Random variation—include as-is" },
+          { id: "neutral", label: "❓ 数据输入错误", text: "Wrong numbers typed" },
+          { id: "harm", label: "🔄 Arms swapped", text: "Intervention/control mixed up" }
+        ],
+        answer: "harm",
+        xp: 30
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "COLCOT濒临灾难", title: "One Swapped Arm",
+        text: "The extractor assumed left bar = intervention. It was right = intervention. One error in one critical field would have reversed the entire conclusion.",
+        followup: "红队日常检查发现了这一点。这就是为什么有影响力的研究得到验证。"
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "🔴", title: "Scenario: Red-Team Finds an Error",
+        xp: 30,
+        scenario: "红队检查员法蒂玛发现 COLCOT 手臂被交换了。这是最大的试验（占总重量的 40%）。提取器辩称：“该数字不明确。”",
+        question: "What should happen?",
+        options: [
+          { letter: "A", text: "根据表 2 中的出处进行修复，日志更正", correct: true },
+          { letter: "B", text: "Exclude COLCOT—too risky to include", correct: false },
+          { letter: "C", text: "Expand audit to ALL studies immediately", correct: false },
+          { letter: "D", text: "Ask the original authors to clarify", correct: false }
+        ],
+        feedback: {
+          correct: "正确！修正出处（表 2 确认分配），记录更正。单个明确原因的错误不需要扩展审核。",
+          incorrect: "不要针对单个明确原因的错误排除良好数据或过度扩展审核。修复来源，记录它，并向提取器简要介绍。"
+        }
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "红队系统",
+        subtitle: "Daily adversarial checking",
+        text: "从第 11 天开始，每天都有 2 名轮流团队成员花 12-15 分钟检查自动选择的研究。",
+        highlight: "Boldt 检测：当红队发现不可能招募时，他的欺诈行为（90 多项研究）被抓获"
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "博尔特灾难", title: "九十个谎言研究",
+        text: "约阿希姆·博尔特（Joachim Boldt）是麻醉领域最多产的研究者。他发表了 90 多项关于胶体流体的研究。他的工作塑造了全世界的临床指南。然后有人注意到：一家医院声称每年招募 800 名患有罕见疾病的患者。",
+        followup: "Investigation revealed: No ethics approval existed. Patient records couldn't be found. Co-authors had never seen the data. <strong>Ninety studies</strong> were retracted—the largest fraud in medical history. Clinical guidelines had to be rewritten. The question that would have stopped him? 'Can you show me the source documents?'"
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "🔢", title: "场景：不可能的数字",
+        xp: 25,
+        scenario: "在提取过程中，您注意到一项研究在 18 个月内从一家医院招募了 450 名患有罕见疾病的患者。已发表的流行病学表明，医院每年会看到大约 50 名此类患者。",
+        question: "你应该做什么？",
+        options: [
+          { letter: "A", text: "纳入研究 — 招募成功率各不相同", correct: false },
+          { letter: "B", text: "验证标志：检查伦理批准和患者记录", correct: true },
+          { letter: "C", text: "Exclude as a statistical outlier", correct: false },
+          { letter: "D", text: "向作者发送电子邮件以澄清招募方法", correct: false }
+        ],
+        feedback: {
+          correct: "正确！博尔特被抓是因为招募率不可能。当数字没有意义时，请在纳入研究之前验证源文档是否存在。",
+          incorrect: "Boldt 就是这样被发现的：每年有 800 名患者患有影响 200 人的疾病。不可能的数字表明潜在的欺诈行为。验证伦理批准和原始数据是否存在。"
+        }
+      }},
+      { type: "story", theme: "dark", content: {
+        label: "韦克菲尔德欺诈", title: "12 Children, 12 Million Harmed",
+        text: "1998 年，安德鲁·韦克菲尔德 (Andrew Wakefield) 发表了一项针对 12 名儿童的研究，将 MMR 疫苗与自闭症联系起来。疫苗接种率直线下降。麻疹疫情再度爆发。儿童死于可预防的疾病。",
+        followup: "It took 12 years to prove the fraud. Wakefield had been paid £435,643 by lawyers to produce evidence for lawsuits. He had manipulated data. He had undisclosed conflicts. But for a decade, his 12-patient study outweighed millions of patients in honest research. One fraudulent paper. Thousands of preventable infections."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "📝", title: "场景：失踪的出处",
+        xp: 25,
+        scenario: "An extractor recorded 'events: 45/230' for a study but didn't note the source (table/figure/page). When you check the PDF, you find events reported in Table 2 (45/230), Figure 1 (42/228), and text (43/225).",
+        question: "正确的操作是什么？",
+        options: [
+          { letter: "A", text: "Use any number—they're close enough", correct: false },
+          { letter: "B", text: "Use the most conservative estimate (42/228)", correct: false },
+          { letter: "C", text: "联系作者以澄清", correct: false },
+          { letter: "D", text: "Apply pre-specified hierarchy (e.g., Table > Figure > Text)", correct: true }
+        ],
+        feedback: {
+          correct: "正确！您的协议应指定冲突数字的层次结构。一致地应用它并记录来源。",
+          incorrect: "您需要针对这种情况预先指定规则。 “最保守”是一条规则，但它应该写入您的协议中。没有出处，您无法验证任何内容。"
+        }
+      }},
+      { type: "checklist", theme: "dark", content: {
+        title: "DoD-C Checklist",
+        items: [
+          "Extraction template frozen",
+          "RoB tool + decision rules written",
+          "Critical fields verified by second person",
+          "Overlap rules applied",
+          "Arbitration process operating"
+        ]
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "鲁本麻醉欺诈", title: "The Most Prolific Faker in Medicine",
+        text: "Scott Reuben was anesthesiology's rising star. Between 1996 and 2008, he published prolifically on postoperative pain management. His studies shaped how surgeons treated patients after operations. Drug companies funded his research. <strong>Pfizer paid him consulting fees</strong> while he published studies showing their drugs worked brilliantly.",
+        followup: "In 2009, an anonymous tip led to investigation. Reuben hadn't just manipulated data—<strong>he had never enrolled a single patient</strong>. Studies claiming to follow hundreds of patients were pure invention. He fabricated everything: consent forms, patient records, outcomes. Twenty-one papers were retracted. Clinical guidelines based on his 'research' had to be rewritten. The patients who received treatment recommendations based on his fabrications? They were experiments in a trial that never happened, with no informed consent, following protocols invented by a liar."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "👤", title: "场景：多产的研究人员",
+        xp: 25,
+        scenario: "您注意到一位研究人员在 3 年内在您的领域发表了 15 项试验，比任何部门实际进行的试验都要多。所有这些都表明他的资助者制造的药物取得了积极的效果。没有其他中心重复他的发现。他的机构从未审核过他的数据。",
+        question: "在将他的研究纳入您的审查之前，您应该做什么？",
+        options: [
+          { letter: "A", text: "Include them—they're peer-reviewed and published", correct: false },
+          { letter: "B", text: "Request verification of ethics approval and patient enrollment records", correct: true },
+          { letter: "C", text: "在有或没有他的研究的情况下进行敏感性分析", correct: false },
+          { letter: "D", text: "Weight his studies lower due to potential bias", correct: false }
+        ],
+        feedback: {
+          correct: "正确！ Reuben 发表了 12 年来 21 项捏造的试验。没有人检查病人是否存在。请求伦理委员会文件和注册验证——制造商无法提供它们。",
+          incorrect: "Scott Reuben 发明了 21 项针对假想患者的研究。同行评审没有发现这一点。敏感性分析无法发现捏造行为。验证患者是否存在。"
+        }
+      }},
+      { type: "story", theme: "dark", content: {
+        label: "VIGOR 欺骗", title: "The Three Heart Attacks They Hid",
+        text: "Merck knew Vioxx caused heart attacks. Their own trial—VIGOR—showed it clearly. But the published paper in the <strong>New England Journal of Medicine</strong> had a secret: Merck scientists had chosen a data cutoff date that excluded <strong>three additional heart attacks</strong> that occurred in the Vioxx group.",
+        followup: "Those three heart attacks mattered. Including them would have changed the safety signal from 'possibly concerning' to 'clearly dangerous.' Instead, the published paper suggested the increased heart attacks might be because the comparison drug (naproxen) was protective—not because Vioxx was deadly. The NEJM editors only learned of the missing data years later. They published an 'expression of concern,' calling it 'inaccurate and incomplete.' By then, tens of thousands had suffered heart attacks. The data cutoff wasn't a scientific decision. It was a marketing decision disguised as methodology."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "📅", title: "场景：战略切断",
+        xp: 25,
+        scenario: "您正在提取数据，并注意到试验的数据截止日期是研究规定的结束日期之前 2 周。这些方法没有解释原因。不会报告截止后发生的事件。这个时间恰好与安全信号变得具有统计意义的时间一致。",
+        question: "您应该记录和请求什么？",
+        options: [
+          { letter: "A", text: "使用已发布的数据 - 作者选择了他们的截止值", correct: false },
+          { letter: "B", text: "Note unexplained cutoff in Risk of Bias; request complete data from authors/FDA", correct: true },
+          { letter: "C", text: "排除不完整报告的研究", correct: false },
+          { letter: "D", text: "Impute likely events based on trends before cutoff", correct: false }
+        ],
+        feedback: {
+          correct: "正确！ VIGOR 截止值隐藏了三次心脏病发作，这改变了一切。将无法解释的截止值记录为高偏倚风险，并积极从注册机构或 FDA 寻求完整数据。",
+          incorrect: "默克的 VIGOR 截止值不是方法论，而是隐瞒。无法解释的中断是危险信号。记录风险并通过官方渠道获取完整数据。"
+        }
+      }},
+      { type: "quiz", theme: "dark", content: {
+        question: "What is 'provenance' in META-SPRINT?",
+        options: [
+          { text: "进行研究的国家", correct: false },
+          { text: "A citation showing where a number came from", correct: true },
+          { text: "试验的资金来源", correct: false },
+          { text: "研究发表的日期", correct: false }
+        ],
+        xp: 20,
+        feedback: {
+          correct: "Right! Provenance like 'Table 2, p.1234' creates an audit trail. No provenance = no trust.",
+          incorrect: "Provenance means the exact source: 'Table 2, p.1234.' It's your evidence trail for every extracted number."
+        }
+      }},
+      { type: "summary", theme: "green-bg", content: {
+        summary: "You've mastered extraction fundamentals: provenance, Red-Team checking, and handling conflicting data. Next: making your analysis reproducible."
+      }}
+    ]
+  },
+  {
+    id: 6, title: "Phase D: Analysis", subtitle: "第29-33天：可重现结果", xp: 180,
+    slides: [
+      { type: "title", theme: "green-bg", content: { title: "Phase D: Analysis", subtitle: "Days 29-33: If you can't reproduce it, neither can anyone else" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "Understand rerun equivalence tolerances",
+          "学习处理分析差异",
+          "Know how to document influential studies",
+          "掌握分析胶囊的概念"
+        ],
+        tip: "再现性是不可协商的。完成此任务即可获得统计向导徽章！"
+      }},
+      { type: "stats", theme: "dark", content: {
+        title: "可重复性危机",
+        stats: [
+          { value: "70%", label: "Failed to reproduce others" },
+          { value: "50%", label: "Failed to reproduce self" }
+        ],
+        caption: "Nature (2016): Most researchers can't reproduce published findings."
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "安进现实检验", title: "47 of 53 Failed",
+        text: "2012 年，安进科学家试图重现 53 项“里程碑式”癌症研究——这些论文塑造了癌症研究、启动了临床试验并消耗了数十亿美元的资金。他们直接与原作者合作。他们使用了相同的方法。",
+        followup: "Result: <strong>47 of 53 studies could not be reproduced.</strong> 89% failure rate. Years of research built on foundations that didn't exist. Clinical trials started based on findings that weren't real. The cancer research community had been chasing phantoms."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "🔬", title: "场景：里程碑式的论文",
+        xp: 25,
+        scenario: "来自顶级期刊的“里程碑式”临床前研究构成了新治疗的基础。独立实验室的三次复制尝试都失败了。原作者称复制者“缺乏技术专长”。没有人见过原始数据。",
+        question: "指南应如何对待这一证据？",
+        options: [
+          { letter: "A", text: "Trust the original—it's in a top journal", correct: false },
+          { letter: "B", text: "Downgrade certainty until reproducibility is demonstrated", correct: true },
+          { letter: "C", text: "Weight original and replications equally", correct: false },
+          { letter: "D", text: "Wait for a fourth replication attempt", correct: false }
+        ],
+        feedback: {
+          correct: "Correct! The Amgen lesson: 89% of landmark cancer studies couldn't be reproduced. If it can't be replicated, it's not evidence—it's a hypothesis.",
+          incorrect: "53 项里程碑式研究中有 47 项未能重现。期刊的声望并不等于真理。不可重复的发现不应成为治疗指南的基础。"
+        }
+      }},
+      { type: "story", theme: "dark", content: {
+        label: "杜克丑闻", title: "从未有过的天才",
+        text: "杜克大学的 Anil Potti 开发了一种基因组测试来个性化癌症治疗。他的论文发表在顶级期刊上。临床试验招募了患者。他被誉为有远见的人。",
+        followup: "Then two statisticians noticed: the data was impossible. Gene signatures were backwards. Spreadsheets had been manipulated. Potti had invented his credentials. Over 100 cancer patients had been enrolled in trials based on fraudulent science. Some received treatments that harmed them based on data that never existed."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "🔄", title: "场景：重新运行不匹配",
+        xp: 30,
+        scenario: "Audit 2: Two analysts independently rerun the analysis. Analyst A: I²=34.2%. Analyst B: I²=31.8%. The tolerance is 1%. Difference: 2.4%.",
+        question: "What should happen?",
+        options: [
+          { letter: "A", text: "对结果进行平均——两者都是合理的", correct: false },
+          { letter: "B", text: "Use the more conservative estimate", correct: false },
+          { letter: "C", text: "Line-by-line comparison to find the discrepancy", correct: true },
+          { letter: "D", text: "Trigger CondGO (emergency mode)", correct: false }
+        ],
+        feedback: {
+          correct: "Correct! Line-by-line comparison found one SE rounded to 2 decimals instead of 4. Fix the source, rerun, verify match.",
+          incorrect: "不要平均或接受不匹配。找到差异的根源。在这种情况下：一个 SE 舍入不正确。"
+        }
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "Rerun Equivalence Tolerances",
+        subtitle: "Two runs must match exactly",
+        checkpoints: [
+          { day: "Study count", event: "Exactly identical" },
+          { day: "Effect sizes", event: "≤0.001 (log scale)" },
+          { day: "Pooled effect", event: "≤0.001" },
+          { day: "I² heterogeneity", event: "Within 1%" }
+        ]
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "📈", title: "场景：有影响力的研究",
+        xp: 25,
+        scenario: "留一分析显示，删除 COLCOT 试验会将合并 RR 从 0.65（显着）更改为 0.78（仍然显着）。 COLCOT 贡献了 40% 的权重。",
+        question: "您应该记录什么？",
+        options: [
+          { letter: "A", text: "Nothing—result is still significant", correct: false },
+          { letter: "B", text: "Document that COLCOT is influential but robust", correct: true },
+          { letter: "C", text: "Exclude COLCOT as an outlier", correct: false },
+          { letter: "D", text: "Downgrade certainty to VERY LOW", correct: false }
+        ],
+        feedback: {
+          correct: "正确！记录有影响力的研究并注意结论是可靠的。不要仅仅因为好的数据有影响力而将其排除在外。",
+          incorrect: "您必须记录有影响力的研究。在这里，删除 COLCOT 会改变幅度，但不会改变方向——这是一个强有力的发现。不要排除好的数据。"
+        }
+      }},
+      { type: "checklist", theme: "dark", content: {
+        title: "DoD-D Checklist",
+        items: [
+          "Capsule runs end-to-end",
+          "Forest + heterogeneity outputs",
+          "Sensitivity set executed",
+          "有影响力的研究记录",
+          "Audit 2 completed",
+          "Rerun equivalence satisfied"
+        ]
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "BMP-2的掩盖", title: "Paid Authors, Hidden Harms",
+        text: "美敦力向撰写有关其骨生长产品BMP-2论文的外科医生支付了2.1亿美元。每一篇发表的论文都说它是安全有效的。每篇论文都是由未公开财务关系的作者撰写的。没有人报告美敦力所知的不良事件。",
+        followup: "When independent researchers obtained FDA adverse event reports, they found: <strong>10-50x higher complication rates</strong> than published papers claimed. Cancers. Sterility. Chronic pain. The published literature was a marketing document. The real evidence was in FDA files no one had read."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "💰", title: "场景：咨询费",
+        xp: 25,
+        scenario: "You're extracting data from 15 studies on a medical device. You notice all 15 lead authors have received consulting fees from the manufacturer. The amounts range from $50,000 to $500,000 per author. All 15 studies show benefit; no harms are reported.",
+        question: "您应该在审查中记录什么？",
+        options: [
+          { letter: "A", text: "Nothing—disclosed conflicts aren't bias", correct: false },
+          { letter: "B", text: "Document conflicts and check FDA adverse event database", correct: true },
+          { letter: "C", text: "Exclude all studies due to conflict of interest", correct: false },
+          { letter: "D", text: "Run sensitivity analysis by funding source", correct: false }
+        ],
+        feedback: {
+          correct: "Correct! BMP-2 lesson: all published papers hid harms that FDA reports revealed. Always cross-check industry-funded device/drug studies against regulatory databases.",
+          incorrect: "The BMP-2 cover-up: $210M paid to authors who reported no harms; FDA data showed 10-50x higher complication rates. Industry conflicts require regulatory cross-checking."
+        }
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "金属对金属的髋关节灾难", title: "使患者中毒的关节",
+        text: "In the 2000s, device manufacturers promised a revolution: metal-on-metal hip implants that would last forever. DePuy's ASR hip was the flagship. <strong>93,000 patients</strong> worldwide received them. The company cited laboratory testing showing excellent wear characteristics. Surgeons believed the marketing.",
+        followup: "Inside patients' bodies, reality was different. The metal surfaces ground against each other, releasing cobalt and chromium ions into tissues. Patients developed <strong>metallosis</strong>—metal poisoning causing tissue death, bone destruction, and chronic pain. Some developed neurological symptoms as cobalt reached their brains. The failure rate reached <strong>40% at 5 years</strong>—catastrophic for a device meant to last decades. DePuy had internal data showing problems but kept selling. When the hip was finally recalled in 2010, Johnson & Johnson paid $2.5 billion in settlements. The laboratory tests that 'proved' safety had never predicted what happens inside a living, moving human body."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "🦴", title: "场景：实验室证据",
+        xp: 25,
+        scenario: "新型外科植入物在实验室磨损测试和动物研究中显示出优异的结果。制造商希望跳过大规模人体试验，直接进入市场并进行上市后监测。他们认为，“基准测试证明它有效”。",
+        question: "这个推理的关键缺陷是什么？",
+        options: [
+          { letter: "A", text: "Animal studies should be longer before human use", correct: false },
+          { letter: "B", text: "Laboratory conditions cannot replicate the biological environment inside patients", correct: true },
+          { letter: "C", text: "Post-marketing surveillance is sufficient for rare harms", correct: false },
+          { letter: "D", text: "基准测试仅对药物有效，对设备无效", correct: false }
+        ],
+        feedback: {
+          correct: "正确！金属对金属的髋关节通过了每一项实验室测试，然后用模拟器预测不到的金属离子毒害了患者。身体不是实验室。真实条件下的人体试验是不可替代的。",
+          incorrect: "DePuy 的实验室测试表明髋关节将永远持续下去。在患者体内，它会破坏组织并释放金属离子。实验室条件≠生物现实。长期随访的大型人体试验至关重要。"
+        }
+      }},
+      { type: "story", theme: "dark", content: {
+        label: "Essure 灾难", title: "毁掉生命的永久避孕",
+        text: "Bayer's Essure promised women permanent contraception without surgery—tiny metal coils inserted through the cervix that would block the fallopian tubes. The <strong>FDA approved it based on 2 years of data from 518 women</strong>. What could go wrong with a simple, non-surgical procedure?",
+        followup: "Thousands of women reported devices migrating through their bodies, perforating organs, causing chronic pain, autoimmune reactions, and—devastatingly—<strong>unintended pregnancies, including ectopic pregnancies that can be fatal</strong>. Women needed hysterectomies to remove devices they'd been told were 'permanent solutions.' A Facebook group for Essure victims grew to over 30,000 members. The FDA eventually added a black box warning, then restricted sales. Bayer stopped selling it in 2018. The lesson: 2 years of follow-up in 518 women was never enough to detect rare complications from a permanent implant. Approval timelines should match device permanence."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "⚠️", title: "场景：永久装置",
+        xp: 25,
+        scenario: "永久植入装置正在寻求 FDA 的批准，基于 3 年的随访600名患者。该装置旨在终生留在患者体内。尚未报告严重不良事件。该公司认为这证明了长期安全性。",
+        question: "What should regulators require before approval?",
+        options: [
+          { letter: "A", text: "Post-marketing surveillance with mandatory reporting", correct: false },
+          { letter: "B", text: "Follow-up duration proportional to intended implant life; registry with long-term tracking", correct: true },
+          { letter: "C", text: "Approval is appropriate—3 years is standard for devices", correct: false },
+          { letter: "D", text: "Additional laboratory durability testing", correct: false }
+        ],
+        feedback: {
+          correct: "正确！ Essure 的永久性设备的 2 年数据获得批准。多年来出现了并发症。永久植入物需要与其持久性成比例的随访，以及强制性的长期登记。",
+          incorrect: "Essure 的 2 年数据遗漏了破坏女性健康的并发症。永久性装置需要相应的长期随访。上市后监控发现问题为时已晚。"
+        }
+      }},
+      { type: "quiz", theme: "dark", content: {
+        question: "什么是“分析胶囊”？",
+        options: [
+          { text: "A summary of key findings", correct: false },
+          { text: "任何人都可以运行的代码+数据+指令", correct: true },
+          { text: "森林图输出", correct: false },
+          { text: "压缩数据文件", correct: false }
+        ],
+        xp: 20,
+        feedback: {
+          correct: "完全正确！胶囊是重现分析所需的一切。代码、数据、环境 — 所有版本。",
+          incorrect: "A capsule is a complete reproducible package: code, data, instructions. Anyone can run it and get identical results."
+        }
+      }}
+    ]
+  },
+  {
+    id: 7, title: "Phase E & CondGO", subtitle: "Days 34-40: Ship or emergency", xp: 180,
+    slides: [
+      { type: "title", theme: "red-bg", content: { title: "Phase E: Submission", subtitle: "第 34-40 天：FREEZE 和 CondGO" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "了解 FREEZE 及其重要性",
+          "Learn when CondGO is triggered",
+          "Know the three CondGO exit options",
+          "Master the DoD-E final checklist"
+        ],
+        tip: "防止“我们稍后再处理”灾难的紧急协议。"
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "冻结（第 34 天）",
+        subtitle: "此后没有新研究",
+        text: "Scope is locked. Only corrections to existing data allowed.",
+        highlight: "BMP 丑闻：行业不断“寻找”有利于其产品的新研究。冻结可以防止武器化范围蔓延。"
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "📚", title: "Scenario: New Study After Freeze",
+        xp: 25,
+        scenario: "现在是第 36 天。一位同事向您发送了一份新发布的 RCT，它完全符合您的标准。这是一次大型、高质量的试用。",
+        question: "What do you do?",
+        options: [
+          { letter: "A", text: "Add it—quality evidence shouldn't be excluded", correct: false },
+          { letter: "B", text: "Note it as a limitation, don't add", correct: true },
+          { letter: "C", text: "Add it but run sensitivity with/without", correct: false },
+          { letter: "D", text: "Request deadline extension to include it", correct: false }
+        ],
+        feedback: {
+          correct: "正确！冻结后，请注意新研究的局限性。添加它们打开了选择性包含的大门。",
+          incorrect: "冻结意味着冻结。添加“只是一项好的研究”正是范围蔓延破坏评论的方式。请注意作为限制。"
+        }
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "文迪雅时间表", title: "Seven Years of Silence",
+        text: "GSK 在 2000 年看到了心血管信号。他们选择“观察并等待”，没有最后期限。七年后，Nissen 的荟萃分析揭露了其危害。",
+        followup: "CondGO exists because 'we'll deal with it eventually' kills people."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "⏰", title: "场景：无限期审查",
+        xp: 25,
+        scenario: "您的系统审查发现了一个潜在的安全信号：与安慰剂相比，药物 X 显示心脏事件增加了 28%。您的主管建议“将调查结果保留在内部，直到我们收集更多数据”，但没有具体的时间表。",
+        question: "您应该坚持什么？",
+        options: [
+          { letter: "A", text: "Agree—premature publication could cause panic", correct: false },
+          { letter: "B", text: "Set a fixed deadline: publish or escalate within 30 days", correct: true },
+          { letter: "C", text: "首先与药品制造商分享他们的意见", correct: false },
+          { letter: "D", text: "Run additional analyses to confirm the signal", correct: false }
+        ],
+        feedback: {
+          correct: "Correct! The Avandia lesson: 'watch and wait with no deadline' killed 83,000 people. CondGO principle: safety signals need hard deadlines, not open-ended deliberation.",
+          incorrect: "GSK 'watched and waited' on Avandia for seven years. 83,000 heart attacks later, we learned: indefinite timelines kill. Set hard deadlines for safety decisions."
+        }
+      }},
+      { type: "story", theme: "dark", content: {
+        label: "完整的文迪雅故事", title: "他们的电子表格埋葬",
+        text: "1999年，葛兰素史克自己的分析显示文迪雅使心脏病发作增加了31%。一位公司统计员创建了一个电子表格。高管们看到了。他们计算了责任。他们继续销售。",
+        followup: "For seven years, Avandia remained a blockbuster drug. $3 billion per year in sales. The spreadsheet stayed hidden. When Steven Nissen published his meta-analysis in 2007, the world learned what GSK had known since 1999: Avandia caused an estimated <strong>83,000 heart attacks</strong>. The delay wasn't oversight—it was a decision."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "📈", title: "场景：业务决策",
+        xp: 25,
+        scenario: "您的分析显示药物会使不良事件增加 25%。该药年收入达 20 亿美元。据 Legal 计算，潜在的诉讼可能会花费 5 亿美元。一位高级管理人员建议“数学有利于持续销售”。",
+        question: "道德反应是什么？",
+        options: [
+          { letter: "A", text: "这是一项商业决策，而不是科学决策", correct: false },
+          { letter: "B", text: "Report the finding to regulators immediately", correct: true },
+          { letter: "C", text: "Seek independent confirmation before acting", correct: false },
+          { letter: "D", text: "在标签上添加警告并继续销售", correct: false }
+        ],
+        feedback: {
+          correct: "正确！ 1999 年，文迪雅的电子表格显示出了危害。葛兰素史克进行了“计算”并继续销售。道德答案从来都不是关于收入，而是关于患者安全。",
+          incorrect: "GSK calculated liability vs. revenue and chose sales. 83,000 heart attacks later: the 'business decision' was mass harm. Safety findings require immediate regulatory disclosure."
+        }
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "沙利度胺课程", title: "10,000 Children",
+        text: "1957年，一家德国公司将沙利度胺作为孕妇的安全安眠药进行销售。 “没有证据表明造成伤害，”他们说。他们并没有寻找伤害。他们不需要证据。他们假设。",
+        followup: "Within four years: 10,000 children born with severe limb deformities. Many more died before birth. One woman, Frances Kelsey at the FDA, had demanded proper evidence before approving it in America. She was called 'bureaucratic.' Her skepticism saved thousands of American children. Evidence isn't bureaucracy. Evidence is protection."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "🚨", title: "Scenario: CondGO Trigger",
+        xp: 30,
+        scenario: "Day 33. DoD-D fails: Audit 2 found that reruns don't match within tolerance, and you can't identify the source of discrepancy after 4 hours.",
+        question: "What happens now?",
+        options: [
+          { letter: "A", text: "将截止日期延长一周", correct: false },
+          { letter: "B", text: "Trigger CondGO: 72 hours to fix or decide", correct: true },
+          { letter: "C", text: "无论如何提交，并附上有关差异的注释", correct: false },
+          { letter: "D", text: "放弃项目", correct: false }
+        ],
+        feedback: {
+          correct: "Correct! CondGO gives exactly 72 hours to fix using allowed actions, or make a termination decision.",
+          incorrect: "CondGO is triggered. 72 hours, bounded actions only. No extensions. Fix it or face the decision to stop."
+        }
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "CondGO Rules",
+        subtitle: "72 hours, bounded actions",
+        allowed: ["Correct extraction errors", "Fix conversions", "Resolve overlaps", "Repair audit pack"],
+        forbidden: ["New outcomes", "Post-hoc subgroups", "冻结后的新研究"]
+      }},
+      { type: "checklist", theme: "dark", content: {
+        title: "DoD-E Checklist",
+        items: [
+          "PRISMA清单完成",
+          "所有附录完成",
+          "Two reruns equivalent",
+          "Clinical Summary included",
+          "偏差日志完成",
+          "GRADE assessment done",
+          "Audit-Grade Index: 9/9"
+        ]
+      }},
+      { type: "quiz", theme: "dark", content: {
+        question: "CondGO 退出选项是什么？",
+        options: [
+          { text: "Continue, Pause, or Restart", correct: false },
+          { text: "Pass, Submit minimal, or Terminate", correct: true },
+          { text: "Extend 24h, 48h, or 72h", correct: false },
+          { text: "没有退出 - 您必须修复它", correct: false }
+        ],
+        xp: 20,
+        feedback: {
+          correct: "Right! PASS (fixed), Submit minimal version, or Terminate with Failure Log. No middle ground.",
+          incorrect: "CondGO has exactly three exits: fix it (PASS), submit minimal version, or terminate and archive with Failure Log."
+        }
+      }}
+    ]
+  },
+  {
+    id: 8, title: "案例：Colchicine回顾", subtitle: "4 crises, 0 failures", xp: 250,
+    slides: [
+      { type: "title", theme: "purple-bg", content: { title: "秋水仙碱回顾", subtitle: "40天的冲刺，有4次危机和0次失败" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "See META-SPRINT in action through a real case",
+          "Learn how each crisis was resolved",
+          "Understand why the system worked",
+          "Apply lessons to your own reviews"
+        ],
+        tip: "这个案例研究将所有内容联系在一起。赢得秋水仙英雄徽章！"
+      }},
+      { type: "stats", theme: "dark", content: {
+        title: "The Question",
+        subtitle: "Does colchicine reduce cardiac events after heart attack?",
+        stats: [
+          { value: "8", label: "RCTs" },
+          { value: "11,774", label: "Patients" },
+          { value: "40", label: "Days" },
+          { value: "4", label: "Crises" }
+        ]
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "1️⃣", title: "危机 1：时间点困境",
+        xp: 25,
+        scenario: "Day 2. Trials report MACE at 30 days, 90 days, 1 year, 3 years. Protocol says 'longest follow-up' but reviewers disagree on interpretation.",
+        question: "您将如何解决这个问题？",
+        options: [
+          { letter: "A", text: "Vote on which interpretation to use", correct: false },
+          { letter: "B", text: "准备包含选项和权衡的咨询包", correct: true },
+          { letter: "C", text: "Let the Integrator decide alone", correct: false },
+          { letter: "D", text: "Use both interpretations as sensitivity", correct: false }
+        ],
+        feedback: {
+          correct: "Correct! The Consult Pack forces structured thinking. They chose: 'Longest ≥1 year, else longest available.'",
+          incorrect: "准备了包含证据和选项的咨询包。 15 分钟的结构化讨论避免了数小时的返工。"
+        }
+      }},
+      { type: "decision", theme: "red-bg", content: {
+        icon: "2️⃣", title: "危机 2：交换武器",
+        xp: 30,
+        scenario: "Day 14. Red-team pulls COLCOT (n=4,745). Forest plot shows colchicine INCREASES events—opposite of all other trials. Investigation reveals: Figure 3 bars were unlabeled, extractor assumed wrong direction.",
+        question: "是什么拯救了这篇评论？",
+        options: [
+          { letter: "A", text: "集成者的直觉", correct: false },
+          { letter: "B", text: "红队日报微观检查", correct: true },
+          { letter: "C", text: "发表前同行评审", correct: false },
+          { letter: "D", text: "Statistical outlier detection", correct: false }
+        ],
+        feedback: {
+          correct: "完全正确！红队系统发现了协作审查可能遗漏的内容。有影响力的研究会受到对抗性检查。",
+          incorrect: "红队日常检查发现了这一点。 Fatima 注意到 COLCOT 的方向是相反的——如果药物在一次试验中确实发挥不同作用，这是不可能的。"
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "3️⃣", title: "危机 3：事后想法",
+        xp: 25,
+        scenario: "Day 22. Clinical advisor suggests: 'Three trials used 0.5mg, five used 1mg. Shouldn't you analyze by dose?' He's probably right scientifically.",
+        question: "正确答案是什么？",
+        options: [
+          { letter: "A", text: "Change primary analysis to split by dose", correct: false },
+          { letter: "B", text: "Ignore the suggestion—too late to change", correct: false },
+          { letter: "C", text: "Add as exploratory sensitivity, label post-hoc", correct: true },
+          { letter: "D", text: "返回并在方案中添加剂量", correct: false }
+        ],
+        feedback: {
+          correct: "Perfect! Good ideas after Day 3 go in sensitivity, clearly labelled post-hoc. Primary analysis stays protected.",
+          incorrect: "方案保护您免受自己的伤害。将其添加为敏感度分析，将其标记为“探索性、事后分析”。"
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "4️⃣", title: "危机 4：重新运行不匹配",
+        xp: 25,
+        scenario: "Day 31. Audit 2 reruns: Analyst A gets I²=34.2%, Analyst B gets I²=31.8%. Tolerance is 1%. Difference: 2.4%.",
+        question: "根本原因是什么？",
+        options: [
+          { letter: "A", text: "Different software versions", correct: false },
+          { letter: "B", text: "One SE rounded to 2 decimals instead of 4", correct: true },
+          { letter: "C", text: "Different random seeds", correct: false },
+          { letter: "D", text: "研究包含中的拼写错误", correct: false }
+        ],
+        feedback: {
+          correct: "Right! Line-by-line found Nidorf 2020 SE: 0.0847 vs 0.08. A 0.0047 difference created 2.4% I² change.",
+          incorrect: "Line-by-line comparison found one SE was rounded to 2 decimals (0.08) instead of 4 (0.0847). 'Close enough' isn't."
+        }
+      }},
+      { type: "stats", theme: "green-bg", content: {
+        title: "The Result",
+        stats: [
+          { value: "RR 0.65", label: "95% CI: 0.49–0.88" },
+          { value: "I² 34%", label: "Low-moderate" },
+          { value: "9/9", label: "Audit-Grade" }
+        ],
+        caption: "Colchicine reduces major cardiac events by ~35%. The system caught all 4 crises."
+      }},
+      { type: "lesson", theme: "dark", content: {
+        title: "为什么系统已完成",
+        lessons: [
+          { title: "Crisis 1 → Consult Pack", desc: "Structured discussion prevented rework" },
+          { title: "Crisis 2 → Red-Team", desc: "Adversarial checking caught the swap" },
+          { title: "Crisis 3 → Deviation Log", desc: "Good ideas captured safely" },
+          { title: "Crisis 4 → Rerun Tolerance", desc: "Precision requirements caught silent errors" }
+        ]
+      }},
+      { type: "story", theme: "dark", content: {
+        label: "VIGOR 试验", title: "失踪的心脏病发作",
+        text: "In 2000, Merck published the VIGOR trial for Vioxx. The paper showed a 4-fold increase in heart attacks compared to naproxen. But here's what they didn't tell you: three more heart attacks occurred <strong>after the data cutoff</strong>. Merck scientists knew about them. They didn't include them.",
+        followup: "Why did it matter? Including those three heart attacks would have changed the risk ratio from concerning to alarming. Instead, the published paper suggested the difference might be because naproxen protected hearts—not because Vioxx damaged them. The data cutoff date was a decision. That decision cost lives."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "✂️", title: "场景：方便的截止",
+        xp: 25,
+        scenario: "您正在从试验中提取数据。该方案指定随访 12 个月。发表的论文仅报告 6 个月的数据。脚注表示“6 个月后发生了其他事件，但未包含在主要分析中。”",
+        question: "你应该做什么？",
+        options: [
+          { letter: "A", text: "使用已发布的 6 个月数据", correct: false },
+          { letter: "B", text: "联系作者以获取完整的后续数据", correct: true },
+          { letter: "C", text: "由于选择性报告而排除研究", correct: false },
+          { letter: "D", text: "注意您的偏倚评估风险存在差异", correct: false }
+        ],
+        feedback: {
+          correct: "Correct! The VIGOR lesson: data cutoffs can hide safety signals. Three missing heart attacks changed Vioxx from 'concerning' to 'alarming.' Always seek complete data.",
+          incorrect: "VIGOR 试验排除了可能改变结论的截断后心脏病发作。方便的切断可以隐藏关键的安全信号。获取完整数据。"
+        }
+      }},
+      { type: "story", theme: "dark", content: {
+        label: "激素测试悲剧", title: "Primodos 和它所伤害的儿童",
+        text: "In the 1960s and 70s, doctors prescribed <strong>Primodos</strong>—a high-dose hormone pill—as a pregnancy test. Take two pills; if you bleed, you're not pregnant. Simple. Convenient. Millions of women used it. <strong>No one ran trials to check if it harmed unborn babies.</strong>",
+        followup: "Then the birth defects appeared. Cleft palates. Heart malformations. Limb abnormalities. Women who had taken Primodos and were actually pregnant—the test had failed—gave birth to damaged children. Decades later, researchers analyzed the data: exposure to Primodos was associated with a <strong>40% increase in congenital abnormalities</strong>. The manufacturer had received reports of problems for years. They kept selling. An official UK review in 2017 found 'clear evidence' of an association. The lesson: 'it seems to work' is not evidence. 'It seems safe' is not safety data. Pregnancy exposures demand the highest burden of proof."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "🧪", title: "场景：方便的测试",
+        xp: 25,
+        scenario: "一种新的家庭妊娠测试使用一种新型化学物质，可以在几秒钟而不是几分钟内提供结果。它已被数百万人使用，没有出现明显的急性伤害。然而，一些女性尽早进行测试，发现该化学物质可能会影响实际怀孕的胚胎的发育。",
+        question: "What evidence should exist before widespread marketing?",
+        options: [
+          { letter: "A", text: "Absence of reported harms is sufficient for a diagnostic test", correct: false },
+          { letter: "B", text: "Long-term follow-up of pregnancy outcomes in exposed women vs. controls", correct: true },
+          { letter: "C", text: "动物畸胎学研究足以短时间暴露", correct: false },
+          { letter: "D", text: "Post-marketing surveillance will detect any problems", correct: false }
+        ],
+        feedback: {
+          correct: "正确！由于没有人追踪妊娠结果，几十年来一直没有发现 Primodos 的损害。潜在怀孕期间的任何接触都需要系统的结果跟踪，而不是被动监视。",
+          incorrect: "Primodos 多年来一直伤害婴儿，但“没有人注意到”。妊娠暴露需要主动跟踪结果。出生缺陷的上市后监测失败——这种联系很难在以后证明。"
+        }
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "贝科尔灾难", title: "溶解肌肉的他汀类药物",
+        text: "In 1997, Bayer launched cerivastatin (Baycol) to compete in the lucrative statin market. It was the most potent statin ever—lowering cholesterol more effectively than competitors. Bayer pushed aggressive dosing. They promoted combining it with gemfibrozil for even greater cholesterol reduction. Sales reached $500 million annually.",
+        followup: "Patients started dying. Their muscles were dissolving—a condition called <strong>rhabdomyolysis</strong>. Breakdown products overwhelmed kidneys. By the time Bayer withdrew Baycol in 2001, at least <strong>100 patients had died and over 1,500 were hospitalized</strong>. Internal documents revealed Bayer knew the risk was higher than competitors. They knew the gemfibrozil combination was especially dangerous. They kept promoting both. The 'most effective' statin became the deadliest. More aggressive isn't always better—sometimes it's fatal."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "📈", title: "场景：积极的方法",
+        xp: 25,
+        scenario: "一种新药在更高的剂量下显示出比现有治疗更强大的效果剂量。制造商希望将最高有效剂量作为标准进行销售。竞争对手使用较低剂量且安全性良好。一些早期报告提到了严重的肌肉相关不良事件。",
+        question: "What should guide dosing recommendations?",
+        options: [
+          { letter: "A", text: "Maximum efficacy should be the goal—that's why patients take medication", correct: false },
+          { letter: "B", text: "Lowest effective dose with systematic safety monitoring; investigate all serious events", correct: true },
+          { letter: "C", text: "Match competitor dosing for market positioning", correct: false },
+          { letter: "D", text: "Let prescribers choose based on patient cholesterol levels", correct: false }
+        ],
+        feedback: {
+          correct: "正确！贝科尔的激进剂量导致患者死亡。肌肉事件是警告信号。最安全的有效剂量（而不是最强的剂量）应该是标准的。早期的严重事件需要调查，而不是解雇。",
+          incorrect: "Baycol 是“最有效”的他汀类药物，也是最致命的。当功效和毒性之间的差距缩小时，并不是越多越好。早期严重不良事件是信号，而不是噪音。"
+        }
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "未遂事件", title: "What If We Hadn't Checked?",
+        text: "In the colchicine review, COLCOT contributed 40% of the total weight. If the swapped arms had gone undetected, the meta-analysis would have concluded: <strong>'Colchicine appears to INCREASE cardiac events.'</strong> The opposite of reality.",
+        followup: "医生可能拒绝采取有效治疗。本来可以得到帮助的病人会被拒绝。一个未被发现的提取错误可能会扭转临床实践。红队检查花了 15 分钟。错过它的代价？无法计算。"
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "⚖️", title: "场景：15 分钟问题",
+        xp: 25,
+        scenario: "您的团队落后于计划。最大的试验（占总重量的 45%）尚未经过红队验证。有人建议跳过它“因为提取是由我们最有经验的人完成的。”",
+        question: "你应该做什么？",
+        options: [
+          { letter: "A", text: "Skip it—experience reduces error rates", correct: false },
+          { letter: "B", text: "Verify it—influential studies always get checked", correct: true },
+          { letter: "C", text: "Spot-check one data point instead of full verification", correct: false },
+          { letter: "D", text: "Trust but add a note about limited verification time", correct: false }
+        ],
+        feedback: {
+          correct: "正确！秋水仙碱险些失手：红队在 15 分钟的检查中发现了一个可能会推翻结论的错误。经验并不能消除错误，验证却可以。",
+          incorrect: "COLCOT 错误是由经验丰富的提取者造成的。红队检查花了 15 分钟。跳过对有影响力的研究的验证可能会导致灾难性错误。"
+        }
+      }}
+    ]
+  },
+  {
+    id: 9, title: "Final Assessment", subtitle: "证明您的掌握", xp: 300,
+    slides: [
+      { type: "title", theme: "dark", content: { title: "Final Assessment", subtitle: "Apply everything you've learned" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "Apply META-SPRINT principles to complex scenarios",
+          "Demonstrate understanding of protocol integrity",
+          "Handle crisis situations correctly",
+          "Uphold ethical reporting standards"
+        ],
+        tip: "三个具有挑战性的场景。全部正确回答即可获得完美的模块奖励！"
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "🎯", title: "Final Scenario 1: The Protocol Pressure",
+        xp: 40,
+        scenario: "您的主管希望明天开始筛选。协议已起草但尚未在 PROSPERO 上注册（需要 24-48 小时）。 “开始吧——我们稍后可以注册。”",
+        question: "What do you do?",
+        options: [
+          { letter: "A", text: "Start screening—registration is just paperwork", correct: false },
+          { letter: "B", text: "在任何数据收集之前等待注册", correct: true },
+          { letter: "C", text: "Start screening but don't record results yet", correct: false },
+          { letter: "D", text: "Submit to a faster registry service", correct: false }
+        ],
+        feedback: {
+          correct: "正确的！注册会为您的承诺加盖时间戳。在注册之前开始会导致结果切换——31% 的问题。",
+          incorrect: "注册必须在任何数据收集之前进行。这可以防止 31% 结果切换问题。"
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "🔥", title: "最终场景 2：危机",
+        xp: 40,
+        scenario: "Day 33. Your rerun shows RR=0.72. Collaborator's shows RR=0.68. Both significant but outside tolerance. You have 6 hours until DoD-D deadline.",
+        question: "您的第一个行动是什么？",
+        options: [
+          { letter: "A", text: "平均到 0.70 并继续", correct: false },
+          { letter: "B", text: "Line-by-line input comparison", correct: true },
+          { letter: "C", text: "Trigger CondGO immediately", correct: false },
+          { letter: "D", text: "Ask both analysts to re-run again", correct: false }
+        ],
+        feedback: {
+          correct: "正确！逐行比较找出差异根源。 6 小时内，您可以修复它，而无需 CondGO。",
+          incorrect: "First: find the source of discrepancy. Line-by-line comparison. Most mismatches have fixable causes."
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "⚖️", title: "Final Scenario 3: The Ethical Edge",
+        xp: 40,
+        scenario: "您的荟萃分析显示药物 X 是有害的（RR 1.35，CI 1.10-1.65）。为您的评论提供资助的制药公司要求您将其“重新定义”为“没有显着益处”。",
+        question: "您如何回应？",
+        options: [
+          { letter: "A", text: "They're technically correct—reframe as requested", correct: false },
+          { letter: "B", text: "Report the finding accurately: harm detected", correct: true },
+          { letter: "C", text: "Compromise: say 'insufficient evidence of benefit'", correct: false },
+          { letter: "D", text: "Add sensitivity analyses until harm disappears", correct: false }
+        ],
+        feedback: {
+          correct: "Correct! RR 1.35 with CI excluding 1.0 is harm. Report it accurately. The Avandia story: suppressing harm signals kills patients.",
+          incorrect: "RR 1.35 (CI 1.10-1.65) = statistically significant HARM. Report it accurately. The Avandia scandal: silence killed tens of thousands."
+        }
+      }},
+      { type: "story", theme: "dark", content: {
+        label: "等待的成本", title: "What Silence Buys",
+        text: "Between 2000 and 2004, while Merck debated what to do about Vioxx, <strong>25,000 people died</strong> from heart attacks caused by a drug they trusted. Between 1999 and 2007, while GSK buried the Avandia spreadsheet, <strong>83,000 people suffered heart attacks</strong> from a diabetes drug that was supposed to help them.",
+        followup: "这些并非意外。他们并非不可知。它们是没有最后期限的系统、未经验证的证据以及认为“观望”比“停下来检查”更安全的人们的可预测结果。每天的延误都会统计人数。"
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "📅", title: "场景：舒适的延误",
+        xp: 30,
+        scenario: "您的系统审查发现了明显的伤害证据。您的机构希望在发表任何公开声明之前“等待同行评审反馈”。同行评审过程通常需要 6-12 个月。",
+        question: "你应该做什么？",
+        options: [
+          { letter: "A", text: "等待同行评审 - 正确的流程很重要", correct: false },
+          { letter: "B", text: "Post a preprint immediately while pursuing publication", correct: true },
+          { letter: "C", text: "Share findings privately with key opinion leaders", correct: false },
+          { letter: "D", text: "Accelerate peer review by submitting to multiple journals", correct: false }
+        ],
+        feedback: {
+          correct: "Correct! Vioxx: 4 years of 'waiting' = 25,000 deaths. Avandia: 7 years = 83,000 heart attacks. When evidence shows harm, delay is not neutral—it's harmful. Preprint immediately.",
+          incorrect: "Vioxx and Avandia: 'waiting' killed over 100,000 people combined. When evidence shows harm, every day of delay has a body count. Preprint findings immediately."
+        }
+      }},
+      { type: "story", theme: "green-bg", content: {
+        label: "其他路径", title: "Frances Kelsey's 19 Months",
+        text: "In 1960, the FDA received an application to approve thalidomide in America. One reviewer—Frances Kelsey—refused to approve it. The manufacturer pressured her. Her colleagues questioned her. She held firm for <strong>19 months</strong>, demanding evidence of safety.",
+        followup: "While she waited, 10,000 children were born with deformities in countries that had approved the drug. American children were spared—not by luck, but by one person who demanded proof before action. Kelsey proved that asking for evidence isn't obstruction. It's protection. META-SPRINT exists to make that protection systematic."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "🛡️", title: "场景：批准的压力",
+        xp: 30,
+        scenario: "您正在评审一种新的治疗方法。制造商表示，你们“对证据的过度要求”正在推迟获得可能挽救生命的药物。你的同事认为你“过于谨慎”。行业律师暗示将对“妨碍”采取法律行动。",
+        question: "What should guide your decision?",
+        options: [
+          { letter: "A", text: "Speed up approval—patients are waiting", correct: false },
+          { letter: "B", text: "Maintain evidence standards regardless of pressure", correct: true },
+          { letter: "C", text: "有条件批准的妥协", correct: false },
+          { letter: "D", text: "Escalate to supervisors to share responsibility", correct: false }
+        ],
+        feedback: {
+          correct: "正确！弗朗西斯·凯尔西 (Frances Kelsey) 在长达 19 个月的时间里被称为“官僚主义”，而其他国家的 10,000 名儿童却受到了伤害。她拯救了数千名美国儿童。证据标准拯救生命。",
+          incorrect: "凯尔西在 19 个月的压力下批准了沙利度胺。她的“阻挠”拯救了数千名儿童。压力和紧迫感不是证据。标准保护患者。"
+        }
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "Rezulin 灾难", title: "摧毁肝脏的糖尿病药物",
+        text: "In 1997, Warner-Lambert launched troglitazone (Rezulin) as a revolutionary diabetes treatment. The FDA approved it despite a medical officer's objections about liver toxicity signals. <strong>Within months, reports of liver failure poured in.</strong> The UK banned it in December 1997. Japan banned it in 2000.",
+        followup: "The FDA kept Rezulin on the American market until March 2000—<strong>three years after the UK acted</strong>. During those three years, at least 90 Americans died of liver failure from a drug banned elsewhere. FDA's own scientists had warned of the danger. They were overruled. When Rezulin was finally withdrawn, internal documents revealed Warner-Lambert had hidden early liver toxicity data and downplayed risks. The gap between the UK ban and US withdrawal: three years. The cost: dozens of preventable deaths. Different regulators, same data, vastly different responses."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "🌍", title: "场景：监管分歧",
+        xp: 30,
+        scenario: "您正在荟萃分析中审查的一种药物因安全问题在欧洲被撤回2几年前，但在您的国家/地区仍然可用。当地监管机构称“没有足够的证据表明这对我们的人口造成了伤害”。欧洲试验显示出明确的肝脏毒性信号。",
+        question: "这将如何影响您的系统评价？",
+        options: [
+          { letter: "A", text: "仅使用您所在国家/地区的数据 - 监管决策各不相同", correct: false },
+          { letter: "B", text: "在讨论中包含所有数据并突出报告监管分歧", correct: true },
+          { letter: "C", text: "Exclude the drug entirely due to safety concerns", correct: false },
+          { letter: "D", text: "Trust your local regulators' interpretation", correct: false }
+        ],
+        feedback: {
+          correct: "正确！在英国采取行动后，雷祖林杀害了美国人三年。您的审查应包括所有安全数据并突出监管差异。读者需要完整的信息，而不是按地理边界过滤。",
+          incorrect: "Rezulin was banned in UK in 1997; Americans died until 2000. Regulatory decisions aren't evidence—they're interpretations. Include all data and report divergences so readers can judge."
+        }
+      }},
+      { type: "story", theme: "dark", content: {
+        label: "Ketek 丑闻", title: "The Antibiotic Built on Fabricated Trials",
+        text: "In 2004, the FDA approved telithromycin (Ketek) for respiratory infections. The approval relied heavily on a large trial—Study 3014—conducted by Dr. Anne Kirkman-Campbell. She enrolled <strong>407 patients in just 9 months</strong> from a solo practice. Impossible numbers, but the FDA didn't question them.",
+        followup: "Dr. Kirkman-Campbell was later convicted of fraud. She had <strong>fabricated patient enrollment entirely</strong>—some 'patients' were relatives who never had infections. But her fake data had already supported FDA approval. When real-world use began, Ketek caused liver failures, some fatal. An FDA reviewer had flagged Study 3014's impossible enrollment before approval—she was overruled. The drug that was approved based partly on invented patients went on to harm real ones. The question no one asked: 'How can one doctor enroll 400 patients in conditions that would take a large hospital years?'"
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "🔢", title: "场景：超级注册者",
+        xp: 30,
+        scenario: "一项关键药物试验包括来自一位单独医生的数据，该试验在 6 个月内招募了 350 名患者，比接下来的 10 个地点的总和还要多。现场监测报告被标记为“令人满意”。该试验显示出强大的功效。",
+        question: "What verification should occur before regulatory decisions?",
+        options: [
+          { letter: "A", text: "站点监测已通过，因此数据已得到验证", correct: false },
+          { letter: "B", text: "Audit source documents: patient records, consent forms, medical histories", correct: true },
+          { letter: "C", text: "使用和不使用该站点数据进行分析", correct: false },
+          { letter: "D", text: "联系研究者以解释高注册率", correct: false }
+        ],
+        feedback: {
+          correct: "正确！ Kirkman-Campbell 在制造 407 名患者时通过了现场监测。源文件验证——实际的病人记录——会抓住她的。自我报告的入学数据和“令人满意”的监测毫无意义。",
+          incorrect: "Dr. Kirkman-Campbell's site passed monitoring. Her patients didn't exist. Source document audits—not self-reports—catch fabrication. Impossible enrollment rates demand verification of original records."
+        }
+      }},
+      { type: "story", theme: "dark", content: {
+        label: "The Promise", title: "可信证据创造了什么",
+        text: "In 1987, the ISIS-2 trial showed aspirin reduces death after heart attack by 23%. The evidence was solid. The methods were transparent. The data was verifiable. Since then, aspirin after heart attack has saved an estimated <strong>100,000 lives per year</strong>.",
+        followup: "That's what honest evidence creates: treatments that work, given to people who need them, saving lives that would otherwise be lost. Every protocol you register, every number you verify, every gate you pass—you're building the foundation for the next ISIS-2. The next treatment that actually works. The next million lives saved."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "🌟", title: "场景：您的第一次审核",
+        xp: 30,
+        scenario: "您即将开始您的第一次系统审核。一位资深同事提出建议：“不要太担心所有这些协议和清单。只要做好工作，证据就会说明一切。'",
+        question: "您应该如何应对？",
+        options: [
+          { letter: "A", text: "Follow their advice—experience beats process", correct: false },
+          { letter: "B", text: "Follow META-SPRINT rigorously—systems prevent disasters", correct: true },
+          { letter: "C", text: "根据您的具体情况调整流程", correct: false },
+          { letter: "D", text: "第一次审查时使用较轻的版本，然后改进", correct: false }
+        ],
+        feedback: {
+          correct: "正确！良好的意愿并不能防止错误。由于严谨，ISIS-2 的阿司匹林证据每年挽救了 100,000 人的生命。波德曼斯的欺诈行为导致 80 万人死亡，因为无人核实。保护患者的是系统，而不是意图。",
+          incorrect: "没有系统的“出色工作”导致了 Poldermans、CAST、Vioxx、Avandia。 ISIS-2 凭借严格的方法拯救了数百万人。 100,000 人获救和 800,000 人死亡之间的区别是系统验证。"
+        }
+      }},
+      { type: "stats", theme: "green-bg", content: {
+        title: "Course Complete!",
+        stats: [
+          { value: "5", label: "Phases mastered" },
+          { value: "5", label: "Gates understood" },
+          { value: "8", label: "Modules completed" },
+          { value: "∞", label: "Patients protected" }
+        ],
+        caption: "您现在了解如何提供拯救生命的证据。"
+      }},
+      { type: "refrain", theme: "black", content: { text: "去建立信任。 40天。 5个门。证据很重要。" }}
+    ]
+  }
+];
+
+// ===== NAVIGATION STATE =====
+let currentModule = 0;
+let currentSlide = 0;
+let consecutiveCorrect = gameState.consecutiveCorrect || 0;
+
+// ===== SAVE/LOAD =====
+function saveGame() {
+  safeSetStorage('metasprintGame_v1', gameState);
+}
+
+function resetProgress() {
+  if (confirm('Reset all progress and achievements?')) {
+    gameState = { ...DEFAULT_STATE, answeredQuestions: {}, badges: [], completedModules: [], perfectModules: [], consecutiveCorrect: 0 };
+    consecutiveCorrect = 0;
+    saveGame();
+    currentModule = 0;
+    currentSlide = 0;
+    renderAll();
+  }
+}
+
+// ===== GLOSSARY =====
+function toggleGlossary() {
+  document.getElementById('glossaryPanel').classList.toggle('open');
+}
+
+// ===== COURSE PROGRESS =====
+function updateCourseProgress() {
+  const totalModules = MODULES.length;
+  const completedCount = gameState.completedModules.length;
+  const pct = Math.round((completedCount / totalModules) * 100);
+  const fillEl = document.getElementById('courseProgressFill');
+  const pctEl = document.getElementById('courseProgressPct');
+  if (fillEl) fillEl.style.width = pct + '%';
+  if (pctEl) pctEl.textContent = pct + '%';
+}
+
+// ===== MODULE QUESTION TRACKING =====
+function getModuleQuestionIds(moduleIndex) {
+  const mod = MODULES[moduleIndex];
+  const ids = [];
+  mod.slides.forEach((slide, si) => {
+    if (slide.type === 'decision') ids.push(`dec_${moduleIndex}_${si}`);
+    if (slide.type === 'quiz') ids.push(`quiz_${moduleIndex}_${si}`);
+    if (slide.type === 'prediction') ids.push(`pred_${moduleIndex}_${si}`);
+  });
+  return ids;
+}
+
+function checkPerfectModule(moduleIndex) {
+  const mod = MODULES[moduleIndex];
+  const questionIds = getModuleQuestionIds(moduleIndex);
+  if (questionIds.length === 0) return false;
+
+  let allCorrect = true;
+  questionIds.forEach(id => {
+    const answer = gameState.answeredQuestions[id];
+    if (answer === undefined || answer === null) { allCorrect = false; return; }
+
+    // Find the slide and check if answer was correct
+    const parts = id.split('_');
+    const slideIndex = parseInt(parts[2]);
+    const slide = mod.slides[slideIndex];
+
+    if (slide.type === 'decision') {
+      const correctOpt = slide.content.options.find(o => o.correct);
+      if (answer !== correctOpt?.letter) allCorrect = false;
+    } else if (slide.type === 'quiz') {
+      const correctIdx = slide.content.options.findIndex(o => o.correct);
+      if (answer !== correctIdx) allCorrect = false;
+    } else if (slide.type === 'prediction') {
+      if (answer !== slide.content.answer) allCorrect = false;
+    }
+  });
+
+  return allCorrect;
+}
+
+// ===== XP & LEVELING =====
+function addXP(amount) {
+  gameState.xp += amount;
+  checkLevelUp();
+  saveGame();
+  updateStatsDisplay();
+  showXPPopup(amount);
+}
+
+function checkLevelUp() {
+  for (let i = LEVELS.length - 1; i >= 0; i--) {
+    if (gameState.xp >= LEVELS[i].xp && gameState.level < LEVELS[i].level) {
+      gameState.level = LEVELS[i].level;
+      showLevelUp(LEVELS[i]);
+      break;
+    }
+  }
+}
+
+function showXPPopup(amount) {
+  const popup = document.getElementById('xpPopup');
+  document.getElementById('xpAmount').textContent = `+${amount}`;
+  popup.classList.add('show');
+  setTimeout(() => popup.classList.remove('show'), 1500);
+}
+
+function showLevelUp(levelData) {
+  triggerConfetti();
+  showBadgeModal({ icon: levelData.icon, name: `Level ${levelData.level}`, desc: levelData.title });
+}
+
+// ===== BADGES =====
+function awardBadge(badgeId) {
+  if (gameState.badges.includes(badgeId)) return;
+  gameState.badges.push(badgeId);
+  saveGame();
+  const badge = BADGES.find(b => b.id === badgeId);
+  if (badge) showBadgeModal(badge);
+  updateBadges();
+}
+
+function awardBadgeIfNew(id, icon, name, desc) {
+  if (gameState.badges.includes(id)) return;
+  gameState.badges.push(id);
+  saveGame();
+  showBadgeModal({ icon, name, desc });
+  updateBadges();
+}
+
+function showBadgeModal(badge) {
+  const modal = document.getElementById('badgeModal');
+  // Remove any existing focus trap handler before adding a new one
+  if (modal._focusTrapHandler) {
+    modal.removeEventListener('keydown', modal._focusTrapHandler);
+  }
+  document.getElementById('badgeModalIcon').textContent = badge.icon;
+  document.getElementById('badgeModalTitle').textContent = badge.name;
+  document.getElementById('badgeModalDesc').textContent = badge.desc;
+  modal.classList.add('show');
+  triggerConfetti();
+
+  // Focus trap for accessibility
+  const focusableElements = modal.querySelectorAll('button, [tabindex]:not([tabindex="-1"])');
+  if (focusableElements.length > 0) {
+    focusableElements[0].focus();
+  }
+  const trapHandler = function(e) {
+    if (e.key === 'Escape') {
+      closeBadgeModal();
+      return;
+    }
+    if (e.key === 'Tab') {
+      const firstFocusable = focusableElements[0];
+      const lastFocusable = focusableElements[focusableElements.length - 1];
+      if (e.shiftKey && document.activeElement === firstFocusable) {
+        e.preventDefault();
+        lastFocusable.focus();
+      } else if (!e.shiftKey && document.activeElement === lastFocusable) {
+        e.preventDefault();
+        firstFocusable.focus();
+      }
+    }
+  };
+  modal._focusTrapHandler = trapHandler;
+  modal.addEventListener('keydown', trapHandler);
+}
+
+function closeBadgeModal() {
+  const modal = document.getElementById('badgeModal');
+  if (modal._focusTrapHandler) {
+    modal.removeEventListener('keydown', modal._focusTrapHandler);
+    delete modal._focusTrapHandler;
+  }
+  modal.classList.remove('show');
+}
+
+// ===== STREAK =====
+function updateStreak() {
+  const today = new Date().toDateString();
+  if (gameState.lastActive !== today) {
+    const yesterday = new Date(Date.now() - 86400000).toDateString();
+    if (gameState.lastActive === yesterday) {
+      gameState.streak++;
+      if (gameState.streak >= 3) awardBadge('streak_3');
+      if (gameState.streak >= 7) awardBadge('streak_7');
+    } else if (gameState.lastActive) {
+      gameState.streak = 1;
+    } else {
+      gameState.streak = 1;
+    }
+    gameState.lastActive = today;
+    saveGame();
+  }
+}
+
+// ===== CONFETTI =====
+function triggerConfetti() {
+  // Respect reduced motion preference
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  const container = document.getElementById('confettiContainer');
+  const colors = ['#D4AF37', '#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#7c3aed'];
+  for (let i = 0; i < 50; i++) {
+    const confetti = document.createElement('div');
+    confetti.className = 'confetti';
+    confetti.style.left = Math.random() * 100 + '%';
+    confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+    confetti.style.animationDelay = Math.random() * 0.5 + 's';
+    confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+    container.appendChild(confetti);
+    setTimeout(() => confetti.remove(), 3500);
+  }
+}
+
+// ===== COMBO COUNTER =====
+function updateComboDisplay() {
+  const comboEl = document.getElementById('comboDisplay');
+  const countEl = document.getElementById('comboCount');
+
+  if (consecutiveCorrect >= 2) {
+    countEl.textContent = consecutiveCorrect;
+    comboEl.classList.add('show');
+
+    // Animate for big combos
+    if (consecutiveCorrect >= 5) {
+      comboEl.classList.add('big');
+      setTimeout(() => comboEl.classList.remove('big'), 300);
+    }
+  } else {
+    comboEl.classList.remove('show');
+  }
+}
+
+// ===== MOBILE SIDEBAR =====
+function toggleSidebar() {
+  const sidebar = document.querySelector('.sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  sidebar.classList.toggle('open');
+  overlay.classList.toggle('show');
+  var btn = document.querySelector('.sidebar-toggle, .hamburger, .mobile-menu-btn'); if (btn) btn.setAttribute('aria-expanded', btn.getAttribute('aria-expanded') === 'true' ? 'false' : 'true');
+}
+
+// ===== RENDER =====
+function renderAll() {
+  updateStreak();
+  renderSidebar();
+  renderSlides();
+  updateStatsDisplay();
+  updateBadges();
+  updateCourseProgress();
+}
+
+function updateStatsDisplay() {
+  const levelData = LEVELS.find(l => l.level === gameState.level) || LEVELS[0];
+  const nextLevel = LEVELS.find(l => l.level === gameState.level + 1);
+
+  document.getElementById('levelIcon').textContent = levelData.icon;
+  document.getElementById('levelTitle').textContent = levelData.title;
+  document.getElementById('levelNum').textContent = gameState.level;
+
+  const currentXP = gameState.xp - levelData.xp;
+  const neededXP = nextLevel ? (nextLevel.xp - levelData.xp) : 500;
+  const pct = Math.min(100, (currentXP / neededXP) * 100);
+
+  document.getElementById('xpFill').style.width = pct + '%';
+  document.getElementById('xpCurrent').textContent = currentXP;
+  document.getElementById('xpNeeded').textContent = neededXP;
+
+  document.getElementById('correctCount').textContent = gameState.correctAnswers;
+  document.getElementById('decisionCount').textContent = gameState.decisionsCompleted;
+  document.getElementById('predictCount').textContent = gameState.predictionsCorrect;
+  document.getElementById('streakCount').textContent = gameState.streak;
+
+  const streakEl = document.getElementById('streakDisplay');
+  streakEl.classList.toggle('active', gameState.streak > 0);
+}
+
+function updateBadges() {
+  const grid = document.getElementById('badgesGrid');
+  grid.innerHTML = BADGES.map(b => {
+    const earned = gameState.badges.includes(b.id);
+    let progress = '';
+
+    // Show progress for certain badges
+    if (!earned) {
+      if (b.id === 'oracle') progress = `${gameState.predictionsCorrect}/5`;
+      if (b.id === 'decision_maker') progress = `${gameState.decisionsCompleted}/10`;
+      if (b.id === 'streak_3') progress = `${Math.min(gameState.streak, 3)}/3`;
+      if (b.id === 'streak_7') progress = `${Math.min(gameState.streak, 7)}/7`;
+      if (b.id === 'finisher') progress = `${gameState.completedModules.length}/${MODULES.length}`;
+    }
+
+    return `
+      <button class="badge-item ${earned ? 'earned' : ''}" data-tooltip="${b.name}: ${b.desc}" aria-label="${b.name}: ${b.desc}${earned ? ' (Earned)' : ''}">
+        ${b.icon}
+        ${progress && !earned ? `<span class="badge-progress">${progress}</span>` : ''}
+      </button>
+    `;
+  }).join('');
+}
+
+function renderSidebar() {
+  const list = document.getElementById('moduleList');
+  list.innerHTML = MODULES.map((mod, i) => {
+    const completed = gameState.completedModules.includes(mod.id);
+    const locked = i > 0 && !gameState.completedModules.includes(MODULES[i-1].id);
+    // Estimate ~1.5 min per slide
+    const estMins = Math.round(mod.slides.length * 1.5);
+    return `
+      <div class="module-item ${i === currentModule ? 'active' : ''} ${completed ? 'completed' : ''} ${locked ? 'locked' : ''}"
+           onclick="${locked ? '' : `goToModule(${i})`}"
+           role="button"
+           tabindex="${locked ? -1 : 0}"
+           aria-label="${mod.title}${completed ? ' (completed)' : ''}${locked ? ' (locked)' : ''}">
+        <div class="module-number">${completed ? '✓' : (locked ? '🔒' : mod.id)}</div>
+        <div class="module-info">
+          <div class="module-title">${mod.title}</div>
+          <div class="module-subtitle">${mod.subtitle}</div>
+          <div class="module-xp">+${mod.xp} XP</div>
+          <div class="module-time">⏱️ ~${estMins} min</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderSlides() {
+  const container = document.getElementById('main-content');
+  container.innerHTML = MODULES.map((mod, mi) => {
+    const progressPct = ((currentSlide + 1) / mod.slides.length) * 100;
+    return `
+    <div class="module-slides ${mi === currentModule ? 'active' : ''}" data-module="${mi}">
+      <div class="slide-progress-bar" style="width: ${mi === currentModule ? progressPct : 0}%"></div>
+      ${mod.slides.map((slide, si) => renderSlide(slide, si, mi)).join('')}
+      <div class="slide-nav">
+        <button class="nav-btn" onclick="prevSlide()" aria-label="Previous slide" ${currentSlide === 0 ? 'disabled' : ''}>←</button>
+        <div class="nav-center">
+          <div class="slide-counter">${currentSlide + 1} / ${mod.slides.length}</div>
+          <div class="progress-dots">
+            ${mod.slides.map((_, i) => `<button class="progress-dot ${i === currentSlide ? 'active' : ''}" type="button" onclick="goToSlide(${i})" aria-label="Go to slide ${i + 1}" ${i === currentSlide ? 'aria-current="true"' : ''}></button>`).join('')}
+          </div>
+        </div>
+        <button class="nav-btn" onclick="nextSlide()" aria-label="Next slide">→</button>
+      </div>
+    </div>
+  `;
+  }).join('');
+  document.getElementById('currentModule').textContent = MODULES[currentModule].title;
+  updateSlideVisibility();
+}
+
+function renderSlide(slide, index, moduleIndex) {
+  const theme = slide.theme || 'dark';
+  let html = `<div class="slide ${theme} ${index === currentSlide ? 'active' : ''}" data-slide="${index}">`;
+
+  switch(slide.type) {
+    case 'title':
+      html += `<div class="content"><h1 class="title gold animate">${slide.content.title}</h1><p class="subtitle animate delay-1">${slide.content.subtitle}</p></div>`;
+      break;
+
+    case 'objectives':
+      html += `<div class="content">
+        <div class="objectives-box animate">
+          <div class="objectives-header">
+            <div class="objectives-icon">🎯</div>
+            <div class="objectives-title">Learning Objectives</div>
+          </div>
+          <ul class="objectives-list">
+            ${slide.content.objectives.map(obj => `<li>${obj}</li>`).join('')}
+          </ul>
+        </div>
+        ${slide.content.tip ? `<p class="subtitle animate delay-1" style="font-size:0.85rem;max-width:600px">${slide.content.tip}</p>` : ''}
+      </div>`;
+      break;
+
+    case 'summary':
+      const modXP = MODULES[moduleIndex]?.xp || 0;
+      const isPerfect = checkPerfectModule(moduleIndex);
+      html += `<div class="content">
+        <div class="summary-box animate">
+          <div class="summary-icon">🎉</div>
+          <div class="summary-title">Module Complete!</div>
+          <div class="summary-stats">
+            <div class="summary-stat">
+              <div class="summary-stat-value">+${modXP}</div>
+              <div class="summary-stat-label">XP Earned</div>
+            </div>
+            <div class="summary-stat">
+              <div class="summary-stat-value">${gameState.correctAnswers}</div>
+              <div class="summary-stat-label">Total Correct</div>
+            </div>
+          </div>
+          ${isPerfect ? `<div class="perfect-bonus animate delay-1">⭐ PERFECT MODULE +${Math.round(modXP * 0.5)} XP ⭐</div>` : ''}
+          <p class="subtitle" style="margin-top:1rem;font-size:0.85rem">${slide.content.summary || '干得好！继续学习下一个模块。'}</p>
+          <button class="summary-next animate delay-2" onclick="nextSlide()">Continue to Next Module →</button>
+        </div>
+      </div>`;
+      break;
+
+    case 'story':
+      html += `<div class="content">
+        <article class="story-box ${slide.content.success ? 'success' : ''} animate" role="article" aria-label="Case study: ${slide.content.label}">
+          <div class="story-label">${slide.content.label}</div>
+          ${slide.content.title ? `<h2 class="title gold" style="font-size:1.8rem;margin-bottom:0.75rem">${slide.content.title}</h2>` : ''}
+          <p class="story-text">${slide.content.text}</p>
+          ${slide.content.followup ? `<p class="story-text" style="margin-top:0.75rem;font-style:italic;opacity:0.9">${slide.content.followup}</p>` : ''}
+        </article>
+      </div>`;
+      break;
+
+    case 'stats':
+      html += `<div class="content">
+        ${slide.content.title ? `<h2 class="title gold animate">${slide.content.title}</h2>` : ''}
+        ${slide.content.subtitle ? `<p class="subtitle animate delay-1">${slide.content.subtitle}</p>` : ''}
+        <div class="stats-grid animate delay-2">
+          ${slide.content.stats.map(s => `<div class="stat-box"><div class="stat-value gold">${s.value}</div><div class="stat-label">${s.label}</div></div>`).join('')}
+        </div>
+        ${slide.content.caption ? `<p class="subtitle animate delay-3" style="font-size:0.85rem;margin-top:0.75rem">${slide.content.caption}</p>` : ''}
+      </div>`;
+      break;
+
+    case 'refrain':
+      html += `<div class="content" style="justify-content:center;height:100%"><p class="refrain animate">"${slide.content.text}"</p></div>`;
+      break;
+
+    case 'lesson':
+      html += `<div class="content">
+        <h2 class="title ${theme === 'light' ? 'navy' : 'gold'} animate">${slide.content.title}</h2>
+        <div class="animate delay-1">
+          ${slide.content.lessons.map((l, i) => `
+            <div class="lesson-item">
+              <div class="lesson-number">${i + 1}</div>
+              <div class="lesson-content"><h4>${l.title}</h4><p>${l.desc}</p></div>
+            </div>
+          `).join('')}
+        </div>
+      </div>`;
+      break;
+
+    case 'timeline':
+      html += `<div class="content">
+        <h2 class="title gold animate">${slide.content.title}</h2>
+        <div class="timeline animate delay-1">
+          ${slide.content.items.map(item => `
+            <div class="timeline-item phase-${item.phase || ''}">
+              <div class="timeline-days">${item.days}</div>
+              <div class="timeline-content">
+                <div class="timeline-title">${item.title}</div>
+                <div class="timeline-desc">${item.desc}</div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>`;
+      break;
+
+    case 'checklist':
+      html += `<div class="content">
+        <h2 class="title gold animate">${slide.content.title}</h2>
+        <div class="checklist animate delay-1">
+          ${slide.content.items.map(item => `
+            <div class="checklist-item">
+              <div class="check-icon">✓</div>
+              <div class="checklist-text">${item}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>`;
+      break;
+
+    case 'concept':
+      html += `<div class="content">
+        <h2 class="title ${theme === 'light' ? 'navy' : 'gold'} animate">${slide.content.title}</h2>
+        ${slide.content.subtitle ? `<p class="subtitle animate delay-1">${slide.content.subtitle}</p>` : ''}
+        ${slide.content.text ? `<div class="card ${theme === 'light' ? '' : 'navy-bg'} animate delay-2"><p class="card-text">${slide.content.text}</p></div>` : ''}
+        ${slide.content.highlight ? `<div class="story-box warning animate delay-3"><div class="story-label">Key Insight</div><p class="story-text">${slide.content.highlight}</p></div>` : ''}
+        ${slide.content.checkpoints ? `
+          <div class="timeline animate delay-2" style="margin-top:0.75rem">
+            ${slide.content.checkpoints.map(cp => `
+              <div class="timeline-item"><div class="timeline-days">${cp.day}</div><div class="timeline-content"><div class="timeline-title">${cp.event}</div></div></div>
+            `).join('')}
+          </div>
+        ` : ''}
+        ${slide.content.allowed ? `
+          <div class="card green-border animate delay-2" style="margin-top:0.75rem">
+            <div class="card-label" style="color:var(--green)">✓ Allowed</div>
+            <ul style="margin-left:1.25rem;font-size:0.9rem">${slide.content.allowed.map(a => `<li>${a}</li>`).join('')}</ul>
+          </div>
+          <div class="card red-border animate delay-3">
+            <div class="card-label" style="color:var(--red)">✗ Forbidden</div>
+            <ul style="margin-left:1.25rem;font-size:0.9rem">${slide.content.forbidden.map(f => `<li>${f}</li>`).join('')}</ul>
+          </div>
+        ` : ''}
+      </div>`;
+      break;
+
+    case 'takeaway':
+      html += `<div class="content">
+        <div class="takeaway-card animate">
+          <div class="takeaway-label"><span class="takeaway-icon">💡</span>Key Takeaway</div>
+          <p class="takeaway-text">${slide.content.text}</p>
+        </div>
+      </div>`;
+      break;
+
+    case 'prediction':
+      const pid = `pred_${moduleIndex}_${index}`;
+      const answered = gameState.answeredQuestions[pid];
+      html += `<div class="content">
+        <div class="prediction-panel animate" id="${pid}_panel">
+          <div class="prediction-icon">${slide.content.icon}</div>
+          <div class="prediction-title">${slide.content.title}</div>
+          <p class="prediction-subtitle">${slide.content.subtitle}</p>
+          <div class="prediction-buttons" id="${pid}_buttons">
+            ${slide.content.options.map(opt => `
+              <button class="predict-btn ${opt.id === 'benefit' ? 'benefit' : opt.id === 'harm' ? 'harm' : 'neutral'} ${answered === opt.id ? 'selected' : ''}"
+                      onclick="makePrediction('${pid}', '${opt.id}', '${slide.content.answer}', ${slide.content.xp})"
+                      ${answered ? 'disabled' : ''}>
+                ${opt.label}<br><small>${opt.text}</small>
+              </button>
+            `).join('')}
+          </div>
+          <div class="prediction-result ${answered ? 'show' : ''} ${answered === slide.content.answer ? 'correct' : 'incorrect'}" id="${pid}_result">
+            ${answered === slide.content.answer ? '✓ 您的直觉是对的！' : answered ? '✗ 数据让您大吃一惊——很高兴知道！' : ''}
+          </div>
+        </div>
+      </div>`;
+      break;
+
+    case 'decision':
+      const did = `dec_${moduleIndex}_${index}`;
+      const decAnswered = gameState.answeredQuestions[did];
+      html += `<div class="content">
+        <div class="decision-tree animate">
+          <div class="decision-header">
+            <div class="decision-icon">${slide.content.icon}</div>
+            <div><div class="decision-title">${slide.content.title}</div></div>
+            <div class="decision-xp">+${slide.content.xp} XP</div>
+          </div>
+          <div class="decision-scenario">${slide.content.scenario}</div>
+          <div class="decision-question">${slide.content.question}</div>
+          <div class="decision-options" id="${did}_options">
+            ${slide.content.options.map((opt, oi) => `
+              <div class="decision-option ${decAnswered === opt.letter ? (opt.correct ? 'correct' : 'incorrect') : ''} ${decAnswered && opt.correct ? 'correct' : ''} ${decAnswered ? 'disabled' : ''}"
+                   onclick="makeDecision('${did}', '${opt.letter}', ${opt.correct}, ${slide.content.xp})"
+                   tabindex="${decAnswered ? -1 : 0}"
+                   role="button"
+                   aria-label="Option ${opt.letter}: ${opt.text}"
+                   onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();makeDecision('${did}', '${opt.letter}', ${opt.correct}, ${slide.content.xp});}">
+                <div class="option-letter">${opt.letter}</div>
+                <div class="option-text">${opt.text}</div>
+              </div>
+            `).join('')}
+          </div>
+          <div class="decision-feedback ${decAnswered ? 'show' : ''} ${decAnswered && slide.content.options.find(o => o.letter === decAnswered)?.correct ? 'correct' : 'incorrect'}" id="${did}_feedback">
+            <div class="feedback-title">${decAnswered && slide.content.options.find(o => o.letter === decAnswered)?.correct ? '✓ Correct!' : '✗ Not quite'}</div>
+            <div class="feedback-text">${decAnswered && slide.content.options.find(o => o.letter === decAnswered)?.correct ? slide.content.feedback.correct : slide.content.feedback.incorrect}</div>
+          </div>
+        </div>
+      </div>`;
+      break;
+
+    case 'quiz':
+      const qid = `quiz_${moduleIndex}_${index}`;
+      const qAnswered = gameState.answeredQuestions[qid];
+      html += `<div class="content">
+        <div class="quiz-container animate">
+          <p class="quiz-question">${slide.content.question}</p>
+          <div class="quiz-options" id="${qid}_options">
+            ${slide.content.options.map((opt, i) => `
+              <div class="quiz-option ${qAnswered === i ? (opt.correct ? 'correct' : 'incorrect') : ''} ${qAnswered !== undefined && opt.correct ? 'correct' : ''} ${qAnswered !== undefined ? 'disabled' : ''}"
+                   onclick="answerQuiz('${qid}', ${i}, ${opt.correct}, ${slide.content.xp || 20})">
+                ${opt.text}
+              </div>
+            `).join('')}
+          </div>
+          <div class="quiz-feedback ${qAnswered !== undefined ? 'show' : ''} ${qAnswered !== undefined && slide.content.options[qAnswered]?.correct ? 'correct' : 'incorrect'}" id="${qid}_feedback">
+            ${qAnswered !== undefined ? (slide.content.options[qAnswered]?.correct ? slide.content.feedback.correct : slide.content.feedback.incorrect) : ''}
+          </div>
+        </div>
+      </div>`;
+      break;
+  }
+
+  html += '</div>';
+  return html;
+}
+
+function updateSlideVisibility() {
+  const moduleSlides = document.querySelector(`.module-slides[data-module="${currentModule}"]`);
+  if (!moduleSlides) return;
+  moduleSlides.querySelectorAll('.slide').forEach((slide, i) => slide.classList.toggle('active', i === currentSlide));
+  const counter = moduleSlides.querySelector('.slide-counter');
+  if (counter) counter.textContent = `${currentSlide + 1} / ${MODULES[currentModule].slides.length}`;
+  moduleSlides.querySelectorAll('.progress-dot').forEach((dot, i) => dot.classList.toggle('active', i === currentSlide));
+  const prevBtn = moduleSlides.querySelector('.nav-btn:first-child');
+  if (prevBtn) prevBtn.disabled = currentSlide === 0;
+}
+
+// ===== INTERACTIONS =====
+function makePrediction(pid, choice, answer, xp) {
+  if (gameState.answeredQuestions[pid]) return;
+  gameState.answeredQuestions[pid] = choice;
+  gameState.predictionsTotal++;
+
+  const correct = choice === answer;
+  if (correct) {
+    gameState.predictionsCorrect++;
+    addXP(xp);
+    if (gameState.predictionsCorrect >= 5) awardBadge('oracle');
+  }
+  saveGame();
+  renderSlides();
+}
+
+function makeDecision(did, choice, correct, xp) {
+  if (gameState.answeredQuestions[did]) return;
+  gameState.answeredQuestions[did] = choice;
+  gameState.decisionsCompleted++;
+
+  if (correct) {
+    gameState.correctAnswers++;
+    consecutiveCorrect++;
+    addXP(xp);
+    if (gameState.correctAnswers === 1) awardBadge('first_blood');
+    if (consecutiveCorrect >= 5) awardBadge('perfect_5');
+    if (gameState.decisionsCompleted >= 10) awardBadge('decision_maker');
+  } else {
+    consecutiveCorrect = 0;
+  }
+  gameState.consecutiveCorrect = consecutiveCorrect;
+  saveGame();
+  renderSlides();
+  updateReviewButton();
+  updateComboDisplay();
+}
+
+function answerQuiz(qid, choice, correct, xp) {
+  if (gameState.answeredQuestions[qid] !== undefined) return;
+  gameState.answeredQuestions[qid] = choice;
+
+  if (correct) {
+    gameState.correctAnswers++;
+    consecutiveCorrect++;
+    addXP(xp);
+    if (gameState.correctAnswers === 1) awardBadge('first_blood');
+    if (consecutiveCorrect >= 5) awardBadge('perfect_5');
+  } else {
+    consecutiveCorrect = 0;
+  }
+  gameState.consecutiveCorrect = consecutiveCorrect;
+  saveGame();
+  renderSlides();
+  updateReviewButton();
+  updateComboDisplay();
+}
+
+// ===== NAVIGATION =====
+function goToModule(index) {
+  if (index > 0 && !gameState.completedModules.includes(MODULES[index-1].id)) return;
+  currentModule = index;
+  currentSlide = 0;
+  renderSlides();
+  renderSidebar();
+}
+
+function goToSlide(index) {
+  currentSlide = index;
+  updateSlideVisibility();
+}
+
+function nextSlide() {
+  const mod = MODULES[currentModule];
+  if (currentSlide < mod.slides.length - 1) {
+    currentSlide++;
+    updateSlideVisibility();
+  } else {
+    completeModule();
+  }
+}
+
+function prevSlide() {
+  if (currentSlide > 0) {
+    currentSlide--;
+    updateSlideVisibility();
+  }
+}
+
+function completeModule() {
+  const mod = MODULES[currentModule];
+  if (!gameState.completedModules.includes(mod.id)) {
+    gameState.completedModules.push(mod.id);
+    addXP(mod.xp);
+
+    // Check for perfect module (all questions correct)
+    if (checkPerfectModule(currentModule) && !gameState.perfectModules.includes(mod.id)) {
+      gameState.perfectModules.push(mod.id);
+      const bonusXP = Math.round(mod.xp * 0.5);
+      addXP(bonusXP);
+      showPerfectBonus(bonusXP);
+    }
+
+    // Check for module-specific badges
+    if (mod.id === 3) awardBadge('protocol_pro');
+    if (mod.id === 4) awardBadge('search_savant');
+    if (mod.id === 5) awardBadge('data_detective');
+    if (mod.id === 6) awardBadge('stats_wizard');
+    if (mod.id === 8) awardBadge('colchicine_hero');
+    if (gameState.completedModules.length === MODULES.length) {
+      awardBadge('finisher');
+      setTimeout(showCompletionModal, 500);
+    }
+
+    saveGame();
+    triggerConfetti();
+    updateCourseProgress();
+  }
+
+  if (currentModule < MODULES.length - 1) {
+    goToModule(currentModule + 1);
+  }
+}
+
+function showPerfectBonus(xp) {
+  const popup = document.getElementById('xpPopup');
+  document.getElementById('xpAmount').innerHTML = `+${xp}<br><small style="font-size:0.8rem">PERFECT!</small>`;
+  popup.classList.add('show');
+  setTimeout(() => {
+    popup.classList.remove('show');
+    document.getElementById('xpAmount').textContent = '+0';
+  }, 2000);
+}
+
+// ===== CERTIFICATE DOWNLOAD =====
+function downloadCertificate() {
+  const courseName = 'META-SPRINT：40 天获得可信证据';
+  const completionDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  const level = LEVELS[gameState.level - 1] || LEVELS[0];
+  const badgeCount = gameState.badges.length;
+  const totalXP = gameState.xp;
+
+  const certHTML = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Certificate of Completion - ${courseName}</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Source+Sans+Pro:wght@400;600&display=swap');
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Source Sans Pro', sans-serif; background: #f5f5f5; padding: 20px; }
+    .certificate {
+      max-width: 800px; margin: 0 auto; background: linear-gradient(135deg, #1E2761 0%, #141B3D 100%);
+      border: 8px solid #D4AF37; border-radius: 12px; padding: 60px 50px; text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    .cert-header { font-family: 'Cormorant Garamond', serif; color: #D4AF37; font-size: 1rem; letter-spacing: 0.3em; text-transform: uppercase; margin-bottom: 10px; }
+    .cert-title { font-family: 'Cormorant Garamond', serif; color: #FAF8F5; font-size: 3rem; font-weight: 700; margin-bottom: 30px; }
+    .cert-subtitle { color: rgba(255,255,255,0.8); font-size: 1.1rem; margin-bottom: 40px; }
+    .cert-course { font-family: 'Cormorant Garamond', serif; color: #D4AF37; font-size: 2rem; font-weight: 600; margin-bottom: 15px; padding: 20px; border-top: 1px solid rgba(212,175,55,0.3); border-bottom: 1px solid rgba(212,175,55,0.3); }
+    .cert-stats { display: flex; justify-content: center; gap: 40px; margin: 30px 0; }
+    .cert-stat { text-align: center; }
+    .cert-stat-value { font-family: 'Cormorant Garamond', serif; font-size: 2rem; color: #D4AF37; font-weight: 700; }
+    .cert-stat-label { font-size: 0.8rem; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 0.1em; }
+    .cert-date { color: rgba(255,255,255,0.7); font-size: 0.95rem; margin-top: 40px; }
+    .cert-footer { margin-top: 40px; padding-top: 30px; border-top: 1px solid rgba(212,175,55,0.2); }
+    .cert-issuer { color: rgba(255,255,255,0.5); font-size: 0.85rem; }
+    .cert-badge { display: inline-block; margin-top: 15px; padding: 8px 20px; background: rgba(212,175,55,0.2); border: 1px solid rgba(212,175,55,0.4); border-radius: 20px; color: #D4AF37; font-size: 0.9rem; }
+    @media print {
+      body { background: white; padding: 0; }
+      .certificate { box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="certificate">
+    <div class="cert-header">Synthesis Course Collection</div>
+    <div class="cert-title">Certificate of Completion</div>
+    <div class="cert-subtitle">This certifies successful completion of</div>
+    <div class="cert-course">${courseName}</div>
+    <div class="cert-stats">
+      <div class="cert-stat">
+        <div class="cert-stat-value">${totalXP.toLocaleString()}</div>
+        <div class="cert-stat-label">Total XP Earned</div>
+      </div>
+      <div class="cert-stat">
+        <div class="cert-stat-value">${badgeCount}</div>
+        <div class="cert-stat-label">Badges Earned</div>
+      </div>
+      <div class="cert-stat">
+        <div class="cert-stat-value">${level.title}</div>
+        <div class="cert-stat-label">Final Level</div>
+      </div>
+    </div>
+    <div class="cert-date">Completed on ${completionDate}</div>
+    <div class="cert-footer">
+      <div class="cert-issuer">Synthesis Course Collection — Evidence Synthesis & Meta-Analysis Training</div>
+      <div class="cert-badge">Verified Completion</div>
+    </div>
+  </div>
+  <script>window.onload = () => window.print();<\/script>
+</body>
+</html>`;
+
+  const blob = new Blob([certHTML], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'Certificate-META-SPRINT-Course.html';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// ===== KEYBOARD =====
+document.addEventListener('keydown', (e) => {
+  // Close modals with Escape
+  if (e.key === 'Escape') {
+    closeBadgeModal();
+    document.getElementById('glossaryPanel').classList.remove('open');
+    document.getElementById('completionModal').classList.remove('show');
+    document.getElementById('reviewPanel').classList.remove('show');
+    // Close mobile sidebar
+    document.querySelector('.sidebar').classList.remove('open');
+    document.getElementById('sidebarOverlay').classList.remove('show');
+    return;
+  }
+  // Keyboard support for interactive elements (check first to avoid intercepting their keys)
+  if ((e.target.classList.contains('module-item') || e.target.classList.contains('decision-option') || e.target.classList.contains('quiz-option')) && (e.key === 'Enter' || e.key === ' ')) {
+    e.preventDefault();
+    e.target.click();
+    return;
+  }
+  // Don't navigate if review panel is open
+  if (document.getElementById('reviewPanel').classList.contains('show')) return;
+  // Navigation
+  if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextSlide(); }
+  else if (e.key === 'ArrowLeft') { e.preventDefault(); prevSlide(); }
+});
+
+// ===== TOUCH/SWIPE =====
+let touchStartX = 0;
+let touchEndX = 0;
+
+document.addEventListener('touchstart', (e) => {
+  touchStartX = e.changedTouches[0].screenX;
+}, { passive: true });
+
+document.addEventListener('touchend', (e) => {
+  touchEndX = e.changedTouches[0].screenX;
+  handleSwipe();
+}, { passive: true });
+
+function handleSwipe() {
+  const swipeThreshold = 50;
+  const diff = touchStartX - touchEndX;
+  if (Math.abs(diff) < swipeThreshold) return;
+
+  if (diff > 0) {
+    // Swipe left = next; guard against swiping past last slide of completed module
+    const mod = MODULES[currentModule];
+    if (currentSlide >= mod.slides.length - 1 && gameState.completedModules.includes(mod.id)) return;
+    nextSlide();
+  } else {
+    // Swipe right = prev
+    prevSlide();
+  }
+}
+
+// ===== STREAK WARNING =====
+function checkStreakWarning() {
+  const today = new Date().toDateString();
+  const streakEl = document.getElementById('streakDisplay');
+  if (gameState.lastActive && gameState.lastActive !== today && gameState.streak > 0) {
+    // User has a streak but hasn't engaged today
+    const lastDate = new Date(gameState.lastActive);
+    const now = new Date();
+    const hoursSince = (now - lastDate) / (1000 * 60 * 60);
+    if (hoursSince > 20 && hoursSince < 48) {
+      // Streak at risk!
+      streakEl.classList.add('streak-warning');
+      streakEl.title = '今天完成一堂课，以保持您的连胜！';
+    }
+  }
+}
+
+// ===== COMPLETION MODAL =====
+function showCompletionModal() {
+  document.getElementById('finalXP').textContent = gameState.xp;
+  document.getElementById('finalCorrect').textContent = gameState.correctAnswers;
+  document.getElementById('finalBadges').textContent = gameState.badges.length;
+  document.getElementById('completionModal').classList.add('show');
+  triggerConfetti();
+  setTimeout(triggerConfetti, 500);
+  setTimeout(triggerConfetti, 1000);
+}
+
+function closeCompletionModal() {
+  document.getElementById('completionModal').classList.remove('show');
+}
+
+// ===== REVIEW MISTAKES =====
+function updateReviewButton() {
+  const mistakes = getIncorrectAnswers();
+  const btn = document.getElementById('reviewMistakesBtn');
+  if (mistakes.length > 0) {
+    btn.classList.add('show');
+    btn.textContent = `📝 Review ${mistakes.length} Mistake${mistakes.length > 1 ? 's' : ''}`;
+  } else {
+    btn.classList.remove('show');
+  }
+}
+
+function getIncorrectAnswers() {
+  const mistakes = [];
+  MODULES.forEach((mod, mi) => {
+    mod.slides.forEach((slide, si) => {
+      if (slide.type === 'decision') {
+        const did = `dec_${mi}_${si}`;
+        const answer = gameState.answeredQuestions[did];
+        if (answer) {
+          const correct = slide.content.options.find(o => o.correct);
+          const chosen = slide.content.options.find(o => o.letter === answer);
+          if (chosen && !chosen.correct) {
+            mistakes.push({
+              module: mod.title,
+              question: slide.content.question,
+              scenario: slide.content.scenario,
+              yourAnswer: chosen.text,
+              correctAnswer: correct.text,
+              explanation: slide.content.feedback.correct
+            });
+          }
+        }
+      }
+      if (slide.type === 'quiz') {
+        const qid = `quiz_${mi}_${si}`;
+        const answer = gameState.answeredQuestions[qid];
+        if (answer !== undefined) {
+          const chosen = slide.content.options[answer];
+          if (chosen && !chosen.correct) {
+            const correct = slide.content.options.find(o => o.correct);
+            mistakes.push({
+              module: mod.title,
+              question: slide.content.question,
+              scenario: null,
+              yourAnswer: chosen.text,
+              correctAnswer: correct.text,
+              explanation: slide.content.feedback.correct
+            });
+          }
+        }
+      }
+    });
+  });
+  return mistakes;
+}
+
+function showReviewPanel() {
+  const mistakes = getIncorrectAnswers();
+  const content = document.getElementById('reviewContent');
+
+  if (mistakes.length === 0) {
+    content.innerHTML = '<p style="text-align:center;opacity:0.7;padding:2rem">No mistakes to review. Great job!</p>';
+  } else {
+    content.innerHTML = mistakes.map(m => `
+      <div class="review-item">
+        <div class="review-module">${m.module}</div>
+        ${m.scenario ? `<div class="review-question" style="font-size:0.85rem;opacity:0.8;margin-bottom:0.5rem">${m.scenario}</div>` : ''}
+        <div class="review-question">${m.question}</div>
+        <div class="review-your-answer">❌ Your answer: ${m.yourAnswer}</div>
+        <div class="review-correct-answer">✓ Correct: ${m.correctAnswer}</div>
+        <div class="review-explanation">${m.explanation}</div>
+      </div>
+    `).join('');
+  }
+
+  document.getElementById('reviewPanel').classList.add('show');
+}
+
+function closeReviewPanel() {
+  document.getElementById('reviewPanel').classList.remove('show');
+}
+
+// ===== INIT =====
+renderAll();
+checkStreakWarning();
+updateReviewButton();
+</script>
+</body>
+</html>

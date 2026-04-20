@@ -1,0 +1,3321 @@
+<!DOCTYPE html>
+
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ميثاق الأدلة: كتابة ورقة التحليل التلوي</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&amp;family=Source+Sans+Pro:wght@300;400;600;700&amp;display=swap" rel="stylesheet"/>
+<style>
+    :root {
+      --navy: #1E2761;
+      --deep-navy: #141B3D;
+      --gold: #D4AF37;
+      --cream: #FAF8F5;
+      --red: #C53030;
+      --green: #22c55e;
+      --teal: #00D4AA;
+      --purple: #A855F7;
+      --orange: #F97316;
+      --blue: #3B82F6;
+      --pink: #EC4899;
+      --blood-red: #8B0000;
+      --transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      height: 100%;
+      font-family: 'Source Sans Pro', sans-serif;
+      background: var(--deep-navy);
+      color: var(--cream);
+    }
+
+    .course-container { display: flex; height: 100vh; overflow: hidden; }
+
+    .sidebar {
+      width: 280px;
+      background: linear-gradient(180deg, var(--deep-navy) 0%, #0a0f1a 100%);
+      border-left: 1px solid rgba(212,175,55,0.2);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    /* mobile sidebar handled by hamburger toggle below */
+
+    .sidebar-header { padding: 1.25rem; border-bottom: 1px solid rgba(212,175,55,0.2); }
+    .sidebar-header h1 { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; font-weight: 700; color: var(--gold); }
+    .sidebar-header p { font-size: 0.65rem; color: rgba(255,255,255,0.6); margin-top: 0.25rem; }
+
+    .module-list { flex: 1; overflow-y: auto; padding: 0.5rem 0; }
+
+    .module-item {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.45rem 0.75rem; cursor: pointer;
+      border-right: 3px solid transparent; transition: all 0.2s;
+    }
+    .module-item:hover { background: rgba(212,175,55,0.1); }
+    .module-item.active { background: rgba(212,175,55,0.15); border-right-color: var(--gold); }
+    .module-item.completed .module-number { background: var(--green); color: white; }
+
+    .module-number {
+      width: 20px; height: 20px; border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.6rem; font-weight: 700; flex-shrink: 0;
+    }
+    .module-item.active .module-number { background: var(--gold); color: var(--navy); }
+
+    .module-info { flex: 1; min-width: 0; }
+    .module-title { font-size: 0.7rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .module-subtitle { font-size: 0.55rem; color: rgba(255,255,255,0.5); }
+
+    .sidebar-footer {
+      padding: 0.6rem 0.75rem; border-top: 1px solid rgba(212,175,55,0.2);
+      font-size: 0.55rem; color: rgba(255,255,255,0.4); line-height: 1.4;
+    }
+
+    .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+    .content-header {
+      padding: 0.5rem 1rem;
+      background: rgba(0,0,0,0.3);
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .breadcrumb { font-size: 0.7rem; color: rgba(255,255,255,0.6); }
+    .breadcrumb span { color: var(--gold); }
+    .header-actions { display: flex; gap: 0.4rem; }
+
+    .btn {
+      padding: 0.3rem 0.6rem; border: 1px solid rgba(212,175,55,0.3);
+      border-radius: 6px; background: rgba(255,255,255,0.05);
+      color: var(--cream); font-size: 0.65rem; cursor: pointer; transition: all 0.2s;
+    }
+    .btn:hover { background: rgba(212,175,55,0.2); border-color: var(--gold); }
+    .btn.primary { background: var(--gold); color: var(--navy); border-color: var(--gold); font-weight: 600; }
+
+    .content-body { flex: 1; overflow: hidden; display: flex; }
+    .slides-container { flex: 1; position: relative; overflow: hidden; }
+    .module-slides { display: none; width: 100%; height: 100%; }
+    .module-slides.active { display: block; }
+
+    .slide {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      display: flex; flex-direction: column; justify-content: flex-start; align-items: center;
+      padding: 1rem 1rem 2.5rem 1rem; padding-top: 1.25rem;
+      opacity: 0; visibility: hidden;
+      transition: opacity var(--transition), visibility var(--transition);
+      overflow-y: auto; overflow-x: hidden;
+    }
+    .slide .content { margin-top: auto; margin-bottom: auto; }
+    .slide.active { opacity: 1; visibility: visible; }
+    .slide.dark { background: var(--deep-navy); }
+    .slide.black { background: #000; }
+    .slide.gradient { background: linear-gradient(135deg, var(--deep-navy) 0%, #2a1a4a 100%); }
+    .slide.blood { background: linear-gradient(135deg, #1a0a0a 0%, #2d1515 100%); }
+    .slide.hope { background: linear-gradient(135deg, #0a1a0a 0%, #152d15 100%); }
+    .slide.fraud { background: linear-gradient(135deg, #1a1a0a 0%, #2d2515 100%); }
+    .slide.blue { background: linear-gradient(135deg, #0a1a2a 0%, #152d4a 100%); }
+
+    .title { font-family: 'Cormorant Garamond', serif; font-size: clamp(1.3rem, 3vw, 2.2rem); font-weight: 700; margin-bottom: 0.5rem; line-height: 1.2; }
+    .title.gold { color: var(--gold); }
+    .title.red { color: var(--red); }
+    .title.green { color: var(--green); }
+    .title.blue { color: var(--blue); }
+
+    .subtitle { font-size: clamp(0.8rem, 1.6vw, 1rem); color: rgba(255,255,255,0.7); margin-bottom: 1rem; }
+
+    .big-number { font-family: 'Cormorant Garamond', serif; font-size: clamp(2rem, 8vw, 5rem); font-weight: 700; line-height: 1; }
+    .big-number.red { color: var(--red); }
+    .big-number.gold { color: var(--gold); }
+    .big-number.green { color: var(--green); }
+
+    .refrain {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1rem, 2.2vw, 1.5rem);
+      font-style: italic; color: var(--gold);
+      text-align: center; max-width: 650px; line-height: 1.4;
+    }
+    .refrain.warning { color: var(--red); border-right: 4px solid var(--red); padding-right: 1rem; text-align: right; }
+    .refrain.hope { color: var(--green); }
+
+    .rhetorical {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(0.95rem, 2vw, 1.4rem);
+      color: rgba(255,255,255,0.9);
+      text-align: center; max-width: 580px; line-height: 1.5;
+    }
+    .rhetorical em { color: var(--gold); font-style: normal; }
+
+    .simple-box {
+      background: linear-gradient(135deg, rgba(0,212,170,0.1), rgba(0,0,0,0.2));
+      border: 2px solid var(--teal); border-radius: 10px;
+      padding: 0.9rem; max-width: 500px; margin: 0.5rem 0;
+    }
+    .simple-box .simple-title { color: var(--teal); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; margin-bottom: 0.35rem; }
+    .simple-box .simple-text { font-size: 0.85rem; line-height: 1.5; }
+    .simple-box .simple-text strong { color: var(--gold); }
+
+    .story-card {
+      background: rgba(0,0,0,0.3); border-right: 4px solid var(--gold);
+      padding: 0.9rem 1.1rem; max-width: 580px; margin: 0.5rem 0;
+    }
+    .story-card .place { font-size: 0.6rem; color: var(--gold); letter-spacing: 0.1em; margin-bottom: 0.3rem; }
+    .story-card .narrative { font-family: 'Cormorant Garamond', serif; font-size: 0.9rem; line-height: 1.5; color: rgba(255,255,255,0.9); }
+    .story-card .source { font-size: 0.55rem; color: rgba(255,255,255,0.5); margin-top: 0.5rem; font-style: italic; }
+    .story-card.red { border-right-color: var(--red); }
+    .story-card.red .place { color: var(--red); }
+
+    /* DECISION TREES */
+    .decision-tree {
+      background: rgba(0,0,0,0.4); border: 2px solid var(--gold);
+      border-radius: 12px; padding: 0.9rem; max-width: 620px; width: 100%;
+    }
+    .decision-tree h4 { color: var(--gold); font-family: 'Cormorant Garamond', serif; font-size: 0.85rem; margin-bottom: 0.6rem; text-align: center; }
+
+    .tree-row { display: flex; justify-content: center; gap: 0.35rem; margin: 0.25rem 0; flex-wrap: wrap; }
+    .tree-node {
+      background: var(--navy); border: 2px solid var(--gold);
+      border-radius: 6px; padding: 0.35rem 0.5rem;
+      text-align: center; min-width: 65px; font-size: 0.65rem;
+    }
+    .tree-node.root { background: var(--gold); color: var(--navy); font-weight: 700; }
+    .tree-node.question { background: var(--purple); color: white; border-color: var(--purple); }
+    .tree-node.positive { background: rgba(197,48,48,0.3); border-color: var(--red); }
+    .tree-node.negative { background: rgba(34,197,94,0.3); border-color: var(--green); }
+    .tree-node.action { background: var(--teal); color: var(--navy); border-color: var(--teal); }
+    .tree-node.warning { background: var(--orange); color: white; border-color: var(--orange); }
+    .tree-node.yes { background: var(--green); color: white; border-color: var(--green); }
+    .tree-node.no { background: var(--red); color: white; border-color: var(--red); }
+    .tree-node.blue { background: var(--blue); color: white; border-color: var(--blue); }
+    .tree-node small { display: block; font-size: 0.5rem; opacity: 0.85; margin-top: 0.1rem; }
+
+    .tree-arrow { color: var(--gold); font-size: 0.9rem; text-align: center; margin: 0.1rem 0; }
+    .tree-branch { display: flex; gap: 1.2rem; justify-content: center; margin-top: 0.2rem; flex-wrap: wrap; }
+    .tree-branch-item { display: flex; flex-direction: column; align-items: center; }
+    .tree-label { font-size: 0.5rem; color: rgba(255,255,255,0.6); margin: 0.1rem 0; }
+
+    /* PRISMA Flow Diagram */
+    .prisma-flow {
+      background: rgba(0,0,0,0.4); border: 2px solid var(--blue);
+      border-radius: 12px; padding: 0.9rem; max-width: 600px; width: 100%;
+    }
+    .prisma-flow h4 { color: var(--blue); text-align: center; margin-bottom: 0.6rem; font-family: 'Cormorant Garamond', serif; font-size: 0.85rem; }
+    .prisma-box {
+      background: var(--navy); border: 2px solid var(--blue);
+      border-radius: 6px; padding: 0.4rem 0.6rem; margin: 0.25rem auto;
+      text-align: center; max-width: 280px; font-size: 0.65rem;
+    }
+    .prisma-box.id { border-color: var(--gold); }
+    .prisma-box.screen { border-color: var(--purple); }
+    .prisma-box.eligible { border-color: var(--orange); }
+    .prisma-box.included { border-color: var(--green); background: rgba(34,197,94,0.2); }
+    .prisma-box .label { font-size: 0.5rem; color: rgba(255,255,255,0.5); }
+    .prisma-box .number { font-size: 0.9rem; font-weight: 700; color: var(--gold); }
+    .prisma-exclude { font-size: 0.55rem; color: rgba(255,255,255,0.6); margin: 0.15rem 0; }
+
+    /* Checklist */
+    .checklist {
+      background: rgba(0,0,0,0.3); border: 2px solid var(--purple);
+      border-radius: 10px; padding: 0.9rem; max-width: 550px; width: 100%;
+    }
+    .checklist h4 { color: var(--purple); font-size: 0.8rem; margin-bottom: 0.6rem; }
+    .checklist-item { display: flex; align-items: flex-start; gap: 0.5rem; margin: 0.35rem 0; font-size: 0.75rem; }
+    .checklist-item .check { color: var(--green); font-weight: 700; }
+    .checklist-item .number { color: var(--gold); font-weight: 700; min-width: 20px; }
+
+    .stats-grid { display: flex; gap: 0.5rem; margin: 0.6rem 0; flex-wrap: wrap; justify-content: center; }
+    .stat-box { background: var(--navy); padding: 0.5rem 0.7rem; text-align: center; min-width: 80px; border-radius: 8px; }
+    .stat-value { font-family: 'Cormorant Garamond', serif; font-size: clamp(1rem, 2vw, 1.3rem); font-weight: 700; }
+    .stat-label { font-size: 0.55rem; opacity: 0.8; margin-top: 0.1rem; }
+
+    .lesson-item { display: flex; align-items: flex-start; gap: 0.5rem; margin: 0.35rem 0; max-width: 600px; text-align: right; }
+    .lesson-number {
+      background: var(--gold); color: var(--navy);
+      width: 22px; height: 22px; display: flex; align-items: center; justify-content: center;
+      font-weight: 700; flex-shrink: 0; border-radius: 4px; font-size: 0.65rem;
+    }
+    .lesson-content h4 { font-size: 0.8rem; font-weight: 700; color: var(--cream); margin-bottom: 0.05rem; }
+    .lesson-content p { font-size: 0.7rem; color: rgba(255,255,255,0.7); }
+
+    .formula-box {
+      background: rgba(0,0,0,0.4); border: 1px solid var(--purple);
+      border-radius: 8px; padding: 0.5rem 0.9rem;
+      font-family: 'Cormorant Garamond', serif; font-size: 0.95rem;
+      text-align: center; max-width: 400px; margin: 0.5rem 0;
+    }
+    .formula-box .formula { color: var(--gold); margin: 0.25rem 0; }
+    .formula-box .label { font-size: 0.65rem; color: rgba(255,255,255,0.6); font-family: 'Source Sans Pro', sans-serif; }
+
+    .gold-line { width: 80px; height: 2px; background: var(--gold); margin: 0.6rem auto; }
+
+    .content { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 800px; }
+
+    .slide.active .animate { animation: fadeUp 0.5s ease-out forwards; }
+    .slide.active .animate.delay-1 { animation-delay: 0.1s; }
+    .slide.active .animate.delay-2 { animation-delay: 0.2s; }
+    .slide.active .animate.delay-3 { animation-delay: 0.3s; }
+    .slide.active .animate.delay-4 { animation-delay: 0.4s; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .animate { opacity: 0; }
+
+    .slide-nav {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      display: flex; justify-content: space-between; align-items: flex-end;
+      padding: 0.5rem 0.6rem 0.6rem 0.6rem; z-index: 100; pointer-events: none;
+    }
+    .nav-btn {
+      background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2);
+      color: white; font-size: 0.9rem; cursor: pointer; opacity: 0.6;
+      padding: 0.3rem 0.45rem; border-radius: 6px; pointer-events: auto; transition: all 0.2s;
+    }
+    .nav-btn:hover { opacity: 1; border-color: var(--gold); }
+    .nav-center { display: flex; flex-direction: column; align-items: center; gap: 0.1rem; pointer-events: auto; }
+    .slide-counter { color: rgba(255,255,255,0.6); font-size: 0.65rem; }
+    .progress { display: flex; gap: 2px; flex-wrap: wrap; justify-content: center; max-width: 140px; }
+    .progress-dot { width: 4px; height: 4px; border-radius: 50%; background: rgba(255,255,255,0.25); cursor: pointer; }
+    .progress-dot.active { background: var(--gold); transform: scale(1.2); }
+
+    .quiz-container { background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); padding: 0.9rem; max-width: 580px; width: 100%; border-radius: 8px; }
+    .quiz-question { font-family: 'Cormorant Garamond', serif; font-size: 0.95rem; margin-bottom: 0.5rem; color: var(--gold); line-height: 1.4; }
+    .quiz-options { display: flex; flex-direction: column; gap: 0.3rem; }
+    .quiz-option { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); padding: 0.45rem 0.7rem; cursor: pointer; border-radius: 6px; font-size: 0.75rem; text-align: right; }
+    .quiz-option:hover { background: rgba(212,175,55,0.1); border-color: var(--gold); }
+    .quiz-option.correct { background: rgba(34,197,94,0.2); border-color: var(--green); }
+    .quiz-option.incorrect { background: rgba(197,48,48,0.2); border-color: var(--red); }
+    .quiz-feedback { margin-top: 0.5rem; padding: 0.5rem; border-radius: 6px; display: none; font-size: 0.75rem; }
+    .quiz-feedback.show { display: block; }
+    .quiz-feedback.correct { background: rgba(34,197,94,0.2); border: 1px solid var(--green); }
+    .quiz-feedback.incorrect { background: rgba(197,48,48,0.2); border: 1px solid var(--red); }
+
+    .references { background: rgba(0,0,0,0.3); border: 1px solid rgba(212,175,55,0.3); border-radius: 8px; padding: 0.9rem; max-width: 580px; text-align: right; font-size: 0.6rem; line-height: 1.5; }
+    .references h4 { color: var(--gold); font-size: 0.75rem; margin-bottom: 0.5rem; }
+    .references ol { padding-right: 1rem; }
+    .references li { margin-bottom: 0.25rem; color: rgba(255,255,255,0.8); }
+
+    .text-center { text-align: center; }
+
+    /* Timeline */
+    .timeline { max-width: 550px; width: 100%; }
+    .timeline-item { display: flex; gap: 0.6rem; margin: 0.4rem 0; }
+    .timeline-marker { width: 24px; height: 24px; border-radius: 50%; background: var(--gold); display: flex; align-items: center; justify-content: center; font-size: 0.6rem; font-weight: 700; color: var(--navy); flex-shrink: 0; }
+    .timeline-content { flex: 1; }
+    .timeline-content h5 { font-size: 0.75rem; color: var(--gold); }
+    .timeline-content p { font-size: 0.65rem; color: rgba(255,255,255,0.7); }
+    .mobile-menu-toggle{display:none;position:fixed;top:12px;right: 12px;z-index:1001;background:#1E2761;border:1px solid #D4AF37;color:#D4AF37;width:40px;height:40px;border-radius:8px;font-size:1.2rem;cursor:pointer;align-items:center;justify-content:center;}
+    @media(max-width:768px){.mobile-menu-toggle{display:flex;}.sidebar{transform:translateX(100%);transition:transform 0.3s ease;position:fixed;z-index:1000;height:100vh;}.sidebar.open{transform:translateX(0);}.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:999;}.sidebar-overlay.show{display:block;}}
+    .skip-link{position:absolute;top:-40px;left:0;background:#D4AF37;color:#1E2761;padding:8px 16px;z-index:100;transition:top 0.3s;font-family:'Source Sans Pro',sans-serif;text-decoration:none;font-weight:600;}.skip-link:focus{top:0;}
+
+    /* Focus-visible styles for keyboard navigation */
+    :focus-visible {
+      outline: 2px solid var(--gold, #D4AF37);
+      outline-offset: 2px;
+    }
+
+    :focus:not(:focus-visible) {
+      outline: none;
+    }
+
+    button:focus-visible,
+    a:focus-visible,
+    [role="button"]:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible {
+      outline: 2px solid var(--gold, #D4AF37);
+      outline-offset: 2px;
+      box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.3);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+
+    /* Story Box - Real-world cases with lessons */
+    .story-box {
+      background: linear-gradient(135deg, rgba(30,39,97,0.9) 0%, rgba(20,27,61,0.95) 100%);
+      border: 2px solid var(--gold);
+      border-radius: 12px;
+      padding: 1.1rem 1.3rem;
+      max-width: 600px;
+      margin: 0.6rem 0;
+      position: relative;
+      box-shadow: 0 4px 20px rgba(212,175,55,0.15);
+    }
+    .story-box::before {
+      content: "REAL CASE";
+      position: absolute;
+      top: -10px;
+      left: 20px;
+      background: var(--gold);
+      color: var(--navy);
+      font-size: 0.55rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      padding: 2px 10px;
+      border-radius: 3px;
+    }
+    .story-box .story-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--cream);
+      margin-bottom: 0.4rem;
+      margin-top: 0.3rem;
+    }
+    .story-box .story-period {
+      font-size: 0.6rem;
+      color: var(--gold);
+      letter-spacing: 0.08em;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+    .story-box .story-narrative {
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: rgba(255,255,255,0.9);
+      margin-bottom: 0.6rem;
+    }
+    .story-box .story-narrative strong {
+      color: var(--cream);
+    }
+    .story-box .story-lesson {
+      background: rgba(212,175,55,0.15);
+      border-right: 3px solid var(--gold);
+      padding: 0.5rem 0.8rem;
+      margin-top: 0.6rem;
+      border-radius: 0 6px 6px 0;
+    }
+    .story-box .story-lesson .lesson-label {
+      font-size: 0.55rem;
+      color: var(--gold);
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.2rem;
+    }
+    .story-box .story-lesson .lesson-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.85rem;
+      font-style: italic;
+      color: var(--gold);
+      line-height: 1.4;
+    }
+
+    /* Story-box enhanced pattern: opener + real-data + decision-paths + revelation */
+    .story-box .story-opener {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.05rem;
+      font-style: italic;
+      color: rgba(255,255,255,0.9);
+      margin-bottom: 0.7rem;
+      text-align: center;
+    }
+    .story-box .real-data-box {
+      background: rgba(0,0,0,0.35);
+      border-right: 3px solid var(--teal);
+      padding: 0.6rem 0.8rem;
+      margin: 0.5rem 0;
+      border-radius: 0 6px 6px 0;
+    }
+    .story-box .real-data-box h4 {
+      font-size: 0.55rem;
+      color: var(--teal);
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.25rem;
+    }
+    .story-box .real-data-box p {
+      font-size: 0.78rem;
+      line-height: 1.5;
+      color: rgba(255,255,255,0.85);
+    }
+    .data-highlight {
+      color: var(--gold);
+      font-weight: 700;
+    }
+    .story-box .decision-tree .decision-tree-header {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--gold);
+      text-align: center;
+      margin-bottom: 0.4rem;
+    }
+    .story-box .decision-tree .decision-scenario {
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.8);
+      text-align: center;
+      margin-bottom: 0.5rem;
+      line-height: 1.4;
+    }
+    .decision-paths {
+      display: flex;
+      gap: 0.6rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .decision-path {
+      flex: 1;
+      min-width: 200px;
+      max-width: 260px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 8px;
+      padding: 0.6rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      border: 2px solid transparent;
+      text-align: center;
+    }
+    .decision-path:hover, .decision-path:focus {
+      transform: translateY(-2px);
+      outline: none;
+    }
+    .decision-path.path-a {
+      border-color: var(--red);
+    }
+    .decision-path.path-a:hover, .decision-path.path-a:focus {
+      background: rgba(197,48,48,0.15);
+      box-shadow: 0 2px 12px rgba(197,48,48,0.3);
+    }
+    .decision-path.path-b {
+      border-color: var(--green);
+    }
+    .decision-path.path-b:hover, .decision-path.path-b:focus {
+      background: rgba(34,197,94,0.15);
+      box-shadow: 0 2px 12px rgba(34,197,94,0.3);
+    }
+    .path-label {
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.3rem;
+    }
+    .path-a .path-label { color: var(--red); }
+    .path-b .path-label { color: var(--green); }
+    .path-choice {
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.9);
+      margin-bottom: 0.2rem;
+      line-height: 1.4;
+    }
+    .path-arrow {
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.5);
+      margin: 0.15rem 0;
+    }
+    .path-consequence {
+      font-size: 0.65rem;
+      color: rgba(255,255,255,0.7);
+      line-height: 1.4;
+      margin-bottom: 0.3rem;
+    }
+    .path-outcome {
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      display: inline-block;
+    }
+    .path-a .path-outcome {
+      background: rgba(197,48,48,0.3);
+      color: var(--red);
+    }
+    .path-b .path-outcome {
+      background: rgba(34,197,94,0.3);
+      color: var(--green);
+    }
+    .story-revelation {
+      background: rgba(212,175,55,0.12);
+      border: 1px solid rgba(212,175,55,0.3);
+      border-radius: 6px;
+      padding: 0.5rem 0.8rem;
+      margin-top: 0.6rem;
+      text-align: center;
+    }
+    .revelation-label {
+      font-size: 0.5rem;
+      color: var(--gold);
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      margin-bottom: 0.2rem;
+    }
+    .revelation-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.82rem;
+      font-style: italic;
+      color: var(--gold);
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+<a class="skip-link" href="#main-content">انتقل إلى المحتوى الرئيسي</a>
+<button aria-expanded="false" aria-label="Toggle navigation menu" class="mobile-menu-toggle" onclick="toggleSidebar()">☰</button>
+<div class="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show');"></div>
+<div class="course-container">
+<nav aria-label="الملاحة بالطبع" class="sidebar" role="navigation">
+<div class="sidebar-header">
+<a href="index-ar.html" onmouseout="this.style.color='rgba(212,175,55,0.7)'" onmouseover="this.style.color='#D4AF37'" style="display:block;font-size:0.7rem;color:rgba(212,175,55,0.7);text-decoration:none;margin-bottom:0.5rem;">← مكتبة الدورة</a>
+<h1>ميثاق الأدلة</h1>
+<p>كتابة ورقة التحليل التلوي</p>
+</div>
+<div class="module-list" id="moduleList"></div>
+<div class="sidebar-footer">
+        "اكتب حتى يتم العثور على الحقيقة،<br/>
+        فيجدها أيضًا الذين يتبعون."
+      </div>
+</nav>
+<main class="main-content" id="main-content">
+<header class="content-header">
+<div class="breadcrumb">الكتابة &gt; <span id="currentModule">البيانات المخفية</span></div>
+<div class="header-actions">
+<button class="btn" onclick="goToModule(20)">مراجع</button>
+<button class="btn primary" onclick="nextSlide()">يكمل</button>
+</div>
+</header>
+<div class="content-body">
+<div class="slides-container">
+ ==================== الوحدة 1: البيانات المخفية ==================== 
+<div class="module-slides active" data-module="1">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  ألم تسمع عن التجارب التي كانت مخفية،<br/>
+                  البيانات التي تم دفنها،<br/>
+                  الأوراق التي قالت <em>نصف الحقيقة فقط</em>?
+                </div>
+</div>
+</div>
+<div class="slide blood">
+<div class="content text-center">
+<div class="title red animate">فضيحة التاميفلو</div>
+<div class="story-card red animate delay-1">
+<div class="place">تعاون كوكرين، 2009-2014</div>
+<div class="narrative">
+                    قامت الحكومات بتخزين عقار تاميفلو بقيمة 9 مليارات دولار لمكافحة جائحة الأنفلونزا.
+                    <br/><br/>
+                    ولكن عندما حاول باحثو كوكرين التحقق من فوائد الدواء، وجدوا ذلك <strong>60% من بيانات التجارب لم يتم نشرها قط</strong>.
+                    <br/><br/>
+                    وبعد معركة استمرت 5 سنوات، حصلوا على البيانات المخفية. لقد تغير الاستنتاج: <strong>تاميفلو أدى إلى تقصير الأعراض بأقل من يوم واحد</strong>
+                    ولم يمنع المضاعفات.
+                    <br/><br/>
+                    تم إنفاق 9 مليارات دولار على أدلة لم يتم الكشف عنها بالكامل.
+                  </div>
+<div class="source">جيفرسون تي وآخرون. كوكرين قاعدة بيانات نظام القس. 2014؛4:CD008965</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">لماذا نكتب التحليلات التلوية</div>
+<div class="decision-tree animate delay-1">
+<h4>الغرض من التوليف</h4>
+<div class="tree-row"><div class="tree-node root">الدراسات الفردية</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">مشكلة؟</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node warning">عينات صغيرة<small>طاقة منخفضة</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node warning">نتائج متضاربة<small>ما الذي يجب تصديقه؟</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node warning">تحيز النشر<small>السلبيات المفقودة</small></div>
+</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node action">التحليل التلوي<small>التوليف المنهجي</small></div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node yes">تقدير أكثر دقة + كشف التحيز</div></div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<div class="story-title">حملة الشفافية للتاميفلو</div>
+<div class="story-period">2009-2014 | تعاون كوكرين مقابل شركة روش</div>
+<div class="story-narrative">
+                    لسنوات، قامت الحكومات في جميع أنحاء العالم بتخزين عقار تاميفلو (أوسيلتاميفير) بتكلفة قدرها 100000 دولار أمريكي <strong>مليارات الدولارات</strong>، بناءً على ادعاءات الشركة المصنعة بأنها تمنع مضاعفات الأنفلونزا والاستشفاء.
+                    <br/><br/>
+                    عندما طلب مراجعو كوكرين بيانات التجربة الكاملة للتحقق من هذه الادعاءات، <strong>رفضت روش لمدة 5 سنوات</strong>نقلا عن "السرية". وقد أجرت الشركة 10 تجارب علاجية، لكن تم نشر اثنتين فقط منها بالكامل.
+                    <br/><br/>
+                    وبعد ضغوط لا هوادة فيها، صدرت أخيرا تقارير الدراسات السريرية في عام 2014. وتغيرت الصورة بشكل كبير: <strong>أدى تاميفلو إلى تقصير الأعراض بأقل من يوم ولم يظهر أي دليل على منع دخول المستشفى أو حدوث مضاعفات خطيرة.</strong>
+</div>
+<div class="story-lesson">
+<div class="lesson-label">الدرس</div>
+<div class="lesson-text">إن جودة التحليل التلوي تكون جيدة بقدر جودة البيانات التي يمكنه الوصول إليها. يمكن للتجارب الخفية أن تجعل العلاجات غير الفعالة تبدو فعالة، وتكلف المليارات من الموارد المهدرة.</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  "وعلمت الشركة،<br/>
+                  وكان المنظمون يعرفون،<br/>
+                  لكن الأوراق المنشورة لم تخبرنا –<br/>
+                  وأنفقت المليارات على نصف الحقيقة."
+                </div>
+<div class="gold-line animate delay-2"></div>
+<p class="animate delay-3" style="color:rgba(255,255,255,0.6);font-style:italic;font-size:0.8rem;">
+                  ولهذا السبب نكتب التحليلات الوصفية للعثور على الحقيقة كاملة.
+                </p>
+</div>
+</div>
+</div>
+ ==================== الوحدة 2: العهد (PRISMA) ================ 
+<div class="module-slides" data-module="2">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  إذا كنت ترغب في أن يكون عملك <em>موثوق</em>,<br/>
+                  يجب عليك الدخول في عهد مع القراء.
+                  <br/><br/>
+                  وهذا العهد له اسم:<br/>
+<em>بريسما</em>.
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">بريسما 2020</div>
+<div class="subtitle animate delay-1">عناصر التقارير المفضلة للمراجعات المنهجية والتحليلات الوصفية</div>
+<div class="stats-grid animate delay-2">
+<div class="stat-box" style="background:var(--blue);">
+<div class="stat-value" style="color:white;">27</div>
+<div class="stat-label">عناصر قائمة المراجعة</div>
+</div>
+<div class="stat-box" style="background:var(--purple);">
+<div class="stat-value" style="color:white;">2020</div>
+<div class="stat-label">نسخة محدثة</div>
+</div>
+<div class="stat-box" style="background:var(--green);">
+<div class="stat-value" style="color:white;">50K+</div>
+<div class="stat-label">الاستشهادات</div>
+</div>
+</div>
+<div class="simple-box animate delay-3">
+<div class="simple-title">العهد</div>
+<div class="simple-text">
+                    PRISMA ليست بيروقراطية. إنه أ <strong>وعد لقرائك</strong>
+                    أنك قمت بالعمل بشفافية وبشكل كامل.
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">الأقسام السبعة</div>
+<div class="timeline animate delay-1">
+<div class="timeline-item">
+<div class="timeline-marker">1</div>
+<div class="timeline-content">
+<h5>عنوان</h5>
+<p>حدد كمراجعة منهجية، أو تحليل تلوي، أو كليهما</p>
+</div>
+</div>
+<div class="timeline-item">
+<div class="timeline-marker">2</div>
+<div class="timeline-content">
+<h5>خلاصة</h5>
+<p>ملخص منظم للمراجعة بأكملها</p>
+</div>
+</div>
+<div class="timeline-item">
+<div class="timeline-marker">3</div>
+<div class="timeline-content">
+<h5>مقدمة</h5>
+<p>الأساس المنطقي والأهداف مع PICO</p>
+</div>
+</div>
+<div class="timeline-item">
+<div class="timeline-marker">4</div>
+<div class="timeline-content">
+<h5>طُرق</h5>
+<p>البروتوكول، البحث، الاختيار، البيانات، التحيز، التوليف</p>
+</div>
+</div>
+<div class="timeline-item">
+<div class="timeline-marker">5</div>
+<div class="timeline-content">
+<h5>نتائج</h5>
+<p>مخطط التدفق، الخصائص، خطر التحيز، نتائج التوليف</p>
+</div>
+</div>
+<div class="timeline-item">
+<div class="timeline-marker">6</div>
+<div class="timeline-content">
+<h5>مناقشة</h5>
+<p>ملخص، القيود، التفسير، الآثار</p>
+</div>
+</div>
+<div class="timeline-item">
+<div class="timeline-marker">7</div>
+<div class="timeline-content">
+<h5>آخر</h5>
+<p>التسجيل والتمويل وتضارب المصالح</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<div class="story-title">ثورة بريسما</div>
+<div class="story-period">2009 إلى الوقت الحاضر | تحويل تقارير المراجعة المنهجية</div>
+<div class="story-narrative">
+                    قبل PRISMA (2009)، كانت تقارير المراجعة المنهجية فوضوية. لم تبلغ بعض المراجعات عن استراتيجيات البحث الخاصة بها على الإطلاق. وأغفل آخرون خطر تقييمات التحيز. فشل الكثيرون في تفسير سبب استبعاد الدراسات. <strong>القراء لا يستطيعون الحكم على الجودة</strong>- كان عليهم أن يثقوا بشكل أعمى.
+                    <br/><br/>
+                    لقد غيرت قائمة PRISMA المكونة من 27 عنصرًا كل شيء. لقد تطلب الأمر من المؤلفين توثيق كل خطوة: استراتيجية البحث الكاملة، ومعايير الاختيار، وطرق الاستخراج، وقرارات التوليف.
+                    <br/><br/>
+                    اليوم، <strong>أكثر من 10.000 مجلة تؤيد PRISMA</strong>. وما كان ذات يوم شفافية استثنائية أصبح المعيار المتوقع.
+                  </div>
+<div class="story-lesson">
+<div class="lesson-label">الدرس</div>
+<div class="lesson-text">قائمة مرجعية بسيطة حولت مجالًا بأكمله. لقد انتقلت عملية إعداد التقارير الشفافة من الاستثناء إلى القاعدة، وهذا دليل على أهمية المعايير.</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  "PRISMA هو العهد بين المؤلف والقارئ:<br/>
+                  سأريكم كل شيء -<br/>
+                  كيف بحثت، ماذا وجدت، ما الذي استبعدته، لماذا.<br/>
+                  لذلك يمكنك الحكم على عملي والثقة في استنتاجاتي أو التشكيك فيها".
+                </div>
+</div>
+</div>
+</div>
+ وحدة 3: البروتوكول 
+<div class="module-slides" data-module="3">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  هل لم تشاهد المراجع<br/>
+                  الذي غير النتيجة بعد رؤية البيانات،<br/>
+                  الذي حرك قوائم المرمى حتى النتائج <em>بدا صحيحا</em>?
+                </div>
+</div>
+</div>
+<div class="slide fraud">
+<div class="content text-center">
+<div class="title gold animate">التحليلات التلوية المنسحبة</div>
+<div class="story-card red animate delay-1">
+<div class="place">مجلات متعددة، 2010-2023</div>
+<div class="narrative">
+                    وجد الباحثون ذلك <strong>العديد من التحليلات التلوية تراجعت</strong> لم يكن لديه بروتوكول مسجل مسبقا.
+                    <br/><br/>
+                    بدون بروتوكول، يمكن للمراجعين:<br/>
+                    • تغيير معايير الاشتمال بعد رؤية النتائج<br/>
+                    • تبديل النتائج الأولية لإظهار الأهمية<br/>
+                    • إضافة أو إزالة الدراسات لتغيير الاستنتاج<br/>
+<br/><br/>
+                    البروتوكول هو الخاص بك <strong>جهاز ما قبل الالتزام</strong>- يمنعك من خداع نفسك.
+                  </div>
+<div class="source">تبديل النتائج المحددة: تسجيل PROSPERO يمنع التحيز</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">شجرة قرار تسجيل البروتوكول</div>
+<div class="decision-tree animate delay-1">
+<h4>مكان تسجيل البروتوكول الخاص بك</h4>
+<div class="tree-row"><div class="tree-node root">مراجعة منهجية جديدة</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">نوع المراجعة؟</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">الصحة/الطبية</div>
+<div class="tree-node action">بروسبيرو<small>prospero.york.ac.uk</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">أي مجال</div>
+<div class="tree-node action">OSF<small>osf.io/registries</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">كوكرين</div>
+<div class="tree-node action">مكتبة كوكرين<small>بروتوكول متكامل</small></div>
+</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node yes">معرف التسجيل في الورق<small>استشهد في الأساليب</small></div></div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">ما يجب أن يحتوي عليه البروتوكول</div>
+<div class="checklist animate delay-1">
+<h4>عناصر البروتوكول الأساسية</h4>
+<div class="checklist-item"><span class="number">1.</span> سؤال البحث (تنسيق PICO)</div>
+<div class="checklist-item"><span class="number">2.</span> معايير الأهلية (الإدراج/الاستبعاد)</div>
+<div class="checklist-item"><span class="number">3.</span> مصادر المعلومات واستراتيجية البحث</div>
+<div class="checklist-item"><span class="number">4.</span> عملية اختيار الدراسة</div>
+<div class="checklist-item"><span class="number">5.</span> عناصر استخراج البيانات</div>
+<div class="checklist-item"><span class="number">6.</span> خطر أداة تقييم التحيز</div>
+<div class="checklist-item"><span class="number">7.</span> النتائج الأولية والثانوية</div>
+<div class="checklist-item"><span class="number">8.</span> طرق التوليف (خطة التحليل التلوي)</div>
+<div class="checklist-item"><span class="number">9.</span> تحليلات المجموعة الفرعية والحساسية</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  "اكتب البروتوكول قبل أن ترى البيانات.<br/>
+                  قم بتأمينه في سجل عام.<br/>
+                  ثم اتبعه - أو اشرح سبب انحرافك.<br/>
+                  هذه هي الطريقة التي تثبت بها أنك لم تغش."
+                </div>
+</div>
+</div>
+</div>
+ وحدة 4: العنوان 
+<div class="module-slides" data-module="4">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  العنوان هو الوعد الأول الذي تقوم به.
+                  <br/><br/>
+                  ويجب أن يخبر القارئ:<br/>
+<em>ماذا درست وكيف درسته وما هو نوع الدراسة.</em>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">تشريح العنوان</div>
+<div class="decision-tree animate delay-1">
+<h4>متطلبات عنوان PRISMA</h4>
+<div class="tree-row"><div class="tree-node root">يجب أن يتضمن العنوان</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node action">سكان<small>الذي تمت دراسته</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node action">تدخل<small>ماذا تم</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node action">حصيلة<small>ما تم قياسه</small></div>
+</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node blue">+ "المراجعة المنهجية" أو "التحليل التلوي"</div></div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">العناوين الجيدة مقابل العناوين السيئة</div>
+<div class="story-card red animate delay-1">
+<div class="place">❌ عنوان سيئ</div>
+<div class="narrative">
+                    "مراجعة لعلاج مرض السكري"
+                    <br/><br/>
+<em>المشكلات: لم يتم تحديد عدد السكان، ولا يوجد تدخل، ولا نتيجة، ولا يشير إلى مراجعة منهجية</em>
+</div>
+</div>
+<div class="story-card animate delay-2">
+<div class="place">✓ عنوان جيد</div>
+<div class="narrative">
+                    "فعالية مثبطات SGLT2 على وفيات القلب والأوعية الدموية لدى البالغين المصابين بداء السكري من النوع 2: مراجعة منهجية وتحليل تلوي"
+                    <br/><br/>
+<em>السكان والتدخل والنتيجة ونوع الدراسة كلها واضحة</em>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  "العنوان هو كلمتك الأولى للقارئ.<br/>
+                  اجعلها كاملة. اجعلها صادقة.<br/>
+                  أخبرهم بالضبط بما سيجدونه
+                </div>
+</div>
+</div>
+</div>
+ وحدة 5: الملخص 
+<div class="module-slides" data-module="5">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  سيقرأ معظم القراء الملخص الخاص بك فقط.
+                  <br/><br/>
+                  إذا كان الملخص يكذب أو يحذف أو يضلل -<br/>
+<em>فلن يعرف معظم القراء أبدًا.</em>
+</div>
+</div>
+</div>
+<div class="slide blood">
+<div class="content text-center">
+<div class="title red animate">مشكلة الدوران</div>
+<div class="story-card red animate delay-1">
+<div class="place">بوترون وآخرون، 2010</div>
+<div class="narrative">
+                    قام الباحثون بتحليل 72 تجربة معشاة ذات شواهد مع نتائج أولية غير مهمة.
+                    <br/><br/>
+                    لقد وجدوا ذلك <strong>احتوت 40% من الملخصات على "تدور"</strong>- التقارير التي تركز على النتائج الثانوية أو المجموعات الفرعية أو التغييرات داخل المجموعة لجعل النتائج تبدو أكثر ملاءمة مما كانت عليه.
+                    <br/><br/>
+                    روى الملخص قصة مختلفة عن البيانات.
+                  </div>
+<div class="source">بوترون أنا وآخرون. جاما. 2010;303:2058-2064</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">عناصر مجردة منظمة</div>
+<div class="checklist animate delay-1">
+<h4>قائمة مراجعة خلاصة PRISMA</h4>
+<div class="checklist-item"><span class="check">□</span> الخلفية والأهداف</div>
+<div class="checklist-item"><span class="check">□</span> معايير الأهلية</div>
+<div class="checklist-item"><span class="check">□</span> مصادر المعلومات</div>
+<div class="checklist-item"><span class="check">□</span> خطر تقييم التحيز</div>
+<div class="checklist-item"><span class="check">□</span> طرق التجميع</div>
+<div class="checklist-item"><span class="check">□</span> النتائج (# دراسات، # مشاركين، تقدير التأثير باستخدام CI)</div>
+<div class="checklist-item"><span class="check">□</span> القيود</div>
+<div class="checklist-item"><span class="check">□</span> الاستنتاجات والآثار</div>
+<div class="checklist-item"><span class="check">□</span> رقم التسجيل</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<p class="story-opener">ماذا يحدث عندما يروي الملخص قصة مختلفة عن الورقة نفسها؟</p>
+<div class="real-data-box">
+<h4>البيانات الحقيقية</h4>
+<p>بيتكين وآخرون. (1999، BMJ) فحص الملخصات المنظمة في ست مجلات رئيسية ووجدت ذلك <span class="data-highlight">18-68%</span> من الملخصات التي تحتوي على بيانات غير متوافقة مع المقالة الكاملة. وتراوحت أوجه القصور بين الأخطاء العددية والاستنتاجات التي لا تدعمها النتائج المبلغ عنها.</p>
+</div>
+<div class="decision-tree">
+<div class="decision-tree-header">الملخص المضلل: بيتكين 1999</div>
+<div class="decision-scenario">وجد تحليلك التلوي نتيجة أولية غير هامة (RR 0.92، 95% CI 0.78-1.09). كيف تكتب الملخص؟</div>
+<div class="decision-paths">
+<div class="decision-path path-a" role="button" tabindex="0">
+<div class="path-label">المسار أ: قم بتدوير الملخص</div>
+<div class="path-choice">التأكيد على نتيجة ثانوية مهمة واستخدام لغة مثل "الاتجاه نحو المنفعة"</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">القراء الذين يرون الملخص فقط يشكلون انطباعًا إيجابيًا مضللًا عن العلاج</div>
+<div class="path-outcome">النتيجة: قرارات سريرية مضللة</div>
+</div>
+<div class="decision-path path-b" role="button" tabindex="0">
+<div class="path-label">المسار ب: الإبلاغ بأمانة</div>
+<div class="path-choice">اذكر النتيجة الأولية غير الهامة بوضوح ولاحظ النتائج الثانوية باعتبارها استكشافية</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">يحصل القراء على ملخص دقيق؛ أولئك الذين يحتاجون إلى تفاصيل قراءة الورقة كاملة</div>
+<div class="path-outcome">النتيجة: الحفاظ على سلامة الأدلة</div>
+</div>
+</div>
+</div>
+<div class="story-revelation">
+<div class="revelation-label">الرؤيا</div>
+<div class="revelation-text">معظم القراء لا يتجاوزون الملخص أبدًا. إذا كان الملخص مضللاً، فإن صدق الورقة الكاملة لا يمكن أن يزيل الضرر.</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  "لا تدور. لا تختبئ.<br/>
+                  إذا كانت النتيجة الأولية فارغة، قل ذلك.<br/>
+                  يجب أن يكون الملخص مرآة صادقة -<br/>
+                  ليست صورة الاغراء."
+                </div>
+</div>
+</div>
+</div>
+ ================================== الوحدة 6: السؤال (PICO) 
+<div class="module-slides" data-module="6">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  سؤال غامض ينتج عنه إجابات غامضة.
+                  <br/><br/>
+                  قبل أن تبحث، قبل أن تكتب..<br/>
+                  يجب أن تعرف بالضبط <em>ما تسعى إليه</em>.
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">إطار عمل بيكو</div>
+<div class="decision-tree animate delay-1">
+<h4>صياغة سؤال البحث</h4>
+<div class="tree-row"><div class="tree-node root">سؤال بحثي</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node action">P<small>سكان</small></div>
+<div class="tree-label">Who?</div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node action">I<small>تدخل</small></div>
+<div class="tree-label">ما العلاج؟</div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node action">C<small>المقارنة</small></div>
+<div class="tree-label">مقابل. ماذا؟</div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node action">O<small>حصيلة</small></div>
+<div class="tree-label">ما قياس؟</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">مثال بيكو</div>
+<div class="story-card animate delay-1">
+<div class="place">تحويل سؤال غامض</div>
+<div class="narrative">
+<strong>غامض:</strong> "هل تساعد التمارين الرياضية في علاج الاكتئاب؟"
+                    <br/><br/>
+<strong>بيكو:</strong><br/>
+                    • <strong>P:</strong> البالغين الذين تم تشخيصهم باضطراب اكتئابي كبير<br/>
+                    • <strong>I:</strong> تمرينات هوائية تحت الإشراف (≥3x/أسبوع لمدة ≥8 أسابيع)<br/>
+                    • <strong>C:</strong> الرعاية المعتادة أو التحكم في قائمة الانتظار<br/>
+                    • <strong>O:</strong> التغير في درجة الاكتئاب (HAM-D أو BDI)
+                    <br/><br/>
+                    الآن أنت تعرف بالضبط ما الذي تبحث عنه.
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  "حدد سؤالك بدقة.<br/>
+                  من هم المرضى؟ ما هو العلاج؟<br/>
+                  ما هو المقارن؟ ماذا ستقيس؟<br/>
+                  PICO هي الخريطة قبل الرحلة."
+                </div>
+</div>
+</div>
+</div>
+ وحدة 7: البحث 
+<div class="module-slides" data-module="7">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  هل سمعت عن التحليل التلوي؟<br/>
+                  التي بحثت في قاعدة بيانات واحدة فقط،<br/>
+                  ضاعت نصف الأدلة،<br/>
+                  ووجه <em>استنتاج خاطئ</em>?
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">شجرة قرارات استراتيجية البحث</div>
+<div class="decision-tree animate delay-1">
+<h4>أين تبحث</h4>
+<div class="tree-row"><div class="tree-node root">بحث شامل</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">الحد الأدنى من قواعد البيانات</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node action">ميدلاين<small>مجلات</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node action">إمباس<small>التركيز الأوروبي</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node action">سنترال<small>تجارب كوكرين</small></div>
+</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">بالإضافة إلى مصادر إضافية</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node blue">سجلات المحاكمة<small>ClinicalTrials.gov</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node blue">الأدب الرمادي<small>الأطروحات والتقارير</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node blue">قوائم مرجعية<small>الاقتباس إلى الوراء</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">توثيق البحث</div>
+<div class="simple-box animate delay-1">
+<div class="simple-title">ما يجب الإبلاغ عنه</div>
+<div class="simple-text">
+                    • <strong>استراتيجية البحث الكاملة</strong> لقاعدة بيانات واحدة على الأقل (الملحق)<br/>
+                    • <strong>تاريخ البحث</strong> لكل قاعدة بيانات<br/>
+                    • <strong>أي حدود</strong> (اللغة، التاريخ، نوع النشر)<br/>
+                    • <strong>البحث اليدوي</strong> (المجلات، وقائع المؤتمرات)<br/>
+                    • <strong>التواصل مع المؤلفين</strong> للبيانات غير المنشورة
+                  </div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">اختبار قابلية التكرار</div>
+<div class="simple-text">
+                    وينبغي أن يكون باحث آخر قادرا على ذلك <strong>تكرار البحث الخاص بك بالضبط</strong>
+                    والعثور على نفس العدد من السجلات.
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<div class="story-title">اكتشاف استراتيجية بحث كوكرين</div>
+<div class="story-period">2003 | مراجعة منهجية كوكرين</div>
+<div class="story-narrative">
+                    طرح باحثو كوكرين سؤالاً بسيطًا: ماذا سيحدث إذا قام المراجعون المنهجيون بالبحث في MEDLINE فقط؟
+                    <br/><br/>
+                    كانت الإجابة مثيرة للقلق. سيكون لديهم <strong>غاب عن 30٪ من الدراسات المشمولة</strong>- بما في ذلك بعض النتائج التي غيرت استنتاجات التحليل التلوي بالكامل.
+                    <br/><br/>
+                    أحد الأمثلة الصارخة: أظهر التحليل التلوي المضاد للاكتئاب <strong>الاستفادة عندما تعتمد على MEDLINE وحده</strong>، لكن <strong>لا فائدة عندما يتم تضمين كافة المصادر</strong>. وكانت الدراسات المفقودة عبارة عن تجارب سلبية أصغر حجمًا ومفهرسة في قواعد البيانات المتخصصة مثل EMBASE وPsycINFO.
+                  </div>
+<div class="story-lesson">
+<div class="lesson-label">الدرس</div>
+<div class="lesson-text">يمكن أن تؤدي عمليات البحث في قاعدة بيانات واحدة إلى تفويت التجارب السلبية بشكل منهجي. قد تكون الدراسات غير الموجودة في MEDLINE هي نفس الدراسات التي تغير استنتاجك.</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  "ابحث على نطاق واسع. ابحث بعمق.<br/>
+                  توثيق كل قاعدة بيانات، كل تاريخ، كل فصل دراسي.<br/>
+                  قد يكون الدليل الذي تفتقده هو الدليل الأكثر أهمية."
+                </div>
+</div>
+</div>
+</div>
+<!-- ==================== MODULE 8: THE SELECTION ==================== -->
+<div class="module-slides" data-module="8">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  من بين آلاف السجلات، عليك أن تختار.
+                  <br/><br/>
+                  لكن اختر بأي قاعدة؟<br/>
+                  ومن سيتحقق من اختياراتك؟
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">مخطط تدفق بريسما</div>
+<div class="prisma-flow animate delay-1">
+<h4>مخطط التدفق لـ PRISMA 2020</h4>
+<div class="prisma-box id">
+<div class="label">تعريف</div>
+<div class="number">n = 3,847</div>
+                    السجلات من قواعد البيانات
+                  </div>
+<div class="tree-arrow">↓</div>
+<div class="prisma-exclude">تمت إزالة التكرارات (ن = 892)</div>
+<div class="prisma-box screen">
+<div class="label">الفحص</div>
+<div class="number">n = 2,955</div>
+                    العناوين/الملخصات التي تم فحصها
+                  </div>
+<div class="tree-arrow">↓</div>
+<div class="prisma-exclude">مستبعد (ن = 2680)</div>
+<div class="prisma-box eligible">
+<div class="label">الأهلية</div>
+<div class="number">n = 275</div>
+                    تم تقييم النص الكامل
+                  </div>
+<div class="tree-arrow">↓</div>
+<div class="prisma-exclude">مستبعد مع الأسباب (ن = 247)</div>
+<div class="prisma-box included">
+<div class="label">متضمنة</div>
+<div class="number">n = 28</div>
+                    دراسات في التركيب
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">شجرة قرارات عملية الاختيار</div>
+<div class="decision-tree animate delay-1">
+<h4>من يختار؟ كيف؟</h4>
+<div class="tree-row"><div class="tree-node root">اختيار الدراسة</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node yes">مراجعان مستقلان<small>المعيار الذهبي</small></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node question">خلاف؟</div>
+<div class="tree-branch" style="gap:0.3rem;">
+<div class="tree-branch-item">
+<div class="tree-node action" style="font-size:0.5rem;">إجماع<small>مناقشة</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node action" style="font-size:0.5rem;">مراجع ثالث<small>حكم</small></div>
+</div>
+</div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node warning">مراجع واحد فقط<small>إقرار القيود</small></div>
+</div>
+</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">اتفاقية التقرير</div>
+<div class="simple-text">
+                    احسب وأبلغ <strong>اتفاقية بين المقيمين</strong> (إحصائية كابا). يشير الاتفاق المنخفض إلى معايير غير واضحة.
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<p class="story-opener">هل يمكن لتحليل مجموعة فرعية لاحقة من تجربة واحدة أن يعيد تشكيل مجال بأكمله لمدة عقد من الزمن؟</p>
+<div class="real-data-box">
+<h4>البيانات الحقيقية</h4>
+<p>وجدت مبادرة صحة المرأة (WHI، 2002) أن العلاج التعويضي بالهرمونات <span class="data-highlight">زيادة</span> مخاطر القلب والأوعية الدموية بشكل عام. لكن تحليل المجموعة الفرعية بعد المخصصة اقترح أن النساء في عمر <span class="data-highlight">&lt;60</span> أو في غضون 10 سنوات من انقطاع الطمث قد تستفيد، في حين تتضرر النساء الأكبر سنا. أثارت "فرضية التوقيت" هذه سنوات من النقاش والمزيد من الدراسات.</p>
+</div>
+<div class="decision-tree">
+<div class="decision-tree-header">فرضية توقيت العلاج التعويضي بالهرمونات: WHI 2002</div>
+<div class="decision-scenario">يُظهر تحليلك التلوي للعلاج التعويضي بالهرمونات الضرر بشكل عام، لكن مجموعة فرعية استكشافية تشير إلى فائدة لدى النساء الأصغر سنًا. كيف تكتب هذا؟</div>
+<div class="decision-paths">
+<div class="decision-path path-a" role="button" tabindex="0">
+<div class="path-label">المسار أ: المبالغة في تقدير المجموعة الفرعية</div>
+<div class="path-choice">ضع عنوانًا لنتيجة المجموعة الفرعية العمرية كما لو كانت النتيجة الأولية</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">يصف الأطباء العلاج التعويضي بالهرمونات على أساس مجموعة فرعية استكشافية ضعيفة القوة. قد لا تتكرر النتيجة</div>
+<div class="path-outcome">النتيجة: تغير سريري سابق لأوانه</div>
+</div>
+<div class="decision-path path-b" role="button" tabindex="0">
+<div class="path-label">المسار ب: التقرير بصراحة</div>
+<div class="path-choice">تقديم النتيجة الإجمالية كأولية؛ تصنيف المجموعة الفرعية على أنها استكشافية ومحددة مسبقًا أو لاحقة</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">يفهم القراء أن الفرضية تحتاج إلى تأكيد؛ يمكن تصميم تجارب مستقبلية لاختباره</div>
+<div class="path-outcome">النتيجة: توليد الفرضيات المسؤولة</div>
+</div>
+</div>
+</div>
+<div class="story-revelation">
+<div class="revelation-label">الرؤيا</div>
+<div class="revelation-text">تحليلات المجموعات الفرعية تولد فرضيات، وليس استنتاجات. قم دائمًا بتسميتها على أنها استكشافية وأبلغ عن النتيجة الإجمالية أولاً.</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  "يجب أن يكون لكل استبعاد سبب.<br/>
+                  يجب توثيق كل سبب.<br/>
+                  زوجان من العيون أفضل من زوج واحد -<br/>
+                  فما فاته قد يلحقه الآخر."
+                </div>
+</div>
+</div>
+</div>
+ ==================== الوحدة 9: خطر التحيز ==================== 
+<div class="module-slides" data-module="9">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  هل لم تشاهد التحليل التلوي<br/>
+                  التي جمعت الدراسات الجيدة مع السيئة،<br/>
+                  ويسمى المتوسط <em>حقيقة</em>?
+                </div>
+</div>
+</div>
+<div class="slide blood">
+<div class="content text-center">
+<div class="title red animate">خطورة تجاهل التحيز</div>
+<div class="story-card red animate delay-1">
+<div class="place">فضيحة مضادات الاكتئاب</div>
+<div class="narrative">
+                    حصل تيرنر وآخرون (2008) على بيانات إدارة الغذاء والدواء بشأن 74 تجربة مضادة للاكتئاب.
+                    <br/><br/>
+                    في <strong>الأدبيات المنشورة</strong>: 94% من التجارب كانت إيجابية.
+                    <br/><br/>
+                    في <strong>قاعدة بيانات إدارة الغذاء والدواء الأمريكية</strong>: 51% فقط كانوا إيجابيين.
+                    <br/><br/>
+                    وقد جمعت التحليلات التلوية المنشورة البيانات المبلغ عنها بشكل انتقائي. وكان حجم التأثير <strong>تضخم بنسبة 32%</strong>.
+                  </div>
+<div class="source">تيرنر إه وآخرون</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">مخاطر أدوات تقييم التحيز</div>
+<div class="decision-tree animate delay-1">
+<h4>ما هي الأداة التي يجب استخدامها؟</h4>
+<div class="tree-row"><div class="tree-node root">تصميم الدراسة</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">RCTs</div>
+<div class="tree-node action">روب 2<small>أداة كوكرين</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">غير عشوائية</div>
+<div class="tree-node action">روبنز-آي<small>التدخلات</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">دراسات DTA</div>
+<div class="tree-node action">كواداس-2<small>التشخيص</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">رصدي</div>
+<div class="tree-node action">NOS<small>نيوكاسل-أوتاوا</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">مجالات روب 2</div>
+<div class="checklist animate delay-1">
+<h4>خطر كوكرين للتحيز 2.0 للتجارب المعشاة ذات الشواهد</h4>
+<div class="checklist-item"><span class="number">D1</span> عملية التوزيع العشوائي</div>
+<div class="checklist-item"><span class="number">D2</span> الانحرافات عن التدخلات المقصودة</div>
+<div class="checklist-item"><span class="number">D3</span> بيانات النتائج المفقودة</div>
+<div class="checklist-item"><span class="number">D4</span> قياس النتيجة</div>
+<div class="checklist-item"><span class="number">D5</span> اختيار النتيجة المبلغ عنها</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">خيارات الحكم</div>
+<div class="simple-text">
+                    كل مجال: <strong style="color:var(--green);">مخاطر منخفضة</strong> /
+                    <strong style="color:var(--orange);">بعض المخاوف</strong> /
+                    <strong style="color:var(--red);">خطر مرتفع</strong>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  "تحليل تلوي للدراسات المتحيزة<br/>
+                  يؤدي إلى نتيجة متحيزة -<br/>
+                  مع فاصل ثقة أضيق.<br/>
+                  لقد جعلت الكذب أكثر دقيق."
+                </div>
+</div>
+</div>
+</div>
+ ====================== 
+<div class="module-slides" data-module="10">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  من كل دراسة، يجب عليك استخراج الأرقام.
+                  <br/><br/>
+                  استخرج الخطأ، و تحليلك بالكامل<br/>
+                  مبني على <em>sand</em>.
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">نموذج استخراج البيانات</div>
+<div class="checklist animate delay-1">
+<h4>عناصر البيانات الأساسية</h4>
+<div class="checklist-item"><span class="number">1</span> معرفات الدراسة (المؤلف، السنة، البلد)</div>
+<div class="checklist-item"><span class="number">2</span> تصميم الدراسة وإعداداتها</div>
+<div class="checklist-item"><span class="number">3</span> خصائص المشارك (العمر والجنس والشدة)</div>
+<div class="checklist-item"><span class="number">4</span> تفاصيل التدخل (الجرعة، المدة، التسليم)</div>
+<div class="checklist-item"><span class="number">5</span> تفاصيل المقارنة</div>
+<div class="checklist-item"><span class="number">6</span> تعريفات النتائج وقياسها</div>
+<div class="checklist-item"><span class="number">7</span> النتائج (الوسائل، SD، الأحداث، أحجام العينات)</div>
+<div class="checklist-item"><span class="number">8</span> مدة المتابعة وخسارة المتابعة</div>
+<div class="checklist-item"><span class="number">9</span> مصدر التمويل وتضارب المصالح</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">شجرة قرار الاستخراج</div>
+<div class="decision-tree animate delay-1">
+<h4>التعامل مع البيانات المفقودة</h4>
+<div class="tree-row"><div class="tree-node root">البيانات لا تم الإبلاغ عن</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">ما يجب القيام به؟</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">أولاً</div>
+<div class="tree-node action">اتصل بالمؤلفين<small>البريد الإلكتروني للبيانات</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">إذا لم يكن هناك رد</div>
+<div class="tree-node warning">احسب/احسب<small>طريقة التوثيق</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">إذا كان مستحيلا</div>
+<div class="tree-node no">استبعاد من ماجستير<small>تضمين في السرد</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<div class="story-title">خطأ في استخراج بيانات روزيجليتازون</div>
+<div class="story-period">2007 | نيو انجلاند جورنال اوف ميديسين</div>
+<div class="story-narrative">
+                    وجد التحليل التلوي الذي أجراه نيسن وولسكي عام 2007 للروزيجليتازون (أفانديا) <strong>43% زيادة في خطر الإصابة بالنوبات القلبية</strong>. أثار هذا الاكتشاف تحذيرات إدارة الغذاء والدواء وتسبب في انهيار الوصفات الطبية في جميع أنحاء العالم.
+                    <br/><br/>
+                    لكن الفحص اللاحق كشف عن تعقيدات. تم استخلاص بعض تقديرات التأثير <strong>من المنشورات الثانوية بدلاً من تقارير التجارب الأولية</strong>. أدت الاختلافات الصغيرة في كيفية حساب الأحداث - المستخرجة من مصادر مختلفة - إلى تغيير النتائج بشكل ملموس.
+                    <br/><br/>
+                    كان التحليل التلوي مؤثرًا وصحيحًا إلى حد كبير، لكن الجدل سلط الضوء على كيفية <strong>يمكن أن يكون لقرارات الاستخراج الصغيرة عواقب تبلغ مليار دولار</strong>. اكتسب عقار ميرك المنافس حصة في السوق. واجهت شركة GSK دعوى قضائية واسعة النطاق.
+                  </div>
+<div class="story-lesson">
+<div class="lesson-label">الدرس</div>
+<div class="lesson-text">الاستخراج من المصادر الأولية دائمًا. توثيق كل خيار. يمكن أن يؤدي وجود تناقض بسيط في الأرقام المستخرجة إلى تغيير القرارات التنظيمية وثروات السوق.</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  "استخرج نسختين. تحقق من كل رقم.<br/>
+                  رقم واحد خاطئ يمكن أن يغير النتيجة.<br/>
+                  نموذج الاستخراج هو دفتر الأستاذ الخاص بك—<br/>
+                  حافظ على الدقة، اجعله صحيحًا."
+                </div>
+</div>
+</div>
+</div>
+ ============ الوحدة 11: تدابير التأثير ============== 
+<div class="module-slides" data-module="11">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  حجم التأثير هو جوهر التحليل التلوي الخاص بك.
+                  <br/><br/>
+                  اختر مقياسًا خاطئًا،<br/>
+                  وسيكون تقديرك المجمع <em>لا معنى له</em>.
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">شجرة قرار قياس التأثير</div>
+<div class="decision-tree animate delay-1">
+<h4>اختيار حجم التأثير الصحيح</h4>
+<div class="tree-row"><div class="tree-node root">نوع النتيجة</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">ثنائي</div>
+<div class="tree-node action">RR, OR, RD<small>أحداث/لا توجد أحداث</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">مستمر</div>
+<div class="tree-node question">نفس المقياس؟</div>
+<div class="tree-branch" style="gap:0.3rem;">
+<div class="tree-branch-item">
+<div class="tree-node action" style="font-size:0.5rem;">Yes<small>MD (متوسط الفرق)</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node action" style="font-size:0.5rem;">No<small>SMD (G التحوط)</small></div>
+</div>
+</div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">الوقت للحدث</div>
+<div class="tree-node action">HR<small>نسبة المخاطر</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">مقاييس التأثير المشترك</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box">
+<div class="stat-value" style="color:var(--gold);">RR</div>
+<div class="stat-label">نسبة المخاطر<br/>مضاعف</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--purple);">OR</div>
+<div class="stat-label">نسبة الاحتمالات<br/>مراقبة الحالة</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--teal);">MD</div>
+<div class="stat-label">متوسط الفرق<br/>نفس الوحدات</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--blue);">SMD</div>
+<div class="stat-label">المتوسط القياسي فرق<br/>بمقاييس مختلفة</div>
+</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">المبدأ</div>
+<div class="simple-text">
+                    يجب أن يكون قياس التأثير تكون <strong>قابلة للمقارنة عبر الدراسات</strong>. إذا استخدمت الدراسات مقاييس مختلفة، توحيدها.
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<p class="story-opener">هل يمكن للتجربة التي تغير الممارسة العالمية أن تظل خاضعة لقيود خطيرة؟</p>
+<div class="real-data-box">
+<h4>البيانات الحقيقية</h4>
+<p>أثبتت تجربة RECOVERY (2020) أن الديكساميثازون قلل معدل الوفيات لمدة 28 يومًا في مرضى كوفيد-19 في المستشفى الذين يحتاجون إلى الأكسجين: <span class="data-highlight">RR 0.83, 95% CI 0.75-0.93</span>. ومع ذلك، كانت التجربة مفتوحة التسمية (بدون تعمية)، وتم إجراؤها في الغالب في مستشفيات المملكة المتحدة، وتلقت المجموعة الضابطة الرعاية المعتادة (التي تختلف).</p>
+</div>
+<div class="decision-tree">
+<div class="decision-tree-header">تجربة RECOVERY: 2020</div>
+<div class="decision-scenario">يتضمن التحليل التلوي الخاص بك RECOVERY باعتبارها الدراسة المهيمنة. كيف يمكنك التعامل مع القيود المفروضة على تجربة تاريخية؟</div>
+<div class="decision-paths">
+<div class="decision-path path-a" role="button" tabindex="0">
+<div class="path-label">المسار أ: تقليل القيود</div>
+<div class="path-choice">التقليل من أهمية تصميم العلامة المفتوحة والتركيز الجغرافي؛ التركيز على فائدة الوفيات المذهلة</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">لا يمكن للقراء الحكم على قابلية التعميم على إعدادات أخرى؛ تم حجب تحيز الكشف المحتمل</div>
+<div class="path-outcome">النتيجة: تقييم غير مكتمل للأدلة</div>
+</div>
+<div class="decision-path path-b" role="button" tabindex="0">
+<div class="path-label">المسار ب: القيود الصادقة</div>
+<div class="path-choice">الاعتراف بتصميم التسمية المفتوحة والقيود الجغرافية مع الإشارة بوضوح إلى فائدة الوفيات</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">يفهم القراء كلاً من قوة النتائج ومكان عدم اليقين</div>
+<div class="path-outcome">النتيجة: تقارير متوازنة وجديرة بالثقة</div>
+</div>
+</div>
+</div>
+<div class="story-revelation">
+<div class="revelation-label">الرؤيا</div>
+<div class="revelation-text">حتى التجارب الرائدة لها قيود. والاعتراف بها لا يقوض النتائج؛ فهو يبني ثقة القارئ ويوجه الأبحاث المستقبلية.</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  "اختر المقياس الذي يناسب البيانات.<br/>
+                  نسب المخاطرة للنتائج الشائعة، ونسب الأرجحية للنتائج النادرة.<br/>
+                  توحيد المعايير عندما تختلف المقاييس.<br/>
+                  المقياس الخاطئ يجمع التفاح مع البرتقال."
+                </div>
+</div>
+</div>
+</div>
+ ================================= الوحدة 12 
+<div class="module-slides" data-module="12">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  ألم تشاهد مؤامرة الغابة<br/>
+                  حيث أشارت الدراسات إلى اتجاهين متعاكسين،<br/>
+                  ومع ذلك فقد أعلنت الماسة عن <em>حقيقة</em>?
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">تأثير واحد ثابت مقابل تأثيرات عشوائية</div>
+<div class="decision-tree animate delay-1">
+<h4>أي نموذج يجب استخدامه؟</h4>
+<div class="tree-row"><div class="tree-node root">نموذج التحليل التلوي</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">الافتراض حول التأثير الحقيقي؟</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">تأثير حقيقي واحد</div>
+<div class="tree-node blue">تأثير ثابت<small>جميع الدراسات تقدر نفس θ</small></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node warning" style="font-size:0.5rem;">نادرًا ما يكون مناسبًا<small>دراسات مشابهة جداً</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">تختلف التأثيرات</div>
+<div class="tree-node yes">تأثيرات عشوائية<small>توزيع θᵢ</small></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node action" style="font-size:0.5rem;">يفضل عادةً<small>أكثر تحفظًا</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">عندما لا تجمع</div>
+<div class="checklist animate delay-1">
+<h4>لا تقم بالتحليل التلوي إذا...</h4>
+<div class="checklist-item"><span class="check" style="color:var(--red);">✗</span> الدراسات غير متجانسة للغاية (سريرية أو منهجية)</div>
+<div class="checklist-item"><span class="check" style="color:var(--red);">✗</span> يتم تعريف النتائج بشكل مختلف</div>
+<div class="checklist-item"><span class="check" style="color:var(--red);">✗</span> السكان مختلفون بشكل أساسي</div>
+<div class="checklist-item"><span class="check" style="color:var(--red);">✗</span> خطر التحيز مرتفع للغاية عبر الدراسات</div>
+<div class="checklist-item"><span class="check" style="color:var(--red);">✗</span> تحيز النشر شديد</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">الحكمة</div>
+<div class="simple-text">
+                    في بعض الأحيان يكون الاستنتاج الأكثر صدقًا هو:
+                    <strong>"لا ينبغي تجميع هذه الدراسات."</strong>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<p class="story-opener">ماذا يحدث عندما يتصاعد النقد المنهجي لمراجعة كوكرين إلى أزمة تنظيمية؟</p>
+<div class="real-data-box">
+<h4>البيانات الحقيقية</h4>
+<p>في عام 2018، نشر بيتر جوتشه وزملاؤه نقدًا لمراجعة لقاح كوكرين لفيروس الورم الحليمي البشري، بحجة أنها استبعدت التجارب الرئيسية واستخدمت معايير إدراج غير مناسبة. وقد تضمنت مراجعة كوكرين <span class="data-highlight">26 دراسة مع أكثر من 73000 امرأة</span>. وتحول النزاع إلى أزمة حكم، وبلغت ذروتها بطرد جوتشه من مجلس إدارة كوكرين.</p>
+</div>
+<div class="decision-tree">
+<div class="decision-tree-header">جدل كوكرين حول فيروس الورم الحليمي البشري: 2018</div>
+<div class="decision-scenario">تتلقى نقدًا منهجيًا لتوليفتك المنشورة بحجة أنه كان يجب عليك تضمين دراسات إضافية. كيف ترد؟</div>
+<div class="decision-paths">
+<div class="decision-path path-a" role="button" tabindex="0">
+<div class="path-label">المسار أ: رفض النقد</div>
+<div class="path-choice">الدفاع عن النهج الأصلي دون التعامل مع النقاط المنهجية المحددة المثارة</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">وتآكلت ثقة الجمهور؛ ويصبح الخلاف شخصياً وليس علمياً؛ لم يتم تحسين قاعدة الأدلة</div>
+<div class="path-outcome">النتيجة: الاستقطاب وفقدان المصداقية</div>
+</div>
+<div class="decision-path path-b" role="button" tabindex="0">
+<div class="path-label">المسار ب: المشاركة بشفافية</div>
+<div class="path-choice">إجراء تحليلات الحساسية التي تتضمن الدراسات المقترحة؛ نشر رد شفاف يوضح ما إذا كانت الاستنتاجات قد تغيرت</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">وتعززت الأدلة؛ الخطاب المنهجي يتقدم في هذا المجال. يتم الحفاظ على الثقة</div>
+<div class="path-outcome">النتيجة: العلم يصحح نفسه علنًا</div>
+</div>
+</div>
+</div>
+<div class="story-revelation">
+<div class="revelation-label">الرؤيا</div>
+<div class="revelation-text">النقد المنهجي هو كيف يتحسن العلم. إن الاستجابة بالبيانات، وليس بالدفاعية، تعزز كلا من المراجعة والميدان.</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  "لا تجمع من أجل التجميع.<br/>
+                  التحليل التلوي للدراسات غير المتوافقة<br/>
+                  ليس التوليف، بل هو الارتباك.<br/>
+                  اعرف متى تقول: لا يمكن لهذه الأشياء أن تقول: يتم الجمع بينهما."
+                </div>
+</div>
+</div>
+</div>
+ ==================== الوحدة 13: عدم التجانس ==================== 
+<div class="module-slides" data-module="13">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  عندما تختلف الدراسات<br/>
+                  الخلاف في حد ذاته <em>data</em>.
+                  <br/><br/>
+                  لا تخفيه. <em>اشرح ذلك.</em>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">تدابير عدم التجانس</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box">
+<div class="stat-value" style="color:var(--gold);">Q</div>
+<div class="stat-label">سؤال كوكران س<br/>اختبار الأهمية</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--purple);">I²</div>
+<div class="stat-label">التناقض<br/>٪ تفاوت</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--teal);">τ²</div>
+<div class="stat-label">تاو تربيع<br/>بين الدراسة فار</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--blue);">PI</div>
+<div class="stat-label">الفاصل الزمني للتنبؤ<br/>الدراسات المستقبلية</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">التحقيق في عدم التجانس</div>
+<div class="decision-tree animate delay-1">
+<h4>عندما أنا² &gt; 50%</h4>
+<div class="tree-row"><div class="tree-node root">عدم التجانس العالي</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">طرق التحقيق</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node action">تحليل المجموعة الفرعية<small>محددة مسبقا</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node action">الانحدار التلوي<small>إذا ≥10 دراسات</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node action">تحليل الحساسية<small>استبعاد القيم المتطرفة</small></div>
+</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node warning">الإبلاغ عن عدم التجانس غير المبررة<small>القيد</small></div></div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<p class="story-opener">ماذا لو تم إلغاء التحليل التلوي للتجارب الإيجابية الصغيرة من خلال تجربة واحدة ضخمة؟</p>
+<div class="real-data-box">
+<h4>البيانات الحقيقية</h4>
+<p>بحلول أوائل التسعينيات، أشارت عدة تجارب صغيرة إلى أن حقن المغنيسيوم في الوريد أدى إلى خفض معدل الوفيات بعد احتشاء عضلة القلب الحاد. قام التحليل التلوي (Teo et al., 1991) بتجميع هذه العناصر ووجد فائدة كبيرة: <span class="data-highlight">OR 0.44, 95% CI 0.27-0.71</span>. ثم داعش-4 (1995)، محاكمة ضخمة مع <span class="data-highlight">58.050 مريضا</span>، لم تجد أي فائدة على الإطلاق. وقد تم تجاهل آثار الدراسة الصغيرة وعدم التجانس.</p>
+</div>
+<div class="decision-tree">
+<div class="decision-tree-header">الجدل حول المغنيسيوم: 1991-1995</div>
+<div class="decision-scenario">يُظهر تحليلك التلوي للتجارب الصغيرة عدم تجانس عالٍ (I² أعلى من 50%) ولكن التقدير المجمع مهم. كيف تقدم هذا؟</div>
+<div class="decision-paths">
+<div class="decision-path path-a" role="button" tabindex="0">
+<div class="path-label">المسار أ: دفن عدم التجانس</div>
+<div class="path-choice">قم بالإبلاغ عن التقدير المجمع المهم بشكل بارز؛ أذكر I² فقط بشكل عابر</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">الأطباء يعتمدون العلاج؛ قد تتعارض تجربة كبيرة مستقبلية مع التحليل التلوي، مما يؤدي إلى تآكل الثقة في الطريقة</div>
+<div class="path-outcome">النتيجة: تغييرات توجيهية سابقة لأوانها</div>
+</div>
+<div class="decision-path path-b" role="button" tabindex="0">
+<div class="path-label">المسار ب: التحقيق بشفافية</div>
+<div class="path-choice">تسليط الضوء على عدم التجانس. التحقيق في المصادر (حجم الدراسة والجودة)؛ لاحظ أن تأثيرات الدراسات الصغيرة قد تؤدي إلى تضخيم التقدير</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">القراء يفهمون عدم اليقين. تدعو التوصيات إلى إجراء تجربة نهائية واسعة النطاق قبل تغيير الممارسة</div>
+<div class="path-outcome">النتيجة: الحذر المناسب للأدلة</div>
+</div>
+</div>
+</div>
+<div class="story-revelation">
+<div class="revelation-label">الرؤيا</div>
+<div class="revelation-text">إن عدم التجانس هو إشارة تحذير، وليس حاشية سفلية. يمكن أن تؤدي تأثيرات الدراسات الصغيرة إلى تقديرات مجمعة مطمئنة زائفة يمكن أن تنقلب عليها تجربة واحدة كبيرة.</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  "إن I-squared ليس مجرد رقم يجب الإبلاغ عنه.<br/>
+                  والسؤال هنا: لماذا تختلف هذه الدراسات؟<br/>
+                  يفتش. يشرح. أو الاعتراف بالجهل."
+                </div>
+</div>
+</div>
+</div>
+ ================================= الوحدة 14: تحيز النشر 
+<div class="module-slides" data-module="14">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  ألم تسمع عن درج الملفات،<br/>
+                  حيث تذهب الدراسات السلبية <em>die</em>,<br/>
+                  ولم يتبق سوى الناجين الإيجابيين<br/>
+                  ليقول أ <em>قصة مشوهة</em>?
+                </div>
+</div>
+</div>
+<div class="slide blood">
+<div class="content text-center">
+<div class="title red animate">كارثة فيوكس</div>
+<div class="story-card red animate delay-1">
+<div class="place">ميرك، 2004</div>
+<div class="narrative">
+                    كان Vioxx (rofecoxib) مسكنًا رائعًا للألم يكسب 2.5 مليار دولار سنويًا.
+                    <br/><br/>
+                    أظهرت وثائق الشركة الداخلية أن شركة ميرك كانت على علم بمخاطر القلب والأوعية الدموية ولكن <strong>قمع البيانات غير المواتية</strong> ونشرت التحليلات الإيجابية فقط.
+                    <br/><br/>
+                    كشف التحليل التلوي باستخدام جميع البيانات المتاحة أ <strong>زيادة خطر الإصابة بنوبة قلبية بمقدار ضعفين</strong>.
+                    <br/><br/>
+                    تم سحب Vioxx. لقد تسبب في ما يقدر بـ <strong>88.000-140.000 نوبة قلبية زائدة</strong>.
+                  </div>
+<div class="source">Topol EJ. ن إنجل ي ميد. 2004;351:1707-1709</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">اكتشاف تحيز النشر</div>
+<div class="decision-tree animate delay-1">
+<h4>طرق التقييم</h4>
+<div class="tree-row"><div class="tree-node root">تقييم تحيز النشر</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node action">مخطط القمع<small>الفحص البصري</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node action">اختبار إيجر<small>عدم التماثل الإحصائي</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node action">تقليم وملء<small>فقدان القدرة</small></div>
+</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node warning">يتطلب ≥10 دراسات<small>طاقة منخفضة وإلا</small></div></div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">منع التحيز: حملة AllTrials</div>
+<div class="simple-box animate delay-1">
+<div class="simple-title">ALLTRIALS.NET</div>
+<div class="simple-text">
+<strong>"تم تسجيل جميع التجارب. تم الإبلاغ عن جميع النتائج."</strong>
+<br/><br/>
+                    • ابحث في سجلات التجارب (ClinicalTrials.gov, WHO ICTRP)<br/>
+                    • الاتصال بالشركات للحصول على البيانات غير المنشورة<br/>
+                    • اذكر أرقام التسجيل في رأيك<br/>
+                    • قم بالإبلاغ عن التجارب المسجلة المفقودة من تحليلك
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  ""درج الملفات ليس فارغًا.<br/>
+                  ويحمل الدراسات التي أخفتها الشركات،<br/>
+                  النتائج التي رفضتها المجلات.<br/>
+                  مهمتك هي أن تفتح هذا الدرج، أو تقول إنك لا تستطيع ذلك.
+                </div>
+</div>
+</div>
+</div>
+ ================================= الوحدة 15 
+<div class="module-slides" data-module="15">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  مؤامرة الغابة هي وجه التحليل التلوي الخاص بك.
+                  <br/><br/>
+                  ويظهر للقارئ <em>كل شئ</em>:<br/>
+                  كل دراسة، كل وزن، كل فاصل ثقة،<br/>
+                  والتقدير المجمع النهائي.
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">قراءة مؤامرة الغابة</div>
+<div class="decision-tree animate delay-1">
+<h4>عناصر مؤامرة الغابة</h4>
+<div class="tree-row"><div class="tree-node root">قطعة أرض الغابات</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node blue">أسماء الدراسات<small>العمود الأيسر</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node action">المربعات<small>تقديرات النقاط</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node action">خطوط<small>95% CI</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node yes">الماس<small>التقدير المجمع</small></div>
+</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node warning">الحجم المربع = وزن الدراسة<small>أكبر = أكثر دقة</small></div></div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">قائمة مراجعة قطعة الأرض للغابات</div>
+<div class="checklist animate delay-1">
+<h4>ما يجب تضمينه</h4>
+<div class="checklist-item"><span class="check">□</span> معرفات الدراسة (المؤلف، السنة)</div>
+<div class="checklist-item"><span class="check">□</span> حجم العينة لكل ذراع</div>
+<div class="checklist-item"><span class="check">□</span> تقدير التأثير مع 95% CI</div>
+<div class="checklist-item"><span class="check">□</span> الوزن (نسبة المساهمة)</div>
+<div class="checklist-item"><span class="check">□</span> خط عدم التأثير (RR=1 أو MD=0)</div>
+<div class="checklist-item"><span class="check">□</span> التقدير المجمع مع 95% CI</div>
+<div class="checklist-item"><span class="check">□</span> إحصائيات عدم التجانس (I²، τ²، Q)</div>
+<div class="checklist-item"><span class="check">□</span> اختبار التأثير الكلي (Z، قيمة p)</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<div class="story-title">أرقام Vioxx التي غيرت كل شيء</div>
+<div class="story-period">2004 | الموافقة على التجربة والانسحاب من السوق</div>
+<div class="story-narrative">
+                    لسنوات عديدة، أظهرت مخططات الغابات الخاصة بسلامة القلب والأوعية الدموية لعقار Vioxx (rofecoxib) نمطًا مطمئنًا. تقديرات النقاط من التجارب السابقة متجمعة حول خط عدم التأثير. أشارت الماسة إلى أن الدواء آمن.
+                    <br/><br/>
+                    ثم جاءت محاكمة APPROVe. وعندما أضيفت بياناتها إلى قطعة أرض الغابة، <strong>تغيرت الصورة بشكل كبير</strong>. قام المربع الكبير لـ APPROVe بسحب الماسة المجمعة بشكل نهائي نحو الضرر. وكان البصرية لا لبس فيها.
+                    <br/><br/>
+                    تلك مؤامرة الغابة <strong>انتهى فيوكس</strong>. قامت شركة ميرك بسحب الدواء طوعا. وقد كلف التقاضي اللاحق الشركة <strong>4.85 مليار دولار في التسويات</strong>. وقد عانى آلاف المرضى من أزمات قلبية، في حين أظهرت التجارب السابقة الأصغر نتائج غامضة.
+                  </div>
+<div class="story-lesson">
+<div class="lesson-label">الدرس</div>
+<div class="lesson-text">يمكن لتجربة واحدة جيدة التنفيذ ومدعومة بشكل كافٍ أن تغير التقدير المجمع بالكامل. تحكي مؤامرات الغابات قصة كيفية تراكم الأدلة، وأحيانًا كيف تعكس مسارها.</div>
+</div>
+<div class="decision-tree" style="margin-top:0.6rem;">
+<div class="decision-tree-header">مؤامرة الغابة المضللة</div>
+<div class="decision-scenario">أنت تقوم بتصميم قطعة أرض للغابات من أجل التحليل التلوي الخاص بك. يمكن لمقياس المحور وترتيب الدراسة تغيير الانطباع البصري. كيف يمكنك المضي قدما؟</div>
+<div class="decision-paths">
+<div class="decision-path path-a" role="button" tabindex="0">
+<div class="path-label">المسار أ: التصميم من أجل التأثير</div>
+<div class="path-choice">استخدم مقياس المحور المضغوط لجعل أحجام التأثير تبدو أكبر؛ ترتيب الدراسات لبناء السرد البصري</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">يشكل القراء انطباعات مبالغ فيها عن حجم التأثير؛ تصبح الحبكة أداة مناصرة بدلاً من عرض البيانات</div>
+<div class="path-outcome">النتيجة: تشويه بصري للأدلة</div>
+</div>
+<div class="decision-path path-b" role="button" tabindex="0">
+<div class="path-label">المسار ب: تصميم للوضوح</div>
+<div class="path-choice">استخدام مقياس المحور القياسي؛ ترتيب الدراسات حسب السنة أو أبجديا؛ تشمل جميع العناصر القياسية (الأوزان، CIs، I²)</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">يمكن للقراء إصدار أحكامهم الخاصة؛ المؤامرة بمثابة تصور بيانات شفافة</div>
+<div class="path-outcome">النتيجة: التواصل البصري الصادق</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  "مؤامرة الغابة لا تخفي شيئا.<br/>
+                  كل دراسة مرئية. كل وزن شفاف.<br/>
+                  دع القارئ يرى ما رأيته -<br/>
+                  ويحكمون بأنفسهم".
+                </div>
+</div>
+</div>
+</div>
+ ==================== الوحدة 16: يقين الأدلة ===================== 
+<div class="module-slides" data-module="16">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  التقدير المجمع لا يكفي.
+                  <br/><br/>
+                  ويجب عليك أيضًا أن تخبر القارئ:<br/>
+<em>ما مدى ثقتهم في هذه النتيجة؟</em>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">تقييم درجة اليقين</div>
+<div class="decision-tree animate delay-1">
+<h4>تصنيف الأدلة</h4>
+<div class="tree-row"><div class="tree-node root">البداية: المضبوطة = عالية، Obs = منخفضة</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">أسباب التراجع؟</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node no">خطر التحيز<small>-1 or -2</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node no">التناقض<small>-1 or -2</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node no">عدم المباشرة<small>-1 or -2</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node no">عدم الدقة<small>-1 or -2</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node no">حانة. تحيز<small>-1 or -2</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">مستويات اليقين الصف</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box" style="background:var(--green);">
+<div class="stat-value" style="color:white;">⊕⊕⊕⊕</div>
+<div class="stat-label">HIGH<br/>واثق جدا</div>
+</div>
+<div class="stat-box" style="background:var(--gold);">
+<div class="stat-value" style="color:var(--navy);">⊕⊕⊕◯</div>
+<div class="stat-label">متوسط<br/>من المحتمل أن يكون قريبًا</div>
+</div>
+<div class="stat-box" style="background:var(--orange);">
+<div class="stat-value" style="color:white;">⊕⊕◯◯</div>
+<div class="stat-label">LOW<br/>قد تختلف</div>
+</div>
+<div class="stat-box" style="background:var(--red);">
+<div class="stat-value" style="color:white;">⊕◯◯◯</div>
+<div class="stat-label">منخفض جدًا<br/>غير مؤكد</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<p class="story-opener">ماذا يحدث عندما يصطدم تقييم GRADE "منخفض اليقين" بحالة طوارئ صحية عامة؟</p>
+<div class="real-data-box">
+<h4>البيانات الحقيقية</h4>
+<p>وجدت مراجعة كوكرين لعام 2023 للتدخلات الجسدية للحد من انتشار فيروسات الجهاز التنفسي (جيفرسون وآخرون) أن الأدلة على الأقنعة في البيئات المجتمعية كانت <span class="data-highlight">يقين منخفض</span> لكل درجة، مع فترات ثقة واسعة. تم الإبلاغ عن المراجعة على نطاق واسع على أنها تثبت أن "الأقنعة لا تعمل"، على الرغم من أن المؤلفين ذكروا أن الأدلة لم تكن كافية لاستخلاص استنتاجات قاطعة في أي من الاتجاهين.</p>
+</div>
+<div class="decision-tree">
+<div class="decision-tree-header">مراجعة قناع كوكرين: 2023</div>
+<div class="decision-scenario">تحصل مراجعتك المنهجية لموضوع حساس سياسيًا على تصنيف GRADE "منخفض اليقين". كيف يمكنك توصيل هذا؟</div>
+<div class="decision-paths">
+<div class="decision-path path-a" role="button" tabindex="0">
+<div class="path-label">المسار أ: تخفيف التقييم</div>
+<div class="path-choice">التقليل من أهمية تقييم GRADE لتجنب الجدل السياسي؛ التأكيد على تقدير النقطة على مستوى اليقين</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">تفقد المراجعة مصداقيتها المنهجية؛ أصبح يُنظر إلى GRADE على أنه اختياري وليس صارمًا</div>
+<div class="path-outcome">النتيجة: منهجية وسط</div>
+</div>
+<div class="decision-path path-b" role="button" tabindex="0">
+<div class="path-label">المسار ب: الإبلاغ بأمانة</div>
+<div class="path-choice">الإبلاغ عن تصنيف GRADE بأمانة؛ اشرح بوضوح ما يعنيه "انخفاض اليقين" (ولا يعني ذلك)؛ التمييز بين غياب الدليل وبين دليل الغياب</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">قد يخطئ الجمهور في التفسير، لكن السجل العلمي دقيق؛ أصبحت اتجاهات البحث المستقبلية واضحة</div>
+<div class="path-outcome">النتيجة: النزاهة المنهجية</div>
+</div>
+</div>
+</div>
+<div class="story-revelation">
+<div class="revelation-label">الرؤيا</div>
+<div class="revelation-text">"اليقين المنخفض" لا يعني "عدم وجود تأثير". يجب الإبلاغ عن تقييمات GRADE بأمانة، مع شرح واضح لما تعنيه، خاصة بالنسبة للموضوعات المشحونة سياسيًا.</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  "حجم التأثير هو ماذا.<br/>
+                  درجة اليقين هي مدى التأكد.<br/>
+                  قم بالإبلاغ عن كليهما – وإلا لن يتمكن القارئ من الحكم<br/>
+                  ما مدى ثقتك في استنتاجك."
+                </div>
+</div>
+</div>
+</div>
+ ==================== الوحدة 17: المناقشة ====================================================================== 
+<div class="module-slides" data-module="17">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  المناقشة هي حيث أنت <em>يفسر</em>.
+                  <br/><br/>
+                  لا تدور. عدم المبالغة.<br/>
+                  ولكن لشرح ما تعنيه النتائج التي توصلت إليها -<br/>
+                  وماذا يفعلون <em>not</em> يقصد.
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">هيكل المناقشة</div>
+<div class="timeline animate delay-1">
+<div class="timeline-item">
+<div class="timeline-marker">1</div>
+<div class="timeline-content">
+<h5>ملخص النتائج</h5>
+<p>أعد صياغة النتائج الرئيسية مع تصنيف اليقين</p>
+</div>
+</div>
+<div class="timeline-item">
+<div class="timeline-marker">2</div>
+<div class="timeline-content">
+<h5>مقارنة مع الأدب الموجود</h5>
+<p>كيف ترتبط نتائجك بالمراجعات السابقة؟</p>
+</div>
+</div>
+<div class="timeline-item">
+<div class="timeline-marker">3</div>
+<div class="timeline-content">
+<h5>نقاط القوة والقيود</h5>
+<p>كل من المراجعة والدراسات المشمولة</p>
+</div>
+</div>
+<div class="timeline-item">
+<div class="timeline-marker">4</div>
+<div class="timeline-content">
+<h5>الآثار المترتبة على الممارسة</h5>
+<p>ما الذي يجب على الأطباء/صانعي السياسات فعله؟</p>
+</div>
+</div>
+<div class="timeline-item">
+<div class="timeline-marker">5</div>
+<div class="timeline-content">
+<h5>الآثار المترتبة على البحوث</h5>
+<p>ما هي الدراسات التي لا تزال مطلوبة؟</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">الأخطاء الشائعة في المناقشة</div>
+<div class="checklist animate delay-1">
+<h4>ما لا يجب فعله</h4>
+<div class="checklist-item"><span class="check" style="color:var(--red);">✗</span> المبالغة في الاستنتاجات خارج نطاق البيانات</div>
+<div class="checklist-item"><span class="check" style="color:var(--red);">✗</span> تجاهل القيود</div>
+<div class="checklist-item"><span class="check" style="color:var(--red);">✗</span> علاج الأهمية الإحصائية كأهمية سريرية</div>
+<div class="checklist-item"><span class="check" style="color:var(--red);">✗</span> الفشل في معالجة عدم التجانس</div>
+<div class="checklist-item"><span class="check" style="color:var(--red);">✗</span> تقديم ادعاءات سببية من بيانات الرصد</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<p class="story-opener">ماذا لو حذرت ورقة المنهجية الأكثر استشهاداً بها والتي تم نشرها على الإطلاق من أن معظم نتائج الأبحاث خاطئة؟</p>
+<div class="real-data-box">
+<h4>البيانات الحقيقية</h4>
+<p>تم الاستشهاد بمقالة جون إيوانيديس المنشورة عام 2005 في PLoS Medicine بعنوان "لماذا تكون معظم نتائج الأبحاث المنشورة خاطئة"؟ <span class="data-highlight">10,000 مرة</span>. باستخدام النمذجة الرياضية، قال إن احتمالية صحة نتائج البحث تعتمد على قوة الدراسة والتحيز وعدد العلاقات التي تم اختبارها. بالنسبة للعديد من تصميمات الأبحاث، يمكن أن يكون احتمال التوصل إلى نتيجة حقيقية بعد الدراسة أقل من 50%.</p>
+</div>
+<div class="decision-tree">
+<div class="decision-tree-header">نداء إيقاظ يوانيديس: 2005</div>
+<div class="decision-scenario">يحتوي التحليل التلوي الخاص بك على نتيجة ذات دلالة إحصائية، ولكن الدراسات المشمولة صغيرة وغير متجانسة، والعديد منها معرض لخطر التحيز بشكل كبير. كيف تكتب المناقشة؟</div>
+<div class="decision-paths">
+<div class="decision-path path-a" role="button" tabindex="0">
+<div class="path-label">المسار أ: الإفراط في بيع النتيجة</div>
+<div class="path-choice">قم بالتقدير المجمع المهم؛ تقليل القيود؛ تقديم توصيات ممارسة قوية</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">تدخل النتيجة في المبادئ التوجيهية قبل الأوان. عندما يفشل النسخ المتماثل، يتم إلقاء اللوم على أسلوب التحليل التلوي بأكمله</div>
+<div class="path-outcome">النتيجة: تآكل الثقة في تركيب الأدلة</div>
+</div>
+<div class="decision-path path-b" role="button" tabindex="0">
+<div class="path-label">المسار ب: معايرة التفسير</div>
+<div class="path-choice">مناقشة النتيجة في سياق جودة الدراسة، وعدم التجانس، واليقين؛ مطابقة قوة التوصية مع قوة الأدلة</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">يفهم القراء درجة الثقة المضمونة؛ أصبحت أولويات البحث المستقبلية واضحة</div>
+<div class="path-outcome">النتيجة: استنتاجات متناسبة وجديرة بالثقة</div>
+</div>
+</div>
+</div>
+<div class="story-revelation">
+<div class="revelation-label">الرؤيا</div>
+<div class="revelation-text">يجب أن معايرة المناقشة الحماس لجودة الأدلة. إن الادعاءات القوية من الأدلة الضعيفة تضر بمصداقية المجال بأكمله.</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  "المناقشة ليست من أجل المناصرة.<br/>
+                  إنها من أجل تفسير صادق.<br/>
+                  قل ما تظهره الأدلة.<br/>
+                  اعترف بما لا يظهر."
+                </div>
+</div>
+</div>
+</div>
+ ==================== الوحدة 18: الشفافية ================= 
+<div class="module-slides" data-module="18">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  ألم تسمع عن ويكفيلد ورقة،<br/>
+                  حيث تم إخفاء تضارب المصالح،<br/>
+                  حيث تم تلفيق البيانات،<br/>
+                  وذهب ملايين الأطفال <em>غير مطعمة</em>?
+                </div>
+</div>
+</div>
+<div class="slide blood">
+<div class="content text-center">
+<div class="title red animate">احتيال التوحد</div>
+<div class="story-card red animate delay-1">
+<div class="place">لانسيت، 1998-2010</div>
+<div class="narrative">
+                    نشر أندرو ويكفيلد دراسة تربط لقاح MMR بمرض التوحد.
+                    <br/><br/>
+                    لم يفصح عن أنه <strong>دفع 435.643 جنيهًا إسترلينيًا من قبل المحامين</strong>
+                    تسعى لمقاضاة الشركات المصنعة للقاحات.
+                    <br/><br/>
+                    ولم يفصح عن أنه كان <strong>قدم براءة اختراع</strong>
+                    للقاح الحصبة المتنافس بجرعة واحدة.
+                    <br/><br/>
+                    تم سحب الدراسة في نهاية المطاف من قبل ويكفيلد، لكن الضرر وقع: <strong>انخفضت معدلات التطعيم</strong>، وعادت حالات تفشي مرض الحصبة.
+                  </div>
+<div class="source">الغزلان ب. BMJ. 2011;342:c5347</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">قائمة التحقق من الشفافية</div>
+<div class="checklist animate delay-1">
+<h4>ماذا تعلن</h4>
+<div class="checklist-item"><span class="check">□</span> رقم تسجيل البروتوكول</div>
+<div class="checklist-item"><span class="check">□</span> مصادر التمويل (الكل)</div>
+<div class="checklist-item"><span class="check">□</span> دور الممول في المراجعة</div>
+<div class="checklist-item"><span class="check">□</span> تضارب المصالح (جميع المؤلفين)</div>
+<div class="checklist-item"><span class="check">□</span> توفر البيانات. بيان</div>
+<div class="checklist-item"><span class="check">□</span> الانحرافات عن البروتوكول (مع الأسباب)</div>
+<div class="checklist-item"><span class="check">□</span> مساهمات المؤلف</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<div class="story-title">مبادرة AllTrials</div>
+<div class="story-period">2013 إلى الوقت الحاضر | حركة شعبية للشفافية</div>
+<div class="story-narrative">
+                    في عام 2013، أطلق Ben Goldacre وزملاؤه في Cochrane Collaboration AllTrials بعد اكتشاف حقيقة مزعجة: <strong>ما يقرب من نصف جميع التجارب السريرية لم يتم نشرها قط</strong>كانت التجارب المفقودة بشكل غير متناسب هي تلك التي كانت ذات نتائج سلبية أو غير مريحة.
+                    <br/><br/>
+                    جمعت الحملة <strong>أكثر من 90,000 موقع فردي</strong> وأكثر من 700 منظمة وطالبت بتسجيل جميع التجارب السابقة والمستقبلية، مع الأساليب والنتائج الكاملة تم الإبلاغ عنه.
+                    <br/><br/>
+                    كان التأثير تحويليًا. <strong>يتطلب الاتحاد الأوروبي الآن تسجيل التجارب والإبلاغ عن النتائج</strong>. عززت إدارة الغذاء والدواء متطلباتها الخاصة. بدأت المجلات تطالب بالتسجيل المحتمل. وما بدأ كدعوة أصبح سياسة عالمية.
+                  </div>
+<div class="story-lesson">
+<div class="lesson-label">الدرس</div>
+<div class="lesson-text">المطالبة بالوصول إلى البيانات تعمل على تغيير اللوائح الدولية - مما يثبت أن دعاة الشفافية يمكنهم إعادة تشكيل النظام البيئي للأدلة.</div>
+</div>
+<div class="decision-tree" style="margin-top:0.6rem;">
+<div class="decision-tree-header">هيدروكسي كلوروكين. تتالي الطباعة المسبقة: 2020</div>
+<div class="decision-scenario">إننا في أوائل عام 2020. لدى فريقك نتائج التحليل التلوي الأولي بشأن علاج كوفيد-19. لقد انتشرت بالفعل نسخة Gautret (غير العشوائية، 42 مريضًا) وستعرض فضيحة Surgisphere قريبًا بيانات ملفقة في المجلات الكبرى انتظر؟</div>
+<div class="decision-paths">
+<div class="decision-path path-a" role="button" tabindex="0">
+<div class="path-label">المسار أ: الطباعة المسبقة للسرعة</div>
+<div class="path-choice">انشر على الفور إلى medRxiv للتأثير على السياسة؛ وتخطي مراجعة النظراء من أجل الاستعجال</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">إذا كانت الدراسات المشمولة تحتوي على بيانات ملفقة أو طرق معيبة، فإن التحليل التلوي الخاص بك يضخم أخطاء التراجع؛ المصداقية</div>
+<div class="path-outcome">النتيجة: معلومات خاطئة متسارعة</div>
+</div>
+<div class="decision-path path-b" role="button" tabindex="0">
+<div class="path-label">المسار ب: التحقق، ثم النشر</div>
+<div class="path-choice">تقييم جودة الدراسة بدقة؛ الاتصال بالمؤلفين للحصول على البيانات الأولية؛ الخضوع لمراجعة سريعة من قبل النظراء قبل النشر</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">أبطأ في النشر، لكن التحليل قوي ويبقى عند سحب الدراسات المعيبة</div>
+<div class="path-outcome">النتيجة: متينة وجديرة بالثقة؛ الدليل</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  "الشفافية ليست اختيارية.<br/>
+                  أعلن عن تمويلك. أعلن عن تعارضاتك.<br/>
+                  ومن حق القارئ أن يعرف<br/>
+                  من دفع مقابل هذا العمل - ولماذا."
+                </div>
+</div>
+</div>
+</div>
+ ==================== الوحدة 19: الفحص النهائي =============== 
+<div class="module-slides" data-module="19">
+<div class="slide gradient active">
+<div class="content text-center">
+<div class="title gold animate">قبل الإرسال</div>
+<div class="subtitle animate delay-1">قائمة المراجعة النهائية</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">الفحص النهائي لبريسما 2020</div>
+<div class="checklist animate delay-1">
+<h4>هل...</h4>
+<div class="checklist-item"><span class="check">□</span> هل أكملت جميع عناصر قائمة PRISMA المرجعية البالغ عددها 27 عنصرًا؟</div>
+<div class="checklist-item"><span class="check">□</span> هل تم تضمين مخطط تدفق PRISMA؟</div>
+<div class="checklist-item"><span class="check">□</span> قدمت استراتيجية البحث الكاملة في الملحق؟</div>
+<div class="checklist-item"><span class="check">□</span> هل أدرجت الدراسات المستبعدة مع الأسباب؟</div>
+<div class="checklist-item"><span class="check">□</span> هل تم الإبلاغ عن خطر التحيز لكل دراسة؟</div>
+<div class="checklist-item"><span class="check">□</span> قطعة أرض (أراضي) الغابات المقدمة؟</div>
+<div class="checklist-item"><span class="check">□</span> تقييم تحيز النشر (إذا كانت ≥10 دراسات)؟</div>
+<div class="checklist-item"><span class="check">□</span> اليقين المتدرج للأدلة (GRADE)؟</div>
+<div class="checklist-item"><span class="check">□</span> أعلن جميع تضارب المصالح؟</div>
+<div class="checklist-item"><span class="check">□</span> تسجيل البروتوكول المذكور؟</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">المواد التكميلية</div>
+<div class="simple-box animate delay-1">
+<div class="simple-title">ما الذي يجب تضمينه</div>
+<div class="simple-text">
+                    • <strong>استراتيجيات البحث الكاملة</strong> لجميع قواعد البيانات<br/>
+                    • <strong>قائمة الدراسات المستبعدة</strong> مع الأسباب<br/>
+                    • <strong>استخراج البيانات النماذج</strong> (فارغة ومكتملة)<br/>
+                    • <strong>خطر تفاصيل التحيز</strong> لكل دراسة<br/>
+                    • <strong>قطع أراضي الغابات الإضافية</strong> (المجموعات الفرعية، الحساسية)<br/>
+                    • <strong>مخطط القمع</strong> والاختبارات الإحصائية<br/>
+                    • <strong>ملف تعريف أدلة الدرجات</strong> الجداول
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<p class="story-opener">إلى متى يمكن للورقة الاحتيالية أن تنجو من مراجعة النظراء، والتدقيق التحريري، التحدي العام؟</p>
+<div class="real-data-box">
+<h4>البيانات الحقيقية</h4>
+<p>تناولت ورقة لانسيت الصادرة في عام 1998 والتي كتبها أندرو ويكفيلد والتي تربط لقاح MMR بالتوحد <span class="data-highlight">12 سنة</span> سيتم سحبه بالكامل (2010). خلال تلك الفترة، كشف الصحفي بريان دير عن صراعات مالية وانتهاكات أخلاقية وتلاعب بالبيانات. دراسات كبيرة متعددة (بما في ذلك مجموعة دنماركية من <span class="data-highlight">أكثر من 650,000 طفل</span>) لم يجدوا أي ارتباط، ومع ذلك استمر تأثير الورقة الأصلية.</p>
+</div>
+<div class="decision-tree">
+<div class="decision-tree-header">تراجع ويكفيلد: 1998-2010</div>
+<div class="decision-scenario">أثناء مراجعة النظراء، أثار أحد المراجعين مخاوف جدية بشأن دراسة مدرجة في التحليل التلوي الخاص بك، مشيرًا إلى عدم اتساق البيانات. كيف ترد؟</div>
+<div class="decision-paths">
+<div class="decision-path path-a" role="button" tabindex="0">
+<div class="path-label">المسار أ: صرف الانتباه عن القلق</div>
+<div class="path-choice">تجاهل مخاوف المراجع باعتبارها حذرة بشكل مفرط؛ احتفظ بالدراسة متضمنة دون مزيد من الاستقصاء</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">إذا تم سحب الدراسة لاحقًا، فقد يكون التحليل التلوي الخاص بك ملوثًا</div>
+<div class="path-outcome">النتيجة: أدلة ملوثة؛ التوليف</div>
+</div>
+<div class="decision-path path-b" role="button" tabindex="0">
+<div class="path-label">المسار ب: التحقيق بدقة</div>
+<div class="path-choice">اتصل بمؤلفي الدراسة للحصول على البيانات الأولية؛ قم بتشغيل تحليل الحساسية باستثناء الدراسة المشكوك فيها؛ واكشف عن المخاوف بشفافية</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">التحليل التلوي الخاص بك قوي لإدراج أو استبعاد الدراسة المشتبه فيها موثق</div>
+<div class="path-outcome">النتيجة: مرنة وتصحيح ذاتي؛ المراجعة</div>
+</div>
+</div>
+</div>
+<div class="story-revelation">
+<div class="revelation-label">الرؤيا</div>
+<div class="revelation-text">إن مراجعة النظراء هي دفاعك الأخير قبل النشر. تعامل مع مخاوف المراجعين باعتبارها فرصًا لتعزيز عملك، وليس عقبات يجب التغلب عليها.</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide hope">
+<div class="content text-center">
+<div class="refrain hope animate">
+                  "لقد جمعت الأدلة.<br/>
+                  لقد قمت بوزنها بشكل عادل.<br/>
+                  لقد كتبتها بشفافية.<br/>
+<br/>
+                  الآن أرسل عملك —<br/>
+                  واسمح بالعثور على الحقيقة، والعثور عليها مرة أخرى."
+                </div>
+</div>
+</div>
+</div>
+ =========== الوحدة 20: الاختبار والمراجع ====================================================================== 
+<div class="module-slides" data-module="20">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="title gold animate">مراجع</div>
+<div class="references animate delay-1">
+<h4>المصادر الرئيسية</h4>
+<ol>
+<li>صفحة MJ et al. بي إم جيه. 2021;372:ن71. [بريسما 2020]</li>
+<li>جيفرسون تي وآخرون. كوكرين 201;4:CD008965. [تاميفلو]</li>
+<li>تيرنر EH وآخرون. ن إنجل ي ميد. 2008;358:252-260. [مضادات الاكتئاب]</li>
+<li>بوترون الأول وآخرون. جاما. 2010;303:2058-2064. [تدور]</li>
+<li>توبول إي جيه. ن إنجل ي ميد. 2004;351:1707-1709. [فيوكس]</li>
+<li>دير بي. بي إم جي. 2011;342:c5347. [ويكفيلد]</li>
+<li>ستيرن جاك وآخرون. بي إم جيه. 2019;366:l4898. [RoB 2]</li>
+<li>هيجينز JPT وآخرون. دليل كوكرين. 2023.</li>
+<li>شونمان إتش جيه وآخرون. دليل الصف. 2013.</li>
+<li>إيوانيديس JPA. بلوس ميد. 2005;2:e124. [لماذا معظم الأبحاث خاطئة]</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="quiz-container animate">
+<div class="quiz-question">ما هي النسبة المئوية للتجارب المضادة للاكتئاب التي بدت إيجابية في الأدبيات المنشورة مقابل بيانات إدارة الغذاء والدواء؟</div>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkAnswer(this, false)">تم النشر 51%، FDA 94%</div>
+<div class="quiz-option" onclick="checkAnswer(this, true)">تم النشر 94%، FDA 51%</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)">كلاهما حوالي 75%</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)">منشور 80%، إدارة الغذاء والدواء 60%</div>
+</div>
+<div class="quiz-feedback"></div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="quiz-container animate">
+<div class="quiz-question">ما هو الغرض من تسجيل البروتوكول قبل إجراء مراجعة منهجية؟</div>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkAnswer(this, false)">للحصول على التمويل</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)">للمطالبة بالأولوية</div>
+<div class="quiz-option" onclick="checkAnswer(this, true)">لمنع تبديل النتائج والقرارات المستندة إلى البيانات</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)">لإجراء المراجعة قابلة للنشر</div>
+</div>
+<div class="quiz-feedback"></div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="quiz-container animate">
+<div class="quiz-question">متى يجب عدم تجميع الدراسات في التحليل التلوي؟</div>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkAnswer(this, false)">عندما يكون هناك أقل من 10 دراسات</div>
+<div class="quiz-option" onclick="checkAnswer(this, true)">عندما تكون الدراسات غير متجانسة سريريًا أو منهجيًا</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)">عندما لا يكون التأثير إحصائيًا هام</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)">عندما تكون الدراسات من بلدان مختلفة</div>
+</div>
+<div class="quiz-feedback"></div>
+</div>
+</div>
+</div>
+<div class="slide hope">
+<div class="content text-center">
+<div class="big-number green animate" style="font-size:3rem;">✔</div>
+<div class="title green animate delay-1">اكتملت الدورة</div>
+<div class="gold-line animate delay-2"></div>
+<div class="refrain hope animate delay-3">
+                  "أنت تعرف الآن ميثاق الأدلة:<br/>
+                  سجل قبل البحث.<br/>
+                  بحث شامل. اختر بشفافية.<br/>
+                  استخراج بعناية. تقييم التحيز بصدق.<br/>
+                  تجمع بحكمة - أو لا في الكل.<br/>
+                  أكتب حتى تجد الحقيقة<br/>
+                  فيجدها أيضًا الذين يتبعون."
+                </div>
+</div>
+</div>
+</div>
+ ================================ 
+<div class="module-slides" data-module="21">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  الطرق ليست شيئًا بدون الأدوات اللازمة لتنفيذها.
+                  <br/><br/>
+                  والتي سيحمل البرنامج تحليلك<br/>
+                  من البروتوكول إلى <em>مؤامرة الغابة</em>?
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">شجرة قرارات البرمجيات</div>
+<div class="decision-tree animate delay-1">
+<h4>اختيار أدواتك</h4>
+<div class="tree-row"><div class="tree-node root">برامج التحليل التلوي</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">السياق الخاص بك؟</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">مراجعة كوكرين</div>
+<div class="tree-node action">RevMan<small>مجاني، رسمي</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">أكاديمي / مرن</div>
+<div class="tree-node action">استعارة R<small>مجاني وقوي</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">رخصة المؤسسة</div>
+<div class="tree-node action">ستاتا ميتا<small>شامل</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">أشر وانقر</div>
+<div class="tree-node action">CMA<small>سهل الاستخدام</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">مجموعة الأدوات الأساسية</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box" style="background:var(--blue);">
+<div class="stat-value" style="color:white;font-size:1rem;">RevMan</div>
+<div class="stat-label">مسؤول كوكرين<br/>تحميل مجاني</div>
+</div>
+<div class="stat-box" style="background:var(--purple);">
+<div class="stat-value" style="color:white;font-size:1rem;">R + الاستعارة</div>
+<div class="stat-label">الأكثر مرونة<br/>رمز قابل للتكرار</div>
+</div>
+<div class="stat-box" style="background:var(--teal);">
+<div class="stat-value" style="color:var(--navy);font-size:1rem;">غريد برو</div>
+<div class="stat-label">جداول اليقين<br/>جداول SoF</div>
+</div>
+<div class="stat-box" style="background:var(--orange);">
+<div class="stat-value" style="color:white;font-size:1rem;">الريان</div>
+<div class="stat-label">أداة الفرز<br/>بمساعدة الذكاء الاصطناعي</div>
+</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">إمكانية التكرار</div>
+<div class="simple-text">
+                    يتم إنشاء الأدوات المستندة إلى التعليمات البرمجية (R، Stata). <strong>تحليلات قابلة للتكرار</strong>. شارك الرمز الخاص بك حتى يتمكن الآخرون من التحقق من عملك.
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">مثال استعارة R</div>
+<div class="simple-box animate delay-1" style="text-align: right;font-family:monospace;font-size:0.7rem;">
+<div class="simple-title">تحليل ميتا أساسي في R</div>
+<div class="simple-text">
+                    مكتبة (استعارة)<br/><br/>
+                    # حساب أحجام التأثير<br/>
+                    dat &lt;- escalc(measure="RR", ai=events_tx, bi=noevents_tx,<br/>
+                        ci=events_ctrl، di=noevents_ctrl، data=mydata)<br/><br/>
+                    # نموذج التأثيرات العشوائية<br/>
+                    الدقة &lt;- rma(yi, vi, data=dat,method="REML")<br/><br/>
+                    # قطعة أرض الغابة<br/>
+                    غابة (الدقة، بلاطة = لصق (المؤلف، السنة))
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<p class="story-opener">كيف يمكنك تنسيق الكتابة عندما يكون للمراجعة المنهجية عشرات المؤلفين؟</p>
+<div class="real-data-box">
+<h4>البيانات الحقيقية</h4>
+<p>تجربة SPRINT (2015) المذكورة أعلاه <span class="data-highlight">100 مؤلف</span> من عشرات المؤسسات. ضمت مجموعة الكتابة لجنة توجيهية ومحققين في الموقع وإحصائيين. يتطلب تنسيق المساهمات وإدارة التحكم في الإصدار وتحديد رصيد التأليف هياكل رسمية. تحدد معايير ICMJE التأليف على أنه يتطلب مساهمة كبيرة، أو صياغة أو مراجعة، أو موافقة نهائية، أو مساءلة.</p>
+</div>
+<div class="decision-tree">
+<div class="decision-tree-header">تحديات كتابة الفريق: مراجعات تعاونية كبيرة</div>
+<div class="decision-scenario">يضم فريق المراجعة المنهجية الخاص بك 12 عضوًا في 4 دول. كيف تدير عملية الكتابة؟</div>
+<div class="decision-paths">
+<div class="decision-path path-a" role="button" tabindex="0">
+<div class="path-label">المسار أ: التنسيق غير الرسمي</div>
+<div class="path-choice">تمرير المسودات عبر البريد الإلكتروني؛ حل التأليف في النهاية؛ لا توجد خطة للكتابة أو التحكم في الإصدار</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">ازدواجية الجهود؛ نزاعات التأليف عند التقديم؛ صوت وتنسيق غير متناسقين؛ المساهمات المفقودة</div>
+<div class="path-outcome">النتيجة: التأخير والصراع</div>
+</div>
+<div class="decision-path path-b" role="button" tabindex="0">
+<div class="path-label">المسار ب: عملية منظمة</div>
+<div class="path-choice">تعيين يؤدي القسم مقدما؛ استخدام الأنظمة الأساسية المشتركة مع التحكم في الإصدار؛ الموافقة على معايير ICMJE وأمر التأليف في البداية</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">مساءلة واضحة؛ إخراج متسق؛ مساهمات شفافة؛ تقرر التأليف قبل معرفة النتائج</div>
+<div class="path-outcome">النتيجة: تعاون فعال وعادل</div>
+</div>
+</div>
+</div>
+<div class="story-revelation">
+<div class="revelation-label">الرؤيا</div>
+<div class="revelation-text">الاتفاق على معايير التأليف ومسؤوليات الكتابة قبل بدء العمل. من الصعب حل النزاعات بعد معرفة النتائج.</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  "الأداة لا تقوم بالتحليل.<br/>
+                  يفعل المحلل.<br/>
+                  لكن اختر أداتك بحكمة —<br/>
+                  وشارك الكود الخاص بك حتى يمكن التحقق من الحقيقة."
+                </div>
+</div>
+</div>
+</div>
+ ==================== الوحدة 22: قراءة التحليلات الوصفية ==================================================================== 
+<div class="module-slides" data-module="22">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  لا يكتب الجميع التحليلات التلوية.
+                  <br/><br/>
+                  ولكن يجب على كل طبيب، وكل صانع سياسات، وكل مريض<br/>
+                  أن يعرف كيفية <em>read</em> هم.
+                </div>
+</div>
+</div>
+<div class="slide blood">
+<div class="content text-center">
+<div class="title red animate">عكس HRT</div>
+<div class="story-card red animate delay-1">
+<div class="place">مبادرة صحة المرأة، 2002</div>
+<div class="narrative">
+                    على مدى عقود، أشارت الدراسات الرصدية إلى أن العلاج بالهرمونات البديلة (HRT) يحمي النساء من أمراض القلب.
+                    <br/><br/>
+                    وأظهرت التحليلات التلوية لهذه الدراسات أ <strong>تقليل مخاطر الإصابة بأمراض القلب والأوعية الدموية بنسبة 35-50%</strong>.
+                    <br/><br/>
+                    ثم كشفت تجربة WHI العشوائية عن الحقيقة: العلاج التعويضي بالهرمونات <strong>زيادة</strong> خطر الإصابة بالنوبات القلبية بنسبة 29%.
+                    <br/><br/>
+                    قامت التحليلات الوصفية الرصدية بتجميع <strong>بيانات مشوشة</strong>— النساء الأكثر صحة اختارن العلاج التعويضي بالهرمونات، وليس العكس.
+                  </div>
+<div class="source">Rossouw JE et al. جاما. 2002;288:321-333</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">كيفية قراءة قطعة أرض في الغابة</div>
+<div class="decision-tree animate delay-1">
+<h4>دليل المستهلك</h4>
+<div class="tree-row"><div class="tree-node root">قراءة مؤامرة الغابة</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node blue">خط ليس له أي تأثير<small>RR=1 or MD=0</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node action">موقف الماس<small>اليسار = المنفعة، اليمين = الأذى</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node warning">عرض الماس<small>ضيق = دقيق</small></div>
+</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">هل الماس يعبر الخط؟</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node yes">No<small>ذات دلالة إحصائية</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node no">Yes<small>ليست كبيرة</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">الأعلام الحمراء عند القراءة</div>
+<div class="checklist animate delay-1">
+<h4>علامات التحذير في التحليلات الوصفية المنشورة</h4>
+<div class="checklist-item"><span class="check" style="color:var(--red);">⚠</span> لم يتم الاستشهاد بتسجيل البروتوكول</div>
+<div class="checklist-item"><span class="check" style="color:var(--red);">⚠</span> بحثت في قاعدة بيانات واحدة</div>
+<div class="checklist-item"><span class="check" style="color:var(--red);">⚠</span> لا يوجد خطر لتقييم التحيز</div>
+<div class="checklist-item"><span class="check" style="color:var(--red);">⚠</span> ارتفاع I² ولكن لا يوجد تحقيق</div>
+<div class="checklist-item"><span class="check" style="color:var(--red);">⚠</span> تم تجاهل مؤامرة القمع غير المتماثلة</div>
+<div class="checklist-item"><span class="check" style="color:var(--red);">⚠</span> تمويل الصناعة، لا يوجد تحليل للحساسية</div>
+<div class="checklist-item"><span class="check" style="color:var(--red);">⚠</span> الاستنتاجات تتجاوز الأدلة</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">ماذا تعني تقييمات الصف</div>
+<div class="simple-box animate delay-1">
+<div class="simple-title">للأطباء والمرضى</div>
+<div class="simple-text">
+<strong style="color:var(--green);">عالي:</strong> نحن واثقون جدًا. من غير المرجح أن يتغير البحث المستقبلي.<br/><br/>
+<strong style="color:var(--gold);">معتدل:</strong> ربما قريب من الحقيقة. البحوث المستقبلية قد تغير التقدير.<br/><br/>
+<strong style="color:var(--orange);">LOW:</strong> غير مؤكد. من المرجح أن تتغير الأبحاث المستقبلية بشكل كبير.<br/><br/>
+<strong style="color:var(--red);">منخفض جدًا:</strong> غير مؤكد للغاية. أي تقدير هو المضاربة.
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  "اقرأ الغابة، وليس الماس فقط.<br/>
+                  ابحث عن البروتوكول. تحقق من التحيز.<br/>
+                  اسأل: من قام بتمويل هذا؟ ماذا أخفوا؟<br/>
+                  القارئ المستنير هو حارس الحقيقة."
+                </div>
+</div>
+</div>
+</div>
+ =========================================================================================================== الوحدة 23: 
+<div class="module-slides" data-module="23">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  ماذا لو كان يجب عليك مقارنة العلاجات<br/>
+                  التي لم يتم اختبارها وجها لوجه؟
+                  <br/><br/>
+                  هذا هو عالم <em>التحليل التلوي للشبكة</em>.
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">متى يتم استخدام Network MA</div>
+<div class="decision-tree animate delay-1">
+<h4>شجرة قرار NMA</h4>
+<div class="tree-row"><div class="tree-node root">معالجات متعددة</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">هل تتوفر مقارنات مباشرة؟</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">مقارنة جميع الأزواج مباشرة</div>
+<div class="tree-node action">MA الزوجي<small>النهج القياسي</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">بعض غير المباشرة فقط</div>
+<div class="tree-node yes">ماجستير الشبكة<small>قوة الاقتراض</small></div>
+</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node warning">التحقق من افتراض العبور<small>مجموعات سكانية مماثلة عبر المقارنات</small></div></div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">هندسة الشبكة</div>
+<div class="simple-box animate delay-1">
+<div class="simple-title">تصور الأدلة</div>
+<div class="simple-text" style="text-align:center;">
+<svg style="max-width:300px;margin:0.5rem auto;" viewbox="0 0 200 150">
+<circle cx="100" cy="30" fill="var(--gold)" r="20" stroke="var(--cream)" stroke-width="2"></circle>
+<text fill="var(--navy)" font-size="10" font-weight="bold" text-anchor="middle" x="100" y="35">A</text>
+<circle cx="40" cy="120" fill="var(--blue)" r="15" stroke="var(--cream)" stroke-width="2"></circle>
+<text fill="white" font-size="10" font-weight="bold" text-anchor="middle" x="40" y="124">B</text>
+<circle cx="160" cy="120" fill="var(--purple)" r="18" stroke="var(--cream)" stroke-width="2"></circle>
+<text fill="white" font-size="10" font-weight="bold" text-anchor="middle" x="160" y="124">C</text>
+<line stroke="var(--cream)" stroke-width="4" x1="100" x2="40" y1="50" y2="105"></line>
+<line stroke="var(--cream)" stroke-width="6" x1="100" x2="160" y1="50" y2="102"></line>
+<line stroke="var(--cream)" stroke-dasharray="5,5" stroke-width="2" x1="55" x2="142" y1="120" y2="120"></line>
+</svg>
+<br/>
+<strong>العقد</strong> = المعالجات (الحجم = العينة)<br/>
+<strong>الحواف</strong> = مقارنات مباشرة (العرض = دراسات)<br/>
+<strong>متقطع</strong> = أدلة غير مباشرة فقط
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">جداول الدوري</div>
+<div class="simple-box animate delay-1">
+<div class="simple-title">قراءة نتائج NMA</div>
+<div class="simple-text">
+                    تظهر جداول الدوري <strong>جميع المقارنات الزوجية</strong> من الشبكة.
+                    <br/><br/>
+                    • كل خلية: تقدير التأثير + 95% CI<br/>
+                    • الصف مقابل العمود: المعاملة A مقابل المعالجة B<br/>
+                    • <strong style="color:var(--green);">أخضر</strong> = معاملة الصف المفضلة<br/>
+                    • <strong style="color:var(--red);">Red</strong> = معاملة العمود المفضلة<br/>
+                    • تساعد التصنيفات (SUCRA/P-score) في تحديد أفضل الخيارات
+                  </div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">الافتراض النقدي</div>
+<div class="simple-text">
+<strong>العبور:</strong> إذا تمت مقارنة A مقابل B وB مقابل C في مرضى مماثلين، فيمكننا تقدير A مقابل C بشكل غير مباشر.
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<p class="story-opener">ماذا يحدث للتحليلات الوصفية عندما يتم سحب كامل أعمال المؤلف الغزير الإنتاج؟</p>
+<div class="real-data-box">
+<h4>البيانات الحقيقية</h4>
+<p>قام يواكيم بولدت، طبيب التخدير الألماني، بسحب أكثر من <span class="data-highlight">220 ورقة</span> لتصنيع البيانات (تم اكتشافه في 2010-2011). وقد أدرجت دراساته حول المحاليل الغروانية في العديد من المراجعات المنهجية والتحليلات التلوية. وعندما جاءت عمليات التراجع، كان لا بد من إعادة تقييم كل التحليل التلوي الذي يحتوي على عمله. تغيرت بعض الاستنتاجات بشكل كبير عندما تمت إزالة بياناته الملفقة.</p>
+</div>
+<div class="decision-tree">
+<div class="decision-tree-header">سلسلة تراجع بولدت: 2010-2011</div>
+<div class="decision-scenario">اكتشفت أن دراسة مضمنة في تحليلك التلوي المنشور قد تم سحبها لتلفيق البيانات. ماذا تفعل؟</div>
+<div class="decision-paths">
+<div class="decision-path path-a" role="button" tabindex="0">
+<div class="path-label">المسار أ: الأمل ألا يلاحظه أحد</div>
+<div class="path-choice">تجاهل التراجع؛ تم نشر التحليل التلوي بالفعل وكانت الدراسة المسحوبة صغيرة</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">يستشهد آخرون بتحليلك التلوي؛ وتنتشر البيانات الملفقة من خلال الاستشهادات الثانوية؛ تستند قرارات رعاية المرضى إلى أدلة ملوثة</div>
+<div class="path-outcome">النتيجة: الضرر المتتالي الناتج عن التقاعس عن العمل</div>
+</div>
+<div class="decision-path path-b" role="button" tabindex="0">
+<div class="path-label">المسار ب: التصحيح الذاتي علنًا</div>
+<div class="path-choice">نشر تصحيح أو تحليل محدث باستثناء الدراسة المسحوبة؛ إخطار المجلة؛ اذكر ما إذا كانت الاستنتاجات قد تغيرت</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">تم تصحيح السجل العلمي؛ يرى القراء التحليل المحدث؛ يتم تعزيز سمعتك فيما يتعلق بالنزاهة</div>
+<div class="path-outcome">النتيجة: التصحيح الذاتي العلمي</div>
+</div>
+</div>
+</div>
+<div class="story-revelation">
+<div class="revelation-label">الرؤيا</div>
+<div class="revelation-text">تعتمد سلامة تجميع الأدلة على اليقظة المستمرة. عندما يتم سحب الدراسات المشمولة، فإن الواجب الأخلاقي هو التحديث والتصحيح، وليس البقاء صامتًا.</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  "عندما لا يجتمع العلاج أبدًا،<br/>
+                  تبني الشبكة جسرًا من الأدلة.<br/>
+                  لكن الجسر يرتكز على العبور<br/>
+                  التحقق من أن المجموعات السكانية قابلة للمقارنة. نماذج التنبؤ بالذكاء الاصطناعي/تعلم الآلة =====================
+                </div>
+</div>
+</div>
+</div>
+ ألم ترَ الذكاء الاصطناعي الذي تنبأ بالسرطان 
+<div class="module-slides" data-module="24">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  بدقة 99% في مجموعة التدريب—<br/>
+                  وفشل بشكل كارثي<br/>
+                  عند نشره في<br/>
+                  فشل خوارزمية الإنتان <em>العالم الحقيقي</em>?
+                </div>
+</div>
+</div>
+<div class="slide blood">
+<div class="content text-center">
+<div class="title red animate">لكن دراسة مستقلة في Michigan Medicine وجدت النموذج</div>
+<div class="story-card red animate delay-1">
+<div class="place">نموذج الإنتان الملحمي، 2021</div>
+<div class="narrative">
+                    تم نشر خوارزمية التنبؤ بالإنتان الخاصة بـ Epic في <strong>مئات المستشفيات</strong>.
+                    <br/><br/>
+                    أظهر التحقق الداخلي أداءً ممتازًا.
+                    <br/><br/>
+                    تم التحقق من صحة الخوارزمية على
+                    <strong>أخطأ 67% من حالات الإنتان</strong> وولدت إنذارات كاذبة مفرطة.
+                    <br/><br/>
+                    نفس المجموعة تم تدريبه على <strong>— وصفة للتجاوز والفشل.</strong>مستويات الأدلة لـ AI/ML
+                  </div>
+<div class="source">وونغ وآخرون. جاما المتدرب ميد. 2021;181:1065-1070</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">شجرة قرار التحقق من صحة الذكاء الاصطناعي</div>
+<div class="decision-tree animate delay-1">
+<h4>تقسيم البيانات نفسه</h4>
+<div class="tree-row"><div class="tree-node root">نموذج التنبؤ بالذكاء الاصطناعي</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">مستوى التحقق؟</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node no">داخلي فقط<small>هل هي احتمالات متوقعة دقيقة؟</small></div>
+<div class="tree-label" style="color:var(--red);">مخاطر عالية</div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node warning">زمني<small>وقت مختلف</small></div>
+<div class="tree-label" style="color:var(--orange);">متوسط</div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node action">خارجي<small>موقع مختلف</small></div>
+<div class="tree-label" style="color:var(--gold);">أحسن</div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node yes">تأثير المضبوطة<small>نتائج المرضى</small></div>
+<div class="tree-label" style="color:var(--green);">BEST</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">بروباست وترايبود</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box" style="background:var(--purple);">
+<div class="stat-value" style="color:white;font-size:0.9rem;">بروباست</div>
+<div class="stat-label">نموذج التنبؤ<br/>خطر التحيز</div>
+</div>
+<div class="stat-box" style="background:var(--blue);">
+<div class="stat-value" style="color:white;font-size:0.9rem;">ترايبود</div>
+<div class="stat-label">إعداد التقارير<br/>المبدأ التوجيهي</div>
+</div>
+<div class="stat-box" style="background:var(--teal);">
+<div class="stat-value" style="color:var(--navy);font-size:0.9rem;">ترايبود-AI</div>
+<div class="stat-label">خاص بالذكاء الاصطناعي<br/>امتداد</div>
+</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">المعايرة مقابل. تمييز</div>
+<div class="simple-text">
+<strong>إحصائية AUC/c:</strong> هل يستطيع النموذج تصنيف المرضى؟ (تمييز)<br/>
+<strong>معايرة:</strong> "تعلمت الخوارزمية من البيانات،<br/><br/>
+<em>يمكن أن يحتوي النموذج على مساحة تحت المنحني (AUC) جيدة ولكن معايرة سيئة، مما يؤدي إلى الإضرار بالمرضى.</em>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  وكانت البيانات متحيزة.<br/>
+                  ============ الوحدة 25: التواصل مع المرضى =====================<br/>
+                  وقد ثبتت صحتها على نفسها،<br/>
+                  ودعا انعكاسها الحقيقة.<br/>
+                  التحقق الخارجي ليس اختياريًا، بل هو البقاء."
+                </div>
+</div>
+</div>
+</div>
+ التحليل التلوي يتحدث بالأرقام. 
+<div class="module-slides" data-module="25">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  ولكن المريض يسمع
+                  <br/><br/>
+                  المخاوف والآمال <em>كيف ستسد الفجوة بينك وبين</em>.
+                  <br/><br/>
+                  الفجوة؟
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">ترجمة الأرقام إلى معنى</div>
+<div class="decision-tree animate delay-1">
+<h4>شجرة قرارات الاتصال</h4>
+<div class="tree-row"><div class="tree-node root">نتيجة التحليل التلوي</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">نوع حجم التأثير؟</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">قريب (RR، OR)</div>
+<div class="tree-node action">تحويل إلى NNT<small>أكثر بديهية</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">مطلق (RD)</div>
+<div class="tree-node yes">استخدم مباشرة<small>"X أقل لكل 1000"</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">مستمر (MD)</div>
+<div class="tree-node action">ضع سياقًا<small>الحد الأدنى من الفروق المهمة</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">نصوص للمرضى</div>
+<div class="story-card animate delay-1">
+<div class="place">شرح نتيجة إيجابية</div>
+<div class="narrative">
+                    "جمع البحث 15 دراسة مع 8000 مريض.
+                    <br/><br/>
+                    وجد أن هذا العلاج يقلل من خطر [النتيجة] بحوالي 30%.
+                    <br/><br/>
+                    من الناحية العملية: إذا عالجنا 100 شخص مثلك، حوالي 5 أقل سيحصلون على [النتيجة] مقارنةً بعدم العلاج.
+                    <br/><br/>
+                    نحن واثقون إلى حد ما في هذا - قد تغيره الأبحاث المستقبلية قليلاً.
+                    <br/><br/>
+                    ما هي الأسئلة التي لديك حول هذا؟"
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">أسئلة يجب أن يطرحها المرضى</div>
+<div class="checklist animate delay-1">
+<h4>تمكين المرضى</h4>
+<div class="checklist-item"><span class="number">1</span> "كم عدد الدراسات والمرضى الذين تم تضمينهم؟"</div>
+<div class="checklist-item"><span class="number">2</span> "ما مدى ثقة الباحثين في هذه النتيجة؟"</div>
+<div class="checklist-item"><span class="number">3</span> "ما هي الفوائد والأضرار؟"</div>
+<div class="checklist-item"><span class="number">4</span> "هل تم تضمين أشخاص مثلي في هذه الدراسات؟"</div>
+<div class="checklist-item"><span class="number">5</span> "من قام بتمويل هذا البحث؟"</div>
+<div class="checklist-item"><span class="number">6</span> "ماذا يعني هذا بالنسبة لموقفي المحدد؟"</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<p class="story-opener">هل يمكن لخطأ في جدول البيانات في ورقة أكاديمية أن يشكل بشكل مباشر السياسة الاقتصادية لدول بأكملها؟</p>
+<div class="real-data-box">
+<h4>البيانات الحقيقية</h4>
+<p>زعمت ورقة راينهارت وروجوف لعام 2010 أن البلدان التي يتجاوز دينها العام 1.5 مليار دولار <span class="data-highlight">90% من الناتج المحلي الإجمالي</span> شهدت انخفاضًا كبيرًا في النمو. وقد تم الاستشهاد بهذه النتيجة على نطاق واسع لتبرير سياسات التقشف في جميع أنحاء أوروبا. وفي عام 2013، اكتشف هيرندون وآش وبولين خطأً في جدول البيانات: فقد تم استبعاد العديد من البلدان عن طريق الخطأ من الحسابات. وبعد التصحيح، اختفت عتبة الـ 90% الحادة.</p>
+</div>
+<div class="decision-tree">
+<div class="decision-tree-header">تأثير سياسة راينهارت-روجوف: 2010-2013</div>
+<div class="decision-scenario">نتائج التحليل التلوي الخاص بك لها آثار سياسية واضحة. إن صناع السياسات حريصون على توجيه رسالة بسيطة. كيف تكتب ملخص السياسة؟</div>
+<div class="decision-paths">
+<div class="decision-path path-a" role="button" tabindex="0">
+<div class="path-label">المسار أ: المبالغة في التبسيط من أجل التأثير</div>
+<div class="path-choice">توفير عتبة نظيفة أو رقم العنوان؛ حذف المحاذير ونطاقات عدم اليقين لتحقيق أقصى قدر من التأثير على السياسة</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">يتم اعتماد السياسة بناءً على نتائج مبسطة؛ فعندما تظهر فروق دقيقة أو يتم العثور على أخطاء، يفقد البحث والسياسة الناتجة مصداقيتهما</div>
+<div class="path-outcome">النتيجة: سياسة مبنية على أساس هش</div>
+</div>
+<div class="decision-path path-b" role="button" tabindex="0">
+<div class="path-label">المسار ب: التواصل بنزاهة</div>
+<div class="path-choice">تقديم الأدلة مع عدم اليقين المناسب؛ تمييز النتائج القوية عن النتائج الموحية؛ تقديم ملخصات قابلة للتنفيذ تحافظ على الفروق الدقيقة</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">ويدرك صناع السياسات ما تدعمه الأدلة وأين تظل حالة عدم اليقين؛ يتم اتخاذ القرارات بالحذر المناسب</div>
+<div class="path-outcome">النتيجة: سياسة متينة قائمة على الأدلة</div>
+</div>
+</div>
+</div>
+<div class="story-revelation">
+<div class="revelation-label">الرؤيا</div>
+<div class="revelation-text">يجب أن تنقل ملخصات السياسات حالة عدم اليقين بأمانة. وقد تكتسب النتائج المبالغ في تبسيطها تأثيرا سريعا، ولكنها تنهار عند التدقيق فيها، مما يضر بالثقة في العلاقات بين السياسات البحثية.</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  "التحليل التلوي يتحدث بالأرقام.<br/>
+                  يسمع المريض في المخاوف والآمال.<br/>
+                  مهمتك هي أن تكون المترجم -<br/>
+                  أمينًا للدليل، رحيمًا بالشخص."
+                </div>
+</div>
+</div>
+</div>
+ ==================== الوحدة 26: المراجعات الحية والمستقبل ================ 
+<div class="module-slides" data-module="26">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  تلتقط المراجعة المنهجية الأدلة في لحظة من الزمن.
+                  <br/><br/>
+                  لكن العلم لا يتوقف.<br/>
+                  كيف نحافظ على الأدلة <em>على قيد الحياة</em>?
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">مراجعات منهجية حية</div>
+<div class="story-card animate delay-1">
+<div class="place">جائحة كوفيد-19، 2020-2023</div>
+<div class="narrative">
+                    أثناء الجائحة، ظهرت الأدلة بشكل أسرع من قدرة المراجعات التقليدية على تجميعها.
+                    <br/><br/>
+<strong>تم تحديث المراجعات المنهجية الحية</strong> بشكل مستمر مع الإبلاغ عن تجارب جديدة - أحيانًا في غضون أيام من النشر.
+                    <br/><br/>
+                    أنتج اتحاد COVID-NMA مراجعات حية حول العلاجات واللقاحات والتشخيصات، وقام بتحديث التوصيات في <strong>في الوقت الفعلي</strong> كما تطورت الأدلة.
+                    <br/><br/>
+                    تحول عقار هيدروكسي كلوروكين من "واعد" إلى "غير فعال" في غضون أشهر.
+                  </div>
+<div class="source">تم تعريفها بواسطة كوكرين: تحديثات مستمرة على فترات ≥ شهرية</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">متى يتم استخدام المراجعات الحية</div>
+<div class="decision-tree animate delay-1">
+<h4>شجرة قرارات المراجعة الحية</h4>
+<div class="tree-row"><div class="tree-node root">مراجعة نوع القرار</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">هل الأدلة تتطور بسرعة؟</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">نعم + أولوية عالية</div>
+<div class="tree-node yes">المراجعة الحية<small>تحديثات مستمرة</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">لا / مستقر</div>
+<div class="tree-node action">المراجعة القياسية<small>تحديث كل 2-5 سنوات</small></div>
+</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node warning">كثيفة الموارد<small>تتطلب تمويلًا مستمرًا</small></div></div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">مستقبل تركيب الأدلة</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box" style="background:var(--purple);">
+<div class="stat-value" style="color:white;font-size:0.8rem;">أتمتة</div>
+<div class="stat-label">فحص بمساعدة التعلم الآلي<br/>screening</div>
+</div>
+<div class="stat-box" style="background:var(--blue);">
+<div class="stat-value" style="color:white;font-size:0.8rem;">IPD-MA</div>
+<div class="stat-label">تجميع بيانات المريض الفردي<br/>تجميع البيانات</div>
+</div>
+<div class="stat-box" style="background:var(--teal);">
+<div class="stat-value" style="color:var(--navy);font-size:0.8rem;">العالم الحقيقي</div>
+<div class="stat-label">قائم على السجلات الصحية الإلكترونية<br/>دليل</div>
+</div>
+<div class="stat-box" style="background:var(--gold);">
+<div class="stat-value" style="color:var(--navy);font-size:0.8rem;">متكيف</div>
+<div class="stat-label">تجارب المنصة<br/>+ MA</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide hope">
+<div class="content text-center">
+<div class="refrain hope animate">
+                  "إن عهد الأدلة ليس ثابتا.<br/>
+                  إنه ينمو مع كل دراسة جديدة، ومع كل سؤال جديد.<br/>
+                  إبقاء الاستعراضات الخاصة بك على قيد الحياة.<br/>
+                  حافظ على شفافية أساليبك.<br/>
+                  اجعل الحقيقة في قلب كل ما تفعله."
+                </div>
+</div>
+</div>
+</div>
+<div class="slide-nav">
+<button class="nav-btn" onclick="prevSlide()">←</button>
+<div class="nav-center">
+<div class="slide-counter" id="slideCounter">1 / 4</div>
+<div class="progress" id="progressDots"></div>
+</div>
+<button class="nav-btn" onclick="nextSlide()">→</button>
+</div>
+</div>
+</div>
+</main>
+</div>
+<script>
+    function toggleSidebar() {
+      document.querySelector('.sidebar').classList.toggle('open');
+      var overlay = document.querySelector('.sidebar-overlay');
+      if (overlay) overlay.classList.toggle('show');
+      var btn = document.querySelector('.mobile-menu-toggle, .sidebar-toggle, .hamburger');
+      if (btn) btn.setAttribute('aria-expanded', btn.getAttribute('aria-expanded') === 'true' ? 'false' : 'true');
+    }
+
+    const modules = [
+      { id: 1, title: "البيانات المخفية", subtitle: "Tamiflu scandal", slides: 5 },
+      { id: 2, title: "العهد", subtitle: "PRISMA 2020", slides: 5 },
+      { id: 3, title: "البروتوكول", subtitle: "Pre-registration", slides: 5 },
+      { id: 4, title: "العنوان", subtitle: "First promise", slides: 4 },
+      { id: 5, title: "الملخص", subtitle: "بدون دوران", slides: 5 },
+      { id: 6, title: "السؤال", subtitle: "PICO framework", slides: 4 },
+      { id: 7, title: "البحث", subtitle: "البحث عن جميع الأدلة", slides: 5 },
+      { id: 8, title: "الاختيار", subtitle: "PRISMA flow", slides: 5 },
+      { id: 9, title: "خطر التحيز", subtitle: "RoB 2 / ROBINS-I", slides: 5 },
+      { id: 10, title: "Data Extraction", subtitle: "Getting numbers", slides: 5 },
+      { id: 11, title: "مقاييس التأثير", subtitle: "RR, OR, MD, SMD", slides: 5 },
+      { id: 12, title: "التركيب", subtitle: "ثابت مقابل عشوائي", slides: 5 },
+      { id: 13, title: "Heterogeneity", subtitle: "عندما تختلف الدراسات", slides: 5 },
+      { id: 14, title: "Publication Bias", subtitle: "درج الملفات", slides: 5 },
+      { id: 15, title: "Forest Plot", subtitle: "Visualizing results", slides: 5 },
+      { id: 16, title: "GRADE Certainty", subtitle: "ما مدى الثقة؟", slides: 5 },
+      { id: 17, title: "المناقشة", subtitle: "Interpretation", slides: 5 },
+      { id: 18, title: "Transparency", subtitle: "Conflicts & funding", slides: 5 },
+      { id: 19, title: "Final Check", subtitle: "قبل الإرسال", slides: 5 },
+      { id: 20, title: "الاختبار والمصادر", subtitle: "Test yourself", slides: 5 },
+      { id: 21, title: "Software Tools", subtitle: "RevMan, R, Stata", slides: 6 },
+      { id: 22, title: "Reading Meta-Analyses", subtitle: "Consumer's guide", slides: 6 },
+      { id: 23, title: "Network MA", subtitle: "Indirect comparisons", slides: 6 },
+      { id: 24, title: "التحقق من صحة AI/ML", subtitle: "Prediction models", slides: 5 },
+      { id: 25, title: "Patient Communication", subtitle: "Translating evidence", slides: 6 },
+      { id: 26, title: "Living Reviews", subtitle: "الاحتفاظ بالأدلة حية", slides: 5 }
+    ];
+
+    let currentModule = 1;
+    let currentSlide = 1;
+    const completedModules = new Set();
+
+    function init() {
+      renderModuleList();
+      updateSlideNav();
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowLeft' || e.key === ' ') { e.preventDefault(); nextSlide(); }
+        else if (e.key === 'ArrowRight') { e.preventDefault(); prevSlide(); }
+      });
+    }
+
+    function renderModuleList() {
+      const list = document.getElementById('moduleList');
+      list.innerHTML = modules.map(m => `
+        <div class="عنصر الوحدة ${m.id === currentModule ? 'active' : ''} ${CompletedModules.has(m.id) ؟ 'مكتمل' : ''}" onclick="goToModule(${m.id})">
+          <div class="module-number">${completedModules.has(m.id) ? '✓' : m.id}</div>
+          <div class="module-info">
+            <div class="module-title">${m.title}</div>
+            <div class="module-subtitle">${m.subtitle}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function goToModule(moduleId) {
+      if (moduleId > currentModule) completedModules.add(currentModule);
+      currentModule = moduleId;
+      currentSlide = 1;
+      document.querySelectorAll('.module-slides').forEach(el => el.classList.remove('active'));
+      document.querySelector(`.module-slides[data-module="${moduleId}"]`).classList.add('active');
+      updateSlideVisibility();
+      updateSlideNav();
+      renderModuleList();
+      document.getElementById('currentModule').textContent = modules[moduleId - 1].title;
+    }
+
+    function updateSlideVisibility() {
+      const moduleSlides = document.querySelector(`.module-slides[data-module="${currentModule}"]`);
+      const slides = moduleSlides.querySelectorAll('.slide');
+      slides.forEach((slide, index) => slide.classList.toggle('active', index + 1 === currentSlide));
+    }
+
+    function updateSlideNav() {
+      const module = modules[currentModule - 1];
+      document.getElementById('slideCounter').textContent = `${currentSlide} / ${module.slides}`;
+      document.getElementById('progressDots').innerHTML = Array.from({ length: module.slides }, (_, i) =>
+        `<div class="progress-dot ${i + 1 === currentSlide ? 'active' : ''}" onclick="goToSlide(${i + 1})"></div>`
+      ).join('');
+    }
+
+    function goToSlide(slideNum) { currentSlide = slideNum; updateSlideVisibility(); updateSlideNav(); }
+
+    function nextSlide() {
+      const module = modules[currentModule - 1];
+      if (currentSlide < module.slides) { currentSlide++; updateSlideVisibility(); updateSlideNav(); }
+      else if (currentModule < modules.length) { goToModule(currentModule + 1); }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 1) { currentSlide--; updateSlideVisibility(); updateSlideNav(); }
+      else if (currentModule > 1) {
+        const prevModuleSlides = modules[currentModule - 2].slides;
+        currentModule--;
+        currentSlide = prevModuleSlides;
+        document.querySelectorAll('.module-slides').forEach(el => el.classList.remove('active'));
+        document.querySelector(`.module-slides[data-module="${currentModule}"]`).classList.add('active');
+        updateSlideVisibility();
+        updateSlideNav();
+        renderModuleList();
+        document.getElementById('currentModule').textContent = modules[currentModule - 1].title;
+      }
+    }
+
+    function checkAnswer(element, isCorrect) {
+      const container = element.closest('.quiz-container');
+      const options = container.querySelectorAll('.quiz-option');
+      const feedback = container.querySelector('.quiz-feedback');
+      options.forEach(opt => { opt.style.pointerEvents = 'none'; if (opt === element) opt.classList.add(isCorrect ? 'correct' : 'incorrect'); });
+      feedback.classList.add('show', isCorrect ? 'correct' : 'incorrect');
+      feedback.textContent = isCorrect ? 'صحيح. لقد تعلمت جيدا.' : 'ليس تمامًا. فكر في القصص التي سمعتها.';
+    }
+
+    init();
+  </script>
+</body>
+</html>

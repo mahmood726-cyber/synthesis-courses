@@ -1,0 +1,3276 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Advanced Meta-Analysis: Beyond the Basics</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&amp;family=Source+Sans+Pro:wght@300;400;600;700&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+<script>
+if (typeof Plotly === 'undefined') {
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('[id*="plot"], [id*="chart"], .plotly-graph-div, .js-plotly-plot').forEach(function(el) {
+      el.innerHTML = '<div style="padding:2rem;text-align:center;background:#2a2a4a;border:1px dashed #D4AF37;border-radius:8px;color:#FAF8F5;margin:1rem 0;"><p style="font-size:1.1rem;margin-bottom:0.5rem;">Interactive chart unavailable offline</p><p style="font-size:0.85rem;opacity:0.7;">Connect to the internet to load interactive Plotly.js visualizations</p></div>';
+    });
+  });
+}
+</script>
+<style>
+    :root {
+      --navy: #1E2761;
+      --deep-navy: #141B3D;
+      --gold: #D4AF37;
+      --cream: #FAF8F5;
+      --light-cream: #FFFFFF;
+      --text: #2D3748;
+      --light-text: #718096;
+      --red: #C53030;
+      --green: #22c55e;
+      --teal: #0f5b6a;
+      --purple: #7c3aed;
+      --orange: #f59e0b;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      height: 100%;
+      font-family: 'Source Sans Pro', sans-serif;
+      background: var(--deep-navy);
+      color: var(--cream);
+    }
+    .course-container { display: flex; height: 100vh; overflow: hidden; }
+    .sidebar {
+      width: 320px;
+      background: linear-gradient(180deg, var(--deep-navy) 0%, #0a0f1a 100%);
+      border-right: 1px solid rgba(212,175,55,0.2);
+      display: flex; flex-direction: column; flex-shrink: 0;
+    }
+    .sidebar-header { padding: 1.5rem; border-bottom: 1px solid rgba(212,175,55,0.2); }
+    .sidebar-header h1 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.4rem; font-weight: 700; color: var(--gold); margin-bottom: 0.25rem;
+    }
+    .sidebar-header p { font-size: 0.75rem; color: rgba(255,255,255,0.6); }
+    .sidebar-badge {
+      display: inline-block; padding: 0.25rem 0.5rem;
+      background: linear-gradient(135deg, var(--purple), #9333ea);
+      border-radius: 4px; font-size: 0.65rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.05em; margin-top: 0.5rem;
+    }
+    .module-list { flex: 1; overflow-y: auto; padding: 1rem 0; }
+    .module-item {
+      display: flex; align-items: center; gap: 0.75rem;
+      padding: 0.65rem 1.25rem; cursor: pointer; transition: all 0.2s;
+      border-left: 3px solid transparent;
+    }
+    .module-item:hover { background: rgba(212,175,55,0.1); }
+    .module-item.active { background: rgba(212,175,55,0.15); border-left-color: var(--gold); }
+    .module-item.completed .module-number { background: var(--green); color: white; }
+    .module-number {
+      width: 26px; height: 26px; border-radius: 50%;
+      background: rgba(255,255,255,0.1); display: flex;
+      align-items: center; justify-content: center;
+      font-size: 0.75rem; font-weight: 600; flex-shrink: 0;
+    }
+    .module-info { flex: 1; min-width: 0; }
+    .module-title { font-size: 0.85rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .module-subtitle { font-size: 0.7rem; color: rgba(255,255,255,0.5); }
+    .sidebar-footer { padding: 1rem; border-top: 1px solid rgba(212,175,55,0.2); }
+    .progress-dashboard-btn {
+      width: 100%; padding: 0.75rem;
+      background: rgba(212,175,55,0.15); border: 1px solid rgba(212,175,55,0.3);
+      border-radius: 8px; color: var(--gold); font-weight: 600; cursor: pointer;
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;
+    }
+    .progress-bar-container { margin-top: 0.75rem; }
+    .progress-label { font-size: 0.75rem; color: rgba(255,255,255,0.6); margin-bottom: 0.25rem; }
+    .progress-bar { height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, var(--purple), var(--gold)); border-radius: 3px; transition: width 0.3s; }
+    .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .top-bar {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1rem 2rem; background: rgba(0,0,0,0.2);
+      border-bottom: 1px solid rgba(212,175,55,0.15);
+    }
+    .module-indicator { font-size: 0.9rem; color: rgba(255,255,255,0.7); }
+    .overall-progress { font-size: 0.8rem; color: var(--gold); margin-left: 1rem; }
+    .top-bar-actions { display: flex; gap: 0.75rem; }
+    .top-bar-btn {
+      padding: 0.5rem 1rem; background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2); border-radius: 6px;
+      color: var(--cream); font-size: 0.85rem; cursor: pointer; transition: all 0.2s;
+    }
+    .top-bar-btn:hover { background: rgba(255,255,255,0.15); }
+    .top-bar-btn.primary { background: var(--purple); border-color: var(--purple); }
+    .slide-container { flex: 1; overflow-y: auto; padding: 2rem; }
+    .slide { display: none; max-width: 1000px; margin: 0 auto; }
+    .slide.active { display: block; }
+
+    /* Storytelling Styles */
+    .rhetoric-question {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.6rem; font-style: italic; color: var(--gold);
+      text-align: center; padding: 2rem; line-height: 1.5;
+      border-top: 1px solid rgba(212,175,55,0.3);
+      border-bottom: 1px solid rgba(212,175,55,0.3);
+      margin: 1.5rem 0;
+    }
+    .contrast-container { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0; }
+    .contrast-box {
+      padding: 1.25rem; border-radius: 12px;
+    }
+    .contrast-box.wrong {
+      background: linear-gradient(135deg, rgba(197,48,48,0.15), rgba(30,39,97,0.1));
+      border-left: 4px solid var(--red);
+    }
+    .contrast-box.right {
+      background: linear-gradient(135deg, rgba(34,197,94,0.15), rgba(30,39,97,0.1));
+      border-left: 4px solid var(--green);
+    }
+    .contrast-title { font-weight: 700; margin-bottom: 0.5rem; }
+    .contrast-box.wrong .contrast-title { color: var(--red); }
+    .contrast-box.right .contrast-title { color: var(--green); }
+    .oath-statement {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.4rem; color: var(--cream); text-align: center;
+      padding: 1.5rem; background: rgba(0,0,0,0.3);
+      border-radius: 8px; margin: 1rem 0; line-height: 1.6;
+    }
+    .oath-statement em { color: var(--gold); font-style: normal; }
+    .revelation-sequence {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(212,175,55,0.2);
+      border-radius: 12px; padding: 1.5rem; margin: 1rem 0;
+    }
+    .revelation-step {
+      padding: 1rem; margin: 0.5rem 0;
+      border-left: 3px solid rgba(255,255,255,0.2);
+      transition: all 0.3s;
+    }
+    .revelation-step.revealed {
+      border-left-color: var(--gold);
+      background: rgba(212,175,55,0.1);
+    }
+    .revelation-step .step-number {
+      font-size: 0.75rem; color: var(--gold);
+      text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem;
+    }
+    .cycle-return {
+      background: linear-gradient(135deg, rgba(124,58,237,0.2), rgba(212,175,55,0.1));
+      border: 2px dashed rgba(212,175,55,0.4);
+      border-radius: 12px; padding: 1.25rem; margin: 1.5rem 0;
+      text-align: center;
+    }
+    .cycle-return .principle-recall {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.3rem; font-style: italic; color: var(--gold);
+    }
+    .vivid-consequence {
+      background: linear-gradient(135deg, rgba(197,48,48,0.2), rgba(0,0,0,0.3));
+      border-radius: 12px; padding: 1.5rem; margin: 1rem 0;
+      border-left: 5px solid var(--red);
+    }
+    .vivid-consequence .death-toll {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 2.5rem; font-weight: 700; color: var(--red);
+      text-align: center; margin: 1rem 0;
+    }
+    .vivid-consequence .toll-label {
+      text-align: center; font-size: 0.9rem; color: rgba(255,255,255,0.7);
+    }
+
+    /* Standard content styles */
+    .principle-display { text-align: center; margin-bottom: 2rem; }
+    .principle-text {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 2rem; font-style: italic; color: var(--gold); line-height: 1.4;
+    }
+    .slide-title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 2.2rem; color: var(--gold); margin-bottom: 1.5rem; text-align: center;
+    }
+    .slide-content {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(212,175,55,0.15);
+      border-radius: 12px; padding: 2rem;
+    }
+    .story-box {
+      background: linear-gradient(135deg, rgba(124,58,237,0.15), rgba(30,39,97,0.2));
+      border-left: 4px solid var(--purple);
+      border-radius: 0 12px 12px 0; padding: 1.5rem; margin-bottom: 1.5rem;
+    }
+    .story-label {
+      font-size: 0.75rem; text-transform: uppercase;
+      letter-spacing: 0.1em; color: var(--purple); margin-bottom: 0.5rem;
+    }
+    .story-text { font-size: 1.1rem; line-height: 1.7; color: var(--cream); }
+    .story-hook {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.3rem; font-style: italic; color: var(--gold);
+      margin-top: 1rem; padding-top: 1rem;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+    .method-box {
+      background: linear-gradient(135deg, rgba(15,91,106,0.15), rgba(30,39,97,0.1));
+      border-left: 4px solid var(--teal);
+      border-radius: 0 12px 12px 0; padding: 1.5rem; margin: 1.5rem 0;
+    }
+    .method-label {
+      font-size: 0.75rem; text-transform: uppercase;
+      letter-spacing: 0.1em; color: var(--teal); margin-bottom: 0.5rem;
+    }
+    .method-content h3 { color: var(--cream); margin-bottom: 1rem; font-size: 1.2rem; }
+    .method-content ul { margin-left: 1.5rem; color: rgba(255,255,255,0.85); }
+    .method-content li { margin-bottom: 0.5rem; line-height: 1.5; }
+    .tool-panel {
+      background: var(--light-cream);
+      border-radius: 12px; padding: 1.5rem; margin: 1.5rem 0; color: var(--text);
+    }
+    .tool-header {
+      display: flex; align-items: center; gap: 0.75rem;
+      margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 2px solid var(--purple);
+    }
+    .tool-icon { font-size: 1.5rem; }
+    .tool-title { font-weight: 700; font-size: 1.1rem; color: var(--navy); }
+    .tool-controls { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem; }
+    .tool-control { display: flex; flex-direction: column; gap: 0.25rem; }
+    .tool-control label { font-size: 0.8rem; font-weight: 600; color: var(--navy); }
+    .tool-control input, .tool-control select {
+      padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 0.9rem;
+    }
+    .tool-btn {
+      padding: 0.6rem 1.25rem; background: var(--purple); color: white;
+      border: none; border-radius: 6px; font-weight: 600; cursor: pointer;
+    }
+    .tool-btn:hover { background: #6d28d9; }
+    .plot-area { width: 100%; min-height: 400px; background: white; border-radius: 8px; }
+
+    /* Warning boxes */
+    .warning-box {
+      background: linear-gradient(135deg, rgba(245,158,11,0.2), rgba(30,39,97,0.1));
+      border: 2px solid var(--orange);
+      border-radius: 12px; padding: 1.25rem; margin: 1rem 0;
+    }
+    .warning-box .warning-title {
+      display: flex; align-items: center; gap: 0.5rem;
+      font-weight: 700; color: var(--orange); margin-bottom: 0.5rem;
+    }
+
+    /* Clinical guide box */
+    .clinical-guide {
+      background: linear-gradient(135deg, rgba(34,197,94,0.15), rgba(30,39,97,0.1));
+      border: 2px solid var(--green);
+      border-radius: 12px; padding: 1.5rem; margin: 1.5rem 0;
+    }
+    .clinical-guide .guide-title {
+      display: flex; align-items: center; gap: 0.5rem;
+      font-weight: 700; color: var(--green); margin-bottom: 1rem;
+      font-size: 1.1rem;
+    }
+    .clinical-checklist { list-style: none; margin: 0; padding: 0; }
+    .clinical-checklist li {
+      padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.1);
+      display: flex; align-items: flex-start; gap: 0.5rem;
+    }
+    .clinical-checklist li::before {
+      content: "✓"; color: var(--green); font-weight: 700;
+    }
+
+    /* Story deep dive */
+    .story-deep {
+      background: linear-gradient(135deg, rgba(124,58,237,0.1), rgba(30,39,97,0.15));
+      border-left: 4px solid var(--purple);
+      border-radius: 0 16px 16px 0; padding: 1.5rem; margin: 1.5rem 0;
+    }
+    .story-timeline { position: relative; padding-left: 2rem; margin: 1rem 0; }
+    .story-timeline::before {
+      content: ''; position: absolute; left: 8px; top: 0; bottom: 0;
+      width: 2px; background: rgba(255,255,255,0.2);
+    }
+    .timeline-event { position: relative; margin-bottom: 1.25rem; padding-left: 1rem; }
+    .timeline-event::before {
+      content: ''; position: absolute; left: -1.5rem; top: 0.35rem;
+      width: 12px; height: 12px; border-radius: 50%;
+      background: var(--gold); border: 2px solid rgba(255,255,255,0.3);
+    }
+    .timeline-event.crisis::before { background: var(--red); }
+    .timeline-event.revelation::before { background: var(--green); }
+    .timeline-year { font-weight: 700; color: var(--gold); font-size: 0.85rem; }
+    .timeline-text { color: rgba(255,255,255,0.9); line-height: 1.5; margin-top: 0.25rem; }
+    .real-data-card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(212,175,55,0.3);
+      border-radius: 12px; padding: 1.25rem; margin: 1rem 0;
+    }
+    .real-data-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 1rem; padding-bottom: 0.75rem;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .real-data-source { font-size: 0.75rem; color: rgba(255,255,255,0.6); }
+    .real-data-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+    .real-data-stat { display: flex; flex-direction: column; }
+    .real-data-stat .value {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.4rem; font-weight: 700; color: var(--gold);
+    }
+    .real-data-stat .label { font-size: 0.8rem; color: rgba(255,255,255,0.7); }
+
+    /* Quiz styles */
+    .quiz-container {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(212,175,55,0.2);
+      border-radius: 12px; padding: 1.5rem; margin: 1.5rem 0;
+    }
+    .quiz-question { font-size: 1.1rem; margin-bottom: 1rem; line-height: 1.5; }
+    .quiz-options { display: flex; flex-direction: column; gap: 0.5rem; }
+    .quiz-option {
+      padding: 0.75rem 1rem; background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.2); border-radius: 8px;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .quiz-option:hover { background: rgba(255,255,255,0.1); }
+    .quiz-option.selected { border-color: var(--gold); background: rgba(212,175,55,0.1); }
+    .quiz-option.correct { border-color: var(--green); background: rgba(34,197,94,0.15); }
+    .quiz-option.incorrect { border-color: var(--red); background: rgba(239,68,68,0.1); }
+    .quiz-check-btn {
+      margin-top: 1rem; padding: 0.75rem 1.5rem;
+      background: var(--gold); color: var(--navy);
+      border: none; border-radius: 6px; font-weight: 600; cursor: pointer;
+    }
+    .quiz-explanation {
+      margin-top: 1rem; padding: 1rem;
+      background: rgba(212,175,55,0.1); border-radius: 8px; display: none;
+    }
+    .quiz-explanation.visible { display: block; }
+
+    /* Decision tree */
+    .decision-tree {
+      background: linear-gradient(135deg, rgba(30,39,97,0.1), rgba(20,27,61,0.15));
+      border: 2px solid rgba(212,175,55,0.3);
+      border-radius: 16px; padding: 1.5rem; margin: 1.5rem 0;
+    }
+    .decision-node {
+      background: rgba(255,255,255,0.08);
+      border: 2px solid rgba(255,255,255,0.2);
+      border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem;
+    }
+    .decision-node.active { border-color: var(--gold); background: rgba(212,175,55,0.15); }
+    .decision-question { font-size: 1.1rem; font-weight: 600; color: var(--cream); margin-bottom: 1rem; }
+    .decision-branches { display: flex; flex-direction: column; gap: 0.5rem; }
+    .decision-branch {
+      display: flex; align-items: center; gap: 0.75rem;
+      padding: 0.75rem 1rem; background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.15); border-radius: 8px;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .decision-branch:hover { background: rgba(255,255,255,0.1); border-color: var(--gold); }
+    .decision-branch.selected { background: rgba(212,175,55,0.2); border-color: var(--gold); }
+    .branch-arrow {
+      width: 24px; height: 24px; border-radius: 50%;
+      background: rgba(212,175,55,0.3); display: flex;
+      align-items: center; justify-content: center; font-size: 0.8rem; flex-shrink: 0;
+    }
+    .decision-outcome {
+      margin-top: 1rem; padding: 1rem; border-radius: 8px; display: none;
+    }
+    .decision-outcome.visible { display: block; animation: fadeIn 0.3s ease; }
+    .decision-outcome.good { background: rgba(34,197,94,0.15); border-left: 4px solid var(--green); }
+    .decision-outcome.bad { background: rgba(197,48,48,0.15); border-left: 4px solid var(--red); }
+    .decision-outcome.neutral { background: rgba(245,158,11,0.15); border-left: 4px solid var(--orange); }
+
+    /* Scenario */
+    .scenario-panel {
+      background: linear-gradient(135deg, rgba(124,58,237,0.1), rgba(30,39,97,0.2));
+      border: 2px solid rgba(124,58,237,0.4);
+      border-radius: 16px; padding: 1.5rem; margin: 1.5rem 0;
+    }
+    .scenario-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; }
+    .scenario-icon { font-size: 1.5rem; }
+    .scenario-title { font-weight: 700; font-size: 1.1rem; color: var(--cream); }
+    .scenario-situation {
+      background: rgba(0,0,0,0.2); padding: 1rem;
+      border-radius: 8px; margin-bottom: 1rem; line-height: 1.6;
+    }
+    .scenario-question { font-weight: 600; color: var(--gold); margin-bottom: 1rem; }
+    .scenario-choices { display: flex; flex-direction: column; gap: 0.5rem; }
+    .scenario-choice {
+      display: flex; align-items: flex-start; gap: 0.75rem;
+      padding: 0.75rem 1rem; background: rgba(255,255,255,0.05);
+      border: 2px solid rgba(255,255,255,0.15); border-radius: 8px;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .scenario-choice:hover { background: rgba(255,255,255,0.1); border-color: rgba(124,58,237,0.5); }
+    .scenario-choice.correct { background: rgba(34,197,94,0.15); border-color: var(--green); }
+    .scenario-choice.incorrect { background: rgba(239,68,68,0.1); border-color: var(--red); }
+    .choice-letter {
+      width: 24px; height: 24px; border-radius: 50%;
+      background: rgba(124,58,237,0.3); display: flex;
+      align-items: center; justify-content: center;
+      font-weight: 700; font-size: 0.8rem; flex-shrink: 0;
+    }
+    .scenario-result { margin-top: 1rem; padding: 1rem; border-radius: 8px; display: none; }
+    .scenario-result.visible { display: block; }
+    .scenario-result.good { background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.3); }
+    .scenario-result.bad { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); }
+    .scenario-result.neutral { background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.3); }
+
+    /* Navigation */
+    .slide-nav {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1rem 2rem; background: rgba(0,0,0,0.2);
+      border-top: 1px solid rgba(212,175,55,0.15);
+    }
+    .nav-btn {
+      padding: 0.75rem 1.5rem; background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2); border-radius: 8px;
+      color: var(--cream); font-weight: 600; cursor: pointer; transition: all 0.2s;
+    }
+    .nav-btn:hover { background: rgba(255,255,255,0.15); }
+    .nav-btn.primary { background: var(--gold); border-color: var(--gold); color: var(--navy); }
+    .nav-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .slide-counter { font-size: 0.9rem; color: rgba(255,255,255,0.6); text-align: center; }
+
+    /* Dashboard */
+    .dashboard-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+      display: none; align-items: center; justify-content: center; z-index: 1000;
+    }
+    .dashboard-overlay.open { display: flex; }
+    .dashboard-panel {
+      background: var(--light-cream); border-radius: 16px;
+      width: 90%; max-width: 600px; max-height: 80vh;
+      overflow-y: auto; color: var(--text);
+    }
+    .dashboard-header {
+      padding: 1.5rem; background: linear-gradient(135deg, var(--purple), var(--teal));
+      color: white; border-radius: 16px 16px 0 0; position: relative;
+    }
+    .dashboard-header h2 { font-family: 'Cormorant Garamond', Georgia, serif; margin-bottom: 0.5rem; }
+    .close-btn {
+      position: absolute; top: 1rem; right: 1rem;
+      width: 32px; height: 32px; border-radius: 50%;
+      background: rgba(255,255,255,0.2); border: none;
+      color: white; font-size: 1.2rem; cursor: pointer;
+    }
+    .dashboard-content { padding: 1.5rem; }
+    .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+    .stat-card { text-align: center; padding: 1rem; background: #f7fafc; border-radius: 8px; }
+    .stat-card .stat-value { font-size: 1.8rem; font-weight: 700; color: var(--navy); }
+    .stat-card .stat-label { font-size: 0.75rem; color: var(--light-text); text-transform: uppercase; }
+
+    /* Glossary */
+    .glossary-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+      display: none; align-items: center; justify-content: center; z-index: 1000;
+    }
+    .glossary-overlay.open { display: flex; }
+    .glossary-panel {
+      background: var(--light-cream); border-radius: 16px;
+      width: 90%; max-width: 700px; max-height: 80vh;
+      overflow-y: auto; color: var(--text);
+    }
+    .glossary-header {
+      padding: 1.5rem; background: var(--navy);
+      color: white; border-radius: 16px 16px 0 0; position: relative;
+    }
+    .glossary-search {
+      width: 100%; padding: 0.75rem; border: none;
+      border-radius: 8px; font-size: 1rem; margin-top: 1rem;
+    }
+    .glossary-content { padding: 1.5rem; }
+    .glossary-term { padding: 1rem 0; border-bottom: 1px solid #eee; }
+    .glossary-term strong { color: var(--purple); }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-in { animation: fadeIn 0.4s ease; }
+    .mobile-menu-toggle{display:none;position:fixed;top:12px;left:12px;z-index:1001;background:#1E2761;border:1px solid #D4AF37;color:#D4AF37;width:40px;height:40px;border-radius:8px;font-size:1.2rem;cursor:pointer;align-items:center;justify-content:center;}
+    @media(max-width:768px){.mobile-menu-toggle{display:flex;}.sidebar{transform:translateX(-100%);transition:transform 0.3s ease;position:fixed;z-index:1000;height:100vh;}.sidebar.open{transform:translateX(0);}.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:999;}.sidebar-overlay.show{display:block;}}
+    .skip-link{position:absolute;top:-40px;left:0;background:#D4AF37;color:#1E2761;padding:8px 16px;z-index:100;transition:top 0.3s;font-family:'Source Sans Pro',sans-serif;text-decoration:none;font-weight:600;}.skip-link:focus{top:0;}
+
+    /* Focus-visible styles for keyboard navigation */
+    :focus-visible {
+      outline: 2px solid var(--gold, #D4AF37);
+      outline-offset: 2px;
+    }
+
+    :focus:not(:focus-visible) {
+      outline: none;
+    }
+
+    button:focus-visible,
+    a:focus-visible,
+    [role="button"]:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible {
+      outline: 2px solid var(--gold, #D4AF37);
+      outline-offset: 2px;
+      box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.3);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<button aria-expanded="false" aria-label="Toggle navigation menu" class="mobile-menu-toggle" onclick="toggleSidebar()">☰</button>
+<div class="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show');"></div>
+<div class="course-container">
+<nav class="sidebar">
+<div class="sidebar-header">
+<a href="index.html" onmouseout="this.style.color='rgba(212,175,55,0.7)'" onmouseover="this.style.color='#D4AF37'" style="display:block;font-size:0.7rem;color:rgba(212,175,55,0.7);text-decoration:none;margin-bottom:0.5rem;">← Course Library</a>
+<h1>Advanced Meta-Analysis</h1>
+<p>기본을 넘어서</p>
+<span class="sidebar-badge">Advanced Level</span>
+</div>
+<div aria-label="코스 탐색" class="module-list" id="moduleList"></div>
+<div class="sidebar-footer">
+<button class="progress-dashboard-btn" onclick="openDashboard()">
+<span>📊 Progress Dashboard</span>
+<span id="sidebarPoints">0 pts</span>
+</button>
+<div class="progress-bar-container">
+<div class="progress-label">Progress: <span id="progressPercent">0%</span></div>
+<div class="progress-bar">
+<div class="progress-fill" id="progressFill" style="width: 0%"></div>
+</div>
+</div>
+</div>
+</nav>
+<main class="main-content" id="main-content">
+<div class="top-bar">
+<div>
+<span class="module-indicator" id="moduleIndicator">모듈 0: 게이트웨이</span>
+<span class="overall-progress" id="overallProgress">Overall: 0%</span>
+</div>
+<div class="top-bar-actions">
+<button class="top-bar-btn" onclick="openGlossary()">📖 Glossary</button>
+<button class="top-bar-btn primary" onclick="goToNextModule()">Next Module →</button>
+</div>
+</div>
+<div class="slide-container" id="slideContainer"></div>
+<div class="slide-nav">
+<button class="nav-btn" id="prevBtn" onclick="prevSlide()">← Previous</button>
+<div class="slide-counter">
+<span id="slideCounter">1 / 10</span>
+</div>
+<button class="nav-btn primary" id="nextBtn" onclick="nextSlide()">Next →</button>
+</div>
+</main>
+</div>
+<!-- Dashboard -->
+<div class="dashboard-overlay" id="progressDashboard">
+<div class="dashboard-panel">
+<div class="dashboard-header">
+<button class="close-btn" onclick="closeDashboard()">×</button>
+<h2>Your Progress</h2>
+<p id="levelBadge">Level 1: Apprentice Methodologist</p>
+</div>
+<div class="dashboard-content">
+<div class="stat-grid">
+<div class="stat-card">
+<div class="stat-value" id="totalPoints">0</div>
+<div class="stat-label">Points</div>
+</div>
+<div class="stat-card">
+<div class="stat-value" id="modulesCompleted">0/9</div>
+<div class="stat-label">Modules</div>
+</div>
+<div class="stat-card">
+<div class="stat-value" id="toolsUsed">0</div>
+<div class="stat-label">Tools Used</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Glossary -->
+<div class="glossary-overlay" id="glossaryOverlay">
+<div class="glossary-panel">
+<div class="glossary-header">
+<button class="close-btn" onclick="closeGlossary()">×</button>
+<h2>Glossary of Terms</h2>
+<input class="glossary-search" id="glossarySearch" oninput="filterGlossary()" placeholder="Search terms..." type="text"/>
+</div>
+<div class="glossary-content" id="glossaryContent"></div>
+</div>
+</div>
+<script>
+function toggleSidebar() {
+  const sidebar = document.querySelector('.sidebar');
+  const overlay = document.querySelector('.sidebar-overlay');
+  const toggle = document.querySelector('.mobile-menu-toggle');
+  if (!sidebar) return;
+  const isOpen = sidebar.classList.toggle('open');
+  if (overlay) overlay.classList.toggle('show', isOpen);
+  if (toggle) toggle.setAttribute('aria-expanded', String(isOpen));
+}
+
+// ============================================================
+// GLOSSARY DATA
+// ============================================================
+const glossaryTerms = [
+  { term: "Network Meta-Analysis (NMA)", def: "직접적인 증거와 간접적인 증거를 결합하여 직접 비교 임상시험이 존재하지 않는 경우에도 여러 치료법을 동시에 비교하는 통계적 방법입니다." },
+  { term: "Transitivity", def: "서로 다른 비교에 있는 환자가 충분히 유사(교환 가능)하다는 가정은 공유 비교를 통한 간접 비교가 유효합니다. 수학적 속성이 아니라 환자 모집단에 관한 것입니다." },
+  { term: "Consistency", def: "직접적 증거(직접 임상시험에서 나온)와 간접적인 증거(네트워크를 통해 추론됨) 간의 일치입니다. 불일치는 잠재적인 문제를 나타냅니다." },
+  { term: "SUCRA", def: "누적 순위 곡선 아래의 표면입니다. NMA의 확률 기반 순위 측정항목입니다. 경고: 치료에 신뢰할 수 있는 간격이 겹치는 경우 오해의 소지가 있을 수 있습니다." },
+  { term: "IPD Meta-Analysis", def: "개별 환자 데이터 메타 분석. 게시된 요약 대신 원시 환자 수준 데이터를 사용합니다. 하위 그룹 효과를 탐지하기 위한 최적의 표준." },
+  { term: "One-stage vs Two-stage", def: "Two approaches to IPD analysis. One-stage models all patients together; two-stage analyzes each study then combines. One-stage better separates within-study from across-study effects." },
+  { term: "Ecological Fallacy", def: "연구 수준 연관성을 가정하는 오류는 환자 수준 관계를 반영합니다. 노인 환자를 대상으로 한 연구에서 더 작은 효과가 나타났다고 해서 노인이 더 적은 혜택을 받는 것은 아닙니다." },
+  { term: "HSROC", def: "계층적 요약 ROC 곡선. 진단 테스트 정확도 메타 분석에서 기본 ROC 곡선을 모델링하여 연구 전반의 임계값 변화를 고려합니다." },
+  { term: "Bivariate Model", def: "DTA 메타 분석에서는 민감도와 특이성이 함께 모델링되어 임계값 차이로 인해 연구 전반에서 (음의) 상관 관계가 있음을 인식합니다." },
+  { term: "Prior Distribution", def: "베이지안 분석에서는 데이터를 보기 전에 우리가 믿었던 것을 나타냅니다. 가능성(데이터)과 결합하여 사후(업데이트된 믿음)을 생성합니다." },
+  { term: "Posterior Distribution", def: "베이지안 분석에서 이전 믿음과 관찰된 데이터를 결합한 후 업데이트된 확률 분포입니다. 직접적인 확률 설명을 허용합니다." },
+  { term: "MASEM", def: "메타 분석 구조 방정식 모델링. 연구 전반에 걸쳐 상관관계 매트릭스를 풀링한 다음 SEM을 적합하게 하여 이론적 경로와 조정을 테스트합니다." },
+  { term: "Dose-Response Meta-Analysis", def: "단순한 '노출 대 비노출' 비교가 아닌 노출/용량 수준과 결과 사이의 관계를 모델링합니다." },
+  { term: "Greenland-Longnecker Method", def: "공통 참조를 공유하는 연구 내 용량별 추정치 간의 상관관계를 적절하게 설명하는 용량-반응 MA 기술 그룹." },
+  { term: "Umbrella Review", def: "체계적인 검토/메타 분석에 대한 체계적인 검토입니다. 중복성, 합의성을 평가하고 신뢰성 기준을 적용하여 증거 환경을 매핑합니다." },
+  { term: "GRADE-NMA / CINeMA", def: "네트워크 메타 분석을 위한 GRADE의 확장입니다. 표준 5개 GRADE 도메인에 비전환성 및 비일관성에 대한 도메인을 추가합니다." },
+  { term: "Prediction Interval", def: "새 연구/설정에서 실제 효과가 떨어질 가능성이 있는 범위입니다. 이질성을 포함하므로 신뢰 구간보다 넓습니다." },
+  { term: "Node-splitting", def: "Technique to check NMA consistency by comparing direct vs indirect estimates for each comparison separately." }
+];
+
+// ============================================================
+// ADVANCED PRINCIPLES - NARRATIVE STORYTELLING STYLE
+// ============================================================
+const advancedPrinciples = [
+  { num: 1, text: "The network reveals what pairs cannot see", short: "Network" },
+  { num: 2, text: "In each patient lies a truth the average conceals", short: "IPD" },
+  { num: 3, text: "To diagnose is not to treat; the curve tells what the number hides", short: "DTA" },
+  { num: 4, text: "이전에 알고 있던 내용이 증거 테이블에 위치합니다.", short: "Bayesian" },
+  { num: 5, text: "경로는 끝점이 모호하게 하는 것을 밝혀줍니다", short: "MASEM" },
+  { num: 6, text: "용량은 독이 되고 치료법은", short: "Dose-Response" },
+  { num: 7, text: "합성됩니다 합성, 먼저 모르는 것을 알라", short: "Umbrella" }
+];
+
+// ============================================================
+// MODULES DATA - NARRATIVE STORYTELLING STYLE
+// ============================================================
+const modules = [
+  // MODULE 0: THE GATEWAY
+  {
+    id: 0,
+    title: "The Gateway",
+    subtitle: "Beyond Pairwise Comparison",
+    principle: null,
+    slides: [
+      {
+        type: 'title',
+        content: {
+          title: "Advanced Meta-Analysis",
+          subtitle: "복잡한 증거 합성 방법",
+          text: "기초를 마스터하셨습니다. 이제 기본이 건드릴 수 없는 질문에 답하는 방법을 알아보세요."
+        }
+      },
+      {
+        type: 'rhetoric',
+        content: {
+          question: "21가지 항우울제에 직면했지만 둘 중 하나를 선택할 방법이 없었던 임상의를 생각해 보셨나요?"
+        }
+      },
+      {
+        type: 'story',
+        content: {
+          label: "불가능한 선택의 이야기",
+          text: "In 2009, a psychiatrist stood before her patient. Twenty-one antidepressants lay available. Traditional meta-analyses compared each to placebo—but placebo was not the question. She needed to know: which drug for THIS patient? Five hundred trials existed. None compared all twenty-one. The evidence was scattered across isolated pairwise prisons, each trial a locked cell that could not speak to its neighbors.",
+          hook: "세포가 연결될 수 있다면 어떨까요? A와 B, B와 C를 비교하는 증거가 A와 C를 말할 수 있다면 어떨까요? 이것이 여러분이 성취하기 위해 배우게 될 약속입니다."
+        }
+      },
+      {
+        type: 'content',
+        content: {
+          title: "7가지 고급 원칙",
+          sections: [
+            {
+              heading: "What You Will Master:",
+              items: [
+                "1. 네트워크 — 쌍이 보이지 않을 때 네트워크는",
+                "2를 드러냅니다. 개인 — 각 환자에게는 평균이 숨기는 진실이 있습니다",
+                "3. 진단 — 곡선은 단일 숫자가 무엇을 숨기고 있는지 알려줍니다.",
+                "4. 이전 — 이전에 알고 있던 내용이 테이블에 속합니다",
+                "5. 경로 — 엔드포인트뿐만 아니라 메커니즘도 중요합니다",
+                "6. 복용량 — 단지 이익이나 해악이 아닌 곡선의 모양",
+                "7. THE UMBRELLA — Synthesis of syntheses requires humility"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        type: 'content',
+        content: {
+          title: "시작하기 전에",
+          sections: [
+            {
+              heading: "Prerequisites — Do not proceed without these:",
+              items: [
+                "✓ 고정 및 무작위 효과 메타 분석을 이해합니다",
+                "✓ You can interpret forest plots, funnel plots, heterogeneity metrics",
+                "✓ 확실성 평가를 위한 GRADE 프레임워크를 알고 있습니다",
+                "✓ 체계적인 검색을 수행했으며 편향 위험이 있습니다. 평가",
+                "✓ 종합에 따른 책임감을 느낍니다."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        type: 'oath',
+        content: {
+          text: "By the <em>522 trials</em> that Cipriani synthesized, by the <em>450,000 women</em> whose data EBCTCG gathered, by the <em>50,000 deaths</em> that flawed synthesis has caused — you will learn these methods not for cleverness, but for the patients whose lives depend on your rigor."
+        }
+      }
+    ]
+  },
+
+  // MODULE 1: THE NETWORK
+  {
+    id: 1,
+    title: "The Network",
+    subtitle: "Network Meta-Analysis",
+    principle: 0,
+    slides: [
+      {
+        type: 'principle',
+        content: {
+          text: "The network reveals what pairs cannot see"
+        }
+      },
+      {
+        type: 'rhetoric',
+        content: {
+          question: "Cipriani가 21개 항우울제의 순위를 어떻게 매겼는지 생각해 보셨나요? 단일 임상시험에서 모두 비교하지 않았나요? 각 약물은 위약에 대해 테스트되었으며 위약은 직접 비교 시험에서는 결코 수행되지 않은 것과 연결되었습니다."
+        }
+      },
+      {
+        type: 'story-deep',
+        content: {
+          label: "계시: CIPRIANI의 네트워크",
+          source: "Lancet 2018; 391:1357-1366 | 522 trials | 116,477 patients",
+          timeline: [
+            { year: "The Darkness", text: "Twenty-one antidepressants. Hundreds of trials. No single study compared them all. Clinicians prescribed by habit, by marketing, by guess.", type: "normal" },
+            { year: "2009", text: "Cipriani는 공유 비교를 통해 117개의 시험을 연결합니다. 첫 번째 네트워크에서는 일부 약물이 확실히 더 우수하다는 점을 밝힙니다. 불가능한 순위가 가능해집니다.", type: "revelation" },
+            { year: "2018", text: "The network expands: 522 trials, 116,477 patients. Every drug compared to every other. Agomelatine, escitalopram, mirtazapine rise. Reboxetine, trazodone fall.", type: "revelation" },
+            { year: "The Light", text: "Guidelines worldwide update. Patients receive better drugs. What individual trials could never show, the network revealed.", type: "revelation" }
+          ],
+          realData: {
+            trials: "522 double-blind RCTs",
+            patients: "116,477",
+            treatments: "21 antidepressants",
+            topEfficacy: "Amitriptyline (OR 2.13)",
+            topTolerability: "Agomelatine (dropout OR 0.84)"
+          },
+          hook: "Consider: No single trial compared amitriptyline to agomelatine. Yet through the network of shared comparators, their relative merits emerged. The network saw what no pair could see."
+        }
+      },
+      {
+        type: 'contrast',
+        content: {
+          title: "Two Understandings of Transitivity",
+          wrong: {
+            title: "수학적 오류",
+            text: "If A > B and B > C, then A > C. Simple algebra! Just connect the comparisons mathematically."
+          },
+          right: {
+            title: "진정한 이해",
+            text: "전환성은 숫자가 아닌 환자에 관한 것입니다. A-vs-B 시험의 환자를 B-vs-C 시험의 환자와 교환할 수 있습니까? 둘 중 하나에 등록되었을 수도 있나요? 그렇지 않은 경우 연결이 실패합니다."
+          }
+        }
+      },
+      {
+        type: 'story-deep',
+        content: {
+          label: "전이성 위반: THROMBOLYTICS",
+          source: "정의: Caldwell et al. BMJ 2005 — 급성 심근경색에 대한 혈전용해제의 네트워크 메타 분석을 비이동성",
+          timeline: [
+            { year: "The Setup", text: "정의한 사례. 여러 약물을 스트렙토키나제(SK)와 비교하고, 일부는 서로 비교했습니다. 네트워크는 최고의 에이전트를 밝혀야 합니다.", type: "normal" },
+            { year: "The Finding", text: "직접적인 증거: ISIS-3 및 GISSI-2 시험에서 tPA와 SK는 차이가 없음을 보여주었습니다. 다른 비교를 통한 간접적인 증거는 tPA가 SK보다 더 우수함을 시사했습니다.", type: "normal" },
+            { year: "The Explanation", text: "ISIS-3 및 GISSI-2는 헤파린 없이 tPA를 느린 주입으로 제공했습니다. 다른 시험에서는 헤파린과 함께 가속 tPA를 사용했습니다. '동일한 치료'는 실제로 다른 치료였습니다.", type: "crisis" },
+            { year: "The Lesson", text: "Transitivity failed because trial designs differed systematically. Patients weren't exchangeable—protocols weren't comparable. The network's indirect path saw a DIFFERENT drug.", type: "revelation" }
+          ],
+          realData: {
+            directRR: "tPA vs SK direct: RR 1.00 (0.91-1.10)",
+            indirectRR: "tPA vs SK indirect: RR 0.77 (0.65-0.92)",
+            inconsistency: "p = 0.007 for disagreement",
+            cause: "Protocol differences (infusion rate, heparin use)"
+          },
+          hook: "연결되어서는 안 되는 시험을 연결했기 때문에 네트워크는 존재하지 않았던 것을 보았습니다. 전이성은 통계적 연결이 아니라 임상적 비교에 관한 것입니다."
+        }
+      },
+      {
+        type: 'method',
+        content: {
+          label: "THE METHOD",
+          title: "Conducting Network Meta-Analysis",
+          sections: [
+            {
+              heading: "1단계: 네트워크 매핑",
+              text: "Identify all treatments. Define what counts as 'same' (doses? formulations?). Draw the network: nodes are treatments, edges are direct comparisons. A dense network with many connections is strong. A sparse star (all vs placebo) relies heavily on transitivity."
+            },
+            {
+              heading: "Step 2: Assess Transitivity (BEFORE analysis)",
+              text: "Plot patient characteristics across comparisons. Do A-vs-B trials enroll similar patients as B-vs-C trials? Check: age, severity, comorbidities, setting, outcome timing. If they differ systematically, the network may mislead."
+            },
+            {
+              heading: "3단계: 모델 적합",
+              text: "이질성을 설명하기 위한 무작위 효과. 베이지안 접근 방식은 복잡한 계층 구조를 자연스럽게 처리합니다. 모델은 모든 쌍별 비교를 동시에 추정합니다."
+            },
+            {
+              heading: "Step 4: Check Consistency (AFTER analysis)",
+              text: "Node-splitting: For each comparison with both direct and indirect evidence, compare them. If they disagree substantially, transitivity is violated somewhere. Report the disagreement—don't hide it."
+            },
+            {
+              heading: "5단계: 겸손하게 순위 지정",
+              text: "SUCRA 또는 P-점수는 순위를 요약합니다. 하지만: 신뢰 구간이 겹치는 순위는 의미 있는 차이가 없습니다. 전체 사후 분포를 보고합니다. 불확실성이 여러 순위에 걸쳐 있을 때 '약물 X가 최고'라고 주장하지 마십시오."
+            }
+          ]
+        }
+      },
+      {
+        type: 'warning',
+        content: {
+          title: "⚠️ SUCRA 함정",
+          text: "SUCRA values can look decisive when they're not. Drug A: SUCRA 78%. Drug B: SUCRA 72%. The naive say 'A is better!' But if their 95% credible intervals for rank both span 1-8, the difference is noise. ALWAYS examine the rank probability distribution. NEVER report SUCRA without credible intervals."
+        }
+      },
+      {
+        type: 'tool-network',
+        content: {
+          id: 'network-visualizer',
+          title: "Network Geometry Visualizer",
+          description: "Build and analyze treatment networks. See how connections enable indirect comparisons."
+        }
+      },
+      {
+        type: 'decision-tree',
+        content: {
+          title: "불일치 딜레마",
+          situation: "You've completed a network meta-analysis of five blood pressure medications. Node-splitting reveals a problem: Direct evidence for Drug A vs B: RR 0.72 (0.60-0.87) — A strongly better. Indirect evidence for Drug A vs B: RR 1.15 (0.95-1.39) — B possibly better. These estimates point in OPPOSITE directions.",
+          nodes: [
+            {
+              id: 'start',
+              question: "중요한 불일치를 발견했습니다. 귀하의 순위에 따르면 약물 A가 가장 좋습니다. 어떻게 하시나요?",
+              branches: [
+                { id: 'a', text: "순위 보고 — 혼합 추정으로 모든 것이 균형을 이룹니다.", nextNode: 'ignore' },
+                { id: 'b', text: "Investigate why direct and indirect disagree", nextNode: 'investigate' },
+                { id: 'c', text: "Report only direct evidence — indirect is clearly wrong", nextNode: 'direct_only' }
+              ]
+            },
+            {
+              id: 'ignore',
+              type: 'outcome',
+              consequence: 'bad',
+              title: "The Reckoning",
+              text: "Your NMA is published. Three years later, a large head-to-head trial confirms A vs B: RR 1.18 — matching the INDIRECT estimate. Your ranking was wrong. Why? The A-vs-placebo trials enrolled healthier patients than B-vs-placebo trials. Transitivity was violated. The network lied because you didn't listen to its warning.",
+              realCase: "불일치를 무시하면 실제 NMA가 뒤집어졌습니다. 네트워크 내부 모순은 조사를 촉구했습니다."
+            },
+            {
+              id: 'investigate',
+              question: "You examine the trials. Discovery: Direct A vs B trials enrolled mild hypertension (BP 140-160). Indirect path used severe hypertension (BP > 180). The PATIENTS differed.",
+              branches: [
+                { id: 'd', text: "Transitivity is violated — stratify by severity", nextNode: 'stratify' },
+                { id: 'e', text: "Direct evidence has fewer patients — trust indirect", nextNode: 'wrong_choice' }
+              ]
+            },
+            {
+              id: 'stratify',
+              type: 'outcome',
+              consequence: 'good',
+              title: "미묘한 진실",
+              text: "You report: 'In mild hypertension (direct evidence): A superior to B, RR 0.72. In severe hypertension (indirect evidence): B may be superior, RR 0.87.' The network revealed effect modification. Your stratified analysis becomes a guide for personalized treatment.",
+              realCase: "Cipriani's antidepressant NMA found efficacy rankings differed by baseline severity — visible only through careful exploration of inconsistency."
+            },
+            {
+              id: 'wrong_choice',
+              type: 'outcome',
+              consequence: 'bad',
+              title: "숫자 게임",
+              text: "환자가 많다고 해서 더 나은 증거가 나오는 것은 아닙니다. 간접 경로에는 더 많은 환자가 있지만 전이성에 의존합니다. 환자가 서로 다를 경우 데이터가 많다는 것은 더 나은 데이터가 아니라 편향된 데이터가 많다는 것을 의미합니다. 정확성과 타당성을 혼동하셨습니다.",
+              realCase: "DECREASE 시험에는 수천 명이 등록했지만 조작되었습니다. 표본 크기는 진실을 보장하지 않습니다."
+            },
+            {
+              id: 'direct_only',
+              type: 'outcome',
+              consequence: 'neutral',
+              title: "조심스러운 후퇴",
+              text: "NMA 가정이 충족되지 않았음을 인정하여 쌍별 결과만 보고합니다. 귀하의 논문은 덜 영향력이 있지만 더 정직합니다. 임상 질문은 여전히 ​​열려 있지만 잘못된 답변을 제공하지 않았습니다. 때때로 네트워크는 우리가 아직 알 수 없는 것을 가르쳐 줍니다.",
+              realCase: "Some methodologists argue this is correct when transitivity fails. Others argue exploring WHY it fails is more valuable."
+            }
+          ]
+        }
+      },
+      {
+        type: 'clinical-guide',
+        content: {
+          title: "How to Read an NMA for Clinical Practice",
+          items: [
+            "리그 표 찾기: 이것은 모든 쌍별 비교를 보여줍니다. 행과 열을 읽습니다.",
+            "Check CONSISTENCY: Look for node-splitting results. Major disagreements = less trustworthy.",
+            "Examine RANKINGS with skepticism: Look at credible intervals, not just SUCRA. If treatments' intervals overlap, they're clinically similar.",
+            "Note NETWORK GEOMETRY: Star networks (all vs placebo) rely heavily on transitivity. Well-connected networks are more robust.",
+            "Consider TRANSITIVITY: Were similar patients enrolled across comparisons? If the paper doesn't discuss this, be cautious.",
+            "Apply GRADE-NMA / CINeMA: Rate certainty using domains including intransitivity and incoherence."
+          ]
+        }
+      },
+      {
+        type: 'cycle-return',
+        content: {
+          principle: "네트워크는 볼 수 없는 쌍이 무엇인지 보여줍니다. 하지만 비교 대상 환자를 교환할 수 있는 경우에만 가능합니다. 네트워크는 가장 약한 가정만큼 강력합니다."
+        }
+      },
+      {
+        type: 'quiz',
+        content: {
+          question: "In network meta-analysis, 'inconsistency' refers to:",
+          options: [
+            { id: 'a', text: "Heterogeneity in effect sizes across trials of the same comparison", correct: false },
+            { id: 'b', text: "동일한 비교에 대한 직접 증거와 간접 증거 사이의 불일치", correct: true },
+            { id: 'c', text: "Variation in sample sizes across the network", correct: false },
+            { id: 'd', text: "Differences in outcome definitions across trials", correct: false }
+          ],
+          explanation: "Inconsistency is the disagreement between what direct head-to-head trials tell us and what we infer through the network. When direct and indirect evidence conflict, transitivity may be violated — the network's connections may not be valid. This is different from heterogeneity (variation within a comparison) and signals potential problems with the network's structure."
+        }
+      }
+    ]
+  },
+
+  // MODULE 2: THE INDIVIDUAL (IPD)
+  {
+    id: 2,
+    title: "The Individual",
+    subtitle: "IPD Meta-Analysis",
+    principle: 1,
+    slides: [
+      {
+        type: 'principle',
+        content: {
+          text: "In each patient lies a truth the average conceals"
+        }
+      },
+      {
+        type: 'rhetoric',
+        content: {
+          question: "EBCTCG가 ER 양성 환자에서 타목시펜의 이점이 두 배로 증가했다는 사실을 어떻게 발견했는지 생각해 보지 않으셨습니까? 이는 출판된 요약에서는 보이지 않는 진실이며, 37,000명의 개인에 대한 데이터를 수집했을 때만 밝혀졌습니다. 여성이요?"
+        }
+      },
+      {
+        type: 'story-deep',
+        content: {
+          label: "황금 표준: EBCTCG",
+          source: "Early Breast Cancer Trialists' Collaborative Group | 460+ trials | 450,000+ women",
+          timeline: [
+            { year: "1985", text: "Richard Peto는 불가능하다고 제안합니다. 전 세계 모든 유방암 임상시험에서 개별 환자 데이터를 수집하는 것입니다. 협력자들은 웃는다. 물류는 상상을 초월합니다.", type: "normal" },
+            { year: "1988", text: "First overview published. 28,000 women, 61 trials. IPD reveals what aggregate could not: Tamoxifen works ONLY in ER-positive tumors. Aggregate said 'tamoxifen works.' IPD said 'for WHOM.'", type: "revelation" },
+            { year: "1995", text: "Polychemotherapy overview: 18,000 women. Age matters: chemo reduces mortality 27% under age 50, only 11% over 50. Published trials showed 'average' benefit. IPD showed differential truth.", type: "revelation" },
+            { year: "Today", text: "460+ trials, 450,000+ women. The definitive source for breast cancer treatment evidence. What Peto's impossible vision became: proof that individual data reveals what aggregates hide.", type: "revelation" }
+          ],
+          realData: {
+            trials: "460+ worldwide",
+            patients: "450,000+ individual records",
+            tamoxifen_ER_pos: "HR 0.61 (strong benefit)",
+            tamoxifen_ER_neg: "HR 0.97 (no benefit)",
+            invisible: "이 하위 그룹 효과는 집계 데이터에서 보이지 않습니다"
+          },
+          hook: "Consider the woman with ER-negative breast cancer who took tamoxifen for five years because aggregate meta-analysis said 'it works.' IPD revealed: for her, it worked not at all. The aggregate concealed what the individual data would have shown."
+        }
+      },
+      {
+        type: 'contrast',
+        content: {
+          title: "두 종류의 증거",
+          wrong: {
+            title: "AGGREGATE DATA",
+            text: "공개된 요약. 연구 수준의 숫자. 각 연구의 평균을 알 수 있지만 그 연구에서 누가 혜택을 받았는지, 피해를 입었는지는 알 수 없습니다. 개인은 삭제됩니다."
+          },
+          right: {
+            title: "개인 환자 데이터",
+            text: "Raw records for every patient. Age, sex, severity, comorbidities, outcomes. You can ask: who benefits? Who is harmed? Does age modify effect? Time-varying patterns? The individual speaks."
+          }
+        }
+      },
+      {
+        type: 'story-deep',
+        content: {
+          label: "생태적 함정: 콜레스테롤과 CHD",
+          source: "Robinson & Goodman, Int J Epidemiol 1977 — The classic demonstration",
+          timeline: [
+            { year: "The Data", text: "International comparison: Countries with higher average serum cholesterol have higher coronary heart disease rates. The correlation is strong (r=0.8). Seems conclusive.", type: "normal" },
+            { year: "The Fallacy", text: "Researchers concluded: Higher cholesterol causes CHD at the individual level. Policy promoted population-wide cholesterol lowering.", type: "normal" },
+            { year: "The Problem", text: "국가 내에서 개인 수준 연관성은 더 약했습니다. 국가마다 식이요법, 운동, 건강관리, 유전학이 달랐습니다. 국가 수준 상관관계는 인과관계가 아닌 혼란을 포착했습니다.", type: "crisis" },
+            { year: "The Lesson", text: "콜레스테롤뿐만 아니라 많은 차이가 있는 평균 콜레스테롤이 더 높은 등록 인구를 대상으로 한 연구입니다. 집계 상관관계는 개별 효과를 2~3배 과대평가했습니다.", type: "revelation" }
+          ],
+          realData: {
+            ecologicalCorr: "r = 0.80 (country-level)",
+            individualCorr: "r = 0.35 (within-country, IPD)",
+            inflation: "생태계의 ~2.3배 과대평가",
+            confounders: "Smoking, SES, diet patterns, healthcare access"
+          },
+          hook: "집계는 큰 소리로 말했지만 거짓말을 했습니다. 연구 내 개인을 조사해야만 교란된 잡음에서 신호를 분리할 수 있습니다."
+        }
+      },
+      {
+        type: 'method',
+        content: {
+          label: "THE METHOD",
+          title: "1단계 및 2단계 IPD 분석",
+          sections: [
+            {
+              heading: "Two-Stage Approach",
+              text: "Stage 1: Analyze each trial separately. Get study-specific effect estimates. Stage 2: Meta-analyze these estimates like traditional MA. Familiar, but for interactions, it can conflate within-study and across-study associations."
+            },
+            {
+              heading: "One-Stage Approach",
+              text: "모든 환자를 동시에 모델링합니다. 연구 내에 중첩된 환자. 치료 효과는 연구마다 다릅니다(무작위). 연구 내에서 환자 수준에서 추정된 상호작용. 효과 수정을 감지하는 데 더욱 강력해졌습니다. 상호 작용이 중요한 경우 권장되는 접근 방식입니다."
+            },
+            {
+              heading: "중요한 차이점",
+              text: "WITHIN-STUDY 상호 작용: 각 시험 내에서 젊은 환자와 노인 환자를 비교합니다. 이는 인과관계입니다. 무작위화가 이를 보호합니다. ACROSS-STUDY 연관성: 더 큰 효과를 보여주는 젊은 환자를 대상으로 한 시험. 이것은 생태학적입니다. 혼란스럽습니다. 1단계로 구분됩니다. 2단계는 혼동을 줄 수 있습니다."
+            },
+            {
+              heading: "When to Use Which",
+              text: "주효과만? 어느 접근 방식이든 비슷한 결과를 제공합니다. 하위 그룹 상호 작용? 1단계 선호. 시간에 따른 효과(생존 곡선)? 1단계가 필요합니다. 혼합 데이터(일부 IPD, 일부 집계)? 특별한 2단계 방법이 있습니다."
+            }
+          ]
+        }
+      },
+      {
+        type: 'tool-ipd',
+        content: {
+          id: 'ipd-simulator',
+          title: "IPD vs Aggregate Simulator",
+          description: "See how subgroup effects visible in IPD can vanish in aggregate analysis"
+        }
+      },
+      {
+        type: 'scenario',
+        content: {
+          title: "숨겨진 하위 그룹",
+          situation: "You've obtained IPD from 8 cancer drug trials (N=4,800). The published aggregate meta-analysis shows HR 0.82 (0.74-0.91) — the drug works. Your IPD analysis reveals:\n\nAge < 65: HR 0.68 (0.58-0.80) — strong benefit\nAge ≥ 65: HR 1.05 (0.91-1.21) — NO benefit, possible harm\nInteraction p-value: 0.003\n\nThe drug is approved for all ages based on aggregate analysis.",
+          question: "이 결과로 무엇을 합니까?",
+          choices: [
+            {
+              id: 'a',
+              text: "Report it prominently — this changes clinical practice",
+              consequence: 'good',
+              result: "IPD 분석을 통해 숨겨진 집계 데이터가 무엇인지 드러납니다. 0.82의 '평균' HR은 노인 환자의 잠재적인 위험을 가렸습니다. 결과를 보고합니다. 규제 기관이 검토합니다. 지침 업데이트. 노인 환자는 자신에게 도움이 되지 않는 약물을 사용하지 않아도 됩니다. 이것이 바로 IPD가 존재하는 이유입니다."
+            },
+            {
+              id: 'b',
+              text: "Report as exploratory only — age wasn't pre-specified",
+              consequence: 'neutral',
+              result: "Technical correctness, but the interaction is strong (p=0.003), biologically plausible (drug metabolism differs by age), and consistent across trials. By underreporting, clinicians continue prescribing to patients who gain nothing. The conservative framing has clinical cost."
+            },
+            {
+              id: 'c',
+              text: "보고하지 마세요. 집계 데이터가 승인된 데이터입니다.",
+              consequence: 'bad',
+              result: "집계가 잘못되었습니다. 평균적으로 잘못된 것은 아니지만 특정 환자에 대해서는 잘못된 것입니다. 노인 환자들은 자신에게 도움이 되지 않고 부작용을 일으키는 약을 투여받습니다. 이를 보여줄 데이터가 있었습니다. IPD는 이러한 진실을 찾기 위해 정확하게 수집되었습니다. 당신은 그것을 묻었습니다."
+            }
+          ],
+          correct: 'a'
+        }
+      },
+      {
+        type: 'cycle-return',
+        content: {
+          principle: "모든 환자에게는 평균이 감추고 있는 진실이 있습니다. IPD 메타 분석을 통해 개인이 말할 수 있습니다."
+        }
+      },
+      {
+        type: 'quiz',
+        content: {
+          question: "The main advantage of one-stage IPD meta-analysis over two-stage is:",
+          options: [
+            { id: 'a', text: "It's computationally faster", correct: false },
+            { id: 'b', text: "It properly separates within-study from across-study interactions", correct: true },
+            { id: 'c', text: "It doesn't require individual patient data", correct: false },
+            { id: 'd', text: "It always gives more precise estimates", correct: false }
+          ],
+          explanation: "One-stage analysis models patient-level data directly, allowing it to distinguish within-study interactions (comparing younger vs older patients WITHIN each trial — this is causally interpretable) from across-study associations (trials with younger patients showing larger effects — this may be ecological confounding). Two-stage approaches can conflate these, leading to misleading subgroup conclusions."
+        }
+      }
+    ]
+  },
+
+  // MODULE 3: THE DIAGNOSIS (DTA)
+  {
+    id: 3,
+    title: "The Diagnosis",
+    subtitle: "Diagnostic Test Accuracy",
+    principle: 2,
+    slides: [
+      {
+        type: 'principle',
+        content: {
+          text: "To diagnose is not to treat; the curve tells what the number hides"
+        }
+      },
+      {
+        type: 'rhetoric',
+        content: {
+          question: "Have you not considered that D-dimer has '95% sensitivity' for pulmonary embolism — yet two meta-analyses reported different specificities, because they pooled studies using different thresholds? The number deceived; the curve would have spoken truth."
+        }
+      },
+      {
+        type: 'story-deep',
+        content: {
+          label: "양날의 검: PE를 위한 D-DIMER",
+          source: "Multiple DTA meta-analyses 2004-2015",
+          timeline: [
+            { year: "The Promise", text: "D-dimer: a simple blood test for pulmonary embolism. High sensitivity — if negative, PE is 'ruled out.' Emergency physicians embrace it.", type: "normal" },
+            { year: "The Numbers", text: "Meta-analyses report: Sensitivity 95%, Specificity 40%. Clinicians celebrate: 'We can safely rule out PE!'", type: "normal" },
+            { year: "The Problem", text: "그러나 민감도와 특이도는 절충됩니다. 다른 임계값은 다른 쌍을 제공합니다. 연구에서는 다양한 컷오프를 사용했습니다. 풀링된 95%/40%는 사과와 오렌지의 평균이었습니다.", type: "crisis" },
+            { year: "The Truth", text: "99% 민감도(진정으로 '안전한' 배제)를 제공하는 임계값에서 특이도는 15%로 떨어집니다. 대부분의 양성 테스트는 거짓 양성이 됩니다. 거의 모든 사람을 위한 CT 혈관 조영술.", type: "crisis" },
+            { year: "The Method", text: "HSROC 및 이변량 모델이 등장합니다. 그들은 숫자를 모으지 않고 CURVE를 모델링합니다. 그들은 단일한 민감도/특이성이 없음을 밝힙니다. 장단점이 있을 뿐입니다.", type: "revelation" }
+          ],
+          realData: {
+            test: "폐색전증에 대한 D-이량체",
+            sensitivity_range: "80-99% depending on threshold",
+            specificity_range: "10-60% depending on threshold",
+            tradeoff: "Higher sensitivity = lower specificity",
+            clinical_impact: "Threshold choice determines false positive burden"
+          },
+          hook: "'95% 감도'의 테스트는 훌륭해 보입니다. 하지만 그 95%에 20%의 특이성이 따른다면 어떨까요? 10개의 양성 테스트 중 8개는 FALSE입니다. 단일 번호가 속였습니다. 곡선은 진실을 보여줍니다."
+        }
+      },
+      {
+        type: 'tool-roc',
+        content: {
+          id: 'sroc-curve',
+          title: "Interactive SROC Curve",
+          description: "민감도와 특이도가 어떻게 균형을 이루는지 확인하세요. 임계값을 끌어서 두 변경 사항을 모두 살펴보세요."
+        }
+      },
+      {
+        type: 'method',
+        content: {
+          label: "THE METHOD",
+          title: "HSROC 및 이변량 모델",
+          sections: [
+            {
+              heading: "Why Standard MA Fails for DTA",
+              text: "각 연구에서 서로 다른 임계값을 사용할 수 있습니다. 서로 다른 임계값에서 연구 전반에 걸쳐 민감도를 풀링하는 것은 의미가 없습니다. 서로 다른 곡선의 서로 다른 점을 평균화하는 것입니다. 결과는 실제 동작점이 아닙니다."
+            },
+            {
+              heading: "Bivariate Random Effects Model",
+              text: "로짓(Sens)과 로짓(Spec)을 JOINTLY로 모델화합니다. 연구 전반에 걸쳐 음의 상관관계가 있습니다(역치 효과). 공동 분포를 추정합니다. 출력은 단지 두 개의 숫자가 아니라 신뢰 영역이 포함된 요약 지점입니다."
+            },
+            {
+              heading: "HSROC (Hierarchical Summary ROC)",
+              text: "Model the underlying ROC curve directly. Parameters: accuracy (how good overall), threshold (where on the curve), shape (symmetry). Produces a CURVE, not a point. Better for comparing tests that use different thresholds."
+            },
+            {
+              heading: "임상의를 위한 해석",
+              text: "DON'T report just 'Sens 90%, Spec 70%.' Report the curve. Show the prediction region. Ask: At what threshold do we get the sensitivity we need? What specificity comes with it? What's the PPV in our population's prevalence?"
+            }
+          ]
+        }
+      },
+      {
+        type: 'vivid-consequence',
+        content: {
+          title: "PPV 재해",
+          text: "A screening test with 85% sensitivity and 92% specificity. Sounds excellent. But the cancer prevalence in the screening population is 0.5%. Calculate:\n\nIn 100,000 people: 500 have cancer, 99,500 don't.\nTrue positives: 500 × 0.85 = 425\nFalse positives: 99,500 × 0.08 = 7,960\n\nPositive Predictive Value = 425 / (425 + 7,960) = 5%",
+          toll: "95%",
+          tollLabel: "of positive screening tests are FALSE ALARMS"
+        }
+      },
+      {
+        type: 'clinical-guide',
+        content: {
+          title: "DTA for Clinical Decision Rules",
+          items: [
+            "D-dimer doesn't stand alone — it follows Wells score or PERC rule",
+            "테스트는 예/아니요로 대답하는 것이 아니라 사전 테스트 확률을 수정합니다.",
+            "High sensitivity for RULE-OUT (negative test = stop testing)",
+            "High specificity for RULE-IN (positive test = act on it)",
+            "PPV는 모집단에 따라 다릅니다. 보급률 - 메타 분석 인구가 아님",
+            "Ask: What happens to false positives? (CT radiation, contrast injury, anxiety)"
+          ]
+        }
+      },
+      {
+        type: 'cycle-return',
+        content: {
+          principle: "곡선은 숫자가 무엇을 숨기고 있는지 알려줍니다. 단일 민감도는 없습니다. 선택한 역치에서의 절충점만 있습니다."
+        }
+      },
+      {
+        type: 'quiz',
+        content: {
+          question: "Two meta-analyses of the same diagnostic test report: Study A: Sensitivity 90%, Specificity 70%. Study B: Sensitivity 75%, Specificity 90%. The most likely explanation is:",
+          options: [
+            { id: 'a', text: "One meta-analysis made an error", correct: false },
+            { id: 'b', text: "포함된 연구 전반에 걸쳐 서로 다른 역치가 사용되었습니다.", correct: true },
+            { id: 'c', text: "테스트는 실제로 다릅니다", correct: false },
+            { id: 'd', text: "Random sampling variation", correct: false }
+          ],
+          explanation: "This is the classic THRESHOLD EFFECT. Both meta-analyses may be 'correct' but are summarizing different points on the same ROC curve. Meta-analysis A pooled studies using lower thresholds (more sensitive, less specific). Meta-analysis B pooled studies using higher thresholds. HSROC models explicitly account for this by modeling the underlying curve rather than pooling arbitrary points."
+        }
+      }
+    ]
+  },
+
+  // Additional modules would continue here...
+  // For brevity, I'll include the framework for the remaining modules
+
+  // MODULE 4: THE PRIOR (Bayesian)
+  {
+    id: 4,
+    title: "The Prior",
+    subtitle: "Bayesian Meta-Analysis",
+    principle: 3,
+    slides: [
+      {
+        type: 'principle',
+        content: {
+          text: "What you knew before has a place at the table of evidence"
+        }
+      },
+      {
+        type: 'rhetoric',
+        content: {
+          question: "Have you not considered the magnesium debate — where seven trials showed OR 0.44 for mortality, then ISIS-4 with 58,000 patients showed OR 1.06? The frequentist discarded the seven. The Bayesian asked: why should we forget what we learned?"
+        }
+      },
+      {
+        type: 'story-deep',
+        content: {
+          label: "THE DEBATE: MAGNESIUM AND THE MEGA-TRIAL",
+          source: "ISIS-4 (Lancet 1995) vs prior meta-analysis | The Bayesian battleground",
+          timeline: [
+            { year: "1991", text: "Seven small trials suggest IV magnesium reduces mortality in MI. Meta-analysis: OR 0.44 (0.27-0.71). A 56% reduction! Hope rises.", type: "normal" },
+            { year: "1995", text: "ISIS-4 mega-trial: 58,050 patients. OR 1.06 (0.99-1.13). NO benefit. Complete contradiction. The small trials appear wrong.", type: "crisis" },
+            { year: "The Debate", text: "Frequentists: ISIS-4 is definitive. Ignore the prior trials. Bayesians: Both are evidence. Combine them properly. The prior deserves its place.", type: "normal" },
+            { year: "The Analysis", text: "Bayesian synthesis with informative prior from early trials + ISIS-4 likelihood: Posterior OR ~0.93 (0.79-1.09). Uncertainty remains. Neither 'dramatic benefit' nor 'no effect' is certain.", type: "revelation" }
+          ],
+          realData: {
+            priorMA: "OR 0.44 (0.27-0.71) — 7 trials, 1,301 patients",
+            isis4: "OR 1.06 (0.99-1.13) — 58,050 patients",
+            bayesPosterior: "OR ~0.93 (0.79-1.09)",
+            tension: "Prior and likelihood severely conflict"
+          },
+          hook: "The frequentist discards the seven trials: 'ISIS-4 is bigger.' The Bayesian asks: 'Why should we forget what we learned?' Neither approach is wrong — but only Bayesian analysis makes the tension explicit."
+        }
+      },
+      {
+        type: 'content',
+        content: {
+          title: "Bayesian Primer — The Three Components",
+          sections: [
+            {
+              heading: "THE PRIOR: What you believed before",
+              items: [
+                "Represents knowledge BEFORE seeing current data",
+                "Can be informative (strong belief) or vague (let data speak)",
+                "Must be specified and justified — not hidden"
+              ]
+            },
+            {
+              heading: "THE LIKELIHOOD: What the data says",
+              items: [
+                "The probability of observing this data given each possible truth",
+                "This is what frequentist analysis focuses on exclusively",
+                "It's evidence, but not the whole picture"
+              ]
+            },
+            {
+              heading: "THE POSTERIOR: Updated belief",
+              items: [
+                "Prior × Likelihood = Posterior (simplified)",
+                "Combines what you knew with what you learned",
+                "Allows direct probability statements: 'There's 85% probability the effect is beneficial'"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        type: 'tool-bayes',
+        content: {
+          id: 'bayes-visualizer',
+          title: "Bayesian Prior-Posterior Explorer",
+          description: "Adjust priors and see how they combine with data to form posteriors"
+        }
+      },
+      {
+        type: 'method',
+        content: {
+          label: "THE METHOD",
+          title: "Choosing and Justifying Priors",
+          sections: [
+            {
+              heading: "Non-Informative (Vague) Priors",
+              text: "Let data 'speak for itself.' Flat distributions. Results approximate frequentist analysis. Safe but wastes prior knowledge. Use when you truly have no prior information."
+            },
+            {
+              heading: "Weakly Informative Priors",
+              text: "Rule out implausible values without strong preference. 'Effect unlikely > 2-fold.' Prevents extreme estimates while staying humble. Recommended for routine use."
+            },
+            {
+              heading: "Informative Priors",
+              text: "Incorporate specific prior knowledge — previous meta-analyses, mechanism, expert belief. Must be pre-specified and justified. Powerful but requires defensible choices."
+            },
+            {
+              heading: "Skeptical Priors",
+              text: "For extraordinary claims: center at null, moderate precision. New data must 'overcome' skepticism. Used in FDA Bayesian trials. Protects against false positives."
+            },
+            {
+              heading: "The Golden Rule",
+              text: "ALWAYS report sensitivity analysis with different priors. If conclusions depend heavily on prior choice, acknowledge this. Transparency about subjectivity is more honest than hiding it in arbitrary frequentist conventions."
+            }
+          ]
+        }
+      },
+      {
+        type: 'cycle-return',
+        content: {
+          principle: "What you knew before has a place at the table — but you must show it openly, and test whether your conclusion depends on it."
+        }
+      },
+      {
+        type: 'quiz',
+        content: {
+          question: "A Bayesian meta-analysis uses an informative prior with mean 0.7 and moderate precision. The data likelihood peaks at 0.4. The posterior will:",
+          options: [
+            { id: 'a', text: "Peak at exactly 0.55 (the midpoint)", correct: false },
+            { id: 'b', text: "Be between 0.4 and 0.7, closer to whichever has more precision", correct: true },
+            { id: 'c', text: "Peak at 0.4 because data always overrides priors", correct: false },
+            { id: 'd', text: "Peak at 0.7 because priors always dominate", correct: false }
+          ],
+          explanation: "The posterior is a weighted combination of prior and likelihood, with weights proportional to precision (inverse variance). More precise information pulls harder. If the data are very precise (large N), the posterior shifts toward 0.4. If the prior is very tight (strong belief), it stays near 0.7. The actual location depends on the relative precisions — Bayesian analysis makes this explicit."
+        }
+      }
+    ]
+  },
+
+  // MODULE 5: THE PATHWAY (MASEM)
+  {
+    id: 5,
+    title: "The Pathway",
+    subtitle: "MASEM",
+    principle: 4,
+    slides: [
+      {
+        type: 'principle',
+        content: {
+          text: "The pathway illuminates what the endpoint obscures"
+        }
+      },
+      {
+        type: 'rhetoric',
+        content: {
+          question: "Have you not considered that CBT 'works' for depression — yet for decades, training emphasized cognitive restructuring, until MASEM revealed the behavioral component was equally powerful? They knew THAT it worked, but not HOW — and trained therapists in half the mechanism."
+        }
+      },
+      {
+        type: 'story-deep',
+        content: {
+          label: "THE BLACK BOX: COGNITIVE THERAPY'S MECHANISMS",
+          source: "Cuijpers et al. Psychol Med 2019 — The mechanism mystery",
+          timeline: [
+            { year: "The Success", text: "Meta-analyses confirm: Cognitive Behavioral Therapy (CBT) reduces depression (d = 0.70). Guidelines recommend it. Billions spent training therapists. But HOW does it work?", type: "normal" },
+            { year: "The Theory", text: "Beck's model: CBT changes dysfunctional cognitions → reduces negative automatic thoughts → improves mood. The pathway seems clear.", type: "normal" },
+            { year: "The Problem", text: "When researchers tested this: cognitive change explains only 25-35% of improvement. What about the other 65%? Behavioral activation? Alliance? Expectation? The box remained black.", type: "crisis" },
+            { year: "The MASEM Solution", text: "Lemmens et al. pooled 12 studies, modeled full pathway. Found: behavioral change (β=0.41) contributed AS MUCH as cognitive change (β=0.38). The 'cognitive' in CBT was only half the story.", type: "revelation" }
+          ],
+          realData: {
+            studies: "12 RCTs with mediator data, N = 1,847",
+            cognitivePath: "β = 0.38 (cognitive mediation)",
+            behavioralPath: "β = 0.41 (behavioral mediation)",
+            directPath: "β = 0.15 (unexplained)",
+            implication: "Behavioral components may be equally important targets"
+          },
+          hook: "For decades, CBT training emphasized cognitive restructuring. MASEM revealed the behavioral component was equally powerful. Training programs worldwide are now being revised."
+        }
+      },
+      {
+        type: 'story-deep',
+        content: {
+          label: "THE PUZZLE: HOW DOES MINDFULNESS REDUCE DEPRESSION?",
+          source: "Gu et al. (Clin Psychol Rev 2015) + van der Velden et al. (Clin Psychol Rev 2015)",
+          timeline: [
+            { year: "The Finding", text: "Meta-analyses establish: Mindfulness-based interventions reduce depression relapse. Effect size around d = 0.30-0.50. But HOW? Through what pathway?", type: "normal" },
+            { year: "Competing Theories", text: "Theory A: Mindfulness reduces rumination (repetitive negative thinking). Theory B: Mindfulness increases meta-awareness (observing thoughts without fusion). Theory C: Mindfulness enhances emotional regulation. All plausible. All have supporting correlations.", type: "normal" },
+            { year: "The MASEM Approach", text: "Pool correlation matrices from 18 studies. Not just 'X predicts Y' but the full web: mindfulness↔rumination↔awareness↔regulation↔depression. Fit structural equation models to the pooled matrix.", type: "revelation" },
+            { year: "The Revelation", text: "Path coefficients reveal: Rumination reduction is the DOMINANT pathway (β = -0.42). Meta-awareness contributes but primarily through rumination. Direct mindfulness→depression path is weak. The mechanism is specified.", type: "revelation" }
+          ],
+          realData: {
+            studies: "18 cross-sectional/longitudinal studies, N = 2,912",
+            pooledR: "Mindfulness-Depression r = -0.33",
+            pathViaRumination: "Indirect effect β = -0.22 (67% of total)",
+            directPath: "Direct effect β = -0.11 (33% of total)",
+            conclusion: "Interventions should target rumination specifically"
+          },
+          hook: "Traditional meta-analysis would tell you 'mindfulness works.'MASEM은'mindfulness works BY REDUCING RUMINATION.' One informs policy. The other guides intervention design."
+        }
+      },
+      {
+        type: 'content',
+        content: {
+          title: "MASEM — The Two-Stage Approach",
+          sections: [
+            {
+              heading: "Stage 1: Pool the Correlation Matrices",
+              items: [
+                "Extract correlation matrices from each study",
+                "Account for different variables measured across studies",
+                "Use fixed-effects or random-effects pooling",
+                "Handle missing correlations (pairwise available)",
+                "Check the pooled matrix is positive-definite (can you actually fit SEM?)"
+              ]
+            },
+            {
+              heading: "Stage 2: Fit Structural Equation Model",
+              items: [
+                "Specify your theoretical model (paths, latent variables)",
+                "Estimate path coefficients using pooled correlations",
+                "Use harmonic mean N or total N for SEs",
+                "Test model fit (RMSEA, CFI, SRMR)",
+                "Compare competing models (AIC, chi-square difference)"
+              ]
+            },
+            {
+              heading: "What MASEM Can Do",
+              items: [
+                "Test MEDIATION: Does X affect Y through M?",
+                "Test MODERATION (with TSSEM extensions)",
+                "Compare path models across subgroups",
+                "Quantify indirect effects with confidence intervals",
+                "Distinguish correlation from directional influence"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        type: 'contrast',
+        content: {
+          leftTitle: "Traditional Meta-Analysis",
+          leftItems: [
+            "Asks: Does X predict Y?",
+            "Pools effect sizes for one relationship",
+            "Cannot distinguish direct from indirect effects",
+            "Treats mechanism as a black box",
+            "Informs WHETHER to intervene"
+          ],
+          rightTitle: "MASEM",
+          rightItems: [
+            "Asks: HOW does X relate to Y?",
+            "Pools entire correlation matrices",
+            "Decomposes direct and indirect pathways",
+            "Maps the mechanism explicitly",
+            "Informs WHERE in the pathway to intervene"
+          ]
+        }
+      },
+      {
+        type: 'tool-masem',
+        content: {
+          id: 'masem-visualizer',
+          title: "MASEM Path Diagram Explorer",
+          description: "Build and visualize path models with pooled correlations"
+        }
+      },
+      {
+        type: 'vivid-consequence',
+        content: {
+          title: "THE WRONG PATHWAY DISASTER",
+          text: "A workplace wellness program targeted 'employee engagement' to reduce burnout, based on meta-analytic evidence that engagement correlates with lower burnout (r = -0.45). Millions spent on engagement initiatives. Burnout unchanged.\n\nA MASEM analysis later revealed: Engagement and burnout are BOTH downstream of job resources. Engagement doesn't CAUSE less burnout — they share a common cause. The intervention targeted a correlate, not a cause.",
+          toll: "$2.1M",
+          tollLabel: "spent on wrong intervention target"
+        }
+      },
+      {
+        type: 'decision-tree',
+        content: {
+          title: "The MASEM Feasibility Decision",
+          situation: "You want to understand HOW leadership style affects team performance. You have 45 studies measuring leadership, team cohesion, psychological safety, and performance. Not all studies measure all variables. You attempt to pool correlation matrices for MASEM.",
+          nodes: [
+            {
+              id: 'start',
+              question: "Your pooled correlation matrix is NOT positive-definite. The eigenvalue check fails. What do you do?",
+              branches: [
+                { id: 'a', text: "Force it positive-definite using nearest PD approximation", nextNode: 'force' },
+                { id: 'b', text: "Investigate which correlations are causing the problem", nextNode: 'investigate' },
+                { id: 'c', text: "Abandon MASEM and do separate bivariate meta-analyses", nextNode: 'abandon' }
+              ]
+            },
+            {
+              id: 'force',
+              type: 'outcome',
+              consequence: 'bad',
+              title: "The Silent Distortion",
+              text: "Forcing a matrix to be positive-definite changes the correlations. Your path coefficients are now based on ALTERED data. The indirect effect of leadership through cohesion is 0.28. But the true pooled correlation was impossible — perhaps because cohesion and safety are nearly collinear, or because a coding error exists. Your model runs but the numbers are artifacts.",
+              realCase: "Cheung (2015) documented MASEM studies where forced PD matrices led to unstable, non-replicable results. The math worked; the meaning didn't."
+            },
+            {
+              id: 'investigate',
+              question: "You examine the pairwise correlations. Discovery: Cohesion-Safety correlation is 0.92 in some studies, creating near-collinearity. Also, 3 studies measured 'leadership' very differently (transformational vs transactional).",
+              branches: [
+                { id: 'd', text: "Remove the problematic studies and re-run", nextNode: 'remove' },
+                { id: 'e', text: "Model cohesion and safety as one latent construct", nextNode: 'collapse' },
+                { id: 'f', text: "Separate transformational and transactional leadership models", nextNode: 'separate' }
+              ]
+            },
+            {
+              id: 'remove',
+              type: 'outcome',
+              consequence: 'neutral',
+              title: "The Data Loss Dilemma",
+              text: "You now have 37 studies. The matrix is PD. But you've excluded studies post-hoc. If those 8 studies differ systematically (perhaps they're the highest-quality ones, or from specific contexts), your model is biased. Report the exclusions and sensitivity analyses.",
+              realCase: "Systematic exclusion can introduce selection bias. Some MASEM guidelines now require pre-registered exclusion criteria."
+            },
+            {
+              id: 'collapse',
+              type: 'outcome',
+              consequence: 'good',
+              title: "The Theoretical Revision",
+              text: "You model 'psychological climate' as a latent factor indicated by both cohesion and safety. The model fits well. Leadership → Climate → Performance. The indirect effect is 0.34. Your theoretical model evolved based on empirical reality. You report: 'Cohesion and safety were empirically inseparable in these data, suggesting they represent a common psychological climate factor.'",
+              realCase: "Viswesvaran et al.'s job satisfaction MASEM collapsed related constructs when empirical correlations exceeded theoretical distinctiveness."
+            },
+            {
+              id: 'separate',
+              type: 'outcome',
+              consequence: 'good',
+              title: "The Split Insight",
+              text: "You run two separate MASEMs: one for transformational, one for transactional leadership. Both matrices are PD. Results differ dramatically: Transformational works through inspiration (β=0.41), transactional through structure (β=0.29). The pathway DEPENDS on leadership type. One model would have been wrong for half your question.",
+              realCase: "Judge & Piccolo's leadership MASEM separated leadership types, finding different mediation pathways for each."
+            },
+            {
+              id: 'abandon',
+              type: 'outcome',
+              consequence: 'neutral',
+              title: "The Honest Retreat",
+              text: "You report bivariate meta-analyses: Leadership-Performance r=0.31; Leadership-Cohesion r=0.45; Cohesion-Performance r=0.38. You cannot claim mediation, but you can report the building blocks. Future studies with complete data may enable MASEM. You've avoided false precision.",
+              realCase: "Some argue that bivariate MA with explicit theoretical discussion is more honest than forced MASEM with unstable matrices."
+            }
+          ]
+        }
+      },
+      {
+        type: 'clinical-guide',
+        content: {
+          title: "MASEM Interpretation Checklist",
+          items: [
+            "CHECK: Is the pooled correlation matrix positive-definite? (If not, SEM cannot be fitted properly)",
+            "SPECIFY: Your theoretical model BEFORE running analyses (not data-driven model building)",
+            "REPORT: Both direct and indirect effects with confidence intervals",
+            "TEST: Model fit — CFI > 0.95, RMSEA < 0.06, SRMR < 0.08 as rough guidelines",
+            "COMPARE: Alternative models if theory permits multiple structures",
+            "ACKNOWLEDGE: Cross-sectional data cannot establish causation — only theory does",
+            "TRANSLATE: What does the pathway mean for intervention design?"
+          ]
+        }
+      },
+      {
+        type: 'cycle-return',
+        content: {
+          principle: "The pathway illuminates what the endpoint obscures. Know not just WHETHER, but HOW — for the how determines where to place your intervention."
+        }
+      },
+      {
+        type: 'quiz',
+        content: {
+          question: "A MASEM analysis finds: Job demands → burnout (β = 0.45), burnout → performance (β = -0.30), and job demands → performance (β = -0.05, n.s.). The indirect effect of demands on performance through burnout is significant. This suggests:",
+          options: [
+            { id: 'a', text: "Job demands have no effect on performance", correct: false },
+            { id: 'b', text: "Burnout fully mediates the demands-performance relationship", correct: true },
+            { id: 'c', text: "The model is incorrectly specified", correct: false },
+            { id: 'd', text: "Demands and burnout are the same construct", correct: false }
+          ],
+          explanation: "This is FULL MEDIATION. The direct path (demands → performance) is non-significant, but the indirect path through burnout is significant. Job demands affect performance entirely BY causing burnout. Intervention implication: Don't just reduce demands — target burnout recovery mechanisms."
+        }
+      }
+    ]
+  },
+
+  // MODULE 6: THE DOSE (Dose-Response)
+  {
+    id: 6,
+    title: "The Dose",
+    subtitle: "Dose-Response",
+    principle: 5,
+    slides: [
+      {
+        type: 'principle',
+        content: {
+          text: "The dose makes the poison—and the cure"
+        }
+      },
+      {
+        type: 'rhetoric',
+        content: {
+          question: "Have you not seen how patients took 325mg of aspirin 'to be safe' — until dose-response meta-analysis revealed: 75mg provided all the cardiovascular benefit, and higher doses only added bleeding? The curve had the answer; the simple comparison hid it."
+        }
+      },
+      {
+        type: 'story-deep',
+        content: {
+          label: "THE ASPIRIN CURVE THAT CHANGED CARDIOLOGY",
+          source: "Antithrombotic Trialists' Collaboration — Lancet 2009",
+          timeline: [
+            { year: "The Question", text: "Aspirin prevents heart attacks. But how much? Doses varied wildly: 75mg to 1500mg daily. Higher doses = more protection? Or more bleeding?", type: "normal" },
+            { year: "The Linear Thinking", text: "Early trials used high doses (900-1500mg). Seemed to work. Cardiologists reasoned: if some is good, more is better. Patients bled.", type: "normal" },
+            { year: "The Dose-Response MA", text: "Antithrombotic Trialists pooled 287 studies across dose categories. Applied proper within-study correlation methods. Modeled the CURVE, not just presence vs absence.", type: "revelation" },
+            { year: "The Plateau", text: "CVD reduction plateaued at 75-100mg. Higher doses: NO additional benefit, only more GI bleeding. The dose-response curve had a CEILING. 75mg was optimal.", type: "revelation" }
+          ],
+          realData: {
+            at75mg: "RR 0.68 for CVD events",
+            at325mg: "RR 0.68 for CVD events (no additional benefit)",
+            at1500mg: "RR 0.67 for CVD events (still no better)",
+            bleedingAt75: "GI bleed RR 1.5",
+            bleedingAt1500: "GI bleed RR 2.8",
+            conclusion: "Guidelines now recommend 75-100mg, not higher"
+          },
+          hook: "For decades, patients took 325mg or more 'to be safe.' The dose-response meta-analysis revealed the truth: they bled more without gaining protection. The curve had spoken — but only those who modeled it could hear."
+        }
+      },
+      {
+        type: 'story-deep',
+        content: {
+          label: "THE J-CURVE THAT CONFOUNDED POLICY",
+          source: "Alcohol and Cardiovascular Disease — Di Castelnuovo et al. (Arch Intern Med 2006)",
+          timeline: [
+            { year: "The Observation", text: "Individual studies consistently suggest: Moderate drinkers have LOWER CVD mortality than non-drinkers. The 'French Paradox.' Does alcohol protect the heart?", type: "normal" },
+            { year: "The Linear Fallacy", text: "Some analysts pool 'any drinking vs none.' OR = 0.75. Alcohol appears protective! Guidelines soften. 'Moderate drinking may be beneficial.'", type: "crisis" },
+            { year: "The Dose-Response Analysis", text: "Pool 34 prospective studies with dose categories. Don't compare 'any vs none' — model the CURVE. Use restricted cubic splines. Account for Greenland-Longnecker correlation.", type: "normal" },
+            { year: "The J-Curve Revealed", text: "Risk decreases from 0 to ~1 drink/day (RR nadir ~0.80). Then RISES. At 4+ drinks/day, RR > 1.0. Heavy drinking is HARMFUL. The 'protection' exists only in a narrow window — if it exists at all.", type: "revelation" },
+            { year: "The Controversy", text: "Critics note: 'Non-drinkers'과거에 술을 많이 마셨던 사람(금단 편향)도 포함한다고 말합니다. J-곡선은 인공물일 수 있습니다. 멘델의 무작위 연구에서는 보호 효과가 발견되지 않았습니다. 곡선은's shape depends on who you call 'zero.'", type: "crisis" }
+          ],
+          realData: {
+            studies: "34 prospective studies, 1,015,835 participants",
+            atZero: "Reference category (RR = 1.0)",
+            at1drink: "RR = 0.80 (0.78-0.83)",
+            at4drinks: "RR = 1.13 (1.06-1.21)",
+            nadir: "~12.5 g/day (about 1 drink)"
+          },
+          hook: "A simple meta-analysis would say 'drinkers have 25% lower CVD risk.' The dose-response meta-analysis says '일 수 있지만 하루에 1잔만 마시고 더 많이 마시면 ​​반대가 됩니다.' Same data, profoundly different policy implications."
+        }
+      },
+      {
+        type: 'content',
+        content: {
+          title: "Dose-Response Meta-Analysis Methods",
+          sections: [
+            {
+              heading: "The Greenland-Longnecker Method",
+              items: [
+                "Within a study, dose categories are NOT independent",
+                "The low-dose group shares a reference with the high-dose group",
+                "Standard MA would ignore this correlation → wrong SEs",
+                "G-L reconstructs the covariance matrix from published tables",
+                "Requires: cases, person-time or N, RR and CI for each dose level"
+              ]
+            },
+            {
+              heading: "Modeling the Curve Shape",
+              items: [
+                "LINEAR: Assumes every unit of dose has same effect — rarely true",
+                "QUADRATIC: Captures U-shaped or inverse-U relationships",
+                "RESTRICTED CUBIC SPLINES (RCS): Flexible curves with knots",
+                "FRACTIONAL POLYNOMIALS: Data-driven non-linear shapes",
+                "The shape IS the finding — report and interpret the curve"
+              ]
+            },
+            {
+              heading: "Critical Decisions",
+              items: [
+                "What is 'zero dose'? (Never exposed? Low exposure? Former users?)",
+                "How to assign dose values to categories ('1-3 cups' → midpoint?)",
+                "Where to place spline knots? (Typically 3 knots at 10th, 50th, 90th percentiles)",
+                "One-stage vs two-stage approach?"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        type: 'tool-dose',
+        content: {
+          id: 'dose-response-tool',
+          title: "Dose-Response Curve Visualizer",
+          description: "Explore how different curve shapes change interpretation"
+        }
+      },
+      {
+        type: 'vivid-consequence',
+        content: {
+          title: "THE LINEAR ASSUMPTION KILLS",
+          text: "A meta-analysis of vitamin D supplementation and mortality found 'no significant effect' (pooled RR = 0.97, 95% CI: 0.94-1.01). Case closed? No.\n\nDose-response reanalysis revealed: Benefit peaked at 20-40 ng/mL blood levels, then REVERSED at higher levels. The trials gave everyone the SAME dose, pushing some into harmful territory while leaving others deficient. The null overall effect masked a U-shaped curve.",
+          toll: "Hidden",
+          tollLabel: "harms from one-dose-fits-all policy"
+        }
+      },
+      {
+        type: 'method',
+        content: {
+          label: "THE METHOD",
+          title: "Reading and Reporting Dose-Response Curves",
+          sections: [
+            {
+              heading: "Identify the Nadir/Peak",
+              text: "Where is maximum benefit (or minimum risk)? This is often the policy-relevant number. 'Optimal intake is approximately X units/day.'"
+            },
+            {
+              heading: "Identify Threshold Effects",
+              text: "Is there a dose below which no effect occurs? Above which harm begins? These thresholds define safe/effective ranges."
+            },
+            {
+              heading: "Report the Curve, Not Just Points",
+              text: "Show the spline with confidence bands. Readers need to see the SHAPE. A table of 'RR at 1, 2, 3, 4 units' loses the curve information."
+            },
+            {
+              heading: "Test for Non-Linearity",
+              text: "Statistical test: Does a non-linear model fit significantly better than linear? If yes, DON'선형 추정치를 보고합니다. 이는's misleading."
+            },
+            {
+              heading: "Address Reference Category Issues",
+              text: "Who is in the 'zero' group matters enormously. Former users, never users, and minimal users may differ systematically. Sensitivity analysis essential."
+            }
+          ]
+        }
+      },
+      {
+        type: 'decision-tree',
+        content: {
+          title: "The Reference Group Dilemma",
+          situation: "You'커피 소비 및 심혈관 사망률에 대한 용량-반응 메타 분석을 수행하는 것입니다. 연구에 따르면 하루에 0, 1~2, 3~4, 5잔 이상의 컵이 위험하다고 보고됩니다. 그러나'0 cups'그룹은 다릅니다. 일부 그룹은'never drinkers,' others include 'former drinkers who quit for health reasons.'",
+          nodes: [
+            {
+              id: 'start',
+              question: "Your preliminary analysis shows a J-curve: 0 cups has RR=1.0 (reference), 2-3 cups has RR=0.85 (benefit), 5+ cups has RR=0.95. How do you handle the heterogeneous reference category?",
+              branches: [
+                { id: 'a', text: "Use 0 cups as reference — that's what the studies reported", nextNode: 'naive' },
+                { id: 'b', text: "Investigate who is in the '0 cups' category across studies", nextNode: 'investigate' },
+                { id: 'c', text: "Use the lowest non-zero consumption category as reference", nextNode: 'shift' }
+              ]
+            },
+            {
+              id: 'naive',
+              type: 'outcome',
+              consequence: 'bad',
+              title: "The Sick Quitter Trap",
+              text: "Your J-curve is published. Critics point out: Studies including 'former drinkers' in reference show STRONGER protective effects at moderate doses. Why? Former drinkers quit because of illness — they're sicker at baseline. You compared healthy moderate drinkers to sick former drinkers, inflating apparent benefit.",
+              realCase: "The alcohol J-curve controversy hinged exactly on this: studies excluding former drinkers showed NO cardioprotection. The entire 'moderate drinking benefit' may be sick-quitter bias."
+            },
+            {
+              id: 'investigate',
+              question: "You stratify: 15 studies defined '0' as never-drinkers, 12 included former drinkers. In never-drinker studies, the curve is flatter. In former-drinker studies, moderate consumption appears more protective.",
+              branches: [
+                { id: 'd', text: "Report separate curves and acknowledge the uncertainty", nextNode: 'transparent' },
+                { id: 'e', text: "Use only never-drinker studies as primary analysis", nextNode: 'restrict' }
+              ]
+            },
+            {
+              id: 'transparent',
+              type: 'outcome',
+              consequence: 'good',
+              title: "The Honest Uncertainty",
+              text: "You report both curves with explanation: 'When reference includes only never-drinkers, optimal consumption is 2-3 cups/day with RR 0.90. When former drinkers are included, benefit appears larger (RR 0.82). The difference likely reflects sick-quitter bias rather than true effect modification.'",
+              realCase: "Poole et al.'s coffee meta-analysis explicitly stratified by reference definition, showing how conclusions depend on this methodological choice."
+            },
+            {
+              id: 'restrict',
+              type: 'outcome',
+              consequence: 'neutral',
+              title: "The Clean but Limited Analysis",
+              text: "Using only 15 never-drinker studies, your curve shows modest benefit peaking at 3 cups (RR 0.92). Effect is smaller than full pooling, but likely less biased. You lose power but gain validity. Report this as primary, with full pooling as sensitivity analysis.",
+              realCase: "This approach is increasingly recommended for lifestyle dose-response analyses where 'non-users' are heterogeneous."
+            },
+            {
+              id: 'shift',
+              type: 'outcome',
+              consequence: 'neutral',
+              title: "The Shifted Perspective",
+              text: "Using 1 cup/day as reference avoids the sick-quitter problem. Now your curve shows 2-3 cups has RR 0.94 vs 1 cup — smaller benefit. But '0 cups' becomes harder to interpret. Different reference, different question, different answer.",
+              realCase: "Some nutritional dose-response MAs use 'moderate intake' as reference, avoiding zero-category problems but changing the clinical question entirely."
+            }
+          ]
+        }
+      },
+      {
+        type: 'clinical-guide',
+        content: {
+          title: "Dose-Response Clinical Translation",
+          items: [
+            "OPTIMAL DOSE: Where does the curve reach maximum benefit?",
+            "CEILING EFFECT: Beyond what dose does no additional benefit accrue?",
+            "THRESHOLD OF HARM: At what dose does benefit reverse to harm?",
+            "THERAPEUTIC WINDOW: What is the range of beneficial doses?",
+            "INDIVIDUAL VARIATION: Curves are AVERAGES — individuals may differ",
+            "REFERENCE GROUP: Who is 'unexposed'? This affects the ENTIRE curve",
+            "BIOLOGICAL PLAUSIBILITY: Does the curve shape make mechanistic sense?"
+          ]
+        }
+      },
+      {
+        type: 'cycle-return',
+        content: {
+          principle: "The dose makes the poison—and the cure. Never ask only 'does it work?' Ask 'how much, and where does benefit become harm?'"
+        }
+      },
+      {
+        type: 'quiz',
+        content: {
+          question: "A dose-response meta-analysis of physical activity and mortality shows: Sedentary (reference), Low (RR=0.80), Moderate (RR=0.65), High (RR=0.64), Very High (RR=0.65). What pattern does this suggest?",
+          options: [
+            { id: 'a', text: "Linear benefit — more is always better", correct: false },
+            { id: 'b', text: "Ceiling effect — benefit plateaus at moderate activity", correct: true },
+            { id: 'c', text: "U-shaped — very high activity is harmful", correct: false },
+            { id: 'd', text: "No relationship — exercise doesn't affect mortality", correct: false }
+          ],
+          explanation: "This shows a CEILING EFFECT. The benefit of moving from sedentary to low activity is large (20% reduction). From low to moderate, another large gain. But from moderate to high to very high — the curve flattens. Policy implication: Focus on getting sedentary people moving, not pushing active people to do more."
+        }
+      }
+    ]
+  },
+
+  // MODULE 7: THE UMBRELLA (Meta-Research)
+  {
+    id: 7,
+    title: "The Umbrella",
+    subtitle: "Meta-Research",
+    principle: 6,
+    slides: [
+      {
+        type: 'principle',
+        content: {
+          text: "To synthesize syntheses, first know what you do not know"
+        }
+      },
+      {
+        type: 'rhetoric',
+        content: {
+          question: "Have you not observed that Ioannidis found 264 meta-analyses claiming foods cause or prevent cancer — yet when he applied credibility criteria, only 5 (2%) had convincing evidence? The journals were full of 'significant findings.' The truth was nearly empty."
+        }
+      },
+      {
+        type: 'story-deep',
+        content: {
+          label: "THE BIOMARKER GRAVEYARD: 85% DOWNGRADED",
+          source: "Ioannidis & Panagiotou, JAMA 2011 — The credibility reckoning",
+          timeline: [
+            { year: "The Promise", text: "Hundreds of meta-analyses claimed: biomarker X predicts disease Y. CRP predicts heart disease! IL-6 predicts cancer! Vitamin D predicts everything! Journals published, guidelines cited.", type: "normal" },
+            { year: "The Umbrella", text: "Ioannidis examined 35 meta-analyses of biomarker-disease associations. All had 'statistically significant' pooled results. But how many were CREDIBLE?", type: "normal" },
+            { year: "The Criteria", text: "Applied: >1000 cases, p<10⁻⁶, I²<50%, no small-study bias, largest study significant. These are MINIMAL standards for believing an association.", type: "normal" },
+            { year: "The Reckoning", text: "Only 6 of 35 (17%) met all criteria. 29 (83%) had inflated effects — average inflation 1.7x. Most 'proven' biomarker associations were shadows, not signals.", type: "crisis" }
+          ],
+          realData: {
+            metaAnalyzed: "35 biomarker-disease meta-analyses",
+            claimed: "100% reported 'significant' associations",
+            credible: "Only 6 (17%) met all credibility criteria",
+            avgInflation: "1.7-fold overestimate in weak studies",
+            implication: "Most biomarker 'discoveries' don't replicate"
+          },
+          hook: "Every biomarker had a meta-analysis. Every meta-analysis was 'significant.' But when credibility criteria were applied, 83% crumbled. Statistical significance without credibility is a mirage."
+        }
+      },
+      {
+        type: 'story-deep',
+        content: {
+          label: "EVERYTHING WE EAT CAUSES CANCER",
+          source: "Schoenfeld & Ioannidis (Am J Clin Nutr 2013) + Subsequent umbrella reviews",
+          timeline: [
+            { year: "The Problem", text: "Nutritional epidemiology produces hundreds of meta-analyses. Coffee causes cancer. Coffee prevents cancer. Red wine protects. Red wine harms. The public is confused. Policy paralyzed.", type: "normal" },
+            { year: "The Umbrella Approach", text: "Ioannidis and colleagues systematically review meta-analyses OF food-cancer associations. Not individual studies — the meta-analyses themselves. How many are credible?", type: "normal" },
+            { year: "The Sobering Findings", text: "Of 264 meta-analyses examined: Most showed 'statistically significant' associations. But credibility assessment revealed: Only 5 had 'convincing' evidence (>1000 cases, p<10⁻⁶, low heterogeneity, no bias). The vast majority? Weak, contradictory, likely biased.", type: "revelation" },
+            { year: "The Implication", text: "Most published meta-analyses in nutrition are noise, not signal. 'Statistically significant' ≠ credible. Without credibility criteria, we mistake quantity of evidence for quality.", type: "crisis" },
+            { year: "The Pattern", text: "Later umbrella reviews in other fields found similar: 85% of 'significant' biomarker associations downgrade when credibility assessed. Most meta-analyses don't survive scrutiny.", type: "revelation" }
+          ],
+          realData: {
+            metaAnalyzed: "264 meta-analyses of food-cancer associations",
+            significant: "~80% reported statistically significant results",
+            convincing: "Only 5 (2%) met all credibility criteria",
+            suggestive: "18 (7%) met 'suggestive' criteria",
+            weak: "91% weak or non-credible evidence"
+          },
+          hook: "One meta-analysis tells you 'this food causes cancer.'상위 검토를 통해'of the 50 foods claimed to cause cancer, only 2 claims are credible.' The meta-research level reveals what individual meta-analyses hide."
+        }
+      },
+      {
+        type: 'content',
+        content: {
+          title: "Umbrella Review Methods",
+          sections: [
+            {
+              heading: "What IS an Umbrella Review?",
+              items: [
+                "A systematic review of systematic reviews and meta-analyses",
+                "The unit of analysis is the META-ANALYSIS, not the primary study",
+                "Maps the entire evidence landscape on a topic",
+                "Identifies agreements, contradictions, and gaps",
+                "Applies credibility criteria to distinguish signal from noise"
+              ]
+            },
+            {
+              heading: "The Credibility Criteria (Ioannidis et al.)",
+              items: [
+                "CONVINCING: >1000 cases, p<10⁻⁶, I²<50%, no small-study bias, largest study significant",
+                "HIGHLY SUGGESTIVE: >1000 cases, p<10⁻⁶",
+                "SUGGESTIVE: >1000 cases, p<10⁻³",
+                "WEAK: p<0.05 but fails above criteria",
+                "NON-SIGNIFICANT: p≥0.05"
+              ]
+            },
+            {
+              heading: "The Overlap Problem",
+              items: [
+                "Multiple meta-analyses include the SAME primary studies",
+                "They appear independent but share data",
+                "Counting them as separate evidence is double-counting",
+                "Use CCA (Corrected Covered Area) to quantify overlap",
+                "Slight overlap: <5%, moderate: 6-10%, high: 11-15%, very high: >15%"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        type: 'contrast',
+        content: {
+          leftTitle: "Without Umbrella Review",
+          leftItems: [
+            "'Meta-analysis shows significant effect'",
+            "Cherry-pick the favorable MA",
+            "Ignore contradicting MAs",
+            "No assessment of credibility",
+            "Confuse significance with truth"
+          ],
+          rightTitle: "With Umbrella Review",
+          rightItems: [
+            "'Of 12 MAs, only 2 meet credibility criteria'",
+            "Map all available syntheses",
+            "Explain contradictions systematically",
+            "Apply consistent credibility standards",
+            "Distinguish strong from weak evidence"
+          ]
+        }
+      },
+      {
+        type: 'tool-umbrella',
+        content: {
+          id: 'credibility-tool',
+          title: "Evidence Credibility Assessor",
+          description: "Apply credibility criteria to evaluate meta-analytic evidence"
+        }
+      },
+      {
+        type: 'vivid-consequence',
+        content: {
+          title: "THE CONTRADICTORY META-ANALYSES TRAP",
+          text: "Vitamin E supplementation: One meta-analysis (2004) suggested cardiovascular benefit. Another (2005) found increased all-cause mortality. Same nutrient, opposite conclusions. Policy oscillated. Confusion reigned.\n\nUmbrella review revealed: Different inclusion criteria, different doses combined, massive study overlap. When credibility criteria applied: NO convincing evidence either way. The 'debate' was noise.",
+          toll: "Years",
+          tollLabel: "of policy confusion from uncritical MA acceptance"
+        }
+      },
+      {
+        type: 'method',
+        content: {
+          label: "THE METHOD",
+          title: "Conducting and Interpreting Umbrella Reviews",
+          sections: [
+            {
+              heading: "Quality Assessment (AMSTAR-2)",
+              text: "Rate each included meta-analysis for methodological quality. Did they register a protocol? Search comprehensively? Assess risk of bias? Use appropriate methods? Quality varies enormously."
+            },
+            {
+              heading: "Overlap Assessment",
+              text: "Create a citation matrix: which primary studies appear in which meta-analyses? Calculate overlap. If very high (>15%), treat overlapping MAs as essentially the same evidence."
+            },
+            {
+              heading: "Concordance Assessment",
+              text: "Do the meta-analyses agree? If not, WHY? Different search dates? Different inclusion criteria? Different effect measures? Explain discordance, don't just report it."
+            },
+            {
+              heading: "Credibility Grading",
+              text: "Apply the criteria: sample size, statistical significance, heterogeneity, small-study effects, consistency. Grade each association as Convincing, Suggestive, Weak, or Non-credible."
+            },
+            {
+              heading: "Evidence Mapping",
+              text: "Present findings visually: a table or figure showing all associations, their grades, and the overall landscape. Readers should see AT A GLANCE what is credible."
+            }
+          ]
+        }
+      },
+      {
+        type: 'decision-tree',
+        content: {
+          title: "The Conflicting Meta-Analyses Dilemma",
+          situation: "You're writing clinical guidelines for statin use in primary prevention. You find 8 meta-analyses on statins and all-cause mortality. Four show significant benefit (RR 0.86-0.91). Four show no significant effect (RR 0.94-1.02). All are published in good journals. Your committee asks: What do we recommend?",
+          nodes: [
+            {
+              id: 'start',
+              question: "Eight meta-analyses, split 4-4 on whether statins reduce mortality. How do you proceed?",
+              branches: [
+                { id: 'a', text: "Majority vote — 4 show benefit, 4 don't, so inconclusive", nextNode: 'vote' },
+                { id: 'b', text: "Use the largest/most recent meta-analysis", nextNode: 'largest' },
+                { id: 'c', text: "Conduct an umbrella review with credibility assessment", nextNode: 'umbrella' }
+              ]
+            },
+            {
+              id: 'vote',
+              type: 'outcome',
+              consequence: 'bad',
+              title: "The False Democracy",
+              text: "Your 'inconclusive' finding treats a high-quality Cochrane review with 50,000 patients the same as a low-quality MA with 5,000 patients in a predatory journal. The four 'positive' MAs have 85% study overlap — they're essentially one evidence base counted four times. Vote-counting ignores quality, overlap, and credibility.",
+              realCase: "Vote-counting across MAs was discredited in the 1990s but persists in narrative reviews. It's intellectually lazy and often misleading."
+            },
+            {
+              id: 'largest',
+              type: 'outcome',
+              consequence: 'neutral',
+              title: "The Recency Heuristic",
+              text: "The 2022 meta-analysis with 120,000 patients shows RR 0.91 (0.87-0.95). You cite this. But this MA included industry-funded trials with questionable endpoint adjudication, and its 'all-cause mortality' combined different follow-up periods. Size doesn't guarantee quality. The 2019 Cochrane review with 80,000 patients found RR 0.94 (0.89-1.00) using stricter criteria.",
+              realCase: "Larger isn't always better. The CTT Collaboration's statin MAs used individual patient data but were criticized for industry involvement and selective reporting."
+            },
+            {
+              id: 'umbrella',
+              question: "You conduct an umbrella review: assess AMSTAR-2 quality, calculate overlap (CCA), and apply credibility criteria to the pooled estimates. What do you find?",
+              branches: [
+                { id: 'd', text: "Two high-quality MAs with low overlap both show modest benefit", nextNode: 'synthesis' },
+                { id: 'e', text: "All MAs have critical flaws and massive overlap", nextNode: 'uncertainty' }
+              ]
+            },
+            {
+              id: 'synthesis',
+              type: 'outcome',
+              consequence: 'good',
+              title: "The Clarified Picture",
+              text: "After AMSTAR-2: Only 3 MAs are high quality. Overlap analysis: CCA = 65% — the 8 MAs draw from essentially 2-3 independent evidence bases. Credibility grading: The association grades as 'Suggestive' — significant p<10⁻³, >1000 events, but I²=45% and some small-study effects. Your guideline states: 'Suggestive evidence of modest mortality benefit (RR ~0.90). Certainty limited by heterogeneity. Individual clinical judgment required.'",
+              realCase: "Umbrella reviews of statins by Tonin et al. and others have systematically graded the evidence, providing nuanced recommendations."
+            },
+            {
+              id: 'uncertainty',
+              type: 'outcome',
+              consequence: 'neutral',
+              title: "The Honest Unknown",
+              text: "Your umbrella reveals: ALL 8 MAs have critical AMSTAR-2 flaws (no registered protocol, incomplete searches, or no RoB assessment). Overlap is 78% — essentially one evidence base recycled. After credibility criteria: 'Weak' evidence grade. Your guideline acknowledges: 'Despite numerous meta-analyses, the evidence base is weaker than quantity suggests. Recommend shared decision-making pending better data.'",
+              realCase: "Many clinical questions have dozens of meta-analyses but weak evidence after quality assessment. Quantity ≠ quality."
+            }
+          ]
+        }
+      },
+      {
+        type: 'clinical-guide',
+        content: {
+          title: "Using Umbrella Reviews for Practice",
+          items: [
+            "START with umbrella reviews when they exist — they've done the mapping",
+            "CHECK the credibility grade before acting on any meta-analytic finding",
+            "WEIGHT convincing evidence heavily, suggestive moderately, weak minimally",
+            "EXPLAIN contradictions — they're usually methodological, not biological",
+            "ACKNOWLEDGE the overlap — 20 meta-analyses may be only 3 independent evidence bases",
+            "UPDATE your priors: Most 'significant' findings in low-quality MAs won't replicate",
+            "DEMAND credibility assessment in guidelines — not just citation of 'a meta-analysis'"
+          ]
+        }
+      },
+      {
+        type: 'cycle-return',
+        content: {
+          principle: "To synthesize syntheses, first know what you do not know. Most meta-analyses are noise. Credibility criteria separate signal from shadow."
+        }
+      },
+      {
+        type: 'quiz',
+        content: {
+          question: "An umbrella review finds 15 meta-analyses on supplement X and disease Y. Overlap assessment shows CCA = 45%. Ten MAs show significant benefit, five show null results. What should you conclude?",
+          options: [
+            { id: 'a', text: "Strong evidence of benefit (10 vs 5 positive)", correct: false },
+            { id: 'b', text: "The evidence is essentially from one or two independent datasets recycled many times", correct: true },
+            { id: 'c', text: "The field is hopelessly contradictory", correct: false },
+            { id: 'd', text: "More meta-analyses are needed", correct: false }
+          ],
+          explanation: "CCA of 45% is VERY HIGH overlap — these 15 'independent' meta-analyses are largely analyzing the same primary studies in different combinations. The 10 vs 5 split doesn't represent 15 independent tests — it's likely 2-3 independent evidence bases repackaged. You should find the LEAST overlapping, highest quality MAs and weight those, not vote-count all 15."
+        }
+      }
+    ]
+  },
+
+  // MODULE 8: THE CAPSTONE
+  {
+    id: 8,
+    title: "The Capstone",
+    subtitle: "Integration",
+    principle: null,
+    slides: [
+      {
+        type: 'title',
+        content: {
+          title: "The Capstone",
+          subtitle: "Integration and Oath",
+          text: "You have walked through the seven principles. Now we seal them with integration and commitment."
+        }
+      },
+      {
+        type: 'rhetoric',
+        content: {
+          question: "Have you not considered that knowledge without wisdom is a blade without a handle — dangerous to the one who wields it?"
+        }
+      },
+      {
+        type: 'content',
+        content: {
+          title: "The Seven Principles Unified",
+          sections: [
+            {
+              heading: "From the Network",
+              items: [
+                "Indirect evidence has power, but transitivity is its foundation",
+                "Never rank treatments without showing uncertainty",
+                "Consistency must be tested, not assumed"
+              ]
+            },
+            {
+              heading: "From the Individual",
+              items: [
+                "Aggregate data conceals individual truth",
+                "IPD reveals what summary data hides",
+                "Ecological fallacy is the price of convenience"
+              ]
+            },
+            {
+              heading: "From the Diagnosis",
+              items: [
+                "The curve tells what the number hides",
+                "Sensitivity and specificity trade on a continuum",
+                "PPV depends on YOUR population"
+              ]
+            },
+            {
+              heading: "From the Prior",
+              items: [
+                "What you knew before has a place at the table",
+                "But you must show it openly",
+                "And test whether conclusions depend on it"
+              ]
+            },
+            {
+              heading: "From the Pathway",
+              items: [
+                "Knowing THAT is not knowing HOW",
+                "The mechanism guides the intervention",
+                "Correlation is not the path"
+              ]
+            },
+            {
+              heading: "From the Dose",
+              items: [
+                "More is not always better",
+                "The curve reveals the window",
+                "The threshold separates cure from poison"
+              ]
+            },
+            {
+              heading: "From the Umbrella",
+              items: [
+                "Most meta-analyses are noise",
+                "Credibility criteria separate signal",
+                "Quantity of evidence ≠ quality of evidence"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        type: 'vivid-consequence',
+        content: {
+          title: "THE WEIGHT OF WHAT WE DO",
+          text: "Every number in a meta-analysis represents patients. The pooled effect size is an average across thousands of human lives. The heterogeneity statistic captures how differently real people responded. The confidence interval bounds what we truly know versus what we guess.\n\nWhen we pool carelessly, we deceive. When we ignore heterogeneity, we harm those who differ from the average. When we present certainty we don't have, we lead clinicians to false confidence.",
+          toll: "Countless",
+          tollLabel: "patients affected by evidence synthesis quality"
+        }
+      },
+      {
+        type: 'oath',
+        content: {
+          text: "I will not pool what should not be combined.<br><br>I will not hide heterogeneity behind an average.<br><br>I will not present certainty I do not have.<br><br>I will trace the pathway, measure the dose, assess the credibility.<br><br>I will remember that behind every data point is a patient, behind every study is a question of truth.<br><br>I will use these methods not for cleverness, not for publication counts, but for the <em>patients</em> whose lives depend on the truths I help uncover."
+        }
+      },
+      {
+        type: 'cycle-return',
+        content: {
+          principle: "You came seeking methods. You leave with principles. The methods will evolve. The principles endure. Apply them wisely, for the evidence you synthesize shapes the care patients receive."
+        }
+      }
+    ]
+  }
+];
+
+// ============================================================
+// INTERACTIVE TOOLS - Real working implementations
+// ============================================================
+
+// Bayesian Prior-Posterior Visualizer using Plotly
+function renderBayesianTool(containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  container.innerHTML = `
+    <div class="tool-controls">
+      <div class="tool-control">
+        <label>Prior Mean</label>
+        <input type="number" id="priorMean" value="0" step="0.1" onchange="updateBayesPlot()">
+      </div>
+      <div class="tool-control">
+        <label>Prior SD</label>
+        <input type="number" id="priorSD" value="1" step="0.1" min="0.1" onchange="updateBayesPlot()">
+      </div>
+      <div class="tool-control">
+        <label>Data Mean</label>
+        <input type="number" id="dataMean" value="0.5" step="0.1" onchange="updateBayesPlot()">
+      </div>
+      <div class="tool-control">
+        <label>Data SE</label>
+        <input type="number" id="dataSE" value="0.3" step="0.05" min="0.05" onchange="updateBayesPlot()">
+      </div>
+    </div>
+    <div id="bayesPlot" class="plot-area"></div>
+    <div id="bayesInterpretation" style="margin-top:1rem;padding:1rem;background:#f3f4f6;border-radius:8px;font-size:0.9rem;"></div>
+  `;
+
+  updateBayesPlot();
+}
+
+function updateBayesPlot() {
+  const priorMean = parseFloat(document.getElementById('priorMean')?.value || 0);
+  const priorSD = parseFloat(document.getElementById('priorSD')?.value || 1);
+  const dataMean = parseFloat(document.getElementById('dataMean')?.value || 0.5);
+  const dataSE = parseFloat(document.getElementById('dataSE')?.value || 0.3);
+
+  const priorPrec = 1 / (priorSD * priorSD);
+  const dataPrec = 1 / (dataSE * dataSE);
+  const postPrec = priorPrec + dataPrec;
+  const postMean = (priorMean * priorPrec + dataMean * dataPrec) / postPrec;
+  const postSD = Math.sqrt(1 / postPrec);
+
+  const x = [];
+  for (let i = -3; i <= 3; i += 0.05) x.push(i);
+
+  const gaussian = (xVal, mean, sd) => Math.exp(-0.5 * Math.pow((xVal - mean) / sd, 2)) / (sd * Math.sqrt(2 * Math.PI));
+
+  const priorY = x.map(v => gaussian(v, priorMean, priorSD));
+  const likeY = x.map(v => gaussian(v, dataMean, dataSE));
+  const postY = x.map(v => gaussian(v, postMean, postSD));
+
+  const maxY = Math.max(...priorY, ...likeY, ...postY);
+  const normPrior = priorY.map(v => v / maxY);
+  const normLike = likeY.map(v => v / maxY);
+  const normPost = postY.map(v => v / maxY);
+
+  Plotly.newPlot('bayesPlot', [
+    { x, y: normPrior, name: 'Prior', line: { color: '#6b7280', dash: 'dash' } },
+    { x, y: normLike, name: 'Likelihood (Data)', line: { color: '#3b82f6', dash: 'dot' } },
+    { x, y: normPost, name: 'Posterior', line: { color: '#22c55e', width: 3 } }
+  ], {
+    title: 'Bayesian Updating',
+    xaxis: { title: 'Effect Size', zeroline: true },
+    yaxis: { title: 'Density (normalized)', showticklabels: false },
+    legend: { x: 0.02, y: 0.98 },
+    margin: { t: 50, r: 20, b: 50, l: 50 }
+  }, { responsive: true });
+
+  const interp = document.getElementById('bayesInterpretation');
+  if (interp) {
+    const priorWeight = (priorPrec / postPrec * 100).toFixed(0);
+    const dataWeight = (dataPrec / postPrec * 100).toFixed(0);
+    interp.innerHTML = `
+      <strong>Posterior mean:</strong> ${postMean.toFixed(3)} (95% CI: ${(postMean - 1.96*postSD).toFixed(3)} to ${(postMean + 1.96*postSD).toFixed(3)})<br>
+      <strong>Weight from prior:</strong> ${priorWeight}% | <strong>Weight from data:</strong> ${dataWeight}%<br>
+      <em>The posterior is pulled toward whichever source is more precise.</em>
+    `;
+  }
+}
+
+// SROC Curve Interactive Tool
+function renderSROCTool(containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  container.innerHTML = `
+    <div class="tool-controls">
+      <div class="tool-control">
+        <label>Threshold (0-1)</label>
+        <input type="range" id="srocThreshold" min="0" max="1" step="0.01" value="0.5" oninput="updateSROC()">
+        <span id="thresholdValue">0.50</span>
+      </div>
+      <div class="tool-control">
+        <label>Prevalence (%)</label>
+        <input type="number" id="srocPrevalence" min="0.1" max="50" value="5" step="0.5" onchange="updateSROC()">
+      </div>
+    </div>
+    <div id="srocPlot" class="plot-area"></div>
+    <div id="srocStats" style="margin-top:1rem;display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;"></div>
+  `;
+
+  updateSROC();
+}
+
+function updateSROC() {
+  const threshold = parseFloat(document.getElementById('srocThreshold')?.value || 0.5);
+  const prevalence = parseFloat(document.getElementById('srocPrevalence')?.value || 5) / 100;
+
+  document.getElementById('thresholdValue').textContent = threshold.toFixed(2);
+
+  // Simulated ROC curve (inverted logistic)
+  const fprs = [];
+  const tprs = [];
+  for (let fpr = 0; fpr <= 1; fpr += 0.01) {
+    fprs.push(fpr);
+    // Higher AUC curve
+    const tpr = 1 / (1 + Math.exp(-5 * (fpr - 0.3)));
+    tprs.push(Math.min(1, tpr + 0.1));
+  }
+
+  // Current operating point based on threshold
+  const currentFPR = 1 - threshold;
+  const currentTPR = 1 / (1 + Math.exp(-5 * (currentFPR - 0.3)));
+  const sens = Math.min(0.99, currentTPR + 0.1);
+  const spec = threshold;
+
+  // Calculate PPV, NPV
+  const ppv = (sens * prevalence) / (sens * prevalence + (1 - spec) * (1 - prevalence));
+  const npv = (spec * (1 - prevalence)) / (spec * (1 - prevalence) + (1 - sens) * prevalence);
+
+  Plotly.newPlot('srocPlot', [
+    { x: fprs, y: tprs, name: 'ROC Curve', line: { color: '#3b82f6', width: 2 } },
+    { x: [0, 1], y: [0, 1], name: 'Random', line: { color: '#d1d5db', dash: 'dash' } },
+    { x: [1-spec], y: [sens], mode: 'markers', name: 'Current Point', marker: { size: 14, color: '#ef4444' } }
+  ], {
+    title: 'ROC Curve with Operating Point',
+    xaxis: { title: '1 - Specificity (False Positive Rate)', range: [0, 1] },
+    yaxis: { title: 'Sensitivity (True Positive Rate)', range: [0, 1] },
+    legend: { x: 0.6, y: 0.2 },
+    margin: { t: 50, r: 20, b: 50, l: 60 }
+  }, { responsive: true });
+
+  document.getElementById('srocStats').innerHTML = `
+    <div style="text-align:center;padding:0.5rem;background:#dcfce7;border-radius:8px;">
+      <div style="font-size:1.5rem;font-weight:bold;color:#166534;">${(sens*100).toFixed(1)}%</div>
+      <div style="font-size:0.75rem;color:#166534;">Sensitivity</div>
+    </div>
+    <div style="text-align:center;padding:0.5rem;background:#dbeafe;border-radius:8px;">
+      <div style="font-size:1.5rem;font-weight:bold;color:#1e40af;">${(spec*100).toFixed(1)}%</div>
+      <div style="font-size:0.75rem;color:#1e40af;">Specificity</div>
+    </div>
+    <div style="text-align:center;padding:0.5rem;background:#fef3c7;border-radius:8px;">
+      <div style="font-size:1.5rem;font-weight:bold;color:#92400e;">${(ppv*100).toFixed(1)}%</div>
+      <div style="font-size:0.75rem;color:#92400e;">PPV</div>
+    </div>
+    <div style="text-align:center;padding:0.5rem;background:#f3e8ff;border-radius:8px;">
+      <div style="font-size:1.5rem;font-weight:bold;color:#6b21a8;">${(npv*100).toFixed(1)}%</div>
+      <div style="font-size:0.75rem;color:#6b21a8;">NPV</div>
+    </div>
+  `;
+}
+
+// Network Visualizer
+function renderNetworkTool(containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  container.innerHTML = `
+    <div style="margin-bottom:1rem;">
+      <p style="color:#6b7280;font-size:0.9rem;">This interactive network shows how treatments connect through shared comparators. Click nodes to highlight paths.</p>
+    </div>
+    <div id="networkPlot" class="plot-area"></div>
+    <div id="networkInfo" style="margin-top:1rem;padding:1rem;background:#f3f4f6;border-radius:8px;font-size:0.9rem;"></div>
+  `;
+
+  // Example network data
+  const treatments = ['Placebo', 'Drug A', 'Drug B', 'Drug C', 'Drug D', 'Drug E'];
+  const comparisons = [
+    { from: 0, to: 1, trials: 8 },
+    { from: 0, to: 2, trials: 12 },
+    { from: 0, to: 3, trials: 5 },
+    { from: 1, to: 2, trials: 3 },
+    { from: 1, to: 4, trials: 2 },
+    { from: 2, to: 3, trials: 4 },
+    { from: 3, to: 5, trials: 2 },
+    { from: 4, to: 5, trials: 1 }
+  ];
+
+  // Position nodes in a circle
+  const n = treatments.length;
+  const nodeX = treatments.map((_, i) => Math.cos(2 * Math.PI * i / n - Math.PI/2));
+  const nodeY = treatments.map((_, i) => Math.sin(2 * Math.PI * i / n - Math.PI/2));
+
+  // Create edge traces
+  const edgeTraces = comparisons.map(c => ({
+    x: [nodeX[c.from], nodeX[c.to], null],
+    y: [nodeY[c.from], nodeY[c.to], null],
+    mode: 'lines',
+    line: { width: c.trials, color: '#93c5fd' },
+    hoverinfo: 'text',
+    text: `${treatments[c.from]} vs ${treatments[c.to]}: ${c.trials} trials`,
+    showlegend: false
+  }));
+
+  // Node trace
+  const nodeTrace = {
+    x: nodeX,
+    y: nodeY,
+    mode: 'markers+text',
+    marker: { size: 30, color: '#3b82f6', line: { width: 2, color: '#1e40af' } },
+    text: treatments,
+    textposition: 'top center',
+    hoverinfo: 'text',
+    showlegend: false
+  };
+
+  Plotly.newPlot('networkPlot', [...edgeTraces, nodeTrace], {
+    title: 'Treatment Network',
+    showlegend: false,
+    xaxis: { visible: false, range: [-1.5, 1.5] },
+    yaxis: { visible: false, range: [-1.5, 1.5], scaleanchor: 'x' },
+    margin: { t: 50, r: 20, b: 20, l: 20 }
+  }, { responsive: true });
+
+  document.getElementById('networkInfo').innerHTML = `
+    <strong>Network summary:</strong> ${treatments.length} treatments, ${comparisons.length} direct comparisons, ${comparisons.reduce((s,c) => s+c.trials, 0)} total trials.<br>
+    <strong>Connectivity:</strong> Well-connected network with multiple paths between most treatments.<br>
+    <em>Edge thickness represents number of trials. Thick edges = more direct evidence.</em>
+  `;
+}
+
+// MASEM Path Diagram Visualizer
+function renderMASEMTool(containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  container.innerHTML = `
+    <div style="margin-bottom:1rem;">
+      <p style="color:#6b7280;font-size:0.9rem;">Interactive MASEM path diagram. Adjust path coefficients to see how indirect effects change.</p>
+    </div>
+    <div class="tool-controls">
+      <div class="tool-control">
+        <label>X → M (a path)</label>
+        <input type="range" id="pathA" min="0" max="0.9" step="0.05" value="0.5" oninput="updateMASEMPlot()">
+        <span id="pathAVal">0.50</span>
+      </div>
+      <div class="tool-control">
+        <label>M → Y (b path)</label>
+        <input type="range" id="pathB" min="0" max="0.9" step="0.05" value="0.4" oninput="updateMASEMPlot()">
+        <span id="pathBVal">0.40</span>
+      </div>
+      <div class="tool-control">
+        <label>X → Y direct (c' path)</label>
+        <input type="range" id="pathC" min="-0.3" max="0.5" step="0.05" value="0.1" oninput="updateMASEMPlot()">
+        <span id="pathCVal">0.10</span>
+      </div>
+    </div>
+    <div id="masemDiagram" style="margin:1.5rem 0;text-align:center;"></div>
+    <div id="masemResults" style="padding:1rem;background:#f3f4f6;border-radius:8px;"></div>
+  `;
+
+  updateMASEMPlot();
+}
+
+function updateMASEMPlot() {
+  const a = parseFloat(document.getElementById('pathA').value);
+  const b = parseFloat(document.getElementById('pathB').value);
+  const c = parseFloat(document.getElementById('pathC').value);
+
+  document.getElementById('pathAVal').textContent = a.toFixed(2);
+  document.getElementById('pathBVal').textContent = b.toFixed(2);
+  document.getElementById('pathCVal').textContent = c.toFixed(2);
+
+  const indirect = a * b;
+  const total = indirect + c;
+  const propMediated = total !== 0 ? (indirect / total * 100).toFixed(1) : 0;
+
+  // Draw SVG path diagram
+  document.getElementById('masemDiagram').innerHTML = `
+    <svg width="400" height="200" viewBox="0 0 400 200">
+      <!-- Boxes -->
+      <rect x="30" y="80" width="80" height="40" fill="#3b82f6" rx="5"/>
+      <text x="70" y="105" text-anchor="middle" fill="white" font-weight="bold">X</text>
+
+      <rect x="160" y="20" width="80" height="40" fill="#8b5cf6" rx="5"/>
+      <text x="200" y="45" text-anchor="middle" fill="white" font-weight="bold">M</text>
+
+      <rect x="290" y="80" width="80" height="40" fill="#22c55e" rx="5"/>
+      <text x="330" y="105" text-anchor="middle" fill="white" font-weight="bold">Y</text>
+
+      <!-- Arrows -->
+      <defs>
+        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+          <polygon points="0 0, 10 3.5, 0 7" fill="#374151"/>
+        </marker>
+      </defs>
+
+      <!-- X to M -->
+      <line x1="110" y1="85" x2="160" y2="55" stroke="#374151" stroke-width="2" marker-end="url(#arrowhead)"/>
+      <text x="125" y="60" fill="#374151" font-size="14">a=${a.toFixed(2)}</text>
+
+      <!-- M to Y -->
+      <line x1="240" y1="55" x2="290" y2="85" stroke="#374151" stroke-width="2" marker-end="url(#arrowhead)"/>
+      <text x="265" y="60" fill="#374151" font-size="14">b=${b.toFixed(2)}</text>
+
+      <!-- X to Y direct -->
+      <line x1="110" y1="100" x2="288" y2="100" stroke="#9ca3af" stroke-width="2" stroke-dasharray="5,5" marker-end="url(#arrowhead)"/>
+      <text x="200" y="125" fill="#9ca3af" font-size="14">c'=${c.toFixed(2)}</text>
+    </svg>
+  `;
+
+  const mediationType = c < 0.05 ? 'Full mediation' : indirect > Math.abs(c) ? 'Partial mediation' : 'No significant mediation';
+
+  document.getElementById('masemResults').innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;">
+      <div>
+        <strong>Indirect effect (a×b):</strong><br>
+        <span style="font-size:1.5rem;color:#8b5cf6;">${indirect.toFixed(3)}</span>
+      </div>
+      <div>
+        <strong>Direct effect (c'):</strong><br>
+        <span style="font-size:1.5rem;color:#9ca3af;">${c.toFixed(3)}</span>
+      </div>
+      <div>
+        <strong>Total effect:</strong><br>
+        <span style="font-size:1.5rem;color:#22c55e;">${total.toFixed(3)}</span>
+      </div>
+      <div>
+        <strong>% Mediated:</strong><br>
+        <span style="font-size:1.5rem;color:#3b82f6;">${propMediated}%</span>
+      </div>
+    </div>
+    <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid #e5e7eb;">
+      <strong>Interpretation:</strong> ${mediationType}<br>
+      <em>${indirect > 0.1 ? 'Substantial indirect pathway. Interventions on M may be effective.' : 'Weak indirect pathway. M may not be a useful intervention target.'}</em>
+    </div>
+  `;
+}
+
+// Dose-Response Curve Visualizer
+function renderDoseResponseTool(containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  container.innerHTML = `
+    <div style="margin-bottom:1rem;">
+      <p style="color:#6b7280;font-size:0.9rem;">Explore different dose-response curve shapes. See how assumptions change interpretation.</p>
+    </div>
+    <div class="tool-controls">
+      <div class="tool-control">
+        <label>Curve Shape</label>
+        <select id="curveShape" onchange="updateDoseResponsePlot()">
+          <option value="linear">Linear</option>
+          <option value="jcurve" selected>J-Curve</option>
+          <option value="threshold">Threshold</option>
+          <option value="ceiling">Ceiling Effect</option>
+          <option value="ucurve">U-Curve</option>
+        </select>
+      </div>
+      <div class="tool-control">
+        <label>Nadir/Threshold Position</label>
+        <input type="range" id="nadirPos" min="1" max="4" step="0.5" value="2" oninput="updateDoseResponsePlot()">
+        <span id="nadirPosVal">2</span>
+      </div>
+    </div>
+    <div id="doseResponsePlot" class="plot-area"></div>
+    <div id="doseResponseInfo" style="margin-top:1rem;padding:1rem;background:#f3f4f6;border-radius:8px;"></div>
+  `;
+
+  updateDoseResponsePlot();
+}
+
+function updateDoseResponsePlot() {
+  const shape = document.getElementById('curveShape').value;
+  const nadir = parseFloat(document.getElementById('nadirPos').value);
+  document.getElementById('nadirPosVal').textContent = nadir.toFixed(1);
+
+  const doses = [];
+  const rrs = [];
+  const lower = [];
+  const upper = [];
+
+  for (let d = 0; d <= 6; d += 0.2) {
+    doses.push(d);
+    let rr, se;
+
+    switch(shape) {
+      case 'linear':
+        rr = 1 - 0.08 * d;
+        se = 0.03;
+        break;
+      case 'jcurve':
+        rr = 1 - 0.15 * d + 0.04 * d * d;
+        se = 0.02 + 0.01 * d;
+        break;
+      case 'threshold':
+        rr = d < nadir ? 1 : 1 - 0.15 * (d - nadir);
+        se = 0.03;
+        break;
+      case 'ceiling':
+        rr = 1 - 0.25 * (1 - Math.exp(-d / nadir));
+        se = 0.02;
+        break;
+      case 'ucurve':
+        rr = 1 + 0.1 * Math.pow(d - nadir, 2) - 0.15;
+        se = 0.03;
+        break;
+    }
+
+    rrs.push(Math.max(0.4, Math.min(1.4, rr)));
+    lower.push(Math.max(0.3, rr - 1.96 * se));
+    upper.push(Math.min(1.5, rr + 1.96 * se));
+  }
+
+  const traceRR = {
+    x: doses,
+    y: rrs,
+    mode: 'lines',
+    name: 'Relative Risk',
+    line: { color: '#3b82f6', width: 3 }
+  };
+
+  const traceCI = {
+    x: [...doses, ...doses.slice().reverse()],
+    y: [...upper, ...lower.slice().reverse()],
+    fill: 'toself',
+    fillcolor: 'rgba(59,130,246,0.2)',
+    line: { color: 'transparent' },
+    name: '95% CI',
+    showlegend: true,
+    hoverinfo: 'skip'
+  };
+
+  const traceRef = {
+    x: [0, 6],
+    y: [1, 1],
+    mode: 'lines',
+    line: { color: '#ef4444', width: 1, dash: 'dash' },
+    name: 'No effect',
+    showlegend: true
+  };
+
+  Plotly.newPlot('doseResponsePlot', [traceCI, traceRR, traceRef], {
+    title: `Dose-Response Curve (${shape})`,
+    xaxis: { title: 'Dose (units/day)', range: [0, 6] },
+    yaxis: { title: 'Relative Risk', range: [0.4, 1.4] },
+    showlegend: true,
+    legend: { x: 0.7, y: 0.95 },
+    margin: { t: 50, r: 20, b: 50, l: 60 }
+  }, { responsive: true });
+
+  const minRR = Math.min(...rrs);
+  const optDose = doses[rrs.indexOf(minRR)];
+
+  const interpretations = {
+    linear: 'Linear model assumes constant benefit per unit dose. Often an oversimplification. Higher doses would appear infinitely beneficial.',
+    jcurve: `J-curve shows benefit at low doses, harm at high doses. Optimal dose around ${optDose.toFixed(1)} units. Classic pattern for alcohol/CVD, some nutrients.`,
+    threshold: `No effect until threshold (${nadir} units), then benefit. Suggests minimum effective dose. Below threshold, intervention is wasted.`,
+    ceiling: `Benefit plateaus after ~${nadir} units. Adding more dose provides diminishing returns. Focus on reaching threshold, not maximizing.`,
+    ucurve: `Both low AND high doses harmful. Optimal at ${nadir} units. Deficiency and excess both problematic (e.g., vitamin D, BMI).`
+  };
+
+  document.getElementById('doseResponseInfo').innerHTML = `
+    <strong>Minimum RR:</strong> ${minRR.toFixed(2)} at ${optDose.toFixed(1)} units/day<br><br>
+    <strong>Interpretation:</strong> ${interpretations[shape]}<br><br>
+    <em style="color:#ef4444;">Warning: A linear model would miss the reversal/plateau. Always test for non-linearity.</em>
+  `;
+}
+
+// Umbrella Review Credibility Assessment Tool
+function renderCredibilityTool(containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  container.innerHTML = `
+    <div style="margin-bottom:1rem;">
+      <p style="color:#6b7280;font-size:0.9rem;">Assess the credibility of meta-analytic evidence using established criteria.</p>
+    </div>
+    <div class="tool-controls" style="flex-direction:column;">
+      <div class="tool-control" style="width:100%;">
+        <label>Total cases (or N for continuous)</label>
+        <input type="number" id="credCases" value="1500" oninput="updateCredibilityAssessment()">
+      </div>
+      <div class="tool-control" style="width:100%;">
+        <label>P-value (e.g., 0.001)</label>
+        <input type="number" id="credPval" value="0.0001" step="0.0001" oninput="updateCredibilityAssessment()">
+      </div>
+      <div class="tool-control" style="width:100%;">
+        <label>I² heterogeneity (%)</label>
+        <input type="number" id="credI2" value="35" min="0" max="100" oninput="updateCredibilityAssessment()">
+      </div>
+      <div class="tool-control" style="width:100%;">
+        <label>Small-study bias detected?</label>
+        <select id="credBias" onchange="updateCredibilityAssessment()">
+          <option value="no">No</option>
+          <option value="yes">Yes</option>
+        </select>
+      </div>
+      <div class="tool-control" style="width:100%;">
+        <label>Largest study significant?</label>
+        <select id="credLargest" onchange="updateCredibilityAssessment()">
+          <option value="yes">Yes</option>
+          <option value="no">No</option>
+        </select>
+      </div>
+    </div>
+    <div id="credibilityResult" style="margin-top:1.5rem;padding:1.5rem;border-radius:8px;text-align:center;"></div>
+    <div id="credibilityChecklist" style="margin-top:1rem;padding:1rem;background:#f8fafc;border-radius:8px;font-size:0.9rem;"></div>
+  `;
+
+  updateCredibilityAssessment();
+}
+
+function updateCredibilityAssessment() {
+  const cases = parseInt(document.getElementById('credCases').value) || 0;
+  const pval = parseFloat(document.getElementById('credPval').value) || 1;
+  const i2 = parseInt(document.getElementById('credI2').value) || 0;
+  const hasBias = document.getElementById('credBias').value === 'yes';
+  const largestSig = document.getElementById('credLargest').value === 'yes';
+
+  const checks = {
+    cases1000: cases >= 1000,
+    pHighlySig: pval < 0.000001,
+    pSig: pval < 0.001,
+    pMod: pval < 0.05,
+    lowHet: i2 < 50,
+    noBias: !hasBias,
+    largestSig: largestSig
+  };
+
+  let grade, color, description;
+
+  if (checks.cases1000 && checks.pHighlySig && checks.lowHet && checks.noBias && checks.largestSig) {
+    grade = 'CONVINCING';
+    color = '#22c55e';
+    description = '모든 기준이 충족되었음을 알 수 있습니다. 실무에 정보를 제공할 수 있는 강력한 증거입니다.';
+  } else if (checks.cases1000 && checks.pHighlySig) {
+    grade = 'HIGHLY SUGGESTIVE';
+    color = '#84cc16';
+    description = '대규모 표본과 매우 유의미하지만 다른 기준이 충족되지 않았습니다. 합리적으로 강력한 증거.';
+  } else if (checks.cases1000 && checks.pSig) {
+    grade = 'SUGGESTIVE';
+    color = '#f59e0b';
+    description = '샘플이 적절하고 유의미하지만 이질성이나 편향이 우려됩니다. 주의해서 해석하세요.';
+  } else if (checks.pMod) {
+    grade = 'WEAK';
+    color = '#ef4444';
+    description = 'Statistically significant but fails multiple credibility criteria. Low confidence in the finding.';
+  } else {
+    grade = 'NON-SIGNIFICANT';
+    color = '#6b7280';
+    description = '통계적 유의성에 도달하지 못했습니다. 효과에 대한 믿을만한 증거가 없습니다.';
+  }
+
+  document.getElementById('credibilityResult').innerHTML = `
+    <div style="font-size:0.9rem;color:#6b7280;margin-bottom:0.5rem;">EVIDENCE GRADE</div>
+    <div style="font-size:2rem;font-weight:bold;color:${color};">${grade}</div>
+    <div style="margin-top:0.5rem;color:#374151;">${description}</div>
+  `;
+
+  document.getElementById('credibilityChecklist').innerHTML = `
+    <strong>Criteria Checklist:</strong>
+    <ul style="margin-top:0.5rem;list-style:none;padding:0;">
+      <li>${checks.cases1000 ? '✅' : '❌'} Sample size ≥ 1,000 cases (${cases.toLocaleString()})</li>
+      <li>${checks.pHighlySig ? '✅' : (checks.pSig ? '⚠️' : '❌')} P-value < 10⁻⁶ (p = ${pval < 0.0001 ? pval.toExponential(1) : pval})</li>
+      <li>${checks.lowHet ? '✅' : '❌'} I² < 50% (I² = ${i2}%)</li>
+      <li>${checks.noBias ? '✅' : '❌'} No evidence of small-study bias</li>
+      <li>${checks.largestSig ? '✅' : '❌'} Largest study shows significant effect</li>
+    </ul>
+    <div style="margin-top:1rem;padding-top:0.5rem;border-top:1px solid #e5e7eb;font-size:0.85rem;color:#6b7280;">
+      <em>Based on Ioannidis criteria for umbrella reviews. 'Convincing' ≈ top 2% of published associations.</em>
+    </div>
+  `;
+}
+
+// ============================================================
+// CORE COURSE FUNCTIONALITY
+// ============================================================
+const STORAGE_KEY = 'advancedMetaAnalysisCourse_v2';
+
+let state = {
+  currentModule: 0,
+  currentSlide: 0,
+  points: 0,
+  completedModules: [],
+  toolsUsed: [],
+  quizAnswered: {}
+};
+
+function loadState() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) state = { ...state, ...JSON.parse(saved) };
+  } catch (e) {
+    console.warn('Failed to load state, using defaults');
+  }
+}
+
+function saveState() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch (e) {}
+}
+
+function initCourse() {
+  loadState();
+  renderModuleList();
+  renderSlide();
+  updateProgress();
+
+  // Keyboard navigation
+  document.addEventListener('keydown', e => {
+    const tag = e.target.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || e.target.isContentEditable) return;
+    if (e.target.matches('button, a, [role="button"]')) {
+        if (e.key === ' ' || e.key === 'Enter') return;
+    }
+    if (e.key === 'Escape') { closeDashboard(); closeGlossary(); }
+    if (e.key === 'ArrowRight') { e.preventDefault(); nextSlide(); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); prevSlide(); }
+  });
+}
+
+function renderModuleList() {
+  const list = document.getElementById('moduleList');
+  list.innerHTML = modules.map((m, i) => `
+    <div class="module-item ${i === state.currentModule ? 'active' : ''} ${state.completedModules.includes(i) ? 'completed' : ''}"
+         onclick="goToModule(${i})" tabindex="0" role="button" aria-label="Module ${i}: ${m.title}"
+         onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();goToModule(${i});}">
+      <div class="module-number">${i}</div>
+      <div class="module-info">
+        <div class="module-title">${m.title}</div>
+        <div class="module-subtitle">${m.subtitle}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderSlide() {
+  const module = modules[state.currentModule];
+  const slide = module.slides[state.currentSlide];
+  const container = document.getElementById('slideContainer');
+
+  document.getElementById('moduleIndicator').textContent = `Module ${module.id}: ${module.title}`;
+  document.getElementById('slideCounter').textContent = `${state.currentSlide + 1} / ${module.slides.length}`;
+
+  const overallSlides = modules.reduce((s, m) => s + m.slides.length, 0);
+  let currentOverall = 0;
+  for (let i = 0; i < state.currentModule; i++) currentOverall += modules[i].slides.length;
+  currentOverall += state.currentSlide + 1;
+  document.getElementById('overallProgress').textContent = `Overall: ${Math.round(currentOverall/overallSlides*100)}%`;
+
+  container.innerHTML = `<div class="slide active animate-in">${renderSlideContent(slide)}</div>`;
+
+  document.getElementById('prevBtn').disabled = state.currentSlide === 0;
+  document.getElementById('nextBtn').disabled = state.currentSlide === module.slides.length - 1;
+
+  // Initialize tools if present
+  setTimeout(() => {
+    if (slide.type === 'tool-bayes') renderBayesianTool(slide.content.id);
+    if (slide.type === 'tool-roc') renderSROCTool(slide.content.id);
+    if (slide.type === 'tool-network') renderNetworkTool(slide.content.id);
+    if (slide.type === 'tool-masem') renderMASEMTool(slide.content.id);
+    if (slide.type === 'tool-dose') renderDoseResponseTool(slide.content.id);
+    if (slide.type === 'tool-umbrella') renderCredibilityTool(slide.content.id);
+  }, 100);
+}
+
+function renderSlideContent(slide) {
+  switch(slide.type) {
+    case 'title':
+      return `<div class="slide-content" style="text-align:center;padding:3rem;">
+        <h1 class="slide-title" style="font-size:3rem;margin-bottom:1rem;">${slide.content.title}</h1>
+        <p style="font-size:1.3rem;color:var(--gold);margin-bottom:2rem;">${slide.content.subtitle}</p>
+        <p style="font-size:1.1rem;opacity:0.8;max-width:600px;margin:0 auto;">${slide.content.text}</p>
+      </div>`;
+
+    case 'principle':
+      return `<div class="principle-display" style="padding:4rem 2rem;">
+        <p class="principle-text">"${slide.content.text}"</p>
+      </div>`;
+
+    case 'rhetoric':
+      return `<div class="rhetoric-question">${slide.content.question}</div>`;
+
+    case 'oath':
+      return `<div class="oath-statement">${slide.content.text}</div>`;
+
+    case 'story':
+      return `<div class="story-box">
+        <div class="story-label">${slide.content.label}</div>
+        <div class="story-text">${slide.content.text}</div>
+        <div class="story-hook">${slide.content.hook}</div>
+      </div>`;
+
+    case 'story-deep':
+      return `<div class="story-deep">
+        <div class="story-label">${slide.content.label}</div>
+        <div class="real-data-source">${slide.content.source}</div>
+        <div class="story-timeline">
+          ${slide.content.timeline.map(e => `
+            <div class="timeline-event ${e.type || ''}">
+              <div class="timeline-year">${e.year}</div>
+              <div class="timeline-text">${e.text}</div>
+            </div>
+          `).join('')}
+        </div>
+        ${slide.content.realData ? `
+          <div class="real-data-card">
+            <div class="real-data-header"><strong>Real Data</strong></div>
+            <div class="real-data-grid">
+              ${Object.entries(slide.content.realData).map(([k,v]) => `
+                <div class="real-data-stat">
+                  <span class="label">${k}:</span>
+                  <span class="value">${v}</span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        ` : ''}
+        <div class="story-hook">${slide.content.hook}</div>
+      </div>`;
+
+    case 'content':
+      return `<div class="slide-content">
+        <h2 class="slide-title">${slide.content.title}</h2>
+        ${slide.content.sections.map(s => `
+          <div class="method-box">
+            <h3 style="color:var(--gold);margin-bottom:0.75rem;">${s.heading}</h3>
+            ${s.items ? `<ul>${s.items.map(i => `<li>${i}</li>`).join('')}</ul>` : ''}
+            ${s.text ? `<p style="line-height:1.6;">${s.text}</p>` : ''}
+          </div>
+        `).join('')}
+      </div>`;
+
+    case 'method':
+      return `<div class="method-box">
+        <div class="method-label">${slide.content.label}</div>
+        <div class="method-content">
+          <h3>${slide.content.title}</h3>
+          ${slide.content.sections.map(s => `
+            <div style="margin:1rem 0;">
+              <strong style="color:var(--gold);">${s.heading}</strong>
+              <p style="margin-top:0.5rem;line-height:1.6;">${s.text}</p>
+            </div>
+          `).join('')}
+        </div>
+      </div>`;
+
+    case 'contrast':
+      // Support both formats: wrong/right with text, or leftTitle/rightTitle with items
+      if (slide.content.leftTitle) {
+        return `<div class="slide-content">
+          <h2 class="slide-title">${slide.content.title || 'Comparison'}</h2>
+          <div class="contrast-container">
+            <div class="contrast-box wrong">
+              <div class="contrast-title">${slide.content.leftTitle}</div>
+              <ul style="margin:0;padding-left:1.5rem;">${slide.content.leftItems.map(i => `<li>${i}</li>`).join('')}</ul>
+            </div>
+            <div class="contrast-box right">
+              <div class="contrast-title">${slide.content.rightTitle}</div>
+              <ul style="margin:0;padding-left:1.5rem;">${slide.content.rightItems.map(i => `<li>${i}</li>`).join('')}</ul>
+            </div>
+          </div>
+        </div>`;
+      }
+      return `<div class="slide-content">
+        <h2 class="slide-title">${slide.content.title}</h2>
+        <div class="contrast-container">
+          <div class="contrast-box wrong">
+            <div class="contrast-title">${slide.content.wrong.title}</div>
+            <p>${slide.content.wrong.text}</p>
+          </div>
+          <div class="contrast-box right">
+            <div class="contrast-title">${slide.content.right.title}</div>
+            <p>${slide.content.right.text}</p>
+          </div>
+        </div>
+      </div>`;
+
+    case 'warning':
+      return `<div class="warning-box">
+        <div class="warning-title">${slide.content.title}</div>
+        <p style="line-height:1.6;">${slide.content.text}</p>
+      </div>`;
+
+    case 'vivid-consequence':
+      return `<div class="vivid-consequence">
+        <p style="line-height:1.7;">${slide.content.text}</p>
+        <div class="death-toll">${slide.content.toll}</div>
+        <div class="toll-label">${slide.content.tollLabel}</div>
+      </div>`;
+
+    case 'clinical-guide':
+      return `<div class="clinical-guide">
+        <div class="guide-title">🏥 ${slide.content.title}</div>
+        <ul class="clinical-checklist">
+          ${slide.content.items.map(i => `<li>${i}</li>`).join('')}
+        </ul>
+      </div>`;
+
+    case 'cycle-return':
+      return `<div class="cycle-return">
+        <p style="font-size:0.8rem;color:var(--gold);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.5rem;">Return to the Principle</p>
+        <p class="principle-recall">"${slide.content.principle}"</p>
+      </div>`;
+
+    case 'tool-bayes':
+    case 'tool-roc':
+    case 'tool-network':
+    case 'tool-ipd':
+    case 'tool-masem':
+    case 'tool-dose':
+    case 'tool-umbrella':
+      return `<div class="tool-panel">
+        <div class="tool-header">
+          <span class="tool-icon">🔧</span>
+          <span class="tool-title">${slide.content.title}</span>
+        </div>
+        <p style="margin-bottom:1rem;">${slide.content.description}</p>
+        <div id="${slide.content.id}"></div>
+      </div>`;
+
+    case 'decision-tree':
+      return renderDecisionTree(slide.content);
+
+    case 'scenario':
+      return renderScenario(slide.content);
+
+    case 'quiz':
+      return renderQuiz(slide.content);
+
+    default:
+      return `<div class="slide-content"><p>Slide type: ${slide.type}</p></div>`;
+  }
+}
+
+function renderDecisionTree(content) {
+  const firstNode = content.nodes.find(n => n.id === 'start') || content.nodes[0];
+  return `
+    <div class="decision-tree">
+      <h3 style="color:var(--gold);margin-bottom:1rem;font-family:'Cormorant Garamond',serif;font-size:1.4rem;">${content.title}</h3>
+      <div class="scenario-situation">${content.situation}</div>
+      <div id="decision-container">${renderDecisionNode(firstNode, content.nodes)}</div>
+    </div>`;
+}
+
+function renderDecisionNode(node, allNodes) {
+  if (node.type === 'outcome') {
+    return `<div class="decision-outcome visible ${node.consequence}">
+      <h4 style="margin-bottom:0.5rem;">${node.title}</h4>
+      <p style="margin-bottom:0.5rem;">${node.text}</p>
+      ${node.realCase ? `<p style="font-style:italic;opacity:0.8;"><strong>Real case:</strong> ${node.realCase}</p>` : ''}
+    </div>`;
+  }
+  return `<div class="decision-node active">
+    <div class="decision-question">${node.question}</div>
+    <div class="decision-branches">
+      ${node.branches.map(b => `
+        <div class="decision-branch" onclick="selectBranch('${b.nextNode}', this)">
+          <span class="branch-arrow">→</span>
+          <span>${b.text}</span>
+        </div>
+      `).join('')}
+    </div>
+  </div>`;
+}
+
+function selectBranch(nextNodeId, element) {
+  const module = modules[state.currentModule];
+  const slide = module.slides[state.currentSlide];
+  const nodes = slide.content.nodes;
+  const nextNode = nodes.find(n => n.id === nextNodeId);
+  if (nextNode) {
+    element.classList.add('selected');
+    document.getElementById('decision-container').innerHTML += renderDecisionNode(nextNode, nodes);
+    if (nextNode.type === 'outcome' && nextNode.consequence === 'good') addPoints(15);
+  }
+}
+
+function renderScenario(content) {
+  return `<div class="scenario-panel">
+    <div class="scenario-header">
+      <span class="scenario-icon">🔀</span>
+      <span class="scenario-title">${content.title}</span>
+    </div>
+    <div class="scenario-situation">${content.situation}</div>
+    <div class="scenario-question">${content.question}</div>
+    <div class="scenario-choices">
+      ${content.choices.map(c => `
+        <div class="scenario-choice" data-id="${c.id}" onclick="selectScenarioChoice('${c.id}', '${c.consequence}', '${content.correct}', this)">
+          <span class="choice-letter">${c.id.toUpperCase()}</span>
+          <span>${c.text}</span>
+        </div>
+      `).join('')}
+    </div>
+    <div id="scenario-result" class="scenario-result"></div>
+  </div>`;
+}
+
+function selectScenarioChoice(id, consequence, correct, element) {
+  document.querySelectorAll('.scenario-choice').forEach(c => {
+    c.style.pointerEvents = 'none';
+    if (c.dataset.id === correct) c.classList.add('correct');
+  });
+  if (id !== correct) element.classList.add('incorrect');
+
+  const module = modules[state.currentModule];
+  const slide = module.slides[state.currentSlide];
+  const choice = slide.content.choices.find(c => c.id === id);
+
+  const result = document.getElementById('scenario-result');
+  result.className = `scenario-result visible ${consequence}`;
+  result.innerHTML = `<p>${choice.result}</p>`;
+
+  if (consequence === 'good') addPoints(15);
+}
+
+function renderQuiz(content) {
+  const quizKey = `${state.currentModule}-${state.currentSlide}`;
+  const answered = state.quizAnswered[quizKey];
+
+  return `<div class="quiz-container">
+    <div class="quiz-question">${content.question}</div>
+    <div class="quiz-options">
+      ${content.options.map(o => `
+        <div class="quiz-option ${answered ? (o.correct ? 'correct' : answered === o.id && !o.correct ? 'incorrect' : '') : ''}"
+             data-id="${o.id}" ${answered ? '' : `onclick="selectQuizOption('${o.id}', ${o.correct}, this)"`}
+             style="${answered ? 'pointer-events:none;' : ''}">${o.text}</div>
+      `).join('')}
+    </div>
+    <div class="quiz-explanation ${answered ? 'visible' : ''}">${content.explanation}</div>
+  </div>`;
+}
+
+function selectQuizOption(id, correct, element) {
+  const quizKey = `${state.currentModule}-${state.currentSlide}`;
+  state.quizAnswered[quizKey] = id;
+  saveState();
+
+  document.querySelectorAll('.quiz-option').forEach(o => {
+    o.style.pointerEvents = 'none';
+    const module = modules[state.currentModule];
+    const slide = module.slides[state.currentSlide];
+    const opt = slide.content.options.find(op => op.id === o.dataset.id);
+    if (opt?.correct) o.classList.add('correct');
+  });
+
+  if (!correct) element.classList.add('incorrect');
+  document.querySelector('.quiz-explanation').classList.add('visible');
+
+  if (correct) addPoints(20);
+}
+
+function addPoints(pts) {
+  state.points += pts;
+  document.getElementById('sidebarPoints').textContent = `${state.points} pts`;
+  saveState();
+}
+
+function prevSlide() {
+  if (state.currentSlide > 0) {
+    state.currentSlide--;
+    renderSlide();
+    saveState();
+  } else if (state.currentModule > 0) {
+    state.currentModule--;
+    state.currentSlide = modules[state.currentModule].slides.length - 1;
+    renderModuleList();
+    renderSlide();
+    saveState();
+  }
+}
+
+function nextSlide() {
+  const module = modules[state.currentModule];
+  if (state.currentSlide < module.slides.length - 1) {
+    state.currentSlide++;
+    renderSlide();
+    saveState();
+  } else if (state.currentModule < modules.length - 1) {
+    if (!state.completedModules.includes(state.currentModule)) state.completedModules.push(state.currentModule);
+    state.currentModule++;
+    state.currentSlide = 0;
+    renderModuleList();
+    renderSlide();
+    saveState();
+  }
+}
+
+function goToModule(index) {
+  if (index !== state.currentModule) {
+    const prev = modules[state.currentModule];
+    if (state.currentSlide === prev.slides.length - 1 && !state.completedModules.includes(state.currentModule)) {
+      state.completedModules.push(state.currentModule);
+    }
+    state.currentModule = index;
+    state.currentSlide = 0;
+    renderModuleList();
+    renderSlide();
+    updateProgress();
+    saveState();
+  }
+}
+
+function goToNextModule() {
+  if (state.currentModule < modules.length - 1) goToModule(state.currentModule + 1);
+}
+
+function updateProgress() {
+  const percent = Math.round((state.completedModules.length / modules.length) * 100);
+  document.getElementById('progressPercent').textContent = `${percent}%`;
+  document.getElementById('progressFill').style.width = `${percent}%`;
+}
+
+function openDashboard() {
+  document.getElementById('progressDashboard').classList.add('open');
+  document.getElementById('totalPoints').textContent = state.points;
+  document.getElementById('modulesCompleted').textContent = `${state.completedModules.length}/${modules.length}`;
+  document.getElementById('toolsUsed').textContent = state.toolsUsed.length;
+}
+
+function closeDashboard() {
+  document.getElementById('progressDashboard').classList.remove('open');
+}
+
+function openGlossary() {
+  document.getElementById('glossaryOverlay').classList.add('open');
+  renderGlossary();
+}
+
+function closeGlossary() {
+  document.getElementById('glossaryOverlay').classList.remove('open');
+}
+
+function renderGlossary(filter = '') {
+  const filtered = glossaryTerms.filter(t =>
+    t.term.toLowerCase().includes(filter.toLowerCase()) ||
+    t.def.toLowerCase().includes(filter.toLowerCase())
+  );
+  document.getElementById('glossaryContent').innerHTML = filtered.map(t => `
+    <div class="glossary-term">
+      <strong>${t.term}</strong><br>
+      <span style="color:#4b5563;">${t.def}</span>
+    </div>
+  `).join('');
+}
+
+function filterGlossary() {
+  const query = document.getElementById('glossarySearch').value;
+  renderGlossary(query);
+}
+
+document.addEventListener('DOMContentLoaded', initCourse);
+</script>
+</body>
+</html>

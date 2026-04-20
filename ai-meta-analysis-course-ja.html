@@ -1,0 +1,2386 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>The Silicon Scribe: AI によるメタ分析</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&amp;family=Source+Sans+Pro:wght@300;400;600;700&amp;display=swap" rel="stylesheet"/>
+<style>
+    :root {
+      --navy: #1E2761;
+      --deep-navy: #141B3D;
+      --gold: #D4AF37;
+      --cream: #FAF8F5;
+      --red: #C53030;
+      --green: #22c55e;
+      --teal: #00D4AA;
+      --purple: #A855F7;
+      --orange: #F97316;
+      --blue: #3B82F6;
+      --pink: #EC4899;
+      --cyber: #00FFFF;
+      --electric: #7B68EE;
+      --transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      height: 100%;
+      font-family: 'Source Sans Pro', sans-serif;
+      background: var(--deep-navy);
+      color: var(--cream);
+    }
+
+    .course-container { display: flex; height: 100vh; overflow: hidden; }
+
+    .sidebar {
+      width: 280px;
+      background: linear-gradient(180deg, var(--deep-navy) 0%, #0a0f1a 100%);
+      border-right: 1px solid rgba(0,255,255,0.2);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    /* mobile sidebar handled by hamburger toggle below */
+
+    .sidebar-header { padding: 1.25rem; border-bottom: 1px solid rgba(0,255,255,0.2); }
+    .sidebar-header h1 { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; font-weight: 700; color: var(--cyber); }
+    .sidebar-header p { font-size: 0.65rem; color: rgba(255,255,255,0.6); margin-top: 0.25rem; }
+
+    .module-list { flex: 1; overflow-y: auto; padding: 0.5rem 0; }
+
+    .module-item {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.45rem 0.75rem; cursor: pointer;
+      border-left: 3px solid transparent; transition: all 0.2s;
+    }
+    .module-item:hover { background: rgba(0,255,255,0.1); }
+    .module-item.active { background: rgba(0,255,255,0.15); border-left-color: var(--cyber); }
+    .module-item.completed .module-number { background: var(--green); color: white; }
+
+    .module-number {
+      width: 20px; height: 20px; border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.6rem; font-weight: 700; flex-shrink: 0;
+    }
+    .module-item.active .module-number { background: var(--cyber); color: var(--navy); }
+
+    .module-info { flex: 1; min-width: 0; }
+    .module-title { font-size: 0.7rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .module-subtitle { font-size: 0.55rem; color: rgba(255,255,255,0.5); }
+
+    .sidebar-footer {
+      padding: 0.6rem 0.75rem; border-top: 1px solid rgba(0,255,255,0.2);
+      font-size: 0.55rem; color: rgba(255,255,255,0.4); line-height: 1.4;
+    }
+
+    .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+    .content-header {
+      padding: 0.5rem 1rem;
+      background: rgba(0,0,0,0.3);
+      border-bottom: 1px solid rgba(0,255,255,0.2);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .breadcrumb { font-size: 0.7rem; color: rgba(255,255,255,0.6); }
+    .breadcrumb span { color: var(--cyber); }
+    .header-actions { display: flex; gap: 0.4rem; }
+
+    .btn {
+      padding: 0.3rem 0.6rem; border: 1px solid rgba(0,255,255,0.3);
+      border-radius: 6px; background: rgba(255,255,255,0.05);
+      color: var(--cream); font-size: 0.65rem; cursor: pointer; transition: all 0.2s;
+    }
+    .btn:hover { background: rgba(0,255,255,0.2); border-color: var(--cyber); }
+    .btn.primary { background: var(--cyber); color: var(--navy); border-color: var(--cyber); font-weight: 600; }
+
+    .content-body { flex: 1; overflow: hidden; display: flex; }
+    .slides-container { flex: 1; position: relative; overflow: hidden; }
+    .module-slides { display: none; width: 100%; height: 100%; }
+    .module-slides.active { display: block; }
+
+    .slide {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      display: flex; flex-direction: column; justify-content: flex-start; align-items: center;
+      padding: 1rem 1rem 2.5rem 1rem; padding-top: 1.25rem;
+      opacity: 0; visibility: hidden;
+      transition: opacity var(--transition), visibility var(--transition);
+      overflow-y: auto; overflow-x: hidden;
+    }
+    .slide .content { margin-top: auto; margin-bottom: auto; }
+    .slide.active { opacity: 1; visibility: visible; }
+    .slide.dark { background: var(--deep-navy); }
+    .slide.black { background: #000; }
+    .slide.gradient { background: linear-gradient(135deg, var(--deep-navy) 0%, #1a0a2e 100%); }
+    .slide.cyber { background: linear-gradient(135deg, #0a1a2a 0%, #0d2137 100%); }
+    .slide.warning { background: linear-gradient(135deg, #2a1a0a 0%, #3d2515 100%); }
+    .slide.danger { background: linear-gradient(135deg, #1a0a0a 0%, #2d1515 100%); }
+    .slide.hope { background: linear-gradient(135deg, #0a1a0a 0%, #152d15 100%); }
+    .slide.matrix { background: linear-gradient(135deg, #0a0a0a 0%, #0d1a0d 100%); }
+
+    .title { font-family: 'Cormorant Garamond', serif; font-size: clamp(1.3rem, 3vw, 2.2rem); font-weight: 700; margin-bottom: 0.5rem; line-height: 1.2; }
+    .title.gold { color: var(--gold); }
+    .title.cyber { color: var(--cyber); }
+    .title.red { color: var(--red); }
+    .title.green { color: var(--green); }
+    .title.purple { color: var(--purple); }
+
+    .subtitle { font-size: clamp(0.8rem, 1.6vw, 1rem); color: rgba(255,255,255,0.7); margin-bottom: 1rem; }
+
+    .big-number { font-family: 'Cormorant Garamond', serif; font-size: clamp(2rem, 8vw, 5rem); font-weight: 700; line-height: 1; }
+    .big-number.red { color: var(--red); }
+    .big-number.cyber { color: var(--cyber); }
+    .big-number.green { color: var(--green); }
+
+    .refrain {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1rem, 2.2vw, 1.5rem);
+      font-style: italic; color: var(--cyber);
+      text-align: center; max-width: 650px; line-height: 1.4;
+    }
+    .refrain.warning { color: var(--orange); border-left: 4px solid var(--orange); padding-left: 1rem; text-align: left; }
+    .refrain.danger { color: var(--red); }
+    .refrain.hope { color: var(--green); }
+    .refrain.gold { color: var(--gold); }
+
+    .rhetorical {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(0.95rem, 2vw, 1.4rem);
+      color: rgba(255,255,255,0.9);
+      text-align: center; max-width: 580px; line-height: 1.5;
+    }
+    .rhetorical em { color: var(--cyber); font-style: normal; }
+
+    .simple-box {
+      background: linear-gradient(135deg, rgba(0,255,255,0.1), rgba(0,0,0,0.2));
+      border: 2px solid var(--cyber); border-radius: 10px;
+      padding: 0.9rem; max-width: 500px; margin: 0.5rem 0;
+    }
+    .simple-box .simple-title { color: var(--cyber); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; margin-bottom: 0.35rem; }
+    .simple-box .simple-text { font-size: 0.85rem; line-height: 1.5; }
+    .simple-box .simple-text strong { color: var(--gold); }
+    .simple-box.warning { border-color: var(--orange); }
+    .simple-box.warning .simple-title { color: var(--orange); }
+    .simple-box.danger { border-color: var(--red); }
+    .simple-box.danger .simple-title { color: var(--red); }
+
+    .story-card {
+      background: rgba(0,0,0,0.3); border-left: 4px solid var(--cyber);
+      padding: 0.9rem 1.1rem; max-width: 580px; margin: 0.5rem 0;
+    }
+    .story-card .place { font-size: 0.6rem; color: var(--cyber); letter-spacing: 0.1em; margin-bottom: 0.3rem; }
+    .story-card .narrative { font-family: 'Cormorant Garamond', serif; font-size: 0.9rem; line-height: 1.5; color: rgba(255,255,255,0.9); }
+    .story-card .source { font-size: 0.55rem; color: rgba(255,255,255,0.5); margin-top: 0.5rem; font-style: italic; }
+    .story-card.red { border-left-color: var(--red); }
+    .story-card.red .place { color: var(--red); }
+    .story-card.gold { border-left-color: var(--gold); }
+    .story-card.gold .place { color: var(--gold); }
+
+    /* DECISION TREES */
+    .decision-tree {
+      background: rgba(0,0,0,0.4); border: 2px solid var(--cyber);
+      border-radius: 12px; padding: 0.9rem; max-width: 620px; width: 100%;
+    }
+    .decision-tree h4 { color: var(--cyber); font-family: 'Cormorant Garamond', serif; font-size: 0.85rem; margin-bottom: 0.6rem; text-align: center; }
+
+    .tree-row { display: flex; justify-content: center; gap: 0.35rem; margin: 0.25rem 0; flex-wrap: wrap; }
+    .tree-node {
+      background: var(--navy); border: 2px solid var(--cyber);
+      border-radius: 6px; padding: 0.35rem 0.5rem;
+      text-align: center; min-width: 65px; font-size: 0.65rem;
+    }
+    .tree-node.root { background: var(--cyber); color: var(--navy); font-weight: 700; }
+    .tree-node.question { background: var(--purple); color: white; border-color: var(--purple); }
+    .tree-node.positive { background: rgba(197,48,48,0.3); border-color: var(--red); }
+    .tree-node.negative { background: rgba(34,197,94,0.3); border-color: var(--green); }
+    .tree-node.action { background: var(--electric); color: white; border-color: var(--electric); }
+    .tree-node.warning { background: var(--orange); color: white; border-color: var(--orange); }
+    .tree-node.yes { background: var(--green); color: white; border-color: var(--green); }
+    .tree-node.no { background: var(--red); color: white; border-color: var(--red); }
+    .tree-node.blue { background: var(--blue); color: white; border-color: var(--blue); }
+    .tree-node.cyber { background: var(--cyber); color: var(--navy); border-color: var(--cyber); }
+    .tree-node small { display: block; font-size: 0.5rem; opacity: 0.85; margin-top: 0.1rem; }
+
+    .tree-arrow { color: var(--cyber); font-size: 0.9rem; text-align: center; margin: 0.1rem 0; }
+    .tree-branch { display: flex; gap: 1.2rem; justify-content: center; margin-top: 0.2rem; flex-wrap: wrap; }
+    .tree-branch-item { display: flex; flex-direction: column; align-items: center; }
+    .tree-label { font-size: 0.5rem; color: rgba(255,255,255,0.6); margin: 0.1rem 0; }
+
+    /* Checklist */
+    .checklist {
+      background: rgba(0,0,0,0.3); border: 2px solid var(--purple);
+      border-radius: 10px; padding: 0.9rem; max-width: 550px; width: 100%;
+    }
+    .checklist h4 { color: var(--purple); font-size: 0.8rem; margin-bottom: 0.6rem; }
+    .checklist-item { display: flex; align-items: flex-start; gap: 0.5rem; margin: 0.35rem 0; font-size: 0.75rem; }
+    .checklist-item .check { color: var(--green); font-weight: 700; }
+    .checklist-item .number { color: var(--cyber); font-weight: 700; min-width: 20px; }
+
+    .stats-grid { display: flex; gap: 0.5rem; margin: 0.6rem 0; flex-wrap: wrap; justify-content: center; }
+    .stat-box { background: var(--navy); padding: 0.5rem 0.7rem; text-align: center; min-width: 80px; border-radius: 8px; border: 1px solid rgba(0,255,255,0.3); }
+    .stat-value { font-family: 'Cormorant Garamond', serif; font-size: clamp(1rem, 2vw, 1.3rem); font-weight: 700; }
+    .stat-label { font-size: 0.55rem; opacity: 0.8; margin-top: 0.1rem; }
+
+    .comparison-table {
+      background: rgba(0,0,0,0.3); border: 2px solid var(--cyber);
+      border-radius: 10px; padding: 0.9rem; max-width: 580px; width: 100%;
+    }
+    .comparison-table h4 { color: var(--cyber); font-size: 0.8rem; margin-bottom: 0.6rem; text-align: center; }
+    .comparison-row { display: flex; justify-content: space-between; padding: 0.3rem 0; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 0.7rem; }
+    .comparison-row:last-child { border-bottom: none; }
+    .comparison-row .label { color: rgba(255,255,255,0.7); }
+    .comparison-row .value { font-weight: 600; }
+    .comparison-row .value.good { color: var(--green); }
+    .comparison-row .value.bad { color: var(--red); }
+    .comparison-row .value.warn { color: var(--orange); }
+
+    .code-box {
+      background: #0d1117; border: 1px solid rgba(0,255,255,0.3);
+      border-radius: 8px; padding: 0.7rem; max-width: 500px;
+      font-family: 'Courier New', monospace; font-size: 0.65rem;
+      color: var(--cyber); text-align: left; overflow-x: auto;
+    }
+    .code-box .comment { color: #6a737d; }
+    .code-box .keyword { color: var(--purple); }
+    .code-box .string { color: var(--green); }
+
+    .gold-line { width: 80px; height: 2px; background: var(--cyber); margin: 0.6rem auto; }
+
+    .content { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 800px; }
+
+    .slide.active .animate { animation: fadeUp 0.5s ease-out forwards; }
+    .slide.active .animate.delay-1 { animation-delay: 0.1s; }
+    .slide.active .animate.delay-2 { animation-delay: 0.2s; }
+    .slide.active .animate.delay-3 { animation-delay: 0.3s; }
+    .slide.active .animate.delay-4 { animation-delay: 0.4s; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .animate { opacity: 0; }
+
+    .slide-nav {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      display: flex; justify-content: space-between; align-items: flex-end;
+      padding: 0.5rem 0.6rem 0.6rem 0.6rem; z-index: 100; pointer-events: none;
+    }
+    .nav-btn {
+      background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2);
+      color: white; font-size: 0.9rem; cursor: pointer; opacity: 0.6;
+      padding: 0.3rem 0.45rem; border-radius: 6px; pointer-events: auto; transition: all 0.2s;
+    }
+    .nav-btn:hover { opacity: 1; border-color: var(--cyber); }
+    .nav-center { display: flex; flex-direction: column; align-items: center; gap: 0.1rem; pointer-events: auto; }
+    .slide-counter { color: rgba(255,255,255,0.6); font-size: 0.65rem; }
+    .progress { display: flex; gap: 2px; flex-wrap: wrap; justify-content: center; max-width: 140px; }
+    .progress-dot { width: 4px; height: 4px; border-radius: 50%; background: rgba(255,255,255,0.25); cursor: pointer; }
+    .progress-dot.active { background: var(--cyber); transform: scale(1.2); }
+
+    .quiz-container { background: rgba(255,255,255,0.05); border: 1px solid rgba(0,255,255,0.3); padding: 0.9rem; max-width: 580px; width: 100%; border-radius: 8px; }
+    .quiz-question { font-family: 'Cormorant Garamond', serif; font-size: 0.95rem; margin-bottom: 0.5rem; color: var(--cyber); line-height: 1.4; }
+    .quiz-options { display: flex; flex-direction: column; gap: 0.3rem; }
+    .quiz-option { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); padding: 0.45rem 0.7rem; cursor: pointer; border-radius: 6px; font-size: 0.75rem; text-align: left; }
+    .quiz-option:hover { background: rgba(0,255,255,0.1); border-color: var(--cyber); }
+    .quiz-option.correct { background: rgba(34,197,94,0.2); border-color: var(--green); }
+    .quiz-option.incorrect { background: rgba(197,48,48,0.2); border-color: var(--red); }
+    .quiz-feedback { margin-top: 0.5rem; padding: 0.5rem; border-radius: 6px; display: none; font-size: 0.75rem; }
+    .quiz-feedback.show { display: block; }
+    .quiz-feedback.correct { background: rgba(34,197,94,0.2); border: 1px solid var(--green); }
+    .quiz-feedback.incorrect { background: rgba(197,48,48,0.2); border: 1px solid var(--red); }
+
+    .references { background: rgba(0,0,0,0.3); border: 1px solid rgba(0,255,255,0.3); border-radius: 8px; padding: 0.9rem; max-width: 580px; text-align: left; font-size: 0.6rem; line-height: 1.5; }
+    .references h4 { color: var(--cyber); font-size: 0.75rem; margin-bottom: 0.5rem; }
+    .references ol { padding-left: 1rem; }
+    .references li { margin-bottom: 0.25rem; color: rgba(255,255,255,0.8); }
+
+    .text-center { text-align: center; }
+
+    /* AI-specific styling */
+    .ai-glow { text-shadow: 0 0 10px var(--cyber), 0 0 20px var(--cyber); }
+    .pulse { animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+
+    .tool-card {
+      background: rgba(0,0,0,0.4); border: 2px solid var(--electric);
+      border-radius: 10px; padding: 0.8rem; max-width: 180px; text-align: center;
+    }
+    .tool-card .tool-name { color: var(--cyber); font-weight: 700; font-size: 0.85rem; }
+    .tool-card .tool-desc { font-size: 0.6rem; color: rgba(255,255,255,0.7); margin-top: 0.3rem; }
+    .tool-card .tool-stat { font-size: 0.7rem; color: var(--gold); margin-top: 0.3rem; font-weight: 600; }
+
+    .accuracy-bar {
+      background: rgba(255,255,255,0.1); border-radius: 4px; height: 20px; width: 100%; max-width: 300px; position: relative; overflow: hidden;
+    }
+    .accuracy-fill {
+      height: 100%; border-radius: 4px; display: flex; align-items: center; justify-content: flex-end; padding-right: 0.5rem; font-size: 0.6rem; font-weight: 700;
+    }
+    .skip-link:focus { top: 0; }
+    .mobile-menu-toggle{display:none;position:fixed;top:12px;left:12px;z-index:1001;background:#1E2761;border:1px solid #D4AF37;color:#D4AF37;width:40px;height:40px;border-radius:8px;font-size:1.2rem;cursor:pointer;align-items:center;justify-content:center;}
+    @media(max-width:768px){.mobile-menu-toggle{display:flex;}.sidebar{transform:translateX(-100%);transition:transform 0.3s ease;position:fixed;z-index:1000;height:100vh;}.sidebar.open{transform:translateX(0);}.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:999;}.sidebar-overlay.show{display:block;}}
+
+    /* Focus-visible styles for keyboard navigation */
+    :focus-visible {
+      outline: 2px solid var(--gold, #D4AF37);
+      outline-offset: 2px;
+    }
+
+    :focus:not(:focus-visible) {
+      outline: none;
+    }
+
+    button:focus-visible,
+    a:focus-visible,
+    [role="button"]:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible {
+      outline: 2px solid var(--gold, #D4AF37);
+      outline-offset: 2px;
+      box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.3);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+<body>
+<a class="skip-link" href="#main-content" style="position:absolute;top:-40px;left:0;background:#D4AF37;color:#1E2761;padding:8px 16px;z-index:100;transition:top 0.3s;">Skip to main content</a>
+<button aria-expanded="false" aria-label="Toggle navigation menu" class="mobile-menu-toggle" onclick="toggleSidebar()">☰</button>
+<div class="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show');"></div>
+<div class="course-container">
+<nav aria-label="コースナビゲーション" class="sidebar" role="navigation">
+<div class="sidebar-header">
+<a href="index.html" onmouseout="this.style.color='rgba(212,175,55,0.7)'" onmouseover="this.style.color='#D4AF37'" style="display:block;font-size:0.7rem;color:rgba(212,175,55,0.7);text-decoration:none;margin-bottom:0.5rem;">← Course Library</a>
+<h1>決して反対しないシリコン スクライブ</h1>
+<p>AI in Meta-Analysis: When to Trust, When to Verify</p>
+</div>
+<div class="module-list" id="moduleList"></div>
+<div class="sidebar-footer">
+        「機械は過去から学習します。<br/>
+        過去が当てはまるかどうか判断しなければなりません。」
+      </div>
+</nav>
+<main class="main-content" id="main-content">
+<header class="content-header">
+<div class="breadcrumb">AI &gt; <span id="currentModule">約束と危険</span></div>
+<div class="header-actions">
+<button class="btn" onclick="goToModule(20)">References</button>
+<button class="btn primary" onclick="nextSlide()">Continue</button>
+</div>
+</header>
+<div class="content-body">
+<div class="slides-container">
+ ==================== モジュール 1: 約束と危険 ==================== 
+<div class="module-slides active" data-module="1">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  データを抽出する<br/>
+                  ten thousand abstracts in an hour,<br/>
+                  と書かれたマシンについて聞いたことはありませんかあなたが眠っている間に、<br/>
+                  that promises to <em>単調な仕事から解放されます</em>?
+                </div>
+</div>
+</div>
+<div class="slide cyber">
+<div class="content text-center">
+<div class="title cyber animate ai-glow">証拠合成における AI 革命</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box">
+<div class="stat-value" style="color:var(--cyber);">67%</div>
+<div class="stat-label">Workload reduction<br/>with AI screening</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--green);">95%</div>
+<div class="stat-label">Recall achievable<br/>アクティブ ラーニングによる</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--gold);">10x</div>
+<div class="stat-label">Faster screening<br/>than manual</div>
+</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">THE PROMISE</div>
+<div class="simple-text">
+                    AI は要約をスクリーニングし、データを抽出し、バイアスのリスクを評価し、新しい情報を監視できます証拠—<strong>if used correctly</strong>.
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide danger">
+<div class="content text-center">
+<div class="title red animate">When AI Fails in Healthcare</div>
+<div class="story-card red animate delay-1">
+<div class="place">IBM WATSON ONCOLOGY, MD ANDERSON, 2013-2017</div>
+<div class="narrative">
+                    2013 年、MD アンダーソンがんセンターは IBM Watson と提携して、がん治療の推奨に革命をもたらしました。プロジェクトコスト <strong>$62 million</strong>.
+                    <br/><br/>
+                    2017 年までにプロジェクトは放棄されました。ワトソンの推奨事項は実際の患者データではなく、 <strong>「安全ではなく間違っている」</strong> in multiple cases.
+                    <br/><br/>
+                    In one documented case, Watson recommended a treatment that would cause <strong>severe bleeding in a patient already on blood thinners</strong>.
+                    <br/><br/>
+                    The core problem: Watson had been trained primarily on <strong>hypothetical cases created by physicians</strong>であることが判明しました。 AI は、実際の結果から学ぶのではなく、専門家の意見を模倣することを学習しました。
+                  </div>
+<div class="source">Stat News, 2017; IEEE Spectrum, 2019</div>
+</div>
+<div class="simple-box danger animate delay-2">
+<div class="simple-title">THE LESSON</div>
+<div class="simple-text" style="color: var(--gold);">
+                    合成データまたは仮説データで訓練された AI は、実際の患者では失敗します。トレーニング データと現実の間のギャップは致命的になる可能性があります。
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide danger">
+<div class="content text-center">
+<div class="title red animate">幻覚問題</div>
+<div class="story-card red animate delay-1">
+<div class="place">LAWYERS SANCTIONED, NEW YORK, 2023</div>
+<div class="narrative">
+                    Attorneys used ChatGPT to research case law for a federal court brief.
+                    <br/><br/>
+                    AI は、完全な引用、引用、ページ番号を付けて 6 つの事件を引用しました。
+                    <br/><br/>
+<strong>どの事件も存在しませんでした。</strong>
+<br/><br/>
+                    裁判官は、引用が「意味不明」であると判断しました。
+                    <br/><br/>
+                    これはバグではありません。これは大規模な言語モデルの仕組みです。検証された真実ではなく、もっともらしいテキストを予測します。
+                  </div>
+<div class="source">Mata v. Avianca, Inc., 22-cv-1461 (S.D.N.Y. 2023)</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">中心的な質問</div>
+<div class="decision-tree animate delay-1">
+<h4>When to Trust AI in Meta-Analysis</h4>
+<div class="tree-row"><div class="tree-node root">AI Tool Output</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">Task Type?</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">Ranking/Prioritization</div>
+<div class="tree-node yes">Lower risk<small>Human reviews top-ranked</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">Binary Decision</div>
+<div class="tree-node warning">Medium risk<small>Needs validation</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">Text Generation</div>
+<div class="tree-node no">High risk<small>Hallucination possible</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">AI にできることとできないこと</div>
+<div class="comparison-table animate delay-1">
+<h4>Honest Assessment</h4>
+<div class="comparison-row">
+<span class="label">Screening prioritization</span>
+<span class="value good">✓ Excellent</span>
+</div>
+<div class="comparison-row">
+<span class="label">Duplicate detection</span>
+<span class="value good">✓ Excellent</span>
+</div>
+<div class="comparison-row">
+<span class="label">データ抽出 (構造化)</span>
+<span class="value warn">⚠ Needs verification</span>
+</div>
+<div class="comparison-row">
+<span class="label">Risk of bias assessment</span>
+<span class="value warn">⚠ Preliminary only</span>
+</div>
+<div class="comparison-row">
+<span class="label">ライティングプロトコル/メソッド</span>
+<span class="value warn">⚠ Draft only</span>
+</div>
+<div class="comparison-row">
+<span class="label">Statistical analysis</span>
+<span class="value bad">✗ Human required</span>
+</div>
+<div class="comparison-row">
+<span class="label">Clinical interpretation</span>
+<span class="value bad">✗ Human required</span>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  「マシンは読み取りは速いですが、理解できません。<br/>
+                  真実ではなく、次の単語を予測します。<br/>
+                  置き換えるのではなく、加速するために使用します。<br/>
+                  The judgment must remain yours."
+                </div>
+</div>
+</div>
+</div>
+ ====================モジュール 2: AI 支援スクリーニング ==================== 
+<div class="module-slides" data-module="2">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  重要な 1 つの研究<br/>
+                  who screened ten thousand titles by hand,<br/>
+                  whose eyes grew tired, whose attention wandered,<br/>
+                  を見逃したレビュー担当者 <em>を見たことがありませんか?</em>?
+                </div>
+</div>
+</div>
+<div class="slide cyber">
+<div class="content text-center">
+<div class="title cyber animate">ツール</div>
+<div class="stats-grid animate delay-1">
+<div class="tool-card">
+<div class="tool-name">ASReview</div>
+<div class="tool-desc">Active learning<br/>Open source</div>
+<div class="tool-stat">Free</div>
+</div>
+<div class="tool-card">
+<div class="tool-name">Rayyan</div>
+<div class="tool-desc">AI recommendations<br/>Collaboration</div>
+<div class="tool-stat">Freemium</div>
+</div>
+<div class="tool-card">
+<div class="tool-name">Abstrackr</div>
+<div class="tool-desc">Semi-automated<br/>Web-based</div>
+<div class="tool-stat">Free</div>
+</div>
+<div class="tool-card">
+<div class="tool-name">EPPI-Reviewer</div>
+<div class="tool-desc">Priority screening<br/>Full workflow</div>
+<div class="tool-stat">Subscription</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">How Active Learning Works</div>
+<div class="decision-tree animate delay-1">
+<h4>ASReview Workflow</h4>
+<div class="tree-row"><div class="tree-node root">Import References</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node action">Screen seed papers<small>10-20 known relevant</small></div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node cyber">AI learns patterns<small>決定ごとに更新</small></div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node action">Prioritizes likely relevant<small>Most promising first</small></div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">Stopping rule?</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node yes">Consecutive irrelevant<small>e.g., 100-200 in row</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node warning">% screened<small>例: リコールチェックで 50%</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">実際のパフォーマンスデータ</div>
+<div class="story-card gold animate delay-1">
+<div class="place">VAN DE SCHOOT ET AL., 2021</div>
+<div class="narrative">
+                    Systematic evaluation of ASReview across 4 datasets:
+                    <br/><br/>
+                    • <strong>PTSD dataset:</strong> 95% recall after screening 40% of records
+                    <br/>
+                    • <strong>Software fault prediction:</strong> 95% recall after 20%
+                    <br/>
+                    • <strong>Virus metagenomics:</strong> 95% recall after 10%
+                    <br/><br/>
+                    Average workload reduction: <strong>67-95%</strong> depending on prevalence.
+                    <br/><br/>
+                    But: Performance varies by topic and prevalence.
+                    Low-prevalence topics show greater efficiency gains.
+                  </div>
+<div class="source">Van de Schoot R et al. Nat Mach Intell. 2021;3:125-133</div>
+</div>
+</div>
+</div>
+<div class="slide hope">
+<div class="content text-center">
+<div class="title green animate">When AI-Assisted Screening Works</div>
+<div class="story-card gold animate delay-1">
+<div class="place">ASREVIEW AND COCHRANE COVID-19 RESPONSE, 2020</div>
+<div class="narrative">
+                    During the COVID-19 pandemic, Cochrane needed to screen <strong>50,000+ citations weekly</strong> to keep reviews current.
+                    <br/><br/>
+                    ASReview のアクティブラーニングシステムは人間による厳格な監視のもとに導入されました。
+                    <br/><br/>
+                    • Reduced human screening workload by <strong>75%</strong>
+<br/>
+                    • Missed fewer than <strong>1% of relevant studies</strong>
+<br/>
+                    • Validated at every stage by human reviewers
+                    <br/><br/>
+                    成功: <strong>human-in-the-loop validation at every stage</strong>。AI が優先順位を付けましたが、最終的な判断は人間が行い、AI が除外したレコードのサンプルをチェックしました。
+                  </div>
+<div class="source">Cochrane COVID-NMA consortium, 2020-2021</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">THE LESSON</div>
+<div class="simple-text" style="color: var(--gold);">
+                    AI は人間の判断力を強化します。それはそれに代わるものではありません。成功は自動化ではなくパートナーシップから生まれます。
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide danger">
+<div class="content text-center">
+<div class="title red animate">When Internal Validation Fails</div>
+<div class="story-card red animate delay-1">
+<div class="place">EPIC SEPSIS MODEL, JAMA INTERNAL MEDICINE, 2021</div>
+<div class="narrative">
+                    Epic Systems deployed a sepsis prediction algorithm to <strong>hundreds of hospitals</strong> 米国全土で。
+                    <br/><br/>
+                    Epic's internal validation showed excellent performance. Hospitals trusted it.
+                    <br/><br/>
+                    その後、JAMA内科での外部検証研究が行われました。
+                    <br/><br/>
+                    • The model <strong>missed 67% of sepsis cases</strong>
+<br/>
+                    • It triggered <strong>thousands of false alarms</strong>
+<br/>
+                    • Nurses developed severe <strong>"alert fatigue"</strong>
+<br/><br/>
+                    モデルは同じシステムからの履歴データで検証されており、実際の臨床環境でテストされたことはありませんでした。
+                  </div>
+<div class="source">Wong A et al. JAMA Intern Med. 2021;181(8):1065-1070</div>
+</div>
+<div class="simple-box danger animate delay-2">
+<div class="simple-title">THE LESSON</div>
+<div class="simple-text" style="color: var(--gold);">
+                    内部検証は外部検証ではありません。開発時には機能するモデルでも、展開時には失敗する可能性があります。常に現実世界のコンテキストで検証してください。
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide warning">
+<div class="content text-center">
+<div class="title red animate">停止の問題</div>
+<div class="story-card red animate delay-1">
+<div class="place">隠れた危険</div>
+<div class="narrative">
+                    アクティブラーニングによるスクリーニングをいつ停止しますか?
+                    <br/><br/>
+                    あまりにも早く停止した場合: <strong>関連性を見逃します研究</strong>
+<br/>
+                    停止が遅すぎると、 <strong>効率の向上が失われます</strong>
+<br/><br/>
+                    アルゴリズムは、いつすべてを見つけたかを通知できません。残ったもののみがランク付けされます。
+                    <br/><br/>
+<strong>There is no perfect stopping rule.</strong>
+                    Every rule trades recall for efficiency.
+                  </div>
+</div>
+<div class="simple-box danger animate delay-2">
+<div class="simple-title">CRITICAL POINT</div>
+<div class="simple-text">
+                    You must <strong>停止ルールを検証してください</strong> by manually checking
+                    a random sample of unscreened records.
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">AI Screening Decision Tree</div>
+<div class="decision-tree animate delay-1">
+<h4>AI スクリーニングを使用する必要がありますか?</h4>
+<div class="tree-row"><div class="tree-node root">Large Reference Set?</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">&lt;500 refs</div>
+<div class="tree-node action">Manual OK<small>AI オーバーヘッドには価値がありません</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">500-2000 refs</div>
+<div class="tree-node yes">AI helpful<small>Moderate efficiency gain</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">&gt;2000 refs</div>
+<div class="tree-node cyber">AI essential<small>Major time savings</small></div>
+</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node warning">Always validate with random sample<small>Report methodology in paper</small></div></div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  「機械は針をより速く見つけます。<br/>
+                  but it cannot guarantee none remain in the haystack.<br/>
+                  ランキングを信頼し、停止、<br/>
+                  そして常に自分が行ったことを報告してください。"
+                </div>
+</div>
+</div>
+</div>
+ ==================== モジュール 3: データ抽出のための LLM ==================== 
+<div class="module-slides" data-module="3">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  夢にも思わなかったのかアシスタント<br/>
+                  who reads every paper and fills every cell,<br/>
+                  who never tires, never errs,<br/>
+                  who extracts <em>perfectly</em>?
+                  <br/><br/>
+                  そのアシスタントは存在しません。
+                </div>
+</div>
+</div>
+<div class="slide danger">
+<div class="content text-center">
+<div class="title red animate">抽出精度の問題</div>
+<div class="story-card red animate delay-1">
+<div class="place">GPT-4 データ抽出研究、2024 年</div>
+<div class="narrative">
+                    研究者は 100 件の RCT からデータを抽出するために GPT-4 をテストしました
+                    <br/><br/>
+<strong>Results:</strong>
+<br/>
+                    • Sample sizes: 89% accurate
+                    <br/>
+                    • Effect estimates: 76% accurate
+                    <br/>
+                    • Confidence intervals: 71% accurate
+                    <br/>
+                    • Risk of bias judgments: 62% agreement with humans
+                    <br/><br/>
+                    A <strong>24% error rate</strong> 実質的な推定値は、およそ 4 件に 1 件の研究がメタ分析で間違ったデータを含むことを意味します。
+                  </div>
+<div class="source">Guo Y et al. J Clin Epidemiol. 2024;165:111203</div>
+</div>
+</div>
+</div>
+<div class="slide danger">
+<div class="content text-center">
+<div class="title red animate">捏造問題</div>
+<div class="story-card red animate delay-1">
+<div class="place">GPT-4 HALLUCINATIONS IN SYSTEMATIC REVIEWS, 2023</div>
+<div class="narrative">
+                    研究者らはシステマティック レビュー論文からのデータ抽出について GPT-4 をテストしました。モデルには PDF が与えられ、サンプル サイズ、p 値、および効果の推定値を抽出するよう依頼されました。
+                    <br/><br/>
+                    GPT-4 confidently provided all requested numbers with precise formatting.
+                    <br/><br/>
+                    But <strong>抽出の 23% は「幻覚」</strong>- 原文に根拠のない数値です。
+                    <br/><br/>
+                    In one case, the model fabricated a <strong>statistically significant result (p=0.003)</strong> 実際に見つかった研究からの <strong>no significant effect (p=0.42)</strong>.
+                    <br/><br/>
+                    信頼性は本物のデータと捏造されたデータの区別がつきませんでした。
+                  </div>
+<div class="source">体系的レビュー AI 検証研究、2023 年</div>
+</div>
+<div class="simple-box danger animate delay-2">
+<div class="simple-title">THE LESSON</div>
+<div class="simple-text" style="color: var(--gold);">
+                    LLM では定量データについて 100% 人による検証が必要です。近道はありません。すべての数値をソースと照合する必要があります。
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">LLM データ抽出ワークフロー</div>
+<div class="decision-tree animate delay-1">
+<h4>Safe LLM Extraction Protocol</h4>
+<div class="tree-row"><div class="tree-node root">PDF/Full Text</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node cyber">LLM はデータを抽出します<small>Structured prompt</small></div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node warning">Human verifies 100%<small>NOT sampling</small></div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">Discrepancy?</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">Yes</div>
+<div class="tree-node no">Human value used<small>Document error</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">No</div>
+<div class="tree-node yes">Proceed<small>Log verification</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">抽出のためのエンジニアリングを要求します</div>
+<div class="code-box animate delay-1">
+<span class="comment"># Example extraction prompt</span><br/><br/>
+<span class="keyword">Extract</span> この RCT から次のことがわかります:<br/><br/>
+                  1. Sample size (intervention arm): [number]<br/>
+                  2. Sample size (control arm): [number]<br/>
+                  3. Primary outcome definition: [text]<br/>
+                  4. Effect estimate: [number with unit]<br/>
+                  5. 95% CI: [lower, upper]<br/>
+                  6. p-value: [number]<br/><br/>
+<span class="keyword">If not reported</span>, write <span class="string">"NR"</span><br/>
+<span class="keyword">If unclear</span>, write <span class="string">"UNCLEAR: [reason]"</span><br/><br/>
+<span class="comment"># Provide exact quotes for verification</span>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">When LLMs Help vs. Hurt</div>
+<div class="comparison-table animate delay-1">
+<h4>LLM Extraction Value Assessment</h4>
+<div class="comparison-row">
+<span class="label">Standardized fields (author, year)</span>
+<span class="value good">✓ High accuracy</span>
+</div>
+<div class="comparison-row">
+<span class="label">Simple numeric (sample size)</span>
+<span class="value good">✓ Usually reliable</span>
+</div>
+<div class="comparison-row">
+<span class="label">Complex numeric (adjusted OR)</span>
+<span class="value warn">⚠ Often wrong model</span>
+</div>
+<div class="comparison-row">
+<span class="label">Composite outcomes</span>
+<span class="value warn">⚠ Misses components</span>
+</div>
+<div class="comparison-row">
+<span class="label">Intention-to-treat vs per-protocol</span>
+<span class="value bad">✗ Frequently confused</span>
+</div>
+<div class="comparison-row">
+<span class="label">Subgroup data</span>
+<span class="value bad">✗ High error rate</span>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  "The LLM extracts plausible numbers,<br/>
+                  必ずしも正しいとは限りません<br/>
+                  これは簡単な初稿であり、最終的な答えではありません。<br/>
+                  Every cell must be verified by human eyes."
+                </div>
+</div>
+</div>
+</div>
+ ==================== モジュール 4: 自動化されたバイアスのリスク ==================== 
+<div class="module-slides" data-module="4">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  決して意見を異にしない裁判官を望んでいませんか<br/>
+                  who reads every methods section,<br/>
+                  who assesses bias without bias,<br/>
+                  決して反対しない人 <em>themselves</em>?
+                </div>
+</div>
+</div>
+<div class="slide cyber">
+<div class="content text-center">
+<div class="title cyber animate">RobotReviewer</div>
+<div class="story-card gold animate delay-1">
+<div class="place">MARSHALL ET AL., NATURE MACHINE INTELLIGENCE, 2019</div>
+<div class="narrative">
+                    RobotReviewer uses machine learning to assess risk of bias in RCTs.
+                    <br/><br/>
+<strong>Validation against Cochrane assessments:</strong>
+<br/>
+                    • Random sequence generation: 71% agreement
+                    <br/>
+                    • Allocation concealment: 65% agreement
+                    <br/>
+                    • Blinding of participants: 69% agreement
+                    <br/>
+                    • Blinding of outcome assessment: 62% agreement
+                    <br/><br/>
+                    Human inter-rater agreement is typically 70-80%.
+                    <br/><br/>
+<strong>RobotReviewer approaches but does not exceed human performance.</strong>
+</div>
+<div class="source">Marshall IJ et al. Nat Mach Intell. 2019;1:115-117</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">RoB Automation Decision Tree</div>
+<div class="decision-tree animate delay-1">
+<h4>When to Use Automated RoB</h4>
+<div class="tree-row"><div class="tree-node root">Risk of Bias Assessment</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">Review Type?</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">Rapid review</div>
+<div class="tree-node yes">Automated OK<small>Acknowledge limitation</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">Scoping review</div>
+<div class="tree-node yes">Automated OK<small>If RoB included</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">完全な体系的レビュー</div>
+<div class="tree-node warning">Preliminary only<small>Human verification required</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">Cochrane review</div>
+<div class="tree-node no">Human required<small>Draft support only</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">Limitations of Automated RoB</div>
+<div class="checklist animate delay-1">
+<h4>What Machines Cannot Assess</h4>
+<div class="checklist-item"><span class="check" style="color:var(--red);">✗</span> Outcome-specific bias (RoB 2 domain 4)</div>
+<div class="checklist-item"><span class="check" style="color:var(--red);">✗</span> Selective reporting based on protocol comparison</div>
+<div class="checklist-item"><span class="check" style="color:var(--red);">✗</span> Contextual judgment (Is this design appropriate?)</div>
+<div class="checklist-item"><span class="check" style="color:var(--red);">✗</span> Cross-paper inconsistencies (multiple reports)</div>
+<div class="checklist-item"><span class="check" style="color:var(--red);">✗</span> 結果の解釈に対する資金の影響</div>
+</div>
+<div class="simple-box warning animate delay-2">
+<div class="simple-title">基本的な制限</div>
+<div class="simple-text">
+                    AI reads what is <strong>written</strong>.
+                    Bias assessment often requires judging what is <strong>not written</strong>.
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">RoB のハイブリッド ワークフロー</div>
+<div class="decision-tree animate delay-1">
+<h4>Best Practice Protocol</h4>
+<div class="tree-row"><div class="tree-node root">Full Text PDFs</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node cyber">RobotReviewer screening<small>Flags potential issues</small></div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node action">Reviewer 1 assesses<small>Using AI output as reference</small></div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node action">Reviewer 2 independently<small>Blinded to AI output</small></div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">Consensus meeting</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node yes">Final assessment<small>Human decision documented</small></div></div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  "ロボットがメソッドを読み取りますセクション<br/>
+                  but cannot read between the lines.<br/>
+                  判断するためではなく、フラグを立てるために使用します。<br/>
+                  判定は人間でなければなりません。"
+                </div>
+</div>
+</div>
+</div>
+ =================== モジュール 5: プロトコル書き込み用 GPT ==================== 
+<div class="module-slides" data-module="5">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  ライターを望んでいませんか<br/>
+                  who drafts your protocol in minutes,<br/>
+                  who knows every PRISMA item,<br/>
+                  who writes in <em>perfect academic prose</em>?
+                </div>
+</div>
+</div>
+<div class="slide cyber">
+<div class="content text-center">
+<div class="title cyber animate">プロトコル草案用の LLM</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box">
+<div class="stat-value" style="color:var(--green);">✓</div>
+<div class="stat-label">Structure<br/>generation</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--green);">✓</div>
+<div class="stat-label">Boilerplate<br/>text</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--orange);">⚠</div>
+<div class="stat-label">PICO<br/>formulation</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--red);">✗</div>
+<div class="stat-label">Search<br/>strategy</div>
+</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">価値提案</div>
+<div class="simple-text">
+                    LLM は草案を作成できます <strong>構造と標準言語</strong>。以下を提供する必要があります。 <strong>scientific decisions</strong>.
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide danger">
+<div class="content text-center">
+<div class="title red animate">検索戦略の危険</div>
+<div class="story-card red animate delay-1">
+<div class="place">TESTED ACROSS MULTIPLE LLMs, 2023-2024</div>
+<div class="narrative">
+                    Researchers asked GPT-4 and Claude to generate MEDLINE search strategies.
+                    <br/><br/>
+<strong>Common errors:</strong>
+<br/>
+                    • Invented MeSH terms that don't exist
+                    <br/>
+                    • Wrong field codes (e.g., [tiab] vs [tw])
+                    <br/>
+                    • 研究質問に重要な概念が欠落している
+                    <br/>
+                    • Overly narrow strategies missing relevant studies
+                    <br/>
+                    • Syntax errors that wouldn't execute
+                    <br/><br/>
+<strong>An information specialist must write or validate all search strategies.</strong>
+</div>
+<div class="source">複数の検証研究 2023-2024</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">Protocol Writing Decision Tree</div>
+<div class="decision-tree animate delay-1">
+<h4>LLM Use in Protocol Development</h4>
+<div class="tree-row"><div class="tree-node root">Protocol Section</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">Background/Rationale</div>
+<div class="tree-node yes">LLM helpful<small>Draft + fact-check</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">Methods structure</div>
+<div class="tree-node yes">LLM helpful<small>Template generation</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">PICO criteria</div>
+<div class="tree-node warning">Human decides<small>LLM refines wording</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">Search strategy</div>
+<div class="tree-node no">Human/Specialist<small>AI too unreliable</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">Safe LLM Protocol Workflow</div>
+<div class="checklist animate delay-1">
+<h4>Quality Assurance Steps</h4>
+<div class="checklist-item"><span class="number">1</span> Define PICO yourself (human scientific decision)</div>
+<div class="checklist-item"><span class="number">2</span> Ask LLM to draft protocol sections</div>
+<div class="checklist-item"><span class="number">3</span> Verify all cited guidelines exist (PRISMA, Cochrane)</div>
+<div class="checklist-item"><span class="number">4</span> Write search strategy with information specialist</div>
+<div class="checklist-item"><span class="number">5</span> Check all methodological decisions are defensible</div>
+<div class="checklist-item"><span class="number">6</span> Disclose AI assistance in protocol</div>
+<div class="checklist-item"><span class="number">7</span> 人間が検証したものを登録するバージョン</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  「機械は言葉を書くことができます。<br/>
+                  but it cannot make the decisions.<br/>
+                  質問を定義するのはあなたです。方法を選択します。<br/>
+                  プロトコルはあなたのものです。AI がタイピストです。」
+                </div>
+</div>
+</div>
+</div>
+ ==================== モジュール6: LIVING REVIEWS + AI ==================== 
+<div class="module-slides" data-module="6">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  公開前に期限切れとなったシステマティックレビュー<br/>
+                  、<br/>
+                  while new trials accumulated in the literature,<br/>
+<em>unsynthesized, unknown</em>?
+                </div>
+</div>
+</div>
+<div class="slide cyber">
+<div class="content text-center">
+<div class="title cyber animate">The Living Reviewを見たことはありませんか問題</div>
+<div class="story-card gold animate delay-1">
+<div class="place">新型コロナウイルス感染症の証拠津波、2020年</div>
+<div class="narrative">
+                    パンデミックの初年度:
+                    <br/><br/>
+                    • <strong>100,000+ COVID papers published</strong>
+<br/>
+                    • Traditional reviews obsolete within weeks
+                    <br/>
+                    • Clinicians made decisions on incomplete evidence
+                    <br/><br/>
+                    新型コロナウイルス感染症コンソーシアムは <strong>AI-assisted surveillance</strong>
+                    to monitor new trials daily and update meta-analyses weekly.
+                    <br/><br/>
+                    これに必要なもの: 自動検索モニタリング、AI スクリーニングの優先順位付け、迅速なデータ抽出ワークフロー、継続的統計更新。
+                  </div>
+<div class="source">Defined in Cochrane Living Reviews guidance</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">リビング レビュー用 AI コンポーネント</div>
+<div class="decision-tree animate delay-1">
+<h4>Automated Surveillance Stack</h4>
+<div class="tree-row"><div class="tree-node root">リビング レビュー システム</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node cyber">Auto-search<small>Daily/weekly runs</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node cyber">AI triage<small>Priority screening</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node action">Rapid extraction<small>LLM-assisted</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node action">Auto-update<small>Cumulative MA</small></div>
+</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node warning">Human oversight at each stage<small>出版前の編集レビュー</small></div></div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">継続モニタリング用ツール</div>
+<div class="stats-grid animate delay-1">
+<div class="tool-card">
+<div class="tool-name">PubMed Alerts</div>
+<div class="tool-desc">Free email alerts<br/>Saved searches</div>
+<div class="tool-stat">Basic</div>
+</div>
+<div class="tool-card">
+<div class="tool-name">Epistemonikos</div>
+<div class="tool-desc">Systematic review<br/>database</div>
+<div class="tool-stat">AI-curated</div>
+</div>
+<div class="tool-card">
+<div class="tool-name">Covidence</div>
+<div class="tool-desc">Auto-import<br/>Living mode</div>
+<div class="tool-stat">Subscription</div>
+</div>
+<div class="tool-card">
+<div class="tool-name">DistillerSR</div>
+<div class="tool-desc">AI screening<br/>+ monitoring</div>
+<div class="tool-stat">Enterprise</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">リビング レビューの決定フレームワーク</div>
+<div class="decision-tree animate delay-1">
+<h4>「リビング」のレビューを行う時期</h4>
+<div class="tree-row"><div class="tree-node root">これはリビングにする必要がありますか?</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">Criteria Check</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node yes">Priority question<small>Clinical importance</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node yes">Evidence evolving<small>Active trial pipeline</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node yes">Resources secured<small>2 年以上の資金提供</small></div>
+</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node cyber">All three required for living status</div></div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  「機械は文献を監視する<br/>
+                  あなたが寝ている間。<br/>
+                  But someone must wake to judge<br/>
+                  新しい証拠が真実を変えるかどうか。」
+                </div>
+</div>
+</div>
+</div>
+ ==================== モジュール 7: 品質保証フレームワーク ==================== 
+<div class="module-slides" data-module="7">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  認証を行わずに機械を使用すると、<br/>
+                  自分がどのような間違いを犯したかわかりません。
+                  <br/><br/>
+                  機械が生成するものをすべて検証すると、<br/>
+<em>what time have you saved?</em>
+<br/><br/>
+                  答えは次のとおりです <em>strategic verification</em>.
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">検証のパラドックス</div>
+<div class="simple-box animate delay-1">
+<div class="simple-title">THE DILEMMA</div>
+<div class="simple-text">
+<strong>Full verification</strong> = No time savings<br/>
+<strong>No verification</strong> = Unknown error rate<br/>
+<strong>Strategic verification</strong> = Validated efficiency
+                  </div>
+</div>
+<div class="decision-tree animate delay-2">
+<h4>Verification Strategy by Risk</h4>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">High-risk tasks</div>
+<div class="tree-node no">100% human review<small>データ抽出、RoB</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">Medium-risk tasks</div>
+<div class="tree-node warning">Sample validation<small>Screening decisions</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">Low-risk tasks</div>
+<div class="tree-node yes">Spot checks<small>Deduplication</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide hope">
+<div class="content text-center">
+<div class="title green animate">When Oversight Catches Bias</div>
+<div class="story-card gold animate delay-1">
+<div class="place">COCHRANE MACHINE LEARNING PILOT, 2022</div>
+<div class="narrative">
+                    Cochrane tested ML-assisted risk of bias assessment to accelerate systematic reviews.
+                    <br/><br/>
+                    達成されたアルゴリズム <strong>人間の審査員との 85% の同意</strong>—seemingly impressive.
+                    <br/><br/>
+                    しかし、QA チームは 15% の不一致を分析し、次のようなパターンを発見しました。
+                    <br/><br/>
+                    The AI was <strong>systematically biased toward rating industry-funded trials as low risk</strong>.
+                    <br/><br/>
+                    トレーニング データには、製薬会社の治験に対する「低リスク」ラベルがさらに含まれていました。アルゴリズムは、根底にある方法論上の懸念を理解することなく、この相関関係を学習しました。
+                    <br/><br/>
+                    Human oversight caught the pattern <strong>before any biased reviews were published</strong>.
+                  </div>
+<div class="source">コクラン メソッド グループのパイロット研究、2022 年</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">THE LESSON</div>
+<div class="simple-text" style="color: var(--gold);">
+                    不一致分析により、系統的な偏りが明らかになります。全体的な精度が高いと、危険なパターンを隠すことができます。 AI が失敗する頻度だけでなく、どこでどのように失敗するかを常に分析します。
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">AI 支援レビューのための QA フレームワーク</div>
+<div class="checklist animate delay-1">
+<h4>Minimum Quality Standards</h4>
+<div class="checklist-item"><span class="number">1</span> <strong>Pre-specify AI use</strong> in protocol (which tools, which tasks)</div>
+<div class="checklist-item"><span class="number">2</span> <strong>Document AI settings</strong> (model version, prompts, parameters)</div>
+<div class="checklist-item"><span class="number">3</span> <strong>Validate screening</strong> with random sample (calculate recall estimate)</div>
+<div class="checklist-item"><span class="number">4</span> <strong>抽出されたすべてのデータを検証する</strong> against source documents</div>
+<div class="checklist-item"><span class="number">5</span> <strong>Human RoB assessment</strong> (AI as preliminary only)</div>
+<div class="checklist-item"><span class="number">6</span> <strong>Track error rates</strong> per AI task</div>
+<div class="checklist-item"><span class="number">7</span> <strong>Report transparently</strong> in methods section</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">Reporting AI Use (PRISMA-S)</div>
+<div class="simple-box animate delay-1">
+<div class="simple-title">論文で何を報告するか</div>
+<div class="simple-text">
+                    • <strong>Which AI tools</strong> were used (name, version, date)<br/>
+                    • <strong>Which tasks</strong> were AI-assisted<br/>
+                    • <strong>What validation</strong> was performed<br/>
+                    • <strong>What error rates</strong> were observed<br/>
+                    • <strong>What human oversight</strong> was maintained<br/>
+                    • <strong>Any deviations</strong> AI の制限によりプロトコルから除外
+                  </div>
+</div>
+<div class="simple-box warning animate delay-2">
+<div class="simple-title">EMERGING STANDARD</div>
+<div class="simple-text">
+                    Journals increasingly require <strong>AI use statements</strong>.
+                    PRISMA-S extension for search reporting includes automation.
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">完全な AI-MA ワークフロー</div>
+<div class="decision-tree animate delay-1">
+<h4>Integrated Human-AI Process</h4>
+<div class="tree-row"><div class="tree-node root">Protocol (Human + LLM draft)</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node action">Search (Human/Specialist)</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node cyber">Screening (AI prioritize + Human decide)</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node cyber">Extraction (LLM draft + Human verify 100%)</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node warning">RoB (AI flag + Human assess)</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node action">Analysis (Human)</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node yes">Interpretation (Human)</div></div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain gold animate">
+                  "The machine is neither colleague nor replacement.<br/>
+                  これはツールであり、強力で高速ですが、間違いやすいものです。<br/>
+                  Document what you used. Validate what it produced.<br/>
+                  責任は依然としてあなたにあります。」
+                </div>
+</div>
+</div>
+</div>
+ ==================== モジュール 8: 倫理的考慮事項 ==================== 
+<div class="module-slides" data-module="8">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  検討しなかったのですか<br/>
+                  whose labor trained the model,<br/>
+                  whose data it consumed without consent,<br/>
+                  whose jobs it may <em>displace</em>?
+                </div>
+</div>
+</div>
+<div class="slide warning">
+<div class="content text-center">
+<div class="title gold animate">隠れた労働</div>
+<div class="story-card gold animate delay-1">
+<div class="place">KENYAN DATA LABELERS, TIME MAGAZINE 2023</div>
+<div class="narrative">
+                    ChatGPT は、RLHF (ヒューマン フィードバックからの強化学習) と呼ばれるプロセスを通じて「安全」にされました。
+                    <br/><br/>
+                    そのフィードバックを提供した人間はケニアの労働者であり、有給でした。 <strong>less than $2 per hour</strong> 有毒、暴力的、不穏なコンテンツを読んでラベルを付けること。
+                    <br/><br/>
+                    彼らは仕事から精神的トラウマを発症しました。
+                    <br/><br/>
+                    あなたが使用するすべての AI ツールは人間の労働に依存しており、多くの場合目に見えず、賃金が低く、損害を与えていることがよくあります。
+                  </div>
+<div class="source">Perrigo B. Time Magazine. 2023 Jan 18.</div>
+</div>
+</div>
+</div>
+<div class="slide danger">
+<div class="content text-center">
+<div class="title red animate">Automating Inequality</div>
+<div class="story-card red animate delay-1">
+<div class="place">UK A-LEVEL ALGORITHM SCANDAL, 2020</div>
+<div class="narrative">
+                    新型コロナウイルス感染症により英国で A レベル試験が中止されたとき、政府はアルゴリズムを使用して、過去の学校成績に基づいて生徒の成績を予測しました。
+                    <br/><br/>
+                    The results:
+                    <br/><br/>
+                    • Students from <strong>disadvantaged schools were systematically downgraded</strong>
+<br/>
+                    • Students from <strong>私立学校がアップグレードされました</strong>
+<br/>
+                    • アルゴリズムは、生徒が成功するだろうという教師の予測を覆しました
+                    <br/><br/>
+                    After massive public outcry, <strong>成績の40％が改訂されました</strong>.
+                    <br/><br/>
+                    アルゴリズムがエンコードしていた <strong>historical inequality as prediction</strong>。個々の生徒の能力に関係なく、歴史的に大学に送る生徒の数が少ない学校は罰せられました。
+                  </div>
+<div class="source">UK Office of Qualifications and Examinations Regulation, 2020</div>
+</div>
+<div class="simple-box danger animate delay-2">
+<div class="simple-title">THE LESSON</div>
+<div class="simple-text" style="color: var(--gold);">
+                    AI はバイアスを大規模に自動化できます。過去のデータが体系的な不平等を反映している場合、そのデータに基づいてトレーニングされたアルゴリズムがそのデータを永続させ、増幅させます。
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">研究における AI の倫理的枠組み</div>
+<div class="checklist animate delay-1">
+<h4>Questions to Ask</h4>
+<div class="checklist-item"><span class="number">1</span> <strong>Transparency:</strong> Can I fully disclose how AI was used?</div>
+<div class="checklist-item"><span class="number">2</span> <strong>Accountability:</strong> AI エラーの責任は誰にありますか?</div>
+<div class="checklist-item"><span class="number">3</span> <strong>Equity:</strong> Does AI access create research inequities?</div>
+<div class="checklist-item"><span class="number">4</span> <strong>Labor:</strong> このツールを有効にしたのは誰の作業ですか?</div>
+<div class="checklist-item"><span class="number">5</span> <strong>Environment:</strong> What is the carbon cost of model training?</div>
+<div class="checklist-item"><span class="number">6</span> <strong>Reproducibility:</strong> Can others replicate my AI-assisted work?</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">Authorship and AI</div>
+<div class="simple-box animate delay-1">
+<div class="simple-title">ICMJE POSITION</div>
+<div class="simple-text">
+                    AI tools <strong>cannot be listed as authors</strong>.
+                    <br/><br/>
+                    Authors must take responsibility for AI-generated content.
+                    <br/><br/>
+                    AI use must be disclosed in methods or acknowledgments.
+                  </div>
+</div>
+<div class="simple-box warning animate delay-2">
+<div class="simple-title">YOUR RESPONSIBILITY</div>
+<div class="simple-text">
+                    AI が幻覚を起こし、それを公開した場合、
+                    <strong>責任はあなたにあります</strong>— OpenAI でも、Anthropic でも、ツールでもありません。
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  「このマシンには何もありません」良心。<br/>
+                  データが真実かどうかは気にしません。<br/>
+                  それを訓練するために誰が傷つけられたのかは知りません。<br/>
+                  あなたには良心が欠けているのです。」
+                </div>
+</div>
+</div>
+</div>
+ ====================モジュール 9: 将来の方向性 ==================== 
+<div class="module-slides" data-module="9">
+<div class="slide gradient active">
+<div class="content text-center">
+<div class="title cyber animate ai-glow">今後の道</div>
+<div class="subtitle animate delay-1">証拠合成における AI の方向性</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">Emerging Capabilities</div>
+<div class="stats-grid animate delay-1">
+<div class="tool-card">
+<div class="tool-name">Multimodal AI</div>
+<div class="tool-desc">Extract from<br/>figures/tables</div>
+<div class="tool-stat">2024-2025</div>
+</div>
+<div class="tool-card">
+<div class="tool-name">Agent Systems</div>
+<div class="tool-desc">Multi-step<br/>workflows</div>
+<div class="tool-stat">Emerging</div>
+</div>
+<div class="tool-card">
+<div class="tool-name">RAG Systems</div>
+<div class="tool-desc">Retrieval-augmented<br/>generation</div>
+<div class="tool-stat">Active research</div>
+</div>
+<div class="tool-card">
+<div class="tool-name">Fine-tuned Models</div>
+<div class="tool-desc">MA-specific<br/>training</div>
+<div class="tool-stat">In development</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">今後の予定変更</div>
+<div class="checklist animate delay-1">
+<h4>Enduring Human Requirements</h4>
+<div class="checklist-item"><span class="check" style="color:var(--gold);">★</span> 研究課題の定義 (臨床的判断)</div>
+<div class="checklist-item"><span class="check" style="color:var(--gold);">★</span> Interpreting clinical significance (domain expertise)</div>
+<div class="checklist-item"><span class="check" style="color:var(--gold);">★</span> Assessing applicability (contextual knowledge)</div>
+<div class="checklist-item"><span class="check" style="color:var(--gold);">★</span> Making recommendations (value judgments)</div>
+<div class="checklist-item"><span class="check" style="color:var(--gold);">★</span> Taking responsibility (ethical accountability)</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">THE CONSTANT</div>
+<div class="simple-text">
+                    AI はメカニズムを加速します。<br/>
+<strong>科学は人間のままです。</strong>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">未来に備える</div>
+<div class="decision-tree animate delay-1">
+<h4>Skills to Develop</h4>
+<div class="tree-row"><div class="tree-node root">Future-Ready Researcher</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node cyber">Prompt engineering<small>Getting good AI outputs</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node action">Validation methods<small>Knowing when AI errs</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node yes">Core methods<small>AI cannot replace</small></div>
+</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node warning">最高の AI ユーザーが最高です方法論者<small>Understanding enables oversight</small></div></div>
+</div>
+</div>
+</div>
+<div class="slide hope">
+<div class="content text-center">
+<div class="refrain hope animate">
+                  "The machine grows stronger each year.<br/>
+                  しかし、質問は同じです:<br/>
+                  What is true? What helps patients?<br/>
+                  AI は検索を支援できます。<br/>
+                  答えを提供できるのはあなただけです。"
+                </div>
+</div>
+</div>
+</div>
+ =================== モジュール 10: クイズと参考 ==================== 
+<div class="module-slides" data-module="10">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="title cyber animate">知識をテストしてください</div>
+<div class="quiz-container animate delay-1">
+<div class="quiz-question">データ抽出に LLM を使用する主な制限は何ですか?</div>
+<div class="quiz-options">
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">遅すぎます</div>
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">They can generate plausible but incorrect data (hallucinations)</div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">They cannot read PDFs</div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">高価です</div>
+</div>
+<div class="quiz-feedback"></div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="quiz-container animate">
+<div class="quiz-question">When using AI screening (e.g., ASReview), what must you always do?</div>
+<div class="quiz-options">
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">Trust the AI completely after training</div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">Screen only the top 10% of ranked records</div>
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">ランダムサンプルで停止ルールを検証します</div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">複数の AI ツールを同時に使用します</div>
+</div>
+<div class="quiz-feedback"></div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="quiz-container animate">
+<div class="quiz-question">どのタスクについて AI が最終的な意思決定者になるべきではありませんか?</div>
+<div class="quiz-options">
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">Deduplication</div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">Screening prioritization</div>
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">結果の臨床解釈</div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">Reference formatting</div>
+</div>
+<div class="quiz-feedback"></div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">References</div>
+<div class="references animate delay-1">
+<h4>Key Sources</h4>
+<ol>
+<li>Van de Schoot R et al. Nat Mach Intell. 2021;3:125-133. [ASReview]</li>
+<li>Marshall IJ et al. Nat Mach Intell. 2019;1:115-117. [RobotReviewer]</li>
+<li>Guo Y et al. J Clin Epidemiol. 2024;165:111203. [GPT-4 extraction]</li>
+<li>Mata v. Avianca, 22-cv-1461 (S.D.N.Y. 2023). [Hallucination case]</li>
+<li>Perrigo B. Time Magazine. 2023 Jan 18. [AI labor ethics]</li>
+<li>Elliott JH et al. J Clin Epidemiol. 2017;91:23-30. [Living reviews]</li>
+<li>Cochrane Handbook 2023. Chapter on automation.</li>
+<li>ICMJE. Recommendations on AI authorship. 2023.</li>
+<li>Rethlefsen ML et al. J Med Libr Assoc. 2021. [PRISMA-S]</li>
+<li>Wang S et al. Syst Rev. 2023;12:178. [AI screening validation]</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="slide hope">
+<div class="content text-center">
+<div class="big-number green animate" style="font-size:3rem;">✔</div>
+<div class="title green animate delay-1">Course Complete</div>
+<div class="gold-line animate delay-2"></div>
+<div class="refrain hope animate delay-3">
+                  「これでシリコンのことがわかりました」筆記者—<br/>
+                  its powers and its limits.<br/>
+                  置き換えるのではなく、加速するために使用します。<br/>
+                  Validate what it produces.<br/>
+                  自分が行ったことを文書化します。<br/>
+                  常に覚えておいてください。<br/>
+                  機械は次の単語を予測します。<br/>
+                  その単語が正しいかどうかを判断する必要があります。 true."
+                </div>
+</div>
+</div>
+</div>
+ ==================== モジュール 11: 段階的な確認 ==================== 
+<div class="module-slides" data-module="11">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="title cyber animate ai-glow">ASReview: Step-by-Step Tutorial</div>
+<div class="subtitle animate delay-1">インストールから停止決定まで</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">Step 1: Installation</div>
+<div class="code-box animate delay-1">
+<span class="comment"># Option A: Python pip (recommended)</span><br/>
+                  pip install asreview<br/><br/>
+<span class="comment"># オプション B: デスクトップのダウンロードapp</span><br/>
+<span class="comment"># https://asreview.nl/download/</span><br/><br/>
+<span class="comment"># Launch ASReview LAB</span><br/>
+                  asreview lab
+                </div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">REQUIREMENTS</div>
+<div class="simple-text">
+                    • Python 3.8+ (pip インストール用)<br/>
+                    • OR: Windows/Mac desktop app (no Python needed)<br/>
+                    • Your references in RIS, CSV, or EndNote XML format
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">Step 2: Create Project &amp; Import</div>
+<div class="decision-tree animate delay-1">
+<h4>Project Setup Workflow</h4>
+<div class="tree-row"><div class="tree-node root">New Project</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node action">プロジェクトに名前を付けます<small>Descriptive, include date</small></div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node action">Import references<small>RIS/CSV/XML file</small></div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node cyber">ASReview deduplicates<small>Check count matches expected</small></div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node yes">事前知識の準備</div></div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">Step 3: Add Prior Knowledge</div>
+<div class="simple-box animate delay-1">
+<div class="simple-title">CRITICAL STEP</div>
+<div class="simple-text">
+                    モデルは最初の決定から学習します。<br/>
+                    You need <strong>関連性と無関係性の両方</strong> examples.
+                  </div>
+</div>
+<div class="checklist animate delay-2">
+<h4>Prior Knowledge Strategy</h4>
+<div class="checklist-item"><span class="number">1</span> Add 5-10 <strong>known relevant</strong> 研究 (スコープ検索から)</div>
+<div class="checklist-item"><span class="number">2</span> Search for clearly irrelevant topics (random sample)</div>
+<div class="checklist-item"><span class="number">3</span> Mark 10-20 <strong>irrelevant</strong> as negative examples</div>
+<div class="checklist-item"><span class="number">4</span> Aim for ~1:2 ratio (relevant:irrelevant) to start</div>
+</div>
+<div class="simple-box warning animate delay-3">
+<div class="simple-title">WARNING</div>
+<div class="simple-text">
+                    Poor prior knowledge = poor model performance.<br/>
+<strong>Garbage in, garbage out.</strong>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">Step 4: Screen with Active Learning</div>
+<div class="decision-tree animate delay-1">
+<h4>Screening Loop</h4>
+<div class="tree-row"><div class="tree-node root">ASReview presents record</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">Your decision</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node yes">Relevant<small>全文に含める</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node no">Irrelevant<small>Exclude</small></div>
+</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node cyber">Model updates<small>Re-ranks remaining</small></div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node action">Next most likely relevant<small>Repeat until stopping rule</small></div></div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">Step 5: Stopping Decision</div>
+<div class="comparison-table animate delay-1">
+<h4>Stopping Rules Compared</h4>
+<div class="comparison-row">
+<span class="label">Consecutive irrelevant (50-200)</span>
+<span class="value warn">Common, but no recall guarantee</span>
+</div>
+<div class="comparison-row">
+<span class="label">% of total screened (e.g., 50%)</span>
+<span class="value warn">Predictable effort, variable recall</span>
+</div>
+<div class="comparison-row">
+<span class="label">All records screened</span>
+<span class="value good">100% recall, no time savings</span>
+</div>
+<div class="comparison-row">
+<span class="label">Statistical stopping (Busfelder)</span>
+<span class="value good">Evidence-based, requires plugin</span>
+</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">VALIDATION REQUIREMENT</div>
+<div class="simple-text">
+                    After stopping: <strong>manually screen random sample</strong> of unscreened records.
+                    <br/>Report estimated recall with confidence interval.
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  「ツールはシンプルですが、意思決定はシンプルではありません。<br/>
+                  Feed it good examples. Check when you stop.<br/>
+                  プロジェクト ファイルをエクスポートします。これは監査証跡です。」
+                </div>
+</div>
+</div>
+</div>
+ ==================== モジュール 12: プロンプト エンジニアリング ライブラリ ==================== 
+<div class="module-slides" data-module="12">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="title cyber animate ai-glow">プロンプトエンジニアリングライブラリ</div>
+<div class="subtitle animate delay-1">Validated prompts for meta-analysis tasks</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">Prompt Principles</div>
+<div class="checklist animate delay-1">
+<h4>信頼性の高い LLM 出力を実現</h4>
+<div class="checklist-item"><span class="number">1</span> <strong>Be specific:</strong> Define exact fields and formats</div>
+<div class="checklist-item"><span class="number">2</span> <strong>Provide examples:</strong> Show expected output format</div>
+<div class="checklist-item"><span class="number">3</span> <strong>Request uncertainty:</strong> 「NR」または「UNCLEAR」フラグを要求する</div>
+<div class="checklist-item"><span class="number">4</span> <strong>Demand quotes:</strong> Require source text for verification</div>
+<div class="checklist-item"><span class="number">5</span> <strong>Limit scope:</strong> One task per prompt, not everything at once</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">プロンプト 1: RCT データの抽出</div>
+<div class="code-box animate delay-1" style="font-size:0.55rem;max-width:600px;">
+                  この RCT から以下を抽出します。各フィールドに次の情報を入力します。<br/>
+                  - The value<br/>
+                  - 論文からの正確な引用 (引用符内)<br/>
+                  - 報告されていない場合は「NR」、曖昧な場合は「UNCLEAR」<br/><br/>
+<span class="keyword">FIELDS:</span><br/>
+                  1. Intervention group sample size (ITT): [n]<br/>
+                  2. Control group sample size (ITT): [n]<br/>
+                  3. Primary outcome definition: [text]<br/>
+                  4. Primary outcome: intervention events/total: [x/n]<br/>
+                  5. Primary outcome: control events/total: [x/n]<br/>
+                  6. Risk ratio (95% CI): [RR (lower, upper)]<br/>
+                  7. Follow-up duration: [weeks/months]<br/><br/>
+<span class="keyword">OUTPUT FORMAT:</span> 各フィールドの「値」と「引用符」を含む JSON
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">プロンプト 2: 研究の特徴</div>
+<div class="code-box animate delay-1" style="font-size:0.55rem;max-width:600px;">
+                  研究の特徴を抽出します。確認のために正確な見積もりを提供します。<br/><br/>
+<span class="keyword">FIELDS:</span><br/>
+                  1. Study design: [RCT / Cluster RCT / Crossover / Other]<br/>
+                  2. Country/countries: [list]<br/>
+                  3. Setting: [hospital / primary care / community / other]<br/>
+                  4. Recruitment period: [start date - end date]<br/>
+                  5. Funding source: [text]<br/>
+                  6. Trial registration: [ID number or "NR"]<br/>
+                  7. Conflicts of interest declared: [Yes/No/NR]<br/><br/>
+                  If information is in supplementary materials, note "See Supplement".<br/>
+                  If truly not reported anywhere, mark "NR".
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">Prompt 3: Population Characteristics</div>
+<div class="code-box animate delay-1" style="font-size:0.55rem;max-width:600px;">
+                  Extract baseline population characteristics.<br/>
+                  介入グループと制御グループを別々にレポートします。<br/><br/>
+<span class="keyword">FIELDS (per group):</span><br/>
+                  1. N randomized: [n]<br/>
+                  2. N analyzed: [n]<br/>
+                  3. Age: [mean (SD) or median (IQR)]<br/>
+                  4. Sex (% female): [%]<br/>
+                  5. Key inclusion criteria: [text]<br/>
+                  6. Key exclusion criteria: [text]<br/>
+                  7. Disease severity at baseline: [measure and value]<br/><br/>
+<span class="keyword">NOTE:</span> If groups combined only, report combined with note.
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">Prompt 4: Risk of Bias Screening</div>
+<div class="code-box animate delay-1" style="font-size:0.55rem;max-width:600px;">
+<span class="keyword">NOTE:</span> これは PRELIMINARY フラグ設定のみを目的としています。<br/>
+                  Human assessment required for final judgment.<br/><br/>
+                  For each RoB 2 domain, identify relevant text:<br/><br/>
+<span class="keyword">D1 Randomization:</span><br/>
+                  - シーケンス生成方法：[引用符またはNR]<br/>
+                  - 割り当て隠蔽方法：[引用またはNR]<br/><br/>
+<span class="keyword">D2 Deviations:</span><br/>
+                  - Blinding of participants: [quote or NR]<br/>
+                  - Blinding of personnel: [quote or NR]<br/><br/>
+<span class="keyword">D3 Missing data:</span><br/>
+                  - Attrition rates: [intervention: x%, control: y%]<br/>
+                  ・欠落データの扱い：[見積書またはNR]<br/><br/>
+<span class="keyword">DO NOT</span> make judgments. Only extract quotes.
+                </div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  「プロンプトは、マシンとの契約です。<br/>
+                  質問する内容は正確にしてください。<br/>
+                  すべての答えに対して証拠を要求します。<br/>
+                  Verify every output against the source."
+                </div>
+</div>
+</div>
+</div>
+ ==================== モジュール 13: AI 支援によるレビューを読む ==================== 
+<div class="module-slides" data-module="13">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  体系的なレビューを書くことは決してないかもしれません。<br/>
+                  しかし、あなたはそうします <em>read</em> them.<br/>
+<br/>
+                  AI 支援かどうかはどうやってわかりますか<br/>
+                  was done <em>well or poorly</em>?
+                </div>
+</div>
+</div>
+<div class="slide danger">
+<div class="content text-center">
+<div class="title red animate">The IBM Watson Oncology Failure</div>
+<div class="story-card red animate delay-1">
+<div class="place">MD ANDERSON CANCER CENTER, 2017</div>
+<div class="narrative">
+                    IBM Watson for Oncology は、がん治療を推奨するために訓練されました。
+                    <br/><br/>
+                    After spending <strong>$62 million</strong>, MDアンダーソンはプロジェクトをキャンセルした。
+                    <br/><br/>
+                    Internal documents showed Watson made <strong>「安全ではなく間違っている」</strong>
+                    治療の推奨事項。実際の患者データではなく、合成症例に基づいてトレーニングされました。
+                    <br/><br/>
+                    AIは自信を持って見えた。推奨事項は危険でした。
+                    <br/><br/>
+<strong>Lesson: AI confidence ≠ AI correctness</strong>
+</div>
+<div class="source">STAT News investigation, 2017; IEEE Spectrum 2019</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">AI 支援レビューに関する質問</div>
+<div class="checklist animate delay-1">
+<h4>メソッドで何を探すべきか</h4>
+<div class="checklist-item"><span class="number">1</span> Did they <strong>AIツールに名前を付けます</strong> used? (version, date)</div>
+<div class="checklist-item"><span class="number">2</span> Did they <strong>specify which tasks</strong> were AI-assisted?</div>
+<div class="checklist-item"><span class="number">3</span> Did they <strong>validate AI outputs</strong>? How?</div>
+<div class="checklist-item"><span class="number">4</span> AIスクリーニングの場合： <strong>stopping rule</strong>? What <strong>estimated recall</strong>?</div>
+<div class="checklist-item"><span class="number">5</span> AI 抽出の場合: <strong>100% human verified</strong>?</div>
+<div class="checklist-item"><span class="number">6</span> Was there <strong>human oversight</strong> of all AI decisions?</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">Red Flags in AI-Assisted Reviews</div>
+<div class="comparison-table animate delay-1">
+<h4>Warning Signs</h4>
+<div class="comparison-row">
+<span class="label">"AI screened all titles"</span>
+<span class="value bad">No human involvement?</span>
+</div>
+<div class="comparison-row">
+<span class="label">「GPT抽出データ」</span>
+<span class="value bad">No verification mentioned?</span>
+</div>
+<div class="comparison-row">
+<span class="label">"Stopped after 500 consecutive irrelevant"</span>
+<span class="value warn">No recall estimate?</span>
+</div>
+<div class="comparison-row">
+<span class="label">"AI-generated protocol"</span>
+<span class="value warn">Human decisions unclear?</span>
+</div>
+<div class="comparison-row">
+<span class="label">No AI tools mentioned but clearly AI-written</span>
+<span class="value bad">Hidden AI use</span>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">患者と臨床医向け</div>
+<div class="simple-box animate delay-1">
+<div class="simple-title">知っておくべきこと</div>
+<div class="simple-text">
+<strong>Good AI use:</strong> Speeds up the work, human verifies<br/>
+<strong>Bad AI use:</strong> Replaces human judgment, no validation<br/><br/>
+<em>An AI-assisted review can be trustworthy—if done right.</em>
+</div>
+</div>
+<div class="checklist animate delay-2">
+<h4>Simple Questions to Ask</h4>
+<div class="checklist-item"><span class="check" style="color:var(--cyber);">?</span> 「このレビューでは AI が使用されましたか?」</div>
+<div class="checklist-item"><span class="check" style="color:var(--cyber);">?</span> 「AI の結果は人間によってチェックされましたか?」</div>
+<div class="checklist-item"><span class="check" style="color:var(--cyber);">?</span> "Could AI have missed important studies?"</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  "AI assistance is not a flaw—it is often an advantage.<br/>
+                  But only if validated, only if disclosed.<br/>
+                  質問: 機械はチェックされましたか?<br/>
+                  答えが不明瞭な場合は、 "
+                </div>
+</div>
+</div>
+</div>
+ ==================== モジュール 14: リソース制限設定 ==================== 
+<div class="module-slides" data-module="14">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  研究者のことを考えていませんか<br/>
+                  with unstable internet, limited compute,<br/>
+                  no institutional subscription,<br/>
+                  who still needs to synthesize <em>evidence</em>?
+                </div>
+</div>
+</div>
+<div class="slide cyber">
+<div class="content text-center">
+<div class="title cyber animate">無料&amp;オフライン対応ツール</div>
+<div class="stats-grid animate delay-1">
+<div class="tool-card">
+<div class="tool-name">ASReview</div>
+<div class="tool-desc">Desktop app<br/>Works offline</div>
+<div class="tool-stat">FREE</div>
+</div>
+<div class="tool-card">
+<div class="tool-name">Abstrackr</div>
+<div class="tool-desc">Web-based<br/>Free accounts</div>
+<div class="tool-stat">FREE</div>
+</div>
+<div class="tool-card">
+<div class="tool-name">Rayyan</div>
+<div class="tool-desc">Free tier<br/>Limited AI</div>
+<div class="tool-stat">FREEMIUM</div>
+</div>
+<div class="tool-card">
+<div class="tool-name">RevMan</div>
+<div class="tool-desc">Cochrane tool<br/>Full MA software</div>
+<div class="tool-stat">FREE</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">Offline Workflow</div>
+<div class="decision-tree animate delay-1">
+<h4>When Internet is Unreliable</h4>
+<div class="tree-row"><div class="tree-node root">Search Phase</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node action">ライブラリ/カフェ: すべての PDF をダウンロード<small>接続時に一括ダウンロード</small></div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node root">Screening Phase</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node cyber">ASReview desktop<small>Works fully offline</small></div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node root">Extraction Phase</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node action">Spreadsheet + local PDFs<small>No AI needed</small></div></div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">Low-Cost LLM Alternatives</div>
+<div class="simple-box animate delay-1">
+<div class="simple-title">WHEN API COSTS ARE PROHIBITIVE</div>
+<div class="simple-text">
+                    • <strong>Claude/ChatGPT free tiers:</strong> Limited but functional<br/>
+                    • <strong>Ollama + local models:</strong> Free, runs on laptop (requires download)<br/>
+                    • <strong>Hugging Face inference:</strong> Free tier available<br/>
+                    • <strong>Manual extraction:</strong> Still gold standard, just slower
+                  </div>
+</div>
+<div class="simple-box warning animate delay-2">
+<div class="simple-title">HONEST ASSESSMENT</div>
+<div class="simple-text">
+                    AI は必須ではなく便利です。<br/>
+<strong>All Cochrane reviews were done without AI.</strong><br/>
+                    品質はツールではなく方法から生まれます。
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">Resource-Limited Decision Tree</div>
+<div class="decision-tree animate delay-1">
+<h4>選択あなたのアプローチ</h4>
+<div class="tree-row"><div class="tree-node root">Your Resources</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">Internet reliability?</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">Stable</div>
+<div class="tree-node yes">Web tools OK<small>Rayyan, Covidence</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">Unreliable</div>
+<div class="tree-node action">Desktop tools<small>ASReview offline</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">None</div>
+<div class="tree-node warning">Manual + spreadsheets<small>Still valid</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain gold animate">
+                  「証拠はすべての人のものです。<br/>
+                  高速インターネットと有料サブスクリプションを持っている人だけではありません。<br/>
+                  ツールは異なる場合があります。メソッドは残ります。<br/>
+                  Quality synthesis is possible anywhere."
+                </div>
+</div>
+</div>
+</div>
+ =================== モジュール 15: 検証計算 ===================== 
+<div class="module-slides" data-module="15">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="title cyber animate ai-glow">Validation Calculations</div>
+<div class="subtitle animate delay-1">AI 検証のサンプル サイズ</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">Estimating Recall After AI Screening</div>
+<div class="simple-box animate delay-1">
+<div class="simple-title">THE PROBLEM</div>
+<div class="simple-text">
+                    でスクリーニングを停止しました。 5000 件のレコードのうち 1000 件。<br/>
+                    関連する研究がすべて見つかったとどの程度自信がありますか?
+                  </div>
+</div>
+<div class="decision-tree animate delay-2">
+<h4>Validation Sampling</h4>
+<div class="tree-row"><div class="tree-node root">Unscreened records (n=4000)</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node action">Random sample (n=400)<small>10% or at least 200</small></div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">Manual screening</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node yes">0 relevant found<small>Recall ≈ 95-100%</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node no">Relevant found<small>Screen all remaining</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">Sample Size Formula</div>
+<div class="simple-box animate delay-1">
+<div class="simple-title">再現率 95% の信頼性</div>
+<div class="simple-text" style="font-family:monospace;text-align:center;">
+                    n = ln(1 - confidence) / ln(1 - prevalence)<br/><br/>
+<strong>Example:</strong><br/>
+                    If prevalence of relevant = 1% (0.01)<br/>
+                    For 95% confidence (0.95):<br/><br/>
+                    n = ln(1 - 0.95) / ln(1 - 0.01)<br/>
+                    n = ln(0.05) / ln(0.99)<br/>
+                    n ≈ <strong>299</strong> records to sample
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">Quick Reference Table</div>
+<div class="comparison-table animate delay-1">
+<h4>検証用のサンプル サイズ</h4>
+<div class="comparison-row">
+<span class="label">Prevalence 0.5%, 95% conf</span>
+<span class="value">598 records</span>
+</div>
+<div class="comparison-row">
+<span class="label">Prevalence 1%, 95% conf</span>
+<span class="value">299 records</span>
+</div>
+<div class="comparison-row">
+<span class="label">Prevalence 2%, 95% conf</span>
+<span class="value">149 records</span>
+</div>
+<div class="comparison-row">
+<span class="label">Prevalence 5%, 95% conf</span>
+<span class="value">59 records</span>
+</div>
+<div class="comparison-row">
+<span class="label">Practical minimum</span>
+<span class="value good">200 records (conservative)</span>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title cyber animate">レポート検証</div>
+<div class="code-box animate delay-1" style="font-size:0.6rem;max-width:600px;text-align:left;">
+<span class="keyword">メソッドの例のテキスト:</span><br/><br/>
+                  「タイトル/要約のスクリーニングに ASReview LAB (v1.2) を使用しました。<br/>
+                  active learning. Screening ceased after 150 consecutive<br/>
+                  irrelevant records, having screened 1,247 of 4,892 records<br/>
+                  (25%). To validate recall, we manually screened a random<br/>
+                  sample of 300 unscreened records. No additional relevant<br/>
+                  研究結果が特定され、推定再現率 ≥95% が示唆されました<br/>
+                  (binomial 95% CI: 91-100%)."
+                </div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  」検証はオプションではありません。<br/>
+                  Calculate your sample. Screen it manually.<br/>
+                  発見したことを報告してください。あなたが見逃していたかもしれないことを認めてください。」
+                </div>
+</div>
+</div>
+</div>
+<div class="slide-nav">
+<button class="nav-btn" onclick="prevSlide()">←</button>
+<div class="nav-center">
+<div class="slide-counter" id="slideCounter">1 / 6</div>
+<div class="progress" id="progressDots"></div>
+</div>
+<button class="nav-btn" onclick="nextSlide()">→</button>
+</div>
+</div>
+</div>
+</main>
+</div>
+<script>
+    const modules = [
+      { id: 1, title: "Promise & Peril", subtitle: "What AI can/cannot do", slides: 6 },
+      { id: 2, title: "AI Screening", subtitle: "ASReview, Rayyan, Abstrackr", slides: 7 },
+      { id: 3, title: "LLM データ抽出", subtitle: "Validation requirements", slides: 6 },
+      { id: 4, title: "Automated RoB", subtitle: "RobotReviewer limits", slides: 6 },
+      { id: 5, title: "Protocol Writing", subtitle: "製図ツールとしての GPT", slides: 6 },
+      { id: 6, title: "Living Reviews + AI", subtitle: "Continuous surveillance", slides: 6 },
+      { id: 7, title: "Quality Assurance", subtitle: "Verification framework", slides: 6 },
+      { id: 8, title: "Ethics of AI", subtitle: "Labor, equity, accountability", slides: 5 },
+      { id: 9, title: "Future Directions", subtitle: "What's coming", slides: 5 },
+      { id: 10, title: "Quiz & References", subtitle: "Test yourself", slides: 5 },
+      { id: 11, title: "ASReview Tutorial", subtitle: "Step-by-step guide", slides: 7 },
+      { id: 12, title: "Prompt Library", subtitle: "Validated prompts", slides: 6 },
+      { id: 13, title: "Reading AI Reviews", subtitle: "Consumer's guide", slides: 6 },
+      { id: 14, title: "Resource-Limited", subtitle: "無料およびオフライン ツール", slides: 6 },
+      { id: 15, title: "Validation Calcs", subtitle: "Sample sizes", slides: 6 }
+    ];
+
+    let currentModule = 1;
+    let currentSlide = 1;
+    const completedModules = new Set();
+
+    function toggleSidebar() {
+      const sidebar = document.querySelector('.sidebar');
+      const overlay = document.querySelector('.sidebar-overlay');
+      if (!sidebar) return;
+      const isOpen = sidebar.classList.toggle('open');
+      if (overlay) overlay.classList.toggle('show', isOpen);
+    }
+
+    function init() {
+      renderModuleList();
+      updateSlideNav();
+      document.addEventListener('keydown', (e) => {
+        const tag = e.target.tagName;
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || e.target.isContentEditable) return;
+        if (e.target.matches('button, a, [role="button"], [role="radio"], [role="option"]')) {
+            if (e.key === ' ' || e.key === 'Enter') return;
+        }
+        if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextSlide(); }
+        else if (e.key === 'ArrowLeft') { e.preventDefault(); prevSlide(); }
+      });
+    }
+
+    function renderModuleList() {
+      const list = document.getElementById('moduleList');
+      list.innerHTML = modules.map(m => `
+        <div class="module-item ${m.id === currentModule ? 'active' : ''} ${completedModules.has(m.id) ? 'completed' : ''}" onclick="goToModule(${m.id})" tabindex="0" role="button" aria-label="Module ${m.id}: ${m.title}"
+             onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();goToModule(${m.id});}">
+          <div class="module-number">${completedModules.has(m.id) ? '✓' : m.id}</div>
+          <div class="module-info">
+            <div class="module-title">${m.title}</div>
+            <div class="module-subtitle">${m.subtitle}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function goToModule(moduleId) {
+      if (moduleId > currentModule) completedModules.add(currentModule);
+      currentModule = moduleId;
+      currentSlide = 1;
+      document.querySelectorAll('.module-slides').forEach(el => el.classList.remove('active'));
+      document.querySelector(`.module-slides[data-module="${moduleId}"]`).classList.add('active');
+      updateSlideVisibility();
+      updateSlideNav();
+      renderModuleList();
+      document.getElementById('currentModule').textContent = modules[moduleId - 1].title;
+    }
+
+    function updateSlideVisibility() {
+      const moduleSlides = document.querySelector(`.module-slides[data-module="${currentModule}"]`);
+      const slides = moduleSlides.querySelectorAll('.slide');
+      slides.forEach((slide, index) => slide.classList.toggle('active', index + 1 === currentSlide));
+    }
+
+    function updateSlideNav() {
+      const module = modules[currentModule - 1];
+      document.getElementById('slideCounter').textContent = `${currentSlide} / ${module.slides}`;
+      document.getElementById('progressDots').innerHTML = Array.from({ length: module.slides }, (_, i) =>
+        `<div class="progress-dot ${i + 1 === currentSlide ? 'active' : ''}" onclick="goToSlide(${i + 1})"></div>`
+      ).join('');
+    }
+
+    function goToSlide(slideNum) { currentSlide = slideNum; updateSlideVisibility(); updateSlideNav(); }
+
+    function nextSlide() {
+      const module = modules[currentModule - 1];
+      if (currentSlide < module.slides) { currentSlide++; updateSlideVisibility(); updateSlideNav(); }
+      else if (currentModule < modules.length) { goToModule(currentModule + 1); }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 1) { currentSlide--; updateSlideVisibility(); updateSlideNav(); }
+      else if (currentModule > 1) {
+        const prevModuleSlides = modules[currentModule - 2].slides;
+        currentModule--;
+        currentSlide = prevModuleSlides;
+        document.querySelectorAll('.module-slides').forEach(el => el.classList.remove('active'));
+        document.querySelector(`.module-slides[data-module="${currentModule}"]`).classList.add('active');
+        updateSlideVisibility();
+        updateSlideNav();
+        renderModuleList();
+        document.getElementById('currentModule').textContent = modules[currentModule - 1].title;
+      }
+    }
+
+    function checkAnswer(element, isCorrect) {
+      const container = element.closest('.quiz-container');
+      const options = container.querySelectorAll('.quiz-option');
+      const feedback = container.querySelector('.quiz-feedback');
+      options.forEach(opt => {
+        opt.style.pointerEvents = 'none';
+        if (opt === element) opt.classList.add(isCorrect ? 'correct' : 'incorrect');
+        if (!isCorrect && opt.dataset.correct === 'true') opt.classList.add('correct');
+      });
+      feedback.classList.add('show', isCorrect ? 'correct' : 'incorrect');
+      feedback.textContent = isCorrect ? '正しい。いつ信頼すべきか、いつ検証すべきかを理解しています。' : 'Not quite. Remember: the machine predicts, but does not guarantee truth.';
+    }
+
+    init();
+  </script>
+</body>
+</html>

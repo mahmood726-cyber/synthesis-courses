@@ -1,0 +1,2956 @@
+<!DOCTYPE html>
+
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>عندما يكمن الاختبار: دورة DTA النهائية (الإصدار 4)</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&amp;family=Source+Sans+Pro:wght@300;400;600;700&amp;display=swap" rel="stylesheet"/>
+<style>
+    :root {
+      --navy: #1E2761;
+      --deep-navy: #141B3D;
+      --gold: #D4AF37;
+      --cream: #FAF8F5;
+      --text: #2D3748;
+      --light-text: #718096;
+      --red: #C53030;
+      --green: #22c55e;
+      --teal: #00D4AA;
+      --purple: #A855F7;
+      --orange: #F97316;
+      --blood-red: #8B0000;
+      --pink: #EC4899;
+      --transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      height: 100%;
+      font-family: 'Source Sans Pro', sans-serif;
+      background: var(--deep-navy);
+      color: var(--cream);
+    }
+
+    .course-container { display: flex; height: 100vh; overflow: hidden; }
+
+    .sidebar {
+      width: 280px;
+      background: linear-gradient(180deg, var(--deep-navy) 0%, #0a0f1a 100%);
+      border-left: 1px solid rgba(212,175,55,0.2);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    /* mobile sidebar handled by hamburger toggle below */
+
+    .sidebar-header { padding: 1.25rem; border-bottom: 1px solid rgba(212,175,55,0.2); }
+    .sidebar-header h1 { font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; font-weight: 700; color: var(--gold); }
+    .sidebar-header p { font-size: 0.7rem; color: rgba(255,255,255,0.6); }
+
+    .module-list { flex: 1; overflow-y: auto; padding: 0.5rem 0; }
+
+    .module-item {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.5rem 0.75rem; cursor: pointer;
+      border-right: 3px solid transparent; transition: all 0.2s;
+    }
+    .module-item:hover { background: rgba(212,175,55,0.1); }
+    .module-item.active { background: rgba(212,175,55,0.15); border-right-color: var(--gold); }
+    .module-item.completed .module-number { background: var(--green); color: white; }
+
+    .module-number {
+      width: 22px; height: 22px; border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.65rem; font-weight: 700; flex-shrink: 0;
+    }
+    .module-item.active .module-number { background: var(--gold); color: var(--navy); }
+
+    .module-info { flex: 1; min-width: 0; }
+    .module-title { font-size: 0.75rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .module-subtitle { font-size: 0.6rem; color: rgba(255,255,255,0.5); }
+
+    .sidebar-footer {
+      padding: 0.6rem 0.75rem; border-top: 1px solid rgba(212,175,55,0.2);
+      font-size: 0.6rem; color: rgba(255,255,255,0.4); line-height: 1.4;
+    }
+
+    .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+    .content-header {
+      padding: 0.6rem 1.25rem;
+      background: rgba(0,0,0,0.3);
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .breadcrumb { font-size: 0.75rem; color: rgba(255,255,255,0.6); }
+    .breadcrumb span { color: var(--gold); }
+    .header-actions { display: flex; gap: 0.4rem; }
+
+    .btn {
+      padding: 0.35rem 0.7rem; border: 1px solid rgba(212,175,55,0.3);
+      border-radius: 6px; background: rgba(255,255,255,0.05);
+      color: var(--cream); font-size: 0.7rem; cursor: pointer; transition: all 0.2s;
+    }
+    .btn:hover { background: rgba(212,175,55,0.2); border-color: var(--gold); }
+    .btn.primary { background: var(--gold); color: var(--navy); border-color: var(--gold); font-weight: 600; }
+
+    .content-body { flex: 1; overflow: hidden; display: flex; }
+    .slides-container { flex: 1; position: relative; overflow: hidden; }
+    .module-slides { display: none; width: 100%; height: 100%; }
+    .module-slides.active { display: block; }
+
+    .slide {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      display: flex; flex-direction: column; justify-content: flex-start; align-items: center;
+      padding: 1.25rem 1.25rem 3rem 1.25rem; padding-top: 1.5rem;
+      opacity: 0; visibility: hidden;
+      transition: opacity var(--transition), visibility var(--transition);
+      overflow-y: auto; overflow-x: hidden;
+    }
+    .slide .content { margin-top: auto; margin-bottom: auto; }
+    .slide.active { opacity: 1; visibility: visible; }
+    .slide.dark { background: var(--deep-navy); }
+    .slide.black { background: #000; }
+    .slide.gradient { background: linear-gradient(135deg, var(--deep-navy) 0%, #2a1a4a 100%); }
+    .slide.blood { background: linear-gradient(135deg, #1a0a0a 0%, #2d1515 100%); }
+    .slide.hope { background: linear-gradient(135deg, #0a1a0a 0%, #152d15 100%); }
+    .slide.fraud { background: linear-gradient(135deg, #1a1a0a 0%, #2d2515 100%); }
+    .slide.tb { background: linear-gradient(135deg, #0a0a1a 0%, #15152d 100%); }
+    .slide.des { background: linear-gradient(135deg, #1a0a1a 0%, #2d152d 100%); }
+
+    .title { font-family: 'Cormorant Garamond', serif; font-size: clamp(1.4rem, 3.5vw, 2.4rem); font-weight: 700; margin-bottom: 0.6rem; line-height: 1.2; }
+    .title.gold { color: var(--gold); }
+    .title.red { color: var(--red); }
+    .title.green { color: var(--green); }
+    .title.pink { color: var(--pink); }
+
+    .subtitle { font-size: clamp(0.85rem, 1.8vw, 1.1rem); color: rgba(255,255,255,0.7); margin-bottom: 1.25rem; }
+
+    .big-number { font-family: 'Cormorant Garamond', serif; font-size: clamp(2.5rem, 10vw, 6rem); font-weight: 700; line-height: 1; }
+    .big-number.red { color: var(--red); }
+    .big-number.gold { color: var(--gold); }
+    .big-number.green { color: var(--green); }
+
+    .refrain {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.1rem, 2.5vw, 1.7rem);
+      font-style: italic; color: var(--gold);
+      text-align: center; max-width: 700px; line-height: 1.4;
+    }
+    .refrain.warning { color: var(--red); border-right: 4px solid var(--red); padding-right: 1.25rem; text-align: right; }
+    .refrain.hope { color: var(--green); }
+
+    .rhetorical {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1rem, 2.2vw, 1.5rem);
+      color: rgba(255,255,255,0.9);
+      text-align: center; max-width: 600px; line-height: 1.5;
+    }
+    .rhetorical em { color: var(--gold); font-style: normal; }
+
+    .simple-box {
+      background: linear-gradient(135deg, rgba(0,212,170,0.1), rgba(0,0,0,0.2));
+      border: 2px solid var(--teal); border-radius: 10px;
+      padding: 1rem; max-width: 520px; margin: 0.6rem 0;
+    }
+    .simple-box .simple-title { color: var(--teal); font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; margin-bottom: 0.4rem; }
+    .simple-box .simple-text { font-size: 0.9rem; line-height: 1.5; }
+    .simple-box .simple-text strong { color: var(--gold); }
+
+    .story-card {
+      background: rgba(0,0,0,0.3); border-right: 4px solid var(--gold);
+      padding: 1rem 1.25rem; max-width: 600px; margin: 0.6rem 0;
+    }
+    .story-card .place { font-size: 0.65rem; color: var(--gold); letter-spacing: 0.1em; margin-bottom: 0.35rem; }
+    .story-card .narrative { font-family: 'Cormorant Garamond', serif; font-size: 0.95rem; line-height: 1.5; color: rgba(255,255,255,0.9); }
+    .story-card .source { font-size: 0.6rem; color: rgba(255,255,255,0.5); margin-top: 0.6rem; font-style: italic; }
+    .story-card.pink { border-right-color: var(--pink); }
+    .story-card.pink .place { color: var(--pink); }
+
+    /* DECISION TREES */
+    .decision-tree {
+      background: rgba(0,0,0,0.4); border: 2px solid var(--gold);
+      border-radius: 12px; padding: 1rem; max-width: 650px; width: 100%;
+    }
+    .decision-tree h4 { color: var(--gold); font-family: 'Cormorant Garamond', serif; font-size: 0.9rem; margin-bottom: 0.75rem; text-align: center; }
+
+    .tree-row { display: flex; justify-content: center; gap: 0.4rem; margin: 0.3rem 0; flex-wrap: wrap; }
+    .tree-node {
+      background: var(--navy); border: 2px solid var(--gold);
+      border-radius: 6px; padding: 0.4rem 0.6rem;
+      text-align: center; min-width: 70px; font-size: 0.7rem;
+    }
+    .tree-node.root { background: var(--gold); color: var(--navy); font-weight: 700; }
+    .tree-node.question { background: var(--purple); color: white; border-color: var(--purple); }
+    .tree-node.positive { background: rgba(197,48,48,0.3); border-color: var(--red); }
+    .tree-node.negative { background: rgba(34,197,94,0.3); border-color: var(--green); }
+    .tree-node.action { background: var(--teal); color: var(--navy); border-color: var(--teal); }
+    .tree-node.warning { background: var(--orange); color: white; border-color: var(--orange); }
+    .tree-node.tp { background: var(--green); color: white; border-color: var(--green); }
+    .tree-node.fp { background: var(--red); color: white; border-color: var(--red); }
+    .tree-node.fn { background: var(--orange); color: white; border-color: var(--orange); }
+    .tree-node.tn { background: var(--teal); color: var(--navy); border-color: var(--teal); }
+    .tree-node.pink { background: var(--pink); color: white; border-color: var(--pink); }
+    .tree-node small { display: block; font-size: 0.55rem; opacity: 0.85; margin-top: 0.15rem; }
+
+    .tree-arrow { color: var(--gold); font-size: 1rem; text-align: center; margin: 0.15rem 0; }
+    .tree-branch { display: flex; gap: 1.5rem; justify-content: center; margin-top: 0.25rem; flex-wrap: wrap; }
+    .tree-branch-item { display: flex; flex-direction: column; align-items: center; }
+    .tree-label { font-size: 0.55rem; color: rgba(255,255,255,0.6); margin: 0.15rem 0; }
+
+    /* SROC Visualization */
+    .sroc-container {
+      background: rgba(0,0,0,0.5); border: 2px solid var(--purple);
+      border-radius: 12px; padding: 1rem; max-width: 400px; width: 100%;
+    }
+    .sroc-container h4 { color: var(--purple); text-align: center; margin-bottom: 0.75rem; font-family: 'Cormorant Garamond', serif; font-size: 0.9rem; }
+    .sroc-plot {
+      position: relative; width: 100%; height: 200px;
+      background: linear-gradient(135deg, rgba(168,85,247,0.1) 0%, rgba(0,0,0,0.3) 100%);
+      border: 1px solid rgba(255,255,255,0.2); border-radius: 8px;
+    }
+    .sroc-axis-label { position: absolute; font-size: 0.55rem; color: rgba(255,255,255,0.6); }
+    .sroc-axis-label.x { bottom: -18px; left: 50%; transform: translateX(-50%); }
+    .sroc-axis-label.y { top: 50%; left: -40px; transform: rotate(-90deg) translateX(-50%); transform-origin: center; }
+    .sroc-curve { position: absolute; top: 10%; left: 10%; width: 80%; height: 80%; }
+    .sroc-curve svg { width: 100%; height: 100%; }
+    .sroc-dot { position: absolute; width: 8px; height: 8px; background: var(--gold); border-radius: 50%; transform: translate(-50%, -50%); }
+    .sroc-legend { display: flex; gap: 1rem; justify-content: center; margin-top: 0.5rem; font-size: 0.6rem; }
+    .sroc-legend-item { display: flex; align-items: center; gap: 0.25rem; }
+    .sroc-legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+    /* Fagan Nomogram */
+    .fagan-container {
+      background: rgba(0,0,0,0.4); border: 2px solid var(--purple);
+      border-radius: 12px; padding: 1rem; max-width: 550px; width: 100%;
+    }
+    .fagan-container h4 { color: var(--purple); text-align: center; margin-bottom: 0.75rem; font-family: 'Cormorant Garamond', serif; font-size: 0.9rem; }
+    .fagan-visual {
+      display: flex; justify-content: space-between; align-items: stretch;
+      height: 180px; position: relative; padding: 0 0.75rem;
+    }
+    .fagan-scale {
+      display: flex; flex-direction: column; justify-content: space-between;
+      font-size: 0.6rem; color: rgba(255,255,255,0.7); width: 55px; text-align: center;
+    }
+    .fagan-scale-title { font-size: 0.55rem; color: var(--gold); margin-bottom: 0.2rem; }
+    .fagan-line { width: 2px; background: var(--gold); position: relative; }
+    .fagan-marker {
+      position: absolute; width: 10px; height: 10px; border-radius: 50%;
+      background: var(--gold); left: -4px; transform: translateY(-50%);
+    }
+    .fagan-result { font-size: 0.65rem; text-align: center; margin-top: 0.4rem; color: rgba(255,255,255,0.8); }
+
+    /* Interactive Calculator */
+    .calculator {
+      background: rgba(0,0,0,0.4); border: 2px solid var(--teal);
+      border-radius: 12px; padding: 1rem; max-width: 500px; width: 100%;
+    }
+    .calculator h4 { color: var(--teal); text-align: center; margin-bottom: 0.75rem; font-family: 'Cormorant Garamond', serif; font-size: 0.9rem; }
+    .calc-row { display: flex; align-items: center; gap: 0.75rem; margin: 0.5rem 0; }
+    .calc-label { font-size: 0.75rem; min-width: 100px; }
+    .calc-slider { flex: 1; -webkit-appearance: none; height: 6px; border-radius: 3px; background: rgba(255,255,255,0.2); }
+    .calc-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--gold); cursor: pointer; }
+    .calc-value { font-size: 0.8rem; font-weight: 700; color: var(--gold); min-width: 50px; text-align: right; }
+    .calc-result { background: rgba(34,197,94,0.2); padding: 0.75rem; border-radius: 8px; margin-top: 0.75rem; text-align: center; }
+    .calc-result .big { font-size: 1.5rem; font-weight: 700; color: var(--gold); }
+    .calc-result .label { font-size: 0.7rem; color: rgba(255,255,255,0.7); }
+
+    /* 2x2 Table */
+    .matrix-container { background: rgba(0,0,0,0.3); border-radius: 10px; padding: 0.75rem; max-width: 420px; }
+    .matrix-container h4 { color: var(--gold); text-align: center; margin-bottom: 0.6rem; font-family: 'Cormorant Garamond', serif; font-size: 0.85rem; }
+    .matrix-table { width: 100%; border-collapse: collapse; font-size: 0.75rem; }
+    .matrix-table th, .matrix-table td { border: 1px solid rgba(255,255,255,0.2); padding: 0.5rem; text-align: center; }
+    .matrix-table th { background: var(--navy); color: var(--gold); font-size: 0.65rem; }
+    .matrix-table .tp { background: rgba(34,197,94,0.3); }
+    .matrix-table .fp { background: rgba(197,48,48,0.3); }
+    .matrix-table .fn { background: rgba(249,115,22,0.3); }
+    .matrix-table .tn { background: rgba(0,212,170,0.3); }
+
+    /* Worked Example */
+    .worked-example {
+      background: rgba(0,0,0,0.4); border: 2px solid var(--teal);
+      border-radius: 10px; padding: 1rem; max-width: 550px; width: 100%;
+    }
+    .worked-example h4 { color: var(--teal); font-size: 0.85rem; margin-bottom: 0.6rem; }
+    .worked-example .step { margin: 0.4rem 0; font-size: 0.8rem; }
+    .worked-example .step-num { color: var(--gold); font-weight: 700; }
+    .worked-example .calculation { font-family: 'Cormorant Garamond', serif; font-size: 0.95rem; color: var(--gold); margin: 0.25rem 0; }
+    .worked-example .result { background: rgba(34,197,94,0.2); padding: 0.4rem; border-radius: 6px; margin-top: 0.4rem; }
+
+    /* QUADAS-2 */
+    .quadas-container {
+      background: rgba(0,0,0,0.4); border: 2px solid var(--pink);
+      border-radius: 12px; padding: 1rem; max-width: 600px; width: 100%;
+    }
+    .quadas-container h4 { color: var(--pink); text-align: center; margin-bottom: 0.75rem; font-family: 'Cormorant Garamond', serif; font-size: 0.9rem; }
+    .quadas-domain {
+      display: flex; align-items: flex-start; gap: 0.6rem; margin: 0.5rem 0;
+      padding: 0.5rem; background: rgba(255,255,255,0.05); border-radius: 6px;
+    }
+    .quadas-icon { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; flex-shrink: 0; }
+    .quadas-icon.risk { background: var(--red); }
+    .quadas-icon.concern { background: var(--orange); }
+    .quadas-content h5 { font-size: 0.8rem; color: var(--cream); margin-bottom: 0.15rem; }
+    .quadas-content p { font-size: 0.7rem; color: rgba(255,255,255,0.7); }
+
+    .stats-grid { display: flex; gap: 0.6rem; margin: 0.75rem 0; flex-wrap: wrap; justify-content: center; }
+    .stat-box { background: var(--navy); padding: 0.6rem 0.8rem; text-align: center; min-width: 90px; border-radius: 8px; }
+    .stat-value { font-family: 'Cormorant Garamond', serif; font-size: clamp(1.1rem, 2.2vw, 1.4rem); font-weight: 700; }
+    .stat-label { font-size: 0.6rem; opacity: 0.8; margin-top: 0.15rem; }
+
+    .death-toll {
+      background: linear-gradient(135deg, rgba(197,48,48,0.3), rgba(0,0,0,0.5));
+      border: 2px solid var(--red); padding: 1.25rem; text-align: center;
+      max-width: 320px; border-radius: 10px;
+    }
+    .death-toll .number { font-family: 'Cormorant Garamond', serif; font-size: 2.5rem; font-weight: 700; color: var(--red); }
+    .death-toll .label { font-size: 0.8rem; color: rgba(255,255,255,0.8); margin-top: 0.35rem; }
+
+    .lesson-item { display: flex; align-items: flex-start; gap: 0.6rem; margin: 0.4rem 0; max-width: 650px; text-align: right; }
+    .lesson-number {
+      background: var(--gold); color: var(--navy);
+      width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
+      font-weight: 700; flex-shrink: 0; border-radius: 4px; font-size: 0.7rem;
+    }
+    .lesson-content h4 { font-size: 0.85rem; font-weight: 700; color: var(--cream); margin-bottom: 0.1rem; }
+    .lesson-content p { font-size: 0.75rem; color: rgba(255,255,255,0.7); }
+
+    .formula-box {
+      background: rgba(0,0,0,0.4); border: 1px solid var(--purple);
+      border-radius: 8px; padding: 0.6rem 1rem;
+      font-family: 'Cormorant Garamond', serif; font-size: 1rem;
+      text-align: center; max-width: 420px; margin: 0.6rem 0;
+    }
+    .formula-box .formula { color: var(--gold); margin: 0.3rem 0; }
+    .formula-box .label { font-size: 0.7rem; color: rgba(255,255,255,0.6); font-family: 'Source Sans Pro', sans-serif; }
+
+    .gold-line { width: 100px; height: 2px; background: var(--gold); margin: 0.75rem auto; }
+
+    .content { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 850px; }
+
+    .slide.active .animate { animation: fadeUp 0.5s ease-out forwards; }
+    .slide.active .animate.delay-1 { animation-delay: 0.1s; }
+    .slide.active .animate.delay-2 { animation-delay: 0.2s; }
+    .slide.active .animate.delay-3 { animation-delay: 0.3s; }
+    .slide.active .animate.delay-4 { animation-delay: 0.4s; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+    .animate { opacity: 0; }
+
+    .slide-nav {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      display: flex; justify-content: space-between; align-items: flex-end;
+      padding: 0.6rem 0.75rem 0.75rem 0.75rem; z-index: 100; pointer-events: none;
+    }
+    .nav-btn {
+      background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2);
+      color: white; font-size: 1rem; cursor: pointer; opacity: 0.6;
+      padding: 0.35rem 0.5rem; border-radius: 6px; pointer-events: auto; transition: all 0.2s;
+    }
+    .nav-btn:hover { opacity: 1; border-color: var(--gold); }
+    .nav-center { display: flex; flex-direction: column; align-items: center; gap: 0.15rem; pointer-events: auto; }
+    .slide-counter { color: rgba(255,255,255,0.6); font-size: 0.7rem; }
+    .progress { display: flex; gap: 2px; flex-wrap: wrap; justify-content: center; max-width: 160px; }
+    .progress-dot { width: 4px; height: 4px; border-radius: 50%; background: rgba(255,255,255,0.25); cursor: pointer; }
+    .progress-dot.active { background: var(--gold); transform: scale(1.2); }
+
+    .quiz-container { background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); padding: 1rem; max-width: 600px; width: 100%; border-radius: 8px; }
+    .quiz-question { font-family: 'Cormorant Garamond', serif; font-size: 1rem; margin-bottom: 0.6rem; color: var(--gold); line-height: 1.4; }
+    .quiz-options { display: flex; flex-direction: column; gap: 0.35rem; }
+    .quiz-option { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); padding: 0.5rem 0.75rem; cursor: pointer; border-radius: 6px; font-size: 0.8rem; text-align: right; min-height: 44px; }
+    .quiz-option:hover { background: rgba(212,175,55,0.1); border-color: var(--gold); }
+    .quiz-option.correct { background: rgba(34,197,94,0.2); border-color: var(--green); }
+    .quiz-option.incorrect { background: rgba(197,48,48,0.2); border-color: var(--red); }
+    .quiz-feedback { margin-top: 0.6rem; padding: 0.6rem; border-radius: 6px; display: none; font-size: 0.8rem; }
+    .quiz-feedback.show { display: block; }
+    .quiz-feedback.correct { background: rgba(34,197,94,0.2); border: 1px solid var(--green); }
+    .quiz-feedback.incorrect { background: rgba(197,48,48,0.2); border: 1px solid var(--red); }
+
+    .references { background: rgba(0,0,0,0.3); border: 1px solid rgba(212,175,55,0.3); border-radius: 8px; padding: 1rem; max-width: 600px; text-align: right; font-size: 0.65rem; line-height: 1.6; }
+    .references h4 { color: var(--gold); font-size: 0.8rem; margin-bottom: 0.6rem; }
+    .references ol { padding-right: 1rem; }
+    .references li { margin-bottom: 0.3rem; color: rgba(255,255,255,0.8); }
+
+    /* Patient Decision Aid */
+    .decision-aid {
+      background: linear-gradient(135deg, rgba(212,175,55,0.1), rgba(0,0,0,0.3));
+      border: 2px solid var(--gold); border-radius: 12px; padding: 1rem; max-width: 600px; width: 100%;
+    }
+    .decision-aid h4 { color: var(--gold); text-align: center; margin-bottom: 0.75rem; font-family: 'Cormorant Garamond', serif; font-size: 0.9rem; }
+    .decision-aid-row { display: flex; justify-content: space-between; margin: 0.5rem 0; padding: 0.5rem; background: rgba(0,0,0,0.2); border-radius: 6px; }
+    .decision-aid-label { font-size: 0.75rem; }
+    .decision-aid-value { font-size: 0.75rem; font-weight: 700; }
+    .decision-aid-value.benefit { color: var(--green); }
+    .decision-aid-value.harm { color: var(--red); }
+    .decision-aid-question { text-align: center; margin-top: 0.75rem; font-style: italic; color: var(--gold); font-size: 0.85rem; }
+
+    .text-center { text-align: center; }
+    .mobile-menu-toggle{display:none;position:fixed;top:12px;right: 12px;z-index:1001;background:#1E2761;border:1px solid #D4AF37;color:#D4AF37;width:40px;height:40px;border-radius:8px;font-size:1.2rem;cursor:pointer;align-items:center;justify-content:center;}
+    @media(max-width:768px){.mobile-menu-toggle{display:flex;}.sidebar{transform:translateX(100%);transition:transform 0.3s ease;position:fixed;z-index:1000;height:100vh;}.sidebar.open{transform:translateX(0);}.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:999;}.sidebar-overlay.show{display:block;}}
+    .skip-link{position:absolute;top:-40px;left:0;background:#D4AF37;color:#1E2761;padding:8px 16px;z-index:100;transition:top 0.3s;font-family:'Source Sans Pro',sans-serif;text-decoration:none;font-weight:600;}.skip-link:focus{top:0;}
+
+    /* Focus-visible styles for keyboard navigation */
+    :focus-visible {
+      outline: 2px solid var(--gold, #D4AF37);
+      outline-offset: 2px;
+    }
+
+    :focus:not(:focus-visible) {
+      outline: none;
+    }
+
+    button:focus-visible,
+    a:focus-visible,
+    [role="button"]:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible {
+      outline: 2px solid var(--gold, #D4AF37);
+      outline-offset: 2px;
+      box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.3);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+
+    /* ==================== STORY-BOX PATTERN ==================== */
+    .story-box {
+      background: linear-gradient(135deg, rgba(0,0,0,0.5), rgba(30,39,97,0.3));
+      border: 2px solid var(--gold);
+      border-radius: 14px;
+      padding: 1.25rem;
+      max-width: 680px;
+      width: 100%;
+    }
+    .story-opener {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1rem, 2vw, 1.3rem);
+      font-style: italic;
+      color: var(--gold);
+      text-align: center;
+      margin-bottom: 1rem;
+      line-height: 1.4;
+    }
+    .real-data-box {
+      background: rgba(0,0,0,0.4);
+      border-right: 4px solid var(--teal);
+      border-radius: 0 8px 8px 0;
+      padding: 0.75rem 1rem;
+      margin-bottom: 1rem;
+    }
+    .real-data-box h4 {
+      color: var(--teal);
+      font-size: 0.6rem;
+      letter-spacing: 0.15em;
+      font-weight: 700;
+      margin-bottom: 0.4rem;
+    }
+    .real-data-box p {
+      font-size: 0.8rem;
+      line-height: 1.5;
+      color: rgba(255,255,255,0.9);
+    }
+    .data-highlight {
+      color: var(--gold);
+      font-weight: 700;
+    }
+    .decision-tree-header {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--gold);
+      text-align: center;
+      margin-bottom: 0.5rem;
+    }
+    .decision-scenario {
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.8);
+      text-align: center;
+      margin-bottom: 0.75rem;
+      line-height: 1.4;
+    }
+    .decision-paths {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .decision-path {
+      flex: 1;
+      min-width: 200px;
+      max-width: 290px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 10px;
+      padding: 0.75rem;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.2s, border-color 0.2s;
+      border: 2px solid transparent;
+    }
+    .decision-path:hover, .decision-path:focus {
+      transform: translateY(-2px);
+    }
+    .decision-path.path-a {
+      border-color: var(--red);
+    }
+    .decision-path.path-a:hover, .decision-path.path-a:focus {
+      border-color: var(--red);
+      box-shadow: 0 0 12px rgba(197,48,48,0.3);
+    }
+    .decision-path.path-b {
+      border-color: var(--green);
+    }
+    .decision-path.path-b:hover, .decision-path.path-b:focus {
+      border-color: var(--green);
+      box-shadow: 0 0 12px rgba(34,197,94,0.3);
+    }
+    .path-label {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.4rem;
+    }
+    .path-a .path-label { color: var(--red); }
+    .path-b .path-label { color: var(--green); }
+    .path-choice {
+      font-size: 0.78rem;
+      color: rgba(255,255,255,0.9);
+      margin-bottom: 0.3rem;
+    }
+    .path-arrow {
+      font-size: 1.1rem;
+      color: var(--gold);
+      margin: 0.15rem 0;
+    }
+    .path-consequence {
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.7);
+      margin-bottom: 0.3rem;
+      line-height: 1.4;
+    }
+    .path-outcome {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.3rem 0.5rem;
+      border-radius: 4px;
+      display: inline-block;
+    }
+    .path-a .path-outcome { background: rgba(197,48,48,0.3); color: var(--red); }
+    .path-b .path-outcome { background: rgba(34,197,94,0.3); color: var(--green); }
+    .story-revelation {
+      margin-top: 1rem;
+      background: linear-gradient(135deg, rgba(212,175,55,0.15), rgba(0,0,0,0.2));
+      border: 1px solid rgba(212,175,55,0.4);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      text-align: center;
+    }
+    .revelation-label {
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      color: var(--gold);
+      margin-bottom: 0.3rem;
+    }
+    .revelation-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.9);
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+<a class="skip-link" href="#main-content">انتقل إلى المحتوى الرئيسي</a>
+<button aria-expanded="false" aria-label="Toggle navigation menu" class="mobile-menu-toggle" onclick="toggleSidebar()">☰</button>
+<div class="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show');"></div>
+<div class="course-container">
+<nav aria-label="الملاحة بالطبع" class="sidebar" role="navigation">
+<div class="sidebar-header">
+<a href="index-ar.html" onmouseout="this.style.color='rgba(212,175,55,0.7)'" onmouseover="this.style.color='#D4AF37'" style="display:block;font-size:0.7rem;color:rgba(212,175,55,0.7);text-decoration:none;margin-bottom:0.5rem;">← مكتبة الدورة</a>
+<h1>عندما يكذب الاختبار</h1>
+<p>دورة DTA النهائية (V4)</p>
+</div>
+<div class="module-list" id="moduleList"></div>
+<div class="sidebar-footer">
+        "كل إيجابي له ثمن.<br/>كل سلبي له تكلفة."
+      </div>
+</nav>
+<main class="main-content" id="main-content">
+<header class="content-header">
+<div class="breadcrumb">دي تي ايه &gt; <span id="currentModule">الاحتيال</span></div>
+<div class="header-actions">
+<button class="btn" onclick="goToModule(20)">مراجع</button>
+<button class="btn primary" onclick="nextSlide()">يكمل</button>
+</div>
+</header>
+<div class="content-body">
+<div class="slides-container">
+ ================================== الوحدة 1: الاحتيال (ثيرانوس) 
+<div class="module-slides active" data-module="1">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  ألم تسمع حكاية المرأة<br/>
+                  الذي وعد به <em>غير العالم بقطرة دم</em>,<br/>
+                  الذي جمع المليارات في اختبار ذلك <em>لم تعمل قط</em>?
+                </div>
+</div>
+</div>
+<div class="slide fraud">
+<div class="content text-center">
+<div class="title gold animate">بالو ألتو، 2003</div>
+<div class="story-card animate delay-1">
+<div class="place">جامعة ستانفورد</div>
+<div class="narrative">
+                    ترك شاب في التاسعة عشرة من عمره رؤيا: مئات اختبارات الدم من قطرة واحدة.
+                    <br/><br/>
+                    يعتقد المستثمرون. يعتقد والجرينز. يعتقد البنتاغون.
+                    <br/><br/>
+<strong>أعطوها 9 مليارات دولار.</strong>
+<br/><br/>
+                    لكن الاختبارات أعطت نتائج خاطئة. قيل للمرضى أنهم مصابون بفيروس نقص المناعة البشرية بينما لم يكونوا كذلك. قيل للمرضى أن دمائهم كانت طبيعية عندما كانوا كذلك <strong>الموت</strong>.
+                  </div>
+<div class="source">كاريرو جي. الدم الفاسد. 2018</div>
+</div>
+</div>
+</div>
+<div class="slide blood">
+<div class="content text-center">
+<div class="title red animate">شجرة القرار في الخداع</div>
+<div class="decision-tree animate delay-1">
+<h4>ما فعله ثيرانوس مقابل ما يجب أن يحدث</h4>
+<div class="tree-row">
+<div class="tree-node root">اختبار تشخيصي جديد</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">ينبغي أن تفعل</div>
+<div class="tree-node action">التحقق من صحة ضد معيار الذهب</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node action">نشر TP/FP/FN/TN</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node tp">موافقة ادارة الاغذية والعقاقير</div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">فعل ثيرانوس</div>
+<div class="tree-node warning">تخطي التحقق من الصحة</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node warning">إخفاء حالات الفشل</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node fp">ضرر المرضى</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  "وكذب الاختبار،<br/>
+                  ولبس الكذب يقينًا،<br/>
+                  ولم يطلب أحد طاولة 2 × 2."
+                </div>
+<div class="gold-line animate delay-2"></div>
+<p class="animate delay-3" style="color:rgba(255,255,255,0.6);font-style:italic;font-size:0.85rem;">
+                  هذا هو السبب في أننا ندرس دقة الاختبار التشخيصي.
+                </p>
+</div>
+</div>
+</div>
+ =================== الوحدة 2: النتائج الأربعة ==================== 
+<div class="module-slides" data-module="2">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  عندما يتكلم الاختبار<br/>
+                  هناك فقط <em>أربع حقائق محتملة</em>.
+                  <br/><br/>
+                  اثنتين بركات. اثنان لعنات.
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<p class="story-opener">ماذا يحدث عندما تثق المراجعة المنهجية في كل دراسة بالتساوي؟</p>
+<div class="real-data-box">
+<h4>البيانات الحقيقية</h4>
+<p>تثبت تحليلات الحساسية في المراجعات المنهجية لـ DTA باستمرار أن استبعاد دراسات المخاطر العالية للتحيز يغير التقديرات المجمعة. في فحص التصوير الشعاعي للثدي، تميل تصميمات الحالات والشواهد مع التفسير غير المعمى إلى تضخيم الحساسية. المبدأ العام موثق جيدًا: يمكن لتقييم جودة QUADAS-2 أن يغير الحساسية المجمعة <span class="data-highlight">10-15 نقطة مئوية</span> عندما تتم إزالة الدراسات المتحيزة.</p>
+</div>
+<div class="decision-tree">
+<div class="decision-tree-header">تدقيق التصوير الشعاعي للثدي QUADAS-2</div>
+<div class="decision-scenario">يجمع فريق المراجعة 15 دراسة DTA لتصوير الثدي بالأشعة السينية. خمسة لديهم مخاطر عالية للتحيز بسبب تصميم الحالات والشواهد والتفسير غير المعمى.</div>
+<div class="decision-paths">
+<div class="decision-path path-a" role="button" tabindex="0">
+<div class="path-label">المسار أ: تجميع كافة الدراسات</div>
+<div class="path-choice">تشمل جميع الدراسات الـ 15 بغض النظر عن الجودة</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">تضخم الجداول 2x2 المتحيزة أعداد TP، مما ينتج حساسية مجمعة تبلغ 87%</div>
+<div class="path-outcome">النتيجة: الثقة المفرطة في دقة الفحص</div>
+</div>
+<div class="decision-path path-b" role="button" tabindex="0">
+<div class="path-label">المسار ب: تطبيق تقييم الجودة</div>
+<div class="path-choice">استبعد دراسات التحيز عالية الخطورة باستخدام QUADAS-2</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">أسفرت الدراسات العشرة المتبقية منخفضة الروب عن حساسية تبلغ حوالي 75%</div>
+<div class="path-outcome">النتيجة: الأرقام الصادقة توجه القرارات الصادقة</div>
+</div>
+</div>
+</div>
+<div class="story-revelation">
+<div class="revelation-label">الرؤيا</div>
+<div class="revelation-text">النتائج الأربع (TP، FP، FN، TN) تكون جديرة بالثقة فقط إذا كانت الدراسة التي أنتجتها جديرة بالثقة. دراسة متحيزة تلوث الجدول 2x2 بأكمله.</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">شجرة النتائج</div>
+<div class="decision-tree animate delay-1">
+<h4>كل نتيجة اختبار لها حقيقة وراءها</h4>
+<div class="tree-row"><div class="tree-node root">تم اختبار المريض</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">ما هي الحقيقة؟</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">لديه مرض</div>
+<div class="tree-node positive">D+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row" style="gap:0.4rem;">
+<div class="tree-node tp">TP<small>اختبار +</small></div>
+<div class="tree-node fn">FN<small>امتحان -</small></div>
+</div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">لا يوجد مرض</div>
+<div class="tree-node negative">D-</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row" style="gap:0.4rem;">
+<div class="tree-node fp">FP<small>اختبار +</small></div>
+<div class="tree-node tn">TN<small>امتحان -</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">المائدة المقدسة 2×2</div>
+<div class="matrix-container animate delay-1">
+<h4>مثال على الاختبار السريع لفيروس نقص المناعة البشرية (بيانات حقيقية)</h4>
+<table class="matrix-table">
+<tr><th></th><th>HIV+</th><th>HIV-</th><th>المجموع</th></tr>
+<tr><th>اختبار +</th><td class="tp"><strong>98</strong></td><td class="fp"><strong>3</strong></td><td>101</td></tr>
+<tr><th>امتحان -</th><td class="fn"><strong>2</strong></td><td class="tn"><strong>895</strong></td><td>897</td></tr>
+<tr><th>المجموع</th><td>100</td><td>898</td><td>998</td></tr>
+</table>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">من هذا الجدول تأتي كل الحقيقة</div>
+<div class="simple-text">
+<strong>الحساسية</strong> = 98/100 = 98%<br/>
+<strong>الخصوصية</strong> = 895/898 = 99.7%
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  "نتيجتان تنقذان، ونتيجتان تضران.<br/>
+                  TP, TN: الاختبار تحدث صحيح.<br/>
+                  FP، FN: كذب الاختبار.<br/>
+                  اعرفهم بالاسم، فإنهم يحددون المصير".
+                </div>
+</div>
+</div>
+</div>
+ ==================== الوحدة 3: فترة نافذة فيروس نقص المناعة البشرية ==================== 
+<div class="module-slides" data-module="3">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  أما سمعتم بالدم الذي اختبر،<br/>
+                  وجد <em>ينظف</em>,<br/>
+                  وأعطيت للآلاف<br/>
+                  بينما <em>سبح الموت بداخلها</em>?
+                </div>
+</div>
+</div>
+<div class="slide blood">
+<div class="content text-center">
+<div class="title red animate">أزمة إمدادات الدم، 1985</div>
+<div class="story-card animate delay-1">
+<div class="place">الولايات المتحدة</div>
+<div class="narrative">
+                    وعندما بدأ اختبار فيروس نقص المناعة البشرية، احتفل الأطباء: فقد أصبح بإمكانهم الآن فحص إمدادات الدم.
+                    <br/><br/>
+                    لكن الاختبار كان له <strong>فترة النافذة</strong>- بعد أسابيع من الإصابة عندما كان الفيروس موجودًا ولكن <strong>غير قابل للكشف</strong>.
+                    <br/><br/>
+                    تم اختبار الدم. كان الدم "سلبيا". تم نقل الدم.
+                    <br/><br/>
+<strong>8000-12000 أمريكي</strong> أصيبوا بالعدوى من خلال عمليات نقل الدم قبل أن تغلق الاختبارات الأفضل النافذة.
+                  </div>
+<div class="source">مركز السيطرة على الأمراض. معدل وفيات الأمهات. 198;36(49):833-840</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">شجرة قرارات فترة النافذة</div>
+<div class="decision-tree animate delay-1">
+<h4>لماذا السلبيات الكاذبة مميتة</h4>
+<div class="tree-row"><div class="tree-node root">الشخص المصاب مؤخرًا</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">الوقت منذ الإصابة؟</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">&lt; 2 أسابيع</div>
+<div class="tree-node fn">اختبار سلبي<small>فيروس موجود!</small></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node fp" style="background:var(--blood-red);">تم التبرع بالدم<small>مصابون آخرون</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">&gt; 4 أسابيع</div>
+<div class="tree-node tp">اختبار إيجابي<small>تم اكتشافه بشكل صحيح</small></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node action">تم التخلص من الدم<small>إمدادات آمنة</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">تتغير الحساسية مع مرور الوقت</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box">
+<div class="stat-value" style="color:var(--red);">0%</div>
+<div class="stat-label">اليوم 1-7<br/>فترة الكسوف</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--orange);">~50%</div>
+<div class="stat-label">اليوم 14<br/>التحويل المصلي</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--gold);">~95%</div>
+<div class="stat-label">اليوم 21<br/>تم اكتشاف أكثر</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--green);">99.9%</div>
+<div class="stat-label">اليوم 45+<br/>نافذة مغلقة</div>
+</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">الدرس</div>
+<div class="simple-text">
+<strong>الحساسية ليست ثابتة.</strong> ذلك يعتمد على <em>when</em> قمت بالاختبار. قد يكون الاختبار "حساس بنسبة 99%" حساسًا بنسبة 0% في الإصابة المبكرة.
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  "وقال الاختبار "نظيف"<br/>
+                  لأن الفيروس لم يظهر وجهه بعد.<br/>
+                  والدماء كانت مشتركة<br/>
+                  وانتشرت العدوى إلى الأبرياء".
+                </div>
+</div>
+</div>
+</div>
+ ======================================= الوحدة 4: 
+<div class="module-slides" data-module="4">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  ألم تسمع عن حبوب منع الحمل التي تعطى للأمهات؟<br/>
+                  to <em>يحمون حملهم</em>,<br/>
+                  الذين زرعوا <em>السرطان في بناتهم</em><br/>
+                  قبل عشرين عاما من إزهاره؟
+                </div>
+</div>
+</div>
+<div class="slide des">
+<div class="content text-center">
+<div class="title pink animate">مأساة DES، 1938-1971</div>
+<div class="story-card pink animate delay-1">
+<div class="place">الولايات المتحدة وأوروبا</div>
+<div class="narrative">
+                    تم إعطاء ثنائي إيثيلستيلبيسترول (DES) لملايين النساء الحوامل لمنع الإجهاض.
+                    <br/><br/>
+                    لم يتم إجراء أي تجربة سريرية مناسبة على الإطلاق. الأطباء <strong>يفترض</strong> نجح الأمر لأنه بدا معقولاً.
+                    <br/><br/>
+                    بعد عقود، أصيبت بناتهما بسرطان نادر: <strong>سرطان غدي الخلايا الصافية في المهبل</strong>. كان السرطان نادرًا جدًا وكان بمثابة إشارة تشخيصية في حد ذاته.
+                    <br/><br/>
+<strong>5-10 مليون امرأة</strong> تعرضوا. الضرر عبر الأجيال.
+                  </div>
+<div class="source">هيربست آل وآخرون. ن إنجل ي ميد. 1971;284:878-881</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">شجرة قرار التحقق من الصحة</div>
+<div class="decision-tree animate delay-1">
+<h4>ما الذي كان يجب أن يحدث</h4>
+<div class="tree-row"><div class="tree-node root">تدخل طبي جديد</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">هل تم اختباره بشكل صحيح؟</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">YES</div>
+<div class="tree-node action">تجربة عشوائية</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node action">متابعة طويلة الأمد</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node tp">معرفة التأثيرات الحقيقية<small>الفوائد والأضرار</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">NO (DES)</div>
+<div class="tree-node warning">الافتراض فقط</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node warning">الاستخدام واسع النطاق</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node fp">ضرر خفي<small>اكتشف بعد فوات الأوان</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">الإشارة التشخيصية</div>
+<div class="simple-box animate delay-1">
+<div class="simple-title">عندما تصبح الندرة دليلاً</div>
+<div class="simple-text">
+                    كان سرطان الخلايا الغدية الشفاف في المهبل نادرًا جدًا عند النساء الشابات
+                    <strong>7 حالات في مستشفى واحد</strong> أثار التحقيق.
+                    <br/><br/>
+                    كانت المجموعة نفسها هي الاختبار التشخيصي:
+                    <br/><strong>الحساسية للتعرض لـ DES: ما يقرب من 100%</strong>
+<br/>إذا كنت مصابًا بهذا السرطان في هذا العمر، فمن المؤكد تقريبًا أنك تعرضت له.
+                  </div>
+</div>
+<div class="stats-grid animate delay-2">
+<div class="stat-box" style="background:var(--pink);">
+<div class="stat-value" style="color:white;">1:1000</div>
+<div class="stat-label">خطر الخلية الواضحة<br/>السرطان في بنات DES</div>
+</div>
+<div class="stat-box" style="background:var(--red);">
+<div class="stat-value" style="color:white;">5-10M</div>
+<div class="stat-label">النساء مكشوفات<br/>في جميع أنحاء العالم</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  "وأخذت الأمهات الحبة على أمل،<br/>
+                  ونبتت البنات في الظل،<br/>
+                  وبعد عشرين عاما تفشى السرطان..<br/>
+                  التشخيص الذي اتهم جيلا من الطب."
+                </div>
+</div>
+</div>
+</div>
+ ==================== الوحدة 5: الحساسية والنوعية ========================================== 
+<div class="module-slides" data-module="5">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  الاختبار له فضيلتان ورذيلتان.
+                  <br/><br/>
+<em>الحساسية</em>: هل يمكن العثور على المرضى؟
+                  <br/><br/>
+<em>الخصوصية</em>: هل يمكن الاستغناء عن الأصحاء؟
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<p class="story-opener">هل يمكنك الوثوق برقم الحساسية الصادر من المختبر عند استخدام الاختبار في العالم الحقيقي؟</p>
+<div class="real-data-box">
+<h4>البيانات الحقيقية</h4>
+<p>أبلغ اختبار المستضد السريع BinaxNOW لـ COVID-19 عن حساسية حوالي <span class="data-highlight">84-97%</span> في الأفراد الذين يعانون من الأعراض في دراسات الشركة المصنعة. ومع ذلك، وجدت التقييمات الواقعية أن الحساسية منخفضة تصل إلى <span class="data-highlight">35-64%</span> في الأفراد الذين لا تظهر عليهم الأعراض، اعتمادًا على الحمل الفيروسي والتوقيت. أكدت مراجعة كوكرين لاختبارات المستضدات السريعة (Dinnes 2022) متوسط حساسية <span class="data-highlight">73%</span> في الأعراض وفقط <span class="data-highlight">55%</span> في المجموعات السكانية بدون أعراض عبر أكثر من 100 تقييم للدراسة.</p>
+</div>
+<div class="decision-tree">
+<div class="decision-tree-header">مفارقة اختبار كوفيد السريع: 2020-2021</div>
+<div class="decision-scenario">تخطط إحدى الجامعات لفحص الطلاب الذين لا تظهر عليهم أعراض أسبوعيًا قبل السماح بالوصول إلى الحرم الجامعي. لقد قرأوا ادعاء الشركة المصنعة بالحساسية العالية.</div>
+<div class="decision-paths">
+<div class="decision-path path-a" role="button" tabindex="0">
+<div class="path-label">المسار أ: حساسية مختبر الثقة</div>
+<div class="path-choice">اعتمد على رقم الحساسية العالية للشركة المصنعة</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">حاملو الفيروس الذين لا تظهر عليهم أعراض والذين لديهم أحمال فيروسية منخفضة يكون اختبارهم سلبيًا ويحضرون الفصول الدراسية وينشرون الفيروس</div>
+<div class="path-outcome">النتيجة: إحساس زائف بالأمان؛ تفشي المرض في الحرم الجامعي</div>
+</div>
+<div class="decision-path path-b" role="button" tabindex="0">
+<div class="path-label">المسار ب: الطلب على بيانات العالم الحقيقي</div>
+<div class="path-choice">البحث عن دراسات في السكان المستهدفين الفعليين (الطلاب بدون أعراض)</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">تصل حساسية الاكتشاف إلى 55% تقريبًا لدى الأشخاص الذين لا تظهر عليهم أعراض؛ إضافة اختبار تسلسلي وضمانات أخرى</div>
+<div class="path-outcome">النتيجة: السلامة الطبقية تكتشف المزيد من الحالات</div>
+</div>
+</div>
+</div>
+<div class="story-revelation">
+<div class="revelation-label">الرؤيا</div>
+<div class="revelation-text">الحساسية ليست خاصية ثابتة للاختبار. يتغير مع عدد السكان، ومرحلة المرض، والإعداد. اسأل دائمًا: الحساسية في <em>whom</em>?</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">الحساسية: الصياد</div>
+<div class="formula-box animate delay-1">
+<div class="label">الصيغة</div>
+<div class="formula">الحساسية = TP / (TP + FN)</div>
+<div class="label">"من بين جميع المرضى، كم عدد الذين قبضنا عليهم؟"</div>
+</div>
+<div class="worked-example animate delay-2">
+<h4>مثال عملي: اختبار COVID PCR</h4>
+<div class="step"><span class="step-num">منح:</span> تم اختبار 200 مريض مصاب</div>
+<div class="step">TP = 196 (إيجابي بشكل صحيح)، FN = 4 (ضائع)</div>
+<div class="calculation">الحساسية = 196 / (196 + 4) = 196/200 = <strong>98%</strong></div>
+<div class="result">التفسير: الاختبار يلتقط 98 من كل 100 مصاب</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">الخصوصية: الجارديان</div>
+<div class="formula-box animate delay-1">
+<div class="label">الصيغة</div>
+<div class="formula">الخصوصية = TN / (TN + FP)</div>
+<div class="label">"من بين جميع الأصحاء، كم عدد الأشخاص الذين أنقذناهم؟"</div>
+</div>
+<div class="worked-example animate delay-2">
+<h4>مثال عملي: نفس اختبار COVID PCR</h4>
+<div class="step"><span class="step-num">منح:</span> تم اختبار 1000 شخص غير مصاب</div>
+<div class="step">TN = 999 (سلبي بشكل صحيح)، FP = 1 (إنذار كاذب)</div>
+<div class="calculation">النوعية = 999 / (999 + 1) = 999/1000 = <strong>99.9%</strong></div>
+<div class="result">التفسير: الاختبار بشكل صحيح يزيل 999 من كل 1000 شخص سليم</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">قواعد الذاكرة</div>
+<div class="decision-tree animate delay-1">
+<h4>متى يتم استخدام أي اختبار</h4>
+<div class="tree-row"><div class="tree-node question">ماذا تحتاج؟</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">استبعد المرض</div>
+<div class="tree-node action">استخدم حساسية عالية</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node tp" style="font-size:0.6rem;">سنوت<small>سلبي حساس = OUT</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">القاعدة في المرض</div>
+<div class="tree-node action">استخدم خصوصية عالية</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node tp" style="font-size:0.6rem;">سبين<small>إيجابية محددة = في</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  "الحساسية تصيب المرضى.<br/>
+                  التخصيص ينقذ البئر.<br/>
+                  ولكن لا يوجد اختبار يتقن كلاهما بشكل مثالي —<br/>
+                  هذا هو العبء الذي نتحمله".
+                </div>
+</div>
+</div>
+</div>
+ ==================== الوحدة 6: مغالطة المعدل الأساسي ================ 
+<div class="module-slides" data-module="6">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  ألم تشاهد الطبيب<br/>
+                  الذي رأى <em>دقة 99%</em><br/>
+                  واعتقد أن النتيجة الإيجابية تعني <em>يقين 99%</em>?
+                  <br/><br/>
+<em>هذا هو الخطأ الأكثر دموية في الطب.</em>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">مغالطة المعدل الأساسي</div>
+<div class="story-card animate delay-1">
+<div class="place">اللغز</div>
+<div class="narrative">
+                    يصيب المرض شخصًا واحدًا من كل 1000 شخص.<br/>
+                    الاختبار حساس بنسبة 99% ومحدد بنسبة 99%.<br/>
+                    نتيجة اختبار المريض إيجابية.
+                    <br/><br/>
+<strong>ما هو احتمال إصابتهم بالمرض؟</strong>
+<br/><br/>
+                    يقول معظم الأطباء حوالي 99%. <em>الجواب الحقيقي هو حوالي 9٪.</em>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">كشفت الرياضيات</div>
+<div class="worked-example animate delay-1">
+<h4>اختبار 100000 شخص (الانتشار 1/1000)</h4>
+<div class="step"><span class="step-num">الخطوة 1:</span> 100 مصابون بالمرض، 99900 سليم</div>
+<div class="step"><span class="step-num">الخطوة 2:</span> من 100 مريض: 99 اختبار إيجابي (TP)، 1 سلبي (FN)</div>
+<div class="step"><span class="step-num">الخطوة 3:</span> من 99900 سليم: 999 اختبار إيجابي (FP)، 98,901 سلبي (TN)</div>
+<div class="step"><span class="step-num">الخطوة 4:</span> إجمالي الإيجابيات = 99 + 999 = <strong>1,098</strong></div>
+<div class="calculation">PPV = TP / جميع الإيجابيات = 99 / 1,098 = <strong>9%</strong></div>
+<div class="result">91% من النتائج الإيجابية هي نتائج إيجابية كاذبة!</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">حاسبة المعدل الأساسي التفاعلية</div>
+<div class="calculator animate delay-1">
+<h4>انظر كيف يغير الانتشار PPV</h4>
+<div class="calc-row">
+<div class="calc-label">الانتشار:</div>
+<input class="calc-slider" id="prevSlider" max="50" min="0.1" oninput="updateCalc()" step="0.1" type="range" value="1"/>
+<div class="calc-value" id="prevValue">1%</div>
+</div>
+<div class="calc-row">
+<div class="calc-label">الحساسية:</div>
+<input class="calc-slider" id="sensSlider" max="100" min="50" oninput="updateCalc()" step="1" type="range" value="99"/>
+<div class="calc-value" id="sensValue">99%</div>
+</div>
+<div class="calc-row">
+<div class="calc-label">الخصوصية:</div>
+<input class="calc-slider" id="specSlider" max="100" min="50" oninput="updateCalc()" step="1" type="range" value="99"/>
+<div class="calc-value" id="specValue">99%</div>
+</div>
+<div class="calc-result">
+<div class="big" id="ppvResult">9%</div>
+<div class="label">القيمة التنبؤية الإيجابية (PPV)</div>
+<div id="fpRate" style="font-size:0.7rem;color:rgba(255,255,255,0.6);margin-top:0.3rem;">91% من النتائج الإيجابية هي إنذارات كاذبة</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">شجرة القرار للانتشار</div>
+<div class="decision-tree animate delay-1">
+<h4>نفس الاختبار، إعدادات مختلفة</h4>
+<div class="tree-row"><div class="tree-node root">الاختبار: 99% Sens، 99% Spec</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">أين يتم الاختبار؟</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">جنرال بوب<br/>0.1%</div>
+<div class="tree-node warning">PPV = 9%<small>91% خطأ +</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">عالي المخاطر<br/>10%</div>
+<div class="tree-node action">PPV = 92%<small>8% خطأ +</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">تأكيدي<br/>50%</div>
+<div class="tree-node tp">PPV = 99%<small>1% كاذبة +</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  "وقال الطبيب دقيق بنسبة 99%"<br/>
+                  وسمع المريض "مؤكد بنسبة 99%"،<br/>
+                  وكلاهما خدع -<br/>
+                  لأنهم نسوا أن يسألوا: ما مدى ندرة هذا المرض؟
+                </div>
+</div>
+</div>
+</div>
+ ==================== الوحدة 7: السل جينكسبرت ================== 
+<div class="module-slides" data-module="7">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  هل لم تسمع عن الآلة<br/>
+                  يمكنها العثور على مرض السل خلال ساعتين،<br/>
+                  كان ذلك يسمى <em>سلالات</em>—<br/>
+                  ولكن غاب عن <em>مقاومة للأدوية</em> ؟
+                </div>
+</div>
+</div>
+<div class="slide tb">
+<div class="content text-center">
+<div class="title gold animate">قصة GeneXpert، جنوب أفريقيا</div>
+<div class="story-card animate delay-1">
+<div class="place">كيب تاون، 2010</div>
+<div class="narrative">
+                    وعلى مدى قرن من الزمان، تطلب تشخيص مرض السل زراعة البكتيريا لأسابيع. ثم جاء GeneXpert: النتائج <strong>ساعتان</strong>.
+                    <br/><br/>
+                    ونشرتها جنوب أفريقيا على الصعيد الوطني. وقد أيدته منظمة الصحة العالمية.
+                    <br/><br/>
+                    ولكن في المرضى الذين يعانون من <strong>الأحمال البكتيرية منخفضة</strong>- غالبًا ما تكون الإصابة بفيروس نقص المناعة البشرية - انخفضت الحساسية إلى <strong>67%</strong>. غابت واحدة من كل ثلاث حالات.
+                    <br/><br/>
+                    أما بالنسبة للكشف عن مقاومة الريفامبيسين، فقد فشل <strong>5%</strong> من الحالات المقاومة هؤلاء المرضى تلقوا العلاج الخاطئ. انتشار مرض السل المقاوم.
+                  </div>
+<div class="source">ستينجارت KR وآخرون. Cochrane Database Syst Rev. 2014;1:CD009593</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">شجرة قرارات تشخيص مرض السل</div>
+<div class="decision-tree animate delay-1">
+<h4>عندما لا يكون GeneXpert كافيًا</h4>
+<div class="tree-row"><div class="tree-node root">مريض السل المشتبه به</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node action">اختبار جين اكسبرت</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node tp">إيجابي</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node question">ريفامبيسين؟</div>
+<div class="tree-branch" style="gap:0.3rem;">
+<div class="tree-branch-item">
+<div class="tree-node tp" style="font-size:0.55rem;">حساس<small>قياسي Tx</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node fp" style="font-size:0.55rem;">مقاوم<small>MDR-TB Tx</small></div>
+</div>
+</div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node warning">سلبي</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node question">فيروس نقص المناعة البشرية + أو اشتباه كبير؟</div>
+<div class="tree-branch" style="gap:0.3rem;">
+<div class="tree-branch-item">
+<div class="tree-node action" style="font-size:0.55rem;">Yes<small>الثقافة مطلوبة</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node tn" style="font-size:0.55rem;">No<small>من المحتمل أن تكون سلبية</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">الحساسية حسب نوع المريض</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box" style="background:var(--green);">
+<div class="stat-value" style="color:white;">98%</div>
+<div class="stat-label">مسحة إيجابية<br/>(حمولة بكتيرية عالية)</div>
+</div>
+<div class="stat-box" style="background:var(--orange);">
+<div class="stat-value" style="color:white;">67%</div>
+<div class="stat-label">مسحة سلبية<br/>(حمولة بكتيرية منخفضة)</div>
+</div>
+<div class="stat-box" style="background:var(--red);">
+<div class="stat-value" style="color:white;">61%</div>
+<div class="stat-label">الإصابة بفيروس نقص المناعة البشرية<br/>(تثبيط المناعة)</div>
+</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">الدرس</div>
+<div class="simple-text">
+                    قد لا تتطابق حساسية الاختبار في التجارب السريرية مع حساسيته لدى مرضاك.
+                    <strong>تعرف على عدد سكانك.</strong>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  "وقالت الآلة" سلبي "،<br/>
+                  وصدق الطبيب الآلة،<br/>
+                  وعاد المريض إلى منزله مصابًا بالسل في رئتيه،<br/>
+                  مقاومة السعال في العالم."
+                </div>
+</div>
+</div>
+</div>
+ ================================== الوحدة 8: الجدل حول دعم البرامج والإدارة 
+<div class="module-slides" data-module="8">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  هل سمعت عن الاختبار للرجال<br/>
+                  التي وجدت السرطانات التي من شأنها <em>لا تقتل أبدًا</em>,<br/>
+                  وأدى إلى العلاجات التي <em>تدمر حياة الناس</em>?
+                </div>
+</div>
+</div>
+<div class="slide blood">
+<div class="content text-center">
+<div class="title red animate">مأساة فحص PSA</div>
+<div class="story-card animate delay-1">
+<div class="place">الولايات المتحدة، 1990-2010</div>
+<div class="narrative">
+                    يمكن لـ PSA (مستضد البروستاتا النوعي) اكتشاف سرطان البروستاتا مبكرًا.
+                    <br/><br/>
+                    قام الأطباء بفحص ملايين الرجال. تم العثور على السرطان. تمت إزالة البروستاتا.
+                    <br/><br/>
+                    لكن العديد من هذه "السرطانات" لم تكن لتتسبب في ظهور أعراض على الإطلاق. تسببت الجراحة <strong>العجز الجنسي وسلس البول</strong> في الرجال الذين
+                    <strong>كان سيموت بسبب الشيخوخة، وليس السرطان</strong>.
+                  </div>
+<div class="source">موير فا. آن المتدرب ميد. 2012;157:120-134</div>
+</div>
+<div class="story-box animate delay-2" style="margin-top:1rem;">
+<div class="decision-tree">
+<div class="decision-tree-header">معضلة فحص PSA: 2012</div>
+<div class="decision-scenario">رجل يبلغ من العمر 60 عامًا يسأل طبيبه عن فحص PSA. يتمتع PSA عند الحد 4.0 نانوجرام/مل بحساسية تبلغ حوالي 21% للسرطان عالي الدرجة ولكنه يكتشف العديد من أنواع السرطان البطيئة.</div>
+<div class="decision-paths">
+<div class="decision-path path-a" role="button" tabindex="0">
+<div class="path-label">المسار أ: فحص جميع الرجال</div>
+<div class="path-choice">الفحص الروتيني لـ PSA لجميع الرجال الذين تزيد أعمارهم عن 50 عامًا</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">لكل 1000 شخص تم فحصهم على مدار 13 عامًا: تم منع حالة وفاة واحدة أو حالتين، ولكن أكثر من 100 إنذار كاذب و30-40 رجلًا تركوا عاجزين أو مصابين بسلس البول بسبب علاج السرطان الخامل</div>
+<div class="path-outcome">النتيجة: صافي الضرر يتجاوز الفائدة على مستوى السكان</div>
+</div>
+<div class="decision-path path-b" role="button" tabindex="0">
+<div class="path-label">المسار ب: اتخاذ القرار المشترك</div>
+<div class="path-choice">ناقش الأضرار مقابل الفوائد؛ التفرد مع عوامل الخطر، ومتوسط العمر المتوقع، وقيم المريض</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">يمكن للرجال المعرضين للخطر الشديد اختيار الفحص؛ يمكن للرجال ذوي المخاطر المنخفضة أن يتراجعوا؛ المراقبة النشطة تحل محل الجراحة الفورية للحصول على نتائج منخفضة الدرجة</div>
+<div class="path-outcome">النتيجة: علاجات أقل غير ضرورية؛ الحفاظ على استقلالية المريض</div>
+</div>
+</div>
+</div>
+<div class="story-revelation">
+<div class="revelation-label">الرؤيا</div>
+<div class="revelation-text">يمكن أن يسبب الاختبار الذي يتمتع بمعدلات اكتشاف عالية ضررًا أكثر من نفعه عندما يجد حالات لا تحتاج إلى اكتشافها. الإفراط في التشخيص هو التكلفة الخفية للحساسية العالية في المرض الخامل.</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">أرقام الضرر</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box" style="background:var(--green);">
+<div class="stat-value" style="color:white;">1</div>
+<div class="stat-label">الحياة أنقذت من<br/>سرطان البروستاتا<br/>لكل 1000 فحص</div>
+</div>
+<div class="stat-box" style="background:var(--red);">
+<div class="stat-value" style="color:white;">30-40</div>
+<div class="stat-label">جعل الرجال عاجزين<br/>أو منفلت<br/>لكل 1000 فحص</div>
+</div>
+<div class="stat-box" style="background:var(--orange);">
+<div class="stat-value" style="color:white;">100+</div>
+<div class="stat-label">إيجابيات كاذبة<br/>(الخزعات والقلق)<br/>لكل 1000 فحص</div>
+</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">الانعكاس</div>
+<div class="simple-text">
+                    وفي عام 2012، أوصت فرقة العمل المعنية بالخدمات الوقائية بالولايات المتحدة <strong>ضد</strong>
+                    فحص PSA الروتيني. كان الاختبار هو العثور على الكثير مما لا يحتاج إلى العثور عليه.
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">مساعدة المريض على اتخاذ القرار: فحص PSA</div>
+<div class="decision-aid animate delay-1">
+<h4>إذا تم فحص 1000 رجل تتراوح أعمارهم بين 55 و69 عامًا لمدة 13 عامًا</h4>
+<div class="decision-aid-row">
+<div class="decision-aid-label">تم منع الوفيات الناجمة عن سرطان البروستاتا</div>
+<div class="decision-aid-value benefit">1-2 رجال</div>
+</div>
+<div class="decision-aid-row">
+<div class="decision-aid-label">الرجال الذين سيكون لديهم نتائج إيجابية كاذبة يحتاجون إلى خزعة</div>
+<div class="decision-aid-value harm">100-120 رجل</div>
+</div>
+<div class="decision-aid-row">
+<div class="decision-aid-label">الرجال الذين تم تشخيص إصابتهم بالسرطان لن يؤذيهم أبدًا</div>
+<div class="decision-aid-value harm">20-50 رجل</div>
+</div>
+<div class="decision-aid-row">
+<div class="decision-aid-label">ترك الرجال عاجزين أو سلس البول من العلاج</div>
+<div class="decision-aid-value harm">30-40 رجل</div>
+</div>
+<div class="decision-aid-question">هل هذه المقايضة مقبولة بالنسبة لك؟</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  "ووجد الاختبار الظل،<br/>
+                  و قطع الجراح<br/>
+                  وعاش الرجل — عاجزًا، وسلسًا —<br/>
+                  من السرطان الذي لم يكن ليستيقظ أبداً."
+                </div>
+</div>
+</div>
+</div>
+ ==================== الوحدة 9: التروبونين والنوبات القلبية ===================== 
+<div class="module-slides" data-module="9">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  ألم تسمع عن الرجل الذي يعاني من ألم في الصدر<br/>
+                  الذي كان أول تروبونين <em>عادي</em>,<br/>
+                  الذي تم إرساله إلى المنزل -<br/>
+                  ومات قبل الصباح؟
+                </div>
+</div>
+</div>
+<div class="slide blood">
+<div class="content text-center">
+<div class="title red animate">مشكلة توقيت التروبونين</div>
+<div class="story-card animate delay-1">
+<div class="place">أقسام الطوارئ في جميع أنحاء العالم</div>
+<div class="narrative">
+                    التروبونين هو المعيار الذهبي لتشخيص النوبات القلبية. ولكن الأمر يتطلب <strong>3-6 ساعات</strong> للارتفاع بعد إصابة عضلة القلب.
+                    <br/><br/>
+                    يصل المريض بعد ساعة من بدء ألم الصدر. يتم اختبار التروبونين: <strong>عادي</strong>. "أنت بخير. اذهب إلى المنزل."
+                    <br/><br/>
+                    كان القلب يموت. البروتين لم يتسرب بعد
+                    <br/><br/>
+                    تظهر الدراسات <strong>2-5%</strong> من مرضى احتشاء عضلة القلب الذين يتم إرسالهم إلى المنزل من قسم الطوارئ يموتون في غضون 30 يومًا.
+                  </div>
+<div class="source">البابا ج.ه. وآخرون. ن إنجل ي ميد. 2000;342:1163-1170</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">شجرة قرار الاختبار التسلسلي</div>
+<div class="decision-tree animate delay-1">
+<h4>بروتوكول ثنائي التروبونين</h4>
+<div class="tree-row"><div class="tree-node root">مريض آلام الصدر</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node action">التروبونين الأول</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node tp">مرتفع</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node action">تعامل على أنها MI</div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node warning">عادي</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node question">متى بدأ الألم؟</div>
+<div class="tree-branch" style="gap:0.3rem;">
+<div class="tree-branch-item">
+<div class="tree-label">&lt;6 ساعات</div>
+<div class="tree-node action" style="font-size:0.55rem;">انتظر 3 ساعات<small>كرر التروبونين</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">&gt;6 hrs</div>
+<div class="tree-node tn" style="font-size:0.55rem;">مخاطر منخفضة<small>فكر في d/c</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">تروبونين عالي الحساسية</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box">
+<div class="stat-value" style="color:var(--orange);">~70%</div>
+<div class="stat-label">التروبونين التقليدي<br/>حساسية عند 0 ساعة</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--green);">~95%</div>
+<div class="stat-label">hs-Troponin<br/>حساسية عند 0 ساعة</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--gold);">99%</div>
+<div class="stat-label">hs-Troponin<br/>في 3 ساعات مسلسل</div>
+</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">المقايضة</div>
+<div class="simple-text">
+                    يلتقط التروبونين عالي الحساسية المزيد من النوبات القلبية مبكرًا. ولكن لديها أيضًا نتائج إيجابية كاذبة أكثر، حيث ترتفع في أمراض الكلى، وفشل القلب، والإنتان، والعدائين في الماراثون.
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  "والإختبار قال عادي"<br/>
+                  لأن القلب قد بدأ للتو في الموت.<br/>
+                  واطمأن المريض<br/>
+                  وذهب إلى المنزل لينتهي من الموت."
+                </div>
+</div>
+</div>
+</div>
+ ==================== الوحدة 10: نسب الاحتمال ================ 
+<div class="module-slides" data-module="10">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  الحساسية تصف الاختبار.<br/>
+                  تصف الخصوصية الاختبار.<br/>
+<br/>
+                  لكن المريض يسأل:<br/>
+<em>"لقد كانت نتيجة اختباري إيجابية. ما هي فرصي؟"</em>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<p class="story-opener">ماذا لو كانت حساسية الاختبار المنشورة أعلى من الحقيقة، وبالتالي فإن نسب الاحتمالية التي تحسبها خاطئة؟</p>
+<div class="real-data-box">
+<h4>البيانات الحقيقية</h4>
+<p>أظهرت اختبارات البكتيريا العقدية السريعة (RADT) حساسية مجمعة تبلغ تقريبًا <span class="data-highlight">86%</span> في الدراسات المنشورة المدرجة في مراجعات كوكرين. ومع ذلك، كشفت التقديمات التنظيمية لـ FDA 510 (k)، والتي تتضمن بيانات الشركة المصنعة غير المنشورة، عن تقديرات حساسية تبلغ فقط <span class="data-highlight">70-75%</span>. كان من المرجح أن يتم تقديم الدراسات المنشورة ذات الحساسية العالية للنشر، وهي حالة كلاسيكية من تحيز النشر الذي يؤدي إلى تضخيم الدقة الظاهرة.</p>
+</div>
+<div class="decision-tree">
+<div class="decision-tree-header">فجوة منشورات اختبار البكتيريا العقدية السريعة</div>
+<div class="decision-scenario">يقوم الطبيب بحساب LR+ من البيانات المنشورة (الحساسية 86%، النوعية 95%) ليقرر ما إذا كان سيتم علاج التهاب الحلق لدى الطفل أم لا. لكن الحساسية الحقيقية قد تكون 70% فقط.</div>
+<div class="decision-paths">
+<div class="decision-path path-a" role="button" tabindex="0">
+<div class="path-label">المسار أ: التحليل التلوي المنشور من قبل الثقة</div>
+<div class="path-choice">استخدم LR+ من البيانات المنشورة (86/5 = 17.2)</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">المبالغة في تقدير LR+ تؤدي إلى الثقة المفرطة بنتيجة سلبية؛ يتم إرسال الأطفال المصابين بالبكتيريا العقدية إلى المنزل دون استخدام المضادات الحيوية</div>
+<div class="path-outcome">النتيجة: البكتيريا العقدية المفقودة تؤدي إلى خطر الحمى الروماتيزمية</div>
+</div>
+<div class="decision-path path-b" role="button" tabindex="0">
+<div class="path-label">المسار ب: البحث عن البيانات التنظيمية</div>
+<div class="path-choice">استخدم LR+ من تقارير إدارة الغذاء والدواء (70/5 = 14)، ولاحظ أن LR- أسوأ (0.32 مقابل 0.15)</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">التعرف على RADT السلبي لا يمكن أن يستبعد البكتيريا العقدية بثقة؛ قم بعمل نسخة احتياطية من ثقافة الحلق عندما تكون الشكوك السريرية مرتفعة</div>
+<div class="path-outcome">النتيجة: الحذر المناسب يحمي الأطفال</div>
+</div>
+</div>
+</div>
+<div class="story-revelation">
+<div class="revelation-label">الرؤيا</div>
+<div class="revelation-text">إن نسب الاحتمالية لا تكون صادقة إلا بقدر درجة الحساسية والنوعية التي تنتجها. يؤدي تحيز النشر إلى تضخيم الدقة، مما يجعل LR+ متفائلاً للغاية وLR- مطمئنًا للغاية. اسأل دائمًا: هل الدراسات غير المنشورة مفقودة؟</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">نسب الاحتمالية</div>
+<div class="formula-box animate delay-1">
+<div class="label">نسبة الاحتمالية الإيجابية</div>
+<div class="formula">LR+ = الحساسية / (1 - النوعية)</div>
+<div class="label">ما مدى احتمالية أن تكون النتيجة + مريضة مقابل صحية؟</div>
+</div>
+<div class="formula-box animate delay-2">
+<div class="label">نسبة الاحتمالية السلبية</div>
+<div class="formula">LR- = (1 - الحساسية) / الخصوصية</div>
+<div class="label">ما مدى احتمالية حدوث نتيجة مريضة مقابل صحية؟</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">مخطط فاجان</div>
+<div class="fagan-container animate delay-1">
+<h4>من ما قبل الاختبار إلى احتمال ما بعد الاختبار</h4>
+<div class="fagan-visual">
+<div class="fagan-scale">
+<div class="fagan-scale-title">اختبار مسبق<br/>الاحتمالية</div>
+<div>99%</div><div>50%</div><div>20%</div><div>5%</div><div>1%</div>
+</div>
+<div class="fagan-line"><div class="fagan-marker" style="top:70%;"></div></div>
+<div class="fagan-scale">
+<div class="fagan-scale-title">الاحتمالية<br/>النسبة</div>
+<div>100</div><div>10</div><div>1</div><div>0.1</div><div>0.01</div>
+</div>
+<div class="fagan-line"><div class="fagan-marker" style="top:30%;"></div></div>
+<div class="fagan-scale">
+<div class="fagan-scale-title">بعد الاختبار<br/>الاحتمالية</div>
+<div>99%</div><div>80%</div><div>50%</div><div>20%</div><div>1%</div>
+</div>
+</div>
+<div class="fagan-result">
+                    ارسم خطًا من الاختبار القبلي إلى LR لإيجاد احتمالية ما بعد الاختبار
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">تفسير نسب الاحتمال</div>
+<div class="decision-tree animate delay-1">
+<h4>ما مدى قوة هذا الاختبار؟</h4>
+<div class="tree-row"><div class="tree-node question">قيمة LR+؟</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node tp">LR+ &gt; 10<small>قاعدة قوية</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node action">5-10<small>معتدل</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node warning">2-5<small>Weak</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node fn">1-2<small>عديمة الفائدة</small></div>
+</div>
+</div>
+<div style="margin-top:0.75rem;"></div>
+<div class="tree-row"><div class="tree-node question">LR- القيمة؟</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node tp">&lt; 0.1<small>استبعاد قوي</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node action">0.1-0.2<small>معتدل</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node warning">0.2-0.5<small>Weak</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node fn">0.5-1<small>عديمة الفائدة</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  "الحساسية تحكي عن المرضى.<br/>
+                  الخصوصية تحكي عن البئر.<br/>
+                  لكن نسبة الاحتمال تجيب:<br/>
+<em>ماذا تعني هذه النتيجة بالنسبة لهذا المريض؟</em>"
+                </div>
+</div>
+</div>
+</div>
+ ====================================================================================================================== الوحدة 11 
+<div class="module-slides" data-module="11">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  ألم ترَ الطفل المصاب بالحمى في القرية،<br/>
+                  الاختبار السريع الذي قال <em>سلبية</em>,<br/>
+                  و <em>المتصورة</em> التي ظلت تتضاعف؟
+                </div>
+</div>
+</div>
+<div class="slide blood">
+<div class="content text-center">
+<div class="title red animate">مشكلة الملاريا RDT</div>
+<div class="story-card animate delay-1">
+<div class="place">أفريقيا جنوب الصحراء الكبرى</div>
+<div class="narrative">
+                    وتقتل الملاريا 600 ألف شخص سنويا، معظمهم من الأطفال دون سن الخامسة.
+                    <br/><br/>
+                    كان الهدف من اختبارات التشخيص السريع هو توجيه العلاج في المناطق النائية دون مجاهر أو مختبرات.
+                    <br/><br/>
+                    ولكن عندما يكون طفيل الدم منخفضًا<strong>يفتقد RDT الحالات</strong>. ومتى <em>P. falciparum</em> يحذف الجين HRP2
+                    <strong>لا يرى RDT شيئًا على الإطلاق</strong>.
+                  </div>
+<div class="source">من. أداء اختبار الملاريا RDT. 2022</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">شجرة القرار السريري</div>
+<div class="decision-tree animate delay-1">
+<h4>طفل يعاني من الحمى في منطقة تتوطن فيها الملاريا</h4>
+<div class="tree-row"><div class="tree-node root">طفل محموم</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node action">أداء RDT</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node tp">RDT إيجابي</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node action">علاج الملاريا</div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node warning">RDT سلبي</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">الشك السريري؟</div></div>
+<div class="tree-branch" style="gap:0.4rem;">
+<div class="tree-branch-item">
+<div class="tree-label">High</div>
+<div class="tree-node action" style="font-size:0.55rem;">علاج على أي حال<small>أو الفحص المجهري</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">Low</div>
+<div class="tree-node tn" style="font-size:0.55rem;">بحث<small>سبب آخر</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">تختلف الحساسية حسب طفيل الدم</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box" style="background:var(--green);">
+<div class="stat-value" style="color:white;">95%</div>
+<div class="stat-label">ارتفاع طفيل الدم<br/>(&gt;200/μL)</div>
+</div>
+<div class="stat-box" style="background:var(--gold);">
+<div class="stat-value" style="color:var(--navy);">75%</div>
+<div class="stat-label">انخفاض طفيل الدم<br/>(100-200/μL)</div>
+</div>
+<div class="stat-box" style="background:var(--red);">
+<div class="stat-value" style="color:white;">50%</div>
+<div class="stat-label">منخفض جدًا<br/>(&lt;100/μL)</div>
+</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">الدرس السريري</div>
+<div class="simple-text">
+                    لا يستبعد اختبار RDT السلبي وجود الملاريا في المناطق الموبوءة.
+                    <strong>يجب أن يتجاوز الحكم السريري الاختبار</strong> عندما يكون الشك عاليا
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  "وقال الاختبار "سلبي"،<br/>
+                  وأرسل الطفل إلى المنزل،<br/>
+                  وتكاثرت الطفيليات في الظلام،<br/>
+                  وبحلول الصباح لم يستطع الطفل أن يستيقظ."
+                </div>
+</div>
+</div>
+</div>
+ ============================================================================================================ الوحدة 12 
+<div class="module-slides" data-module="12">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  في عام الوباء،<br/>
+                  كان العالم بحاجة إلى اختبار كان <em>fast</em>.
+                  <br/><br/>
+                  ولكن سريع ليس هو نفسه <em>دقيق</em>.
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<p class="story-opener">عندما يصل جيل جديد من الاختبارات بحساسية أعلى، هل يجعله ذلك أفضل تلقائيًا؟</p>
+<div class="real-data-box">
+<h4>البيانات الحقيقية</h4>
+<p>فحوصات التروبونين عالي الحساسية (hs-cTn) تزيد من الحساسية لاحتشاء عضلة القلب الحاد من حوالي <span class="data-highlight">70%</span> (التروبونين التقليدي في العرض) إلى أكثر <span class="data-highlight">95%</span>. لكن النوعية انخفضت من حوالي <span class="data-highlight">95%</span> إلى حوالي <span class="data-highlight">80%</span> لأن hs-cTn يكتشف إصابة عضلة القلب نتيجة لأسباب عديدة غير احتشاء عضلة القلب (قصور القلب، الإنتان، أمراض الكلى، الانسداد الرئوي). يتطلب التأثير السريري الصافي نمذجة HSROC عبر دراسات متعددة لفهم المفاضلة.</p>
+</div>
+<div class="decision-tree">
+<div class="decision-tree-header">تحول جيل التروبونين: 2010</div>
+<div class="decision-scenario">قسم الطوارئ يستخدم hs-troponin. أصبح المزيد من المرضى الآن إيجابيين، لكن العديد منهم لا يعانون من احتشاء عضلة القلب الحاد.</div>
+<div class="decision-paths">
+<div class="decision-path path-a" role="button" tabindex="0">
+<div class="path-label">المسار أ: الاعتماد على أساس الحساسية وحدها</div>
+<div class="path-choice">احتفل بقفز نسبة اكتشاف MI من 70% إلى أكثر من 95%</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">المزيد من النتائج الإيجابية الكاذبة تؤدي إلى عمليات قسطرة غير ضرورية، ودخول المستشفى، وقلق المريض من ارتفاعات التروبونين غير القلبية</div>
+<div class="path-outcome">النتيجة: الإفراط في التشخيص والموارد المهدرة</div>
+</div>
+<div class="decision-path path-b" role="button" tabindex="0">
+<div class="path-label">المسار ب: نموذج المقايضة</div>
+<div class="path-choice">استخدم القياسات التسلسلية (بروتوكولات 0h/1h أو 0h/3h) والسياق السريري للحفاظ على الخصوصية</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">تقوم خوارزميات الاستبعاد السريع بتفريغ المرضى ذوي المخاطر المنخفضة بأمان؛ تظل الحساسية عالية مع إدارة المعدل الإيجابي الكاذب</div>
+<div class="path-outcome">النتيجة: فرز أسرع وأكثر أمانًا لألم الصدر</div>
+</div>
+</div>
+</div>
+<div class="story-revelation">
+<div class="revelation-label">الرؤيا</div>
+<div class="revelation-text">الحساسية والنوعية تتنافسان ضد بعضهما البعض. غالبًا ما يؤدي جيل الاختبار الجديد الذي يرفع الحساسية إلى تقليل الخصوصية. منحنى HSROC هو الأداة التي تكشف ما إذا كانت المقايضة الصافية تساعد المرضى أم تضرهم.</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">حكم كوكرين</div>
+<div class="matrix-container animate delay-1">
+<h4>اختبارات مستضدات فيروس كورونا السريعة (Dinnes 2022 Cochrane Review)</h4>
+<table class="matrix-table">
+<tr><th>سكان</th><th>الحساسية</th><th>غاب</th></tr>
+<tr><td>بدون أعراض</td><td style="color:var(--gold);">73%</td><td style="color:var(--red);">27%</td></tr>
+<tr><td>بدون أعراض</td><td style="color:var(--orange);">55%</td><td style="color:var(--red);">45%</td></tr>
+<tr><td>أول 7 أيام</td><td style="color:var(--green);">80%</td><td style="color:var(--orange);">20%</td></tr>
+</table>
+</div>
+<p class="animate delay-2" style="font-size:0.65rem;color:rgba(255,255,255,0.5);margin-top:0.4rem;">
+                  Dinnes J et al. Cochrane Database Syst Rev. 2022;7:CD013705
+                </p>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">شجرة القرارات الأمنية الزائفة</div>
+<div class="decision-tree animate delay-1">
+<h4>عيد الشكر 2020: ما حدث</h4>
+<div class="tree-row"><div class="tree-node root">اختبارات أفراد العائلة سلبية</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">سلبي حقا؟</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">55% إذا لم تظهر عليك أعراض</div>
+<div class="tree-node tn">صحيح سلبي<small>آمن للتجمع</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">45% إذا لم تظهر عليك أعراض</div>
+<div class="tree-node fn">خطأ سلبي<small>معدي!</small></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node fp" style="background:var(--blood-red);">يجتمع مع العائلة<small>الأجداد مصابون</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  "وقال الاختبار "سلبي"،<br/>
+                  و احتضنت العائلة<br/>
+                  و بنهاية الشتاء<br/>
+                  لقد دفن الجد".
+                </div>
+</div>
+</div>
+</div>
+ ==================== الوحدة 13: تصوير الثدي بالأشعة السينية ================= 
+<div class="module-slides" data-module="13">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  هل لم تسمع عن الفحص<br/>
+                  التي وجدت السرطانات التي <em>لن يقتل أبدًا</em>,<br/>
+                  وأدى إلى العلاجات التي <em>يسبب ضررًا أكبر من المرض</em>?
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<p class="story-opener">هل يمكنك الوثوق في التحليل التلوي لـ DTA الذي تم إجراؤه في جدول بيانات؟</p>
+<div class="real-data-box">
+<h4>البيانات الحقيقية</h4>
+<p>يتطلب التحليل التلوي لـ DTA النموذج ثنائي المتغير أو HSROC، وكلاهما يحتاج إلى أقصى تقدير لاحتمالية الحساسية والنوعية المرتبطة على المقياس اللوغاريتمي. لقد وثقت الأبحاث أن حسابات Excel اليدوية تؤدي في كثير من الأحيان إلى حدوث أخطاء: أظهرت دراسة تاريخية أجراها راينهارت وروجوف (2010، الاقتصاد) كيف أدى خطأ بسيط في جدول البيانات إلى تغييرات في السياسة العالمية. في DTA، يتجاهل تطبيق تحويلات اللوغاريتم يدويًا وتجميع الحساسية/النوعية بشكل منفصل في Excel الارتباط بينهما، ويمكن أن ينتج تقديرات مجمعة تختلف بشكل كبير عن النماذج ثنائية المتغير التي تم التحقق من صحتها في البرامج (R mada/reitsma، Stata metandi، SAS NLMIXED).</p>
+</div>
+<div class="decision-tree">
+<div class="decision-tree-header">خطأ QUADAS Excel</div>
+<div class="decision-scenario">يحتاج فريق البحث إلى حساسية وخصوصية مجمعة لإجراء مراجعة منهجية لـ DTA. لديهم 12 دراسة. يقوم أحد أعضاء الفريق ببناء نموذج Excel؛ يستخدم آخر حزمة R's mada.</div>
+<div class="decision-paths">
+<div class="decision-path path-a" role="button" tabindex="0">
+<div class="path-label">المسار أ: استخدم جدول البيانات</div>
+<div class="path-choice">تجميع الحساسية والنوعية بشكل منفصل في Excel باستخدام المتوسطات البسيطة أو الصيغ ذات التأثير الثابت</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">يتجاهل العلاقة بين الحساسية والنوعية؛ مجمع أخطاء تحويل اللوغاريتم؛ تم تقليل الحساسية المجمعة بحوالي 12 نقطة مئوية</div>
+<div class="path-outcome">النتيجة: نشر أرقام خاطئة؛ المبادئ التوجيهية السريرية مضللة</div>
+</div>
+<div class="decision-path path-b" role="button" tabindex="0">
+<div class="path-label">المسار ب: استخدم برامج تم التحقق منها</div>
+<div class="path-choice">استخدم R (mada/reitsma) أو Stata (metandi) أو SAS (NLMIXED) مع النموذج ثنائي المتغير</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">حسابات GLMM ثنائية المتغير المناسبة لمقايضة خصوصية الحساسية، وتنتج مناطق ثقة صالحة، وتتعامل مع عدم التجانس بين الدراسة</div>
+<div class="path-outcome">النتيجة: نتائج صحيحة وقابلة للتكرار وقابلة للتدقيق</div>
+</div>
+</div>
+</div>
+<div class="story-revelation">
+<div class="revelation-label">الرؤيا</div>
+<div class="revelation-text">التحليل التلوي لـ DTA ليس تجميعًا بسيطًا. تتطلب الطبيعة الثنائية المتغير للبيانات (الحساسية والخصوصية المقترنة) برامج إحصائية متخصصة. لا يعد الخطأ في جدول البيانات مجرد إزعاج، بل يمكن أن يغير الممارسة السريرية.</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">مشكلة الإفراط في التشخيص</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box" style="background:var(--green);">
+<div class="stat-value" style="color:white;">3-4</div>
+<div class="stat-label">إنقاذ حياة<br/>لكل 10000 تم فحصها</div>
+</div>
+<div class="stat-box" style="background:var(--red);">
+<div class="stat-value" style="color:white;">50-130</div>
+<div class="stat-label">تم تشخيصه بشكل مفرط<br/>(معالجة دون داعٍ)</div>
+</div>
+<div class="stat-box" style="background:var(--orange);">
+<div class="stat-value" style="color:white;">~500</div>
+<div class="stat-label">إنذارات كاذبة<br/>(قلق، خزعات)</div>
+</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">السؤال</div>
+<div class="simple-text">
+                    ومن أجل إنقاذ حياة 3-4 أشخاص، تتلقى ما يقدر بنحو 50-130 امرأة الجراحة أو الإشعاع أو العلاج الكيميائي لسرطانات لم تكن لتؤذيهن أبدًا.
+                    <br/><br/><strong>فهل تستحق هذه المقايضة كل هذا العناء؟</strong>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">مساعدة المريض على اتخاذ القرار: التصوير الشعاعي للثدي</div>
+<div class="decision-aid animate delay-1">
+<h4>إذا تم فحص 10000 امرأة تتراوح أعمارهن بين 50 و69 عامًا لمدة 10 سنوات</h4>
+<div class="decision-aid-row">
+<div class="decision-aid-label">منع الوفيات الناجمة عن سرطان الثدي</div>
+<div class="decision-aid-value benefit">3-4 نساء</div>
+</div>
+<div class="decision-aid-row">
+<div class="decision-aid-label">اتصلت النساء مرة أخرى للحصول على إنذارات كاذبة</div>
+<div class="decision-aid-value harm">~ 500 امرأة</div>
+</div>
+<div class="decision-aid-row">
+<div class="decision-aid-label">خزعات غير ضرورية</div>
+<div class="decision-aid-value harm">~200 امرأة</div>
+</div>
+<div class="decision-aid-row">
+<div class="decision-aid-label">نساء يعالجن من سرطان لا يضرهن أبدا</div>
+<div class="decision-aid-value harm">~ 15 امرأة</div>
+</div>
+<div class="decision-aid-question">هل الفحص مناسب لك؟</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">شجرة القرار المتتالية للفحص</div>
+<div class="decision-tree animate delay-1">
+<h4>تم فحص 10000 امرأة على مدى 10 سنوات</h4>
+<div class="tree-row"><div class="tree-node root">10,000 امرأة</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node warning">تم استدعاء 1000 تقريبًا<small>غير طبيعي</small></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-branch" style="gap:0.25rem;">
+<div class="tree-branch-item">
+<div class="tree-node fp" style="font-size:0.5rem;">~500 خطأ<br/>إنذار</div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node warning" style="font-size:0.5rem;">~500 خزعة<br/>~50 السرطان</div>
+</div>
+</div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node tn">تم مسح 9000 تقريبًا</div>
+</div>
+</div>
+<div style="margin-top:0.4rem;">
+<div class="tree-row"><div class="tree-node question" style="font-size:0.6rem;">من بين 50 حالة سرطان تقريبًا</div></div>
+<div class="tree-branch" style="gap:0.5rem;">
+<div class="tree-branch-item">
+<div class="tree-node tp" style="font-size:0.5rem;">~ 35 سيقتل<small>3-4 تم حفظه</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node fn" style="font-size:0.5rem;">~ 15 لن يقتل أبدًا<small>تم تشخيصه بشكل مفرط</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  "ووجد الاختبار الظل،<br/>
+                  وأطلقوا عليه اسم السرطان،<br/>
+                  والمرأة قطعت وأحرقت<br/>
+                  لظل لن يظلمها أبدًا أيام."
+                </div>
+</div>
+</div>
+</div>
+ ==================== الوحدة 14: أميلويد الزهايمر ===================== 
+<div class="module-slides" data-module="14">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  هل لم تسمع عن المسح<br/>
+                  الذي يجد اللويحات في الدماغ،<br/>
+                  ولكن لا أستطيع أن أقول لك<br/>
+                  إذا كان العقل سوف <em>fade</em>?
+                </div>
+</div>
+</div>
+<div class="slide gradient">
+<div class="content text-center">
+<div class="title gold animate">مفارقة الأميلويد</div>
+<div class="story-card animate delay-1">
+<div class="place">أبحاث مرض الزهايمر، 2010-2020</div>
+<div class="narrative">
+                    يمكن الآن لفحوصات التصوير المقطعي بالإصدار البوزيتروني اكتشاف لويحات الأميلويد، وهي السمة المميزة لمرض الزهايمر.
+                    <br/><br/>
+                    But <strong>30% من كبار السن ذوي القدرات المعرفية الطبيعية</strong> لديك لويحات اميلويد. وقد لا يصابون بالخرف أبدًا.
+                    <br/><br/>
+                    And <strong>10-20% من المصابين بالخرف</strong> ليس لديهم أميلويد.
+                    <br/><br/>
+                    الاختبار يجد اللوحات. لكن اللويحات ليست المرض.
+                    <strong>نحن نختبر البديل، وليس النتيجة.</strong>
+</div>
+<div class="source">جاك كر وآخرون. لانسيت نيورول. 2018;17:760-773</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">البديل مقابل شجرة القرار النتيجة</div>
+<div class="decision-tree animate delay-1">
+<h4>ما الذي نختبره حقًا؟</h4>
+<div class="tree-row"><div class="tree-node root">اختبار تشخيصي</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">ماذا يكشف؟</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">النتيجة نفسها</div>
+<div class="tree-node tp">التشخيص المباشر<small>على سبيل المثال، خزعة للسرطان</small></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node action">قيمة سريرية عالية</div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">علامة بديلة</div>
+<div class="tree-node warning">إشارة غير مباشرة<small>على سبيل المثال، اميلويد للخرف</small></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node question">الرابط مصدق؟</div>
+<div class="tree-branch" style="gap:0.3rem;">
+<div class="tree-branch-item">
+<div class="tree-node action" style="font-size:0.5rem;">Yes<small>استخدم بحذر</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node fn" style="font-size:0.5rem;">No<small>قيمة محدودة</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  "ووجد المسح اللوحات،<br/>
+                  وأطلق عليه الطبيب اسم الزهايمر،<br/>
+                  والمريض يعيش في رعب<br/>
+                  من النسيان الذي قد لا يأتي أبدًا."
+                </div>
+</div>
+</div>
+</div>
+ ============================================================================= الوحدة 15: 
+<div class="module-slides" data-module="15">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  لا يتم إنشاء جميع الدراسات على قدم المساواة.
+                  <br/><br/>
+                  البعض كذلك <em>متحيز</em>.<br/>
+                  البعض كذلك <em>تصميم سيء</em>.<br/>
+                  البعض لا ينبغي أن يكون <em>موثوق</em>.
+                  <br/><br/>
+                  كيف نفصل القمح عن القشر؟
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<p class="story-opener">ماذا لو لم تقدم معظم دراسات DTA معلومات كافية للحكم على جودتها؟</p>
+<div class="real-data-box">
+<h4>البيانات الحقيقية</h4>
+<p>قبل نشر مبادرة STARD في عام 2003، وجد تقييم منهجي أن أقل من <span class="data-highlight">half</span> من دراسات DTA ذكرت ما إذا كان تفسير اختبار المؤشر أعمى، وكانت الأوصاف المعيارية المرجعية غير كافية في كثير من الأحيان. بعد STARD، تحسنت عملية الإبلاغ: وجدت العديد من التقييمات الوبائية التلوية أن الالتزام بعناصر STARD ارتفع بشكل كبير، على الرغم من أن العديد من الدراسات لا تزال قاصرة عن العناصر الرئيسية مثل مخططات التدفق والتعامل مع النتائج غير المحددة.</p>
+</div>
+<div class="decision-tree">
+<div class="decision-tree-header">ثورة STARD: 2003</div>
+<div class="decision-scenario">يكمل الفريق دراسة DTA لاختبار نقطة رعاية جديدة. إنهم حريصون على النشر بسرعة. لديهم بيانات 2 × 2 ولكن لم يوثقوا التعمية أو تدفق المريض أو النتائج غير المحددة.</div>
+<div class="decision-paths">
+<div class="decision-path path-a" role="button" tabindex="0">
+<div class="path-label">المسار أ: النشر بسرعة</div>
+<div class="path-choice">أرسل بدون مخطط تدفق STARD أو تقرير كامل عن الطرق</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">لا يمكن للقراء تقييم التعمية أو طيف المريض أو التحقق. يصنف تقييم QUADAS-2 كل مجال على أنه "غير واضح". قد يتم استبعاد الدراسة من المراجعات المنهجية المستقبلية، أو ما هو أسوأ من ذلك، قد يتم تضمينها مع الوزن المتضخم.</div>
+<div class="path-outcome">النتيجة: هدر الأبحاث؛ نتائج غير قابلة للتفسير</div>
+</div>
+<div class="decision-path path-b" role="button" tabindex="0">
+<div class="path-label">المسار B: اتبع إرشادات STARD</div>
+<div class="path-choice">أكمل قائمة مراجعة STARD، وأنشئ مخطط تدفق المريض، وأبلغ عن نتائج غير محددة، ووصف التعمية</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">يمكن للمراجعين تقييم الجودة بشكل كامل. مجالات QUADAS-2 مسؤولة. تساهم الدراسة بشكل مفيد في المراجعات المنهجية والمبادئ التوجيهية السريرية.</div>
+<div class="path-outcome">النتيجة: دليل جدير بالثقة يعمل على تحسين الرعاية</div>
+</div>
+</div>
+</div>
+<div class="story-revelation">
+<div class="revelation-label">الرؤيا</div>
+<div class="revelation-text">لا يمكنك تقييم الجودة إذا لم تعلن الدراسة عن أساليبها. يضمن STARD أن دراسات DTA كاملة بما يكفي ليتم الحكم عليها بواسطة QUADAS-2. التقارير غير المكتملة ليست محايدة - فهي تخفي التحيز.</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">QUADAS-2: قائمة فحص الجودة</div>
+<div class="quadas-container animate delay-1">
+<h4>أربعة مجالات لخطر التحيز</h4>
+<div class="quadas-domain">
+<div class="quadas-icon risk">1</div>
+<div class="quadas-content">
+<h5>اختيار المريض</h5>
+<p>هل تم تسجيل عينة متتالية أم عشوائية؟ هل تم تجنب تصميم الحالات والشواهد؟</p>
+</div>
+</div>
+<div class="quadas-domain">
+<div class="quadas-icon risk">2</div>
+<div class="quadas-content">
+<h5>اختبار الفهرس</h5>
+<p>هل تم تفسير الاختبار دون معرفة المعيار المرجعي؟ هل تم تحديد العتبة مسبقًا؟</p>
+</div>
+</div>
+<div class="quadas-domain">
+<div class="quadas-icon risk">3</div>
+<div class="quadas-content">
+<h5>المعيار المرجعي</h5>
+<p>هل من المحتمل أن يصنف المعيار المرجعي الحالة بشكل صحيح؟ هل تم تفسيره بشكل أعمى؟</p>
+</div>
+</div>
+<div class="quadas-domain">
+<div class="quadas-icon concern">4</div>
+<div class="quadas-content">
+<h5>التدفق والتوقيت</h5>
+<p>هل كانت هناك فترة زمنية مناسبة بين الاختبارات؟ هل حصل جميع المرضى على نفس المعيار المرجعي؟</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">QUADAS-2 شجرة القرار</div>
+<div class="decision-tree animate delay-1">
+<h4>هل يجب أن تثق بهذه الدراسة؟</h4>
+<div class="tree-row"><div class="tree-node root">دراسة DTA</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">تحقق من جميع المجالات الأربعة</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">جميع المخاطر منخفضة</div>
+<div class="tree-node tp">جودة عالية<small>نتائج الثقة</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">بعض غير واضح</div>
+<div class="tree-node warning">معتدل<small>استخدم بحذر</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">أي مخاطر عالية</div>
+<div class="tree-node fp">جودة منخفضة<small>قد تكون النتائج متحيزة</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">التحيزات الشائعة في دراسات DTA</div>
+<div class="lesson-item animate delay-1">
+<div class="lesson-number" style="background:var(--red);">!</div>
+<div class="lesson-content">
+<h4>تحيز التحقق</h4>
+<p>الاختبارات الإيجابية فقط هي التي تحصل على المعيار المرجعي → تضخم الحساسية</p>
+</div>
+</div>
+<div class="lesson-item animate delay-2">
+<div class="lesson-number" style="background:var(--red);">!</div>
+<div class="lesson-content">
+<h4>التحيز الطيفي</h4>
+<p>يختلف مجتمع الدراسة عن الواقع السريري ← النتائج لا تعمم</p>
+</div>
+</div>
+<div class="lesson-item animate delay-3">
+<div class="lesson-number" style="background:var(--orange);">!</div>
+<div class="lesson-content">
+<h4>التحيز التأسيسي</h4>
+<p>يعد اختبار الفهرس جزءًا من المعيار المرجعي → دقة عالية بشكل مصطنع</p>
+</div>
+</div>
+<div class="lesson-item animate delay-4">
+<div class="lesson-number" style="background:var(--orange);">!</div>
+<div class="lesson-content">
+<h4>مراجعة التحيز</h4>
+<p>يتم تفسير اختبار الفهرس لمعرفة النتيجة المرجعية → يضخم كلا المقياسين</p>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  "قبل أن تثق بالأرقام،<br/>
+                  اسأل: كيف تم جمعهم؟<br/>
+                  دراسة متحيزة تتحدث بثقة -<br/>
+                  لكن ثقتها كذبة."
+                </div>
+</div>
+</div>
+</div>
+ ==================== الوحدة 16: التحليل التلوي وSROC ================ 
+<div class="module-slides" data-module="16">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  دراسة واحدة قد تخدع.<br/>
+                  دراسة واحدة قد تملق.
+                  <br/><br/>
+                  ولكن عندما تجمع <em>كل الأدلة</em>—<br/>
+                  يصبح إخفاء الحقيقة أكثر صعوبة.
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<p class="story-opener">ماذا يحدث عندما تستخدم دراسات مختلفة حدودًا مختلفة لنفس الاختبار، وتحاول تجميعها؟</p>
+<div class="real-data-box">
+<h4>البيانات الحقيقية</h4>
+<p>يستخدم اختبار D-dimer للانسداد الرئوي (PE) تقليديًا قطعًا ثابتًا قدره <span class="data-highlight">500 µg/L</span>. أظهرت تجربة ADJUST-PE (Righini et al., JAMA 2014) أن القطع المعدل حسب العمر (<span class="data-highlight">العمر × 10 ميكروجرام/لتر</span> للمرضى الذين تزيد أعمارهم عن 50 عامًا) زاد من نسبة المرضى المسنين الذين لديهم نتائج D-dimer سلبية من <span class="data-highlight">~6% to ~30%</span>، مع خطر الإصابة بالجلطات الدموية الوريدية لمدة 3 أشهر بنسبة 0.3% فقط في المجموعة السلبية المعدلة حسب العمر. يجب أن يستخدم التحليل التلوي DTA لدراسات D-dimer النموذج ثنائي المتغير لأن العتبات المختلفة تخلق مقايضة خصوصية الحساسية مرئية على منحنى SROC.</p>
+</div>
+<div class="decision-tree">
+<div class="decision-tree-header">معضلة عتبة D-dimer: ADJUST-PE 2014</div>
+<div class="decision-scenario">يقدم مريض مسن (75 عامًا) إلى قسم الطوارئ مع احتمال وجود انصباب رئوي. D-dimer هو 620 ميكروغرام / لتر. باستخدام القطع الثابت، وهذا أمر إيجابي. باستخدام الحد المعدل حسب العمر (750 ميكروجرام/لتر)، يعد هذا أمرًا سلبيًا.</div>
+<div class="decision-paths">
+<div class="decision-path path-a" role="button" tabindex="0">
+<div class="path-label">المسار A: استخدام القطع الثابت (500 ميكروجرام/لتر)</div>
+<div class="path-choice">تطبيق عتبة واحدة على جميع المرضى بغض النظر عن العمر</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">يتجاوز المرضى المسنون دائمًا 500 ميكروجرام/لتر. تنخفض النوعية إلى أقل من 10% لدى الأشخاص الذين تزيد أعمارهم عن 80 عامًا. يحصل كل مريض مسن تقريبًا على تصوير الأوعية الدموية الرئوية بالأشعة المقطعية - مع صبغة التباين والإشعاع والنتائج العرضية.</div>
+<div class="path-outcome">النتيجة: يصبح D-dimer عديم الفائدة عند كبار السن</div>
+</div>
+<div class="decision-path path-b" role="button" tabindex="0">
+<div class="path-label">المسار ب: استخدام النموذج ثنائي المتغير مع عتبة المتغير المشترك</div>
+<div class="path-choice">يطبق القطع المعدل حسب العمر؛ تباين عتبة النموذج في التحليل التلوي</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">يُظهر منحنى SROC أن العتبات المعدلة حسب العمر تتحرك على طول المنحنى، مع تداول قدر صغير من الحساسية لتحقيق مكاسب كبيرة في الخصوصية. 30% من المرضى المسنين يتجنبون التصوير المقطعي بأمان.</div>
+<div class="path-outcome">النتيجة: عدد أقل من عمليات الفحص غير الضرورية؛ لم يتم تفويت أي اختبارات تشخيصية سريعة للملاريا</div>
+</div>
+</div>
+</div>
+<div class="story-revelation">
+<div class="revelation-label">الرؤيا</div>
+<div class="revelation-text">تباين العتبة هو السبب وراء احتياج التحليل التلوي لـ DTA إلى النموذج ثنائي المتغير. تستخدم الدراسات المختلفة حدودًا مختلفة، مما يخلق مفاضلة بين الحساسية والنوعية. منحنى SROC هو خريطة تلك المقايضة.</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">لماذا يختلف التحليل التلوي DTA</div>
+<div class="simple-box animate delay-1">
+<div class="simple-title">المشكلة</div>
+<div class="simple-text">
+                    الحساسية والنوعية هي <strong>مرتبطة</strong>. وعندما يرتفع أحدهما، يميل الآخر إلى النزول.
+                    <br/><br/>
+                    لا يمكنك تجميعها بشكل منفصل مثل تأثيرات العلاج. أنت بحاجة إلى <strong>نموذج ثنائي المتغير</strong>.
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">منحنى SROC</div>
+<div class="sroc-container animate delay-1">
+<h4>ملخص خصائص تشغيل جهاز الاستقبال</h4>
+<div class="sroc-plot">
+<div class="sroc-axis-label y">الحساسية</div>
+<div class="sroc-axis-label x">1 - النوعية (المعدل الإيجابي الكاذب)</div>
+<svg class="sroc-curve" preserveaspectratio="none" viewbox="0 0 100 100">
+ خط قطري (اختبار عديم الفائدة) 
+<line stroke="rgba(255,255,255,0.2)" stroke-dasharray="4" stroke-width="1" x1="0" x2="100" y1="100" y2="0"></line>
+ منحنى سروك 
+<path d="M 5 5 Q 10 40, 30 60 Q 50 80, 95 95" fill="none" stroke="var(--gold)" stroke-width="3"></path>
+ منطقة الثقة (القطع الناقص المبسط) 
+<ellipse cx="25" cy="25" fill="rgba(212,175,55,0.2)" rx="15" ry="10" stroke="var(--gold)" stroke-width="1"></ellipse>
+</svg>
+ نقاط الدراسة 
+<div class="sroc-dot" style="left:15%;top:20%;"></div>
+<div class="sroc-dot" style="left:20%;top:25%;"></div>
+<div class="sroc-dot" style="left:25%;top:22%;"></div>
+<div class="sroc-dot" style="left:18%;top:28%;"></div>
+<div class="sroc-dot" style="left:30%;top:30%;"></div>
+</div>
+<div class="sroc-legend">
+<div class="sroc-legend-item"><div class="sroc-legend-dot" style="background:var(--gold);"></div>الدراسات الفردية</div>
+<div class="sroc-legend-item"><div class="sroc-legend-dot" style="background:rgba(212,175,55,0.5);"></div>تقدير موجز</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">قراءة SROC</div>
+<div class="decision-tree animate delay-1">
+<h4>ماذا يخبرك المنحنى؟</h4>
+<div class="tree-row"><div class="tree-node root">موقف منحنى SROC</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">الزاوية العلوية اليسرى</div>
+<div class="tree-node tp">اختبار ممتاز<small>حواس عالية + المواصفات</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">بالقرب من قطري</div>
+<div class="tree-node fn">اختبار عديمة الفائدة<small>ليس أفضل من الصدفة</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">نقاط متناثرة</div>
+<div class="tree-node warning">عدم التجانس العالي<small>التحقيق في المصادر</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain hope animate">
+                  "قد تخدع إحدى الدراسات.<br/>
+                  العديد من الدراسات، وزنها معا،<br/>
+                  تتبع طريق الحقيقة -<br/>
+                  منحنى SROC الذي يكشف عما يمكن أن يفعله الاختبار حقًا."
+                </div>
+</div>
+</div>
+</div>
+ ==================== الوحدة 17: عدم التجانس ============================================================================== 
+<div class="module-slides" data-module="17">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  ولكن ماذا لو كانت الدراسات <em>لا توافق</em>?
+                  <br/><br/>
+                  يقول أحدهم أن الحساسية هي 95%.<br/>
+                  آخر يقول 60%.
+                  <br/><br/>
+<em>ما هي الحقيقة التي تصدقها؟</em>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<p class="story-opener">ماذا لو نجح الاختبار بشكل جيد في عموم السكان ولكنه فشل في المرضى الذين هم في أمس الحاجة إليه؟</p>
+<div class="real-data-box">
+<h4>البيانات الحقيقية</h4>
+<p>تحقق اختبارات التشخيص السريع للملاريا المستندة إلى HRP2 حساسية تبلغ تقريبًا <span class="data-highlight">95%</span> في عموم السكان في المناطق الموبوءة. ومع ذلك، في النساء الحوامل، يمكن أن تنخفض الحساسية إلى <span class="data-highlight">56-76%</span> بسبب عزل الطفيليات المشيمي - تختبئ الطفيليات في المشيمة، مما يبقي طفيل الدم المحيطي منخفضًا وتحت عتبة اكتشاف RDT. وجدت مراجعة كوكرين للاختبارات التشخيصية السريعة الخاصة بالملاريا عدم تجانس كبير (I² غالبًا ما يتجاوز 80٪) مدفوعًا بالمجموعات السكانية الفرعية بما في ذلك الحمل والأطفال دون سن الخامسة والعدوى المشتركة بفيروس نقص المناعة البشرية.</p>
+</div>
+<div class="decision-tree">
+<div class="decision-tree-header">الفحص السريع للملاريا في الحمل</div>
+<div class="decision-scenario">يجمع التحليل التلوي 25 دراسة وتقارير RDT للملاريا مجمعة حساسية 93%. يستخدم الطبيب في عيادة ما قبل الولادة هذا لطمأنة المرأة الحامل التي تعاني من نتيجة اختبار RDT سلبية.</div>
+<div class="decision-paths">
+<div class="decision-path path-a" role="button" tabindex="0">
+<div class="path-label">المسار أ: ثق في التقدير المجمع الإجمالي</div>
+<div class="path-choice">طبق حساسية 93% من التحليل التلوي لعامة السكان</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">في النساء الحوامل، قد تكون الحساسية الحقيقية منخفضة حتى 56-76%. نسبة كبيرة من النساء الحوامل المصابات يتم طمأنتهن بشكل كاذب. تسبب الملاريا غير المعالجة أثناء الحمل فقر الدم الوخيم لدى الأمهات، وانخفاض الوزن عند الولادة، وولادة جنين ميت.</div>
+<div class="path-outcome">النتيجة: وفيات الأمهات والأطفال حديثي الولادة التي يمكن الوقاية منها</div>
+</div>
+<div class="decision-path path-b" role="button" tabindex="0">
+<div class="path-label">المسار ب: التحقيق في عدم التجانس حسب المجموعة الفرعية</div>
+<div class="path-choice">قم بإجراء التحليل التلوي للمجموعة الفرعية للنساء الحوامل؛ استكشاف I² ومصادر الاختلاف</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">اكتشفي أن الحمل هو مصدر رئيسي لعدم التجانس. يوصى بتأكيد الفحص المجهري لجميع النساء الحوامل ذوات الاختبارات التشخيصية السريعة السلبية في المناطق الموبوءة.</div>
+<div class="path-outcome">النتيجة: البروتوكولات المستهدفة تنقذ الأمهات والأطفال</div>
+</div>
+</div>
+</div>
+<div class="story-revelation">
+<div class="revelation-label">الرؤيا</div>
+<div class="revelation-text">إن عدم التجانس ليس مجرد ضجيج إحصائي. غالبًا ما يشير ذلك إلى أن الاختبار يؤدي بشكل مختلف في مجموعات سكانية مختلفة. يمكن أن يكون تجاهل I² وتجميع كل شيء معًا أمرًا قاتلاً للمجموعات الفرعية الضعيفة.</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">مصادر عدم التجانس</div>
+<div class="decision-tree animate delay-1">
+<h4>لماذا تختلف الدراسات</h4>
+<div class="tree-row"><div class="tree-node question">نفس الاختبار ونتائج مختلفة؟</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node warning">العتبة<small>قطع مختلفة</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node warning">سكان<small>الشدة، العمر</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node warning">الإعداد<small>الابتدائي مقابل المتخصص</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node warning">الجودة<small>التحيز، التعمية</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">قياس عدم الاتفاق: I²</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box" style="background:var(--green);">
+<div class="stat-value" style="color:white;">I² &lt; 25%</div>
+<div class="stat-label">Low<br/>توافق الدراسات</div>
+</div>
+<div class="stat-box" style="background:var(--gold);">
+<div class="stat-value" style="color:var(--navy);">I² 25-75%</div>
+<div class="stat-label">معتدل<br/>بعض الاختلاف</div>
+</div>
+<div class="stat-box" style="background:var(--red);">
+<div class="stat-value" style="color:white;">I² &gt; 75%</div>
+<div class="stat-label">High<br/>خلاف كبير</div>
+</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">التحذير</div>
+<div class="simple-text">
+                    عندما يكون I² &gt; 75%، قد يكون التقدير المجمع <strong>لا معنى له</strong>. اشرح الخلاف قبل المتوسط.
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  "عندما تختلف الدراسات،<br/>
+                  لا تسكت المعارضة.<br/>
+                  اسأل: لماذا يرون بشكل مختلف؟<br/>
+                  الخلاف بحد ذاته يعلم."
+                </div>
+</div>
+</div>
+</div>
+ ==================== الوحدة 18: مجموعة الأدوات ==================== 
+<div class="module-slides" data-module="18">
+<div class="slide gradient active">
+<div class="content text-center">
+<div class="title gold animate">مجموعة أدوات DTA الخاصة بك</div>
+<div class="subtitle animate delay-1">التدابير الأساسية ومتى استخدامها</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="story-box animate">
+<p class="story-opener">عندما يدعي الذكاء الاصطناعي أنه يشخص بشكل أفضل من الأطباء، هل يجب أن تثق في المساحة تحت المنحنى بشكل عام؟</p>
+<div class="real-data-box">
+<h4>البيانات الحقيقية</h4>
+<p>تم الإبلاغ عن نماذج التعلم العميق للكشف عن سرطان الجلد تصل قيم AUC إلى <span class="data-highlight">0.91-0.94</span> في مجموعات بيانات التطوير. ومع ذلك، كشف التحقق الخارجي عن تباينات مثيرة للقلق: Daneshjou et al. (<span class="data-highlight">2022</span>، وجدت مجلة Nature Medicine) أن أدوات طب الأمراض الجلدية التجارية ذات الذكاء الاصطناعي يتم إجراؤها بمستويات قريبة من الصدفة على البشرة الداكنة (أنواع فيتزباتريك من V إلى VI)، مع انخفاض المساحة تحت المنحنى. ك <span class="data-highlight">0.50-0.57</span> — عشوائي بشكل أساسي. كانت مجموعات بيانات التدريب متحيزة بشكل كبير نحو ألوان البشرة الفاتحة، مما يعني أنه لم يتم ملء الجدول 2x2 بشكل صحيح لجميع السكان.</p>
+</div>
+<div class="decision-tree">
+<div class="decision-tree-header">وعد الذكاء الاصطناعي للأمراض الجلدية: عشرينيات القرن الحادي والعشرين</div>
+<div class="decision-scenario">يفكر أحد المستشفيات في نشر أداة الذكاء الاصطناعي لفحص سرطان الجلد في عيادة جلدية تخدم مجموعة متنوعة من سكان المناطق الحضرية. أبلغت الشركة المصنعة عن أن المساحة تحت المنحنى تبلغ 0.94.</div>
+<div class="decision-paths">
+<div class="decision-path path-a" role="button" tabindex="0">
+<div class="path-label">المسار أ: النشر بناءً على تفويض الجامعة الشامل</div>
+<div class="path-choice">ثق بالعنوان AUC البالغ 0.94 وانشره لجميع المرضى</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">يتم تجاهل الأورام الميلانينية على البشرة الداكنة بمعدلات أعلى. يخفي رقم الحساسية الإجمالي فجوة خطيرة. المرضى الذين يعانون من أعلى معدل وفيات بسبب التشخيص المتأخر هم الذين يفشل الذكاء الاصطناعي أكثر من غيرهم.</div>
+<div class="path-outcome">النتيجة: تضخم التفاوت الصحي بواسطة التكنولوجيا</div>
+</div>
+<div class="decision-path path-b" role="button" tabindex="0">
+<div class="path-label">المسار ب: التقييم الطبقي المنصف للطلب</div>
+<div class="path-choice">يتطلبون حساسية ونوعية مقسمة حسب لون البشرة (مقياس فيتزباتريك)، والعمر، وموقع الإصابة</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">اكتشف فجوة الأداء. تتطلب إعادة التدريب على مجموعات البيانات المتنوعة أو تقييد استخدامها على المجموعات السكانية التي تم التحقق من صحتها. قم بإقران الذكاء الاصطناعي مع إشراف طبيب الأمراض الجلدية للمجموعات الممثلة تمثيلاً ناقصًا.</div>
+<div class="path-outcome">النتيجة: النشر العادل؛ لم يتخلف أحد عن الركب</div>
+</div>
+</div>
+</div>
+<div class="story-revelation">
+<div class="revelation-label">الرؤيا</div>
+<div class="revelation-text">يمكن لرقم AUC واحد إخفاء تباينات خطيرة. يجب تقييم أدوات التشخيص الناشئة المستندة إلى الذكاء الاصطناعي بنفس الدقة مثل أي اختبار تشخيصي: مقسمة حسب السكان، ويتم التحقق من صحتها خارجيًا، ويتم الاحتفاظ بها وفقًا لمعايير STARD وQUADAS-2.</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">القائمة المرجعية</div>
+<div class="lesson-item animate delay-1">
+<div class="lesson-number" style="background:var(--green);">✓</div>
+<div class="lesson-content">
+<h4>هل كان هناك معيار مرجعي صالح؟</h4>
+<p>هل يتم تطبيق المعيار الذهبي على جميع المرضى؟</p>
+</div>
+</div>
+<div class="lesson-item animate delay-2">
+<div class="lesson-number" style="background:var(--green);">✓</div>
+<div class="lesson-content">
+<h4>هل كان المترجمون أعمى؟</h4>
+<p>قراء الاختبار غير مدركين للتشخيص؟</p>
+</div>
+</div>
+<div class="lesson-item animate delay-3">
+<div class="lesson-number" style="background:var(--green);">✓</div>
+<div class="lesson-content">
+<h4>هل كان الطيف مناسبًا؟</h4>
+<p>المرضى مماثلة لسكانك؟</p>
+</div>
+</div>
+<div class="lesson-item animate delay-4">
+<div class="lesson-number" style="background:var(--green);">✓</div>
+<div class="lesson-content">
+<h4>هل تم تحديد العتبة مسبقًا؟</h4>
+<p>أو تم اختياره لتعظيم النتائج؟</p>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">عندما لا تتطابق النتائج مع الشك</div>
+<div class="decision-tree animate delay-1">
+<h4>شجرة قرارات التجاوز السريرية</h4>
+<div class="tree-row"><div class="tree-node warning">اختبار سلبي، شك كبير</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">ما هو LR-؟</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">LR- &lt; 0.1</div>
+<div class="tree-node tp">استبعاد قوي<small>تقبل السلبية</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">LR- 0.1-0.5</div>
+<div class="tree-node action">كرر الاختبار<small>أو اختبار مختلف</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">LR- &gt; 0.5</div>
+<div class="tree-node warning">الثقة في الحكم<small>الاختبار ضعيف</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">شجرة قرار الاختبار المتسلسل</div>
+<div class="decision-tree animate delay-1">
+<h4>عندما لا يكفي اختبار واحد</h4>
+<div class="tree-row"><div class="tree-node root">اختبار الفحص الأولي</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node tp">إيجابي</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node action">اختبار تأكيدي<small>خصوصية عالية</small></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-branch" style="gap:0.3rem;">
+<div class="tree-branch-item">
+<div class="tree-node tp" style="font-size:0.5rem;">إيجابي<small>تشخيص</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node fn" style="font-size:0.5rem;">سلبي<small>إنذار كاذب</small></div>
+</div>
+</div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node tn">سلبي</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node action">من المحتمل أن تكون سلبية<small>إذا فحص الاستشعار العالي</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide hope">
+<div class="content text-center">
+<div class="refrain hope animate">
+                  "مسلحين بالحساسية، والنوعية، والاحتمالية،<br/>
+                  مسلح بـ SROC وقياس الاتفاق،<br/>
+                  يمكنك أن ترى من خلال كذبة الاختبار -<br/>
+                  واحكم على حقيقتها بنفسك."
+                </div>
+</div>
+</div>
+</div>
+ ==================== الوحدة 19: أخطاء نقل الدم ================ 
+<div class="module-slides" data-module="19">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  ألم تسمع عن المريض<br/>
+                  الذي حصل على <em>دم خاطئ</em>,<br/>
+                  ليس لأن الاختبار كان خاطئا،<br/>
+                  ولكن لأن <em>لم يقم به أحد</em>?
+                </div>
+</div>
+</div>
+<div class="slide blood">
+<div class="content text-center">
+<div class="title red animate">الاختبار الذي لم يتم</div>
+<div class="story-card animate delay-1">
+<div class="place">المستشفيات في جميع أنحاء العالم</div>
+<div class="narrative">
+                    تكون فصيلة الدم ABO دقيقة بنسبة 100% تقريبًا عند إجرائها.
+                    <br/><br/>
+                    Yet <strong>لا تزال تفاعلات نقل الدم تقتل</strong>- ليس من الفشل في الاختبار، ولكن من <strong>الفشل البشري</strong>:
+                    <br/><br/>
+                    • سحب دم خاطئ من مريض خاطئ<br/>
+                    • تم تبديل التسميات في المختبر<br/>
+                    • تخطي فحص السرير في حالات الطوارئ<br/>
+<br/>
+                    في المملكة المتحدة، <strong>1 في 13000 عملية نقل دم</strong> يذهب إلى المريض الخطأ. نجح الاختبار. فشل النظام.
+                  </div>
+<div class="source">Bolton-Maggs PHB. ترانسفوس ميد. 2016;26:303-311</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">الاختبار مقابل شجرة قرار النظام</div>
+<div class="decision-tree animate delay-1">
+<h4>أين يمكن أن تسوء الأمور؟</h4>
+<div class="tree-row"><div class="tree-node root">عملية التشخيص</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">مصدر الخطأ؟</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">اختبار نفسه</div>
+<div class="tree-node warning">خطأ تحليلي<small>مشكلة Sens/Spec</small></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node action">مطلوب اختبار أفضل</div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">خطأ في معرف ما قبل التحليل</div>
+<div class="tree-node fp">عينة خاطئة<small>ID error</small></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node action">يلزم إصلاح النظام</div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">انحياز ما بعد التحليل</div>
+<div class="tree-node fp">عمل خاطئ<small>الإبلاغ عن خطأ</small></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node action">إصلاح العملية اللازمة</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  "الاختبار المثالي لا يعني شيئًا<br/>
+                  إذا تم سحب الدم الخطأ،<br/>
+                  تم تطبيق التسمية الخاطئة،<br/>
+                  الحقيبة الخاطئة معلقة."
+                </div>
+<div class="gold-line animate delay-2"></div>
+<p class="animate delay-3" style="color:rgba(255,255,255,0.6);font-style:italic;font-size:0.8rem;">
+                  تقيس دراسات DTA دقة الاختبار. أنها لا تقيس دقة النظام.
+                </p>
+</div>
+</div>
+</div>
+ =========== الوحدة 20: الاختبار والمراجع ====================================================================== 
+<div class="module-slides" data-module="20">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="title gold animate">مراجع</div>
+<div class="references animate delay-1">
+<h4>المصادر الرئيسية</h4>
+<ol>
+<li>كاريرو جي. الدم الفاسد. كنوبف، 2018. [ثيرانوس]</li>
+<li>مركز السيطرة على الأمراض. معدل وفيات الأمهات. 198;36(49):833-840. [إمدادات الدم لفيروس نقص المناعة البشرية]</li>
+<li>هيربست آل وآخرون. ن إنجل ي ميد. 1971;284:878-881. [ديس]</li>
+<li>موير فا. آن المتدرب ميد. 2012;157:120-134. [دعم البرامج والإدارة]</li>
+<li>البابا ج.ه. وآخرون. ن إنجل ي ميد. 2000;342:1163-1170. [تروبونين]</li>
+<li>ستينجارت KR وآخرون. كوكرين 201;1:CD009593. [جينيكسبيرت]</li>
+<li>دينيس J وآخرون. كوكرين 202؛7:CD013705. [فأر كوفيد]</li>
+<li>لوحة المملكة المتحدة. لانسيت. 2012;380:1778-1786. [تصوير الثدي الشعاعي]</li>
+<li>جاك كر وآخرون. لانسيت نيورول. 2018;17:760-773. [الأميلويد]</li>
+<li>من. أداء اختبار الملاريا RDT. 2022.</li>
+<li>رييتسما جي بي وآخرون. J كلين Epidemiol. 2005;58:982-990. [ثنائي المتغير]</li>
+<li>البياض PF وآخرون. آن المتدرب ميد. 2011;155:529-536. [كواداس-2]</li>
+<li>بولتون ماجز PHB. ترانسفوس ميد. 2016;26:303-311.</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="quiz-container animate">
+<div class="quiz-question">الاختبار حساس بنسبة 99% ومحدد بنسبة 99%. معدل انتشار المرض هو 1/1000. اختبار المريض إيجابي. ما هو احتمال إصابتهم بالمرض؟</div>
+<div class="quiz-options">
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">99%</div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">90%</div>
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">حوالي 9%</div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">50%</div>
+</div>
+<div class="quiz-feedback"></div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="quiz-container animate">
+<div class="quiz-question">ماذا يعني "SnNout"؟</div>
+<div class="quiz-options">
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">اختبار شديد الحساسية، عندما يكون سلبيًا، يستبعد المرض</div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">اختبار محدد للغاية، عندما يكون سلبيًا، يستبعد المرض</div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">وينبغي استخدام الحساسية للفحص</div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">يجب أن تكون الخصوصية أعلى من 90٪</div>
+</div>
+<div class="quiz-feedback"></div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="quiz-container animate">
+<div class="quiz-question">لماذا أصبح إمداد الدم ملوثًا بفيروس نقص المناعة البشرية على الرغم من إجراء الاختبارات؟</div>
+<div class="quiz-options">
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">وكانت الاختبارات خصوصية منخفضة</div>
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">كانت للاختبارات فترة نافذة مع حساسية صفرية للعدوى المبكرة</div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">لم يتم إجراء الاختبارات بشكل صحيح</div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">كانت الاختبارات باهظة الثمن</div>
+</div>
+<div class="quiz-feedback"></div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="quiz-container animate">
+<div class="quiz-question">وهو المجال QUADAS-2 الذي يقيم ما إذا كان قد تم تفسير الاختبار دون معرفة التشخيص؟</div>
+<div class="quiz-options">
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">اختيار المريض</div>
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">اختبار الفهرس</div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">المعيار المرجعي</div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">التدفق والتوقيت</div>
+</div>
+<div class="quiz-feedback"></div>
+</div>
+</div>
+</div>
+<div class="slide hope">
+<div class="content text-center">
+<div class="big-number green animate" style="font-size:3.5rem;">✔</div>
+<div class="title green animate delay-1">اكتملت الدورة</div>
+<div class="gold-line animate delay-2"></div>
+<div class="refrain hope animate delay-3">
+                  "الآن أنت تعرف النتائج الأربع،<br/>
+                  فضيلتان للاختبار،<br/>
+                  مغالطة القاعدة معدل،<br/>
+                  فن تجميع الأدلة،<br/>
+                  والتحيزات التي تخفي الحقيقة.<br/>
+<br/>
+                  عندما يكذب عليك الاختبار التالي —<br/>
+<em>سوف تعرف.</em>"
+                </div>
+</div>
+</div>
+</div>
+<div class="slide-nav">
+<button class="nav-btn" onclick="prevSlide()">←</button>
+<div class="nav-center">
+<div class="slide-counter" id="slideCounter">1 / 4</div>
+<div class="progress" id="progressDots"></div>
+</div>
+<button class="nav-btn" onclick="nextSlide()">→</button>
+</div>
+</div>
+</div>
+</main>
+</div>
+<script>
+    function toggleSidebar() {
+      const sidebar = document.querySelector('.sidebar');
+      const overlay = document.querySelector('.sidebar-overlay');
+      const toggle = document.querySelector('.mobile-menu-toggle');
+      if (!sidebar) return;
+      const isOpen = sidebar.classList.toggle('open');
+      if (overlay) overlay.classList.toggle('show', isOpen);
+      if (toggle) toggle.setAttribute('aria-expanded', String(isOpen));
+    }
+
+    const modules = [
+      { id: 1, title: "الاحتيال", subtitle: "Theranos", slides: 4 },
+      { id: 2, title: "Four Outcomes", subtitle: "TP/FP/FN/TN", slides: 5 },
+      { id: 3, title: "HIV Window", subtitle: "أزمة إمدادات الدم", slides: 5 },
+      { id: 4, title: "DES Tragedy", subtitle: "السرطان عند البنات", slides: 5 },
+      { id: 5, title: "Sens & Spec", subtitle: "الفضيلتان", slides: 6 },
+      { id: 6, title: "مغالطة المعدل الأساسي", subtitle: "الخطأ الأكثر دموية", slides: 6 },
+      { id: 7, title: "TB GeneXpert", subtitle: "Missed resistance", slides: 5 },
+      { id: 8, title: "PSA Tragedy", subtitle: "Overdiagnosis", slides: 5 },
+      { id: 9, title: "Troponin", subtitle: "Timing matters", slides: 5 },
+      { id: 10, title: "Likelihood Ratios", subtitle: "ماذا تعني النتائج", slides: 6 },
+      { id: 11, title: "Malaria RDTs", subtitle: "عندما تفوت الاختبارات", slides: 5 },
+      { id: 12, title: "COVID Tests", subtitle: "False security", slides: 5 },
+      { id: 13, title: "Mammography", subtitle: "العثور على الكثير", slides: 6 },
+      { id: 14, title: "Amyloid Testing", subtitle: "Surrogate markers", slides: 4 },
+      { id: 15, title: "QUADAS-2", subtitle: "Quality assessment", slides: 6 },
+      { id: 16, title: "Meta-Analysis", subtitle: "SROC curves", slides: 6 },
+      { id: 17, title: "Heterogeneity", subtitle: "عندما تختلف الدراسات", slides: 5 },
+      { id: 18, title: "مجموعة الأدوات", subtitle: "Clinical decisions", slides: 6 },
+      { id: 19, title: "System Errors", subtitle: "ما بعد الاختبار", slides: 4 },
+      { id: 20, title: "الاختبار والمصادر", subtitle: "Test yourself", slides: 6 }
+    ];
+
+    let currentModule = 1;
+    let currentSlide = 1;
+    const completedModules = new Set();
+
+    function init() {
+      renderModuleList();
+      updateSlideNav();
+      document.addEventListener('keydown', (e) => {
+        const tag = document.activeElement?.tagName;
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || tag === 'BUTTON') return;
+        const role = document.activeElement?.getAttribute?.('role');
+        if (role === 'button' || role === 'radio' || role === 'option') {
+          if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); document.activeElement.click(); }
+          return;
+        }
+        if (e.key === 'ArrowLeft' || e.key === ' ') { e.preventDefault(); nextSlide(); }
+        else if (e.key === 'ArrowRight') { e.preventDefault(); prevSlide(); }
+      });
+    }
+
+    function renderModuleList() {
+      const list = document.getElementById('moduleList');
+      list.innerHTML = modules.map(m => `
+        <div class="عنصر الوحدة ${m.id === currentModule ? 'active' : ''} ${CompletedModules.has(m.id) ؟ 'مكتمل' : ''}" onclick="goToModule(${m.id})" tabindex="0" role="button" aria-label="الوحدة النمطية ${m.id}: ${m.title}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();goToModule(${m.id});}">
+          <div class="module-number">${completedModules.has(m.id) ? '✓' : m.id}</div>
+          <div class="module-info">
+            <div class="module-title">${m.title}</div>
+            <div class="module-subtitle">${m.subtitle}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function goToModule(moduleId) {
+      if (moduleId > currentModule) completedModules.add(currentModule);
+      currentModule = moduleId;
+      currentSlide = 1;
+      document.querySelectorAll('.module-slides').forEach(el => el.classList.remove('active'));
+      document.querySelector(`.module-slides[data-module="${moduleId}"]`).classList.add('active');
+      updateSlideVisibility();
+      updateSlideNav();
+      renderModuleList();
+      document.getElementById('currentModule').textContent = modules[moduleId - 1].title;
+    }
+
+    function updateSlideVisibility() {
+      const moduleSlides = document.querySelector(`.module-slides[data-module="${currentModule}"]`);
+      const slides = moduleSlides.querySelectorAll('.slide');
+      slides.forEach((slide, index) => slide.classList.toggle('active', index + 1 === currentSlide));
+    }
+
+    function updateSlideNav() {
+      const module = modules[currentModule - 1];
+      document.getElementById('slideCounter').textContent = `${currentSlide} / ${module.slides}`;
+      document.getElementById('progressDots').innerHTML = Array.from({ length: module.slides }, (_, i) =>
+        `<div class="progress-dot ${i + 1 === currentSlide ? 'active' : ''}" onclick="goToSlide(${i + 1})"></div>`
+      ).join('');
+    }
+
+    function goToSlide(slideNum) { currentSlide = slideNum; updateSlideVisibility(); updateSlideNav(); }
+
+    function nextSlide() {
+      const module = modules[currentModule - 1];
+      if (currentSlide < module.slides) { currentSlide++; updateSlideVisibility(); updateSlideNav(); }
+      else if (currentModule < modules.length) { goToModule(currentModule + 1); }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 1) { currentSlide--; updateSlideVisibility(); updateSlideNav(); }
+      else if (currentModule > 1) {
+        const prevModuleSlides = modules[currentModule - 2].slides;
+        currentModule--;
+        currentSlide = prevModuleSlides;
+        document.querySelectorAll('.module-slides').forEach(el => el.classList.remove('active'));
+        document.querySelector(`.module-slides[data-module="${currentModule}"]`).classList.add('active');
+        updateSlideVisibility();
+        updateSlideNav();
+        renderModuleList();
+        document.getElementById('currentModule').textContent = modules[currentModule - 1].title;
+      }
+    }
+
+    function checkAnswer(element, isCorrect) {
+      const container = element.closest('.quiz-container');
+      const options = container.querySelectorAll('.quiz-option');
+      const feedback = container.querySelector('.quiz-feedback');
+      options.forEach(opt => {
+        opt.style.pointerEvents = 'none';
+        if (opt === element) opt.classList.add(isCorrect ? 'correct' : 'incorrect');
+        if (!isCorrect && opt.dataset.correct === 'true') opt.classList.add('correct');
+      });
+      feedback.classList.add('show', isCorrect ? 'correct' : 'incorrect');
+      feedback.textContent = isCorrect ? 'صحيحة. لقد فهمت.' : 'ليس تمامًا. فكر في القصص التي سمعتها.';
+    }
+
+    // Interactive Base Rate Calculator
+    function updateCalc() {
+      const prev = parseFloat(document.getElementById('prevSlider').value);
+      const sens = parseFloat(document.getElementById('sensSlider').value);
+      const spec = parseFloat(document.getElementById('specSlider').value);
+
+      document.getElementById('prevValue').textContent = prev.toFixed(1) + '%';
+      document.getElementById('sensValue').textContent = sens + '%';
+      document.getElementById('specValue').textContent = spec + '%';
+
+      // Calculate PPV
+      const prevDecimal = prev / 100;
+      const sensDecimal = sens / 100;
+      const specDecimal = spec / 100;
+
+      const tp = prevDecimal * sensDecimal;
+      const fp = (1 - prevDecimal) * (1 - specDecimal);
+      const ppv = (tp + fp === 0) ? 0 : tp / (tp + fp) * 100;
+
+      document.getElementById('ppvResult').textContent = ppv.toFixed(1) + '%';
+      document.getElementById('fpRate').textContent = (100 - ppv).toFixed(0) + '% من النتائج الإيجابية هي إنذارات كاذبة';
+    }
+
+    init();
+  </script>
+</body>
+</html>

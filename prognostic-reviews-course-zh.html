@@ -1,0 +1,4304 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Prognostic Reviews: Predicting Patient Futures</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&amp;family=Source+Sans+Pro:wght@400;600&amp;display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --navy: #1E2761;
+  --deep-navy: #141B3D;
+  --gold: #D4AF37;
+  --cream: #FAF8F5;
+  --red: #BF2D2D;
+  --teal: #2D8B8B;
+  --light-text: #718096;
+  --green: #2D8B5F;
+  --purple: #6B46C1;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Source Sans Pro', sans-serif;
+  background: var(--cream);
+  color: var(--navy);
+  min-height: 100vh;
+  display: flex;
+}
+
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--gold);
+  color: var(--navy);
+  padding: 8px 16px;
+  z-index: 1000;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 0 0 8px 0;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+.hamburger {
+  display: none;
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 1001;
+  background: var(--navy);
+  border: none;
+  border-radius: 8px;
+  padding: 12px;
+  cursor: pointer;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.hamburger span {
+  display: block;
+  width: 24px;
+  height: 3px;
+  background: var(--gold);
+  border-radius: 2px;
+  transition: transform 0.3s;
+}
+
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 999;
+}
+
+.sidebar {
+  width: 280px;
+  background: var(--navy);
+  padding: 2rem 1rem;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  height: 100vh;
+  overflow-y: auto;
+  z-index: 1000;
+}
+
+.logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.3rem;
+  color: var(--gold);
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.tagline {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.6);
+  text-align: center;
+  margin-bottom: 2rem;
+  font-style: italic;
+}
+
+.nav-section {
+  margin-bottom: 1.5rem;
+}
+
+.nav-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: rgba(255,255,255,0.4);
+  margin-bottom: 0.75rem;
+  padding-left: 0.5rem;
+}
+
+.module-item {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 0.25rem;
+  border: none;
+  background: transparent;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+.module-item:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+.module-item.active {
+  background: rgba(212, 175, 55, 0.2);
+  border-left: 3px solid var(--gold);
+}
+
+.module-item.completed .module-number {
+  background: var(--green);
+}
+
+.module-number {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  color: white;
+  margin-right: 0.75rem;
+  flex-shrink: 0;
+}
+
+.module-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.module-title {
+  font-size: 0.9rem;
+  color: white;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.module-subtitle {
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.5);
+}
+
+.time-estimate {
+  color: var(--teal);
+  font-weight: 600;
+  font-size: 0.65rem;
+}
+
+.main-content {
+  flex: 1;
+  margin-left: 280px;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background: white;
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.progress-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.progress-bar {
+  width: 200px;
+  height: 8px;
+  background: rgba(0,0,0,0.1);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold), var(--purple));
+  border-radius: 4px;
+  transition: width 0.3s;
+}
+
+.progress-text {
+  font-size: 0.85rem;
+  color: var(--light-text);
+}
+
+.course-time {
+  font-size: 0.8rem;
+  color: var(--light-text);
+  padding: 0.25rem 0.75rem;
+  background: rgba(107, 70, 193, 0.1);
+  border-radius: 12px;
+}
+
+.points-display {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, var(--navy), #2a3a7d);
+  color: var(--gold);
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-weight: 600;
+}
+
+.top-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.action-btn {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--navy);
+  background: transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+}
+
+.action-btn:hover {
+  background: var(--navy);
+  color: white;
+}
+
+.slide-container {
+  flex: 1;
+  padding: 2rem;
+  max-width: 900px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.slide-title {
+  text-align: center;
+  padding: 4rem 2rem;
+}
+
+.slide-title h1 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 3rem;
+  color: var(--navy);
+  margin-bottom: 1rem;
+}
+
+.slide-title .subtitle {
+  font-size: 1.5rem;
+  color: var(--purple);
+  margin-bottom: 1rem;
+}
+
+.slide-title .description {
+  font-size: 1.1rem;
+  color: var(--light-text);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.principle-box {
+  background: linear-gradient(135deg, var(--navy), #2a3a7d);
+  border-radius: 16px;
+  padding: 3rem;
+  text-align: center;
+  margin: 2rem 0;
+}
+
+.principle-box .number {
+  font-size: 4rem;
+  color: var(--gold);
+  font-family: 'Cormorant Garamond', serif;
+  line-height: 1;
+}
+
+.principle-box .text {
+  font-size: 1.8rem;
+  color: white;
+  font-family: 'Cormorant Garamond', serif;
+  margin-top: 1rem;
+  font-style: italic;
+}
+
+.story-deep {
+  background: linear-gradient(135deg, rgba(107,70,193,0.08), rgba(30,39,97,0.12));
+  border-left: 4px solid var(--purple);
+  border-radius: 0 16px 16px 0;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+}
+
+.story-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--purple);
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.story-source {
+  font-size: 0.8rem;
+  color: var(--light-text);
+  margin-bottom: 1rem;
+  font-style: italic;
+}
+
+.timeline {
+  position: relative;
+  padding-left: 2rem;
+  margin: 1.5rem 0;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 0.5rem;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(to bottom, var(--gold), var(--purple), var(--green));
+}
+
+.timeline-event {
+  position: relative;
+  margin-bottom: 1rem;
+  padding-left: 1rem;
+}
+
+.timeline-event::before {
+  content: '';
+  position: absolute;
+  left: -1.5rem;
+  top: 0.5rem;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--gold);
+}
+
+.timeline-event.crisis::before {
+  background: var(--red);
+}
+
+.timeline-event.revelation::before {
+  background: var(--green);
+}
+
+.timeline-year {
+  font-weight: 600;
+  color: var(--purple);
+  font-size: 0.9rem;
+}
+
+.timeline-text {
+  color: var(--navy);
+  font-size: 0.95rem;
+  margin-top: 0.25rem;
+}
+
+.real-data-box {
+  background: rgba(45, 139, 139, 0.1);
+  border-radius: 12px;
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+.real-data-box h4 {
+  color: var(--teal);
+  font-size: 0.85rem;
+  margin-bottom: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.data-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+}
+
+.data-item {
+  text-align: center;
+}
+
+.data-label {
+  font-size: 0.7rem;
+  color: var(--light-text);
+  text-transform: uppercase;
+}
+
+.data-value {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--navy);
+}
+
+.hook-text {
+  background: linear-gradient(135deg, rgba(212,175,55,0.15), rgba(30,39,97,0.1));
+  padding: 1rem;
+  border-radius: 8px;
+  margin-top: 1rem;
+  font-style: italic;
+  color: var(--navy);
+}
+
+.lesson-gold {
+  color: var(--gold);
+  font-weight: 600;
+  font-style: normal;
+  display: block;
+  margin-top: 0.5rem;
+  padding: 0.75rem;
+  background: rgba(30,39,97,0.05);
+  border-left: 3px solid var(--gold);
+  border-radius: 0 8px 8px 0;
+}
+
+.content-box {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  margin: 1.5rem 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.content-box h2 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.8rem;
+  color: var(--navy);
+  margin-bottom: 1.5rem;
+}
+
+.content-section {
+  margin-bottom: 1.5rem;
+}
+
+.content-section:last-child {
+  margin-bottom: 0;
+}
+
+.content-section h3 {
+  color: var(--purple);
+  font-size: 1.1rem;
+  margin-bottom: 0.75rem;
+}
+
+.content-section ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.content-section li {
+  padding: 0.5rem 0;
+  padding-left: 1.5rem;
+  position: relative;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.content-section li:last-child {
+  border-bottom: none;
+}
+
+.content-section li::before {
+  content: '→';
+  position: absolute;
+  left: 0;
+  color: var(--gold);
+}
+
+.content-section p {
+  color: var(--navy);
+  line-height: 1.6;
+}
+
+.method-box {
+  background: linear-gradient(135deg, rgba(45,139,139,0.08), rgba(30,39,97,0.05));
+  border-radius: 16px;
+  padding: 2rem;
+  margin: 1.5rem 0;
+}
+
+.method-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--teal);
+  margin-bottom: 0.5rem;
+}
+
+.method-box h2 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.6rem;
+  color: var(--navy);
+  margin-bottom: 1.5rem;
+}
+
+.method-section {
+  margin-bottom: 1.25rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+.method-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.method-section h3 {
+  color: var(--teal);
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.method-section p {
+  color: var(--navy);
+  line-height: 1.6;
+  white-space: pre-line;
+}
+
+.decision-tree {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  margin: 1.5rem 0;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+}
+
+.decision-tree h2 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.6rem;
+  color: var(--navy);
+  margin-bottom: 0.5rem;
+}
+
+.decision-situation {
+  background: rgba(107,70,193,0.1);
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+  color: var(--navy);
+}
+
+.decision-question {
+  font-weight: 600;
+  color: var(--purple);
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+}
+
+.decision-branches {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.decision-branch {
+  padding: 1rem;
+  background: rgba(0,0,0,0.03);
+  border: 2px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+  font-family: inherit;
+  font-size: 0.95rem;
+}
+
+.decision-branch:hover {
+  border-color: var(--purple);
+  background: rgba(107,70,193,0.05);
+}
+
+.decision-outcome {
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin-top: 1rem;
+}
+
+.decision-outcome.success {
+  background: linear-gradient(135deg, rgba(45,139,95,0.15), rgba(45,139,95,0.05));
+  border-left: 4px solid var(--green);
+}
+
+.decision-outcome.danger {
+  background: linear-gradient(135deg, rgba(191,45,45,0.15), rgba(191,45,45,0.05));
+  border-left: 4px solid var(--red);
+}
+
+.decision-outcome.partial {
+  background: linear-gradient(135deg, rgba(212,175,55,0.15), rgba(212,175,55,0.05));
+  border-left: 4px solid var(--gold);
+}
+
+.outcome-title {
+  font-weight: 600;
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.success .outcome-title { color: var(--green); }
+.danger .outcome-title { color: var(--red); }
+.partial .outcome-title { color: var(--gold); }
+
+.outcome-text {
+  color: var(--navy);
+  margin-bottom: 1rem;
+  line-height: 1.6;
+}
+
+.outcome-lesson {
+  font-style: italic;
+  color: var(--light-text);
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(0,0,0,0.1);
+}
+
+.tree-controls {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.tree-btn {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--navy);
+  background: transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+}
+
+.tree-btn:hover {
+  background: var(--navy);
+  color: white;
+}
+
+.quiz-container {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  margin: 1.5rem 0;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+}
+
+.quiz-question {
+  font-size: 1.1rem;
+  color: var(--navy);
+  margin-bottom: 1.5rem;
+  font-weight: 500;
+}
+
+.quiz-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.quiz-option {
+  padding: 1rem;
+  background: rgba(0,0,0,0.03);
+  border: 2px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+  font-family: inherit;
+  font-size: 0.95rem;
+}
+
+.quiz-option:hover {
+  border-color: var(--purple);
+}
+
+.quiz-option.selected {
+  border-color: var(--navy);
+  background: rgba(30,39,97,0.05);
+}
+
+.quiz-option.correct {
+  border-color: var(--green);
+  background: rgba(45,139,95,0.1);
+}
+
+.quiz-option.incorrect {
+  border-color: var(--red);
+  background: rgba(191,45,45,0.1);
+}
+
+.quiz-feedback {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 8px;
+  display: none;
+}
+
+.quiz-feedback.show {
+  display: block;
+}
+
+.quiz-feedback.correct {
+  background: rgba(45,139,95,0.1);
+  border-left: 4px solid var(--green);
+}
+
+.quiz-feedback.incorrect {
+  background: rgba(191,45,45,0.1);
+  border-left: 4px solid var(--red);
+}
+
+.nav-buttons {
+  display: flex;
+  justify-content: space-between;
+  padding: 1rem 2rem;
+  background: white;
+  border-top: 1px solid rgba(0,0,0,0.1);
+}
+
+.nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.nav-btn.prev {
+  background: rgba(0,0,0,0.05);
+  color: var(--navy);
+}
+
+.nav-btn.prev:hover {
+  background: rgba(0,0,0,0.1);
+}
+
+.nav-btn.next {
+  background: linear-gradient(135deg, var(--purple), #8B5CF6);
+  color: white;
+}
+
+.nav-btn.next:hover {
+  transform: translateX(4px);
+}
+
+.nav-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.badge-notification {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  background: linear-gradient(135deg, var(--navy), #2a3a7d);
+  border-radius: 16px;
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  z-index: 3000;
+  transform: translateY(100px);
+  opacity: 0;
+  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.badge-notification.show {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.badge-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.badge-info {
+  color: white;
+}
+
+.badge-earned {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--gold);
+  margin-bottom: 0.25rem;
+}
+
+.badge-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.badge-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.badge-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1rem;
+  text-align: center;
+  border: 2px solid transparent;
+  transition: all 0.3s;
+}
+
+.badge-card.earned {
+  border-color: var(--gold);
+  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.2);
+}
+
+.badge-card.locked {
+  opacity: 0.5;
+  filter: grayscale(1);
+}
+
+.formula-box {
+  background: rgba(30, 39, 97, 0.08);
+  border-radius: 8px;
+  padding: 1rem;
+  margin: 1rem 0;
+  font-family: 'Courier New', monospace;
+  text-align: center;
+  color: var(--navy);
+  font-size: 1.1rem;
+}
+
+.performance-metric {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: rgba(107, 70, 193, 0.08);
+  border-radius: 8px;
+  margin: 0.75rem 0;
+}
+
+.metric-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--purple);
+  min-width: 80px;
+  text-align: center;
+}
+
+.metric-info h4 {
+  color: var(--navy);
+  margin-bottom: 0.25rem;
+}
+
+.metric-info p {
+  font-size: 0.85rem;
+  color: var(--light-text);
+}
+
+@media (max-width: 768px) {
+  .hamburger {
+    display: flex;
+  }
+
+  .sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.3s;
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .sidebar-overlay.show {
+    display: block;
+  }
+
+  .main-content {
+    margin-left: 0;
+  }
+
+  .slide-title h1 {
+    font-size: 2rem;
+  }
+
+  .data-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .top-bar {
+    padding: 1rem;
+  }
+
+  .progress-bar {
+    width: 120px;
+  }
+}
+
+@media (max-width: 480px) {
+  .sidebar {
+    width: 100%;
+  }
+
+  .slide-container {
+    padding: 1rem;
+  }
+
+  .story-deep, .method-box, .content-box {
+    padding: 1rem;
+  }
+
+  .data-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .top-actions {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+    /* Focus-visible styles for keyboard navigation */
+    :focus-visible {
+      outline: 2px solid var(--gold, #D4AF37);
+      outline-offset: 2px;
+    }
+
+    :focus:not(:focus-visible) {
+      outline: none;
+    }
+
+    button:focus-visible,
+    a:focus-visible,
+    [role="button"]:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible {
+      outline: 2px solid var(--gold, #D4AF37);
+      outline-offset: 2px;
+      box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.3);
+    }
+
+    /* Screen Reader Only */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<button aria-expanded="false" aria-label="Toggle navigation menu" class="hamburger">
+<span></span>
+<span></span>
+<span></span>
+</button>
+<div class="sidebar-overlay"></div>
+<nav aria-label="课程模块" class="sidebar" role="navigation">
+<a href="index.html" onmouseout="this.style.color='rgba(212,175,55,0.7)'" onmouseover="this.style.color='#D4AF37'" style="display:block;font-size:0.7rem;color:rgba(212,175,55,0.7);text-decoration:none;margin-bottom:0.5rem;padding:0.5rem 1rem 0;">← Course Library</a>
+<div class="logo">Prognostic Reviews</div>
+<div class="tagline">Predicting Patient Futures</div>
+<div class="nav-section">
+<div class="nav-label">Modules</div>
+<div id="module-nav"></div>
+</div>
+</nav>
+<main class="main-content" id="main-content">
+<div class="top-bar">
+<div class="progress-section">
+<div class="progress-bar">
+<div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+</div>
+<span class="progress-text" id="progress-text">0% Complete</span>
+</div>
+<div class="course-time">
+<span id="total-time">5h 40m total</span>
+</div>
+<div class="points-display">
+<span id="points-display">0</span> XP
+      </div>
+<div class="top-actions">
+<button class="action-btn" onclick="openBadges()">🏆 Badges</button>
+<button class="action-btn" onclick="openGlossary()">Glossary</button>
+</div>
+</div>
+<div class="slide-container" id="slide-container"></div>
+<div aria-live="polite" class="sr-only" id="slide-announce"></div>
+<div class="nav-buttons">
+<button class="nav-btn prev" id="prev-btn" onclick="prevSlide()">
+<span>←</span> Previous
+      </button>
+<button class="nav-btn next" id="next-btn" onclick="nextSlide()">
+        Next <span>→</span>
+</button>
+</div>
+</main>
+<script>
+const STORAGE_KEY = 'prognostic-reviews-course-progress';
+
+let currentModule = 0;
+let currentSlide = 0;
+let gameState = {
+  points: 0,
+  earnedBadges: [],
+  modulesCompleted: [],
+  decisionTrees: {}
+};
+
+// Badge Definitions
+const BADGES = {
+  'model-builder': { name: 'Model Builder', icon: '🔧', color: '#6B46C1', requirement: '完整的模型开发模块' },
+  'validation-expert': { name: 'Validation Expert', icon: '✅', color: '#2D8B5F', requirement: '完整的验证模块' },
+  'calibration-master': { name: 'Calibration Master', icon: '📊', color: '#2D8B8B', requirement: '完整的校准练习' },
+  'tripod-scholar': { name: 'TRIPOD Scholar', icon: '📝', color: '#D4AF37', requirement: '完整的报告模块' },
+  'decision-analyst': { name: 'Decision Analyst', icon: '📈', color: '#BF2D2D', requirement: '完整的决策曲线模块' },
+  'story-collector': { name: 'Story Collector', icon: '📚', color: '#1e2761', requirement: '阅读所有案例研究' },
+  'tree-navigator': { name: 'Tree Navigator', icon: '🌳', color: '#2D8B5F', requirement: '完成15 个决策树' },
+  'prognosis-master': { name: 'Prognosis Master', icon: '🎓', color: '#6B46C1', requirement: '完成整个课程' },
+  'penalization-pro': { name: 'Penalization Pro', icon: '🎯', color: '#8B5CF6', requirement: 'Master LASSO/Ridge content' },
+  'communicator': { name: 'Patient Communicator', icon: '💬', color: '#EC4899', requirement: 'Learn uncertainty communication' },
+  'skeptic': { name: 'AI Skeptic', icon: '🤖', color: '#F59E0B', requirement: '完整的机器学习与回归模块' },
+  'implementer': { name: 'Implementation Expert', icon: '🏥', color: '#10B981', requirement: '完整的实施模块' }
+};
+
+const modules = [
+  {
+    id: 0,
+    title: "The Opening",
+    subtitle: "Why Prognosis Matters",
+    principle: null,
+    estimatedTime: "15 min",
+    slides: [
+      {
+        type: 'title',
+        content: {
+          title: "Prognostic Reviews",
+          subtitle: "Predicting Patient Futures",
+          text: "通过拯救生命的分数故事以及承诺太多的算法来学习评估和构建预测模型。"
+        }
+      },
+      {
+        type: 'story-deep',
+        content: {
+          label: "基金会：FRAMINGHAM — 何时医生学会预见未来",
+          source: "Framingham Heart Study 1948-present | Wilson 1998 | Circulation",
+          timeline: [
+            { year: "1948", text: "Framingham Heart Study begins in Massachusetts. 5,209 adults enrolled. No one knows what causes heart disease. Cholesterol is just a chemical.", type: "normal" },
+            { year: "1961", text: "First major finding: high cholesterol, high blood pressure, and smoking predict heart attacks. The concept of 'risk factors' is born.", type: "revelation" },
+            { year: "1976", text: "Framingham Risk Score developed: age, sex, cholesterol, BP, smoking, diabetes combined into one number. Doctors can now QUANTIFY a patient's 10-year risk.", type: "revelation" },
+            { year: "1998", text: "Updated Framingham Risk Score published. C-statistic 0.76-0.79. Widely adopted. Millions of statin decisions based on this score.", type: "normal" },
+            { year: "2000s", text: "External validation shows Framingham overestimates risk in some populations (UK, Europe, Asia). Recalibration needed. One model doesn't fit all.", type: "crisis" },
+            { year: "Legacy", text: "Framingham proved prognosis is POSSIBLE and USEFUL. But it also showed: models must be validated, calibration matters, and context is everything.", type: "revelation" }
+          ],
+          realData: {
+            endpoint: "10-year cardiovascular disease risk",
+            model: "Framingham Risk Score",
+            discrimination: "C-statistic 0.76-0.79",
+            impact: "Guides statin therapy for millions worldwide"
+          },
+          hook: "THE HOOK: Before Framingham, doctors guessed who would have heart attacks. After Framingham, they could calculate it. This course teaches you to evaluate such calculations — to know when a prognostic model helps patients and when it's just mathematical theater."
+        }
+      },
+      {
+        type: 'principle',
+        content: {
+          text: "⏸️ KEY INSIGHT: Prognostic models translate uncertainty into numbers. A patient asking 'What are my chances?' deserves more than 'It depends.' But those numbers must be ACCURATE (calibration), DISCRIMINATING (separate high from low risk), and USEFUL (change decisions). A model can fail any of these — and often does."
+        }
+      },
+      {
+        type: 'content',
+        content: {
+          title: "What Is Prognostic Research?",
+          sections: [
+            {
+              heading: "Prognosis vs Other Research Types:",
+              items: [
+                "DIAGNOSTIC: Who HAS the disease NOW? (presence/absence)",
+                "ETIOLOGIC: What CAUSES the disease? (causation)",
+                "THERAPEUTIC: What TREATS the disease? (intervention effects)",
+                "PROGNOSTIC: What WILL HAPPEN to the patient? (future outcomes)"
+              ]
+            },
+            {
+              heading: "Why Prognosis Matters:",
+              items: [
+                "Treatment decisions: Should this patient get aggressive therapy?",
+                "Patient counseling: What should I expect?",
+                "Resource allocation: Who needs intensive monitoring?",
+                "Trial design: Enriching populations for higher event rates",
+                "Quality measurement: Risk-adjusted outcomes"
+              ]
+            },
+            {
+              heading: "The Fundamental Question:",
+              text: "根据我们现在对患者的了解，在规定的时间范围内出现特定结果的概率是多少？"
+            }
+          ]
+        }
+      },
+      {
+        type: 'content',
+        content: {
+          title: "The Seven Principles of Prognostic Modeling",
+          sections: [
+            {
+              heading: "Your Guide Through This Course:",
+              items: [
+                "1。 \\“预测不是因果关系” - 预测变量不必是原因",
+                "2. \"A model is only as good as its validation\" — Development means nothing without testing",
+                "3. \"Discrimination is not enough\" — A model must also be calibrated",
+                "4. \"More predictors is not better\" — Overfitting destroys generalizability",
+                "5。 \\“人口决定预测” - 模型不能自由移动",
+                "6. \"Clinical utility trumps statistics\" — Good numbers don't guarantee good decisions",
+                "7. \"Transparency enables trust\" — TRIPOD and reporting standards matter"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        type: 'decision-tree',
+        content: {
+          id: 'prognosis-vs-diagnosis',
+          title: "Prognosis or Diagnosis?",
+          situation: "Classify each clinical question as prognostic, diagnostic, etiologic, or therapeutic.",
+          nodes: {
+            start: {
+              question: "问题 1：“这位胸痛患者是否患有肺栓塞？”",
+              branches: [
+                { text: "Prognostic — predicting future outcome", nextNode: "q1_wrong" },
+                { text: "Diagnostic — determining current disease state", nextNode: "q1_correct" }
+              ]
+            },
+            q1_wrong: {
+              type: 'outcome',
+              outcome: 'danger',
+              title: "This is diagnostic!",
+              text: "The question is about what the patient HAS right now (PE or not), not what will happen in the future. Diagnosis = current state. Prognosis = future outcome.",
+              lesson: "诊断问题：患者是否患有 X 病症？预后问题：患者会发生什么？"
+            },
+            q1_correct: {
+              situation: "正确！问题是关于当前的疾病状态，而不是未来的结果。",
+              question: "问题 2：“这名 ICU 患者存活到出院的概率是多少？”",
+              branches: [
+                { text: "Prognostic — predicting future survival", nextNode: "q2_correct" },
+                { text: "Diagnostic — assessing current severity", nextNode: "q2_wrong" }
+              ]
+            },
+            q2_wrong: {
+              type: 'outcome',
+              outcome: 'partial',
+              title: "接近，但这是预后",
+              text: "虽然严重程度评估可以为预测提供信息，但问题是关于未来的结果（存活至出院）。时间范围使其具有预测性。",
+              lesson: "如果问题涉及未来的时间点（将生存、将发展、将复发），则它是预测性的。"
+            },
+            q2_correct: {
+              situation: "Correct! Survival to discharge is a future outcome — classic prognosis.",
+              question: "QUESTION 3: 'Does smoking cause lung cancer?'",
+              branches: [
+                { text: "Prognostic — smoking predicts cancer", nextNode: "q3_prog_wrong" },
+                { text: "病因学 - 询问因果关系", nextNode: "q3_correct" }
+              ]
+            },
+            q3_prog_wrong: {
+              type: 'outcome',
+              outcome: 'partial',
+              title: "吸烟是预测性的，但这不是预测性的问题",
+              text: "吸烟确实可以预测肺癌，并且可能存在于预后模型中。但问题是吸烟是否会导致癌症——这是病因学的。无论因果关系如何，预后都会使用预测因子。",
+              lesson: "Prognostic models can include non-causal predictors. Etiologic research specifically asks about CAUSATION."
+            },
+            q3_correct: {
+              type: 'outcome',
+              outcome: 'success',
+              title: "Exactly right!",
+              text: "问题是关于因果关系 - 吸烟会导致癌症吗？这需要因果推理方法（混杂控制、时间性等）。预后模型可以使用吸烟作为预测因子，但无需证明其因果关系。",
+              lesson: "Prediction ≠ Causation. A prognostic model can include age, sex, biomarkers — none 'cause' the outcome, but all predict it."
+            }
+          }
+        }
+      },
+      {
+        type: 'principle',
+        content: {
+          text: "⚠️ THE WARNING: As you learn prognostic methods, remember: every model is wrong, but some are useful. Framingham changed medicine. But poorly validated models have also caused harm — allocating resources wrongly, giving false reassurance, or creating false alarm. The question isn't whether a model exists, but whether it WORKS and HELPS."
+        }
+      }
+    ]
+  },
+  {
+    id: 1,
+    title: "The Factors",
+    subtitle: "预后因素研究",
+    principle: 0,
+    estimatedTime: "25 min",
+    slides: [
+      {
+        type: 'principle-display',
+        content: {
+          principle: "预测不是因果关系"
+        }
+      },
+      {
+        type: 'story-deep',
+        content: {
+          label: "THE BIOMARKER TRAP: TROPONIN — WHEN A PREDICTOR BECAME A TARGET",
+          source: "Multiple troponin trials | JAMA, NEJM | High-sensitivity assays",
+          timeline: [
+            { year: "1990s", text: "Cardiac troponin identified as marker of myocardial damage. Elevated troponin strongly predicts death in ACS patients. OR for death: 3-5x.", type: "normal" },
+            { year: "2000s", text: "Troponin becomes standard for ACS diagnosis AND prognosis. Higher levels = worse outcomes. Dose-response relationship clear.", type: "normal" },
+            { year: "The Idea", text: "'If high troponin predicts bad outcomes, we should treat patients with high troponin more aggressively.' Trials test intensive therapy in troponin-positive patients.", type: "normal" },
+            { year: "The Results", text: "FRISC-II, TACTICS-TIMI 18: Invasive strategy helps troponin-positive patients. Success? Or just treating sicker patients?", type: "revelation" },
+            { year: "The Trap", text: "肌钙蛋白可以预测结果，但不会导致结果。降低肌钙蛋白（数量）并不能改善结果。肌钙蛋白是损伤的标记，而不是治疗目标。", type: "crisis" },
+            { year: "Lesson", text: "预后因素可以指导哪些患者进行强化治疗。但是，除非该因素是因果因素且可修改，否则治疗该因素（降低数字）并无帮助。", type: "revelation" }
+          ],
+          realData: {
+            endpoint: "Mortality, reinfarction",
+            factor: "Troponin elevation",
+            effect: "或 3-5 表示不良结果",
+            lesson: "Predicts outcome; not a treatment target"
+          },
+          hook: "THE HOOK: Troponin is a superb prognostic factor. But trying to 'lower troponin' makes no sense — it's smoke, not fire. The first principle of prognostic factors: PREDICTION does not equal CAUSATION. A factor can be a perfect predictor and a useless treatment target."
+        }
+      },
+      {
+        type: 'principle',
+        content: {
+          text: "⏸️ 关键见解：预后因素是与未来结果相关的变量。它们不必是因果关系。年龄可以预测死亡率——但你无法改变年龄。肿瘤标志物可以预测复发，但降低标志物并不能治愈癌症。区分预后因素和治疗目标。"
+        }
+      },
+      {
+        type: 'content',
+        content: {
+          title: "什么是预后因素研究？",
+          sections: [
+            {
+              heading: "Definition:",
+              items: [
+                "检查某个因素是否与临床结果相关的研究",
+                "Usually in patients with a specific condition (inception cohort)",
+                "Factor measured at baseline; outcome measured later",
+                "Adjust for other known prognostic factors to assess INDEPENDENT contribution"
+              ]
+            },
+            {
+              heading: "Types of Prognostic Factors:",
+              items: [
+                "DEMOGRAPHIC: Age, sex, race/ethnicity",
+                "CLINICAL: Disease stage, comorbidities, functional status",
+                "BIOMARKERS: Lab values, imaging findings, genetic markers",
+                "PATIENT-REPORTED: Quality of life, symptoms, preferences"
+              ]
+            },
+            {
+              heading: "Key Distinction:",
+              text: "预后因素≠风险因素。在健康人群中研究危险因素（谁会患病？）。在疾病患者中研究预后因素（他们会发生什么？）。"
+            }
+          ]
+        }
+      },
+      {
+        type: 'method',
+        content: {
+          label: "方法：预后因素研究设计",
+          title: "如何研究预后因素",
+          sections: [
+            {
+              heading: "1. Define the Population (Inception Cohort):",
+              text: "• Start point: Diagnosis, treatment initiation, or clinical event\n• All patients should be at SIMILAR point in disease course\n• Avoid prevalent cohorts (survivors already selected)"
+            },
+            {
+              heading: "2. Measure the Factor at Baseline:",
+              text: "• Before outcome can occur\n• Standardized measurement\n• Handle missing data transparently"
+            },
+            {
+              heading: "3. Define the Outcome:",
+              text: "• Clinically meaningful (death, recurrence, functional status)\n• Fixed time horizon (5-year survival, 30-day readmission)\n• Objective measurement or adjudication"
+            },
+            {
+              heading: "4. Adjust for Confounders:",
+              text: "• 其他已确定的预后因素 • 可以解释关联的变量 • 使用 DAG 来识别调整组"
+            },
+            {
+              heading: "5. Report Effect Sizes with Uncertainty:",
+              text: "• Hazard ratios, odds ratios, or risk ratios with 95% CIs\n• Continuous factors: per-unit change or meaningful increments\n• Avoid arbitrary dichotomization"
+            }
+          ]
+        }
+      },
+      {
+        type: 'story-deep',
+        content: {
+          label: "THE FALSE PROMISE: PSA VELOCITY — WHEN A PROGNOSTIC FACTOR WASN'T",
+          source: "Vickers et al. JNCI 2011 | PSA velocity meta-analysis | Prostate cancer",
+          timeline: [
+            { year: "1990s", text: "PSA velocity (rate of PSA rise) proposed as prostate cancer predictor. Faster rise = more aggressive cancer. Made biological sense.", type: "normal" },
+            { year: "2000s", text: "观察性研究表明 PSA 速度可以预测死亡率。指南将速度纳入活检决策中。整个临床路径都是围绕它建立的。", type: "normal" },
+            { year: "2007", text: "Systematic review by Vickers: When ADJUSTING FOR BASELINE PSA, velocity adds NO prognostic information. Velocity was confounded by baseline level.", type: "crisis" },
+            { year: "The Math", text: "High velocity often means high PSA. High PSA predicts outcomes. Velocity appeared predictive only because it correlated with level. Classic confounding.", type: "revelation" },
+            { year: "Aftermath", text: "Guidelines revised. Velocity de-emphasized. Years of clinical practice based on a 'prognostic factor' that wasn't independently prognostic.", type: "crisis" },
+            { year: "Lesson", text: "总是问：这个因素是否添加了超出我们已知信息的信息？独立的预后值需要对既定因素进行调整。", type: "revelation" }
+          ],
+          realData: {
+            endpoint: "Prostate cancer mortality",
+            factor: "PSA velocity (unadjusted)",
+            effect: "HR ~2.0 表示高与低",
+            adjusted: "HR ~1.0 when adjusted for baseline PSA"
+          },
+          hook: "THE HOOK: PSA velocity was used for years before anyone checked if it added information beyond baseline PSA. It didn't. The lesson: A factor that CORRELATES with the outcome isn't necessarily an INDEPENDENT prognostic factor. Always adjust for what you already know."
+        }
+      },
+      {
+        type: 'decision-tree',
+        content: {
+          id: 'prognostic-factor-assessment',
+          title: "这个因素真的具有预测作用吗？",
+          situation: "A study claims that serum ferritin predicts mortality in heart failure patients. HR 2.1 (95% CI 1.5-2.9) for high vs low ferritin. The study adjusted for age and sex only. Known prognostic factors in heart failure include: ejection fraction, BNP, renal function, NYHA class.",
+          nodes: {
+            start: {
+              question: "您对这项研究最关心的是什么？",
+              branches: [
+                { text: "2.1 的 HR 太大了，无法预测。可信", nextNode: "hr_concern" },
+                { text: "仅对年龄和性别进行调整是不够的", nextNode: "adjustment_correct" },
+                { text: "Ferritin isn't biologically plausible", nextNode: "biology_concern" }
+              ]
+            },
+            hr_concern: {
+              type: 'outcome',
+              outcome: 'partial',
+              title: "HR 2.1 isn't inherently implausible",
+              text: "强预后因素（肌钙蛋白、BNP）的效应大小通常为 2.0。问题不在于效果的大小，而在于适当调整后效果是否持续。 HR 2.0 未调整的因子可能会调整 HR 1.0。",
+              lesson: "Judge prognostic factors by their adjusted effects, not by whether raw effects 'seem' too big."
+            },
+            adjustment_correct: {
+              situation: "完全正确！如果不调整 EF、BNP、肾功能和 NYHA 分级，我们不知道铁蛋白是独立的预后因素还是仅与这些既定因素相关。",
+              question: "一项新的分析调整了所有主要因素。铁蛋白 HR 从 2.1 降至 1.3 (0.95-1.7)。你得出什么结论？",
+              branches: [
+                { text: "Ferritin is still prognostic — HR > 1.0", nextNode: "still_prognostic_wrong" },
+                { text: "Ferritin adds minimal independent information — CI includes 1.0", nextNode: "minimal_info_correct" },
+                { text: "这项研究是错误的——铁蛋白没有用", nextNode: "useless_too_strong" }
+              ]
+            },
+            biology_concern: {
+              type: 'outcome',
+              outcome: 'partial',
+              title: "Biology matters, but don't require it",
+              text: "Biological plausibility strengthens causal claims. But prognostic factors don't need to be causal! Age predicts mortality without 'causing' it. Ferritin could be a marker of inflammation, iron status, or comorbidity — any of which might explain prediction.",
+              lesson: "对于预测：合理性很好，但不是必需的。对于病因学：合理性至关重要。"
+            },
+            still_prognostic_wrong: {
+              type: 'outcome',
+              outcome: 'danger',
+              title: "查看置信区间！",
+              text: "HR 1.3，95% CI 0.95-1.7 包括 1.0。这意味着我们不能排除任何关联。调整后点估计值下降了 60%（从 2.1 到 1.3），表明大部分“效应”是混杂的。",
+              lesson: "Always report and interpret confidence intervals. A point estimate means nothing without uncertainty."
+            },
+            minimal_info_correct: {
+              type: 'outcome',
+              outcome: 'success',
+              title: "Correct interpretation!",
+              text: "60% 的衰减 (2.1 → 1.3) 表明铁蛋白在很大程度上捕获了其他因素（可能是肾功能和炎症）的变化。 CI 现在包含 1.0。铁蛋白可能对心力衰竭增加很少的独立预后信息。",
+              lesson: "This pattern (strong unadjusted, weak adjusted) is extremely common. Always demand properly adjusted analyses before accepting a 'new prognostic factor.'"
+            },
+            useless_too_strong: {
+              type: 'outcome',
+              outcome: 'partial',
+              title: "Too strong a conclusion",
+              text: "The adjusted HR is 1.3 — not 1.0. Ferritin MIGHT have modest independent prognostic value; we're just uncertain. It's not 'useless' — it's 'not proven useful beyond existing factors.' A larger study might clarify.",
+              lesson: "缺乏证据≠缺乏证据。但在建立独立的预后价值之前，我们不应该在临床上使用因素。"
+            }
+          }
+        }
+      },
+      {
+        type: 'quiz',
+        content: {
+          question: "A biomarker strongly predicts mortality (HR 4.0, p<0.001) but is NOT on the causal pathway to death. This biomarker could still be useful for:",
+          options: [
+            { id: 'a', text: "开发一种降低生物标志物的治疗", correct: false },
+            { id: 'b', text: "Risk stratification to guide treatment intensity", correct: true },
+            { id: 'c', text: "证明生物标志物导致死亡", correct: false },
+            { id: 'd', text: "Replacing other prognostic factors in clinical assessment", correct: false }
+          ],
+          explanation: "非因果预测因子作为治疗目标是无用的（降低它们不会有帮助），但可以用于风险分层。如果生物标志物识别出高危患者，临床医生就可以更积极地治疗这些患者 - 即使生物标志物本身不是治疗目标。"
+        }
+      },
+      {
+        type: 'story-deep',
+        content: {
+          label: "REAL-WORLD CASE: THE PSA SCREENING CONTROVERSY — EXCELLENT DISCRIMINATION, TERRIBLE UTILITY",
+          source: "US Preventive Services Task Force | ERSPC Trial | Prostate cancer screening debates",
+          timeline: [
+            { year: "1986", text: "前列腺特异性抗原 (PSA) 已获得 FDA 批准用于监测前列腺癌。很快就被用于筛查健康男性。逻辑：PSA 升高可预测前列腺癌。", type: "normal" },
+            { year: "1990s", text: "PSA screening becomes routine. Millions of men tested annually. Prostate cancer diagnoses skyrocket. 'Early detection saves lives' becomes dogma.", type: "normal" },
+            { year: "The Problem", text: "PSA is elevated in prostate cancer — but also in benign prostatic hyperplasia, prostatitis, even vigorous cycling. PSA discriminates cancer from no-cancer... imperfectly.", type: "crisis" },
+            { year: "Overdiagnosis", text: "Many detected cancers would NEVER have caused symptoms or death. These indolent tumors were treated anyway: surgery, radiation, hormones. Men suffered incontinence, impotence, anxiety — for cancers that didn't need treatment.", type: "crisis" },
+            { year: "2012", text: "USPSTF 建议反对常规 PSA 筛查。危害（过度诊断、过度治疗）超过了好处。一个具有出色区分度但具有净临床危害的预后因素。", type: "revelation" },
+            { year: "Lesson", text: "PSA correctly identifies men with prostate cancer. But not all prostate cancers are equal. Detecting harmless cancers and treating them aggressively causes MORE harm than missing them. <span class='lesson-gold'>THE LESSON: A prognostic factor can have excellent discrimination yet terrible clinical utility. The question isn't just 'does it predict?' but 'does acting on the prediction help patients?'</span>", type: "revelation" }
+          ],
+          realData: {
+            endpoint: "Prostate cancer detection",
+            factor: "PSA (prostate-specific antigen)",
+            discrimination: "癌症检测的 C 统计量约为 0.70",
+            problem: "Overdiagnosis and overtreatment of indolent cancers"
+          },
+          hook: "THE HOOK: PSA is the canonical example of a good prognostic factor that causes harm in practice. It PREDICTS prostate cancer. The prediction is ACCURATE. But acting on that prediction — biopsying, treating, worrying — often hurts men more than the cancer would have. Clinical utility requires more than accurate prediction."
+        }
+      },
+      {
+        type: 'principle',
+        content: {
+          text: "🎯 PROGRESS CHECK: You now understand prognostic factor studies. Key lessons: (1) Factors must be independently predictive after adjustment; (2) Prediction ≠ causation; (3) Unadjusted associations are often confounded; (4) Non-causal predictors can still guide treatment decisions by identifying high-risk patients."
+        }
+      }
+    ]
+  },
+  {
+    id: 2,
+    title: "The Models",
+    subtitle: "Prediction Model Development",
+    principle: 1,
+    estimatedTime: "40 min",
+    slides: [
+      {
+        type: 'principle-display',
+        content: {
+          principle: "A model is only as good as its validation"
+        }
+      },
+      {
+        type: 'story-deep',
+        content: {
+          label: "过度拟合：杜克大学癌症基因组学 — 当完美预测完全错误时",
+          source: "Baggerly & Coombes 2009 | Nature Medicine | Duke scandal",
+          timeline: [
+            { year: "2006", text: "Duke researchers publish genomic signatures that 'perfectly' predict chemotherapy response. Lancet, Nature Medicine. C-statistics near 1.0. Clinical trials launched.", type: "normal" },
+            { year: "2007-08", text: "Biostatisticians Baggerly & Coombes try to reproduce results. Find errors: mislabeled samples, wrong gene names, data inconsistencies. Report concerns.", type: "crisis" },
+            { year: "2009", text: "杜克大学驳回了担忧。试验继续招募患者。 “结果不言自明。”内部调查未发现任何问题。", type: "crisis" },
+            { year: "2010", text: "NCI pauses trials. External audit confirms systematic errors. Lead researcher Potti found to have fabricated credentials. Trials terminated. Patients harmed.", type: "crisis" },
+            { year: "Root Cause", text: "Models were overfit: trained and 'validated' on same data with errors. 'Perfect' discrimination was data artifacts, not real signal. No independent validation.", type: "revelation" },
+            { year: "Lesson", text: "High apparent performance is a RED FLAG without external validation. Development data can memorize noise. Overfitting looks like success — until real-world deployment.", type: "revelation" }
+          ],
+          realData: {
+            endpoint: "Chemotherapy response",
+            claimed: "C-statistic ~0.90-1.0",
+            actual: "噪声和数据错误",
+            harm: "Patients enrolled in trials based on fabricated models"
+          },
+          hook: "THE HOOK: The Duke researchers had 'perfect' predictions. C-statistics near 1.0. Publications in top journals. Clinical trials. The only problem? The models were completely wrong. Overfitting and data errors masqueraded as breakthrough science. This is why validation isn't optional — it's the only thing that matters."
+        }
+      },
+      {
+        type: 'principle',
+        content: {
+          text: "⏸️ KEY INSIGHT: Development performance is meaningless. A model can achieve C = 0.99 on development data by memorizing noise. Only EXTERNAL validation — testing on completely new data — reveals true performance. If someone shows you only development metrics, you know nothing about whether the model works."
+        }
+      },
+      {
+        type: 'content',
+        content: {
+          title: "预后模型的 PICOT",
+          sections: [
+            {
+              heading: "P — Population:",
+              text: "此模型适合谁？定义纳入/排除标准。该模型仅适用于类似患者。 ICU 患者的模型不适用于门诊患者。"
+            },
+            {
+              heading: "I — Index (Predictors):",
+              text: "模型包含哪些信息？人口统计、实验室、成像、基因组学？所有预测变量在预测时都必须可用。"
+            },
+            {
+              heading: "C — Comparator (Alternative Models):",
+              text: "What are we comparing to? Existing models? Clinical judgment? No model? New models should IMPROVE on existing options."
+            },
+            {
+              heading: "O — Outcome:",
+              text: "我们在预测什么？死亡？重新入学？疾病进展？必须具有临床意义、客观可测量，并且对患者/临床医生重要。"
+            },
+            {
+              heading: "T — Time Horizon:",
+              text: "我们何时进行预测？ 30天死亡率？ 5年生存率？ 10年风险？时间范围会改变一切——预测因子、性能和临床效用。"
+            }
+          ]
+        }
+      },
+      {
+        type: 'method',
+        content: {
+          label: "方法：模型开发步骤",
+          title: "Building a Prognostic Model",
+          sections: [
+            {
+              heading: "1. Assemble the Cohort:",
+              text: "• 具有明确起点的初始队列 • 足够的样本量（每个预测变量≥10 个事件，最好≥20） • 在整个时间范围内完成随访 • 目标人群的代表"
+            },
+            {
+              heading: "2. Select Predictors:",
+              text: "• 基于先前证据，而非数据驱动的选择 • 在预测时可用（无未来信息） • 可靠且一致地测量 • 在建模之前处理缺失数据"
+            },
+            {
+              heading: "3. Choose the Model Type:",
+              text: "• Logistic regression: Binary outcomes at fixed time\n• Cox regression: Time-to-event data\n• Machine learning: Flexible but prone to overfitting\n• Simpler models often generalize better"
+            },
+            {
+              heading: "4. Fit the Model:",
+              text: "• 预先指定建模策略 • 如果有多个预测变量，则使用惩罚（LASSO、岭） • 检查假设（线性、比例风险） • 使用引导程序或交叉验证进行内部验证"
+            },
+            {
+              heading: "5. Apply Shrinkage:",
+              text: "• 估计系数是乐观的（过度拟合） • 计算收缩因子（均匀或惩罚） • 在“最终”模型之前应用于所有系数 • 这会减少过度拟合"
+            }
+          ]
+        }
+      },
+      {
+        type: 'content',
+        content: {
+          title: "Sample Size: The Events Per Variable Rule",
+          sections: [
+            {
+              heading: "The Problem:",
+              text: "与预测因素相关的结果事件很少，模型灾难性地过度拟合。它们适合噪声，而不是信号。"
+            },
+            {
+              heading: "Traditional Rule: EPV ≥ 10",
+              items: [
+                "At least 10 events per predictor variable",
+                "对于 10 个预测变量，需要 ≥100 个事件",
+                "Minimum for stable coefficient estimates",
+                "Many experts now recommend EPV ≥ 20"
+              ]
+            },
+            {
+              heading: "Example Calculation:",
+              text: "You want to develop a model with 12 predictors for 30-day mortality. Mortality rate is 5%. For EPV=10: need 120 events. At 5% rate: need 120/0.05 = 2,400 patients. For EPV=20: need 4,800 patients."
+            },
+            {
+              heading: "When EPV Is Low:",
+              items: [
+                "Use penalization (LASSO, ridge regression)",
+                "Reduce number of predictors (combine, eliminate)",
+                "Consider simpler models",
+                "Be very skeptical of apparent performance"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        type: 'method',
+        content: {
+          label: "深入研究：惩罚方法",
+          title: "LASSO, Ridge, and Elastic Net Explained",
+          sections: [
+            {
+              heading: "The Problem Penalization Solves:",
+              text: "标准回归找到最适合训练数据的系数。但“最佳拟合”通常意味着“过度拟合噪声”。惩罚会增加大系数的成本，迫使模型寻找更简单的解决方案。"
+            },
+            {
+              heading: "Ridge Regression (L2 Penalty):",
+              text: "• Adds penalty = λ × Σ(β²) — sum of squared coefficients\n• SHRINKS all coefficients toward zero (but never exactly zero)\n• Good when many predictors contribute small effects\n• Handles correlated predictors well\n• λ controls shrinkage strength: higher λ = more shrinkage"
+            },
+            {
+              heading: "LASSO (L1 Penalty):",
+              text: "• Adds penalty = λ × Σ|β| — sum of absolute coefficients\n• SHRINKS coefficients AND sets some exactly to zero\n• Performs variable SELECTION (sparse models)\n• Better when few predictors are truly important\n• Can be unstable with correlated predictors"
+            },
+            {
+              heading: "Elastic Net (L1 + L2):",
+              text: "• 结合两个惩罚：λ₁Σ|β| + λ2Σ(β²) • 获得两者的好处：选择和分组收缩 • 通常是最佳默认选择 • 两个调整参数（使用交叉验证）"
+            },
+            {
+              heading: "Choosing Lambda (λ):",
+              text: "• Use cross-validation to find optimal λ\n• λ.min: minimizes prediction error\n• λ.1se: largest λ within 1 SE of minimum (more parsimonious)\n• Clinical prediction often uses λ.1se for simplicity"
+            },
+            {
+              heading: "Critical Limitation:",
+              text: "Penalization REDUCES overfitting but doesn't ELIMINATE it. With EPV < 5, even LASSO cannot rescue a model. Penalization is not a substitute for adequate sample size — it's a tool for when you have borderline-adequate data."
+            }
+          ]
+        }
+      },
+      {
+        type: 'decision-tree',
+        content: {
+          id: 'penalization-choice',
+          title: "哪种惩罚方法？",
+          situation: "您有 200 个事件和 30 个候选预测变量 (EPV ≈ 7)。您怀疑只有 5-8 个预测变量真正重要，但您不确定是哪些。一些预测变量是相关的（例如，收缩压和舒张压）。",
+          nodes: {
+            start: {
+              question: "鉴于您怀疑很少有预测变量重要，但具有相关变量，使用哪种方法？",
+              branches: [
+                { text: "LASSO — I want variable selection", nextNode: "lasso_choice" },
+                { text: "Ridge — handles correlated predictors better", nextNode: "ridge_choice" },
+                { text: "Elastic Net — gets benefits of both", nextNode: "elastic_correct" }
+              ]
+            },
+            lasso_choice: {
+              type: 'outcome',
+              outcome: 'partial',
+              title: "LASSO has a weakness here",
+              text: "LASSO 执行您想要的选择。但对于相关预测变量（BP 变量），LASSO 任意选择一个并将另一个归零。这可能是不稳定的——小的数据变化会改变保留的变量。弹性网络可以更好地处理这个问题。",
+              lesson: "LASSO 非常适合稀疏选择，但在处理相关预测变量时却遇到了困难。当预测变量相关时考虑弹性网络。"
+            },
+            ridge_choice: {
+              type: 'outcome',
+              outcome: 'partial',
+              title: "Ridge won't give you selection",
+              text: "Ridge 可以很好地处理相关预测变量并且非常稳定。但它保留了所有 30 个预测变量（只是缩小了它们）。如果您认为只有 5-8 个因素很重要，那么您的模型就会变得不必要的复杂。对于临床使用，越简单越好。",
+              lesson: "Ridge 很稳定，但并不简化。当您想要一个简约模型时，您需要 L1 (LASSO) 或弹性网络。"
+            },
+            elastic_correct: {
+              type: 'outcome',
+              outcome: 'success',
+              title: "此场景的最佳选择！",
+              text: "弹性网络将 LASSO 的选择与相关预测变量的岭稳定性相结合。它可能会选择 5-10 个预测变量，同时优雅地处理 BP 相关性。使用交叉验证来调整 λ₁ 和 λ2（或混合参数 α）。",
+              lesson: "当有疑问时，弹性网络通常是最安全的选择 - 它同时适应稀疏和密集信号结构。"
+            }
+          }
+        }
+      },
+      {
+        type: 'decision-tree',
+        content: {
+          id: 'sample-size-decision',
+          title: "这个模型是否足够强大？",
+          situation: "一篇论文提出了一种新的死亡率预测模型COVID-19 患者。他们有 500 名患者，其中 75 人死亡（死亡率为 15%）。他们测试了 25 个候选预测变量，并选择了 8 个作为最终模型。 bootstrap 的内部验证显示 C 统计量为 0.82。",
+          nodes: {
+            start: {
+              question: "您首先关心的是什么？",
+              branches: [
+                { text: "EPV is low: 75 events / 8 predictors = 9.4", nextNode: "epv_correct" },
+                { text: "C 统计量 0.82 并不那么令人印象深刻", nextNode: "cstat_issue" },
+                { text: "They tested 25 predictors but only used 8", nextNode: "selection_correct" }
+              ]
+            },
+            epv_correct: {
+              situation: "Correct — EPV is below 10. But there's an even bigger problem...",
+              question: "作者在选择 8 之前测试了 25 个候选预测变量。这是为什么有问题吗？",
+              branches: [
+                { text: "They wasted statistical power on non-significant predictors", nextNode: "power_wrong" },
+                { text: "The effective EPV is 75/25 = 3, not 75/8", nextNode: "effective_epv_correct" }
+              ]
+            },
+            cstat_issue: {
+              type: 'outcome',
+              outcome: 'partial',
+              title: "C 统计很好，但这不是问题",
+              text: "C = 0.82 would be good if it holds in external validation. The problem is that with low EPV and data-driven selection, this C-statistic is almost certainly OPTIMISTIC. The true external performance is probably much lower.",
+              lesson: "通过样本大小和方法来判断模型开发，而不是通过报告的性能指标。"
+            },
+            power_wrong: {
+              type: 'outcome',
+              outcome: 'partial',
+              title: "不是关于“浪费电力”",
+              text: "问题不在于功率，而在于过度拟合。当您测试 75 个事件的 25 个预测因子时，有些预测因子会偶然出现。选择“重要”预测变量利用了这些偶然发现。该模型部分基于噪声构建。",
+              lesson: "Data-driven predictor selection (testing many, keeping 'significant' ones) is a major source of overfitting."
+            },
+            selection_correct: {
+              situation: "Good catch! They tested 25 predictors with only 75 events. The effective EPV is 75/25 = 3.",
+              question: "What should they have done instead?",
+              branches: [
+                { text: "Pre-specify 5-6 predictors based on prior evidence", nextNode: "prespecify_correct" },
+                { text: "Use LASSO to select predictors automatically", nextNode: "lasso_partial" },
+                { text: "Collect more data before testing any predictors", nextNode: "more_data_partial" }
+              ]
+            },
+            effective_epv_correct: {
+              type: 'outcome',
+              outcome: 'success',
+              title: "Exactly right!",
+              text: "The effective degrees of freedom used is ALL 25 predictors that were tested, not just the 8 that were kept. EPV = 75/25 = 3, which is catastrophically low. The model is almost certainly overfit, regardless of what the bootstrap validation shows.",
+              lesson: "EPV 应基于所有测试的预测变量进行计算，而不仅仅是最终模型中的预测变量。数据驱动的选择不会“保存”自由度。"
+            },
+            prespecify_correct: {
+              type: 'outcome',
+              outcome: 'success',
+              title: "Best practice!",
+              text: "Pre-specifying a small number of predictors based on prior clinical knowledge (not this dataset) would give EPV = 75/6 ≈ 12.5. Combined with shrinkage, this might produce a generalizable model. Data-driven selection should be avoided when EPV is limited.",
+              lesson: "基于临床知识的预先指定，而不是数据驱动的选择，是稳健模型开发的基础。"
+            },
+            lasso_partial: {
+              type: 'outcome',
+              outcome: 'partial',
+              title: "LASSO helps, but doesn't fully solve the problem",
+              text: "LASSO 比逐步选择更好，因为它应用了惩罚。但由于有 75 个事件和 25 个候选事件，即使 LASSO 也可能会保留一些噪声变量。您仍然需要足够的样本量。",
+              lesson: "Penalization reduces overfitting but doesn't eliminate it. When EPV is very low, no statistical technique can compensate."
+            },
+            more_data_partial: {
+              type: 'outcome',
+              outcome: 'partial',
+              title: "Ideal but not always possible",
+              text: "More data is always better. But in an emerging pandemic, you may need to build models with what's available. The solution: use prior knowledge to select a small number of predictors, accept that initial models are preliminary, and plan for validation and updating.",
+              lesson: "When data is limited, simplicity is essential. Complex models require large datasets."
+            }
+          }
+        }
+      },
+      {
+        type: 'quiz',
+        content: {
+          question: "A model shows C-statistic of 0.90 in development but 0.65 in external validation. The most likely explanation is:",
+          options: [
+            { id: 'a', text: "外部验证人群不同（案例混合）", correct: false },
+            { id: 'b', text: "开发队列中的过度拟合", correct: true },
+            { id: 'c', text: "外部数据中的测量误差", correct: false },
+            { id: 'd', text: "模型实际上经过良好校准", correct: false }
+          ],
+          explanation: "A drop from 0.90 to 0.65 is dramatic (Δ = 0.25). While case-mix differences can reduce discrimination, this magnitude of drop strongly suggests overfitting. The development C-statistic was inflated by fitting noise. The external validation reveals the true (much lower) performance."
+        }
+      },
+      {
+        type: 'principle',
+        content: {
+          text: "⚠️ THE WARNING: The Duke scandal happened because prestigious researchers, top journals, and major institutions all accepted 'perfect' model performance without independent validation. Overfitting doesn't look like failure — it looks like remarkable success. High development performance should trigger SKEPTICISM, not celebration."
+        }
+      }
+    ]
+  },
+  {
+    id: 3,
+    title: "The Performance",
+    subtitle: "Discrimination & Calibration",
+    principle: 2,
+    estimatedTime: "45 min",
+    slides: [
+      {
+        type: 'principle-display',
+        content: {
+          principle: "歧视"
+        }
+      },
+      {
+        type: 'story-deep',
+        content: {
+          label: "THE CALIBRATION CRISIS: FRAMINGHAM IN EUROPE — WHEN A GOOD MODEL GAVE BAD NUMBERS",
+          source: "Brindle 2003 | Heart | SCORE investigators | European populations",
+          timeline: [
+            { year: "1998", text: "Framingham Risk Score published. Excellent discrimination (C ~0.77). Becomes global standard for CVD risk assessment.", type: "normal" },
+            { year: "2000s", text: "European countries adopt Framingham. Cardiologists calculate 10-year risks. Treatment decisions based on thresholds (e.g., >20% = high risk).", type: "normal" },
+            { year: "2003", text: "Brindle et al. validate Framingham in UK population. DISCRIMINATION preserved (C similar). But CALIBRATION failed: Framingham predicted 47% more events than observed.", type: "crisis" },
+            { year: "The Problem", text: "Framingham developed in US (higher CVD rates). Applied to UK (lower rates). The MODEL ranked patients correctly (discrimination) but gave WRONG PROBABILITIES (calibration).", type: "crisis" },
+            { year: "Consequence", text: "Patients told '25% risk' when true risk was ~17%. Millions prescribed statins based on inflated numbers. Cost, side effects, psychological harm.", type: "crisis" },
+            { year: "Solution", text: "SCORE 还不够，QRISK 是为欧洲人群开发的。重新校准当地发病率。该模型必须适合人群。", type: "revelation" }
+          ],
+          realData: {
+            endpoint: "10-year CVD events",
+            discrimination: "C-statistic similar (0.75-0.77)",
+            calibration: "Predicted 47% more events than observed",
+            ratio: "Predicted/Observed = 1.47"
+          },
+          hook: "THE HOOK: Framingham DISCRIMINATED perfectly in Europe — it correctly ranked who was higher vs lower risk. But it gave WRONG NUMBERS. A patient with 10% true risk was told 15%. This is the calibration problem: discrimination tells you WHO is at higher risk; calibration tells you WHAT that risk actually is."
+        }
+      },
+      {
+        type: 'principle',
+        content: {
+          text: "⏸️ 关键见解：模型有两个工作。歧视：将高风险患者与低风险患者分开（排名）。校准：给出准确的概率估计（数字）。一个模型可能在其中一个方面表现出色，而在另一个方面则可能失败。两者都是临床决策所必需的。"
+        }
+      },
+      {
+        type: 'story-deep',
+        content: {
+          label: "REAL-WORLD CASE: THE FRAMINGHAM RISK SCORE DECAY — WHEN TIME ERODES ACCURACY",
+          source: "Framingham Heart Study | Ridker 2016 | Population-level temporal drift",
+          timeline: [
+            { year: "1998", text: "弗雷明汉风险评分的发布对于预测当代美国人群的心脏病具有极高的准确性。 C 统计量约为 0.76-0.79。", type: "normal" },
+            { year: "2000s", text: "分数成为黄金标准。数以百万计的他汀类药物处方均以弗雷明汉预测为指导。临床指南规定了其阈值。", type: "normal" },
+            { year: "2010s", text: "Researchers notice systematic overestimation. The model predicts more heart attacks than actually occur. Something has changed.", type: "crisis" },
+            { year: "The Cause", text: "人口不断变化，而模型却保持不变。他汀类药物的使用变得广泛。吸烟率直线下降。血压控制得到改善。基线风险下降。", type: "revelation" },
+            { year: "2016", text: "Studies confirm Framingham systematically overestimates risk in modern populations. A model calibrated to 1998 Americans no longer fits 2016 Americans.", type: "crisis" },
+            { year: "Lesson", text: "Prediction models are not timeless. As treatments improve, behaviors change, and populations evolve, even excellent models drift out of calibration. Regular recalibration is essential. <span class='lesson-gold'>THE LESSON: Models need maintenance. A prediction frozen in time will eventually mislead as the world around it changes.</span>", type: "revelation" }
+          ],
+          realData: {
+            endpoint: "10-year cardiovascular disease risk",
+            model: "Framingham Risk Score (1998 coefficients)",
+            problem: "Systematic overestimation by 2010s",
+            cause: "Population-level changes in baseline risk factors"
+          },
+          hook: "THE HOOK: The Framingham Risk Score didn't suddenly become a bad model. It was always a snapshot of 1998 America. But populations don't stand still. When statins, smoking cessation, and better blood pressure control changed baseline risk, the model's predictions drifted from reality. This is TEMPORAL CALIBRATION DRIFT — and it affects every long-lived prediction model."
+        }
+      },
+      {
+        type: 'content',
+        content: {
+          title: "歧视：C 统计量 (AUC)",
+          sections: [
+            {
+              heading: "What It Measures:",
+              text: "随机选择的有结果的患者比随机选择的没有结果的患者具有更高预测风险的概率。"
+            },
+            {
+              heading: "Interpretation:",
+              items: [
+                "C = 0.50: No discrimination (coin flip)",
+                "C = 0.60-0.70: Poor to modest discrimination",
+                "C = 0.70-0.80: Acceptable discrimination",
+                "C = 0.80-0.90: Excellent discrimination",
+                "C > 0.90: Outstanding (or suspicious — check for overfitting)"
+              ]
+            },
+            {
+              heading: "Limitations:",
+              items: [
+                "不会告诉您预测风险是否为正确",
+                "Can be high even with terrible calibration",
+                "Hard to improve in well-developed clinical areas",
+                "Depends on case-mix (heterogeneity of population)"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        type: 'content',
+        content: {
+          title: "校准：数字正确吗？",
+          sections: [
+            {
+              heading: "What It Measures:",
+              text: "Agreement between predicted probabilities and observed event rates. Among patients predicted 20% risk, do 20% actually have events?"
+            },
+            {
+              heading: "Calibration-in-the-Large:",
+              text: "Overall: Does the model predict the right NUMBER of events? If 100 events are predicted but 60 occur, the model overestimates (P/O = 1.67)."
+            },
+            {
+              heading: "Calibration Slope:",
+              items: [
+                "Regress observed outcomes on predicted probabilities",
+                "Ideal slope = 1.0 (perfect agreement)",
+                "Slope < 1.0: Predictions too extreme (overfitting)",
+                "Slope > 1.0: Predictions too conservative"
+              ]
+            },
+            {
+              heading: "Calibration Plot:",
+              items: [
+                "X-axis: Predicted probability (deciles or smooth)",
+                "Y-axis: Observed event rate",
+                "Perfect calibration: Points on 45-degree line",
+                "模型验证的基本图形"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        type: 'method',
+        content: {
+          label: "方法：读取校准图",
+          title: "Patterns and What They Mean",
+          sections: [
+            {
+              heading: "Perfect Calibration:",
+              text: "对角线上的所有点。预测 10% → 观察到 10%。预测 50% → 观察到 50%。这就是目标。"
+            },
+            {
+              heading: "Overestimation (Above Diagonal):",
+              text: "Predicted risks too HIGH. Model says 30% but observed is 20%. Framingham in Europe. Leads to overtreatment."
+            },
+            {
+              heading: "Underestimation (Below Diagonal):",
+              text: "Predicted risks too LOW. Model says 10% but observed is 15%. Leads to undertreatment. Patients falsely reassured."
+            },
+            {
+              heading: "Poor Calibration Slope:",
+              text: "Predictions too SPREAD OUT (slope < 1) or too NARROW (slope > 1). Low-risk too low, high-risk too high = overfitting."
+            },
+            {
+              heading: "Recalibration:",
+              text: "If discrimination is good but calibration poor, RECALIBRATE: update intercept (baseline risk) and/or slope (coefficient shrinkage) to fit local population."
+            }
+          ]
+        }
+      },
+      {
+        type: 'decision-tree',
+        content: {
+          id: 'discrimination-calibration',
+          title: "Discrimination vs Calibration",
+          situation: "You're evaluating two ICU mortality models for your hospital.\n\nModel A: C-statistic 0.85, but predicts 40% mortality when your observed rate is 25%.\nModel B: C-statistic 0.72, but calibration is excellent (predicted/observed = 1.02).",
+          nodes: {
+            start: {
+              question: "您应该使用哪种模型进行患者沟通（告诉患者他们的风险）？",
+              branches: [
+                { text: "Model A — better discrimination", nextNode: "model_a_comm" },
+                { text: "Model B — better calibration", nextNode: "model_b_comm_correct" }
+              ]
+            },
+            model_a_comm: {
+              type: 'outcome',
+              outcome: 'danger',
+              title: "Patients would get wrong numbers!",
+              text: "模型 A 会告诉患者他们的风险是 40%，而实际风险是 25%。这会造成不必要的痛苦，影响积极治疗的决定，并误导家人。对于通信，校准至关重要 - 您需要正确的数字。",
+              lesson: "Patient communication requires calibrated probabilities. Telling someone '40% chance of death' when it's really 25% is harmful misinformation."
+            },
+            model_b_comm_correct: {
+              situation: "Correct! For telling patients their risk, calibration matters most.",
+              question: "Now: which model should you use to TRIAGE patients (decide who gets ICU vs step-down)?",
+              branches: [
+                { text: "Model A — better discrimination for ranking patients", nextNode: "model_a_triage_correct" },
+                { text: "Model B — still need correct numbers", nextNode: "model_b_triage" }
+              ]
+            },
+            model_a_triage_correct: {
+              type: 'outcome',
+              outcome: 'success',
+              title: "Correct — for ranking, discrimination matters!",
+              text: "Triage is about ranking: who is higher risk? Model A (C=0.85) better separates sick from less-sick patients. You don't need the exact probability to rank. Model A's miscalibration doesn't affect who gets ranked higher vs lower.",
+              lesson: "任务确定度量：排名需要区分。概率需要校准。将指标与临床问题相匹配。"
+            },
+            model_b_triage: {
+              type: 'outcome',
+              outcome: 'partial',
+              title: "Calibration is less critical for ranking",
+              text: "For triage, you're RANKING patients, not quoting probabilities. Model A separates high-risk from low-risk better (C=0.85 vs 0.72). Even though Model A's numbers are off, its RANKINGS are better. Use A for triage, B for communication.",
+              lesson: "不同的临床任务需要不同的模型属性。许多模型都有多种用途 - 了解每种用途的要求。"
+            }
+          }
+        }
+      },
+      {
+        type: 'decision-tree',
+        content: {
+          id: 'calibration-plot-reading',
+          title: "Reading Calibration Plots",
+          situation: "您正在审查一项验证研究。校准图显示： • Decile 1（预测 5%）：观测到 8% • Decile 5（预测 25%）：观测到 24% • Decile 10（预测 60%）：观测到 45% 这些点形成一条曲线，在低风险时从对角线下方开始，在高风险时穿过对角线上方。",
+          nodes: {
+            start: {
+              question: "What pattern does this calibration plot show?",
+              branches: [
+                { text: "Overestimation — predictions too high overall", nextNode: "over_wrong" },
+                { text: "Poor slope — predictions too extreme", nextNode: "slope_correct" },
+                { text: "Good calibration — points are close to diagonal", nextNode: "good_wrong" }
+              ]
+            },
+            over_wrong: {
+              type: 'outcome',
+              outcome: 'partial',
+              title: "Look at the pattern more carefully",
+              text: "At LOW predicted risk (5%), observed was HIGHER (8%) — that's underestimation. At HIGH predicted risk (60%), observed was LOWER (45%) — that's overestimation. The model isn't consistently over- or under-estimating; it's making predictions that are too EXTREME.",
+              lesson: "校准问题有不同的模式。均匀高估/低估与斜率问题不同。"
+            },
+            slope_correct: {
+              situation: "Correct! Low predictions too low, high predictions too high = slope < 1 (overfitting). Now:",
+              question: "校准斜率计算为 0.65。应如何重新校准模型？",
+              branches: [
+                { text: "Multiply all predicted probabilities by 0.65", nextNode: "multiply_wrong" },
+                { text: "将预测缩小到平均值（通过斜率调整重新估计）", nextNode: "shrink_correct" }
+              ]
+            },
+            good_wrong: {
+              type: 'outcome',
+              outcome: 'danger',
+              title: "这些偏差具有临床意义！",
+              text: "预测为 5%，观察到的为 8% — 比预测高 60%。预测值为 60%，实际观测值为 45% — 低了 25%。对于临床决策而言，告诉患者“死亡风险为 60%”，而实际死亡风险为 45%，会造成重大伤害。这些偏差都不小。",
+              lesson: "从绝对值来看“小”的校准偏差从相对值来看可能很大，并且在临床上很重要。"
+            },
+            multiply_wrong: {
+              type: 'outcome',
+              outcome: 'danger',
+              title: "That would make things worse!",
+              text: "将所有预测乘以 0.65 会降低所有预测。但低预测已经太低了。你需要将预测缩小到平均值——降低高预测值，提高低预测值。这需要使用斜率约束重新估计。",
+              lesson: "斜率重新校准≠简单乘法。您向平均值收缩，而不是向零收缩。"
+            },
+            shrink_correct: {
+              type: 'outcome',
+              outcome: 'success',
+              title: "Correct recalibration approach!",
+              text: "With slope 0.65, you need to shrink predictions toward the mean outcome rate. Mathematically: calibrated_logit = intercept + 0.65 × (original_logit). This pulls extreme predictions toward the center. Low-risk predictions increase; high-risk predictions decrease.",
+              lesson: "斜率重新校准将预测向平均值收缩。这纠正了模型在两个极端都过于自信的过度拟合模式。"
+            }
+          }
+        }
+      },
+      {
+        type: 'content',
+        content: {
+          title: "Communicating Uncertainty to Patients",
+          sections: [
+            {
+              heading: "Why This Matters:",
+              text: "Prognostic models ultimately serve patients. A perfectly calibrated model is useless if clinicians can't communicate its outputs clearly. Miscommunication causes as much harm as miscalibration."
+            },
+            {
+              heading: "Phrases That Help:",
+              items: [
+                "\"Based on patients similar to you...\" (acknowledges model basis)",
+                "\"This estimate has uncertainty — it could be somewhat higher or lower\" (conveys CI)",
+                "\\“这是概率，而不是确定性 - 有些患者战胜了困难\\”（避免决定论）",
+                "\\“这有助于我们共同决策，而不是准确预测您的未来\\”（共享决策）",
+                "\\“如果100 个像您一样的患者被跟踪...\\\"（频率框架）"
+              ]
+            },
+            {
+              heading: "Phrases to Avoid:",
+              items: [
+                "\"You have a 73% chance of...\" (false precision)",
+                "\"The computer says...\" (abdicates responsibility)",
+                "\\“你将生存/无法生存\\”（确定性语言）",
+                "\\“不要担心数字\\”（不屑一顾）",
+                "\"This is just a rough estimate\" (undermines useful information)"
+              ]
+            },
+            {
+              heading: "Handling Uncertainty:",
+              text: "When the model says 30% (95% CI: 20-45%), you might say: 'Based on similar patients, the risk is probably between 1 in 5 and 1 in 2, with our best estimate around 1 in 3. This helps us think about whether aggressive treatment is right for you.'"
+            },
+            {
+              heading: "When Models Conflict with Gestalt:",
+              text: "If clinical intuition strongly disagrees with the model, acknowledge it: 'The calculator suggests X, but based on factors it doesn't capture, I think Y is more likely. Let's discuss both perspectives.'"
+            }
+          ]
+        }
+      },
+      {
+        type: 'content',
+        content: {
+          title: "Competing Risks: The Hidden Complexity",
+          sections: [
+            {
+              heading: "The Problem:",
+              text: "标准生存分析假设患者要么发生了事件，要么被审查（失去了后续）。但如果他们在事件发生之前就死了怎么办？死亡与感兴趣的结果“竞争”。"
+            },
+            {
+              heading: "Example:",
+              text: "You're predicting hip fracture in elderly patients. A patient dies of heart disease at month 6. They didn't have a hip fracture — but they also can't have one in the future. Standard Kaplan-Meier treats them as censored, which OVERESTIMATES fracture risk in survivors."
+            },
+            {
+              heading: "When It Matters:",
+              items: [
+                "Elderly populations (high competing mortality)",
+                "Cancer patients (death competes with recurrence)",
+                "Long time horizons (more time for competing events)",
+                "Non-fatal outcomes in sick populations"
+              ]
+            },
+            {
+              heading: "Solutions:",
+              items: [
+                "Cause-specific hazards: Model each event separately (traditional)",
+                "Subdistribution hazards (Fine-Gray): Accounts for competing risks directly",
+                "Multi-state models: Explicitly model transitions between states",
+                "Report cumulative incidence, not 1-KM (acknowledges competing risks)"
+              ]
+            },
+            {
+              heading: "For Reviewers:",
+              text: "When reading prognostic studies in elderly/sick populations with non-fatal outcomes, ask: 'How did they handle competing risks?' If the answer is 'standard Cox/KM,' the predictions may be biased upward."
+            }
+          ]
+        }
+      },
+      {
+        type: 'quiz',
+        content: {
+          question: "模型的 C 统计量为 0.75，校准斜率为 0.6。此模式表明什么？",
+          options: [
+            { id: 'a', text: "Good discrimination but predictions are too extreme (overfitting)", correct: true },
+            { id: 'b', text: "Poor discrimination and poor calibration overall", correct: false },
+            { id: 'c', text: "该模型低估了每个人的风险", correct: false },
+            { id: 'd', text: "The model needs more predictors", correct: false }
+          ],
+          explanation: "C = 0.75 indicates acceptable discrimination. Calibration slope of 0.6 (< 1.0) means predictions are too spread out: high-risk predictions are too high, low-risk predictions are too low. This is the classic pattern of overfitting — the model fits noise in development data, producing extreme predictions that don't generalize."
+        }
+      },
+      {
+        type: 'principle',
+        content: {
+          text: "🎯 PROGRESS CHECK: You now understand model performance dimensions AND how to communicate them. Discrimination (C-statistic) = ranking ability. Calibration = probability accuracy. Patient communication requires translating numbers into meaningful, honest conversations. Competing risks matter in elderly/sick populations with non-fatal outcomes."
+        }
+      }
+    ]
+  }
+,
+  {
+    id: 4,
+    title: "The Validation",
+    subtitle: "Internal & External Testing",
+    principle: 3,
+    estimatedTime: "40 min",
+    slides: [
+      {
+        type: 'principle-display',
+        content: {
+          principle: "预测变量并非越多越好"
+        }
+      },
+      {
+        type: 'story-deep',
+        content: {
+          label: "THE EPIC FAILURE: SEPSIS AI — WHEN SILICON VALLEY MET REALITY",
+          source: "Wong et al. JAMA Intern Med 2021 | Epic Sepsis Model | External validation",
+          timeline: [
+            { year: "2017", text: "Epic Systems develops machine learning model for sepsis prediction. Deployed in hundreds of hospitals. Marketing claims strong performance.", type: "normal" },
+            { year: "2019", text: "Epic model in widespread clinical use. Alerts firing. Clinicians responding. Assumed to be saving lives.", type: "normal" },
+            { year: "2021", text: "Wong et al. publish external validation at Michigan Medicine. C-statistic: 0.63 (poor). PPV at common threshold: 12%. Only 7% of sepsis cases detected.", type: "crisis" },
+            { year: "The Gap", text: "Epic's internal 'validation' C = 0.76-0.83. Independent external: C = 0.63. The model performed FAR WORSE in real-world deployment than internal testing suggested.", type: "crisis" },
+            { year: "Root Cause", text: "内部验证使用相同的数据源和相似的人群。部署前没有真正的外部验证。根据供应商声明部署的算法。", type: "revelation" },
+            { year: "Lesson", text: "机器学习并不神奇。专有算法在临床部署之前需要独立的外部验证。供应商指标不是证据。", type: "revelation" }
+          ],
+          realData: {
+            endpoint: "Sepsis onset within 6 hours",
+            internal: "C-statistic 0.76-0.83 (Epic's claim)",
+            external: "C-statistic 0.63 (independent validation)",
+            ppv: "12% at alert threshold"
+          },
+          hook: "THE HOOK: A proprietary algorithm was deployed in hundreds of hospitals based on vendor-provided metrics. Independent validation revealed it barely worked. Patients received thousands of false alerts while 93% of actual sepsis cases were missed. This is why external validation by INDEPENDENT researchers is essential."
+        }
+      },
+      {
+        type: 'principle',
+        content: {
+          text: "⏸️ KEY INSIGHT: Validation has levels. INTERNAL validation (same data) catches obvious overfitting. EXTERNAL validation (new data, new setting) tests generalizability. INDEPENDENT validation (different researchers) catches selective reporting and hidden biases. All three matter."
+        }
+      },
+      {
+        type: 'content',
+        content: {
+          title: "Types of Validation",
+          sections: [
+            {
+              heading: "Internal Validation (Same Data):",
+              items: [
+                "Bootstrap: Resample with replacement, train and test many times",
+                "Cross-validation: Divide data into folds, train on k-1, test on 1, rotate",
+                "Split-sample: Train on 70%, test on 30% (weak, wastes data)",
+                "Purpose: Estimate optimism from overfitting. MINIMUM requirement."
+              ]
+            },
+            {
+              heading: "External Validation (New Data):",
+              items: [
+                "TEMPORAL: Different time period, same setting",
+                "GEOGRAPHIC: Different location, same time period",
+                "DOMAIN: Different patient population or clinical context",
+                "Purpose: Test generalizability. Required before clinical use."
+              ]
+            },
+            {
+              heading: "Independent Validation:",
+              items: [
+                "Different research team conducts the validation",
+                "Eliminates selective reporting, hidden specification searches",
+                "真正测试现实世界性能的唯一验证",
+                "Should be required for any high-stakes model deployment"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        type: 'story-deep',
+        content: {
+          label: "REAL-WORLD CASE: THE APACHE SCORE MISADVENTURE — WHEN GEOGRAPHY FOOLED EVERYONE",
+          source: "APACHE II validation studies | UK Intensive Care Society | Geographic transportability",
+          timeline: [
+            { year: "1985", text: "APACHE II is developed in US academic medical centers to predict ICU mortality. Based on 5,815 admissions across 13 hospitals. Excellent discrimination.", type: "normal" },
+            { year: "Late 1980s", text: "APACHE II becomes the standard for ICU risk adjustment. Hospitals compare their outcomes to APACHE-predicted mortality. 'Better than expected' = quality marker.", type: "normal" },
+            { year: "UK Adoption", text: "British hospitals adopt APACHE II for quality benchmarking. The model predicts mortality; actual deaths are compared. Nearly every UK hospital appears to outperform expectations.", type: "crisis" },
+            { year: "The Problem", text: "APACHE II 根据 20 世纪 80 年代美国 ICU 的基线死亡率较高进行了校准。英国 ICU 的病例组合不同，入院门槛较早，且预后较好。模型的分母错误。", type: "revelation" },
+            { year: "False Reassurance", text: "Hospitals celebrated 'beating' APACHE predictions. But they were being compared to an irrelevant baseline. Poor performers looked adequate; adequate performers looked excellent.", type: "crisis" },
+            { year: "Lesson", text: "Geographic external validation isn't just about discrimination — it's about CALIBRATION TO LOCAL CONTEXT. A model developed in one healthcare system may systematically mispredict in another. <span class='lesson-gold'>THE LESSON: When a model makes every hospital look good, ask whether the model fits your population — or whether you're being fooled by geographic miscalibration.</span>", type: "revelation" }
+          ],
+          realData: {
+            endpoint: "ICU mortality",
+            model: "APACHE II (US-developed)",
+            problem: "Systematic overestimation in UK",
+            consequence: "False reassurance about hospital quality"
+          },
+          hook: "THE HOOK: APACHE II was a valid model in the wrong context. Its discrimination worked fine — it still ranked patients correctly by risk. But its CALIBRATION was anchored to American ICU mortality rates. When UK hospitals used it as a benchmark, they were measuring themselves against the wrong yardstick. Geographic validation without recalibration is a recipe for false confidence."
+        }
+      },
+      {
+        type: 'method',
+        content: {
+          label: "方法：验证工作流程",
+          title: "严格验证的步骤",
+          sections: [
+            {
+              heading: "1. Obtain Completely Independent Data:",
+              text: "• 不同的时间、地点或机构• 与开发数据不重叠• 反映预期使用人群• 足够的事件进行可靠估计（≥100 个事件）理想）"
+            },
+            {
+              heading: "2. Apply Model EXACTLY as Developed:",
+              text: "• 相同的预测变量定义 • 相同的变量处理（缺失数据、截止值） • 无需重新拟合，无需修改 • 模型必须“开箱即用”"
+            },
+            {
+              heading: "3. Assess Discrimination:",
+              text: "• Calculate C-statistic with 95% CI\n• Compare to development performance\n• Drop of >0.05 suggests poor generalizability"
+            },
+            {
+              heading: "4. Assess Calibration:",
+              text: "• Calibration plot (essential)\n• Calibration-in-the-large (P/O ratio)\n• Calibration slope\n• Hosmer-Lemeshow test (limited value)"
+            },
+            {
+              heading: "5. Consider Updating If Needed:",
+              text: "• If discrimination OK but calibration poor → recalibrate\n• If discrimination poor → model may need redevelopment\n• Update intercept for new baseline rates\n• Update slope if predictions too extreme"
+            }
+          ]
+        }
+      },
+      {
+        type: 'method',
+        content: {
+          label: "DEEP DIVE: MODEL UPDATING & RECALIBRATION",
+          title: "When and How to Update Existing Models",
+          sections: [
+            {
+              heading: "Why Update Rather Than Rebuild?",
+              text: "构建新模型需要大型数据集和广泛的验证。如果现有模型区分良好但校准错误，则更新会在修复校准的同时保留经过验证的结构。这通常比从头开始更安全。"
+            },
+            {
+              heading: "Level 1: Intercept-Only Recalibration",
+              text: "• Simplest update: adjust baseline risk only\n• Use when: Model systematically over/under-estimates by a constant factor\n• Method: Re-estimate intercept using local event rate\n• Formula: new_intercept = log(local_odds) - mean(linear_predictor)\n• Preserves all coefficients; only shifts predictions up/down"
+            },
+            {
+              heading: "Level 2: Slope + Intercept Recalibration",
+              text: "• Adjusts both baseline and spread of predictions\n• Use when: Calibration slope ≠ 1 (overfitting pattern)\n• Method: Regress outcomes on linear predictor; use resulting intercept and slope\n• Shrinks extreme predictions toward mean\n• Often needed when applying models to new populations"
+            },
+            {
+              heading: "Level 3: Model Revision (Re-estimation)",
+              text: "• Re-estimate some or all coefficients\n• Use when: Predictor effects differ substantially in new population\n• Method: Start with original coefficients as priors; update with local data\n• Bayesian approaches can combine original and new evidence\n• Requires larger local dataset than simple recalibration"
+            },
+            {
+              heading: "Level 4: Model Extension",
+              text: "• 向现有模型添加新的预测变量 • 何时使用：有新的生物标志物或风险因素可用 • 方法：在保留原始结构的同时添加新术语 • 仍必须在外部验证扩展模型 • 风险：新的预测变量可能会添加噪声而不是信号"
+            },
+            {
+              heading: "Decision Framework:",
+              text: "Discrimination OK + Calibration-in-large off → Level 1\nDiscrimination OK + Slope off → Level 2\nDiscrimination reduced + Some predictors off → Level 3\nNew predictors available → Consider Level 4\nDiscrimination poor across predictors → Rebuild from scratch"
+            }
+          ]
+        }
+      },
+      {
+        type: 'decision-tree',
+        content: {
+          id: 'model-updating-decision',
+          title: "您应该更新还是重建？",
+          situation: "Framingham Risk Score is validated at your Asian hospital. Results:\n• C-statistic: 0.78 (vs 0.79 in original) — discrimination preserved\n• Predicted/Observed events: 1.85 — model predicts 85% more events than occur\n• Calibration slope: 0.95 — close to 1.0\n\nThe model systematically overestimates, but rankings are correct.",
+          nodes: {
+            start: {
+              question: "What type of update is most appropriate?",
+              branches: [
+                { text: "Rebuild a new model for Asian populations", nextNode: "rebuild_wrong" },
+                { text: "Level 1: Intercept-only recalibration", nextNode: "level1_correct" },
+                { text: "Level 2: Slope + intercept recalibration", nextNode: "level2_partial" }
+              ]
+            },
+            rebuild_wrong: {
+              type: 'outcome',
+              outcome: 'danger',
+              title: "过度杀伤对于这个问题！",
+              text: "Discrimination is excellent (0.78) — the model ranks patients correctly. The slope is 0.95 — predictions aren't too extreme. The only problem is SYSTEMATIC overestimation (P/O = 1.85). This is exactly what intercept recalibration fixes. Rebuilding wastes the validated structure.",
+              lesson: "不要重建可以重新校准的东西。如果辨别力和斜率良好，则截距调整就足够了。"
+            },
+            level1_correct: {
+              type: 'outcome',
+              outcome: 'success',
+              title: "Perfect choice!",
+              text: "C-statistic preserved + slope ~1.0 + systematic over-prediction = Level 1 (intercept-only) recalibration. Simply adjust the baseline risk to reflect lower CVD rates in your Asian population. All the hard work (validated predictors, coefficients) is preserved.",
+              lesson: "截距重新校准功能强大且简单。这是当模型系统性地高估/低估时要尝试的第一件事。"
+            },
+            level2_partial: {
+              type: 'outcome',
+              outcome: 'partial',
+              title: "Would work, but more than needed",
+              text: "2 级同时调整截距和斜率。但你的斜率已经是 0.95（本质上是 1.0）——预测并不算太极端，只是系统性地偏高。 1 级更简单且足够。当斜率显着偏离 1.0 时，使用级别 2。",
+              lesson: "将更新级别与问题相匹配。更简单的更新更可靠，需要的数据更少。"
+            }
+          }
+        }
+      },
+      {
+        type: 'decision-tree',
+        content: {
+          id: 'validation-type',
+          title: "这是什么类型的验证？",
+          situation: "Classify each validation scenario by type and adequacy.",
+          nodes: {
+            start: {
+              question: "A COVID mortality model developed in Wuhan (2020) is tested on data from Wuhan (2021). This is:",
+              branches: [
+                { text: "Internal validation — same location", nextNode: "internal_wrong" },
+                { text: "Temporal external validation", nextNode: "temporal_correct" }
+              ]
+            },
+            internal_wrong: {
+              type: 'outcome',
+              outcome: 'danger',
+              title: "No — different time = external",
+              text: "即使是同一家医院，2021 年的数据对于 2020 年的开发队列来说是外部的。这是暂时的外部验证。患者群体、治疗方案和病毒变异可能有所不同。",
+              lesson: "外部验证需要模型开发中未使用的数据。时间间隔使其成为外部的。"
+            },
+            temporal_correct: {
+              situation: "Correct! Different time period = temporal external validation.",
+              question: "同一模型现已于 2021 年在约翰霍普金斯大学进行测试。C 统计量从 0.82 下降到 0.74。您的解释是什么？",
+              branches: [
+                { text: "The model failed — drop is too large", nextNode: "drop_harsh" },
+                { text: "Acceptable performance — C 0.74 is still adequate", nextNode: "acceptable_correct" },
+                { text: "Need to check calibration before judging", nextNode: "calibration_best" }
+              ]
+            },
+            drop_harsh: {
+              type: 'outcome',
+              outcome: 'partial',
+              title: "A drop of 0.08 is concerning but not catastrophic",
+              text: "C 从 0.82 下降到 0.74 表明存在一些过度拟合或总体差异。但 0.74 仍然提供了合理的区分度。关键问题是：0.74在临床上有用吗？那么校准呢？",
+              lesson: "外部验证中预计 C 统计量会下降。通过绝对性能来判断，而不仅仅是下降。"
+            },
+            acceptable_correct: {
+              type: 'outcome',
+              outcome: 'partial',
+              title: "C = 0.74 can be useful, but check calibration",
+              text: "Discrimination of 0.74 is often adequate for clinical use. But you don't know if the model works until you check CALIBRATION. A model with C=0.74 but predicted/observed=2.0 would be dangerous.",
+              lesson: "Never judge a model by C-statistic alone. Calibration failures can make discriminating models clinically harmful."
+            },
+            calibration_best: {
+              type: 'outcome',
+              outcome: 'success',
+              title: "Excellent answer!",
+              text: "您正确地认识到仅 C 统计量是不够的。如果保持校准，从 0.82 下降到 0.74 是可以接受的。如果模型预测死亡率为 30%，但约翰霍普金斯大学预测为 15%，则尽管可以接受歧视，但该模型仍然是有害的。",
+              lesson: "Always assess BOTH discrimination AND calibration in external validation. Many models discriminate adequately but miscalibrate badly."
+            }
+          }
+        }
+      },
+      {
+        type: 'quiz',
+        content: {
+          question: "A research team develops a model and tests it on a random 30% holdout of their original dataset. This is:",
+          options: [
+            { id: 'a', text: "外部验证（数据未用于开发）", correct: false },
+            { id: 'b', text: "Internal validation (same source, doesn't test generalizability)", correct: true },
+            { id: 'c', text: "Independent validation (separate test)", correct: false },
+            { id: 'd', text: "无验证（无法对保留数据进行验证）", correct: false }
+          ],
+          explanation: "Split-sample validation is a form of INTERNAL validation. The holdout data comes from the same time, place, and population as the development data. It does NOT test generalizability to new settings. This is the weakest form of validation — better than nothing, but far from sufficient for clinical deployment."
+        }
+      },
+      {
+        type: 'principle',
+        content: {
+          text: "⚠️ 警告：严重的脓毒症灾难表明，供应商将根据内部指标来营销模型。医院将在没有独立测试的情况下部署它们。患者将接受“在纸上有效”但在实践中失败的算法。始终要求独立的外部验证。"
+        }
+      }
+    ]
+  },
+  {
+    id: 5,
+    title: "The Scores",
+    subtitle: "Clinical Prediction Rules",
+    principle: 4,
+    estimatedTime: "25 min",
+    slides: [
+      {
+        type: 'principle-display',
+        content: {
+          principle: "人口定义预测"
+        }
+      },
+      {
+        type: 'story-deep',
+        content: {
+          label: "成功故事：WELLS 标准 — 当简单性挽救生命",
+          source: "Wells et al. 1998-2006 | Ann Intern Med | Thrombosis",
+          timeline: [
+            { year: "1995", text: "Philip Wells develops simple scoring system for DVT probability. Clinical signs + risk factors = points. No fancy math, no computers required.", type: "normal" },
+            { year: "1997", text: "Wells DVT score validated: Low probability patients have <5% DVT prevalence. Can safely avoid imaging with negative D-dimer.", type: "revelation" },
+            { year: "2000", text: "Wells PE score developed for pulmonary embolism. Similar simplicity: 7 items, integer points, three risk categories.", type: "normal" },
+            { year: "2006", text: "Wells PE 评分得到广泛验证。与 PERC、D-二聚体和 CTPA 协议相结合。对数百万急诊科患者进行了风险分层。", type: "revelation" },
+            { year: "Impact", text: "Reduced unnecessary CT scans. Reduced radiation exposure. Faster diagnoses. Lives saved by rapid identification of high-risk patients.", type: "revelation" },
+            { year: "Why It Worked", text: "简单（可记忆）、经过验证（外部、重复）、集成（通过诊断途径）和临床有用（改变决策）。", type: "revelation" }
+          ],
+          realData: {
+            endpoint: "DVT/PE presence",
+            model: "Wells Score (DVT and PE versions)",
+            discrimination: "C-statistic 0.70-0.75",
+            impact: "Standard of care in emergency medicine worldwide"
+          },
+          hook: "THE HOOK: Wells criteria have modest C-statistics (0.70-0.75) — not impressive by AI standards. But they're memorizable, interpretable, validated, and integrated into care pathways. They've saved more lives than any black-box algorithm. Sometimes simple wins."
+        }
+      },
+      {
+        type: 'content',
+        content: {
+          title: "Famous Clinical Prediction Rules",
+          sections: [
+            {
+              heading: "Cardiovascular:",
+              items: [
+                "Framingham/ASCVD: 10-year CVD risk → statin decisions",
+                "CHA₂DS₂-VASc: Stroke risk in AF → anticoagulation",
+                "HEART Score: Chest pain risk stratification → discharge vs admit",
+                "TIMI Risk Score: ACS prognosis → treatment intensity"
+              ]
+            },
+            {
+              heading: "Emergency Medicine:",
+              items: [
+                "Wells DVT/PE: Thromboembolism probability → testing strategy",
+                "PERC: Rule out PE without testing",
+                "Canadian C-Spine/CT Head: Imaging decisions after trauma",
+                "Ottawa Ankle/Knee: X-ray necessity for injuries"
+              ]
+            },
+            {
+              heading: "Critical Care:",
+              items: [
+                "APACHE II/III/IV: ICU mortality prediction",
+                "SOFA: Sequential organ failure assessment",
+                "qSOFA: Quick sepsis screening (controversial)",
+                "CURB-65: Pneumonia mortality → admit vs discharge"
+              ]
+            },
+            {
+              heading: "What Makes Them Work:",
+              items: [
+                "Simple enough to use at bedside without calculator",
+                "Validated extensively across populations",
+                "集成到临床工作流程和指南中",
+                "Clear decision thresholds with actionable implications"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        type: 'story-deep',
+        content: {
+          label: "THE CONTROVERSY: qSOFA — WHEN A SCORE DIVIDED MEDICINE",
+          source: "Seymour et al. JAMA 2016 | Singer et al. JAMA 2016 | Sepsis-3",
+          timeline: [
+            { year: "2016", text: "Sepsis-3 consensus redefines sepsis. Introduces qSOFA: 3 simple criteria (RR≥22, SBP≤100, altered mental status). 2+ points = 'think sepsis'.", type: "normal" },
+            { year: "The Promise", text: "qSOFA is beautifully simple. No lab tests. Bedside assessment. Could identify sepsis risk anywhere, anytime. International uptake rapid.", type: "normal" },
+            { year: "External Validation", text: "研究纷至沓来。结果好坏参半。 qSOFA 具有特异性（如果呈阳性，预后较差），但敏感性较差（漏掉了许多脓毒症病例）。 C ~0.65-0.70。", type: "crisis" },
+            { year: "The Debate", text: "Is qSOFA for SCREENING (must be sensitive) or PROGNOSIS (can be specific)? Guidelines unclear. Emergency physicians frustrated: patients die with qSOFA=1.", type: "crisis" },
+            { year: "Current Status", text: "qSOFA 对预后有用（阳性预测死亡率），但不适用于筛查（阴性不能排除败血症）。用于不同目的的不同工具。", type: "revelation" },
+            { year: "Lesson", text: "A score's PURPOSE determines its required properties. Screening tools need sensitivity. Prognostic tools can trade sensitivity for specificity. Mismatched purpose = clinical failure.", type: "revelation" }
+          ],
+          realData: {
+            endpoint: "ICU mortality, prolonged stay",
+            model: "qSOFA (RR≥22, SBP≤100, AMS)",
+            discrimination: "C-statistic 0.65-0.70",
+            sensitivity: "脓毒症诊断为 45-60%"
+          },
+          hook: "THE HOOK: qSOFA is a great PROGNOSTIC tool — qSOFA≥2 means poor prognosis. But it was marketed as a SCREENING tool, where it fails (misses half of sepsis). The lesson: Know your score's purpose. A prognostic score isn't a screening score."
+        }
+      },
+      {
+        type: 'decision-tree',
+        content: {
+          id: 'score-selection',
+          title: "选择正确的分数",
+          situation: "You're in the emergency department with a patient presenting with shortness of breath. You suspect PE. Multiple scores exist: Wells PE, Geneva, PERC, YEARS. How do you decide?",
+          nodes: {
+            start: {
+              question: "What should guide your choice of score?",
+              branches: [
+                { text: "使用 C 统计量最高的分数", nextNode: "cstat_wrong" },
+                { text: "使用在您的人群中验证的分数并整合到您的数据中工作流程", nextNode: "workflow_correct" },
+                { text: "Use all scores and average them", nextNode: "average_wrong" }
+              ]
+            },
+            cstat_wrong: {
+              type: 'outcome',
+              outcome: 'partial',
+              title: "C-statistic isn't everything",
+              text: "These scores have similar C-statistics (0.70-0.75). The differences are in: what populations they're validated for, how they integrate with testing (D-dimer, CTPA), and whether your institution has pathways built around them. Implementation matters more than small statistical differences.",
+              lesson: "Among validated scores, choose based on local validation, workflow integration, and clinical pathway support."
+            },
+            workflow_correct: {
+              situation: "Excellent! Your institution uses Wells + D-dimer protocol. Now: a patient has Wells score of 2 ('PE unlikely'). D-dimer is elevated. What next?",
+              question: "Your action:",
+              branches: [
+                { text: "PE is unlikely based on Wells — reassure and discharge", nextNode: "discharge_wrong" },
+                { text: "Elevated D-dimer overrides Wells — get CTPA", nextNode: "ctpa_correct" }
+              ]
+            },
+            average_wrong: {
+              type: 'outcome',
+              outcome: 'danger',
+              title: "这会导致混乱！",
+              text: "Scores aren't designed to be averaged. They have different thresholds, different action points, and different integration with testing. PERC rules out without testing; Wells guides D-dimer interpretation. Using multiple scores without understanding their roles leads to inconsistent care.",
+              lesson: "了解每个分数的目的和途径。每个路径选择一个分数并一致使用。"
+            },
+            discharge_wrong: {
+              type: 'outcome',
+              outcome: 'danger',
+              title: "Dangerous decision!",
+              text: "'PE unlikely' (Wells ≤4) means D-dimer can rule out PE. But if D-dimer is ELEVATED in a 'PE unlikely' patient, they need imaging. The pathway is: Wells → D-dimer → CTPA if D-dimer positive. You can't stop at Wells when D-dimer is abnormal.",
+              lesson: "临床预测规则通常是路径的一部分，而不是独立决策。遵循完整的算法。"
+            },
+            ctpa_correct: {
+              type: 'outcome',
+              outcome: 'success',
+              title: "Correct clinical pathway!",
+              text: "Wells 'PE unlikely' + negative D-dimer = rule out PE. Wells 'PE unlikely' + positive D-dimer = CTPA needed. The score stratifies who needs D-dimer, but the final decision combines score + D-dimer result.",
+              lesson: "临床预测规则通常与路径中的诊断测试相结合。分数本身并不能做出决定。"
+            }
+          }
+        }
+      },
+      {
+        type: 'quiz',
+        content: {
+          question: "CHA₂DS₂-VASc has a C-statistic of only 0.60-0.65 for predicting stroke in atrial fibrillation. Despite this modest discrimination, it's useful because:",
+          options: [
+            { id: 'a', text: "It perfectly calibrated in all populations", correct: false },
+            { id: 'b', text: "It identifies a low-risk group (score 0-1) who can avoid anticoagulation", correct: true },
+            { id: 'c', text: "这是用于此目的的唯一分数", correct: false },
+            { id: 'd', text: "C 统计量测量不正确", correct: false }
+          ],
+          explanation: "CHA2DS2-VASc 的临床实用性并非来自总体上的高度歧视，而是来自于识别低风险群体。评分为 0 分（或女性为 1 分）的患者中风风险足够低，可能不需要抗凝治疗。分数的价值在于排除，而不是预测。"
+        }
+      },
+      {
+        type: 'story-deep',
+        content: {
+          label: "真实案例：ONCOTYPE DX 成功故事 — 通过验证赢得信任",
+          source: "Paik et al. NEJM 2004 | TAILORx Trial 2018 | Breast cancer prognostics",
+          timeline: [
+            { year: "2004", text: "Oncotype DX is introduced: a 21-gene assay that generates a Recurrence Score (0-100) for early-stage, hormone receptor-positive breast cancer. Claims to predict chemotherapy benefit.", type: "normal" },
+            { year: "Skepticism", text: "批评者需要证据。一项研究的基因特征可能在其他地方不起作用。发表偏倚、过度拟合、缺乏临床验证——所有常见问题。", type: "crisis" },
+            { year: "2006-2015", text: "验证研究不断积累。该分数是在先前临床试验（NSABP B-14、B-20、ATAC）的存档样本中进行测试的。各队列的结果一致。歧视依然存在。", type: "normal" },
+            { year: "2018", text: "TAILORx trial results published: 10,273 women with intermediate Recurrence Scores randomized to chemotherapy vs no chemotherapy. Low scores (0-25) could safely skip chemo. Prospective validation achieved.", type: "revelation" },
+            { year: "Impact", text: "Thousands of women spared unnecessary chemotherapy each year. Reduced toxicity, preserved quality of life, saved costs. A prognostic model that EARNED its place in guidelines.", type: "revelation" },
+            { year: "Lesson", text: "Oncotype DX succeeded because it was validated relentlessly: retrospective cohorts, prospective trials, multiple populations. Skeptics were answered with data, not marketing. <span class='lesson-gold'>THE LESSON: Trust in prognostic models is earned through validation. Oncotype DX shows what patient-centered, evidence-based model development looks like.</span>", type: "revelation" }
+          ],
+          realData: {
+            endpoint: "10-year distant recurrence risk",
+            model: "Oncotype DX 21-gene Recurrence Score",
+            discrimination: "Validated across multiple independent cohorts",
+            impact: "Changed standard of care; spares thousands from unnecessary chemotherapy"
+          },
+          hook: "THE HOOK: When Oncotype DX was introduced, it was just another gene signature claiming to predict cancer outcomes. What made it different? Fifteen years of validation. Independent cohorts. Randomized trial evidence. A commercial test that submitted itself to the rigors of science and emerged with guidelines recommending its use. This is how prognostic models should prove themselves."
+        }
+      },
+      {
+        type: 'principle',
+        content: {
+          text: "🎯 PROGRESS CHECK: You've learned about clinical prediction rules. Key lessons: (1) Simplicity enables adoption; (2) Scores work in pathways, not isolation; (3) Purpose (screening vs prognosis) determines required properties; (4) Moderate C-statistics can still be clinically useful if they identify actionable subgroups."
+        }
+      }
+    ]
+  },
+  {
+    id: 6,
+    title: "The Reporting",
+    subtitle: "TRIPOD Guidelines",
+    principle: 5,
+    estimatedTime: "20 min",
+    slides: [
+      {
+        type: 'principle-display',
+        content: {
+          principle: "Clinical utility trumps statistics"
+        }
+      },
+      {
+        type: 'story-deep',
+        content: {
+          label: "THE HIDDEN PROBLEM: COVID MODELS — WHEN URGENCY TRUMPED RIGOR",
+          source: "Wynants et al. BMJ 2020 (living review) | COVID prediction models",
+          timeline: [
+            { year: "Mar 2020", text: "Pandemic begins. Researchers worldwide rush to build COVID prognostic models. Hundreds appear on preprint servers within weeks.", type: "normal" },
+            { year: "Wynants Review", text: "到 2020 年 7 月，系统审查确定了 232 个 COVID 预测模型。使用 PROBAST（偏倚风险工具）进行评估：99% 存在高偏倚风险。", type: "crisis" },
+            { year: "Common Problems", text: "Small samples, data-driven variable selection, no external validation, high risk of overfitting, poorly reported methods, non-reproducible.", type: "crisis" },
+            { year: "Reporting Failures", text: "Most papers didn't report: predictor definitions, missing data handling, calibration plots, sample size calculations, or model equations. Impossible to reproduce or implement.", type: "crisis" },
+            { year: "Consequence", text: "临床医生无法使用这些模型 — 方法不明确，无法实施，在绝望时没有可用的经过验证的工具需要。", type: "crisis" },
+            { year: "Lesson", text: "TRIPOD 报告准则存在，但在匆忙中被忽略。透明的报告不是官僚开销——它对于临床使用至关重要。", type: "revelation" }
+          ],
+          realData: {
+            endpoint: "COVID-19 diagnosis, prognosis, mortality",
+            models: "232 models reviewed",
+            bias: "229/232 (99%) high risk of bias",
+            issue: "Unusable due to poor reporting and methodology"
+          },
+          hook: "亮点：2020 年开发了 232 个新冠肺炎预测模型。其中 99% 由于偏差和报告不力而无法使用。这场流行病迫切需要预测工具——而我们产生的是噪音而不是信号。这就是 TRIPOD 存在的原因。"
+        }
+      },
+      {
+        type: 'content',
+        content: {
+          title: "TRIPOD: Transparent Reporting of Prediction Models",
+          sections: [
+            {
+              heading: "What Is TRIPOD?",
+              items: [
+                "预测模型研究报告指南 (2015)",
+                "22-item checklist for transparent reporting",
+                "涵盖开发、验证和组合研究",
+                "Required by many journals for publication",
+                "TRIPOD-AI extension for machine learning models"
+              ]
+            },
+            {
+              heading: "Key Reporting Elements:",
+              items: [
+                "TITLE: Identify as development, validation, or both; name the outcome",
+                "PARTICIPANTS: Eligibility criteria, settings, dates, flow diagram",
+                "PREDICTORS: Definitions, assessment methods, blinding",
+                "OUTCOME: Definition, assessment, timing, blinding",
+                "SAMPLE SIZE: Number of participants and events, EPV",
+                "MISSING DATA: How much, how handled",
+                "MODEL: Full specification (coefficients, baseline risk)",
+                "PERFORMANCE: Discrimination AND calibration measures"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        type: 'method',
+        content: {
+          label: "方法：TRIPOD 要素",
+          title: "What Readers Need to Implement Your Model",
+          sections: [
+            {
+              heading: "Model Specification (Essential!):",
+              text: "• 所有带有定义的预测变量 • 回归系数或分数权重 • 基线风险或截距 • 计算预测概率的说明 • 没有此信息，您的模型将无法使用"
+            },
+            {
+              heading: "Performance Measures:",
+              text: "• 95% CI 的 C 统计量 • 校准图（显示它） • 大校准和斜率 • 相关阈值的灵敏度/特异性 • 临床效用的决策曲线分析"
+            },
+            {
+              heading: "Flow Diagram:",
+              text: "• 筛查了多少患者，合格、分析 • 每一步排除的原因 • 缺失数据的数字 • 允许读者评估选择偏差"
+            },
+            {
+              heading: "Missing Data:",
+              text: "• 每个变量缺失的比例 • 如何处理缺失数据 • 完整案例与插补 • 如果使用插补，则进行敏感性分析"
+            }
+          ]
+        }
+      },
+      {
+        type: 'decision-tree',
+        content: {
+          id: 'tripod-assessment',
+          title: "本文是否符合 TRIPOD？",
+          situation: "您正在阅读一篇论文关于新的死亡率预测模型。检查关键 TRIPOD 元素。",
+          nodes: {
+            start: {
+              question: "方法部分描述了 15 个候选预测变量，但没有说明最终模型中有多少个。您能实现这个模型吗？",
+              branches: [
+                { text: "是的 - 方法很明确", nextNode: "yes_wrong" },
+                { text: "No — I don't know which predictors are included", nextNode: "no_correct" }
+              ]
+            },
+            yes_wrong: {
+              type: 'outcome',
+              outcome: 'danger',
+              title: "您无法实现您无法定义的内容！",
+              text: "Without knowing which predictors are in the final model and their coefficients, you CANNOT calculate predicted probabilities. The paper is incomplete. This is a TRIPOD violation: model specification must be complete.",
+              lesson: "TRIPOD requires full model specification: all predictors, all coefficients, intercept/baseline. Without this, the paper is useless for clinical application."
+            },
+            no_correct: {
+              situation: "Correct. You find the supplement with coefficients. Now: the paper reports C = 0.81 but shows no calibration plot.",
+              question: "这是足够的性能报告吗？",
+              branches: [
+                { text: "Yes — C-statistic tells us discrimination", nextNode: "cstat_only_wrong" },
+                { text: "No — calibration plot is essential", nextNode: "calibration_needed_correct" }
+              ]
+            },
+            cstat_only_wrong: {
+              type: 'outcome',
+              outcome: 'danger',
+              title: "一半的图片丢失了！",
+              text: "C-statistic tells you DISCRIMINATION only. Without a calibration plot, you don't know if predicted probabilities are accurate. A model can have C=0.81 but overestimate risk by 50%. You need BOTH metrics.",
+              lesson: "TRIPOD 明确要求校准评估。仅报告 C 统计量的论文是不完整的。求校准图。"
+            },
+            calibration_needed_correct: {
+              situation: "好！您需要补充校准数据。最后：论文报告了 Bootstrap 的内部验证，但没有外部验证。",
+              question: "该模型准备好用于临床了吗？",
+              branches: [
+                { text: "Yes — bootstrap validation is rigorous", nextNode: "internal_only" },
+                { text: "No — external validation required before clinical use", nextNode: "external_needed_correct" }
+              ]
+            },
+            internal_only: {
+              type: 'outcome',
+              outcome: 'partial',
+              title: "Bootstrap is necessary but not sufficient",
+              text: "Bootstrap 在开发数据中进行了乐观调整。但它不会测试新设置的通用性。模型可以通过引导程序验证，但在其他地方部署时仍然会失败。临床使用前需要进行外部验证。",
+              lesson: "Development + internal validation = MINIMUM for publication. External validation = MINIMUM for clinical implementation."
+            },
+            external_needed_correct: {
+              type: 'outcome',
+              outcome: 'success',
+              title: "Correct judgment!",
+              text: "本文提供了一项经过内部验证的开发研究。它已可发布，但尚未准备好进行临床部署。作者应该明确说明外部验证的必要性，并且您应该等待它在临床上使用该模型。",
+              lesson: "Be explicit about what a study provides. Development without external validation = hypothesis. External validation = evidence for deployment."
+            }
+          }
+        }
+      },
+      {
+        type: 'quiz',
+        content: {
+          question: "A prediction model paper shows excellent discrimination (C=0.87) and perfect calibration in development data. But it doesn't provide the model equation (coefficients). This paper is:",
+          options: [
+            { id: 'a', text: "完整 — 性能是关键信息", correct: false },
+            { id: 'b', text: "Incomplete — readers cannot implement or validate the model", correct: true },
+            { id: 'c', text: "Acceptable — coefficients can be requested from authors", correct: false },
+            { id: 'd', text: "足以进行临床部署", correct: false }
+          ],
+          explanation: "没有系数，模型就无法实施、验证或使用。 “联系作者”是不可接受的——许多人不会回应，临床实施需要立即访问。 TRIPOD 需要完整的型号规格。这篇论文根本上是不完整的。"
+        }
+      },
+      {
+        type: 'principle',
+        content: {
+          text: "⚠️ THE WARNING: 99% of COVID prediction models were unusable. Not because prognosis was impossible — because reporting was inadequate. TRIPOD exists to ensure that prediction models can be implemented, validated, and used. Ignoring reporting standards wastes research and harms patients."
+        }
+      }
+    ]
+  },
+  {
+    id: 7,
+    title: "The Utility",
+    subtitle: "Decision Curves & Net Benefit",
+    principle: 6,
+    estimatedTime: "30 min",
+    slides: [
+      {
+        type: 'principle-display',
+        content: {
+          principle: "Transparency enables trust"
+        }
+      },
+      {
+        type: 'story-deep',
+        content: {
+          label: "THE MISSING PIECE: WHEN GOOD MODELS DIDN'T HELP PATIENTS",
+          source: "Vickers & Elkin 2006 | Medical Decision Making | Decision curve analysis",
+          timeline: [
+            { year: "Classic Era", text: "Prognostic models evaluated by C-statistic and calibration. 'Good' models (C>0.75, calibrated) assumed to be clinically useful. No direct measurement of utility.", type: "normal" },
+            { year: "The Problem", text: "Many models with good statistics didn't change decisions or outcomes. Example: A model that classifies everyone as high-risk has C=0.50 but perfect 'sensitivity.' Statistics can be gamed.", type: "crisis" },
+            { year: "2006", text: "Vickers & Elkin 引入决策曲线分析 (DCA)。直接衡量净效益：使用该模型帮助的患者多于受到伤害的患者吗？", type: "revelation" },
+            { year: "Key Insight", text: "Clinical utility depends on TREATMENT THRESHOLD — how bad is it to miss a case vs unnecessarily treat? Different thresholds, different utility assessments.", type: "revelation" },
+            { year: "Adoption", text: "许多期刊现在都要求 DCA。 FDA 考虑诊断设备批准的决策曲线。从“良好的统计数据”转变为“临床价值”。", type: "revelation" },
+            { year: "Lesson", text: "Discrimination and calibration are necessary but not sufficient. The ultimate question: Does using this model lead to better decisions than not using it?", type: "revelation" }
+          ],
+          realData: {
+            endpoint: "Decision-making improvement",
+            method: "Net benefit calculation",
+            comparison: "Model vs treat-all vs treat-none",
+            impact: "Now standard in major journals"
+          },
+          hook: "THE HOOK: A model can have C=0.85 and perfect calibration but provide ZERO clinical benefit if it doesn't change appropriate decisions. Decision curves answer: 'Does this model help patients compared to simpler strategies?' This is the question that actually matters."
+        }
+      },
+      {
+        type: 'content',
+        content: {
+          title: "What Is Net Benefit?",
+          sections: [
+            {
+              heading: "The Core Concept:",
+              text: "净效益权衡真阳性（正确识别出需要治疗的患者）与假阳性（不必要治疗的患者），并根据不必要治疗的危害进行调整。"
+            },
+            {
+              heading: "The Formula:",
+              text: "Net Benefit = (True Positives / N) - (False Positives / N) × (threshold / (1 - threshold))"
+            },
+            {
+              heading: "Treatment Threshold:",
+              items: [
+                "您接受治疗的概率",
+                "Reflects tradeoff: harm of missing case vs harm of unnecessary treatment",
+                "Low threshold (5%): treat-all may be reasonable",
+                "High threshold (30%): only treat clear high-risk patients"
+              ]
+            },
+            {
+              heading: "Comparators:",
+              items: [
+                "TREAT ALL: Give treatment to everyone (net benefit = outcome rate - FP penalty)",
+                "TREAT NONE: Give treatment to no one (net benefit = 0)",
+                "MODEL: Use model to select patients (should beat both alternatives)"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        type: 'method',
+        content: {
+          label: "THE方法：读取决策曲线",
+          title: "How to Interpret Decision Curve Analysis",
+          sections: [
+            {
+              heading: "X-Axis: Threshold Probability",
+              text: "The treatment threshold — probability above which you'd treat. Low thresholds (left) = aggressive treatment. High thresholds (right) = conservative treatment."
+            },
+            {
+              heading: "Y-Axis: Net Benefit",
+              text: "越高越好。表示“真阳性减去加权假阳性”。在您的阈值下净收益最高的模型是最好的。"
+            },
+            {
+              heading: "Key Curves:",
+              text: "• TREAT ALL: Usually a downward slope (more FPs as threshold rises)\n• TREAT NONE: Flat line at 0\n• MODEL: Should be ABOVE both treat-all and treat-none in useful threshold range"
+            },
+            {
+              heading: "Interpretation:",
+              items: [
+                "Model above treat-all AND treat-none = useful",
+                "Model matches treat-all = model adds nothing",
+                "Model below treat-none = model causes harm",
+                "Focus on CLINICALLY RELEVANT threshold range"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        type: 'decision-tree',
+        content: {
+          id: 'decision-curve-interpretation',
+          title: "Reading a Decision Curve",
+          situation: "A decision curve shows a model for predicting 30-day readmission. At threshold 0.10: Model net benefit = 0.05, Treat-all = 0.04, Treat-none = 0. At threshold 0.30: Model net benefit = 0.02, Treat-all = -0.05, Treat-none = 0.",
+          nodes: {
+            start: {
+              question: "At threshold 0.10 (intervene if risk >10%), is the model useful?",
+              branches: [
+                { text: "Yes — model has highest net benefit (0.05 > 0.04 > 0)", nextNode: "threshold10_correct" },
+                { text: "Barely — model only slightly better than treat-all", nextNode: "threshold10_partial" }
+              ]
+            },
+            threshold10_correct: {
+              situation: "Correct — at 10% threshold, the model provides slightly more net benefit than treating everyone. Now consider threshold 0.30:",
+              question: "At threshold 0.30 (intervene only if risk >30%), what's the best strategy?",
+              branches: [
+                { text: "Model — net benefit 0.02 is positive", nextNode: "model30_correct" },
+                { text: "Treat-none — model benefit is tiny", nextNode: "treatnone_partial" }
+              ]
+            },
+            threshold10_partial: {
+              type: 'outcome',
+              outcome: 'partial',
+              title: "裕度在临床上很重要",
+              text: "Net benefit 0.05 vs 0.04 is indeed small. But over thousands of patients, even small improvements accumulate. The key question: Is the difference CLINICALLY meaningful and worth the implementation effort?",
+              lesson: "Small net benefit improvements can still be worthwhile at scale. But weigh against implementation costs."
+            },
+            model30_correct: {
+              type: 'outcome',
+              outcome: 'success',
+              title: "Correct reading!",
+              text: "At threshold 0.30: Model (0.02) > Treat-none (0) > Treat-all (-0.05). The model provides positive net benefit when we're conservative about intervention. Importantly, treat-all is now HARMFUL (negative net benefit) — intervening on everyone at high threshold wastes resources on false positives.",
+              lesson: "Decision curves show WHEN a model is useful. This model helps at both thresholds but especially at higher thresholds where treat-all fails."
+            },
+            treatnone_partial: {
+              type: 'outcome',
+              outcome: 'partial',
+              title: "The model is still better than nothing",
+              text: "0.02 的净收益虽小但为正。不治疗的益处为 0。如果干预具有有意义的效益且成本可接受，那么使用该模型仍然值得。 “微小的好处”仍然是好处。",
+              lesson: "Don't dismiss small positive net benefits. But do consider: Is the benefit large enough to justify implementation?"
+            }
+          }
+        }
+      },
+      {
+        type: 'quiz',
+        content: {
+          question: "A model's decision curve shows it has LOWER net benefit than 'treat all' at thresholds below 15%, but HIGHER net benefit above 15%. This model:",
+          options: [
+            { id: 'a', text: "Is useless — it doesn't beat treat-all at low thresholds", correct: false },
+            { id: 'b', text: "Is useful for conservative decision-makers (threshold >15%) but not aggressive ones", correct: true },
+            { id: 'c', text: "Has poor discrimination", correct: false },
+            { id: 'd', text: "Is poorly calibrated", correct: false }
+          ],
+          explanation: "Different thresholds reflect different clinical philosophies. If your threshold is >15% (conservative), use the model. If your threshold is <15% (aggressive), just treat everyone — the model doesn't help. Clinical utility is THRESHOLD-SPECIFIC."
+        }
+      },
+      {
+        type: 'principle',
+        content: {
+          text: "🎯 PROGRESS CHECK: You've learned that clinical utility matters more than statistical performance. Decision curve analysis directly measures whether a model improves decisions. A model with modest C-statistic but positive net benefit is more valuable than a 'perfect' model that doesn't change appropriate care."
+        }
+      }
+    ]
+  },
+  {
+    id: 8,
+    title: "The Bias",
+    subtitle: "PROBAST Assessment",
+    principle: 1,
+    estimatedTime: "25 min",
+    slides: [
+      {
+        type: 'principle-display',
+        content: {
+          principle: "A model is only as good as its validation"
+        }
+      },
+      {
+        type: 'story-deep',
+        content: {
+          label: "THE AI MIRAGE: CHEST X-RAY MODELS — WHEN SHORTCUTS FOOLED EVERYONE",
+          source: "Zech et al. PLOS Med 2018 | DeGrave et al. Nat Mach Intell 2021 | COVID CXR",
+          timeline: [
+            { year: "2017-18", text: "Deep learning models achieve 'radiologist-level' performance detecting pneumonia on chest X-rays. C-statistics >0.90. Major publications.", type: "normal" },
+            { year: "2018", text: "Zech 等人。显示模型学习医院标记（而不是疾病）。在不同医院的图像上进行测试时，性能下降至 C ~0.60。模型学习的是部门印章，而不是肺炎。", type: "crisis" },
+            { year: "2020", text: "COVID CXR models proliferate. Claims of 95%+ accuracy. Deployed in some hospitals without rigorous validation.", type: "normal" },
+            { year: "2021", text: "DeGrave et al. show COVID models used SHORTCUTS: patient positioning (COVID patients were sicker, positioned differently), image artifacts, and laterality markers. Not actual COVID lung findings.", type: "crisis" },
+            { year: "Root Cause", text: "训练数据存在虚假关联。混杂因素比实际的病理学更容易学习。高内部“性能”是一种幻觉。", type: "revelation" },
+            { year: "Lesson", text: "ML 模型找到模式 - 不一定是正确的模式。跨不同环境的外部验证至关重要。没有偏差评估的“AI 性能”毫无意义。", type: "revelation" }
+          ],
+          realData: {
+            endpoint: "Pneumonia/COVID detection",
+            claimed: "C-statistic >0.90",
+            external: "C-statistic ~0.60 (different hospitals)",
+            mechanism: "Learned hospital markers, patient positioning — not disease"
+          },
+          hook: "THE HOOK: AI models 'outperformed radiologists' — by learning what hospital the image came from, not what disease the patient had. This is why PROBAST and systematic bias assessment exist. High numbers mean nothing if the model learned the wrong things."
+        }
+      },
+      {
+        type: 'content',
+        content: {
+          title: "PROBAST: Prediction Model Risk of Bias Assessment Tool",
+          sections: [
+            {
+              heading: "What Is PROBAST?",
+              items: [
+                "Cochrane 认可的用于评估预测模型研究中偏差的工具",
+                "Assesses RISK OF BIAS and APPLICABILITY concerns",
+                "20 signaling questions across 4 domains",
+                "Used in systematic reviews of prognostic models"
+              ]
+            },
+            {
+              heading: "Four Domains:",
+              items: [
+                "1. PARTICIPANTS: Appropriate enrollment, representative population",
+                "2. PREDICTORS: Defined clearly, measured consistently, available at prediction time",
+                "3. OUTCOME: Defined clearly, measured accurately, appropriate time horizon",
+                "4. ANALYSIS: Adequate sample size, appropriate handling of missing data, proper validation"
+              ]
+            },
+            {
+              heading: "Overall Judgment:",
+              text: "HIGH risk of bias if ANY domain is high risk. Like ROBINS-I, PROBAST is intentionally strict. One fatal flaw = study is unreliable."
+            }
+          ]
+        }
+      },
+      {
+        type: 'decision-tree',
+        content: {
+          id: 'probast-assessment',
+          title: "PROBAST in Practice",
+          situation: "You're reviewing a COVID mortality model. The study: (1) Used hospitalized patients from one NYC hospital in April 2020; (2) Predictors included 45 variables, selected by significance testing; (3) Outcome was in-hospital death, well-defined; (4) 500 patients, 150 deaths, internal validation by bootstrap only.",
+          nodes: {
+            start: {
+              question: "Assess the PARTICIPANTS domain:",
+              branches: [
+                { text: "Low risk — all hospitalized COVID patients included", nextNode: "participants_low" },
+                { text: "High risk — one hospital, peak pandemic, selection concerns", nextNode: "participants_high" }
+              ]
+            },
+            participants_high: {
+              situation: "Good judgment. Single NYC hospital during peak means: (1) severe cases overrepresented, (2) overwhelmed system, (3) unique local practices. Now assess ANALYSIS domain:",
+              question: "该研究测试了 150 个事件的 45 个变量。 EPV 是什么？",
+              branches: [
+                { text: "150/45 = 3.3 — critically low, high risk of overfitting", nextNode: "epv_correct" },
+                { text: "引导验证可纠正此问题 - 中等风险", nextNode: "bootstrap_wrong" }
+              ]
+            },
+            participants_low: {
+              type: 'outcome',
+              outcome: 'partial',
+              title: "考虑普遍性问题",
+              text: "While all hospitalized patients were included, a single NYC hospital during peak pandemic has unique features: extreme case severity, overwhelmed resources, specific treatment protocols. External populations will differ substantially.",
+              lesson: "PROBAST 评估偏差（内部有效性）和适用性（外部有效性）。即使没有偏见，模型也可能不适用于其他地方。"
+            },
+            epv_correct: {
+              situation: "Exactly! EPV of 3.3 is critically low. Now: the authors report C-statistic of 0.88 after bootstrap validation.",
+              question: "Does the high C-statistic indicate a good model?",
+              branches: [
+                { text: "是的 - Bootstrap 已针对乐观情况进行了校正，并且 C 仍然很高", nextNode: "cstat_high_wrong" },
+                { text: "No — with EPV 3.3, even bootstrap can't fix overfitting; this C is likely inflated", nextNode: "cstat_skeptic_correct" }
+              ]
+            },
+            bootstrap_wrong: {
+              type: 'outcome',
+              outcome: 'danger',
+              title: "Bootstrap cannot fix inadequate sample size!",
+              text: "Bootstrap 因对开发数据的过度拟合而估计 OPTIMISM。但当 EPV 为 3.3 时，该模型拟合的是噪声而不是信号。 Bootstrap 将表现出一些乐观情绪，但无法揭示模型从根本上来说是无效的。",
+              lesson: "Bootstrap 会纠正已知的过度拟合。它无法挽救样本量根本不足的模型。"
+            },
+            cstat_high_wrong: {
+              type: 'outcome',
+              outcome: 'danger',
+              title: "This C-statistic is almost certainly unreliable!",
+              text: "With EPV 3.3 and 45 variables selected by significance testing, the model has absorbed massive amounts of noise. Bootstrap helps but cannot fully correct this. The true external C is likely 0.65-0.75 at best. High internal C with low EPV = red flag.",
+              lesson: "When EPV is very low, internal metrics (even bootstrap-corrected) are unreliable. Only external validation reveals true performance."
+            },
+            cstat_skeptic_correct: {
+              type: 'outcome',
+              outcome: 'success',
+              title: "Excellent critical appraisal!",
+              text: "You correctly identified: (1) Participant concerns from single-site pandemic peak; (2) Analysis concerns from EPV 3.3; (3) Skepticism of high C despite statistical correction. This study has HIGH risk of bias in multiple domains. PROBAST overall: HIGH RISK.",
+              lesson: "PROBAST requires domain-by-domain assessment. Multiple high-risk domains = study should not inform clinical practice without external validation."
+            }
+          }
+        }
+      },
+      {
+        type: 'quiz',
+        content: {
+          question: "A PROBAST assessment shows: Participants LOW, Predictors LOW, Outcome LOW, Analysis HIGH (inadequate sample size). The overall risk of bias is:",
+          options: [
+            { id: 'a', text: "Low — 3 of 4 domains are low risk", correct: false },
+            { id: 'b', text: "Medium — mostly low with one concern", correct: false },
+            { id: 'c', text: "High — one high-risk domain makes overall high", correct: true },
+            { id: 'd', text: "Unclear — need to average the domains", correct: false }
+          ],
+          explanation: "与 ROBINS-I 一样，PROBAST 使用“最弱链接”原则。如果任何领域都是高风险的，那么整个研究都是高风险的。你不进行平均或投票——一个关键缺陷会使这项研究无效。这是故意保守的，因为存在一个主要问题的模型是不可靠的。"
+        }
+      },
+      {
+        type: 'principle',
+        content: {
+          text: "⚠️ THE WARNING: The chest X-ray AI debacle shows that impressive performance numbers can be completely artifactual. Models learn whatever predicts the outcome — including confounders, shortcuts, and spurious correlations. PROBAST systematically checks whether a model learned the RIGHT things for the RIGHT reasons."
+        }
+      }
+    ]
+  },
+  {
+    id: 9,
+    title: "机器学习",
+    subtitle: "ML vs Regression",
+    principle: 3,
+    estimatedTime: "25 min",
+    slides: [
+      {
+        type: 'principle-display',
+        content: {
+          principle: "预测变量并非越多越好"
+        }
+      },
+      {
+        type: 'story-deep',
+        content: {
+          label: "THE MODEST TRUTH: ML vs LOGISTIC REGRESSION — WHEN COMPLEXITY DIDN'T PAY",
+          source: "Christodoulou et al. 2019 | J Clin Epidemiol | Systematic review",
+          timeline: [
+            { year: "2010s", text: "机器学习炒作进入了医学领域。声称深度学习、随机森林和神经网络将彻底改变预测。 “传统统计数据已经过时。”", type: "normal" },
+            { year: "2019", text: "Christodoulou et al. systematic review: 71 studies directly comparing ML to logistic regression for clinical prediction. Same data, same outcomes.", type: "normal" },
+            { year: "The Results", text: "ML outperformed logistic regression in... 24% of studies. Logistic regression outperformed ML in 10%. No significant difference in 66%. Median C-statistic difference: 0.00.", type: "revelation" },
+            { year: "Why?", text: "对于中等维度的表格临床数据，逻辑回归捕获大部分信号。机器学习的优势体现在图像、序列和非常高的维度上，而不是典型的临床预测因子。", type: "revelation" },
+            { year: "The Cost", text: "机器学习模型的可解释性较差，难以实现，更容易在小数据集上过度拟合，并且需要更多的计算资源。复杂而无益。", type: "crisis" },
+            { year: "Lesson", text: "根据问题选择方法，而不是炒作。对于大多数临床预测任务，逻辑回归与 ML 相比具有竞争力，而且更实用。", type: "revelation" }
+          ],
+          realData: {
+            endpoint: "Various clinical outcomes",
+            comparison: "71 ML vs logistic regression comparisons",
+            result: "Median AUC difference: 0.00",
+            winner: "66% 的研究没有显着差异"
+          },
+          hook: "THE HOOK: The systematic comparison showed ML and logistic regression perform EQUALLY for most clinical prediction. ML wins in specific domains (imaging, sequences) but not for standard clinical data. Don't use complexity when simplicity works."
+        }
+      },
+      {
+        type: 'story-deep',
+        content: {
+          label: "REAL-WORLD CASE: THE COVID SEVERITY SCORES RACE — WHEN SPEED DEFEATED RIGOR",
+          source: "Wynants 等人。 BMJ 2020（实时系统评价）| ISARIC 4C 研究 | COVID-19 预测模型",
+          timeline: [
+            { year: "Early 2020", text: "COVID-19 pandemic begins. Clinicians desperately need tools to predict which patients will deteriorate. Researchers worldwide rush to develop prognostic models.", type: "normal" },
+            { year: "March-June 2020", text: "在短短四个月内发布了 100 多个 COVID 预测模型。机器学习、逻辑回归、神经网络——每种方法都被采用。预印本泛滥服务器。", type: "normal" },
+            { year: "The Review", text: "Wynants et al. systematic review: Of 107 models evaluated, nearly ALL were at high risk of bias. Small samples, no external validation, overfitting to local populations, outcome data that hadn't matured.", type: "crisis" },
+            { year: "Common Flaws", text: "非代表性样本（早期大流行病例）。急性疾病期间的结果确定。对缺失数据的处理不当。没有时间或地理验证。针对噪声而不是信号调整的模型。", type: "crisis" },
+            { year: "The Exceptions", text: "A few models (4C Mortality Score, ISARIC) were developed properly: large datasets (tens of thousands), multiple sites, external validation across countries. These took LONGER but actually worked.", type: "revelation" },
+            { year: "Lesson", text: "Urgent need doesn't justify methodological shortcuts. Most rushed COVID models were useless — or worse, misleading. The rigorous models that took time to develop properly were the ones that actually helped. <span class='lesson-gold'>THE LESSON: In a crisis, there's enormous pressure to 'do something.' But a bad model isn't better than no model. Speed without rigor produces predictions that can't be trusted when trust matters most.</span>", type: "revelation" }
+          ],
+          realData: {
+            endpoint: "COVID-19 mortality or deterioration",
+            models: ">100 published in 4 months",
+            quality: "Nearly all at high risk of bias",
+            validated: "Only handful properly externally validated"
+          },
+          hook: "THE HOOK: The COVID pandemic was a natural experiment in rapid model development. The result? Quantity did not equal quality. Over 100 models, nearly all useless. A handful of properly developed models (4C, ISARIC) required large multinational cohorts and careful validation. There are no shortcuts to good prognostic modeling, even in an emergency."
+        }
+      },
+      {
+        type: 'content',
+        content: {
+          title: "When Does ML Actually Help?",
+          sections: [
+            {
+              heading: "ML Advantages:",
+              items: [
+                "高维数据（基因组学、蛋白质组学）",
+                "Image data (radiology, pathology, dermatology)",
+                "Sequential/temporal data (ECGs, time series)",
+                "Complex non-linear interactions (rare in clinical prediction)",
+                "Very large datasets (>100,000 samples)"
+              ]
+            },
+            {
+              heading: "Logistic Regression Advantages:",
+              items: [
+                "Interpretable coefficients",
+                "Handles small samples better (with penalization)",
+                "更易于实施和部署",
+                "Explicit uncertainty quantification",
+                "易于理解的属性和诊断"
+              ]
+            },
+            {
+              heading: "The Decision Framework:",
+              text: "If your data is tabular with <50 predictors and <10,000 samples, start with penalized logistic regression. Try ML if you have specific reasons (non-linearity, interactions, high dimensions). Compare fairly (same data, same validation)."
+            }
+          ]
+        }
+      },
+      {
+        type: 'decision-tree',
+        content: {
+          id: 'ml-vs-regression',
+          title: "Should You Use Machine Learning?",
+          situation: "You're developing a 30-day mortality model for heart failure patients. You have: 2,000 patients, 200 deaths, 25 candidate predictors (demographics, labs, vitals), structured EHR data. A colleague insists you use deep learning because it's 'state of the art.'",
+          nodes: {
+            start: {
+              question: "25 个预测器的 EPV 是多少模型？",
+              branches: [
+                { text: "200/25 = 8 — marginal for any method", nextNode: "epv_marginal" },
+                { text: "用于深度学习的大量数据", nextNode: "plenty_wrong" }
+              ]
+            },
+            epv_marginal: {
+              situation: "Correct — EPV of 8 is marginal. Deep learning typically needs MORE data than logistic regression to avoid overfitting.",
+              question: "鉴于数据有限，您的方法是什么？",
+              branches: [
+                { text: "Use deep learning but with regularization", nextNode: "dl_regularize_partial" },
+                { text: "Use penalized logistic regression (LASSO/ridge)", nextNode: "penalized_correct" }
+              ]
+            },
+            plenty_wrong: {
+              type: 'outcome',
+              outcome: 'danger',
+              title: "深度学习需要更多数据，而不是更少！",
+              text: "深度学习有数百万个参数。对于 2,000 名患者和 200 个事件，神经网络将严重过度拟合。这正是逻辑回归优于机器学习的环境。样本大小限制倾向于更简单的方法。",
+              lesson: "ML/DL 在大数据中大放异彩。在数据有限的情况下，参数较少的简单模型可以更好地泛化。"
+            },
+            dl_regularize_partial: {
+              type: 'outcome',
+              outcome: 'partial',
+              title: "Regularization helps but doesn't fully solve the problem",
+              text: "您可以应用 dropout、权重衰减和提前停止。但包含 200 个事件的深度学习正在艰难前行。即使是正规化的神经网络也难以应对小样本。使用 LASSO 进行逻辑回归可能会以更少的努力实现同样的效果甚至更好。",
+              lesson: "Regularization is essential but doesn't overcome fundamental sample size limitations for complex models."
+            },
+            penalized_correct: {
+              situation: "Good choice! Now: Your logistic regression model achieves C = 0.78. A vendor offers a proprietary ML model claiming C = 0.82 on similar populations.",
+              question: "您应该切换到供应商的 ML 模型吗？",
+              branches: [
+                { text: "Yes — 0.82 > 0.78, and ML is more sophisticated", nextNode: "switch_wrong" },
+                { text: "No — demand external validation on YOUR population first", nextNode: "validation_first_correct" }
+              ]
+            },
+            switch_wrong: {
+              type: 'outcome',
+              outcome: 'danger',
+              title: "Remember Epic Sepsis!",
+              text: "Vendor-reported metrics are often inflated. A 0.04 difference in C-statistic is within noise. Without validation on YOUR population, you don't know if the ML model works in your context. Plus: Can you interpret it? Debug it? Trust it?",
+              lesson: "切勿采用基于供应商声明的模型。需要对您设置中的代表性数据进行独立验证。"
+            },
+            validation_first_correct: {
+              type: 'outcome',
+              outcome: 'success',
+              title: "Evidence-based skepticism!",
+              text: "您在采用之前要求进行验证是正确的。 0.04 C 统计差异（0.78 与 0.82）可能是噪音。即使是真实的，它也可能不会转化为更好的临床效用。您的可解释逻辑模型可能会更安全、更容易实施。",
+              lesson: "Prefer simpler models unless complexity provides clear, validated, clinically meaningful benefit."
+            }
+          }
+        }
+      },
+      {
+        type: 'quiz',
+        content: {
+          question: "A radiology department wants to implement an AI model for detecting pneumonia on chest X-rays. The model was trained and validated at Stanford with C = 0.92. Before deploying at your community hospital, you should:",
+          options: [
+            { id: 'a', text: "Deploy immediately — Stanford is a top institution", correct: false },
+            { id: 'b', text: "Validate on a sample of your hospital's images first", correct: true },
+            { id: 'c', text: "等待 FDA 批准", correct: false },
+            { id: 'd', text: "Use it only for patients similar to Stanford's population", correct: false }
+          ],
+          explanation: "放射学 AI 模型对采集协议、设备、患者群体和图像质量非常敏感。在斯坦福大学训练的模型可能已经学习了斯坦福大学特有的特征。部署之前，本地验证至关重要 - 胸部 X 射线 AI 失败证明了这一点。"
+        }
+      },
+      {
+        type: 'principle',
+        content: {
+          text: "🎯 PROGRESS CHECK: You've learned that ML isn't magic. For tabular clinical data, logistic regression often matches ML performance with better interpretability. ML advantages emerge with images, sequences, or very large datasets. Choose methods based on your data and problem, not hype. Always validate before deployment."
+        }
+      }
+    ]
+  },
+  {
+    id: 10,
+    title: "The Implementation",
+    subtitle: "从模型到实践",
+    principle: 5,
+    estimatedTime: "20 min",
+    slides: [
+      {
+        type: 'principle-display',
+        content: {
+          principle: "Clinical utility trumps statistics"
+        }
+      },
+      {
+        type: 'story-deep',
+        content: {
+          label: "THE IMPLEMENTATION GAP: CURB-65 — WHEN A GOOD MODEL GATHERED DUST",
+          source: "Implementation science literature | Pneumonia severity scores | Clinical workflow",
+          timeline: [
+            { year: "2003", text: "CURB-65 published for pneumonia severity assessment. Beautifully simple: 5 items, integer points, validated. C-statistic ~0.75 for mortality.", type: "normal" },
+            { year: "Development", text: "Confusion, Urea >7, Respiratory rate ≥30, BP low, Age ≥65. Score 0-1 = outpatient. Score 2 = consider admission. Score 3-5 = ICU.", type: "normal" },
+            { year: "The Problem", text: "Widespread publication didn't mean widespread use. Studies showed CURB-65 used in <50% of pneumonia admissions. Clinicians continued using gestalt.", type: "crisis" },
+            { year: "Barriers", text: "未集成到工作流程中。没有 EHR 提示。需要查找标准。当“我能说出谁生病了”时，就觉得没有必要了。临床惰性。", type: "crisis" },
+            { year: "有效的解决方案", text: "EHR auto-calculation, mandatory documentation, clinical decision support alerts. When CURB-65 was EMBEDDED in workflow, usage increased dramatically.", type: "revelation" },
+            { year: "Lesson", text: "A valid model that isn't USED is worthless. Implementation requires: EHR integration, workflow fit, clinician buy-in, and often, mandatory documentation.", type: "revelation" }
+          ],
+          realData: {
+            endpoint: "30-day mortality in pneumonia",
+            model: "CURB-65",
+            discrimination: "C-statistic ~0.75",
+            usage: "<50% before implementation interventions"
+          },
+          hook: "THE HOOK: CURB-65 was published in 2003. Twenty years later, it's still underused in many hospitals. A prediction model is only as good as its implementation. The final mile — from validation to bedside — is often the hardest."
+        }
+      },
+      {
+        type: 'content',
+        content: {
+          title: "Implementation Barriers",
+          sections: [
+            {
+              heading: "Clinician Factors:",
+              items: [
+                "Awareness: Don't know the score exists",
+                "Agreement: Don't believe it adds value over clinical judgment",
+                "Self-efficacy: Don't know how to use it",
+                "Outcome expectancy: Don't expect it to improve patient outcomes",
+                "Inertia: Existing practice works 'well enough'"
+              ]
+            },
+            {
+              heading: "System Factors:",
+              items: [
+                "No EHR integration — requires separate calculation",
+                "Workflow disruption — extra steps, extra time",
+                "No feedback — clinicians don't see if score helped",
+                "No accountability — no tracking of score use",
+                "Alert fatigue — if auto-calculated, may be ignored"
+              ]
+            },
+            {
+              heading: "Model Factors:",
+              items: [
+                "Complexity — can't remember the criteria",
+                "数据要求 - 未定期收集的预测因子",
+                "Unclear thresholds — what action for what score?",
+                "Lack of local validation — doesn't feel applicable"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        type: 'method',
+        content: {
+          label: "方法：成功实施",
+          title: "How to Get Models Into Practice",
+          sections: [
+            {
+              heading: "1. Choose the Right Model:",
+              text: "• Simple enough to use (or auto-calculate)\n• Validated in similar population\n• Clear action thresholds\n• Addresses a real clinical need"
+            },
+            {
+              heading: "2. Integrate Into Workflow:",
+              text: "• 内置于 EHR（可能时自动计算）• 在适当的临床时刻触发• 显示结果做出决定 • 尽量减少额外的数据输入"
+            },
+            {
+              heading: "3. Provide Decision Support:",
+              text: "• 将分数转化为建议的行动 • 解释建议（为什么该分数建议采取该行动） • 允许用文档覆盖 • 不要只给出一个数字 - 提供指导"
+            },
+            {
+              heading: "4. Monitor and Feedback:",
+              text: "• Track score usage rates\n• Monitor patient outcomes\n• Provide feedback to clinicians\n• Iterate and improve"
+            }
+          ]
+        }
+      },
+      {
+        type: 'story-deep',
+        content: {
+          label: "REAL-WORLD CASE: THE EPIC DETERIORATION INDEX — TECHNICALLY VALID, CLINICALLY FRUSTRATED",
+          source: "Epic Systems implementation studies | Alert fatigue literature | Clinical workflow research",
+          timeline: [
+            { year: "Development", text: "Epic's Deterioration Index is developed to predict patient decline 6-12 hours before clinical recognition. The algorithm analyzes vital signs, lab trends, nursing assessments. Technically sophisticated.", type: "normal" },
+            { year: "Deployment", text: "医院急于实施恶化指数。承诺：对患者病情恶化发出预警。在患者崩溃之前，护士和医生将收到警报。生命将得到拯救。", type: "normal" },
+            { year: "Reality Check", text: "研究揭示了问题。许多警报针对的是已经接受适当护理的患者——护士知道患者生病了。该警报增加了噪声，而不是信号。", type: "crisis" },
+            { year: "Alert Fatigue", text: "Clinicians receive dozens of alerts daily. Most are for patients already being managed. The 'cry wolf' effect sets in: alerts are ignored, dismissed without review, treated as background noise.", type: "crisis" },
+            { year: "The Gap", text: "The model WORKS — it identifies deteriorating patients. But identification isn't the bottleneck. The question is: what can clinicians DO differently? If the patient is already on telemetry, already receiving fluids, already being watched — the alert provides no new action.", type: "revelation" },
+            { year: "Lesson", text: "A prognostic model deployed without actionability is just noise. The Deterioration Index failed not because it couldn't predict — but because prediction without clear, novel intervention is useless at the bedside. <span class='lesson-gold'>THE LESSON: Implementation requires more than accurate prediction. It requires: actionable thresholds, novel information, clear interventions, and workflow integration. Prediction without actionability is just sophisticated interruption.</span>", type: "revelation" }
+          ],
+          realData: {
+            endpoint: "Patient deterioration",
+            model: "Epic Deterioration Index",
+            problem: "Alert fatigue from non-actionable predictions",
+            barrier: "Predictions often confirmed what clinicians already knew"
+          },
+          hook: "THE HOOK: The Epic Deterioration Index is a case study in implementation failure. The model wasn't wrong — it successfully identified deteriorating patients. But the alerts often told clinicians what they already knew, for patients already receiving appropriate care. Prediction needs a purpose: if knowing the score doesn't change what you do, the score is just noise."
+        }
+      },
+      {
+        type: 'decision-tree',
+        content: {
+          id: 'implementation-strategy',
+          title: "Planning Implementation",
+          situation: "Your hospital wants to implement a sepsis prediction model. The model requires: lactate level, vital signs, and WBC count. It outputs a probability of sepsis. You need to design the implementation.",
+          nodes: {
+            start: {
+              question: "模型应在临床工作流程中的哪个位置触发？",
+              branches: [
+                { text: "When a patient is admitted to any unit", nextNode: "admission_trigger" },
+                { text: "When vital signs suggest possible deterioration (SIRS-like)", nextNode: "vital_trigger_correct" },
+                { text: "Every 4 hours automatically for all inpatients", nextNode: "regular_trigger_partial" }
+              ]
+            },
+            admission_trigger: {
+              type: 'outcome',
+              outcome: 'partial',
+              title: "考虑临床背景",
+              text: "Admission is one trigger point, but sepsis can develop DURING hospitalization. A patient admitted for elective surgery who develops sepsis on day 3 wouldn't be captured. Consider continuous or recurrent triggering.",
+              lesson: "将触发点与败血症发生的时间相匹配，而不仅仅是患者进入医院的时间。"
+            },
+            vital_trigger_correct: {
+              situation: "好 — 触发临床恶化可捕获新发病例。现在：模型启动并预测败血症概率为 45%。警报应显示什么？",
+              question: "Alert design:",
+              branches: [
+                { text: "'Sepsis probability 45%' — let clinician decide", nextNode: "probability_only_partial" },
+                { text: "'Moderate sepsis risk — consider: lactate, blood cultures, antibiotics' with order set link", nextNode: "actionable_correct" }
+              ]
+            },
+            regular_trigger_partial: {
+              type: 'outcome',
+              outcome: 'partial',
+              title: "Beware alert fatigue!",
+              text: "每 4 小时计算一次所有住院患者将生成大量警报，其中大多数针对低风险患者。临床医生将学会忽略它们（警报疲劳）。有针对性的触发更有效。",
+              lesson: "Implementation must balance sensitivity against clinician burden. Alert fatigue is a real implementation failure mode."
+            },
+            probability_only_partial: {
+              type: 'outcome',
+              outcome: 'partial',
+              title: "Probabilities alone don't drive action",
+              text: "Clinicians don't know what to DO with '45%.' Is that high? What action is warranted? Best practice: translate probability to risk category and link to specific recommended actions (orders, consults).",
+              lesson: "临床决策支持应该是可操作的。数字不是决策支持——带有相关操作的建议才是。"
+            },
+            actionable_correct: {
+              type: 'outcome',
+              outcome: 'success',
+              title: "这会推动采取适当的行动！",
+              text: "Risk category + specific recommendations + order set link = actionable decision support. The clinician sees the warning, understands the risk level, knows what to do, and can act immediately. This is how models change behavior.",
+              lesson: "Implementation success requires: right trigger, clear recommendation, actionable orders. Make the right thing the easy thing."
+            }
+          }
+        }
+      },
+      {
+        type: 'quiz',
+        content: {
+          question: "A hospital implements a readmission prediction model. Alerts fire frequently, but readmission rates don't improve. The most likely explanation is:",
+          options: [
+            { id: 'a', text: "The model has poor discrimination", correct: false },
+            { id: 'b', text: "Alerts aren't linked to effective interventions", correct: true },
+            { id: 'c', text: "模型校准不佳", correct: false },
+            { id: 'd', text: "Clinicians don't trust the model", correct: false }
+          ],
+          explanation: "没有有效干预的预测不会改善结果。如果警报显示“再入院风险很高”，但没有明确、有效的行动来降低该风险，那么该警报就是噪音。实施必须将预测与实际有效的干预措施联系起来。"
+        }
+      },
+      {
+        type: 'principle',
+        content: {
+          text: "⚠️ THE WARNING: Most validated models never reach clinical practice. Those that do often fail to improve outcomes — not because the model is wrong, but because implementation is poor. The final step — embedding prediction into action — is where many projects fail."
+        }
+      }
+    ]
+  },
+  {
+    id: 11,
+    title: "The Capstone",
+    subtitle: "Full Model Evaluation",
+    principle: null,
+    estimatedTime: "30 min",
+    slides: [
+      {
+        type: 'title',
+        content: {
+          title: "The Capstone",
+          subtitle: "Evaluating a Prognostic Model",
+          text: "Apply everything you've learned to critically evaluate a real prognostic model study."
+        }
+      },
+      {
+        type: 'content',
+        content: {
+          title: "Capstone Exercise: The COVID Mortality Model",
+          sections: [
+            {
+              heading: "The Study:",
+              text: "一篇论文提出了一种机器学习模型来预测 COVID-19 死亡率。声称：“我们的 XGBoost 模型实现了 0.91 的 C 统计量，将彻底改变 COVID 分类。”"
+            },
+            {
+              heading: "Study Details:",
+              items: [
+                "Data: 3,000 hospitalized COVID patients from one NYC hospital, March-May 2020",
+                "Outcome: In-hospital mortality (600 deaths, 20% mortality rate)",
+                "Predictors: 150 variables extracted from EHR, 25 selected by importance ranking",
+                "Validation: 5-fold cross-validation on same dataset",
+                "Calibration: 'Good' (no plot shown)",
+                "No external validation"
+              ]
+            },
+            {
+              heading: "Your Task:",
+              text: "使用本课程中的原理系统地评估这项研究。"
+            }
+          ]
+        }
+      },
+      {
+        type: 'decision-tree',
+        content: {
+          id: 'capstone-evaluation',
+          title: "Capstone: Full Evaluation",
+          situation: "完成此 COVID 死亡率模型的每个评估领域。",
+          nodes: {
+            start: {
+              question: "第 1 步 - 样本大小：他们有600 个事件和 25 个预测变量。 EPV 是什么？它是否足够？",
+              branches: [
+                { text: "EPV = 600/25 = 24 — adequate", nextNode: "epv_surface" },
+                { text: "EPV = 600/150 = 4 — they tested 150 variables", nextNode: "epv_correct" }
+              ]
+            },
+            epv_surface: {
+              type: 'outcome',
+              outcome: 'partial',
+              title: "Look deeper!",
+              text: "They TESTED 150 variables before selecting 25. The effective degrees of freedom used is closer to 150. EPV = 600/150 = 4, which is critically low. Data-driven selection doesn't reduce overfitting — it increases it.",
+              lesson: "EPV 应该计算所有测试的变量，而不仅仅是保留的变量。选择并不能拯救你。"
+            },
+            epv_correct: {
+              situation: "Correct! Effective EPV is ~4, critically low. Now assess VALIDATION:",
+              question: "他们在同一数据集上使用了 5 倍交叉验证。这足够吗？",
+              branches: [
+                { text: "Yes — cross-validation is rigorous internal validation", nextNode: "cv_inadequate" },
+                { text: "No — no external validation means unknown generalizability", nextNode: "cv_correct" }
+              ]
+            },
+            cv_inadequate: {
+              type: 'outcome',
+              outcome: 'danger',
+              title: "Cross-validation is internal only!",
+              text: "5 倍 CV 测试过度拟合，但不具有普遍性。该数据仍然来自疫情高峰期间纽约市的一家医院。在 2020 年 4 月纽约市训练的模型可能无法在 2020 年 7 月德克萨斯州工作。需要外部验证。",
+              lesson: "Internal validation (CV, bootstrap) estimates optimism. External validation tests generalizability. Both are needed."
+            },
+            cv_correct: {
+              situation: "Good! Now assess CALIBRATION:",
+              question: "The paper says calibration is 'good' but shows no calibration plot. Your response:",
+              branches: [
+                { text: "Accept it — they're experts who evaluated calibration", nextNode: "accept_wrong" },
+                { text: "Reject — without a calibration plot, claim is unverifiable", nextNode: "reject_correct" }
+              ]
+            },
+            accept_wrong: {
+              type: 'outcome',
+              outcome: 'danger',
+              title: "Trust but verify!",
+              text: "'Good calibration' without a plot is meaningless. What threshold? What method? The COVID-19 model reviews found most papers didn't properly assess calibration. No plot = no evidence.",
+              lesson: "TRIPOD 需要校准图。没有证据的主张不是证据。"
+            },
+            reject_correct: {
+              situation: "Correct — demand the calibration plot. Now OVERALL ASSESSMENT:",
+              question: "Given everything, what is your PROBAST risk of bias judgment?",
+              branches: [
+                { text: "Moderate — some concerns but promising", nextNode: "moderate_wrong" },
+                { text: "High — multiple critical flaws", nextNode: "high_correct" }
+              ]
+            },
+            moderate_wrong: {
+              type: 'outcome',
+              outcome: 'danger',
+              title: "Too generous!",
+              text: "This study has: (1) High risk participants (single site, peak pandemic); (2) High risk analysis (EPV ~4, data-driven selection, no external validation, no calibration plot). Multiple domains at high risk = overall HIGH RISK.",
+              lesson: "PROBAST 故意严格。该模型不应为临床实践提供信息。"
+            },
+            high_correct: {
+              type: 'outcome',
+              outcome: 'success',
+              title: "Correct critical appraisal!",
+              text: "You identified: critically low EPV, data-driven selection, internal-only validation, unverified calibration claim, single-site limitations. This is a HIGH risk of bias study. The C = 0.91 is likely massively optimistic. External performance is probably C = 0.65-0.75 at best.",
+              lesson: "这项研究代表了 99% 不可用的 COVID 模型。良好的批判性评估会阻止此类模型的部署。"
+            }
+          }
+        }
+      },
+      {
+        type: 'content',
+        content: {
+          title: "🎓 课程完成：您学到了什么",
+          sections: [
+            {
+              heading: "You Can Now:",
+              items: [
+                "✓ Distinguish prognostic factors from therapeutic targets",
+                "✓ Evaluate EPV and recognize overfitting risk",
+                "✓ Interpret C-statistics and calibration plots",
+                "✓ Distinguish internal from external validation",
+                "✓ Assess model bias using PROBAST",
+                "✓ Evaluate clinical prediction rules and their pathways",
+                "✓ Apply TRIPOD reporting standards",
+                "✓ Interpret decision curves and net benefit",
+                "✓ Compare ML to logistic regression appropriately",
+                "✓ Identify implementation barriers",
+                "✓ Critically appraise prognostic model studies"
+              ]
+            },
+            {
+              heading: "The Seven Principles:",
+              items: [
+                "1。预测不是因果关系",
+                "2. A model is only as good as its validation",
+                "3。歧视还不够",
+                "4。预测变量并非越多越好",
+                "5。人群定义预测",
+                "6. Clinical utility trumps statistics",
+                "7. Transparency enables trust"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        type: 'quiz',
+        content: {
+          question: "A colleague presents a new readmission model with C = 0.82, excellent calibration, and positive net benefit across thresholds 10-30%. No external validation yet. The model should:",
+          options: [
+            { id: 'a', text: "Be deployed immediately — performance is excellent", correct: false },
+            { id: 'b', text: "作为开发研究发布，部署前需要外部验证", correct: true },
+            { id: 'c', text: "Be rejected — no external validation means it's invalid", correct: false },
+            { id: 'd', text: "Be used only for research purposes", correct: false }
+          ],
+          explanation: "Development + internal validation = publishable, but NOT deployable. External validation is required before clinical use. This is the appropriate staging: develop → validate internally → publish → validate externally → deploy. Skipping external validation leads to Epic Sepsis failures."
+        }
+      },
+      {
+        type: 'principle',
+        content: {
+          text: "🎓 FINAL MASTERY: You've completed the Prognostic Reviews course. You can now evaluate prediction models rigorously, distinguishing genuine clinical value from statistical theater. Use these skills to protect patients from poorly validated algorithms and to champion models that truly improve care. Remember: every model is wrong, but some are useful. Your job is to tell the difference."
+        }
+      }
+    ]
+  }
+];
+
+// Render Functions
+function renderModuleNav() {
+  const nav = document.getElementById('module-nav');
+  nav.innerHTML = modules.map((m, i) => `
+    <button class="module-item ${i === currentModule ? 'active' : ''} ${gameState.modulesCompleted.includes(i) ? 'completed' : ''}"
+            onclick="goToModule(${i})"
+            aria-current="${i === currentModule ? 'true' : 'false'}">
+      <div class="module-number">${gameState.modulesCompleted.includes(i) ? '✓' : i}</div>
+      <div class="module-info">
+        <div class="module-title">${m.title}</div>
+        <div class="module-subtitle">${m.subtitle}${m.estimatedTime ? ` · <span class="time-estimate">${m.estimatedTime}</span>` : ''}</div>
+      </div>
+    </button>
+  `).join('');
+}
+
+function renderSlide() {
+  const container = document.getElementById('slide-container');
+  const module = modules[currentModule];
+  const slide = module.slides[currentSlide];
+
+  let html = '';
+
+  switch(slide.type) {
+    case 'title':
+      html = `
+        <div class="slide-title">
+          <h1>${slide.content.title}</h1>
+          <div class="subtitle">${slide.content.subtitle}</div>
+          <p class="description">${slide.content.text}</p>
+        </div>
+      `;
+      break;
+
+    case 'principle-display':
+      html = `
+        <div class="principle-box">
+          <div class="number">${module.principle !== null ? module.principle + 1 : ''}</div>
+          <div class="text">"${slide.content.principle}"</div>
+        </div>
+      `;
+      break;
+
+    case 'principle':
+      html = `
+        <div class="principle-box" style="background: linear-gradient(135deg, rgba(107,70,193,0.15), rgba(30,39,97,0.1)); padding: 2rem;">
+          <div class="text" style="font-size: 1.2rem; line-height: 1.6; white-space: pre-line;">${slide.content.text}</div>
+        </div>
+      `;
+      break;
+
+    case 'story-deep':
+      html = renderStoryDeep(slide.content);
+      break;
+
+    case 'content':
+      html = renderContent(slide.content);
+      break;
+
+    case 'method':
+      html = renderMethod(slide.content);
+      break;
+
+    case 'decision-tree':
+      html = renderDecisionTree(slide.content);
+      break;
+
+    case 'quiz':
+      html = renderQuiz(slide.content);
+      break;
+  }
+
+  container.innerHTML = html;
+  updateNavButtons();
+  updateProgress();
+
+  // Announce slide change for screen readers
+  const announcer = document.getElementById('slide-announce');
+  if (announcer) {
+    const module = modules[currentModule];
+    announcer.textContent = `Slide ${currentSlide + 1} of ${module.slides.length}, Module: ${module.title}`;
+  }
+}
+
+function renderStoryDeep(content) {
+  let html = `<div class="story-deep">`;
+  html += `<div class="story-label">${content.label}</div>`;
+  html += `<div class="story-source">${content.source}</div>`;
+
+  if (content.timeline) {
+    html += `<div class="timeline">`;
+    content.timeline.forEach(event => {
+      html += `
+        <div class="timeline-event ${event.type || ''}">
+          <div class="timeline-year">${event.year}</div>
+          <div class="timeline-text">${event.text}</div>
+        </div>
+      `;
+    });
+    html += `</div>`;
+  }
+
+  if (content.realData) {
+    html += `<div class="real-data-box">`;
+    html += `<h4>📊 Real Data</h4>`;
+    html += `<div class="data-grid">`;
+    Object.entries(content.realData).forEach(([key, value]) => {
+      html += `
+        <div class="data-item">
+          <div class="data-label">${key}</div>
+          <div class="data-value">${value}</div>
+        </div>
+      `;
+    });
+    html += `</div></div>`;
+  }
+
+  if (content.hook) {
+    html += `<div class="hook-text">${content.hook}</div>`;
+  }
+
+  html += `</div>`;
+  return html;
+}
+
+function renderContent(content) {
+  let html = `<div class="content-box">`;
+  html += `<h2>${content.title}</h2>`;
+
+  content.sections.forEach(section => {
+    html += `<div class="content-section">`;
+    html += `<h3>${section.heading}</h3>`;
+    if (section.items) {
+      html += `<ul>`;
+      section.items.forEach(item => {
+        html += `<li>${item}</li>`;
+      });
+      html += `</ul>`;
+    }
+    if (section.text) {
+      html += `<p>${section.text}</p>`;
+    }
+    html += `</div>`;
+  });
+
+  html += `</div>`;
+  return html;
+}
+
+function renderMethod(content) {
+  let html = `<div class="method-box">`;
+  html += `<div class="method-label">${content.label}</div>`;
+  html += `<h2>${content.title}</h2>`;
+
+  content.sections.forEach(section => {
+    html += `<div class="method-section">`;
+    html += `<h3>${section.heading}</h3>`;
+    html += `<p>${section.text}</p>`;
+    html += `</div>`;
+  });
+
+  html += `</div>`;
+  return html;
+}
+
+function renderDecisionTree(content) {
+  const treeId = content.id;
+  if (!gameState.decisionTrees[treeId]) {
+    gameState.decisionTrees[treeId] = { currentNode: 'start', history: [] };
+  }
+
+  const currentNodeId = gameState.decisionTrees[treeId].currentNode;
+  const currentNode = content.nodes[currentNodeId];
+
+  let html = `<div class="decision-tree">`;
+  html += `<h2>🌳 ${content.title}</h2>`;
+
+  if (currentNodeId === 'start') {
+    html += `<div class="decision-situation">${content.situation}</div>`;
+  }
+
+  if (currentNode.type === 'outcome') {
+    html += `
+      <div class="decision-outcome ${currentNode.outcome}">
+        <div class="outcome-title">${currentNode.title}</div>
+        <div class="outcome-text">${currentNode.text}</div>
+        <div class="outcome-lesson">${currentNode.lesson}</div>
+      </div>
+    `;
+    html += `<div class="tree-controls">
+      <button class="tree-btn" onclick="resetDecisionTree('${treeId}')">Try Again</button>
+    </div>`;
+  } else {
+    if (currentNode.situation) {
+      html += `<div class="decision-situation">${currentNode.situation}</div>`;
+    }
+    html += `<div class="decision-question">${currentNode.question}</div>`;
+    html += `<div class="decision-branches">`;
+    currentNode.branches.forEach((branch, i) => {
+      html += `
+        <button class="decision-branch" onclick="makeDecision('${treeId}', '${branch.nextNode}', '${branch.text.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}')">
+          ${branch.text}
+        </button>
+      `;
+    });
+    html += `</div>`;
+  }
+
+  html += `</div>`;
+  return html;
+}
+
+function makeDecision(treeId, nextNode, choiceText) {
+  if (!gameState.decisionTrees[treeId]) {
+    gameState.decisionTrees[treeId] = { currentNode: 'start', history: [] };
+  }
+  gameState.decisionTrees[treeId].history.push(choiceText);
+  gameState.decisionTrees[treeId].currentNode = nextNode;
+  addPoints(10);
+  saveProgress();
+  renderSlide();
+}
+
+function resetDecisionTree(treeId) {
+  gameState.decisionTrees[treeId] = { currentNode: 'start', history: [] };
+  saveProgress();
+  renderSlide();
+}
+
+function renderQuiz(content) {
+  const quizId = `quiz_${currentModule}_${currentSlide}`;
+
+  return `
+    <div class="quiz-container">
+      <div class="quiz-question">${content.question}</div>
+      <div class="quiz-options" role="radiogroup" aria-label="Quiz options">
+        ${content.options.map((opt, i) => `
+          <button class="quiz-option" role="radio" aria-checked="false"
+                  data-correct="${opt.correct}"
+                  onclick="selectQuizOption(this, '${quizId}', ${opt.correct})">
+            ${opt.text}
+          </button>
+        `).join('')}
+      </div>
+      <div class="quiz-feedback" id="feedback-${quizId}" role="alert" aria-live="polite">
+        <p>${content.explanation}</p>
+      </div>
+    </div>
+  `;
+}
+
+const _answeredQuizzes = new Set();
+
+function selectQuizOption(element, quizId, isCorrect) {
+  // Prevent re-answering after first answer
+  if (_answeredQuizzes.has(quizId)) return;
+
+  const container = element.closest('.quiz-container');
+  const options = container.querySelectorAll('.quiz-option');
+  const feedback = document.getElementById(`feedback-${quizId}`);
+
+  options.forEach(opt => {
+    opt.classList.remove('selected', 'correct', 'incorrect');
+  });
+
+  element.classList.add('selected');
+  options.forEach(opt => opt.setAttribute('aria-checked', 'false'));
+  element.setAttribute('aria-checked', 'true');
+
+  if (isCorrect) {
+    element.classList.add('correct');
+    feedback.classList.add('show', 'correct');
+    feedback.classList.remove('incorrect');
+    addPoints(30);
+  } else {
+    element.classList.add('incorrect');
+    feedback.classList.add('show', 'incorrect');
+    feedback.classList.remove('correct');
+    options.forEach(opt => {
+      if (opt.dataset.correct === 'true') {
+        opt.classList.add('correct');
+      }
+    });
+  }
+
+  // Lock quiz after answering
+  _answeredQuizzes.add(quizId);
+  options.forEach(opt => {
+    opt.style.pointerEvents = 'none';
+    opt.setAttribute('aria-disabled', 'true');
+  });
+
+  saveProgress();
+}
+
+// Navigation
+function nextSlide() {
+  const module = modules[currentModule];
+  if (currentSlide < module.slides.length - 1) {
+    currentSlide++;
+  } else if (currentModule < modules.length - 1) {
+    if (!gameState.modulesCompleted.includes(currentModule)) {
+      gameState.modulesCompleted.push(currentModule);
+      addPoints(100);
+      checkBadges();
+    }
+    currentModule++;
+    currentSlide = 0;
+  }
+  saveProgress();
+  renderSlide();
+  renderModuleNav();
+  window.scrollTo(0, 0);
+}
+
+function prevSlide() {
+  if (currentSlide > 0) {
+    currentSlide--;
+  } else if (currentModule > 0) {
+    currentModule--;
+    currentSlide = modules[currentModule].slides.length - 1;
+  }
+  saveProgress();
+  renderSlide();
+  renderModuleNav();
+  window.scrollTo(0, 0);
+}
+
+function goToModule(moduleIndex) {
+  currentModule = moduleIndex;
+  currentSlide = 0;
+  saveProgress();
+  renderSlide();
+  renderModuleNav();
+  closeSidebar();
+  window.scrollTo(0, 0);
+}
+
+function updateNavButtons() {
+  const prevBtn = document.getElementById('prev-btn');
+  const nextBtn = document.getElementById('next-btn');
+
+  prevBtn.disabled = currentModule === 0 && currentSlide === 0;
+
+  const isLastSlide = currentModule === modules.length - 1 &&
+                      currentSlide === modules[currentModule].slides.length - 1;
+  nextBtn.textContent = isLastSlide ? 'Complete Course' : 'Next →';
+}
+
+function updateProgress() {
+  let totalSlides = 0;
+  let completedSlides = 0;
+
+  modules.forEach((m, i) => {
+    totalSlides += m.slides.length;
+    if (i < currentModule) {
+      completedSlides += m.slides.length;
+    } else if (i === currentModule) {
+      completedSlides += currentSlide;
+    }
+  });
+
+  const percent = Math.round((completedSlides / totalSlides) * 100);
+  document.getElementById('progress-fill').style.width = `${percent}%`;
+  document.getElementById('progress-text').textContent = `${percent}% Complete`;
+}
+
+// Points and Badges
+function addPoints(points) {
+  gameState.points += points;
+  document.getElementById('points-display').textContent = gameState.points;
+}
+
+function checkBadges() {
+  const newBadges = [];
+
+  // Story Collector: Read most case studies
+  if (gameState.modulesCompleted.length >= 10 && !gameState.earnedBadges.includes('story-collector')) {
+    newBadges.push('story-collector');
+  }
+
+  // Tree Navigator: Complete 15+ decision trees
+  const treesCompleted = Object.keys(gameState.decisionTrees).filter(k =>
+    gameState.decisionTrees[k].history && gameState.decisionTrees[k].history.length > 0
+  ).length;
+  if (treesCompleted >= 15 && !gameState.earnedBadges.includes('tree-navigator')) {
+    newBadges.push('tree-navigator');
+  }
+
+  // Prognosis Master: Complete entire course
+  if (gameState.modulesCompleted.length === 12 && !gameState.earnedBadges.includes('prognosis-master')) {
+    newBadges.push('prognosis-master');
+  }
+
+  // Model Builder: Complete Module 2 (The Models)
+  if (gameState.modulesCompleted.includes(2) && !gameState.earnedBadges.includes('model-builder')) {
+    newBadges.push('model-builder');
+  }
+
+  // Validation Expert: Complete Module 4 (The Validation)
+  if (gameState.modulesCompleted.includes(4) && !gameState.earnedBadges.includes('validation-expert')) {
+    newBadges.push('validation-expert');
+  }
+
+  // Calibration Master: Complete Module 3 (The Performance)
+  if (gameState.modulesCompleted.includes(3) && !gameState.earnedBadges.includes('calibration-master')) {
+    newBadges.push('calibration-master');
+  }
+
+  // TRIPOD Scholar: Complete Module 6 (The Reporting)
+  if (gameState.modulesCompleted.includes(6) && !gameState.earnedBadges.includes('tripod-scholar')) {
+    newBadges.push('tripod-scholar');
+  }
+
+  // Decision Analyst: Complete Module 7 (The Utility)
+  if (gameState.modulesCompleted.includes(7) && !gameState.earnedBadges.includes('decision-analyst')) {
+    newBadges.push('decision-analyst');
+  }
+
+  // Penalization Pro: Complete penalization decision tree
+  if (gameState.decisionTrees['penalization-choice'] &&
+      gameState.decisionTrees['penalization-choice'].history &&
+      gameState.decisionTrees['penalization-choice'].history.length > 0 &&
+      !gameState.earnedBadges.includes('penalization-pro')) {
+    newBadges.push('penalization-pro');
+  }
+
+  // Patient Communicator: Complete calibration-plot-reading tree (communication content)
+  if (gameState.decisionTrees['calibration-plot-reading'] &&
+      gameState.decisionTrees['calibration-plot-reading'].history &&
+      gameState.decisionTrees['calibration-plot-reading'].history.length > 0 &&
+      !gameState.earnedBadges.includes('communicator')) {
+    newBadges.push('communicator');
+  }
+
+  // AI Skeptic: Complete Module 9 (ML vs Regression)
+  if (gameState.modulesCompleted.includes(9) && !gameState.earnedBadges.includes('skeptic')) {
+    newBadges.push('skeptic');
+  }
+
+  // Implementation Expert: Complete Module 10 (The Implementation)
+  if (gameState.modulesCompleted.includes(10) && !gameState.earnedBadges.includes('implementer')) {
+    newBadges.push('implementer');
+  }
+
+  newBadges.forEach(badge => {
+    gameState.earnedBadges.push(badge);
+    showBadgeNotification(badge);
+  });
+
+  if (newBadges.length > 0) saveProgress();
+}
+
+function showBadgeNotification(badgeId) {
+  const badge = BADGES[badgeId];
+  if (!badge) return;
+
+  const notification = document.createElement('div');
+  notification.className = 'badge-notification';
+  notification.innerHTML = `
+    <div class="badge-icon" style="background: ${badge.color}">${badge.icon}</div>
+    <div class="badge-info">
+      <div class="badge-earned">Badge Earned!</div>
+      <div class="badge-name">${badge.name}</div>
+    </div>
+  `;
+  document.body.appendChild(notification);
+
+  setTimeout(() => notification.classList.add('show'), 100);
+  setTimeout(() => {
+    notification.classList.remove('show');
+    setTimeout(() => notification.remove(), 500);
+  }, 3000);
+}
+
+// Persistence
+function saveProgress() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      currentModule,
+      currentSlide,
+      gameState
+    }));
+  } catch (e) {
+    console.log('Could not save progress:', e);
+  }
+}
+
+function loadProgress() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      const data = JSON.parse(saved);
+      if (data.gameState) {
+        gameState = { ...gameState, ...data.gameState };
+      }
+      if (typeof data.currentModule === 'number' && data.currentModule >= 0 && data.currentModule < modules.length) {
+        currentModule = data.currentModule;
+      }
+      if (typeof data.currentSlide === 'number' && data.currentSlide >= 0) {
+        currentSlide = Math.min(data.currentSlide, modules[currentModule].slides.length - 1);
+      }
+    }
+  } catch (e) {
+    console.log('Could not load progress:', e);
+  }
+}
+
+// Mobile Menu
+function toggleSidebar() {
+  const sidebar = document.querySelector('.sidebar');
+  const overlay = document.querySelector('.sidebar-overlay');
+  sidebar.classList.toggle('open');
+  overlay.classList.toggle('show');
+}
+
+function closeSidebar() {
+  const sidebar = document.querySelector('.sidebar');
+  const overlay = document.querySelector('.sidebar-overlay');
+  sidebar.classList.remove('open');
+  overlay.classList.remove('show');
+}
+
+// Modal utilities: close by ID, Escape key handler
+function closeModalOverlay(id) {
+  const el = document.getElementById(id);
+  if (el) el.remove();
+}
+
+function _attachModalEscapeHandler(overlayId) {
+  function handler(e) {
+    if (e.key === 'Escape') {
+      closeModalOverlay(overlayId);
+      document.removeEventListener('keydown', handler);
+    }
+  }
+  document.addEventListener('keydown', handler);
+}
+
+// Badges Modal
+function openBadges() {
+  const earnedCount = gameState.earnedBadges.length;
+  const totalCount = Object.keys(BADGES).length;
+
+  const html = `
+    <div id="badges-modal-overlay" role="dialog" aria-modal="true" aria-label="Badges" style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 1rem;">
+      <div style="background: white; border-radius: 12px; max-width: 700px; max-height: 80vh; overflow-y: auto; padding: 2rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <h2 style="font-family: 'Cormorant Garamond', serif; color: var(--navy);">🏆 Badges (${earnedCount}/${totalCount})</h2>
+          <button id="badges-modal-close" onclick="closeModalOverlay('badges-modal-overlay')" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;" aria-label="Close badges">&times;</button>
+        </div>
+        <div class="badge-grid">
+          ${Object.entries(BADGES).map(([id, badge]) => {
+            const earned = gameState.earnedBadges.includes(id);
+            return `
+              <div class="badge-card ${earned ? 'earned' : 'locked'}">
+                <div class="badge-icon" style="background: ${badge.color}">${badge.icon}</div>
+                <div style="font-weight: 600; color: var(--navy); margin-top: 0.5rem;">${badge.name}</div>
+                <div style="font-size: 0.75rem; color: var(--light-text);">${earned ? '✓ Earned!' : badge.requirement}</div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.insertAdjacentHTML('beforeend', html);
+  const closeBtn = document.getElementById('badges-modal-close');
+  if (closeBtn) closeBtn.focus();
+  _attachModalEscapeHandler('badges-modal-overlay');
+}
+
+// Glossary
+function openGlossary() {
+  const terms = [
+    { term: "Prognostic Factor", def: "A variable associated with future clinical outcomes in patients with a condition." },
+    { term: "C-Statistic (AUC)", def: "Measure of discrimination; probability that a random case is ranked higher than a random non-case." },
+    { term: "Calibration", def: "Agreement between predicted probabilities and observed event rates." },
+    { term: "Calibration Plot", def: "Graph showing predicted vs observed probabilities across risk groups." },
+    { term: "Calibration-in-the-Large", def: "Overall agreement between total predicted and observed events; expressed as P/O ratio." },
+    { term: "Overfitting", def: "When a model learns noise in training data rather than true signal; causes poor generalization." },
+    { term: "EPV", def: "Events Per Variable; ratio of outcome events to predictors. Should be ≥10, preferably ≥20." },
+    { term: "Internal Validation", def: "Testing model on same data source (bootstrap, cross-validation)." },
+    { term: "External Validation", def: "Testing model on completely independent data (different time, place, or population)." },
+    { term: "Temporal Validation", def: "External validation using data from a different time period at the same site." },
+    { term: "Geographic Validation", def: "External validation using data from a different location or institution." },
+    { term: "TRIPOD", def: "Transparent Reporting of prediction models; 22-item reporting guideline." },
+    { term: "PROBAST", def: "Prediction model Risk Of Bias Assessment Tool; evaluates bias in prediction studies." },
+    { term: "Decision Curve", def: "Graph showing net benefit across treatment thresholds; assesses clinical utility." },
+    { term: "Net Benefit", def: "True positives minus weighted false positives; measures clinical value of predictions." },
+    { term: "Shrinkage", def: "Reducing model coefficients to correct for optimism from overfitting." },
+    { term: "Calibration Slope", def: "Regression of outcomes on predictions; slope=1 is ideal, <1 indicates overfitting." },
+    { term: "Clinical Prediction Rule", def: "Scoring system using clinical data to estimate probability or guide decisions." },
+    { term: "Treatment Threshold", def: "Probability above which treatment is indicated; reflects benefit-harm tradeoff." },
+    { term: "LASSO", def: "Least Absolute Shrinkage and Selection Operator; penalization method that shrinks coefficients and sets some to zero." },
+    { term: "Ridge Regression", def: "Penalization method that shrinks all coefficients toward zero but never exactly to zero." },
+    { term: "Elastic Net", def: "Penalization combining LASSO (L1) and Ridge (L2); balances selection and grouped shrinkage." },
+    { term: "Recalibration", def: "Updating model intercept and/or slope to improve calibration in a new population." },
+    { term: "Competing Risks", def: "When patients can experience multiple mutually exclusive events (e.g., death prevents later fracture)." },
+    { term: "Subdistribution Hazard", def: "Hazard function that accounts for competing risks (Fine-Gray method)." },
+    { term: "Cumulative Incidence", def: "Probability of event accounting for competing risks; preferred over 1-KM when competing events occur." },
+    { term: "Prediction Interval", def: "Range of predicted probabilities expected in future similar patients; wider than confidence interval." },
+    { term: "Brier Score", def: "Overall measure combining discrimination and calibration; average squared difference between predicted and observed." }
+  ];
+
+  const html = `
+    <div id="glossary-modal-overlay" role="dialog" aria-modal="true" aria-label="Glossary" style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 1rem;">
+      <div style="background: white; border-radius: 12px; max-width: 600px; max-height: 80vh; overflow-y: auto; padding: 2rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <h2 style="font-family: 'Cormorant Garamond', serif; color: var(--navy);">Glossary</h2>
+          <button id="glossary-modal-close" onclick="closeModalOverlay('glossary-modal-overlay')" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;" aria-label="Close glossary">&times;</button>
+        </div>
+        ${terms.map(t => `
+          <div style="margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(0,0,0,0.1);">
+            <strong style="color: var(--purple);">${t.term}</strong>
+            <p style="margin-top: 0.25rem; color: var(--navy);">${t.def}</p>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+
+  document.body.insertAdjacentHTML('beforeend', html);
+  const closeBtn = document.getElementById('glossary-modal-close');
+  if (closeBtn) closeBtn.focus();
+  _attachModalEscapeHandler('glossary-modal-overlay');
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+  loadProgress();
+  renderModuleNav();
+  renderSlide();
+  document.getElementById('points-display').textContent = gameState.points;
+
+  document.querySelector('.hamburger').addEventListener('click', toggleSidebar);
+  document.querySelector('.sidebar-overlay').addEventListener('click', closeSidebar);
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' && !e.target.matches('input, textarea, button, select, [role="button"]')) {
+      nextSlide();
+    } else if (e.key === 'ArrowLeft' && !e.target.matches('input, textarea, button, select, [role="button"]')) {
+      prevSlide();
+    }
+  });
+});
+</script>
+</body>
+</html>

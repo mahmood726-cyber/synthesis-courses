@@ -1,0 +1,4362 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>危机中的快速审查和证据合成：40 小时，而不是 40 天</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&amp;family=Source+Sans+Pro:wght@300;400;600;700&amp;display=swap" rel="stylesheet"/>
+<style>
+    :root {
+      --navy: #1E2761;
+      --deep-navy: #141B3D;
+      --gold: #D4AF37;
+      --cream: #FAF8F5;
+      --light-cream: #FFFFFF;
+      --text: #2D3748;
+      --light-text: #718096;
+      --red: #C53030;
+      --green: #22c55e;
+      --teal: #0d9488;
+      --orange: #ea580c;
+      --purple: #7c3aed;
+      --transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      height: 100%;
+      font-family: 'Source Sans Pro', sans-serif;
+      background: var(--deep-navy);
+      color: var(--cream);
+    }
+
+    .course-container {
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 280px;
+      background: linear-gradient(180deg, var(--deep-navy) 0%, #0a0f1a 100%);
+      border-right: 1px solid rgba(212,175,55,0.2);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    .sidebar-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+    }
+
+    .sidebar-header h1 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--gold);
+      margin-bottom: 0.25rem;
+    }
+
+    .sidebar-header p {
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.6);
+    }
+
+    .module-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem 0;
+    }
+
+    .module-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      border-left: 3px solid transparent;
+    }
+
+    .module-item:hover { background: rgba(212,175,55,0.1); }
+    .module-item.active {
+      background: rgba(212,175,55,0.15);
+      border-left-color: var(--gold);
+    }
+    .module-item.completed .module-number {
+      background: var(--green);
+      color: white;
+    }
+
+    .module-number {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .module-item.active .module-number {
+      background: var(--gold);
+      color: var(--navy);
+    }
+
+    .module-info { flex: 1; min-width: 0; }
+    .module-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .module-subtitle {
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.7);
+    }
+
+    .sidebar-footer {
+      padding: 1rem 1.5rem;
+      border-top: 1px solid rgba(212,175,55,0.2);
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.4);
+    }
+
+    /* Main Content */
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .content-header {
+      padding: 1rem 2rem;
+      background: rgba(0,0,0,0.3);
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .breadcrumb {
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.6);
+    }
+    .breadcrumb span { color: var(--gold); }
+    .header-actions { display: flex; gap: 0.5rem; }
+
+    .btn {
+      padding: 0.5rem 1rem;
+      border: 1px solid rgba(212,175,55,0.3);
+      border-radius: 6px;
+      background: rgba(255,255,255,0.05);
+      color: var(--cream);
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn:hover {
+      background: rgba(212,175,55,0.2);
+      border-color: var(--gold);
+    }
+    .btn.primary {
+      background: var(--gold);
+      color: var(--navy);
+      border-color: var(--gold);
+      font-weight: 600;
+    }
+
+    .content-body {
+      flex: 1;
+      overflow: hidden;
+      display: flex;
+    }
+
+    /* Slides */
+    .slides-container {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .module-slides {
+      display: none;
+      width: 100%;
+      height: 100%;
+    }
+    .module-slides.active { display: block; }
+
+    .slide {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      padding: 2rem 2rem 4rem 2rem;
+      padding-top: 3rem;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity var(--transition), visibility var(--transition);
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .slide .content, .slide .refrain, .slide .title {
+      margin-top: auto;
+      margin-bottom: auto;
+    }
+
+    .slide > * { max-width: 100%; word-wrap: break-word; }
+    .slide.active { opacity: 1; visibility: visible; }
+    .slide.dark { background: var(--deep-navy); color: var(--cream); }
+    .slide.light { background: var(--cream); color: var(--text); }
+    .slide.black { background: #000; color: var(--cream); }
+    .slide.red { background: linear-gradient(135deg, #7f1d1d 0%, #450a0a 100%); color: var(--cream); }
+    .slide.green { background: linear-gradient(135deg, #14532d 0%, #052e16 100%); color: var(--cream); }
+
+    /* Typography */
+    .serif { font-family: 'Cormorant Garamond', Georgia, serif; }
+
+    .title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 700;
+      margin-bottom: 1rem;
+      line-height: 1.2;
+    }
+    .title.navy { color: var(--navy); }
+    .title.gold { color: var(--gold); }
+    .title.cream { color: var(--cream); }
+
+    .subtitle {
+      font-size: clamp(1rem, 2vw, 1.5rem);
+      color: var(--light-text);
+      margin-bottom: 2rem;
+    }
+    .slide.dark .subtitle { color: rgba(255,255,255,0.7); }
+
+    .big-number {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(4rem, 15vw, 10rem);
+      font-weight: 700;
+      line-height: 1;
+    }
+    .big-number.navy { color: var(--navy); }
+    .big-number.gold { color: var(--gold); }
+    .big-number.red { color: var(--red); }
+
+    .refrain {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(1.5rem, 4vw, 2.5rem);
+      font-style: italic;
+      color: var(--gold);
+      text-align: center;
+      max-width: 800px;
+    }
+
+    /* Storytelling elements */
+    .direct-address {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(1.2rem, 2.5vw, 1.6rem);
+      color: var(--gold);
+      text-align: center;
+      margin: 1rem 0;
+      font-style: italic;
+    }
+
+    .rhetorical {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(1.3rem, 3vw, 1.8rem);
+      font-style: italic;
+      color: rgba(255,255,255,0.9);
+      text-align: center;
+      max-width: 700px;
+      margin: 0.5rem 0;
+    }
+
+    .story-box {
+      background: linear-gradient(135deg, rgba(212,175,55,0.15), rgba(30,39,97,0.2));
+      border-left: 4px solid var(--gold);
+      padding: 1.5rem 2rem;
+      margin: 1.5rem 0;
+      max-width: 700px;
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.1rem;
+      line-height: 1.7;
+      font-style: italic;
+    }
+
+    .warning-box {
+      background: linear-gradient(135deg, rgba(197,48,48,0.2), rgba(127,29,29,0.3));
+      border-left: 4px solid var(--red);
+      padding: 1.5rem 2rem;
+      margin: 1.5rem 0;
+      max-width: 700px;
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.1rem;
+      line-height: 1.7;
+    }
+
+    .success-box {
+      background: linear-gradient(135deg, rgba(34,197,94,0.15), rgba(20,83,45,0.3));
+      border-left: 4px solid var(--green);
+      padding: 1.5rem 2rem;
+      margin: 1.5rem 0;
+      max-width: 700px;
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.1rem;
+      line-height: 1.7;
+    }
+
+    .witness-statement {
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(212,175,55,0.3);
+      border-radius: 8px;
+      padding: 1.25rem 1.5rem;
+      margin: 1rem 0;
+      max-width: 600px;
+    }
+    .witness-statement .source {
+      font-size: 0.8rem;
+      color: var(--gold);
+      margin-bottom: 0.5rem;
+    }
+    .witness-statement .quote {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.1rem;
+      font-style: italic;
+      line-height: 1.6;
+    }
+
+    /* Timeline */
+    .timeline-horizontal {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      max-width: 900px;
+      margin: 2rem 0;
+      position: relative;
+    }
+    .timeline-horizontal::before {
+      content: '';
+      position: absolute;
+      top: 20px;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--gold);
+    }
+    .timeline-point {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      flex: 1;
+      position: relative;
+    }
+    .timeline-dot {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--gold);
+      color: var(--navy);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.8rem;
+      z-index: 1;
+    }
+    .timeline-dot.danger { background: var(--red); color: white; }
+    .timeline-dot.success { background: var(--green); color: white; }
+    .timeline-label {
+      margin-top: 0.75rem;
+      font-size: 0.85rem;
+      max-width: 120px;
+    }
+    .timeline-date {
+      font-size: 0.7rem;
+      color: var(--gold);
+      margin-top: 0.25rem;
+    }
+
+    /* Contrast boxes */
+    .contrast-container {
+      display: flex;
+      gap: 2rem;
+      max-width: 900px;
+      margin: 1.5rem 0;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .contrast-box {
+      flex: 1;
+      min-width: 280px;
+      padding: 1.5rem;
+      border-radius: 8px;
+      text-align: center;
+    }
+    .contrast-box.before {
+      background: rgba(197,48,48,0.15);
+      border: 1px solid rgba(197,48,48,0.4);
+    }
+    .contrast-box.before h4 { color: var(--red); }
+    .contrast-box.after {
+      background: rgba(34,197,94,0.15);
+      border: 1px solid rgba(34,197,94,0.4);
+    }
+    .contrast-box.after h4 { color: var(--green); }
+    .contrast-box h4 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+    }
+    .contrast-box .stat {
+      font-size: 2.5rem;
+      font-weight: 700;
+      font-family: 'Cormorant Garamond', Georgia, serif;
+    }
+    .contrast-box .label {
+      font-size: 0.85rem;
+      opacity: 0.8;
+      margin-top: 0.25rem;
+    }
+
+    /* Decision Tree */
+    .decision-tree {
+      max-width: 800px;
+      margin: 1rem 0;
+    }
+
+    .decision-node {
+      background: var(--navy);
+      color: var(--cream);
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      text-align: center;
+      margin: 0.5rem auto;
+      max-width: 400px;
+      position: relative;
+    }
+    .decision-node.question {
+      background: linear-gradient(135deg, var(--navy), #2a3a7d);
+      border: 2px solid var(--gold);
+    }
+    .decision-node.question::after {
+      content: '?';
+      position: absolute;
+      top: -10px;
+      right: -10px;
+      background: var(--gold);
+      color: var(--navy);
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+    }
+    .decision-node.outcome-yes {
+      background: rgba(34,197,94,0.2);
+      border: 1px solid var(--green);
+      color: var(--cream);
+    }
+    .decision-node.outcome-no {
+      background: rgba(197,48,48,0.2);
+      border: 1px solid var(--red);
+      color: var(--cream);
+    }
+    .decision-node.warning {
+      background: rgba(234,88,12,0.2);
+      border: 1px solid var(--orange);
+      color: var(--cream);
+    }
+
+    .decision-branches {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin: 0.5rem 0;
+    }
+
+    .decision-branch {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .branch-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      margin-bottom: 0.5rem;
+    }
+    .branch-label.yes {
+      background: var(--green);
+      color: white;
+    }
+    .branch-label.no {
+      background: var(--red);
+      color: white;
+    }
+    .branch-label.maybe {
+      background: var(--orange);
+      color: white;
+    }
+
+    .arrow-down {
+      width: 2px;
+      height: 30px;
+      background: rgba(255,255,255,0.3);
+      margin: 0.25rem auto;
+    }
+
+    /* Story Decision Trees - Interactive choice format */
+    .story-decision-tree {
+      background: linear-gradient(135deg, rgba(30,39,97,0.3), rgba(20,30,80,0.4));
+      border: 1px solid rgba(212,175,55,0.3);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-top: 1.5rem;
+      max-width: 700px;
+    }
+    .decision-prompt {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.1rem;
+      font-style: italic;
+      color: var(--gold);
+      text-align: center;
+      margin-bottom: 1.25rem;
+      line-height: 1.5;
+    }
+    .decision-options {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .decision-option {
+      background: rgba(0,0,0,0.2);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      border-left: 4px solid transparent;
+      transition: all 0.3s ease;
+      min-height: 44px;
+    }
+    .decision-option[data-path="wrong"] {
+      border-left-color: var(--red);
+    }
+    .decision-option[data-path="wrong"]:hover {
+      background: rgba(197,48,48,0.15);
+    }
+    .decision-option[data-path="right"] {
+      border-left-color: var(--green);
+    }
+    .decision-option[data-path="right"]:hover {
+      background: rgba(34,197,94,0.15);
+    }
+    .decision-option strong {
+      color: var(--cream);
+      font-size: 0.95rem;
+    }
+    .decision-option .consequence {
+      margin-top: 0.5rem;
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.8);
+      padding-left: 0.5rem;
+    }
+    .decision-option[data-path="wrong"] .consequence {
+      color: rgba(197,48,48,0.9);
+    }
+    .decision-option[data-path="right"] .consequence {
+      color: rgba(34,197,94,0.9);
+    }
+    .slide.light .story-decision-tree {
+      background: linear-gradient(135deg, rgba(30,39,97,0.08), rgba(20,30,80,0.12));
+      border-color: rgba(30,39,97,0.2);
+    }
+    .slide.light .decision-prompt {
+      color: var(--navy);
+    }
+    .slide.light .decision-option {
+      background: rgba(30,39,97,0.05);
+    }
+    .slide.light .decision-option strong {
+      color: var(--navy);
+    }
+    .slide.light .decision-option .consequence {
+      color: var(--text);
+    }
+    .slide.light .decision-option[data-path="wrong"] .consequence {
+      color: var(--red);
+    }
+    .slide.light .decision-option[data-path="right"] .consequence {
+      color: var(--green);
+    }
+
+    .decision-option:focus-visible {
+      outline: 3px solid var(--gold);
+      outline-offset: 2px;
+    }
+
+    /* Stats grid */
+    .stats-grid {
+      display: flex;
+      gap: 1rem;
+      margin: 1.5rem 0;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .stat-box {
+      background: var(--navy);
+      color: var(--cream);
+      padding: 1rem 1.5rem;
+      text-align: center;
+      min-width: 140px;
+      border-radius: 8px;
+    }
+    .stat-box.danger {
+      background: rgba(197,48,48,0.3);
+      border: 1px solid var(--red);
+    }
+    .stat-box.success {
+      background: rgba(34,197,94,0.2);
+      border: 1px solid var(--green);
+    }
+    .stat-value {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(1.5rem, 3vw, 2rem);
+      font-weight: 700;
+    }
+    .stat-label {
+      font-size: 0.75rem;
+      opacity: 0.8;
+      margin-top: 0.25rem;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--light-cream);
+      border: 1px solid var(--gold);
+      padding: 1.5rem 2rem;
+      margin: 0.75rem 0;
+      max-width: 800px;
+      width: 100%;
+      border-radius: 8px;
+    }
+    .card.navy-bg {
+      background: var(--navy);
+      color: var(--cream);
+    }
+    .card-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+    }
+    .card-text { font-size: clamp(0.9rem, 1.8vw, 1.1rem); }
+
+    /* Case study */
+    .case-study {
+      background: linear-gradient(135deg, rgba(212,175,55,0.1), rgba(30,39,97,0.2));
+      border: 1px solid var(--gold);
+      border-radius: 12px;
+      padding: 1.5rem;
+      max-width: 800px;
+      margin: 1rem 0;
+    }
+    .case-study h4 {
+      color: var(--gold);
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+    }
+    .case-study p {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      margin-bottom: 0.75rem;
+    }
+    .case-study.danger {
+      background: linear-gradient(135deg, rgba(197,48,48,0.1), rgba(127,29,29,0.2));
+      border-color: var(--red);
+    }
+    .case-study.danger h4 { color: var(--red); }
+    .case-study.success {
+      background: linear-gradient(135deg, rgba(34,197,94,0.1), rgba(20,83,45,0.2));
+      border-color: var(--green);
+    }
+    .case-study.success h4 { color: var(--green); }
+
+    /* Results table */
+    .results-table {
+      width: 100%;
+      max-width: 700px;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      font-size: 0.9rem;
+    }
+    .results-table th {
+      background: var(--navy);
+      color: var(--cream);
+      padding: 0.75rem 1rem;
+      text-align: left;
+      font-weight: 600;
+    }
+    .results-table td {
+      padding: 0.6rem 1rem;
+      border-bottom: 1px solid #E2E8F0;
+    }
+    .results-table .highlight { font-weight: 700; }
+    .results-table .danger { color: var(--red); }
+    .results-table .success { color: var(--green); }
+
+    /* Comparison */
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      max-width: 800px;
+      margin: 1rem 0;
+    }
+    .comparison-panel {
+      background: rgba(255,255,255,0.05);
+      border-radius: 8px;
+      padding: 1rem;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .comparison-panel h4 {
+      color: var(--gold);
+      margin-bottom: 0.75rem;
+      font-size: 0.9rem;
+    }
+    .comparison-panel.highlight {
+      border-color: var(--gold);
+      background: rgba(212,175,55,0.1);
+    }
+    .comparison-panel.danger {
+      border-color: var(--red);
+      background: rgba(197,48,48,0.1);
+    }
+
+    /* Learning objectives */
+    .learning-objectives {
+      background: rgba(212,175,55,0.1);
+      border: 1px solid var(--gold);
+      border-radius: 8px;
+      padding: 1rem 1.5rem;
+      margin: 1rem 0;
+      max-width: 700px;
+    }
+    .learning-objectives h4 {
+      color: var(--gold);
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      margin-bottom: 0.75rem;
+    }
+    .learning-objectives ul {
+      margin: 0;
+      padding-left: 1.25rem;
+    }
+    .learning-objectives li {
+      margin-bottom: 0.5rem;
+      font-size: 0.95rem;
+      line-height: 1.4;
+    }
+
+    /* Gold line */
+    .gold-line {
+      width: 150px;
+      height: 2px;
+      background: var(--gold);
+      margin: 1.5rem auto;
+    }
+
+    /* Quiz */
+    .quiz-container { max-width: 700px; width: 100%; }
+    .quiz-question h4 {
+      color: var(--text);
+      margin-bottom: 1rem;
+      font-size: 1rem;
+    }
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .quiz-option {
+      padding: 0.75rem 1rem;
+      background: rgba(30,39,97,0.05);
+      border: 1px solid rgba(30,39,97,0.2);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.9rem;
+    }
+    .quiz-option:hover {
+      background: rgba(212,175,55,0.1);
+      border-color: var(--gold);
+    }
+    .quiz-option.correct {
+      background: rgba(34,197,94,0.15);
+      border-color: var(--green);
+    }
+    .quiz-option.incorrect {
+      background: rgba(197,48,48,0.1);
+      border-color: var(--red);
+    }
+    .quiz-option span {
+      font-weight: 700;
+      color: var(--gold);
+      margin-right: 0.5rem;
+    }
+
+    /* Animation */
+    .slide.active .animate { animation: fadeUp 0.6s ease-out forwards; }
+    .slide.active .animate.delay-1 { animation-delay: 0.1s; }
+    .slide.active .animate.delay-2 { animation-delay: 0.2s; }
+    .slide.active .animate.delay-3 { animation-delay: 0.3s; }
+    .slide.active .animate.delay-4 { animation-delay: 0.4s; }
+    .slide.active .animate.delay-5 { animation-delay: 0.5s; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate { opacity: 0; }
+
+    /* Slide nav */
+    .slide-nav {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      padding: 1rem 1rem 1.5rem 1rem;
+      z-index: 100;
+      pointer-events: none;
+    }
+    .nav-btn {
+      background: rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: white;
+      font-size: 1.25rem;
+      cursor: pointer;
+      opacity: 0.6;
+      transition: all 0.2s;
+      padding: 0.5rem 0.75rem;
+      border-radius: 8px;
+      pointer-events: auto;
+    }
+    .nav-btn:hover {
+      opacity: 1;
+      background: rgba(0,0,0,0.7);
+      border-color: var(--gold);
+    }
+    .nav-btn:disabled { opacity: 0.2; cursor: not-allowed; }
+    .nav-center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.25rem;
+      pointer-events: auto;
+    }
+    .slide-counter {
+      font-size: 0.75rem;
+      opacity: 0.6;
+      color: rgba(255,255,255,0.6);
+    }
+    .progress { display: flex; gap: 2px; }
+    .progress-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.25);
+      cursor: pointer;
+      transition: all 0.2s;
+      /* 44px minimum touch target for accessibility (WCAG 2.5.5) */
+      padding: 18px;
+      margin: -18px;
+      background-clip: content-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .progress-dot:focus {
+      outline: 2px solid var(--gold);
+      outline-offset: 2px;
+    }
+    .progress-dot.active {
+      background: var(--gold);
+      background-clip: content-box;
+      transform: scale(1.3);
+    }
+    /* Enhanced touch targets for mobile (coarse pointer) */
+    @media (pointer: coarse) {
+      .progress { gap: 8px; }
+      .progress-dot {
+        width: 12px;
+        height: 12px;
+        padding: 16px;
+        margin: -16px;
+      }
+    }
+
+    /* Utilities */
+    .text-center { text-align: center; }
+    .mb-1 { margin-bottom: 1rem; }
+    .mb-2 { margin-bottom: 2rem; }
+    .mt-1 { margin-top: 1rem; }
+    .mt-2 { margin-top: 2rem; }
+
+    .content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: 1000px;
+    }
+
+    /* Mobile */
+    @media (max-width: 768px) {
+      .sidebar {
+        position: fixed;
+        left: -280px;
+        top: 0;
+        height: 100vh;
+        z-index: 1000;
+        transition: left 0.3s ease;
+      }
+      .sidebar.open { left: 0; }
+      .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 999;
+      }
+      .sidebar-overlay.open { display: block; }
+      .hamburger {
+        display: flex !important;
+        position: fixed;
+        top: 1rem;
+        left: 1rem;
+        z-index: 998;
+        background: var(--navy);
+        border: 1px solid var(--gold);
+        color: var(--gold);
+        padding: 0.5rem 0.75rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 1.25rem;
+      }
+      .comparison-grid { grid-template-columns: 1fr; }
+      .stats-grid { flex-direction: column; }
+      .contrast-container { flex-direction: column; }
+      .decision-branches { flex-direction: column; gap: 1rem; }
+      .content-header { padding-left: 4rem; }
+      .timeline-horizontal { flex-direction: column; gap: 1rem; }
+      .timeline-horizontal::before { display: none; }
+    }
+
+    .hamburger { display: none; }
+
+    .skip-link:focus {
+      left: 1rem !important;
+      top: 1rem !important;
+      outline: 2px solid var(--navy);
+    }
+
+    /* Print stylesheet */
+    @media print {
+      .sidebar, .slide-nav, .hamburger, .content-header { display: none !important; }
+      .course-container { display: block; }
+      .main-content { display: block; }
+      .slides-container { display: block; height: auto; }
+      .module-slides { display: block !important; }
+      .slide {
+        position: relative !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        page-break-inside: avoid;
+        padding: 2rem;
+        border-bottom: 1px solid #ccc;
+        margin-bottom: 1rem;
+      }
+      .slide.dark, .slide.black, .slide.red, .slide.green { background: white !important; color: black !important; }
+      .refrain, .direct-address, .rhetorical { color: var(--navy) !important; }
+    }
+
+    /* Focus-visible styles for keyboard navigation */
+    :focus-visible {
+      outline: 2px solid var(--gold, #D4AF37);
+      outline-offset: 2px;
+    }
+
+    :focus:not(:focus-visible) {
+      outline: none;
+    }
+
+    button:focus-visible,
+    a:focus-visible,
+    [role="button"]:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible {
+      outline: 2px solid var(--gold, #D4AF37);
+      outline-offset: 2px;
+      box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.3);
+    }
+
+    /* Reduced motion for accessibility */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      .slide { transition: none; }
+      .animate { opacity: 1; transform: none; }
+    }
+
+    /* Accessible decision tree linear descriptions */
+    .decision-tree-sr {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    /* Focus indicators for keyboard navigation */
+    .quiz-option:focus {
+      outline: 3px solid var(--gold);
+      outline-offset: 2px;
+    }
+    .nav-btn:focus, .btn:focus, .module-item:focus {
+      outline: 3px solid var(--gold);
+      outline-offset: 2px;
+    }
+
+    /* Citation box styling */
+    .citation-box {
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(212,175,55,0.3);
+      border-radius: 6px;
+      padding: 0.75rem 1rem;
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.7);
+      margin-top: 1rem;
+      max-width: 600px;
+    }
+    .citation-box a { color: var(--gold); }
+
+    /* Scenario quiz styling */
+    .scenario-box {
+      background: linear-gradient(135deg, rgba(124,58,237,0.15), rgba(30,39,97,0.2));
+      border: 1px solid var(--purple);
+      border-radius: 8px;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+    .scenario-box .scenario-label {
+      color: var(--purple);
+      font-weight: 700;
+      font-size: 0.8rem;
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* Spaced Retrieval System */
+    .spaced-retrieval-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      padding: 1rem;
+    }
+    .spaced-retrieval-modal {
+      background: linear-gradient(135deg, var(--deep-navy) 0%, #0a0f1a 100%);
+      border: 2px solid var(--gold);
+      border-radius: 12px;
+      padding: 2rem;
+      max-width: 500px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+    .retrieval-header {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.5rem;
+      color: var(--gold);
+      margin-bottom: 1rem;
+    }
+    .retrieval-question {
+      font-size: 1.1rem;
+      line-height: 1.6;
+      color: var(--cream);
+      margin-bottom: 1.5rem;
+      font-style: italic;
+    }
+    .retrieval-btn {
+      background: var(--gold);
+      color: var(--navy);
+      border: none;
+      padding: 0.75rem 1.5rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-bottom: 1rem;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .retrieval-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(212,175,55,0.4);
+    }
+    .retrieval-answer {
+      background: rgba(212,175,55,0.1);
+      border-left: 3px solid var(--gold);
+      padding: 1rem;
+      margin: 1rem 0;
+      text-align: left;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      color: var(--cream);
+    }
+    .retrieval-close {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.3);
+      color: var(--cream);
+      padding: 0.5rem 1rem;
+      font-size: 0.85rem;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .retrieval-close:hover {
+      background: rgba(255,255,255,0.1);
+      border-color: var(--gold);
+    }
+  </style>
+</head>
+<body>
+<a class="skip-link" href="#main-content" style="position: absolute; left: -9999px; top: 0; z-index: 9999; padding: 1rem; background: var(--gold); color: var(--navy);">Skip to content</a>
+<button aria-expanded="false" aria-label="Open navigation menu" class="hamburger" onclick="toggleSidebar()">☰</button>
+<div aria-hidden="true" class="sidebar-overlay" onclick="toggleSidebar()"></div>
+<div aria-label="快速复习课程" class="course-container">
+<!-- Sidebar -->
+<nav aria-label="课程模块" class="sidebar" role="navigation">
+<div class="sidebar-header">
+<a href="index.html" onmouseout="this.style.color='rgba(212,175,55,0.7)'" onmouseover="this.style.color='#D4AF37'" style="display:block;font-size:0.7rem;color:rgba(212,175,55,0.7);text-decoration:none;margin-bottom:0.5rem;">← Course Library</a>
+<h1>40 小时，而不是 40 天</h1>
+<p>Rapid Reviews in Crisis</p>
+</div>
+<div class="module-list" id="moduleList"></div>
+<div class="sidebar-footer">
+<p style="text-align: center;">Progress: <span id="progressPercent">0%</span></p>
+<button aria-label="重置课程进度" class="btn" onclick="resetProgress()" style="width: 100%; margin-top: 0.5rem; font-size: 0.7rem;">Reset Progress</button>
+</div>
+</nav>
+<!-- Main Content -->
+<main aria-label="课程内容" class="main-content">
+<header class="content-header">
+<div class="breadcrumb">
+          Module <span id="currentModuleNum">0</span>: <span id="currentModuleName">The Reckoning</span>
+</div>
+<div class="header-actions">
+<button class="btn primary" onclick="nextModule()">Next Module</button>
+</div>
+</header>
+<div class="content-body">
+<div class="slides-container" id="main-content">
+ 模块 0：清算 
+<div class="module-slides active" data-module="0">
+<div class="slide dark active" data-index="0">
+<p class="refrain animate">In the hour of crisis, speed saves lives.</p>
+<p class="refrain animate delay-1">But haste without wisdom takes them.</p>
+</div>
+<div class="slide dark" data-index="1">
+<p class="direct-address animate">那些寻求指导治疗者的人啊，</p>
+<p class="direct-address animate delay-1">您亲眼目睹了证据移动太慢时会发生什么？</p>
+<div class="gold-line animate delay-2"></div>
+<p class="animate delay-3" style="font-size: 1rem; text-align: center; max-width: 500px; opacity: 0.8;">
+                您看到过证据移动太快时会发生什么吗？
+              </p>
+</div>
+<div class="slide black" data-index="2">
+<p class="title cream animate text-center">January 2020</p>
+<p class="animate delay-1" style="font-size: 1.3rem; text-align: center;">A novel coronavirus emerges in Wuhan.</p>
+<div class="gold-line animate delay-2"></div>
+<p class="animate delay-3" style="font-size: 1.1rem; text-align: center; max-width: 600px;">
+                Patients are dying. There is no treatment.<br/>
+<span style="color: var(--gold);">世界需要答案。</span>
+</p>
+</div>
+<div class="slide dark" data-index="3">
+<p class="rhetorical animate">How long does a systematic review take?</p>
+<div class="gold-line animate delay-1"></div>
+<div class="contrast-container animate delay-2">
+<div class="contrast-box before">
+<h4>传统系统回顾</h4>
+<div class="stat">12-24</div>
+<div class="label">Months to complete</div>
+<div class="stat" style="margin-top: 1rem;">6-12</div>
+<div class="label">Months until publication</div>
+</div>
+<div class="contrast-box after">
+<h4>Pandemic Timeline</h4>
+<div class="stat">7</div>
+<div class="label">Days to double cases</div>
+<div class="stat" style="margin-top: 1rem;">Now</div>
+<div class="label">何时需要答案</div>
+</div>
+</div>
+</div>
+<div class="slide dark" data-index="4">
+<p class="direct-address animate">您没看到吗世界如何应对？</p>
+<div class="gold-line animate delay-1"></div>
+<div class="stats-grid animate delay-2">
+<div class="stat-box">
+<div class="stat-value">200,000+</div>
+<div class="stat-label">COVID papers in 2020 alone</div>
+</div>
+<div class="stat-box">
+<div class="stat-value">30,000+</div>
+<div class="stat-label">未经同行评审的预印本</div>
+</div>
+<div class="stat-box danger">
+<div class="stat-value">33+</div>
+<div class="stat-label">Major retractions</div>
+</div>
+</div>
+<p class="animate delay-3" style="font-size: 1rem; text-align: center; margin-top: 1rem;">
+                Speed created a flood. <span style="color: var(--gold);">Who would separate truth from noise?</span>
+</p>
+</div>
+<div class="slide dark" data-index="5">
+<p class="title cream animate">困扰我们的问题</p>
+<div class="story-box animate delay-1">
+<strong>两次流行病应对的故事：</strong><br/><br/>
+                2020年3月，法国基于一项有缺陷的小型研究批准羟氯喹用于治疗COVID-19。在更大规模的试验显示没有任何益处以及可能的心脏损害之前，数百万人服用了它。与此同时，英国的 RECOVERY 试验快速而严格地测试了地塞米松。他们在 3 个月内证明，重症病例的死亡人数减少了三分之一。<br/><br/>
+                两国都面临着同样的紧迫性。一个根据微弱的证据采取行动，一个迅速产生强有力的证据。<br/><br/>
+<span style="color: var(--gold);">Speed without rigor cost lives. Rapid rigor saved them.</span>
+</div>
+<div class="story-decision-tree animate delay-2">
+<p class="decision-prompt">2020 年 3 月，您是一名卫生部长。一项小型研究声称一种常见药物可以治愈 COVID-19。您会做什么？</p>
+<div class="decision-options">
+<div class="decision-option" data-path="wrong" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();}" role="button" tabindex="0">
+<strong>Path A:</strong> 根据这项有希望的研究立即批准羟氯喹
+                    <div class="consequence">→ Millions take an ineffective drug with cardiac risks; lupus patients lose access to their medication</div>
+</div>
+<div class="decision-option" data-path="right" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();}" role="button" tabindex="0">
+<strong>Path B:</strong> Fund a rapid but rigorous trial (like RECOVERY) to generate definitive evidence
+                    <div class="consequence">→ Within 3 months, prove dexamethasone works—saving over 1 million lives globally</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide light" data-index="6">
+<div class="content">
+<h2 class="title navy animate">本课程将教您</h2>
+<div class="learning-objectives animate delay-1">
+<h4>到最后，您将能够：</h4>
+<ul>
+<li>在 40 小时（而不是 40 小时）内进行快速审查天</li>
+<li>Know when "good enough" is actually good enough</li>
+<li>识别快速证据中的欺诈和偏见</li>
+<li>Use decision trees for methodological trade-offs</li>
+<li>Understand living systematic reviews</li>
+<li>从羟氯喹和伊维菌素灾难中吸取教训</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="slide dark" data-index="7">
+<p class="direct-address animate">了解快速证据的五项原则：</p>
+<div class="gold-line animate delay-1"></div>
+<div class="animate delay-2" style="text-align: left; max-width: 700px;">
+<p style="margin: 0.75rem 0; color: var(--gold);">1. Speed without rigor is recklessness.</p>
+<p style="margin: 0.75rem 0; color: var(--gold);">2. Rigor without speed is abandonment.</p>
+<p style="margin: 0.75rem 0; color: var(--gold);">3. A flawed study in a meta-analysis poisons all.</p>
+<p style="margin: 0.75rem 0; color: var(--gold);">4. Transparency reveals; concealment deceives.</p>
+<p style="margin: 0.75rem 0; color: var(--gold);">5。活生生的证据为生者服务。</p>
+</div>
+</div>
+<div class="slide dark" data-index="8">
+<p class="title cream animate">手术圈灾难</p>
+<div class="story-box animate delay-1">
+<strong>幻影数据库的故事：</strong><br/><br/>
+                2020 年 5 月，《柳叶刀》发表了一项针对来自六大洲 671 家医院的 96,000 名患者的研究。它显示羟氯喹 <em>increased</em> death rates. The WHO halted trials worldwide.<br/><br/>
+                但数据来自Surgisphere——一家拥有11名员工的公司，其中包括一名科幻小说作家和一名成人内容模特。 <strong>该数据库不存在。</strong><br/><br/>
+<span style="color: var(--gold);">13天内，该论文被撤回。但试验已经停止。时间消失了。信任被粉碎。</span>
+</div>
+<div class="citation-box animate delay-2">
+                Source: Mehra MR et al. Lancet 2020 (RETRACTED). Retraction: Lancet 2020;395:1820.
+              </div>
+</div>
+<div class="slide dark" data-index="9">
+<p class="rhetorical animate">How did two of medicine's most prestigious journals—</p>
+<p class="rhetorical animate delay-1">《柳叶刀》和《新英格兰医学杂志》——发布捏造的数据？</p>
+<div class="gold-line animate delay-2"></div>
+<div class="stats-grid animate delay-3">
+<div class="stat-box danger">
+<div class="stat-value">13</div>
+<div class="stat-label">Days until retraction</div>
+</div>
+<div class="stat-box danger">
+<div class="stat-value">0</div>
+<div class="stat-label">审计人员获得数据访问权限</div>
+</div>
+<div class="stat-box danger">
+<div class="stat-value">100+</div>
+<div class="stat-label">Trials affected</div>
+</div>
+</div>
+<p class="animate delay-4" style="font-size: 1rem; text-align: center; margin-top: 1rem; color: var(--gold);">
+                Speed pressure broke the gatekeepers.
+              </p>
+</div>
+<div class="slide light" data-index="10">
+<div class="content">
+<h2 class="title navy animate">决策树：您应该相信这项研究吗？</h2>
+<div aria-label="用于评估研究可信度的决策树" class="decision-tree animate delay-1" role="img">
+<div class="decision-node question">
+                    独立研究人员能否访问原始数据数据？
+                  </div>
+<div class="decision-branches">
+<div class="decision-branch">
+<div class="branch-label yes">YES</div>
+<div class="arrow-down"></div>
+<div class="decision-node question" style="font-size: 0.85rem;">
+                        研究是否已预先注册？
+                      </div>
+<div class="decision-branches" style="margin-top: 0.5rem;">
+<div class="decision-branch">
+<div class="branch-label yes" style="font-size: 0.7rem;">YES</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node outcome-yes" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>HIGHER TRUST</strong><br/>继续进行标准评估
+                          </div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no" style="font-size: 0.7rem;">NO</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node warning" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>MODERATE TRUST</strong><br/>检查结果切换
+                          </div>
+</div>
+</div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no">NO</div>
+<div class="arrow-down"></div>
+<div class="decision-node outcome-no" style="font-size: 0.85rem;">
+<strong>LOW TRUST</strong><br/>在包含之前请求数据
+                      </div>
+</div>
+</div>
+</div>
+<!-- Screen reader accessible version -->
+<div aria-hidden="false" class="decision-tree-sr">
+                  决策树：独立研究人员能否访问原始数据？如果是，请检查研究是否已预先注册。如果预先注册，信任度更高 - 进行标准评估。如果没有预先注册，则中等信任 - 检查结果切换。如果没有数据访问权限，信任度低 - 在包含之前请求数据。
+                </div>
+</div>
+</div>
+<div class="slide light" data-index="11">
+<div class="content">
+<h2 class="title navy animate">Module 0 Quiz</h2>
+<div class="quiz-container">
+<div class="scenario-box animate delay-1">
+<div class="scenario-label">Scenario</div>
+                    现在是 2020 年 3 月。预印本声称一种常见药物可以 100% 治愈 COVID-19。该研究有 36 名患者，没有对照组，于 2 天前发布。您的医院院长询问您是否应该储存药物。
+                  </div>
+<div class="quiz-question">
+<h4>您应该提出什么建议？</h4>
+<div class="quiz-options" role="radiogroup">
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>A.</span> Yes—patients are dying, we must act
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>B.</span> 不——等待 18 个月后的 Cochrane 审核
+                      </div>
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" onkeydown="handleQuizKey(event, this, true)" role="radio" tabindex="0">
+<span>C.</span> 等待验证——请求数据，检查复制
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>D.</span> It doesn't matter—any action is better than none
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark" data-index="12">
+<p class="direct-address animate">考虑 2020 年的三个见证人：</p>
+<div class="gold-line animate delay-1"></div>
+<div class="witness-statement animate delay-2">
+<div class="source">Dr. Anthony Fauci, March 2020</div>
+<div class="quote">“证据确实非常明显......病毒的传播显着减少。”</div>
+</div>
+<div class="witness-statement animate delay-3">
+<div class="source">WHO Director-General, May 2020</div>
+<div class="quote">“我们已暂时中止团结试验的羟氯喹部分。”</div>
+</div>
+<div class="witness-statement animate delay-4">
+<div class="source">Cochrane, December 2020</div>
+<div class="quote">"Hydroxychloroquine probably has little or no effect on mortality and progression to mechanical ventilation."</div>
+</div>
+<p class="animate delay-5" style="font-size: 0.95rem; margin-top: 1rem; text-align: center; color: var(--gold);">
+                从希望到判决有九个月的时间。期间做出了多少决定？
+              </p>
+</div>
+<div class="slide dark" data-index="13">
+<p class="title cream animate">氯喹中毒</p>
+<div class="warning-box animate delay-1">
+<strong>Nigeria, March 2020:</strong><br/><br/>
+                在羟氯喹宣布后几天内，尼日利亚人开始使用氯喹（一种相关但毒性更强的药物）进行自我治疗。<br/><br/>
+<strong>Three deaths.</strong> 因服药过量多次住院。拉各斯州中毒中心不堪重负。<br/><br/>
+                In Arizona, a man died after drinking fish tank cleaner containing chloroquine phosphate. His wife survived but was hospitalized.<br/><br/>
+<span style="color: var(--red);">Premature evidence claims killed people who never had COVID-19.</span>
+</div>
+<div class="citation-box animate delay-2">
+                Sources: Nigeria Centre for Disease Control, March 2020; Banner Health, Arizona, March 2020.
+              </div>
+</div>
+<div class="slide dark" data-index="14">
+<p class="story-box animate">
+<strong>沙利度胺的故事：</strong><br/><br/>
+                1957年，沙利度胺作为孕妇的安全镇静剂上市。制造商分享的安全数据不完整——动物研究有限，人体试验简短。医生们信任该公司的声誉，广泛开出该药的处方。<br/><br/>
+                到 1961 年，超过 10,000 名儿童出生时患有严重的肢体畸形。安全“地图”存在致命漏洞，无人披露。<br/><br/>
+<span style="color: var(--gold);">不完整的证据，作为完整的证据，造成了永远重塑药品监管的悲剧。</span>
+</p>
+<div class="story-decision-tree animate delay-1">
+<p class="decision-prompt">您是 1957 年的药品监管者。一家制药公司以有限的安全数据提交沙利度胺审批。你会做什么？</p>
+<div class="decision-options">
+<div class="decision-option" data-path="wrong" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();}" role="button" tabindex="0">
+<strong>Path A:</strong> 接受有限的安全数据并迅速批准——孕妇需要缓解孕吐
+                    <div class="consequence">&gt;→超过10,000名患有严重先天缺陷的儿童；悲剧永远重塑药品监管</div>
+</div>
+<div class="decision-option" data-path="right" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();}" role="button" tabindex="0">
+<strong>Path B:</strong> 要求在批准前进行包括生殖毒性在内的完整安全研究
+                    <div class="consequence">→ FDA 的 Frances Kelsey 为美国走了这条路——美国儿童免遭悲剧</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide light" data-index="15">
+<div class="content">
+<h2 class="title navy animate">Decision Tree: When to Share Preliminary Findings</h2>
+<div aria-label="Decision tree for sharing preliminary findings" class="decision-tree animate delay-1" role="img">
+<div class="decision-node question">
+                    Could acting on this finding cause direct harm?
+                  </div>
+<div class="decision-branches">
+<div class="decision-branch">
+<div class="branch-label yes">YES</div>
+<div class="arrow-down"></div>
+<div class="decision-node outcome-no" style="font-size: 0.85rem;">
+<strong>DO NOT SHARE</strong><br/>等待确认
+                      </div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no">NO</div>
+<div class="arrow-down"></div>
+<div class="decision-node question" style="font-size: 0.85rem;">
+                        Could NOT acting cause greater harm?
+                      </div>
+<div class="decision-branches" style="margin-top: 0.5rem;">
+<div class="decision-branch">
+<div class="branch-label yes" style="font-size: 0.7rem;">YES</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node warning" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>分享给注意事项</strong><br/>"Preliminary—may change"
+                          </div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no" style="font-size: 0.7rem;">NO</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node outcome-yes" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>WAIT</strong><br/>完成分析
+                          </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="decision-tree-sr">
+                  决策树：根据此发现采取行动会造成直接伤害吗？如果是，请勿分享 - 等待确认。如果不是，请检查不采取行动是否会造成更大的伤害。如果是，请分享明确的初步警告。如果不紧急，请等待完成分析。
+                </div>
+</div>
+</div>
+<div class="slide black" data-index="16">
+<p class="refrain animate">In the hour of crisis, speed saves lives.</p>
+<p class="animate delay-1" style="font-size: 1.25rem; margin-top: 1.5rem;">模块 1：权衡</p>
+</div>
+</div>
+ 模块 1：权衡 
+<div class="module-slides" data-module="1">
+<div class="slide dark active" data-index="0">
+<p class="refrain animate">Speed without rigor is recklessness.</p>
+<p class="refrain animate delay-1">Rigor without speed is abandonment.</p>
+</div>
+<div class="slide dark" data-index="1">
+<p class="direct-address animate">您考虑过我们为速度牺牲了什么吗？</p>
+<div class="gold-line animate delay-1"></div>
+<p class="animate delay-2" style="font-size: 1.1rem; text-align: center; max-width: 600px;">
+                A systematic review is thorough because it is slow.<br/>
+                A rapid review is fast because it makes trade-offs.<br/>
+<span style="color: var(--gold);">这些是什么</span>
+</p>
+</div>
+<div class="slide light" data-index="2">
+<div class="content">
+<h2 class="title navy animate">系统与快速：差异</h2>
+<table class="results-table animate delay-1">
+<tr>
+<th>Element</th>
+<th>Systematic Review</th>
+<th>Rapid Review</th>
+</tr>
+<tr>
+<td>Databases searched</td>
+<td>5-10+</td>
+<td class="highlight">1-3</td>
+</tr>
+<tr>
+<td>Grey literature</td>
+<td>Extensive</td>
+<td class="highlight">Limited or none</td>
+</tr>
+<tr>
+<td>Screening</td>
+<td>Dual independent</td>
+<td class="highlight">Single + verification</td>
+</tr>
+<tr>
+<td>Quality assessment</td>
+<td>Full tool</td>
+<td class="highlight">Abbreviated</td>
+</tr>
+<tr>
+<td>Timeline</td>
+<td>12-24 months</td>
+<td class="success">1-6 weeks</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="slide dark" data-index="3">
+<p class="title cream animate">Cochrane 响应</p>
+<div class="witness-statement animate delay-1">
+<div class="source">March 2020, Geneva</div>
+<div class="quote">
+                  “2020 年 3 月，Cochrane 方法快速评审小组发布了有关如何进行快速评审的指南，该指南简化了他们的流程，以非常快速地创建高质量评审。 “
+                </div>
+</div>
+<p class="animate delay-2" style="font-size: 1rem; margin-top: 1rem; text-align: center;">
+                The guardians of rigor themselves said: <span style="color: var(--gold);">"We must move faster."</span>
+</p>
+</div>
+<div class="slide light" data-index="4">
+<div class="content">
+<h2 class="title navy animate">Decision Tree: When to Use Rapid Review</h2>
+<div class="decision-tree animate delay-1">
+<div class="decision-node question">
+                    Is the decision urgent (lives at stake NOW)?
+                  </div>
+<div class="decision-branches">
+<div class="decision-branch">
+<div class="branch-label yes">YES</div>
+<div class="arrow-down"></div>
+<div class="decision-node question" style="font-size: 0.85rem;">
+                        现有证据稀疏/冲突吗？
+                      </div>
+<div class="decision-branches" style="margin-top: 0.5rem;">
+<div class="decision-branch">
+<div class="branch-label yes" style="font-size: 0.7rem;">YES</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node outcome-yes" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>RAPID REVIEW</strong><br/>40 hours
+                          </div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no" style="font-size: 0.7rem;">NO</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node" style="font-size: 0.75rem; padding: 0.5rem; background: var(--teal);">
+<strong>UPDATE EXISTING</strong><br/>SR
+                          </div>
+</div>
+</div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no">NO</div>
+<div class="arrow-down"></div>
+<div class="decision-node" style="font-size: 0.85rem;">
+<strong>FULL SYSTEMATIC</strong><br/>Standard timeline
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark" data-index="5">
+<p class="rhetorical animate">What risks do we accept?</p>
+<div class="gold-line animate delay-1"></div>
+<div class="animate delay-2" style="text-align: left; max-width: 600px;">
+<p style="margin: 0.75rem 0;"><span style="color: var(--red); font-weight: 700;">Missing studies:</span> Limited search may miss relevant evidence</p>
+<p style="margin: 0.75rem 0;"><span style="color: var(--red); font-weight: 700;">Selection bias:</span> Single screener may have systematic blind spots</p>
+<p style="margin: 0.75rem 0;"><span style="color: var(--red); font-weight: 700;">Quality gaps:</span> Abbreviated assessment may miss fatal flaws</p>
+<p style="margin: 0.75rem 0;"><span style="color: var(--red); font-weight: 700;">Publication bias:</span> Less grey literature means more bias</p>
+</div>
+<p class="animate delay-3" style="font-size: 0.95rem; margin-top: 1rem; text-align: center; color: var(--gold);">
+                必须在每次快速审查中明确说明这些风险。
+              </p>
+</div>
+<div class="slide dark" data-index="6">
+<p class="direct-address animate">但是，请考虑一下：</p>
+<div class="story-box animate delay-1">
+<strong>诺曼底登陆天气的故事：</strong><br/><br/>
+                6 月 4 日， 1944年，艾森豪威尔面临一个不可能的决定。他的气象学家斯塔格上尉无法保证天气良好，只有 80% 的把握认为 6 月 6 日会出现短暂晴朗。等待确定性意味着将入侵推迟数周，冒着被发现的风险。<br/><br/>
+                艾森豪威尔决定：“好吧，我们走吧。” 80%的预测是正确的。入侵成功了。<br/><br/>
+<span style="color: var(--gold);">斯塔格后来说，完美的预测是不可能的，但可行的预测挽救了战争。有时今天 80% 的确定性击败 95% 的确定性为时已晚。</span>
+</div>
+<div class="story-decision-tree animate delay-2">
+<p class="decision-prompt">您是 1944 年 6 月 4 日的艾森豪威尔将军。您的气象学家对 6 月 6 日的短暂天气窗口给出了 80% 的置信度。等待确定性意味着推迟数周并冒着发现入侵部队的风险。</p>
+<div class="decision-options">
+<div class="decision-option" data-path="wrong" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();}" role="button" tabindex="0">
+<strong>Path A:</strong> 等待确定性达到 95% 后再发起入侵
+                    <div class="consequence">→ Delay of weeks; risk of German discovery; next favorable tide not until late June; potential failure of entire operation</div>
+</div>
+<div class="decision-option" data-path="right" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();}" role="button" tabindex="0">
+<strong>Path B:</strong> Act on the 80% forecast—launch on June 6
+                    <div class="consequence">&gt;→ 预测是正确的；入侵成功；战争的潮流发生了逆转。可操作的证据战胜了完美的证据。</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark" data-index="7">
+<p class="title cream animate">两项荟萃分析的故事</p>
+<div class="story-box animate delay-1">
+<strong>2020 年 7 月：口罩悖论</strong><br/><br/>
+                针对同一问题的两项荟萃分析：“口罩是否能阻止 COVID-19 传播？”<br/><br/>
+                第一个汇总14 项观察性研究： <strong>OR 0.35</strong>—masks reduce risk by 65%!<br/>
+                The second included only 3 RCTs: <strong>OR 0.91</strong>—no significant effect.<br/><br/>
+<span style="color: var(--gold);">Same question. Same year. Opposite answers. Why?</span>
+</div>
+</div>
+<div class="slide dark" data-index="8">
+<p class="rhetorical animate">您纳入的研究决定了您发现的真相。</p>
+<div class="gold-line animate delay-1"></div>
+<div class="contrast-container animate delay-2">
+<div class="contrast-box before">
+<h4>Observational Studies</h4>
+<div class="stat">65%</div>
+<div class="label">Risk reduction</div>
+<p style="font-size: 0.8rem; margin-top: 0.5rem;">Higher confounding risk</p>
+</div>
+<div class="contrast-box after" style="background: rgba(234,88,12,0.15); border-color: var(--orange);">
+<h4 style="color: var(--orange);">RCTs Only</h4>
+<div class="stat">9%</div>
+<div class="label">Risk reduction (NS)</div>
+<p style="font-size: 0.8rem; margin-top: 0.5rem;">Lower power, higher validity</p>
+</div>
+</div>
+<p class="animate delay-3" style="font-size: 0.95rem; margin-top: 1rem; text-align: center; color: var(--gold);">
+                在快速审查中，您的纳入标准就是您的结论。
+              </p>
+</div>
+<div class="slide light" data-index="9">
+<div class="content">
+<h2 class="title navy animate">Decision Tree: Observational vs. RCT Evidence</h2>
+<div aria-label="用于在观察性证据和随机对照试验证据之间进行选择的决策树" class="decision-tree animate delay-1" role="img">
+<div class="decision-node question">
+                    针对此问题是否有 RCT？
+                  </div>
+<div class="decision-branches">
+<div class="decision-branch">
+<div class="branch-label yes">YES</div>
+<div class="arrow-down"></div>
+<div class="decision-node question" style="font-size: 0.85rem;">
+                        RCT 是否足够大，足以满足足够的需求功率？
+                      </div>
+<div class="decision-branches" style="margin-top: 0.5rem;">
+<div class="decision-branch">
+<div class="branch-label yes" style="font-size: 0.7rem;">YES</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node outcome-yes" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>PREFER RCTs</strong><br/>Higher certainty
+                          </div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no" style="font-size: 0.7rem;">NO</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node warning" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>PRESENT BOTH</strong><br/>State uncertainty clearly
+                          </div>
+</div>
+</div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no">NO</div>
+<div class="arrow-down"></div>
+<div class="decision-node warning" style="font-size: 0.85rem;">
+<strong>USE OBSERVATIONAL</strong><br/>But downgrade certainty
+                      </div>
+</div>
+</div>
+</div>
+<div class="decision-tree-sr">
+                  决策树：RCT 可用吗？如果是，请检查它们是否足够大。如果足够大，则更喜欢随机对照试验以获得更高的确定性。如果不够大，请同时呈现并说明不确定性。如果没有可用的 RCT，请使用观察性但降低确定性。
+                </div>
+</div>
+</div>
+<div class="slide light" data-index="10">
+<div class="content">
+<h2 class="title navy animate">Module 1 Quiz</h2>
+<div class="quiz-container">
+<div class="scenario-box animate delay-1">
+<div class="scenario-label">Scenario</div>
+                    您所在的部门需要在 72 小时内补充维生素 D 来预防 COVID-19 的证据。自 2019 年起，已有关于维生素 D 和呼吸道感染的完整 Cochrane 综述，但没有针对 COVID-19 的具体内容。
+                  </div>
+<div class="quiz-question">
+<h4>What is the most appropriate approach?</h4>
+<div class="quiz-options" role="radiogroup">
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>A.</span> 按原样使用 2019 年 Cochrane 综述
+                      </div>
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" onkeydown="handleQuizKey(event, this, true)" role="radio" tabindex="0">
+<span>B.</span> 快速综述：更新 Cochrane 搜索以查找 COVID-19 特定研究
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>C.</span> Commission a new 18-month systematic review
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>D.</span> Tell them evidence-based medicine is impossible in 72 hours
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark" data-index="11">
+<p class="story-box animate">
+<strong>两个城市的故事1918 年：</strong><br/><br/>
+                1918 年 9 月，费城和圣路易斯均发现流感病例。费城卫生专员在采取行动之前等待更多数据。 9月28日，他允许举行20万人的大规模游行。几天之内，医院就人满为患。几周内就有 12,000 人死亡。<br/><br/>
+                圣。圣路易斯也有同样不完整的数据，立即关闭了学校并禁止集会。他们的死亡率是费城的一半。<br/><br/>
+<span style="color: var(--gold);">早期行动的昏暗光芒胜过来得太晚的明亮光芒。</span>
+</p>
+<div class="story-decision-tree animate delay-1">
+<p class="decision-prompt">您是 1918 年 9 月费城的卫生专员。致命流感病例正在出现。大规模的自由贷款游行定于 9 月 28 日举行，预计将有 200,000 人参加。你会做什么？</p>
+<div class="decision-options">
+<div class="decision-option" data-path="wrong" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();}" role="button" tabindex="0">
+<strong>Path A:</strong> 在行动之前等待更多数据 - 游行将提高战争的士气
+                    <div class="consequence">→ 12,000 dead in Philadelphia within weeks; hospitals overflow; bodies pile in morgues</div>
+</div>
+<div class="decision-option" data-path="right" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();}" role="button" tabindex="0">
+<strong>Path B:</strong> Act on incomplete data like St. Louis—cancel public gatherings immediately
+                    <div class="consequence">→ St. Louis had half the death rate of Philadelphia; early action saved thousands of lives</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark" data-index="12">
+<p class="title cream animate">托珠单抗的转变</p>
+<div class="story-box animate delay-1">
+<strong>过早判断的药物的故事：</strong><br/><br/>
+                February 2021: Multiple small trials of tocilizumab (an IL-6 inhibitor) showed no benefit. Headlines declared it useless. Some hospitals stopped using it.<br/><br/>
+                June 2021: RECOVERY trial reports 4,116 patients. <strong>Mortality reduced by 14%.</strong> WHO immediately recommends it.<br/><br/>
+<span style="color: var(--gold);">小型试验动力不足。他们发现“没有效果的证据”——这不是“没有效果的证据”。大型试验发现了真相。</span>
+</div>
+<div class="citation-box animate delay-2">
+                Source: RECOVERY Collaborative. Lancet 2021;397:1637-1645. REMAP-CAP confirmed similar results.
+              </div>
+</div>
+<div class="slide dark" data-index="13">
+<p class="rhetorical animate">这两个陈述之间有什么区别？</p>
+<div class="gold-line animate delay-1"></div>
+<div class="contrast-container animate delay-2">
+<div class="contrast-box before">
+<h4>"No evidence of effect"</h4>
+<div class="stat" style="font-size: 1.8rem;">p = 0.08</div>
+<div class="label">200 patients, underpowered</div>
+<p style="font-size: 0.8rem; margin-top: 0.5rem;">Cannot rule out benefit</p>
+</div>
+<div class="contrast-box after" style="background: rgba(197,48,48,0.15); border-color: var(--red);">
+<h4 style="color: var(--red);">"Evidence of no effect"</h4>
+<div class="stat" style="font-size: 1.8rem;">p = 0.92</div>
+<div class="label">4,000 patients, adequate power</div>
+<p style="font-size: 0.8rem; margin-top: 0.5rem;">Confidently excludes benefit</p>
+</div>
+</div>
+<p class="animate delay-3" style="font-size: 1rem; margin-top: 1rem; text-align: center; color: var(--gold);">
+                没有证据并不等于不存在的证据 - 除非您的研究足够大以检测到它。
+              </p>
+</div>
+<div class="slide light" data-index="14">
+<div class="content">
+<h2 class="title navy animate">决策树：这项研究足够大吗？</h2>
+<div aria-label="用于评估研究能力的决策树" class="decision-tree animate delay-1" role="img">
+<div class="decision-node question">
+                    该研究报告了功效吗计算？
+                  </div>
+<div class="decision-branches">
+<div class="decision-branch">
+<div class="branch-label yes">YES</div>
+<div class="arrow-down"></div>
+<div class="decision-node question" style="font-size: 0.85rem;">
+                        Did they achieve target enrollment?
+                      </div>
+<div class="decision-branches" style="margin-top: 0.5rem;">
+<div class="decision-branch">
+<div class="branch-label yes" style="font-size: 0.7rem;">YES</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node outcome-yes" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>ADEQUATELY POWERED</strong><br/>信任否定结果
+                          </div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no" style="font-size: 0.7rem;">NO</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node warning" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>UNDERPOWERED</strong><br/>"No effect" may be false negative
+                          </div>
+</div>
+</div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no">NO</div>
+<div class="arrow-down"></div>
+<div class="decision-node warning" style="font-size: 0.85rem;">
+<strong>ASSUME UNDERPOWERED</strong><br/>Calculate post-hoc power
+                      </div>
+</div>
+</div>
+</div>
+<div class="decision-tree-sr">
+                  决策树：研究报告功效计算了吗？如果是，请检查他们是否达到了目标入学率。如果实现了，研究就有足够的动力并且负面结果是可信的。如果没有实现，研究动力不足，“无效果”可能是假阴性。如果没有报告功率计算，则假设功率不足并计算事后功率。
+                </div>
+</div>
+</div>
+<div class="slide dark" data-index="15">
+<p class="title cream animate">呼吸机反转</p>
+<div class="warning-box animate delay-1">
+<strong>March 2020: "Intubate Early"</strong><br/>
+                Initial guidance: patients with low oxygen should be intubated quickly to prevent deterioration.<br/><br/>
+<strong>April 2020: "Intubate Later"</strong><br/>
+                临床医生观察到许多患者能够耐受低氧（“快乐缺氧”）。俯卧位通常不需要通气。<br/><br/>
+<strong>Result:</strong> Practice changed mid-pandemic based on real-world observation, not RCTs. Early intubation may have caused avoidable deaths.
+              </div>
+<p class="animate delay-2" style="font-size: 0.95rem; margin-top: 1rem; text-align: center; color: var(--gold);">
+                When RCTs are impossible, observe carefully. Document systematically. Share transparently.
+              </p>
+</div>
+<div class="slide black" data-index="16">
+<p class="refrain animate">Speed without rigor is recklessness.</p>
+<p class="refrain animate delay-1">Rigor without speed is abandonment.</p>
+<p class="animate delay-2" style="font-size: 1.25rem; margin-top: 1.5rem;">模块 2：方法</p>
+</div>
+</div>
+ 模块 2：方法 
+<div class="module-slides" data-module="2">
+<div class="slide dark active" data-index="0">
+<p class="refrain animate">四十小时的真理 - 如果您知道路径。</p>
+</div>
+<div class="slide dark" data-index="1">
+<p class="title cream animate">40 小时快速回顾</p>
+<div class="timeline-horizontal animate delay-1">
+<div class="timeline-point">
+<div class="timeline-dot">1</div>
+<div class="timeline-label">Define Question</div>
+<div class="timeline-date">2 hours</div>
+</div>
+<div class="timeline-point">
+<div class="timeline-dot">2</div>
+<div class="timeline-label">Search Strategy</div>
+<div class="timeline-date">4 hours</div>
+</div>
+<div class="timeline-point">
+<div class="timeline-dot">3</div>
+<div class="timeline-label">Screen &amp; Select</div>
+<div class="timeline-date">12 hours</div>
+</div>
+<div class="timeline-point">
+<div class="timeline-dot">4</div>
+<div class="timeline-label">Extract &amp; Assess</div>
+<div class="timeline-date">14 hours</div>
+</div>
+<div class="timeline-point">
+<div class="timeline-dot">5</div>
+<div class="timeline-label">Synthesize</div>
+<div class="timeline-date">8 hours</div>
+</div>
+</div>
+</div>
+<div class="slide light" data-index="2">
+<div class="content">
+<h2 class="title navy animate">第 1 步：定义问题（2 小时）</h2>
+<div class="case-study animate delay-1">
+<h4>The PICO Framework—Sharper Than Ever</h4>
+<p><strong>Population:</strong> Adults hospitalized with COVID-19 (narrow!)</p>
+<p><strong>Intervention:</strong> Dexamethasone 6mg daily</p>
+<p><strong>Comparator:</strong> Standard care / placebo</p>
+<p><strong>Outcome:</strong> 28-day mortality (primary only)</p>
+</div>
+<div class="story-box animate delay-2" style="background: rgba(30,39,97,0.1); border-color: var(--navy);">
+                  在快速回顾中，问题必须是 <strong>surgical</strong>. Broad questions create endless searches. Narrow questions enable speed.
+                </div>
+</div>
+</div>
+<div class="slide light" data-index="3">
+<div class="content">
+<h2 class="title navy animate">Step 2: Search Strategy (4 hours)</h2>
+<div class="comparison-grid animate delay-1">
+<div class="comparison-panel danger">
+<h4 style="color: var(--red);">DON'T: Systematic Search</h4>
+<p style="font-size: 0.85rem;">MEDLINE + EMBASE + Cochrane + CINAHL + PsycINFO + Web of Science + grey literature + hand searching</p>
+<p style="font-size: 0.8rem; color: var(--light-text); margin-top: 0.5rem;">Time: 40+ hours</p>
+</div>
+<div class="comparison-panel highlight">
+<h4 style="color: var(--green);">DO: Focused Search</h4>
+<p style="font-size: 0.85rem;">PubMed + Cochrane Library + one preprint server (medRxiv)</p>
+<p style="font-size: 0.8rem; color: var(--gold); margin-top: 0.5rem;">Time: 4 hours</p>
+</div>
+</div>
+<p class="animate delay-2" style="font-size: 0.9rem; margin-top: 1rem; text-align: center; color: var(--light-text);">
+                  记录您搜索的内容以及故意排除的内容。
+                </p>
+</div>
+</div>
+<div class="slide dark" data-index="4">
+<p class="direct-address animate">关键捷径：</p>
+<p class="direct-address animate delay-1">单次筛选和验证。</p>
+<div class="gold-line animate delay-2"></div>
+<div class="stats-grid animate delay-3">
+<div class="stat-box">
+<div class="stat-value">1</div>
+<div class="stat-label">Primary screener</div>
+</div>
+<div class="stat-box">
+<div class="stat-value">20%</div>
+<div class="stat-label">Verified by second reviewer</div>
+</div>
+<div class="stat-box">
+<div class="stat-value">100%</div>
+<div class="stat-label">Of exclusions verified</div>
+</div>
+</div>
+<p class="animate delay-4" style="font-size: 0.95rem; margin-top: 1rem; text-align: center;">
+                This saves 50% of screening time while catching most errors.
+              </p>
+</div>
+<div class="slide light" data-index="5">
+<div class="content">
+<h2 class="title navy animate">Decision Tree: Quality Assessment Shortcuts</h2>
+<div class="decision-tree animate delay-1">
+<div class="decision-node question">
+                    您将包含多少项研究？
+                  </div>
+<div class="decision-branches">
+<div class="decision-branch">
+<div class="branch-label" style="background: var(--teal); color: white;">≤10</div>
+<div class="arrow-down"></div>
+<div class="decision-node outcome-yes" style="font-size: 0.85rem;">
+<strong>Full quality assessment</strong><br/>
+                        Use standard tool (RoB 2, ROBINS-I)
+                      </div>
+</div>
+<div class="decision-branch">
+<div class="branch-label maybe">&gt;10</div>
+<div class="arrow-down"></div>
+<div class="decision-node warning" style="font-size: 0.85rem;">
+<strong>Abbreviated assessment</strong><br/>
+                        Key domains only
+                      </div>
+</div>
+</div>
+</div>
+<p class="animate delay-2" style="font-size: 0.85rem; margin-top: 1rem; text-align: center; color: var(--light-text);">
+                  Key domains: randomization, blinding, missing data, selective reporting
+                </p>
+</div>
+</div>
+<div class="slide dark" data-index="6">
+<p class="title cream animate">最后一步：综合</p>
+<div class="story-box animate delay-1">
+<strong>Warning:</strong> Meta-analysis in rapid reviews is dangerous territory.<br/><br/>
+                您可能没有进行全面搜索。你可能错过了学习。来自不完整搜索的汇总估计可能会产生错误的信心。<br/><br/>
+<span style="color: var(--gold);">更喜欢叙述性综合。如果您必须汇集，请大声说明限制。</span>
+</div>
+</div>
+<div class="slide light" data-index="7">
+<div class="content">
+<h2 class="title navy animate">PRISMA-RR：您的报告清单</h2>
+<div class="case-study animate delay-1">
+<h4>PRISMA for Rapid Reviews Extension (2024)</h4>
+<p>When reporting rapid reviews, you MUST include:</p>
+<ul style="margin-top: 0.75rem; margin-left: 1rem; font-size: 0.9rem;">
+<li><strong>Shortcuts taken:</strong> 简化的 SR 与完整 SR 的区别是什么？</li>
+<li><strong>Time constraints:</strong> 为什么需要快速审查？</li>
+<li><strong>Databases searched:</strong> 以及为什么其他人要这样做排除</li>
+<li><strong>Screener count:</strong> Single vs. dual screening</li>
+<li><strong>Date of search:</strong> 截至[日期]的最新证据</li>
+<li><strong>Limitations section:</strong> What may have been missed</li>
+</ul>
+</div>
+<div class="citation-box animate delay-2">
+                  Source: Stevens A et al. PRISMA-RR Extension. J Clin Epidemiol 2024. DOI: 10.1016/j.jclinepi.2024.01.015
+                </div>
+</div>
+</div>
+<div class="slide dark" data-index="8">
+<p class="title cream animate">瑞德西韦逆转的故事</p>
+<div class="story-box animate delay-1">
+<strong>November 2020: Two Giants Disagree</strong><br/><br/>
+                The FDA granted Emergency Use Authorization: "Remdesivir shortens recovery time."<br/>
+                The WHO recommended against it: "No mortality benefit, high cost."<br/><br/>
+                Same drug. Same evidence base. <strong>Opposite conclusions.</strong><br/><br/>
+<span style="color: var(--gold);">差异？ FDA 优先考虑替代结果（恢复时间）。 WHO 优先考虑以患者为中心的结果（死亡率）。</span>
+</div>
+<div class="citation-box animate delay-2">
+                Sources: FDA EUA Oct 2020; WHO Solidarity Trial Consortium, NEJM 2021.
+              </div>
+</div>
+<div class="slide light" data-index="9">
+<div class="content">
+<h2 class="title navy animate">Decision Tree: Choosing Outcomes in Rapid Reviews</h2>
+<div aria-label="用于选择评审结果的决策树" class="decision-tree animate delay-1" role="img">
+<div class="decision-node question">
+                    现有研究中可以测量硬结果（死亡率/主要发病率）吗？
+                  </div>
+<div class="decision-branches">
+<div class="decision-branch">
+<div class="branch-label yes">YES</div>
+<div class="arrow-down"></div>
+<div class="decision-node outcome-yes" style="font-size: 0.85rem;">
+<strong>USE HARD OUTCOMES</strong><br/>Highest certainty
+                      </div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no">NO</div>
+<div class="arrow-down"></div>
+<div class="decision-node question" style="font-size: 0.85rem;">
+                        替代物是否针对这种情况进行了验证？
+                      </div>
+<div class="decision-branches" style="margin-top: 0.5rem;">
+<div class="decision-branch">
+<div class="branch-label yes" style="font-size: 0.7rem;">YES</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node warning" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>谨慎使用</strong><br/>Note indirectness
+                          </div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no" style="font-size: 0.7rem;">NO</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node outcome-no" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>MAJOR UNCERTAINTY</strong><br/>State explicitly
+                          </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="decision-tree-sr">
+                  决定树：硬成果可以衡量吗？如果是，请使用硬结果以获得最高的确定性。如果不是，请检查代理人是否经过验证。如果代理经过验证，请谨慎使用并注意间接性。如果替代品未经验证，则存在重大不确定性 - 明确说明。
+                </div>
+</div>
+</div>
+<div class="slide light" data-index="10">
+<div class="content">
+<h2 class="title navy animate">Module 2 Quiz</h2>
+<div class="quiz-container">
+<div class="scenario-box animate delay-1">
+<div class="scenario-label">Scenario</div>
+                    您正在对一种新的抗病毒药物进行快速审查。您找到 47 条可能相关的摘要。您的时间表：总共 40 小时，分配 12 小时用于筛查。
+                  </div>
+<div class="quiz-question">
+<h4>What screening approach is appropriate?</h4>
+<div class="quiz-options" role="radiogroup">
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>A.</span> Dual independent screening of all 47 abstracts
+                      </div>
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" onkeydown="handleQuizKey(event, this, true)" role="radio" tabindex="0">
+<span>B.</span> 单次筛查，20% 验证和 100% 排除审查
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>C.</span> Include all 47 studies without screening
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>D.</span> Ask a colleague to pick the 10 best-looking titles
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide light" data-index="11">
+<div class="content">
+<h2 class="title navy animate">Module 2 Quiz (2)</h2>
+<div class="quiz-container">
+<div class="quiz-question">
+<h4>根据 PRISMA-RR，快速审查报告中不需要哪些？</h4>
+<div class="quiz-options" role="radiogroup">
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>A.</span> Description of shortcuts taken
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>B.</span> Date of search completion
+                      </div>
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" onkeydown="handleQuizKey(event, this, true)" role="radio" tabindex="0">
+<span>C.</span> Names and qualifications of all peer reviewers
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>D.</span> Explicit limitations section
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark" data-index="12">
+<p class="title cream animate">俯卧定位发现</p>
+<div class="success-box animate delay-1">
+<strong>简单解决方案的故事：</strong><br/><br/>
+                几十年来，ICU 呼吸衰竭患者都是仰卧的。在 COVID-19 中，临床医生注意到了一些值得注意的事情。<br/><br/>
+<strong>Turning patients onto their stomachs</strong>—proning—dramatically improved oxygen levels. No drug required. No cost. Available everywhere.<br/><br/>
+                Meta-analysis of 6 RCTs: <strong>Mortality reduced by 25%</strong> in severe ARDS patients.<br/><br/>
+<span style="color: var(--green);">有时突破不是一个分子。有时这是一个立场。</span>
+</div>
+<div class="citation-box animate delay-2">
+                Source: Munshi L et al. Lancet Respir Med 2017;5:627-38. COVID-19 proning: Ehrmann S et al. Lancet Respir Med 2021.
+              </div>
+</div>
+<div class="slide dark" data-index="13">
+<p class="story-box animate">
+<strong>Excel错误的故事：</strong><br/><br/>
+                2010年，哈佛大学经济学家莱因哈特和罗格夫发表了有影响力的研究：债务占GDP 90%以上的国家出现了负增长。世界各国政府都引用它来证明紧缩政策的合理性。<br/><br/>
+                Three years later, a graduate student found their Excel spreadsheet excluded five countries due to a coding error. When corrected, the 90% threshold disappeared.<br/><br/>
+<span style="color: var(--gold);">一个未经检查的电子表格错误影响了影响数百万人的政策。验证的研究人员与计算的研究人员同样重要。</span>
+</p>
+<div class="story-decision-tree animate delay-1">
+<p class="decision-prompt">您是一名研究生，正在审查政府用来证明紧缩合理性的著名的莱因哈特-罗格夫论文。您是否费心检查哈佛教授的电子表格？</p>
+<div class="decision-options">
+<div class="decision-option" data-path="wrong" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();}" role="button" tabindex="0">
+<strong>Path A:</strong> 相信著名的经济学家，他们不会犯基本错误
+                    <div class="consequence">→ Excel 错误在三年内未被发现；基于有缺陷数据的紧缩政策影响数百万人</div>
+</div>
+<div class="decision-option" data-path="right" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();}" role="button" tabindex="0">
+<strong>Path B:</strong> 请求原始数据并亲自验证每一个计算
+                    <div class="consequence">→ Thomas Herndon 正是这么做的——发现错误，纠正科学记录，改变政策争论</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide light" data-index="14">
+<div class="content">
+<h2 class="title navy animate">Decision Tree: Narrative vs. Meta-Analysis</h2>
+<div aria-label="Decision tree for choosing narrative synthesis versus meta-analysis" class="decision-tree animate delay-1" role="img">
+<div class="decision-node question">
+                    纳入的研究是否具有临床同质性？
+                  </div>
+<div class="decision-branches">
+<div class="decision-branch">
+<div class="branch-label yes">YES</div>
+<div class="arrow-down"></div>
+<div class="decision-node question" style="font-size: 0.85rem;">
+                        您搜索过吗全面吗？
+                      </div>
+<div class="decision-branches" style="margin-top: 0.5rem;">
+<div class="decision-branch">
+<div class="branch-label yes" style="font-size: 0.7rem;">YES</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node outcome-yes" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>META-ANALYSIS OK</strong><br/>充满信心地汇集
+                          </div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no" style="font-size: 0.7rem;">RAPID</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node warning" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>META-ANALYSIS + CAVEAT</strong><br/>“可能会错过研究”
+                          </div>
+</div>
+</div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no">NO</div>
+<div class="arrow-down"></div>
+<div class="decision-node" style="font-size: 0.85rem; background: var(--teal);">
+<strong>NARRATIVE SYNTHESIS</strong><br/>Don't pool apples and oranges
+                      </div>
+</div>
+</div>
+</div>
+<div class="decision-tree-sr">
+                  决策树：纳入的研究在临床上是否同质？如果是，请检查您是否进行了全面的搜索。如果进行全面搜索，荟萃分析是合适的。如果快速搜索，请进行荟萃分析，但明确说明局限性。如果研究内容不同，请使用叙事综合 - 不要将苹果和橙子放在一起。
+                </div>
+</div>
+</div>
+<div class="slide black" data-index="15">
+<p class="refrain animate">四十小时的真理 - 如果您知道路径。</p>
+<p class="animate delay-1" style="font-size: 1.25rem; margin-top: 1.5rem;">模块 3：灾难</p>
+</div>
+</div>
+ 模块 3：灾难（羟氯喹） 
+<div class="module-slides" data-module="3">
+<div class="slide red active" data-index="0">
+<p class="refrain animate">A flawed study in a meta-analysis poisons all.</p>
+</div>
+<div class="slide dark" data-index="1">
+<p class="direct-address animate">你没听过这个故事吗？马赛？</p>
+<p class="direct-address animate delay-1">改变世界的论文——而且不应该有？</p>
+<div class="gold-line animate delay-2"></div>
+</div>
+<div class="slide dark" data-index="2">
+<p class="title cream animate">2020年3月17日：论文</p>
+<div class="case-study danger animate delay-1">
+<h4>Gautret et al. — International Journal of Antimicrobial Agents</h4>
+<p><strong>Claim:</strong> Hydroxychloroquine + azithromycin clears COVID-19 virus in 100% of patients</p>
+<p><strong>Submitted:</strong> March 16, 2020</p>
+<p><strong>Accepted:</strong> March 17, 2020</p>
+<p style="color: var(--red); font-weight: 700; margin-top: 0.5rem;">Peer review time: ONE DAY</p>
+</div>
+<p class="animate delay-2" style="font-size: 0.95rem; margin-top: 1rem; text-align: center;">
+                主编是作者同一个研究所的同事。
+              </p>
+</div>
+<div class="slide dark" data-index="3">
+<p class="rhetorical animate">有什么缺陷？</p>
+<div class="gold-line animate delay-1"></div>
+<div class="stats-grid animate delay-2">
+<div class="stat-box danger">
+<div class="stat-value">36</div>
+<div class="stat-label">Total patients</div>
+</div>
+<div class="stat-box danger">
+<div class="stat-value">6</div>
+<div class="stat-label">退出分析</div>
+</div>
+<div class="stat-box danger">
+<div class="stat-value">1</div>
+<div class="stat-label">Died (excluded)</div>
+</div>
+<div class="stat-box danger">
+<div class="stat-value">3</div>
+<div class="stat-label">To ICU (excluded)</div>
+</div>
+</div>
+<p class="animate delay-3" style="font-size: 1.1rem; margin-top: 1rem; text-align: center; color: var(--red);">
+                病情恶化的患者直接从研究中剔除。分析。
+              </p>
+</div>
+<div class="slide dark" data-index="4">
+<p class="direct-address animate">And yet, consider what followed:</p>
+<div class="warning-box animate delay-1">
+<strong>March 19:</strong> 特朗普总统在推特上称羟氯喹是“医学史上最大的游戏规则改变者之一。”<br/><br/>
+<strong>March 28:</strong> FDA issues Emergency Use Authorization.<br/><br/>
+<strong>April 2020:</strong> Countries worldwide stockpile the drug. India bans exports.<br/><br/>
+<strong>Result:</strong> 需要羟氯喹才能生存的狼疮和类风湿关节炎患者无法获得药物。
+              </div>
+</div>
+<div class="slide light" data-index="5">
+<div class="content">
+<h2 class="title navy animate">七种致命药物缺陷</h2>
+<div class="animate delay-1" style="text-align: left; max-width: 700px;">
+<p style="margin: 0.6rem 0;"><span style="color: var(--red); font-weight: 700;">1.</span> Non-randomized, open-label design</p>
+<p style="margin: 0.6rem 0;"><span style="color: var(--red); font-weight: 700;">2.</span> Convenience control group from different hospitals</p>
+<p style="margin: 0.6rem 0;"><span style="color: var(--red); font-weight: 700;">3.</span> 病情恶化的患者被排除在分析之外</p>
+<p style="margin: 0.6rem 0;"><span style="color: var(--red); font-weight: 700;">4.</span> Different PCR thresholds for treatment vs. control</p>
+<p style="margin: 0.6rem 0;"><span style="color: var(--red); font-weight: 700;">5.</span> Ethics approval granted AFTER trial started</p>
+<p style="margin: 0.6rem 0;"><span style="color: var(--red); font-weight: 700;">6.</span> Children included despite exclusion criteria</p>
+<p style="margin: 0.6rem 0;"><span style="color: var(--red); font-weight: 700;">7.</span> One-day peer review by conflicted editor</p>
+</div>
+</div>
+</div>
+<div class="slide dark" data-index="6">
+<p class="title cream animate">清算：2023年12月</p>
+<div class="witness-statement animate delay-1">
+<div class="source">International Journal of Antimicrobial Agents</div>
+<div class="quote">
+                  “经过近四年的时间和来自科学界的持续压力，该杂志正式撤回了 Gautret 研究，理由是对伦理、方法和数据的担忧完整性。”
+                </div>
+</div>
+<p class="animate delay-2" style="font-size: 1rem; margin-top: 1rem; text-align: center;">
+                It remains the most-cited COVID-19 paper to be retracted.<br/>
+<span style="color: var(--gold);">几天之内就造成了损害。纠正需要数年时间。</span>
+</p>
+</div>
+<div class="slide light" data-index="7">
+<div class="content">
+<h2 class="title navy animate">Decision Tree: Red Flags in Rapid Evidence</h2>
+<div class="decision-tree animate delay-1">
+<div class="decision-node question">
+                    Is the result too good to be true?
+                  </div>
+<div class="decision-branches">
+<div class="decision-branch">
+<div class="branch-label yes">YES</div>
+<div class="arrow-down"></div>
+<div class="decision-node outcome-no" style="font-size: 0.85rem;">
+<strong>STOP</strong><br/>
+                        Verify before sharing
+                      </div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no">NO</div>
+<div class="arrow-down"></div>
+<div class="decision-node question" style="font-size: 0.85rem;">
+                        同行评审 &lt; 1 周？
+                      </div>
+<div class="arrow-down"></div>
+<div class="decision-node warning" style="font-size: 0.8rem;">
+<strong>CAUTION</strong><br/>
+                        Check author/editor affiliations
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark" data-index="8">
+<p class="title cream animate">恢复期血浆崩溃</p>
+<div class="story-box animate delay-1">
+<strong>FDA 匆忙的故事：</strong><br/><br/>
+                2020 年 8 月：FDA 授予恢复期血浆紧急使用授权，死亡率降低了 35%。<br/><br/>
+                数据来自一项针对 35,000 名患者的非随机研究。无对照组。仅进行历史比较。<br/><br/>
+<span style="color: var(--gold);">截至 2021 年 2 月，七项随机对照试验显示死亡率没有改善。 EUA 已修订。已经注射了超过 500,000 剂疫苗。</span>
+</div>
+<div class="citation-box animate delay-2">
+                Sources: FDA EUA Aug 2020; Janiaud P et al. JAMA 2021;325:1185-1195.
+              </div>
+</div>
+<div class="slide dark" data-index="9">
+<p class="direct-address animate">Consider the social media amplification:</p>
+<div class="gold-line animate delay-1"></div>
+<div class="stats-grid animate delay-2">
+<div class="stat-box danger">
+<div class="stat-value">3.1M</div>
+<div class="stat-label">Twitter engagements on Gautret paper (first week)</div>
+</div>
+<div class="stat-box danger">
+<div class="stat-value">15,000</div>
+<div class="stat-label">News articles citing it</div>
+</div>
+<div class="stat-box">
+<div class="stat-value">83</div>
+<div class="stat-label">Engagements on retraction notice</div>
+</div>
+</div>
+<p class="animate delay-3" style="font-size: 1rem; margin-top: 1rem; text-align: center; color: var(--gold);">
+                错误信息的传播速度比纠正的速度更快。这就是你要对抗的不对称性。
+              </p>
+</div>
+<div class="slide dark" data-index="10">
+<p class="title cream animate">接种：预埋防御</p>
+<div class="direct-address animate delay-1">What if you could vaccinate minds against misinformation?</div>
+<div class="gold-line animate delay-2"></div>
+<div class="animate delay-3" style="text-align: left; max-width: 700px;">
+<p style="margin: 0.6rem 0; font-size: 0.95rem;"><span style="color: var(--gold);">Prebunking &gt; Debunking:</span> Warn people about manipulation tactics <em>before</em> they encounter false claims.</p>
+<p style="margin: 0.6rem 0; font-size: 0.95rem;"><span style="color: var(--gold);">The technique:</span> “你可能会听到这样的说法：一项小型研究证明 X 有效。这就是为什么小型研究经常误导......”</p>
+<p style="margin: 0.6rem 0; font-size: 0.95rem;"><span style="color: var(--gold);">The evidence:</span> Inoculation reduces susceptibility to misinformation by 20-30% (van der Linden et al., 2020).</p>
+</div>
+</div>
+<div class="slide light" data-index="11">
+<div class="content">
+<h2 class="title navy animate">Inoculation Messaging: Practical Templates</h2>
+<div class="case-study animate delay-1">
+<h4>Three Prebunking Approaches</h4>
+<div style="font-size: 0.85rem;">
+<p style="margin: 0.75rem 0;"><strong>1. Logic-Based:</strong> “如果有人声称 100% 有效，请问：是否有对照组？一项未经比较的研究证明了这一点没有。”</p>
+<p style="margin: 0.75rem 0;"><strong>2. Source-Based:</strong> “对同行评审之前在网上发布的研究保持警惕 - 它们尚未经过独立专家的检查。”</p>
+<p style="margin: 0.75rem 0;"><strong>3. Emotional-Based:</strong> “神奇疗法声称利用了我们的希望。真正的治疗显示出适度的益处，但有诚实的局限性。”</p>
+</div>
+</div>
+<p class="animate delay-2" style="font-size: 0.8rem; color: var(--light-text); text-align: center; margin-top: 1rem;">
+                  在公共卫生沟通、临床医生培训和新闻中使用这些模板
+                </p>
+</div>
+</div>
+<div class="slide light" data-index="12">
+<div class="content">
+<h2 class="title navy animate">Decision Tree: Evaluating Preprint Claims</h2>
+<div aria-label="用于评估预印本研究的决策树" class="decision-tree animate delay-1" role="img">
+<div class="decision-node question">
+                    该研究是否经过同行评审？
+                  </div>
+<div class="decision-branches">
+<div class="decision-branch">
+<div class="branch-label yes">YES</div>
+<div class="arrow-down"></div>
+<div class="decision-node question" style="font-size: 0.85rem;">
+                        同行评审是否超过 2 周？
+                      </div>
+<div class="decision-branches" style="margin-top: 0.5rem;">
+<div class="decision-branch">
+<div class="branch-label yes" style="font-size: 0.7rem;">YES</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node outcome-yes" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>STANDARD APPRAISAL</strong>
+</div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no" style="font-size: 0.7rem;">NO</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node warning" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>CHECK CONFLICTS</strong><br/>Author-editor relationship?
+                          </div>
+</div>
+</div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no">PREPRINT</div>
+<div class="arrow-down"></div>
+<div class="decision-node outcome-no" style="font-size: 0.85rem;">
+<strong>TREAT AS PRELIMINARY</strong><br/>Never cite as definitive
+                      </div>
+</div>
+</div>
+</div>
+<div class="decision-tree-sr">
+                  决策树：研究是否经过同行评审？如果是，请检查审核时间是否超过 2 周。如果审查时间充足，请使用标准评估。如果快速审阅，请检查作者与编辑之间是否存在冲突。如果仅预印本，请视为初步的，切勿作为最终的引用。
+                </div>
+</div>
+</div>
+<div class="slide light" data-index="11">
+<div class="content">
+<h2 class="title navy animate">Module 3 Quiz</h2>
+<div class="quiz-container">
+<div class="scenario-box animate delay-1">
+<div class="scenario-label">Scenario</div>
+                    一项研究显示疾病的治愈率为 100%。它有 36 名患者，在 1 天内被接受发表，6 名病情恶化的患者被从分析中剔除。
+                  </div>
+<div class="quiz-question">
+<h4>这项研究有多少危险信号？</h4>
+<div class="quiz-options" role="radiogroup">
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>A.</span> 1—small sample size
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>B.</span> 2 — 小样本和快速同行评审
+                      </div>
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" onkeydown="handleQuizKey(event, this, true)" role="radio" tabindex="0">
+<span>C.</span> 4—too-good result, small sample, fast review, selective exclusion
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>D.</span> 0 — 同行评审研究值得信赖
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide light" data-index="12">
+<div class="content">
+<h2 class="title navy animate">Module 3 Quiz (2)</h2>
+<div class="quiz-container">
+<div class="quiz-question">
+<h4>Gautret 羟氯喹研究获得了 310 万次 Twitter 参与。收到的撤回通知 83。这说明：</h4>
+<div class="quiz-options" role="radiogroup">
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" onkeydown="handleQuizKey(event, this, true)" role="radio" tabindex="0">
+<span>A.</span> Misinformation asymmetry—false claims spread faster than corrections
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>B.</span> 撤回没有新闻价值
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>C.</span> Social media users lost interest in COVID-19
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>D.</span> Twitter's algorithm favors positive news
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black" data-index="13">
+<p class="refrain animate">A flawed study in a meta-analysis poisons all.</p>
+<p class="animate delay-1" style="font-size: 1.25rem; margin-top: 1.5rem;">模块 4：欺诈</p>
+</div>
+</div>
+ 模块 4：欺诈（伊维菌素） 
+<div class="module-slides" data-module="4">
+<div class="slide red active" data-index="0">
+<p class="refrain animate">Beware the meta-analysis built on sand.</p>
+</div>
+<div class="slide dark" data-index="1">
+<p class="direct-address animate">您见证了欺诈如何通过网络传播吗证据？</p>
+<p class="direct-address animate delay-1">How one lie becomes the foundation of many truths?</p>
+<div class="gold-line animate delay-2"></div>
+</div>
+<div class="slide dark" data-index="2">
+<p class="title cream animate">伊维菌素现象</p>
+<div class="story-box animate delay-1">
+<strong>2020-2021:</strong> 世界各地的多项研究声称伊维菌素（一种抗寄生虫药物）可以治愈 COVID-19。荟萃分析汇总了结果：死亡率降低了 51%！<br/><br/>
+                Governments in Latin America, Africa, and India distribute millions of doses. Patients demand prescriptions. Some take veterinary formulations.<br/><br/>
+<span style="color: var(--gold);">但数据中存在严重错误。</span>
+</div>
+</div>
+<div class="slide dark" data-index="3">
+<p class="title cream animate">Elgazzar 研究：欺诈剖析</p>
+<div class="case-study danger animate delay-1">
+<h4>Egypt, 2020: The Largest Ivermectin Trial</h4>
+<p>Dr. Ahmed Elgazzar posted a preprint claiming ivermectin reduced COVID-19 mortality by 90%.</p>
+<p>它被纳入多项荟萃分析中，并贡献了 <strong>12.6%</strong> 对死亡率的总体影响估计。</p>
+<p style="color: var(--red); font-weight: 700; margin-top: 0.5rem;">然后一名研究生开始检查数据。</p>
+</div>
+</div>
+<div class="slide dark" data-index="4">
+<p class="rhetorical animate">What did they find?</p>
+<div class="gold-line animate delay-1"></div>
+<div class="stats-grid animate delay-2">
+<div class="stat-box danger">
+<div class="stat-value">79</div>
+<div class="stat-label">患者数据重复</div>
+</div>
+<div class="stat-box danger">
+<div class="stat-value">4+</div>
+<div class="stat-label">Deaths before trial started</div>
+</div>
+<div class="stat-box danger">
+<div class="stat-value">~50%</div>
+<div class="stat-label">Text plagiarized</div>
+</div>
+</div>
+<p class="animate delay-3" style="font-size: 1.1rem; margin-top: 1rem; text-align: center;">
+<span style="color: var(--red);">July 15, 2021:</span> 该研究因“道德问题”而被撤回。
+              </p>
+</div>
+<div class="slide light" data-index="5">
+<div class="content">
+<h2 class="title navy animate">级联效应</h2>
+<table class="results-table animate delay-1">
+<tr>
+<th>Studies Included</th>
+<th>Survival Benefit</th>
+<th>Significance</th>
+</tr>
+<tr>
+<td>All 12 studies</td>
+<td class="success">51% reduction</td>
+<td class="success">Significant</td>
+</tr>
+<tr>
+<td>Without Elgazzar</td>
+<td>38% reduction</td>
+<td style="color: var(--orange);">Borderline</td>
+</tr>
+<tr>
+<td>没有高偏差研究</td>
+<td>10% reduction</td>
+<td class="danger">Not significant</td>
+</tr>
+<tr>
+<td>只有低偏差研究</td>
+<td class="danger">4% reduction</td>
+<td class="danger">Not significant</td>
+</tr>
+</table>
+<p class="animate delay-2" style="font-size: 0.9rem; margin-top: 1rem; text-align: center; color: var(--light-text);">
+                  一项欺诈性研究将结论从“不
+                </p>
+</div>
+</div>
+<div class="slide dark" data-index="6">
+<p class="direct-address animate">《自然医学》警告：</p>
+<div class="witness-statement animate delay-1">
+<div class="source">Nature Medicine, October 2021</div>
+<div class="quote">
+                  “未经严格审查的证据基础支持在全球范围内使用数百万剂可能无效的药物，但当这些证据接受非常基本的数字审查时，它在几周内就崩溃了。”
+                </div>
+</div>
+<p class="animate delay-2" style="font-size: 1rem; margin-top: 1rem; text-align: center; color: var(--gold);">
+                荟萃分析仅基于摘要数据本质上是不可靠的。
+              </p>
+</div>
+<div class="slide light" data-index="7">
+<div class="content">
+<h2 class="title navy animate">Decision Tree: Detecting Problematic Studies</h2>
+<div class="decision-tree animate delay-1">
+<div class="decision-node question">
+                    您可以访问原始数据吗？
+                  </div>
+<div class="decision-branches">
+<div class="decision-branch">
+<div class="branch-label yes">YES</div>
+<div class="arrow-down"></div>
+<div class="decision-node question" style="font-size: 0.85rem;">
+                        Do baseline characteristics make sense?
+                      </div>
+<div class="arrow-down"></div>
+<div class="decision-node outcome-yes" style="font-size: 0.8rem;">
+                        谨慎进行
+                      </div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no">NO</div>
+<div class="arrow-down"></div>
+<div class="decision-node warning" style="font-size: 0.85rem;">
+<strong>HIGH RISK</strong><br/>
+                        在没有它的情况下进行敏感性分析
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark" data-index="8">
+<p class="story-box animate">
+<strong>伊维菌素的教训：</strong><br/><br/>
+                Always run your meta-analysis twice:<br/>
+                一次使用所有数据研究。一旦没有最有影响力的。<br/><br/>
+<span style="color: var(--gold);">如果一项研究改变了你的结论，你的结论是脆弱的。</span>
+</p>
+</div>
+<div class="slide dark" data-index="9">
+<p class="title cream animate">杰克·劳伦斯的故事</p>
+<div class="story-box animate delay-1">
+<strong>The Graduate Student Who Changed Everything:</strong><br/><br/>
+                Jack Lawrence was a master's student in London. He knew no Arabic. But he could spot duplicate rows in a spreadsheet.<br/><br/>
+                他下载了Elgazzar的数据补充。第 148 行与第 11 行相同。第 228 行与第 79 行匹配。 <strong>79 patients appeared twice.</strong><br/><br/>
+                他在推特上发布了他的发现。几天之内，预印本服务器就撤回了这篇论文。荟萃分析进行了修订。政策发生了变化。<br/><br/>
+<span style="color: var(--gold);">一名具有基本数据技能的学生做了同行评审无法做到的事情。</span>
+</div>
+</div>
+<div class="slide light" data-index="10">
+<div class="content">
+<h2 class="title navy animate">Decision Tree: Fraud Detection Checklist</h2>
+<div aria-label="用于检测研究中潜在欺诈的决策树" class="decision-tree animate delay-1" role="img">
+<div class="decision-node question">
+                    Are baseline characteristics "too balanced"?<br/>
+<span style="font-size: 0.7rem; opacity: 0.8;">(Identical means across groups)</span>
+</div>
+<div class="decision-branches">
+<div class="decision-branch">
+<div class="branch-label yes">YES</div>
+<div class="arrow-down"></div>
+<div class="decision-node outcome-no" style="font-size: 0.85rem;">
+<strong>RED FLAG</strong><br/>May indicate fabrication
+                      </div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no">NO</div>
+<div class="arrow-down"></div>
+<div class="decision-node question" style="font-size: 0.85rem;">
+                        Do event dates precede enrollment?
+                      </div>
+<div class="decision-branches" style="margin-top: 0.5rem;">
+<div class="decision-branch">
+<div class="branch-label yes" style="font-size: 0.7rem;">YES</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node outcome-no" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>FABRICATION</strong><br/>Deaths before trial = impossible
+                          </div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no" style="font-size: 0.7rem;">NO</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node outcome-yes" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>PROCEED</strong><br/>Check other signals
+                          </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="decision-tree-sr">
+                  决策树：基线特征是否过于完美平衡？如果是，则可能存在制造危险。如果不是，请检查活动日期是否早于注册日期。在审判开始前死亡是不可能的，并且表明这是捏造的。如果日期有效，请继续检查其他欺诈信号。
+                </div>
+</div>
+</div>
+<div class="slide light" data-index="11">
+<div class="content">
+<h2 class="title navy animate">Module 4 Quiz</h2>
+<div class="quiz-container">
+<div class="scenario-box animate delay-1">
+<div class="scenario-label">Scenario</div>
+                    您正在进行荟萃分析。一项研究贡献了 40% 的综合效应。如果没有它，结果会从显着性 (p=0.02) 变为不显着性 (p=0.31)。
+                  </div>
+<div class="quiz-question">
+<h4>你应该做什么？</h4>
+<div class="quiz-options" role="radiogroup">
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>A.</span> Keep it—all studies meeting criteria should be included
+                      </div>
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" onkeydown="handleQuizKey(event, this, true)" role="radio" tabindex="0">
+<span>B.</span> 显着报告这两项分析；请求原始数据进行验证
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>C.</span> Exclude it—large effects are suspicious
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>D.</span> 仅报告包括所有研究的分析
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide light" data-index="12">
+<div class="content">
+<h2 class="title navy animate">Module 4 Quiz (2)</h2>
+<div class="quiz-container">
+<div class="quiz-question">
+<h4>Elgazzar 伊维菌素研究被检测为欺诈，因为：</h4>
+<div class="quiz-options" role="radiogroup">
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>A.</span> Peer reviewers found statistical errors
+                      </div>
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" onkeydown="handleQuizKey(event, this, true)" role="radio" tabindex="0">
+<span>B.</span> A graduate student found duplicate patient rows and impossible death dates
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>C.</span> The journal's plagiarism detector flagged it
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>D.</span> FDA 审核了试验地点
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark" data-index="13">
+<p class="title cream animate">TOGETHER 试验失望</p>
+<div class="story-box animate delay-1">
+<strong>终结希望的大型试验的故事：</strong><br/><br/>
+                小型试验表明氟伏沙明（一种抗抑郁药）可能预防严重的 COVID-19 后，全世界都在等待最终的答案。<br/><br/>
+                The TOGETHER trial enrolled 1,497 patients in Brazil. <strong>Initial interim: 32% reduction in hospitalization!</strong><br/><br/>
+                最终结果：只有 5.1% 的安慰剂患者住院，而 4.0% 的安慰剂患者住院氟伏沙明患者。效果比预期要小，而且绝对收益也很小。<br/><br/>
+<span style="color: var(--gold);">Small absolute differences require enormous trials to detect. Most promising treatments fade when tested properly.</span>
+</div>
+<div class="citation-box animate delay-2">
+                Source: Reis G et al. Lancet Glob Health 2022. TOGETHER trial platform.
+              </div>
+</div>
+<div class="slide dark" data-index="14">
+<p class="story-box animate">
+<strong>权力姿势的故事：</strong><br/><br/>
+                2010年，研究人员声称“权力姿势”（像超人一样站立）会增加睾丸激素和冒险精神。这项研究迅速传播开来——TED演讲、商业书籍、数以百万计的信徒。多项研究似乎都复制了它。<br/><br/>
+                然后更大的、预先注册的复制失败了。最初的合著者公开否认了这一发现。许多小型、灵活的研究已经找到了他们想要找到的东西。<br/><br/>
+<span style="color: var(--gold);">弱证据成倍增加，感觉像是强有力的证据——直到严格的复制表明它是噪音。</span>
+</p>
+<div class="story-decision-tree animate delay-1">
+<p class="decision-prompt">您是一名期刊编辑，收到了一项大型的、预先注册的复制研究，但该研究未能重现流行的权力摆姿势效应。原始研究拥有数百万信徒和著名的 TED 演讲。</p>
+<div class="decision-options">
+<div class="decision-option" data-path="wrong" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();}" role="button" tabindex="0">
+<strong>Path A:</strong> 拒绝复制，因为它与既定的流行发现相矛盾
+                    <div class="consequence">→ False belief persists; millions continue to be misled; science fails to self-correct</div>
+</div>
+<div class="decision-option" data-path="right" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();}" role="button" tabindex="0">
+<strong>Path B:</strong> 公布失败的复制——让证据说话
+                    <div class="consequence">&gt;→科学自我修正；原始合著者公开否认这一发现；事实胜于雄心</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide light" data-index="15">
+<div class="content">
+<h2 class="title navy animate">Decision Tree: Reading a Forest Plot</h2>
+<div aria-label="用于解释森林图结果的决策树" class="decision-tree animate delay-1" role="img">
+<div class="decision-node question">
+                    汇总估计是否跨越 1（或平均差为 0）？
+                  </div>
+<div class="decision-branches">
+<div class="decision-branch">
+<div class="branch-label yes">YES</div>
+<div class="arrow-down"></div>
+<div class="decision-node outcome-no" style="font-size: 0.85rem;">
+<strong>NOT SIGNIFICANT</strong><br/>Cannot exclude no effect
+                      </div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no">NO</div>
+<div class="arrow-down"></div>
+<div class="decision-node question" style="font-size: 0.85rem;">
+                        Is I² &lt; 50%?
+                      </div>
+<div class="decision-branches" style="margin-top: 0.5rem;">
+<div class="decision-branch">
+<div class="branch-label yes" style="font-size: 0.7rem;">LOW</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node outcome-yes" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>CONSISTENT EFFECT</strong><br/>Higher confidence
+                          </div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no" style="font-size: 0.7rem;">HIGH</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node warning" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>HETEROGENEITY</strong><br/>True effect varies—explore why
+                          </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="decision-tree-sr">
+                  决策树：汇总估计置信区间是否跨越无效线？如果是，则结果不具有统计显着性。如果不是，请检查异质性。如果 I 平方低于 50%，则效果与较高的置信度一致。如果 I 平方很高，则存在异质性，并且不同研究之间的真实效果有所不同 - 探索原因。
+                </div>
+</div>
+</div>
+<div class="slide black" data-index="16">
+<p class="refrain animate">Beware the meta-analysis built on sand.</p>
+<p class="animate delay-1" style="font-size: 1.25rem; margin-top: 1.5rem;">模块 5：胜利</p>
+</div>
+</div>
+ 模块 5：胜利（恢复试验） 
+<div class="module-slides" data-module="5">
+<div class="slide green active" data-index="0">
+<p class="refrain animate">From protocol to saving lives: 100 days.</p>
+</div>
+<div class="slide dark" data-index="1">
+<p class="direct-address animate">现在听听故事应该如何完成。</p>
+<p class="direct-address animate delay-1">Of how speed and rigor found harmony.</p>
+<div class="gold-line animate delay-2"></div>
+</div>
+<div class="slide dark" data-index="2">
+<p class="title cream animate">恢复试验</p>
+<div class="success-box animate delay-1">
+<strong>March 2020, United Kingdom:</strong><br/><br/>
+                随着羟氯喹混乱的蔓延，英国研究人员启动了世界上最大的 COVID-19 治疗试验。它的设计既快速又严格。<br/><br/>
+<span style="color: var(--green);">Within 6 weeks of funding, patients were being enrolled.</span>
+</div>
+</div>
+<div class="slide dark" data-index="3">
+<p class="rhetorical animate">How did they achieve speed without sacrificing quality?</p>
+<div class="gold-line animate delay-1"></div>
+<div class="stats-grid animate delay-2">
+<div class="stat-box success">
+<div class="stat-value">176</div>
+<div class="stat-label">Hospitals enrolled</div>
+</div>
+<div class="stat-box success">
+<div class="stat-value">11,500</div>
+<div class="stat-label">Patients (dexamethasone arm)</div>
+</div>
+<div class="stat-box success">
+<div class="stat-value">100</div>
+<div class="stat-label">天数：协议到结果</div>
+</div>
+</div>
+<p class="animate delay-3" style="font-size: 1rem; margin-top: 1rem; text-align: center;">
+                An adaptive platform trial: multiple treatments tested simultaneously.
+              </p>
+</div>
+<div class="slide light" data-index="4">
+<div class="content">
+<h2 class="title navy animate">2020 年 6 月 16 日：公告</h2>
+<div class="case-study success animate delay-1">
+<h4>Dexamethasone Results</h4>
+<p><strong>Ventilated patients:</strong> 29% mortality reduction (NNT = 8)</p>
+<p><strong>Oxygen therapy:</strong> 20% mortality reduction (NNT = 25)</p>
+<p><strong>No oxygen needed:</strong> No benefit (possible harm)</p>
+<p style="color: var(--green); font-weight: 700; margin-top: 0.5rem;">
+                    Cost per treatment: ~$6 for a common steroid.
+                  </p>
+</div>
+</div>
+</div>
+<div class="slide dark" data-index="5">
+<p class="direct-address animate">这次全世界做出了正确的回应。</p>
+<div class="gold-line animate delay-1"></div>
+<div class="timeline-horizontal animate delay-2">
+<div class="timeline-point">
+<div class="timeline-dot success">1</div>
+<div class="timeline-label">Results announced</div>
+<div class="timeline-date">June 16</div>
+</div>
+<div class="timeline-point">
+<div class="timeline-dot success">2</div>
+<div class="timeline-label">UK practice changed</div>
+<div class="timeline-date">Same day</div>
+</div>
+<div class="timeline-point">
+<div class="timeline-dot success">3</div>
+<div class="timeline-label">NIH guidelines updated</div>
+<div class="timeline-date">Within days</div>
+</div>
+<div class="timeline-point">
+<div class="timeline-dot success">4</div>
+<div class="timeline-label">WHO recommendation</div>
+<div class="timeline-date">September</div>
+</div>
+</div>
+</div>
+<div class="slide dark" data-index="6">
+<p class="big-number gold animate">1,000,000</p>
+<p class="animate delay-1" style="font-size: 1.5rem; margin-top: 1rem;">Lives saved globally by March 2021</p>
+<div class="gold-line animate delay-2"></div>
+<p class="animate delay-3" style="font-size: 1rem; text-align: center; max-width: 600px;">
+                仅在英国就有 22,000 个。来自已上市 60 年的 6 美元药物。<br/>
+<span style="color: var(--gold);">差异是快速产生的严格证据。</span>
+</p>
+</div>
+<div class="slide light" data-index="7">
+<div class="content">
+<h2 class="title navy animate">What Made RECOVERY Different?</h2>
+<div class="animate delay-1" style="text-align: left; max-width: 700px;">
+<p style="margin: 0.6rem 0;"><span style="color: var(--green); font-weight: 700;">1.</span> Randomized controlled design (not observational)</p>
+<p style="margin: 0.6rem 0;"><span style="color: var(--green); font-weight: 700;">2.</span> 预先指定的结果和分析计划</p>
+<p style="margin: 0.6rem 0;"><span style="color: var(--green); font-weight: 700;">3.</span> Massive scale (statistical power)</p>
+<p style="margin: 0.6rem 0;"><span style="color: var(--green); font-weight: 700;">4.</span> Adaptive platform (dropped arms early if no signal)</p>
+<p style="margin: 0.6rem 0;"><span style="color: var(--green); font-weight: 700;">5.</span> Simplified enrollment (one-page consent in emergency)</p>
+<p style="margin: 0.6rem 0;"><span style="color: var(--green); font-weight: 700;">6.</span> 独立数据监测委员会</p>
+</div>
+</div>
+</div>
+<div class="slide dark" data-index="8">
+<p class="story-box animate">
+<strong>恢复：</strong><br/><br/>
+                Speed does not require cutting corners. It requires cutting waste.<br/><br/>
+                Simplified consent forms. Adaptive designs. Platform trials that test multiple treatments at once.<br/><br/>
+<span style="color: var(--gold);">严谨和速度不是敌人。他们是等待被介绍的合作伙伴。</span>
+</p>
+</div>
+<div class="slide dark" data-index="9">
+<p class="title cream animate">团结对比</p>
+<div class="contrast-container animate delay-1">
+<div class="contrast-box before">
+<h4>小型研究组合</h4>
+<div class="stat" style="color: var(--red);">Chaos</div>
+<div class="label">多个相互矛盾的结果</div>
+<p style="font-size: 0.8rem; margin-top: 0.5rem;">Gautret: 36 patients<br/>Elgazzar: ~400 patients (fraud)</p>
+</div>
+<div class="contrast-box after">
+<h4>RECOVERY/SOLIDARITY</h4>
+<div class="stat" style="color: var(--green);">Clarity</div>
+<div class="label">Definitive answers</div>
+<p style="font-size: 0.8rem; margin-top: 0.5rem;">RECOVERY: 11,500 patients<br/>SOLIDARITY: 11,330 patients</p>
+</div>
+</div>
+<p class="animate delay-2" style="font-size: 0.95rem; margin-top: 1rem; text-align: center; color: var(--gold);">
+                平台试验用一项大型研究的信号取代了许多小型研究的噪音一.
+              </p>
+</div>
+<div class="slide light" data-index="10">
+<div class="content">
+<h2 class="title navy animate">决策树：您应该等待大型试验吗？</h2>
+<div aria-label="是否等待大型试验的决策树" class="decision-tree animate delay-1" role="img">
+<div class="decision-node question">
+                    Is a large platform trial (&gt;1000 patients) underway?
+                  </div>
+<div class="decision-branches">
+<div class="decision-branch">
+<div class="branch-label yes">YES</div>
+<div class="arrow-down"></div>
+<div class="decision-node question" style="font-size: 0.85rem;">
+                        Will results be available within decision timeline?
+                      </div>
+<div class="decision-branches" style="margin-top: 0.5rem;">
+<div class="decision-branch">
+<div class="branch-label yes" style="font-size: 0.7rem;">YES</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node outcome-yes" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>WAIT</strong><br/>更高质量的证据即将到来
+                          </div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no" style="font-size: 0.7rem;">NO</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node warning" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>立即快速审查</strong><br/>Update when trial reports
+                          </div>
+</div>
+</div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no">NO</div>
+<div class="arrow-down"></div>
+<div class="decision-node" style="font-size: 0.85rem; background: var(--teal);">
+<strong>RAPID REVIEW</strong><br/>最佳可用证据
+                      </div>
+</div>
+</div>
+</div>
+<div class="decision-tree-sr">
+                  决策树：大型平台试验正在进行中吗？如果是，请检查是否能及时获得结果。如果结果很快出来，请等待更高质量的证据。如果没有及时到达，请立即进行快速审查并在试验报告时更新。如果不存在大型试验，请继续快速审查最佳可用证据。
+                </div>
+</div>
+</div>
+<div class="slide light" data-index="11">
+<div class="content">
+<h2 class="title navy animate">Module 5 Quiz</h2>
+<div class="quiz-container">
+<div class="quiz-question">
+<h4>RECOVERY 试验纳入了地塞米松组的 11,500 名患者。实现这一目标的主要原因是什么？</h4>
+<div class="quiz-options" role="radiogroup">
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>A.</span> Unlimited government funding
+                      </div>
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" onkeydown="handleQuizKey(event, this, true)" role="radio" tabindex="0">
+<span>B.</span> Simplified one-page consent and adaptive platform design
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>C.</span> Patients were enrolled without consent
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>D.</span> Lower ethical standards during pandemics
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide light" data-index="12">
+<div class="content">
+<h2 class="title navy animate">Module 5 Quiz (2)</h2>
+<div class="quiz-container">
+<div class="quiz-question">
+<h4>用于 COVID-19 的地塞米松在全球挽救了估计 100 万人的生命。每次治疗的药物成本为：</h4>
+<div class="quiz-options" role="radiogroup">
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" onkeydown="handleQuizKey(event, this, true)" role="radio" tabindex="0">
+<span>A.</span> ~$6
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>B.</span> ~$600
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>C.</span> ~$6,000
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>D.</span> 该药物已获得专利且昂贵
+                      </div>
+</div>
+</div>
+</div>
+<div class="citation-box animate delay-1">
+                  Source: RECOVERY Collaborative Group. N Engl J Med 2021;384:693-704. Lives saved estimate: Horby &amp; Landray, Science 2021.
+                </div>
+</div>
+</div>
+<div class="slide dark" data-index="13">
+<p class="title cream animate">阿奇霉素的放弃</p>
+<div class="warning-box animate delay-1">
+<strong>药物添加到一切的故事：</strong><br/><br/>
+                Gautret研究将羟氯喹与阿奇霉素结合。突然之间，阿奇霉素无处不在，被添加到世界各地的治疗方案中。<br/><br/>
+                但阿奇霉素从未单独进行过测试。这种组合从未得到证实。阿奇霉素会导致心律失常。<br/><br/>
+<strong>July 2020:</strong> RECOVERY randomizes 7,763 patients. Result: <span style="color: var(--red);">No benefit. Median hospital stay identical. Mortality identical.</span><br/><br/>
+<span style="color: var(--gold);">暴露于心脏风险的数月却带来零益处——因为最初的研究从未受到质疑。</span>
+</div>
+<div class="citation-box animate delay-2">
+                Source: RECOVERY Collaborative. Lancet 2021;397:605-612. Azithromycin arm.
+              </div>
+</div>
+<div class="slide dark" data-index="14">
+<p class="story-box animate">
+<strong>塔科马海峡的故事：</strong><br/><br/>
+                1940年，塔科马海峡大桥快速而廉价地建成。工程师跳过了风洞测试以节省时间。通车四个月后，温和的风使桥梁摇晃。它猛烈地扭曲并倒塌——工程专业的学生仍在研究的胶片上捕捉到了这一点。<br/><br/>
+                附近一座经过大量测试缓慢建造的旧桥仍然矗立着。第三个教训后来出现：现代桥梁使用快速计算测试——不跳过验证的快速方法。<br/><br/>
+<span style="color: var(--gold);">Speed without testing destroys. Testing without speed delays. Rapid testing saves.</span>
+</p>
+<div class="story-decision-tree animate delay-1">
+<p class="decision-prompt">您是 1940 年的一名工程师，负责设计塔科马海峡大桥。预算紧张，期限紧迫。风洞测试将增加数周时间和成本。你会做什么？</p>
+<div class="decision-options">
+<div class="decision-option" data-path="wrong" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();}" role="button" tabindex="0">
+<strong>Path A:</strong> 跳过风洞测试以节省时间和金钱 - 设计在纸上看起来很可靠
+                    <div class="consequence">→ Bridge collapses 4 months after opening; "Galloping Gertie" becomes a cautionary tale studied by every engineering student</div>
+</div>
+<div class="decision-option" data-path="right" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();}" role="button" tabindex="0">
+<strong>Path B:</strong> Insist on proper wind tunnel testing despite the delay
+                    <div class="consequence">&gt;→ 附近的一座旧桥，经过适当的测试建造，至今仍然矗立。现代桥梁使用快速计算测试 - 快速且经过验证。</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide light" data-index="15">
+<div class="content">
+<h2 class="title navy animate">Decision Tree: Evaluating Platform Trial Arms</h2>
+<div aria-label="Decision tree for platform trial arm evaluation" class="decision-tree animate delay-1" role="img">
+<div class="decision-node question">
+                    DSMB 是否提前停止了该试验臂？
+                  </div>
+<div class="decision-branches">
+<div class="decision-branch">
+<div class="branch-label yes">STOPPED</div>
+<div class="arrow-down"></div>
+<div class="decision-node question" style="font-size: 0.85rem;">
+                        因徒劳或伤害而停止？
+                      </div>
+<div class="decision-branches" style="margin-top: 0.5rem;">
+<div class="decision-branch">
+<div class="branch-label" style="background: var(--orange); color: white; font-size: 0.7rem;">FUTILITY</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node warning" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>NO BENEFIT</strong><br/>不要使用此处理
+                          </div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no" style="font-size: 0.7rem;">HARM</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node outcome-no" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>DANGEROUS</strong><br/>Contraindicated
+                          </div>
+</div>
+</div>
+</div>
+<div class="decision-branch">
+<div class="branch-label" style="background: var(--green); color: white;">STOPPED BENEFIT</div>
+<div class="arrow-down"></div>
+<div class="decision-node outcome-yes" style="font-size: 0.85rem;">
+<strong>EFFECTIVE</strong><br/>Update guidelines
+                      </div>
+</div>
+</div>
+</div>
+<div class="decision-tree-sr">
+                  决策树：数据安全监控委员会是否提前停止了该试验臂？如果因无效而停止治疗，则治疗没有任何益处，不应使用。如果因受伤而停止治疗，则治疗是危险且禁忌的。如果由于明显的益处而提前停止，治疗是有效的，并且应该更新指南。
+                </div>
+</div>
+</div>
+<div class="slide black" data-index="16">
+<p class="refrain animate">From protocol to saving lives: 100 days.</p>
+<p class="animate delay-1" style="font-size: 1.25rem; margin-top: 1.5rem;">模块 6：生活</p>
+</div>
+</div>
+ 模块 6：生活系统回顾 
+<div class="module-slides" data-module="6">
+<div class="slide dark active" data-index="0">
+<p class="refrain animate">活生生的证据为生者服务。</p>
+</div>
+<div class="slide dark" data-index="1">
+<p class="direct-address animate">您是否考虑过永不停止的证据</p>
+<p class="direct-address animate delay-1">与流行病本身息息相关的评论？</p>
+<div class="gold-line animate delay-2"></div>
+</div>
+<div class="slide dark" data-index="2">
+<p class="title cream animate">实时系统评论</p>
+<div class="story-box animate delay-1">
+                A traditional review is a photograph: frozen in time.<br/><br/>
+                实时评论是一个视频：随着新证据的出现而不断更新。<br/><br/>
+<span style="color: var(--gold);">In a pandemic, the photograph is obsolete before it's printed.</span>
+</div>
+</div>
+<div class="slide light" data-index="3">
+<div class="content">
+<h2 class="title navy animate">泛美卫生组织的实时评论：案例研究</h2>
+<div class="case-study animate delay-1">
+<h4>Pan American Health Organization, April 2020 - Present</h4>
+<p><strong>Launched:</strong> April 2020</p>
+<p><strong>Interventions assessed:</strong> 305 treatments</p>
+<p><strong>RCTs included:</strong> 924 randomized controlled trials</p>
+<p><strong>Updates:</strong> 48 updates published</p>
+<p><strong>Sources monitored:</strong> 40+ databases including preprint servers</p>
+</div>
+</div>
+</div>
+<div class="slide dark" data-index="4">
+<p class="rhetorical animate">When should a review become "living"?</p>
+<div class="gold-line animate delay-1"></div>
+<div class="animate delay-2" style="text-align: left; max-width: 600px;">
+<p style="margin: 0.75rem 0;"><span style="color: var(--gold);">1.</span> The topic is a <strong>priority</strong> for decision-making</p>
+<p style="margin: 0.75rem 0;"><span style="color: var(--gold);">2.</span> 新证据正在出现 <strong>rapidly</strong></p>
+<p style="margin: 0.75rem 0;"><span style="color: var(--gold);">3.</span> Current certainty is <strong>low</strong></p>
+<p style="margin: 0.75rem 0;"><span style="color: var(--gold);">4.</span> 新证据可能 <strong>change conclusions</strong></p>
+</div>
+<p class="animate delay-3" style="font-size: 0.95rem; margin-top: 1rem; text-align: center; color: var(--gold);">
+                If all four are true, a living approach is warranted.
+              </p>
+</div>
+<div class="slide light" data-index="5">
+<div class="content">
+<h2 class="title navy animate">The Challenge: Keeping Reviews Alive</h2>
+<div class="stats-grid animate delay-1">
+<div class="stat-box">
+<div class="stat-value">97</div>
+<div class="stat-label">Living SRs on COVID-19</div>
+</div>
+<div class="stat-box danger">
+<div class="stat-value">35%</div>
+<div class="stat-label">Updated at least once</div>
+</div>
+<div class="stat-box danger">
+<div class="stat-value">65%</div>
+<div class="stat-label">Never updated (dormant)</div>
+</div>
+</div>
+<div class="story-box animate delay-2" style="background: rgba(30,39,97,0.1); border-color: var(--navy);">
+                  永不更新的“实时”评论比传统评论更糟糕。它造成了证据是最新的错误信心。
+                </div>
+</div>
+</div>
+<div class="slide dark" data-index="6">
+<p class="title cream animate">Decision Tree: When to Update a Living Review</p>
+<div class="decision-tree animate delay-1">
+<div class="decision-node question">
+                  New RCT(s) identified since last update?
+                </div>
+<div class="decision-branches">
+<div class="decision-branch">
+<div class="branch-label yes">YES</div>
+<div class="arrow-down"></div>
+<div class="decision-node question" style="font-size: 0.85rem;">
+                      Likely to change conclusions or certainty?
+                    </div>
+<div class="decision-branches" style="margin-top: 0.5rem;">
+<div class="decision-branch">
+<div class="branch-label yes" style="font-size: 0.7rem;">YES</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node outcome-yes" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>UPDATE NOW</strong>
+</div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no" style="font-size: 0.7rem;">NO</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node" style="font-size: 0.75rem; padding: 0.5rem; background: var(--teal);">
+<strong>Queue for next scheduled update</strong>
+</div>
+</div>
+</div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no">NO</div>
+<div class="arrow-down"></div>
+<div class="decision-node" style="font-size: 0.85rem;">
+<strong>No update needed</strong><br/>
+                      Note: "No new evidence" is still information
+                    </div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark" data-index="7">
+<p class="title cream animate">Molnupiravir 势头的故事</p>
+<div class="story-box animate delay-1">
+<strong>中期分析的危险：</strong><br/><br/>
+                October 2021: Merck announces interim results—50% reduction in hospitalization!<br/>
+                Stock prices soar. Countries pre-order millions of courses. Headlines celebrate.<br/><br/>
+                November 2021: Final results published—30% reduction. Still significant, but...<br/>
+                2021 年 12 月：更新的分析显示只有 6.8% 的对照组住院，而不是住院治疗14.1%。<br/><br/>
+<span style="color: var(--gold);">分母已更改。魔法消失了。教训：中期≠最终。</span>
+</div>
+<div class="citation-box animate delay-2">
+                Source: Jayk Bernal A et al. N Engl J Med 2022;386:509-520. MOVe-OUT trial.
+              </div>
+</div>
+<div class="slide dark" data-index="8">
+<p class="direct-address animate">然后 Paxlovid —</p>
+<div class="gold-line animate delay-1"></div>
+<div class="contrast-container animate delay-2">
+<div class="contrast-box" style="background: rgba(234,88,12,0.15); border-color: var(--orange);">
+<h4 style="color: var(--orange);">Molnupiravir</h4>
+<div class="stat">30%</div>
+<div class="label">Reduction (final)</div>
+<p style="font-size: 0.8rem; margin-top: 0.5rem;">Low-risk patients<br/>Mutagenic concerns</p>
+</div>
+<div class="contrast-box after">
+<h4>Paxlovid</h4>
+<div class="stat">89%</div>
+<div class="label">Reduction (consistent)</div>
+<p style="font-size: 0.8rem; margin-top: 0.5rem;">High-risk patients<br/>Drug interactions</p>
+</div>
+</div>
+<p class="animate delay-3" style="font-size: 0.95rem; margin-top: 1rem; text-align: center; color: var(--gold);">
+                实时审核必须区分中期与最终、初步与确认。
+              </p>
+</div>
+<div class="slide light" data-index="9">
+<div class="content">
+<h2 class="title navy animate">Decision Tree: Retiring a Living Review</h2>
+<div aria-label="何时退休生活审查的决策树" class="decision-tree animate delay-1" role="img">
+<div class="decision-node question">
+                    Has evidence stabilized? (No new significant trials in 6 months)
+                  </div>
+<div class="decision-branches">
+<div class="decision-branch">
+<div class="branch-label yes">YES</div>
+<div class="arrow-down"></div>
+<div class="decision-node question" style="font-size: 0.85rem;">
+                        Is certainty now moderate/high?
+                      </div>
+<div class="decision-branches" style="margin-top: 0.5rem;">
+<div class="decision-branch">
+<div class="branch-label yes" style="font-size: 0.7rem;">YES</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node outcome-yes" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>RETIRE TO STATIC</strong><br/>带有最终日期的存档
+                          </div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no" style="font-size: 0.7rem;">NO</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node warning" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>KEEP LIVING</strong><br/>Low certainty needs monitoring
+                          </div>
+</div>
+</div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no">NO</div>
+<div class="arrow-down"></div>
+<div class="decision-node" style="font-size: 0.85rem; background: var(--teal);">
+<strong>KEEP LIVING</strong><br/>有效证据字段
+                      </div>
+</div>
+</div>
+</div>
+<div class="decision-tree-sr">
+                  决策树：证据已经稳定下来并且六个月内没有新的试验吗？如果是，请检查现在的确定性是中等还是高。如果确定性足够，则退回到静态审查并确定最终日期。如果确定性仍然较低，请继续监测新证据。如果证据尚未稳定，请保持实时回顾活跃。
+                </div>
+</div>
+</div>
+<div class="slide light" data-index="10">
+<div class="content">
+<h2 class="title navy animate">Module 6 Quiz</h2>
+<div class="quiz-container">
+<div class="quiz-question">
+<h4>一项研究发现，65% 的关于 COVID-19 的“实时”系统回顾从未更新。这是有问题的，因为：</h4>
+<div class="quiz-options" role="radiogroup">
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" onkeydown="handleQuizKey(event, this, true)" role="radio" tabindex="0">
+<span>A.</span> “实时”标签会产生错误的信心，认为证据是最新的
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>B.</span> Living reviews must be updated daily by definition
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>C.</span> Authors should have completed them as traditional reviews instead
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>D.</span> Living reviews are always inferior to static reviews
+                      </div>
+</div>
+</div>
+</div>
+<div class="citation-box animate delay-1">
+                  Source: Stable et al. J Clin Epidemiol 2022;142:66-73. Survey of 97 COVID-19 living SRs.
+                </div>
+</div>
+</div>
+<div class="slide light" data-index="11">
+<div class="content">
+<h2 class="title navy animate">Module 6 Quiz (2)</h2>
+<div class="quiz-container">
+<div class="scenario-box animate delay-1">
+<div class="scenario-label">Scenario</div>
+                    您管理抗病毒治疗的实时回顾。 8 个月内没有发布新的 RCT，主要结果的 GRADE 确定性为“中等”。
+                  </div>
+<div class="quiz-question">
+<h4>你应该做什么？</h4>
+<div class="quiz-options" role="radiogroup">
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>A.</span> Keep searching weekly—living reviews never stop
+                      </div>
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" onkeydown="handleQuizKey(event, this, true)" role="radio" tabindex="0">
+<span>B.</span> 退出到具有明确日期标记和重新激活标准的静态审查
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>C.</span> 删除该审查 - 它已过时
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>D.</span> Publish an update saying "no changes" every month
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark" data-index="12">
+<p class="title cream animate">Bamlanivimab撤回</p>
+<div class="warning-box animate delay-1">
+<strong>停止工作的单克隆抗体的故事：</strong><br/><br/>
+                2020 年 11 月：FDA 授予单克隆抗体 bamlanivimab 的 EUA。早期数据显示出希望。<br/><br/>
+                March 2021: EUA revoked. Why? <strong>Variant escape.</strong> 病毒发生变异。抗体不再结合。<br/><br/>
+                追踪单克隆抗体的实时回顾会在几周内标记出这一点。静态指导需要几个月的时间才能改变。<br/><br/>
+<span style="color: var(--gold);">在大流行中，敌人会不断演变。您的证据必须更快地发展。</span>
+</div>
+<div class="citation-box animate delay-2">
+                Source: FDA revocation of bamlanivimab EUA, April 2021. Variant surveillance: CDC SARS-CoV-2 Variants.
+              </div>
+</div>
+<div class="slide dark" data-index="13">
+<p class="story-box animate">
+<strong>流感监测的故事：</strong><br/><br/>
+                CDC 通过哨点监测来监测流感。早期的系统每周检查一次医院，速度太慢，无法捕捉到激增的情况。持续的实时监控让分析师们不堪重负。<br/><br/>
+                解决方案：基于阈值的监视。持续跟踪，但仅当病例超过季节性基线时才触发警报。这种“实时回顾”方法在 2009 年比传统方法早几周就发现了 H1N1。<br/><br/>
+<span style="color: var(--gold);">监控阈值的值班员的表现优于年度检查员和疲惫不堪的每小时检查员。</span>
+</p>
+<div class="story-decision-tree animate delay-1">
+<p class="decision-prompt">您正在设计一个疾病监测系统。您应该多久审查一次证据并触发警报？</p>
+<div class="decision-options">
+<div class="decision-option" data-path="wrong" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();}" role="button" tabindex="0">
+<strong>Path A:</strong> 每年检查效率 - 全面的年度审查非常彻底
+                    <div class="consequence">&gt;→ 错过激增； H1N1 流感在检测前已传播数周；延迟响应会导致生命损失</div>
+</div>
+<div class="decision-option" data-path="right" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();}" role="button" tabindex="0">
+<strong>Path B:</strong> 实施基于阈值的监控——超过基线时持续跟踪并发出警报
+                    <div class="consequence">&gt;→ 比传统方法提前数周捕获 H1N1；早期预警可以加快反应速度； “实时回顾”方法可以拯救生命</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide light" data-index="14">
+<div class="content">
+<h2 class="title navy animate">决策树：这项新研究是否足够重要以触发更新？</h2>
+<div aria-label="用于决定是否更新实时评论的决策树" class="decision-tree animate delay-1" role="img">
+<div class="decision-node question">
+                    添加这项研究会改变确定性评级吗？
+                  </div>
+<div class="decision-branches">
+<div class="decision-branch">
+<div class="branch-label yes">YES</div>
+<div class="arrow-down"></div>
+<div class="decision-node outcome-yes" style="font-size: 0.85rem;">
+<strong>UPDATE IMMEDIATELY</strong><br/>Certainty change = guideline change
+                      </div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no">NO</div>
+<div class="arrow-down"></div>
+<div class="decision-node question" style="font-size: 0.85rem;">
+                        Does it change the point estimate direction?
+                      </div>
+<div class="decision-branches" style="margin-top: 0.5rem;">
+<div class="decision-branch">
+<div class="branch-label yes" style="font-size: 0.7rem;">YES</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node warning" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>UPDATE SOON</strong><br/>Direction change is major
+                          </div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no" style="font-size: 0.7rem;">NO</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node" style="font-size: 0.75rem; padding: 0.5rem; background: var(--teal);">
+<strong>批次队列</strong><br/>Update at next scheduled
+                          </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="decision-tree-sr">
+                  决策树：添加这项研究会改变确定性吗？评级？如果是，请立即更新，因为确定性变化会影响指南。如果不是，检查它是否改变了点估计方向。如果方向发生变化，请尽快更新，因为这是一个重大发现。如果方向没有改变，则排队等待下一批更新。
+                </div>
+</div>
+</div>
+<div class="slide black" data-index="15">
+<p class="refrain animate">活生生的证据为生者服务。</p>
+<p class="animate delay-1" style="font-size: 1.25rem; margin-top: 1.5rem;">模块 7：质量</p>
+</div>
+</div>
+ 模块 7：快速审核的质量 
+<div class="module-slides" data-module="7">
+<div class="slide dark active" data-index="0">
+<p class="refrain animate">Transparency reveals; concealment deceives.</p>
+</div>
+<div class="slide dark" data-index="1">
+<p class="direct-address animate">您如何判断快速审核？</p>
+<p class="direct-address animate delay-1">When time prevents perfection, what is "good enough"?</p>
+<div class="gold-line animate delay-2"></div>
+</div>
+<div class="slide light" data-index="2">
+<div class="content">
+<h2 class="title navy animate">GRADE in 40 Hours: Is It Possible?</h2>
+<div class="comparison-grid animate delay-1">
+<div class="comparison-panel">
+<h4>Full GRADE Assessment</h4>
+<p style="font-size: 0.85rem;">Risk of bias + Inconsistency + Indirectness + Imprecision + Publication bias</p>
+<p style="font-size: 0.8rem; color: var(--light-text); margin-top: 0.5rem;">Time: 8-16 hours per outcome</p>
+</div>
+<div class="comparison-panel highlight">
+<h4>Rapid GRADE</h4>
+<p style="font-size: 0.85rem;">Risk of bias + Imprecision + Major concerns only</p>
+<p style="font-size: 0.8rem; color: var(--gold); margin-top: 0.5rem;">Time: 2-4 hours per outcome</p>
+</div>
+</div>
+<p class="animate delay-2" style="font-size: 0.85rem; margin-top: 1rem; text-align: center; color: var(--light-text);">
+                  Focus on the domains most likely to affect certainty.
+                </p>
+</div>
+</div>
+<div class="slide dark" data-index="3">
+<p class="title cream animate">The Non-Negotiables</p>
+<div class="gold-line animate delay-1"></div>
+<div class="animate delay-2" style="text-align: left; max-width: 600px;">
+<p style="margin: 0.75rem 0;"><span style="color: var(--gold); font-weight: 700;">1. Document everything:</span> 您搜索的内容，排除的内容，为什么</p>
+<p style="margin: 0.75rem 0;"><span style="color: var(--gold); font-weight: 700;">2. State limitations explicitly:</span> 没有埋在文本中——前面和中间</p>
+<p style="margin: 0.75rem 0;"><span style="color: var(--gold); font-weight: 700;">3。区分快速和系统：</span> Never pretend comprehensiveness</p>
+<p style="margin: 0.75rem 0;"><span style="color: var(--gold); font-weight: 700;">4. Date-stamp everything:</span> 截至[日期]的最新证据</p>
+<p style="margin: 0.75rem 0;"><span style="color: var(--gold); font-weight: 700;">5。更新计划：</span> 快速审查并不是最终决定</p>
+</div>
+</div>
+<div class="slide dark" data-index="4">
+<p class="story-box animate">
+<strong>气候不确定性的故事：</strong><br/><br/>
+                IPCC climate reports could claim certainty to seem authoritative. Instead, they explicitly quantify uncertainty: "likely (66-100%)", "very likely (90-100%)", "virtually certain (99-100%)".<br/><br/>
+                当 2021 年报告指出变暖“明确”，但冰盖崩塌时间“低可信度”时，政策制定者确切地知道哪里可以相信地图，以及龙可能在哪里潜伏。<br/><br/>
+<span style="color: var(--gold);">这种透明度增加而不是降低了报告的可信度和政策影响。</span>
+</p>
+<div class="story-decision-tree animate delay-1">
+<p class="decision-prompt">您正在撰写 IPCC 气候报告。你应该声称确定性看起来更权威，还是承认存在不确定性？</p>
+<div class="decision-options">
+<div class="decision-option" data-path="wrong" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();}" role="button" tabindex="0">
+<strong>Path A:</strong> 为了可信度而声称确定性——对冲将使报告显得薄弱
+                    <div class="consequence">→ Lose trust when predictions vary; critics seize on any uncertainty as proof the science is unreliable; credibility undermined</div>
+</div>
+<div class="decision-option" data-path="right" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();}" role="button" tabindex="0">
+<strong>Path B:</strong> Quantify uncertainty explicitly—"likely," "very likely," "virtually certain"
+                    <div class="consequence">&gt;→政策制定者确切地知道在哪里可以相信证据；透明度提高可信度和政策影响力；科学被认为是诚实的</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide light" data-index="5">
+<div class="content">
+<h2 class="title navy animate">How to READ a Rapid Review (Consumer Guide)</h2>
+<div class="case-study animate delay-1">
+<h4>Five Questions to Ask Before Trusting</h4>
+<ol style="margin-left: 1rem; font-size: 0.9rem;">
+<li style="margin: 0.5rem 0;"><strong>检索何时完成？</strong> — If &gt;3 months old in a fast-moving field, it's outdated</li>
+<li style="margin: 0.5rem 0;"><strong>检索了哪些数据库？</strong> — PubMed alone may miss 30% of relevant studies</li>
+<li style="margin: 0.5rem 0;"><strong>筛选是单项还是双项？</strong> — Single screening may miss 5-10% of relevant studies</li>
+<li style="margin: 0.5rem 0;"><strong>是否明确说明了限制？</strong> — Hidden limitations = hidden agendas</li>
+<li style="margin: 0.5rem 0;"><strong>是否有计划更新？</strong> — Rapid reviews should be living or have update triggers</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="slide dark" data-index="6">
+<p class="title cream animate">不确定性下的共同决策</p>
+<div class="direct-address animate delay-1">如何告诉患者证据......不确定？</div>
+<div class="gold-line animate delay-2"></div>
+<div class="animate delay-3" style="text-align: left; max-width: 650px;">
+<p style="margin: 0.6rem 0; font-size: 0.95rem;"><span style="color: var(--gold);">1。说出不确定性：</span> "We have <em>some</em> evidence, but it's early/limited/conflicting."</p>
+<p style="margin: 0.6rem 0; font-size: 0.95rem;"><span style="color: var(--gold);">2. Quantify when possible:</span> “研究表明 20-40% 可能会受益，但我们不确定。”</p>
+<p style="margin: 0.6rem 0; font-size: 0.95rem;"><span style="color: var(--gold);">3. Explain what we're watching:</span> "A larger trial reports next month."</p>
+<p style="margin: 0.6rem 0; font-size: 0.95rem;"><span style="color: var(--gold);">4. Offer structured choice:</span> “鉴于这种不确定性，我们可以尝试或等待。对您来说最重要的是什么？”</p>
+</div>
+</div>
+<div class="slide light" data-index="7">
+<div class="content">
+<h2 class="title navy animate">对话脚本</h2>
+<div class="story-box animate delay-1" style="background: rgba(30,39,97,0.08); border-left-color: var(--navy);">
+<strong>Clinician to Patient:</strong><br/><br/>
+                  “我查看了最新的证据。这是我们所知道的：这种治疗 <em>may</em> 有帮助——一些研究显示改善了30%。但研究规模很小，有些研究没有显示任何益处。<br/><br/>
+                  “我想对你说实话。如果我们等两个月，我们将从更大规模的试验中获得更好的数据。但我也理解你现在正在遭受痛苦。<br/><br/>
+                  “什么可以帮助你做出这个决定？你想在知道不确定性的情况下立即尝试，还是愿意等待更有力的证据？”
+                </div>
+<p class="animate delay-2" style="font-size: 0.85rem; color: var(--light-text); text-align: center; margin-top: 1rem;">
+                  共同决策并不是要获得所有答案。这是关于分享我们 <em>don't</em> know honestly.
+                </p>
+</div>
+</div>
+<div class="slide dark" data-index="8">
+<p class="title cream animate">Network Meta-Analysis: A Word of Caution</p>
+<div class="warning-box animate delay-1">
+<strong>What It Promises:</strong> 比较在试验中从未直接比较过的治疗方法（A 与 B、B 与 C → 推断 A 与 C）。<br/><br/>
+<strong>What Can Go Wrong:</strong><br/>
+                • <span style="color: var(--gold);">Transitivity violation:</span> Populations in A-vs-B trials differ from B-vs-C trials<br/>
+                • <span style="color: var(--gold);">Inconsistency:</span> 直接和间接证据相矛盾<br/>
+                • <span style="color: var(--gold);">Sparse networks:</span> Single-study connections carry entire inference<br/><br/>
+<strong>In Rapid Reviews:</strong> Network meta-analysis typically requires more time and expertise than available. When used, state transitivity assumptions explicitly. When skipped, explain why indirect comparisons weren't attempted.
+              </div>
+<div class="citation-box animate delay-2">
+                Cochrane Training: Network Meta-analysis. Cipriani et al., BMJ 2013.
+              </div>
+</div>
+<div class="slide light" data-index="9">
+<div class="content">
+<h2 class="title navy animate">决策树：您应该相信这个快速审查吗？</h2>
+<div aria-label="用于评估快速审查可信度的决策树" class="decision-tree animate delay-1" role="img">
+<div class="decision-node question">
+                    它是否声明“快速”明确地审查”（不是假装系统）？
+                  </div>
+<div class="decision-branches">
+<div class="decision-branch">
+<div class="branch-label yes">YES</div>
+<div class="arrow-down"></div>
+<div class="decision-node question" style="font-size: 0.85rem;">
+                        是否明确说明了检索日期和数据库？
+                      </div>
+<div class="decision-branches" style="margin-top: 0.5rem;">
+<div class="decision-branch">
+<div class="branch-label yes" style="font-size: 0.7rem;">YES</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node outcome-yes" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>USABLE</strong><br/>在提出注意事项的情况下应用
+                          </div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no" style="font-size: 0.7rem;">NO</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node warning" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>CAUTION</strong><br/>Cannot assess currency
+                          </div>
+</div>
+</div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no">NO</div>
+<div class="arrow-down"></div>
+<div class="decision-node outcome-no" style="font-size: 0.85rem;">
+<strong>DISTRUST</strong><br/>Pretending comprehensiveness
+                      </div>
+</div>
+</div>
+</div>
+<div class="decision-tree-sr">
+                  决策树：审查是否明确表明这是快速审查？如果是，请检查是否明确注明了检索日期和数据库。如果有说明，则该评论可在附带说明的情况下使用。如果没有说明，请谨慎使用，因为无法评估货币。如果评论没有说明速度很快，请不要相信它假装全面。
+                </div>
+</div>
+</div>
+<div class="slide dark" data-index="7">
+<p class="title cream animate">维生素 D 错觉的故事</p>
+<div class="story-box animate delay-1">
+<strong>Correlation Posing as Causation:</strong><br/><br/>
+                Dozens of observational studies showed: low vitamin D → worse COVID outcomes.<br/>
+                这些研究的荟萃分析显示：“补充补充剂可降低 40% 的死亡率！”<br/><br/>
+                Then came the RCTs. One after another: no benefit. No benefit. No benefit.<br/><br/>
+<span style="color: var(--gold);">观察者发现了相关性。病人呆在室内 → 维生素 D 含量低，结果更糟。阳光是混淆因素，而不是治愈方法。</span>
+</div>
+<div class="citation-box animate delay-2">
+                来源：维生素 D for COVID-19 Cochrane Review 2023。11 项随机对照试验，3,968 名参与者。没有死亡率益处。
+              </div>
+</div>
+<div class="slide light" data-index="8">
+<div class="content">
+<h2 class="title navy animate">Module 7 Quiz</h2>
+<div class="quiz-container">
+<div class="quiz-question">
+<h4>A rapid review should ALWAYS include:</h4>
+<div class="quiz-options" role="radiogroup">
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>A.</span> All databases ever created
+                      </div>
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" onkeydown="handleQuizKey(event, this, true)" role="radio" tabindex="0">
+<span>B.</span> Explicit statement of limitations and search date
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>C.</span> Dual screening of all abstracts
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>D.</span> Full GRADE for every outcome
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide light" data-index="9">
+<div class="content">
+<h2 class="title navy animate">Module 7 Quiz (2)</h2>
+<div class="quiz-container">
+<div class="scenario-box animate delay-1">
+<div class="scenario-label">Scenario</div>
+                    一位同事分享了一项“系统审查”，声称补充剂可将 COVID-19 死亡率降低 40%。该综述没有提及其检索日期，仅列出了检索的一个数据库，也没有讨论局限性。
+                  </div>
+<div class="quiz-question">
+<h4>您应该得出什么结论？</h4>
+<div class="quiz-options" role="radiogroup">
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>A.</span> Trust it—"systematic review" means rigorous
+                      </div>
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" onkeydown="handleQuizKey(event, this, true)" role="radio" tabindex="0">
+<span>B.</span> Distrust it—missing transparency markers suggest hidden limitations
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>C.</span> Share it immediately—40% is a big effect
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>D.</span> It doesn't matter—all reviews have flaws
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide light" data-index="10">
+<div class="content">
+<h2 class="title navy animate">Module 7 Quiz (3)</h2>
+<div class="quiz-container">
+<div class="quiz-question">
+<h4>维生素 D 观察性研究显示死亡率降低了 40%。随机对照试验显示没有任何益处。这种差异最好的解释是：</h4>
+<div class="quiz-options" role="radiogroup">
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>A.</span> RCTs used the wrong dose
+                      </div>
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" onkeydown="handleQuizKey(event, this, true)" role="radio" tabindex="0">
+<span>B.</span> Confounding—sicker patients have lower vitamin D AND worse outcomes
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>C.</span> Pharmaceutical companies suppressed positive results
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>D.</span> 观察性研究总是错误的
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide light" data-index="11">
+<div class="content">
+<h2 class="title navy animate">Module 7 Quiz (4)</h2>
+<div class="quiz-container">
+<div class="quiz-question">
+<h4>Inoculation messaging (prebunking) is effective because it:</h4>
+<div class="quiz-options" role="radiogroup">
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>A.</span> Censors false information before people see it
+                      </div>
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" onkeydown="handleQuizKey(event, this, true)" role="radio" tabindex="0">
+<span>B.</span> Warns about manipulation tactics before exposure to false claims
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>C.</span> Relies on correcting misinformation after it spreads
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>D.</span> Only works for highly educated audiences
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide light" data-index="12">
+<div class="content">
+<h2 class="title navy animate">Module 7 Quiz (5)</h2>
+<div class="quiz-container">
+<div class="scenario-box animate delay-1">
+<div class="scenario-label">Scenario</div>
+                    患者询问他们在社交媒体上看到的治疗方法。您的快速审查显示早期证据不确定（3 项小型试验，结果相互矛盾）。您应该如何讨论这个问题？
+                  </div>
+<div class="quiz-question">
+<h4>最好的方法是：</h4>
+<div class="quiz-options" role="radiogroup">
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>A.</span> Say "there's no evidence it works" to discourage use
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>B.</span> Recommend trying it since some studies showed benefit
+                      </div>
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" onkeydown="handleQuizKey(event, this, true)" role="radio" tabindex="0">
+<span>C.</span> Name the uncertainty, quantify if possible, offer structured choice
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" onkeydown="handleQuizKey(event, this, false)" role="radio" tabindex="0">
+<span>D.</span> Refuse to discuss until full systematic review is published
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark" data-index="13">
+<p class="title cream animate">疗养院悲剧</p>
+<div class="warning-box animate delay-1">
+<strong>2020 年 12 月：优先级辩论</strong><br/><br/>
+                疫苗到达。谁应该先得到它们？证据很明确：疗养院居民的死亡率最高。<br/><br/>
+                但有些人主张重要工作人员的利益。其他供医护人员使用。争论推迟了推出。<br/><br/>
+<strong>Result:</strong> 60,000+ US nursing home deaths occurred <em>after</em> 疫苗可用，但 <em>before</em> rollout completed.<br/><br/>
+<span style="color: var(--gold);">Rapid evidence synthesis on prioritization could have saved weeks. Weeks meant thousands of lives.</span>
+</div>
+<div class="citation-box animate delay-2">
+                来源：CDC COVID-19 疗养院数据。分析：AARP 公共政策研究所，2021 年。
+              </div>
+</div>
+<div class="slide dark" data-index="12">
+<p class="story-box animate">
+<strong>挑战者号的故事：</strong><br/><br/>
+                1986 年 1 月 27 日，工程师告诉 NASA，挑战者号的 O 形圈可能会在寒冷的天气中失效。但他们的数据不完整——只有一些冷启动记录和不明确的故障模式。经理拉里·马洛伊要求提供危险证明；工程师只能表现出不确定性。<br/><br/>
+                Mulloy 启动。 O 形圈在 73 秒时失效。后来的分析显示，数据清楚地预测了故障，但前提是分析人员知道要寻找什么。<br/><br/>
+<span style="color: var(--gold);">部分证据（因不充分而被驳回）包含可能挽救七条生命的警告。</span>
+</p>
+<div class="story-decision-tree animate delay-1">
+<p class="decision-prompt">1986 年 1 月 27 日，您是 NASA 的一名工程师。您的不完整数据表明 O 形圈在寒冷天气下可能会失效。发射定于明天在冰冻条件下进行。你的经理要求提供危险证明。</p>
+<div class="decision-options">
+<div class="decision-option" data-path="wrong" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();}" role="button" tabindex="0">
+<strong>Path A:</strong> 承认你无法用不完整的数据证明危险——允许发射继续进行
+                    <div class="consequence">→ 发射后 73 秒，挑战者号爆炸； 7名宇航员死亡；后来的分析显示数据确实预测失败</div>
+</div>
+<div class="decision-option" data-path="right" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();}" role="button" tabindex="0">
+<strong>Path B:</strong> 尽管数据不完整，仍坚持延迟——举证责任应该在于安全，而不是危险
+                    <div class="consequence">&gt;→拯救7条生命；当赌注不可逆转时，“证明它是安全的”原则胜过“证明它是危险的”</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide light" data-index="13">
+<div class="content">
+<h2 class="title navy animate">Decision Tree: Assessing Funding Source Bias</h2>
+<div aria-label="Decision tree for evaluating funding source bias" class="decision-tree animate delay-1" role="img">
+<div class="decision-node question">
+                    该研究是否由对结果有经济利益的一方资助？
+                  </div>
+<div class="decision-branches">
+<div class="decision-branch">
+<div class="branch-label yes">YES</div>
+<div class="arrow-down"></div>
+<div class="decision-node question" style="font-size: 0.85rem;">
+                        试验是否在入组前注册？
+                      </div>
+<div class="decision-branches" style="margin-top: 0.5rem;">
+<div class="decision-branch">
+<div class="branch-label yes" style="font-size: 0.7rem;">YES</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node warning" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>MODERATE CONCERN</strong><br/>Outcome switching limited
+                          </div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no" style="font-size: 0.7rem;">NO</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node outcome-no" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>HIGH CONCERN</strong><br/>Selective reporting possible
+                          </div>
+</div>
+</div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no">INDEPENDENT</div>
+<div class="arrow-down"></div>
+<div class="decision-node outcome-yes" style="font-size: 0.85rem;">
+<strong>LOWER CONCERN</strong><br/>But still assess RoB
+                      </div>
+</div>
+</div>
+</div>
+<div class="decision-tree-sr">
+                  决策树：研究是否由有经济利益的一方资助？如果是，请检查试用是否已预先注册。如果预先注册，请适度关注，因为结果切换是有限的。如果没有预先注册，由于可能有选择性报告，因此会引起高度关注。如果是独立资助的，请降低担忧，但仍评估偏倚风险。
+                </div>
+</div>
+</div>
+<div class="slide dark" data-index="14">
+<p class="title cream animate">预印本悖论</p>
+<div class="story-box animate delay-1">
+<strong>双刃剑：</strong><br/><br/>
+<span style="color: var(--green);">December 2020:</span> 辉瑞疫苗功效数据在发表前已出现在 medRxiv 上。几个小时内，监管机构就开始审查。世界可以计划。<br/><br/>
+<span style="color: var(--red);">January 2021:</span> A preprint claimed vaccines caused deaths in nursing homes. It was methodologically flawed. It went viral. Vaccine hesitancy increased.<br/><br/>
+<span style="color: var(--gold);">同一平台。不同的结果。预印本加速了真相和谎言。读者自行承担判断责任。</span>
+</div>
+</div>
+<div class="slide light" data-index="15">
+<div class="content">
+<h2 class="title navy animate">Decision Tree: When Is a Preprint Acceptable to Cite?</h2>
+<div aria-label="Decision tree for when to cite preprints" class="decision-tree animate delay-1" role="img">
+<div class="decision-node question">
+                    Is this a rapidly evolving emergency situation?
+                  </div>
+<div class="decision-branches">
+<div class="decision-branch">
+<div class="branch-label yes">URGENT</div>
+<div class="arrow-down"></div>
+<div class="decision-node question" style="font-size: 0.85rem;">
+                        Is it from a known, credible research group?
+                      </div>
+<div class="decision-branches" style="margin-top: 0.5rem;">
+<div class="decision-branch">
+<div class="branch-label yes" style="font-size: 0.7rem;">YES</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node warning" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>引用时需注意</strong><br/>“预印本，未经同行评审”
+                          </div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no" style="font-size: 0.7rem;">NO</div>
+<div class="arrow-down" style="height: 15px;"></div>
+<div class="decision-node outcome-no" style="font-size: 0.75rem; padding: 0.5rem;">
+<strong>DO NOT CITE</strong><br/>等待验证
+                          </div>
+</div>
+</div>
+</div>
+<div class="decision-branch">
+<div class="branch-label no">NOT URGENT</div>
+<div class="arrow-down"></div>
+<div class="decision-node" style="font-size: 0.85rem; background: var(--teal);">
+<strong>等待发布</strong><br/>没有理由预印本
+                      </div>
+</div>
+</div>
+</div>
+<div class="decision-tree-sr">
+                  决策树：这是一个快速演变的紧急情况吗？如果紧急，请检查它是否来自已知的可信研究小组。如果是可信的团体，请在引用时附上明确的预印本警告。如果未知群体，请勿引用，等待核实。如果情况不紧急，请等待同行评审的出版物。
+                </div>
+</div>
+</div>
+<div class="slide dark" data-index="16">
+<p class="title cream animate">Regional Adaptation: MENA Context</p>
+<div class="story-box animate delay-1">
+<strong>海湾和中东地区的能力建设：</strong><br/><br/>
+                在 COVID-19 期间，海湾合作委员会 (GCC) 国家面临着重大差距：当地快速审查能力有限意味着依赖西方证据，而这些证据有时会忽略地区因素——斋月禁食、多代家庭、医护人员比例和不同人口人口统计。<br/><br/>
+<span style="color: var(--gold);">课程：根据您的情况调整 40 小时协议。区域数据库中的阿拉伯语搜索词。本地实施注意事项。用于培训的区域案例研究。</span>
+</div>
+<div class="animate delay-2" style="text-align: left; max-width: 650px; margin-top: 1rem;">
+<p style="margin: 0.5rem 0; font-size: 0.9rem;"><strong>Key Adaptations:</strong></p>
+<p style="margin: 0.3rem 0; font-size: 0.85rem; color: rgba(255,255,255,0.8);">• Include regional databases (IMEMR, EMBASE Arabic)</p>
+<p style="margin: 0.3rem 0; font-size: 0.85rem; color: rgba(255,255,255,0.8);">• Consider local healthcare infrastructure capacity</p>
+<p style="margin: 0.3rem 0; font-size: 0.85rem; color: rgba(255,255,255,0.8);">• Adapt communication for local stakeholders</p>
+</div>
+</div>
+<div class="slide black" data-index="17">
+<p class="refrain animate">Transparency reveals; concealment deceives.</p>
+<p class="animate delay-1" style="font-size: 1.25rem; margin-top: 1.5rem;">Final Assessment</p>
+</div>
+</div>
+ 模块 8：最终评估 
+<div class="module-slides" data-module="8">
+<div class="slide dark active" data-index="0">
+<p class="refrain animate">您经历了危机和真相。</p>
+</div>
+<div class="slide dark" data-index="1">
+<p class="title cream animate">五项原则</p>
+<div class="gold-line animate delay-1"></div>
+<div class="animate delay-2" style="text-align: left; max-width: 700px;">
+<p style="margin: 0.6rem 0; color: var(--gold); font-size: 1.1rem;">1. Speed without rigor is recklessness.</p>
+<p style="margin: 0.6rem 0; color: var(--gold); font-size: 1.1rem;">2. Rigor without speed is abandonment.</p>
+<p style="margin: 0.6rem 0; color: var(--gold); font-size: 1.1rem;">3. A flawed study in a meta-analysis poisons all.</p>
+<p style="margin: 0.6rem 0; color: var(--gold); font-size: 1.1rem;">4. Transparency reveals; concealment deceives.</p>
+<p style="margin: 0.6rem 0; color: var(--gold); font-size: 1.1rem;">5。活生生的证据为生者服务。</p>
+</div>
+</div>
+<div class="slide light" data-index="2">
+<div class="content">
+<h2 class="title navy animate">Final Quiz (1/5)</h2>
+<div class="quiz-container">
+<div class="quiz-question">
+<h4>Gautret 羟氯喹研究被撤回，主要是因为：</h4>
+<div class="quiz-options" role="radiogroup">
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" role="radio">
+<span>A.</span> The drug didn't work at all
+                      </div>
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" role="radio">
+<span>B.</span> Major methodological flaws and ethics concerns
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" role="radio">
+<span>C.</span> 样本量太大
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide light" data-index="3">
+<div class="content">
+<h2 class="title navy animate">Final Quiz (2/5)</h2>
+<div class="quiz-container">
+<div class="quiz-question">
+<h4>当欺诈性的 Elgazzar 伊维菌素研究被删除，死亡率获益：</h4>
+<div class="quiz-options" role="radiogroup">
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" role="radio">
+<span>A.</span> Increased significantly
+                      </div>
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" role="radio">
+<span>B.</span> 从 51% 下降至无显着性
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" role="radio">
+<span>C.</span> Remained unchanged
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide light" data-index="4">
+<div class="content">
+<h2 class="title navy animate">Final Quiz (3/5)</h2>
+<div class="quiz-container">
+<div class="quiz-question">
+<h4>RECOVERY 试验大约在：</h4>
+<div class="quiz-options" role="radiogroup">
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" role="radio">
+<span>A.</span> 从方案到公告 100 天
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" role="radio">
+<span>B.</span> 2 年的仔细研究中取得结果研究
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" role="radio">
+<span>C.</span> One week of observation
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide light" data-index="5">
+<div class="content">
+<h2 class="title navy animate">Final Quiz (4/5)</h2>
+<div class="quiz-container">
+<div class="quiz-question">
+<h4>Of 97 "living" systematic reviews on COVID-19, what percentage were never updated?</h4>
+<div class="quiz-options" role="radiogroup">
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" role="radio">
+<span>A.</span> 10%
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" role="radio">
+<span>B.</span> 35%
+                      </div>
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" role="radio">
+<span>C.</span> 65%
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide light" data-index="6">
+<div class="content">
+<h2 class="title navy animate">Final Quiz (5/5)</h2>
+<div class="quiz-container">
+<div class="quiz-question">
+<h4>在快速回顾中，最重要的质量要求是：</h4>
+<div class="quiz-options" role="radiogroup">
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" role="radio">
+<span>A.</span> Searching all possible databases
+                      </div>
+<div class="quiz-option" data-correct="true" onclick="checkAnswer(this, true)" role="radio">
+<span>B.</span> 方法和限制的透明度
+                      </div>
+<div class="quiz-option" data-correct="false" onclick="checkAnswer(this, false)" role="radio">
+<span>C.</span> Having a famous author
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black" data-index="7">
+<p class="refrain animate">您已经完成了旅程。</p>
+<div class="gold-line animate delay-1"></div>
+<p class="animate delay-2" style="font-size: 1.2rem; margin-top: 1rem;">
+                用智慧进行综合。
+              </p>
+<p class="animate delay-3" style="font-size: 0.9rem; margin-top: 2rem; color: rgba(255,255,255,0.6);">
+                记住2020年的教训：<br/>
+                Speed without truth killed. Truth without speed abandoned.<br/>
+<span style="color: var(--gold);">平衡是艺术。</span>
+</p>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<script>
+    const modules = [
+      { title: 'The Reckoning', subtitle: 'Why Speed Matters' },
+      { title: 'The Trade-Off', subtitle: 'Speed vs. Rigor' },
+      { title: 'The Method', subtitle: '40-Hour Protocol' },
+      { title: 'The Disaster', subtitle: 'Hydroxychloroquine' },
+      { title: 'The Fraud', subtitle: 'Ivermectin' },
+      { title: 'The Triumph', subtitle: 'RECOVERY Trial' },
+      { title: 'The Living', subtitle: 'Living Reviews' },
+      { title: 'The Quality', subtitle: 'Standards' },
+      { title: 'Final Assessment', subtitle: '测试您的知识' }
+    ];
+
+    let currentModule = 0;
+    let currentSlide = 0;
+    let completedModules = new Set();
+
+    // localStorage persistence
+    function saveProgress() {
+      localStorage.setItem('rapidReviewsProgress', JSON.stringify({
+        currentModule,
+        currentSlide,
+        completedModules: Array.from(completedModules)
+      }));
+    }
+
+    function loadProgress() {
+      const saved = localStorage.getItem('rapidReviewsProgress');
+      if (saved) {
+        let data;
+        try {
+          data = JSON.parse(saved);
+        } catch (e) {
+          localStorage.removeItem('rapidReviewsProgress');
+          return;
+        }
+        currentModule = data.currentModule || 0;
+        currentSlide = data.currentSlide || 0;
+        completedModules = new Set(data.completedModules || []);
+        // Bounds checking on restored indices
+        const moduleSlides = document.querySelectorAll('.module-slides');
+        if (currentModule < 0 || currentModule >= modules.length || currentModule >= moduleSlides.length) {
+          currentModule = 0;
+          currentSlide = 0;
+        } else {
+          const slides = moduleSlides[currentModule]?.querySelectorAll('.slide');
+          if (!slides || currentSlide < 0 || currentSlide >= slides.length) {
+            currentSlide = 0;
+          }
+        }
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadProgress();
+      renderModuleList();
+      setupSlideNavigation();
+      updateProgressBar();
+      if (currentModule > 0 || currentSlide > 0) {
+        document.querySelectorAll('.module-slides').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.module-slides')[currentModule].classList.add('active');
+        goToSlide(currentSlide);
+        updateHeader();
+      }
+    });
+
+    function renderModuleList() {
+      const list = document.getElementById('moduleList');
+      list.innerHTML = modules.map((m, i) => `
+        <div class="module-item ${i === currentModule ? 'active' : ''} ${completedModules.has(i) ? 'completed' : ''}"
+             onclick="goToModule(${i})" tabindex="0" role="button"
+             aria-label="Module ${i}: ${m.title} – ${m.subtitle}${completedModules.has(i) ? ' (completed)' : ''}"
+             onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();goToModule(${i});}">
+          <div class="module-number">${completedModules.has(i) ? '✓' : i}</div>
+          <div class="module-info">
+            <div class="module-title">${m.title}</div>
+            <div class="module-subtitle">${m.subtitle}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function setupSlideNavigation() {
+      document.querySelectorAll('.module-slides').forEach(moduleEl => {
+        const slides = moduleEl.querySelectorAll('.slide');
+        const nav = document.createElement('div');
+        nav.className = 'slide-nav';
+        nav.innerHTML = `
+          <button class="nav-btn" onclick="prevSlide()" aria-label="Previous slide" title="Previous slide (←)">←</button>
+          <div class="nav-center">
+            <div class="slide-counter" aria-live="polite"><span class="current">1</span> / <span class="total">${slides.length}</span></div>
+            <div class="progress" role="tablist" aria-label="Slide navigation">
+              ${Array.from(slides).map((_, i) => `<div class="progress-dot ${i === 0 ? 'active' : ''}" role="tab" aria-label="Go to slide ${i + 1}" onclick="goToSlide(${i})"></div>`).join('')}
+            </div>
+          </div>
+          <button class="nav-btn" onclick="nextSlide()" aria-label="Next slide" title="Next slide (→)">→</button>
+        `;
+        moduleEl.appendChild(nav);
+      });
+    }
+
+    function goToModule(index) {
+      if (currentModule !== index) {
+        document.querySelectorAll('.module-slides').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.module-slides')[index].classList.add('active');
+        currentModule = index;
+        currentSlide = 0;
+        updateSlideDisplay();
+        renderModuleList();
+        updateHeader();
+        updateProgressBar();
+      }
+    }
+
+    function goToSlide(index) {
+      const moduleEl = document.querySelectorAll('.module-slides')[currentModule];
+      const slides = moduleEl.querySelectorAll('.slide');
+      slides.forEach(s => s.classList.remove('active'));
+      slides[index].classList.add('active');
+      currentSlide = index;
+      updateSlideDisplay();
+      saveProgress();
+    }
+
+    function nextSlide() {
+      const moduleEl = document.querySelectorAll('.module-slides')[currentModule];
+      const slides = moduleEl.querySelectorAll('.slide');
+      if (currentSlide < slides.length - 1) goToSlide(currentSlide + 1);
+    }
+
+    function prevSlide() {
+      if (currentSlide > 0) goToSlide(currentSlide - 1);
+    }
+
+    function nextModule() {
+      if (currentModule < modules.length - 1) goToModule(currentModule + 1);
+    }
+
+    function updateSlideDisplay() {
+      const moduleEl = document.querySelectorAll('.module-slides')[currentModule];
+      const nav = moduleEl.querySelector('.slide-nav');
+      if (nav) {
+        nav.querySelector('.current').textContent = currentSlide + 1;
+        nav.querySelectorAll('.progress-dot').forEach((dot, i) => {
+          dot.classList.toggle('active', i === currentSlide);
+        });
+      }
+    }
+
+    function updateHeader() {
+      document.getElementById('currentModuleNum').textContent = currentModule;
+      document.getElementById('currentModuleName').textContent = modules[currentModule].title;
+    }
+
+    function updateProgressBar() {
+      const percent = Math.round((completedModules.size / modules.length) * 100);
+      document.getElementById('progressPercent').textContent = percent + '%';
+      saveProgress();
+    }
+
+    function checkAnswer(element, isCorrect) {
+      const options = element.parentElement.querySelectorAll('.quiz-option');
+      options.forEach(opt => {
+        opt.style.pointerEvents = 'none';
+        opt.setAttribute('tabindex', '-1');
+      });
+      element.setAttribute('aria-selected', 'true');
+      if (isCorrect) {
+        element.classList.add('correct');
+        element.setAttribute('aria-label', 'Correct answer');
+      } else {
+        element.classList.add('incorrect');
+        element.setAttribute('aria-label', 'Incorrect answer');
+        options.forEach(opt => {
+          if (opt.dataset.correct === 'true') {
+            opt.classList.add('correct');
+            opt.setAttribute('aria-label', '这是正确的答案');
+          }
+        });
+      }
+    }
+
+    // Keyboard handler for quiz accessibility
+    function handleQuizKey(event, element, isCorrect) {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        checkAnswer(element, isCorrect);
+      }
+    }
+
+    // ============================================
+    // SPACED RETRIEVAL SYSTEM
+    // ============================================
+    const spacedRetrievalQuestions = [
+      { q: "在 40 小时快速审查方案中，分配了多长时间进行筛查？", a: "12 hours (single screening with 20% verification)" },
+      { q: "Elgazzar 伊维菌素研究从荟萃分析中删除后发生了什么？", a: "Mortality benefit dropped from 51% to non-significant" },
+      { q: "RECOVERY 试验从方案到地塞米松公告花了多长时间？", a: "Approximately 100 days" },
+      { q: "“没有证据表明", a: "Small underpowered trials show 'no evidence of effect'; large trials can show 'evidence of no effect'" },
+      { q: "实时系统评价更新的三种触发类型是什么？", a: "基于时间、基于信号和基于资源" },
+      { q: "In prebunking/inoculation messaging, what is more effective than debunking?", a: "Warning people about manipulation tactics BEFORE they encounter false claims" },
+      { q: "What 5 non-negotiable elements must a rapid review include?", a: "1) 记录所有内容，2) 明确说明限制，3) 区分系统评价，4) 日期戳，5) 计划更新" },
+      { q: "Gautret 羟氯喹论文的社交媒体参与度不对称是什么？", a: "3.1M engagements on original vs 83 on retraction" }
+    ];
+
+    function showSpacedRetrievalPrompt() {
+      const lastPrompt = localStorage.getItem('rapidReviewsLastRetrieval');
+      const now = Date.now();
+      const oneDay = 24 * 60 * 60 * 1000;
+
+      // Show prompt once per day if user has completed at least 2 modules
+      if (completedModules.size >= 2 && (!lastPrompt || (now - parseInt(lastPrompt)) > oneDay)) {
+        const randomQ = spacedRetrievalQuestions[Math.floor(Math.random() * spacedRetrievalQuestions.length)];
+
+        const promptHTML = `
+          <div class="spaced-retrieval-overlay" id="spacedRetrievalOverlay">
+            <div class="spaced-retrieval-modal">
+              <div class="retrieval-header">📚 Quick Review</div>
+              <div class="retrieval-question">${randomQ.q}</div>
+              <button class="retrieval-btn" onclick="revealRetrievalAnswer()">Reveal Answer</button>
+              <div class="retrieval-answer" id="retrievalAnswer" style="display:none;">
+                <strong>Answer:</strong> ${randomQ.a}
+              </div>
+              <button class="retrieval-close" onclick="closeRetrievalPrompt()">Continue to Course</button>
+            </div>
+          </div>
+        `;
+
+        document.body.insertAdjacentHTML('beforeend', promptHTML);
+        localStorage.setItem('rapidReviewsLastRetrieval', now.toString());
+      }
+    }
+
+    function revealRetrievalAnswer() {
+      document.getElementById('retrievalAnswer').style.display = 'block';
+    }
+
+    function closeRetrievalPrompt() {
+      const overlay = document.getElementById('spacedRetrievalOverlay');
+      if (overlay) overlay.remove();
+    }
+
+    // Show spaced retrieval prompt when returning to course
+    setTimeout(() => {
+      if (completedModules.size >= 2) showSpacedRetrievalPrompt();
+    }, 2000);
+
+    document.addEventListener('keydown', (e) => {
+      const tag = document.activeElement?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || tag === 'BUTTON') return;
+      const role = document.activeElement?.getAttribute?.('role');
+      if (role === 'button' || role === 'radio') {
+        if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); document.activeElement.click(); }
+        return;
+      }
+      if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextSlide(); }
+      else if (e.key === 'ArrowLeft') { e.preventDefault(); prevSlide(); }
+      else if (e.key === 'ArrowDown') { e.preventDefault(); nextModule(); }
+      else if (e.key === 'Escape') { closeSidebar(); }
+    });
+
+    function toggleSidebar() {
+      document.querySelector('.sidebar').classList.toggle('open');
+      document.querySelector('.sidebar-overlay').classList.toggle('open');
+      var btn = document.querySelector('.sidebar-toggle, .hamburger, .mobile-menu-btn'); if (btn) btn.setAttribute('aria-expanded', btn.getAttribute('aria-expanded') === 'true' ? 'false' : 'true');
+    }
+
+    function closeSidebar() {
+      document.querySelector('.sidebar').classList.remove('open');
+      document.querySelector('.sidebar-overlay').classList.remove('open');
+    }
+
+    function resetProgress() {
+      if (confirm('Reset all progress? This cannot be undone.')) {
+        localStorage.removeItem('rapidReviewsProgress');
+        currentModule = 0;
+        currentSlide = 0;
+        completedModules = new Set();
+        document.querySelectorAll('.module-slides').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.module-slides')[0].classList.add('active');
+        goToSlide(0);
+        renderModuleList();
+        updateHeader();
+        updateProgressBar();
+      }
+    }
+
+    // Close sidebar when selecting a module on mobile
+    const originalGoToModule = goToModule;
+    goToModule = function(index) {
+      closeSidebar();
+      originalGoToModule(index);
+    };
+  </script>
+</body>
+</html>

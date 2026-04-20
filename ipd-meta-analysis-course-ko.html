@@ -1,0 +1,4389 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>숨겨진 환자: 개별 참가자 데이터 메타 분석 과정</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&amp;family=Source+Sans+Pro:wght@300;400;600;700&amp;display=swap" rel="stylesheet"/>
+<style>
+    /* Fallback fonts for offline use */
+    @font-face {
+      font-family: 'Cormorant Garamond';
+      src: local('Cormorant Garamond'), local('Georgia'), local('Times New Roman');
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'Source Sans Pro';
+      src: local('Source Sans Pro'), local('Segoe UI'), local('Arial');
+      font-display: swap;
+    }
+
+    :root {
+      --navy: #1E2761;
+      --deep-navy: #141B3D;
+      --gold: #D4AF37;
+      --cream: #FAF8F5;
+      --light-cream: #FFFFFF;
+      --text: #2D3748;
+      --light-text: #718096;
+      --red: #C53030;
+      --green: #22c55e;
+      --teal: #00D4AA;
+      --purple: #A855F7;
+      --orange: #F97316;
+      --blue: #3B82F6;
+      --blood-red: #8B0000;
+      --transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    /* Accessibility: Skip link */
+    .skip-link {
+      position: absolute;
+      top: -40px;
+      left: 0;
+      background: var(--gold);
+      color: var(--navy);
+      padding: 8px 16px;
+      z-index: 1000;
+      font-weight: 600;
+      text-decoration: none;
+      border-radius: 0 0 4px 0;
+    }
+    .skip-link:focus {
+      top: 0;
+    }
+
+    /* Accessibility: Focus indicators */
+    *:focus {
+      outline: 2px solid var(--gold);
+      outline-offset: 2px;
+    }
+    *:focus:not(:focus-visible) {
+      outline: none;
+    }
+    *:focus-visible {
+      outline: 2px solid var(--gold);
+      outline-offset: 2px;
+    }
+
+    /* Accessibility: Reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      .slide { transition: none; }
+    }
+
+    /* Accessibility: Screen reader only */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    /* Accessibility: Live region for announcements */
+    .aria-live-region {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'Source Sans Pro', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: var(--deep-navy);
+      color: var(--cream);
+    }
+
+    .course-container {
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 300px;
+      background: linear-gradient(180deg, var(--deep-navy) 0%, #0a0f1a 100%);
+      border-right: 1px solid rgba(212,175,55,0.2);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    /* mobile sidebar handled by hamburger toggle below */
+
+    .sidebar-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+    }
+
+    .sidebar-header h1 {
+      font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--gold);
+      margin-bottom: 0.25rem;
+    }
+
+    .sidebar-header p {
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.6);
+    }
+
+    .module-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem 0;
+    }
+
+    .module-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      border-left: 3px solid transparent;
+    }
+
+    .module-item:hover { background: rgba(212,175,55,0.1); }
+    .module-item.active { background: rgba(212,175,55,0.15); border-left-color: var(--gold); }
+    .module-item.completed .module-number { background: var(--green); color: white; }
+
+    .module-number {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .module-item.active .module-number { background: var(--gold); color: var(--navy); }
+
+    .module-info { flex: 1; min-width: 0; }
+    .module-title { font-size: 0.85rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .module-subtitle { font-size: 0.7rem; color: rgba(255,255,255,0.7); }
+
+    .sidebar-footer {
+      padding: 1rem 1.5rem;
+      border-top: 1px solid rgba(212,175,55,0.2);
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.4);
+      line-height: 1.4;
+    }
+
+    /* Main Content */
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .content-header {
+      padding: 1rem 2rem;
+      background: rgba(0,0,0,0.3);
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .breadcrumb { font-size: 0.85rem; color: rgba(255,255,255,0.6); }
+    .breadcrumb span { color: var(--gold); }
+
+    .header-actions { display: flex; gap: 0.5rem; }
+
+    .btn {
+      padding: 0.5rem 1rem;
+      border: 1px solid rgba(212,175,55,0.3);
+      border-radius: 6px;
+      background: rgba(255,255,255,0.05);
+      color: var(--cream);
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn:hover { background: rgba(212,175,55,0.2); border-color: var(--gold); }
+    .btn:focus-visible { box-shadow: 0 0 0 3px rgba(212,175,55,0.5); }
+    .btn.primary { background: var(--gold); color: var(--navy); border-color: var(--gold); font-weight: 600; }
+    .btn.primary:focus-visible { box-shadow: 0 0 0 3px rgba(212,175,55,0.7); }
+
+    .content-body { flex: 1; overflow: hidden; display: flex; }
+
+    /* Slides */
+    .slides-container { flex: 1; position: relative; overflow: hidden; }
+
+    .module-slides { display: none; width: 100%; height: 100%; }
+    .module-slides.active { display: block; }
+
+    .slide {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      padding: 2rem 2rem 4rem 2rem;
+      padding-top: 3rem;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity var(--transition), visibility var(--transition);
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .slide .content { margin-top: auto; margin-bottom: auto; }
+    .slide > * { max-width: 100%; word-wrap: break-word; }
+    .slide.active { opacity: 1; visibility: visible; }
+
+    .slide.dark { background: var(--deep-navy); color: var(--cream); }
+    .slide.light { background: var(--cream); color: var(--text); }
+    .slide.black { background: #000; color: var(--cream); }
+    .slide.gradient { background: linear-gradient(135deg, var(--deep-navy) 0%, #2a1a4a 100%); color: var(--cream); }
+    .slide.blood { background: linear-gradient(135deg, #1a0a0a 0%, #2d1515 100%); color: var(--cream); }
+    .slide.hope { background: linear-gradient(135deg, #0a1a0a 0%, #152d15 100%); color: var(--cream); }
+    .slide.ipd { background: linear-gradient(135deg, #0a1a2d 0%, #152d3d 100%); color: var(--cream); }
+    .slide.precision { background: linear-gradient(135deg, #1a0a2d 0%, #2d153d 100%); color: var(--cream); }
+
+    /* Typography */
+    .serif { font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif; }
+
+    .title {
+      font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+      font-size: clamp(1.8rem, 5vw, 3.5rem);
+      font-weight: 700;
+      margin-bottom: 1rem;
+      line-height: 1.2;
+    }
+
+    .title.navy { color: var(--navy); }
+    .title.gold { color: var(--gold); }
+    .title.cream { color: var(--cream); }
+    .title.red { color: var(--red); }
+    .title.green { color: var(--green); }
+    .title.blue { color: var(--blue); }
+    .title.purple { color: var(--purple); }
+
+    .subtitle {
+      font-size: clamp(1rem, 2vw, 1.5rem);
+      color: var(--light-text);
+      margin-bottom: 2rem;
+    }
+
+    .slide.dark .subtitle { color: rgba(255,255,255,0.7); }
+
+    .big-number {
+      font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+      font-size: clamp(4rem, 15vw, 10rem);
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .big-number.navy { color: var(--navy); }
+    .big-number.gold { color: var(--gold); }
+    .big-number.red { color: var(--red); }
+    .big-number.green { color: var(--green); }
+    .big-number.blue { color: var(--blue); }
+
+    /* Refrain */
+    .refrain {
+      font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+      font-size: clamp(1.4rem, 4vw, 2.5rem);
+      font-style: italic;
+      color: var(--gold);
+      text-align: center;
+      max-width: 800px;
+      line-height: 1.4;
+    }
+
+    .refrain.warning {
+      color: var(--red);
+      border-left: 4px solid var(--red);
+      padding-left: 1.5rem;
+      text-align: left;
+    }
+
+    .refrain.hope { color: var(--green); }
+    .refrain.insight { color: var(--blue); }
+
+    /* Rhetorical */
+    .rhetorical {
+      font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+      font-size: clamp(1.2rem, 3vw, 2rem);
+      color: rgba(255,255,255,0.9);
+      text-align: center;
+      max-width: 700px;
+      line-height: 1.5;
+    }
+
+    .rhetorical em { color: var(--gold); font-style: normal; }
+
+    /* Simple explanation box */
+    .simple-box {
+      background: linear-gradient(135deg, rgba(0,212,170,0.1), rgba(0,0,0,0.2));
+      border: 2px solid var(--teal);
+      border-radius: 12px;
+      padding: 1.5rem;
+      max-width: 600px;
+      margin: 1rem 0;
+    }
+
+    .simple-box.blue {
+      background: linear-gradient(135deg, rgba(59,130,246,0.1), rgba(0,0,0,0.2));
+      border-color: var(--blue);
+    }
+
+    .simple-box.purple {
+      background: linear-gradient(135deg, rgba(168,85,247,0.1), rgba(0,0,0,0.2));
+      border-color: var(--purple);
+    }
+
+    .simple-box .simple-title {
+      color: var(--teal);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.75rem;
+    }
+
+    .simple-box.blue .simple-title { color: var(--blue); }
+    .simple-box.purple .simple-title { color: var(--purple); }
+
+    .simple-box .simple-text {
+      font-size: 1.1rem;
+      line-height: 1.6;
+    }
+
+    .simple-box .simple-text strong { color: var(--gold); }
+
+    /* Story card */
+    .story-card {
+      background: rgba(0,0,0,0.3);
+      border-left: 4px solid var(--gold);
+      padding: 1.5rem 2rem;
+      max-width: 700px;
+      margin: 1rem 0;
+    }
+
+    .story-card .place {
+      font-size: 0.75rem;
+      color: var(--gold);
+      letter-spacing: 0.1em;
+      margin-bottom: 0.5rem;
+    }
+
+    .story-card .narrative {
+      font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+      font-size: 1.1rem;
+      line-height: 1.6;
+      color: rgba(255,255,255,0.9);
+    }
+
+    .story-card .source {
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.5);
+      margin-top: 1rem;
+      font-style: italic;
+    }
+
+    /* Decision Tree */
+    .decision-tree {
+      background: rgba(0,0,0,0.3);
+      border: 2px solid var(--gold);
+      border-radius: 12px;
+      padding: 1.5rem;
+      max-width: 800px;
+      width: 100%;
+    }
+
+    .decision-tree h4 {
+      color: var(--gold);
+      font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+      font-size: 1.1rem;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+
+    .tree-level {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      margin: 0.5rem 0;
+      position: relative;
+      flex-wrap: wrap;
+    }
+
+    .tree-node {
+      background: var(--navy);
+      border: 2px solid var(--gold);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      text-align: center;
+      min-width: 120px;
+      font-size: 0.8rem;
+    }
+
+    .tree-node.root { background: var(--gold); color: var(--navy); font-weight: 700; }
+    .tree-node.question { background: rgba(168,85,247,0.3); border-color: var(--purple); }
+    .tree-node.yes { background: rgba(34,197,94,0.3); border-color: var(--green); }
+    .tree-node.no { background: rgba(197,48,48,0.3); border-color: var(--red); }
+    .tree-node.ipd { background: rgba(59,130,246,0.3); border-color: var(--blue); }
+    .tree-node.aggregate { background: rgba(249,115,22,0.3); border-color: var(--orange); }
+    .tree-node.action { background: var(--teal); color: var(--navy); font-weight: 600; }
+
+    .tree-arrow {
+      color: var(--gold);
+      font-size: 1.5rem;
+      text-align: center;
+    }
+
+    .tree-label {
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.7);
+      text-align: center;
+      margin-top: 0.25rem;
+    }
+
+    /* Comparison boxes */
+    .compare-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      max-width: 800px;
+      width: 100%;
+    }
+
+    @media (max-width: 600px) { .compare-grid { grid-template-columns: 1fr; } }
+
+    .compare-box {
+      background: rgba(0,0,0,0.3);
+      border-radius: 12px;
+      padding: 1.5rem;
+      border: 2px solid;
+    }
+
+    .compare-box.aggregate { border-color: var(--orange); }
+    .compare-box.ipd { border-color: var(--blue); }
+
+    .compare-box h4 {
+      font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+      font-size: 1.1rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .compare-box.aggregate h4 { color: var(--orange); }
+    .compare-box.ipd h4 { color: var(--blue); }
+
+    .compare-box ul {
+      list-style: none;
+      font-size: 0.85rem;
+      line-height: 1.8;
+    }
+
+    .compare-box li::before {
+      content: "• ";
+      color: var(--gold);
+    }
+
+    /* Stats */
+    .stats-grid {
+      display: flex;
+      gap: 1rem;
+      margin: 1.5rem 0;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .stat-box {
+      background: var(--navy);
+      color: var(--cream);
+      padding: 1rem 1.5rem;
+      text-align: center;
+      min-width: 130px;
+      border-radius: 8px;
+    }
+
+    .stat-value {
+      font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+      font-size: clamp(1.4rem, 3vw, 2rem);
+      font-weight: 700;
+    }
+
+    .stat-label { font-size: 0.7rem; opacity: 0.8; margin-top: 0.25rem; }
+
+    /* Death toll */
+    .death-toll {
+      background: linear-gradient(135deg, rgba(197,48,48,0.3), rgba(0,0,0,0.5));
+      border: 2px solid var(--red);
+      padding: 2rem;
+      text-align: center;
+      max-width: 400px;
+      border-radius: 12px;
+    }
+
+    .death-toll .number {
+      font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+      font-size: 4rem;
+      font-weight: 700;
+      color: var(--red);
+    }
+
+    .death-toll .label {
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.8);
+      margin-top: 0.5rem;
+    }
+
+    /* Discovery box */
+    .discovery-box {
+      background: linear-gradient(135deg, rgba(59,130,246,0.3), rgba(0,0,0,0.5));
+      border: 2px solid var(--blue);
+      padding: 2rem;
+      text-align: center;
+      max-width: 450px;
+      border-radius: 12px;
+    }
+
+    .discovery-box .insight {
+      font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--blue);
+    }
+
+    .discovery-box .label {
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.8);
+      margin-top: 0.5rem;
+    }
+
+    /* Lesson items */
+    .lesson-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      margin: 0.6rem 0;
+      max-width: 800px;
+      text-align: left;
+    }
+
+    .lesson-number {
+      background: var(--gold);
+      color: var(--navy);
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      flex-shrink: 0;
+      border-radius: 4px;
+    }
+
+    .lesson-content h4 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--cream);
+      margin-bottom: 0.2rem;
+    }
+
+    .lesson-content p { font-size: 0.85rem; color: rgba(255,255,255,0.7); }
+
+    /* Formula box */
+    .formula-box {
+      background: rgba(0,0,0,0.4);
+      border: 1px solid var(--purple);
+      border-radius: 8px;
+      padding: 1rem 1.5rem;
+      font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+      font-size: 1.2rem;
+      text-align: center;
+      max-width: 600px;
+      margin: 1rem 0;
+    }
+
+    .formula-box .formula {
+      color: var(--gold);
+      margin: 0.5rem 0;
+      font-size: 1.1rem;
+    }
+
+    .formula-box .label {
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.6);
+      font-family: 'Source Sans Pro', sans-serif;
+    }
+
+    /* Patient silhouettes */
+    .patient-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.25rem;
+      max-width: 400px;
+      justify-content: center;
+      padding: 1rem;
+      background: rgba(0,0,0,0.3);
+      border-radius: 12px;
+    }
+
+    .patient-icon {
+      font-size: 1.2rem;
+      opacity: 0.7;
+    }
+
+    .patient-icon.highlighted {
+      opacity: 1;
+      filter: drop-shadow(0 0 4px var(--gold));
+    }
+
+    .patient-icon.responder { color: var(--green); }
+    .patient-icon.non-responder { color: var(--red); }
+    .patient-icon.hidden { color: var(--orange); opacity: 0.4; }
+
+    /* Timeline */
+    .timeline {
+      max-width: 600px;
+      width: 100%;
+    }
+
+    .timeline-item {
+      display: flex;
+      gap: 1rem;
+      margin: 1rem 0;
+      padding-left: 1rem;
+      border-left: 3px solid var(--gold);
+    }
+
+    .timeline-year {
+      font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--gold);
+      min-width: 60px;
+    }
+
+    .timeline-content {
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.8);
+    }
+
+    /* Gold line */
+    .gold-line { width: 150px; height: 2px; background: var(--gold); margin: 1.5rem auto; }
+
+    /* Content wrapper */
+    .content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: 1000px;
+    }
+
+    /* Animation */
+    .slide.active .animate { animation: fadeUp 0.6s ease-out forwards; }
+    .slide.active .animate.delay-1 { animation-delay: 0.1s; }
+    .slide.active .animate.delay-2 { animation-delay: 0.2s; }
+    .slide.active .animate.delay-3 { animation-delay: 0.3s; }
+    .slide.active .animate.delay-4 { animation-delay: 0.4s; }
+    .slide.active .animate.delay-5 { animation-delay: 0.5s; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate { opacity: 0; }
+
+    /* Slide Nav */
+    .slide-nav {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      padding: 1rem 1rem 1.5rem 1rem;
+      z-index: 100;
+      pointer-events: none;
+    }
+
+    .nav-btn {
+      background: rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: white;
+      font-size: 1.25rem;
+      cursor: pointer;
+      opacity: 0.6;
+      transition: all 0.2s;
+      padding: 0.5rem 0.75rem;
+      border-radius: 8px;
+      pointer-events: auto;
+    }
+
+    .nav-btn:hover { opacity: 1; background: rgba(0,0,0,0.7); border-color: var(--gold); }
+
+    .nav-center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.25rem;
+      pointer-events: auto;
+    }
+
+    .slide-counter { color: rgba(255,255,255,0.6); font-size: 0.85rem; min-width: 50px; text-align: center; }
+    .progress { display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; max-width: 200px; }
+
+    .progress-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.25);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .progress-dot.active { background: var(--gold); transform: scale(1.3); }
+    .progress-dot:hover { background: rgba(255,255,255,0.6); }
+
+    /* Quiz */
+    .quiz-container {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(212,175,55,0.3);
+      padding: 1.5rem;
+      max-width: 700px;
+      width: 100%;
+      border-radius: 8px;
+    }
+
+    .quiz-question {
+      font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+      color: var(--gold);
+      line-height: 1.4;
+    }
+
+    .quiz-options { display: flex; flex-direction: column; gap: 0.5rem; }
+
+    .quiz-option {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: left;
+      border-radius: 6px;
+      font-size: 0.9rem;
+    }
+
+    .quiz-option:hover { background: rgba(212,175,55,0.1); border-color: var(--gold); }
+    .quiz-option.correct { background: rgba(34,197,94,0.2); border-color: var(--green); }
+    .quiz-option.incorrect { background: rgba(197,48,48,0.2); border-color: var(--red); }
+
+    .quiz-feedback {
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: 8px;
+      display: none;
+      font-size: 0.9rem;
+    }
+
+    .quiz-feedback.show { display: block; }
+    .quiz-feedback.correct { background: rgba(34,197,94,0.2); border: 1px solid var(--green); }
+    .quiz-feedback.incorrect { background: rgba(197,48,48,0.2); border: 1px solid var(--red); }
+
+    /* Branching Scenario */
+    .scenario-panel {
+      background: rgba(0,0,0,0.3);
+      border: 2px solid var(--purple);
+      border-radius: 12px;
+      padding: 1.5rem;
+      max-width: 750px;
+      width: 100%;
+    }
+
+    .scenario-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .scenario-icon { font-size: 1.5rem; }
+
+    .scenario-title {
+      font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+      font-size: 1.3rem;
+      color: var(--gold);
+    }
+
+    .scenario-situation {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      margin-bottom: 1rem;
+      color: rgba(255,255,255,0.9);
+    }
+
+    .scenario-question {
+      font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+      font-size: 1.1rem;
+      color: var(--gold);
+      margin-bottom: 1rem;
+    }
+
+    .scenario-choices {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .scenario-choice {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      border-radius: 6px;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+
+    .scenario-choice:hover { background: rgba(212,175,55,0.1); border-color: var(--gold); }
+    .scenario-choice.answered { pointer-events: none; opacity: 0.6; }
+    .scenario-choice.correct { background: rgba(34,197,94,0.2); border-color: var(--green); opacity: 1; }
+    .scenario-choice.incorrect { background: rgba(197,48,48,0.2); border-color: var(--red); opacity: 1; }
+
+    .choice-letter {
+      background: var(--navy);
+      color: var(--gold);
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      font-weight: 700;
+      font-size: 0.8rem;
+      flex-shrink: 0;
+    }
+
+    .choice-text { font-size: 0.9rem; line-height: 1.4; }
+
+    .scenario-consequence {
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: 8px;
+      display: none;
+    }
+
+    .scenario-consequence.visible { display: block; }
+    .scenario-consequence.good { background: rgba(34,197,94,0.15); border: 1px solid var(--green); }
+    .scenario-consequence.bad { background: rgba(197,48,48,0.15); border: 1px solid var(--red); }
+    .scenario-consequence.neutral { background: rgba(249,115,22,0.15); border: 1px solid var(--orange); }
+
+    .consequence-title {
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .scenario-consequence.good .consequence-title { color: var(--green); }
+    .scenario-consequence.bad .consequence-title { color: var(--red); }
+    .scenario-consequence.neutral .consequence-title { color: var(--orange); }
+
+    .consequence-text { font-size: 0.9rem; line-height: 1.5; margin-bottom: 0.75rem; }
+    .consequence-lesson { font-style: italic; color: var(--gold); font-size: 0.85rem; }
+
+    /* References */
+    .references {
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(212,175,55,0.3);
+      border-radius: 8px;
+      padding: 1.5rem;
+      max-width: 700px;
+      text-align: left;
+      font-size: 0.75rem;
+      line-height: 1.8;
+    }
+
+    .references h4 {
+      color: var(--gold);
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+    }
+
+    .references ol { padding-left: 1.5rem; }
+    .references li { margin-bottom: 0.5rem; color: rgba(255,255,255,0.8); }
+    .references .journal { font-style: italic; }
+
+    .text-center { text-align: center; }
+    .mb-1 { margin-bottom: 1rem; }
+    .mb-2 { margin-bottom: 2rem; }
+    .mt-1 { margin-top: 1rem; }
+    .mt-2 { margin-top: 2rem; }
+
+    /* Interactive element focus states */
+    .module-item:focus-visible {
+      background: rgba(212,175,55,0.2);
+      outline: 2px solid var(--gold);
+      outline-offset: -2px;
+    }
+    .nav-btn:focus-visible {
+      outline: 2px solid var(--gold);
+      outline-offset: 2px;
+      opacity: 1;
+    }
+    .progress-dot:focus-visible {
+      outline: 2px solid var(--gold);
+      outline-offset: 2px;
+      transform: scale(1.5);
+    }
+    .quiz-option:focus-visible,
+    .scenario-choice:focus-visible {
+      outline: 2px solid var(--gold);
+      outline-offset: 2px;
+      background: rgba(212,175,55,0.15);
+    }
+
+    /* High contrast mode support */
+    @media (prefers-contrast: high) {
+      :root {
+        --gold: #FFD700;
+        --cream: #FFFFFF;
+        --text: #000000;
+      }
+      .btn { border-width: 2px; }
+      .slide.dark, .slide.black { background: #000; }
+    }
+
+    /* Print stylesheet */
+    @media print {
+      .sidebar, .content-header, .slide-nav, .header-actions { display: none !important; }
+      .course-container { display: block; height: auto; }
+      .main-content { overflow: visible; }
+      .content-body { overflow: visible; }
+      .slides-container { overflow: visible; position: static; }
+      .module-slides { display: block !important; }
+      .slide {
+        position: static !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        page-break-inside: avoid;
+        page-break-after: always;
+        min-height: 100vh;
+        background: white !important;
+        color: black !important;
+      }
+      .slide * { color: black !important; }
+      .title { color: #1E2761 !important; }
+      .refrain, .gold-line { color: #8B7500 !important; }
+      .simple-box, .story-card, .decision-tree, .compare-box {
+        border: 2px solid #333 !important;
+        background: #f5f5f5 !important;
+      }
+    }
+
+    /* Light theme */
+    body.light-theme {
+      --deep-navy: #f5f5f5;
+      --navy: #e8e8e8;
+      --cream: #1a1a2e;
+      --text: #2D3748;
+      --light-text: #4a5568;
+    }
+    body.light-theme .sidebar {
+      background: linear-gradient(180deg, #f0f0f0 0%, #e0e0e0 100%);
+      border-right-color: rgba(30,39,97,0.2);
+    }
+    body.light-theme .sidebar-header h1 { color: var(--navy); }
+    body.light-theme .module-item:hover { background: rgba(30,39,97,0.1); }
+    body.light-theme .module-item.active { background: rgba(30,39,97,0.15); border-left-color: #1E2761; }
+    body.light-theme .module-number { background: rgba(30,39,97,0.1); color: #1E2761; }
+    body.light-theme .module-item.active .module-number { background: #1E2761; color: white; }
+    body.light-theme .module-title { color: #1a1a2e; }
+    body.light-theme .module-subtitle { color: #4a5568; }
+    body.light-theme .content-header { background: rgba(0,0,0,0.05); border-bottom-color: rgba(30,39,97,0.2); }
+    body.light-theme .breadcrumb { color: #4a5568; }
+    body.light-theme .breadcrumb span { color: #1E2761; }
+    body.light-theme .btn { background: rgba(30,39,97,0.05); color: #1a1a2e; border-color: rgba(30,39,97,0.3); }
+    body.light-theme .btn:hover { background: rgba(30,39,97,0.15); }
+    body.light-theme .btn.primary { background: #1E2761; color: white; }
+    body.light-theme .slide.dark,
+    body.light-theme .slide.black,
+    body.light-theme .slide.gradient,
+    body.light-theme .slide.blood,
+    body.light-theme .slide.hope,
+    body.light-theme .slide.ipd,
+    body.light-theme .slide.precision {
+      background: #fafafa;
+      color: #1a1a2e;
+    }
+    body.light-theme .title.gold { color: #1E2761; }
+    body.light-theme .title.cream { color: #1a1a2e; }
+    body.light-theme .refrain { color: #1E2761; }
+    body.light-theme .refrain.warning { color: #C53030; border-left-color: #C53030; }
+    body.light-theme .refrain.hope { color: #166534; }
+    body.light-theme .refrain.insight { color: #1E40AF; }
+    body.light-theme .rhetorical { color: #1a1a2e; }
+    body.light-theme .rhetorical em { color: #1E2761; }
+    body.light-theme .simple-box { background: linear-gradient(135deg, rgba(0,212,170,0.1), rgba(240,240,240,0.8)); }
+    body.light-theme .story-card { background: rgba(0,0,0,0.03); }
+    body.light-theme .story-card .narrative { color: #2D3748; }
+    body.light-theme .decision-tree { background: rgba(0,0,0,0.03); }
+    body.light-theme .nav-btn { background: rgba(0,0,0,0.1); color: #1a1a2e; border-color: rgba(0,0,0,0.2); }
+    body.light-theme .slide-counter { color: #4a5568; }
+    body.light-theme .progress-dot { background: rgba(0,0,0,0.2); }
+    body.light-theme .progress-dot.active { background: #1E2761; }
+    body.light-theme .sidebar-footer { color: #4a5568; }
+    body.light-theme .gold-line { background: #1E2761; }
+
+    /* Certificate Modal */
+    .certificate-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+    }
+    .certificate-modal.visible { display: flex; }
+    .certificate {
+      background: linear-gradient(135deg, #faf8f5 0%, #fff 100%);
+      border: 8px solid #D4AF37;
+      border-radius: 12px;
+      padding: 3rem;
+      max-width: 700px;
+      width: 90%;
+      text-align: center;
+      position: relative;
+      box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+    }
+    .certificate-header {
+      font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+      font-size: 2.5rem;
+      color: #1E2761;
+      margin-bottom: 0.5rem;
+    }
+    .certificate-subtitle {
+      font-size: 1rem;
+      color: #718096;
+      margin-bottom: 2rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+    }
+    .certificate-body {
+      font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+      font-size: 1.2rem;
+      color: #2D3748;
+      line-height: 1.8;
+      margin-bottom: 2rem;
+    }
+    .certificate-name {
+      font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+      font-size: 2rem;
+      font-weight: 700;
+      color: #1E2761;
+      border-bottom: 2px solid #D4AF37;
+      display: inline-block;
+      padding: 0 2rem 0.5rem;
+      margin: 1rem 0;
+    }
+    .certificate-date {
+      font-size: 0.9rem;
+      color: #718096;
+      margin-top: 1.5rem;
+    }
+    .certificate-seal {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, #D4AF37, #B8860B);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 1.5rem auto 0;
+      color: white;
+      font-size: 2rem;
+      box-shadow: 0 4px 15px rgba(212,175,55,0.4);
+    }
+    .certificate-actions {
+      margin-top: 2rem;
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+    }
+    .certificate-actions button {
+      padding: 0.75rem 1.5rem;
+      border: 2px solid #1E2761;
+      border-radius: 6px;
+      background: white;
+      color: #1E2761;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .certificate-actions button:hover {
+      background: #1E2761;
+      color: white;
+    }
+    .certificate-actions button.primary {
+      background: #1E2761;
+      color: white;
+    }
+    .certificate-close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #718096;
+    }
+    .certificate-close:hover { color: #1E2761; }
+
+    /* Name input for certificate */
+    .certificate-input {
+      font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+      font-size: 1.5rem;
+      text-align: center;
+      border: none;
+      border-bottom: 2px solid #D4AF37;
+      background: transparent;
+      padding: 0.5rem 1rem;
+      width: 80%;
+      max-width: 300px;
+      color: #1E2761;
+    }
+    .certificate-input:focus {
+      outline: none;
+      border-bottom-color: #1E2761;
+    }
+    .mobile-menu-toggle{display:none;position:fixed;top:12px;left:12px;z-index:1001;background:#1E2761;border:1px solid #D4AF37;color:#D4AF37;width:40px;height:40px;border-radius:8px;font-size:1.2rem;cursor:pointer;align-items:center;justify-content:center;}
+    @media(max-width:768px){.mobile-menu-toggle{display:flex;}.sidebar{transform:translateX(-100%);transition:transform 0.3s ease;position:fixed;z-index:1000;height:100vh;}.sidebar.open{transform:translateX(0);}.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:999;}.sidebar-overlay.show{display:block;}}
+  </style>
+</head>
+<body>
+<!-- Skip link for keyboard navigation -->
+<a class="skip-link" href="#main-content">Skip to content</a>
+<button aria-expanded="false" aria-label="Toggle navigation menu" class="mobile-menu-toggle" onclick="toggleSidebar()">☰</button>
+<div class="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show');"></div>
+<!-- Live region for screen reader announcements -->
+<div aria-atomic="true" aria-live="polite" class="aria-live-region" id="ariaLiveRegion"></div>
+<!-- Certificate Modal -->
+<div aria-labelledby="certTitle" aria-modal="true" class="certificate-modal" id="certificateModal" role="dialog">
+<div class="certificate" id="certificateContent">
+<button aria-label="인증서 닫기" class="certificate-close" onclick="closeCertificate()">×</button>
+<div class="certificate-header" id="certTitle">Certificate of Completion</div>
+<div class="certificate-subtitle">개별 참가자 데이터 메타 분석</div>
+<div class="certificate-body">
+        이는<br/>
+<input aria-label="인증서 이름" class="certificate-input" id="certName" placeholder="이름 입력" type="text"/>
+<br/><br/>
+        합성 방법 및 해당 임상 과정을<br/>
+<strong>"The Hidden Patient: IPD Meta-Analysis"</strong><br/>
+        demonstrating understanding of individual participant data<br/>
+        성공적으로 완료했음을 증명합니다.
+      </div>
+<div class="certificate-date" id="certDate"></div>
+<div class="certificate-seal">✓</div>
+<div class="certificate-actions">
+<button aria-label="인증서 인쇄" onclick="printCertificate()">🖨️ Print</button>
+<button aria-label="인증서를 이미지로 다운로드" class="primary" onclick="downloadCertificate()">📥 Download</button>
+</div>
+</div>
+</div>
+<div aria-label="IPD 메타 분석 과정" class="course-container">
+<!-- Sidebar Navigation -->
+<nav aria-label="과정 모듈" class="sidebar" role="navigation">
+<div class="sidebar-header">
+<a href="index.html" onmouseout="this.style.color='rgba(212,175,55,0.7)'" onmouseover="this.style.color='#D4AF37'" style="display:block;font-size:0.7rem;color:rgba(212,175,55,0.7);text-decoration:none;margin-bottom:0.5rem;">← Course Library</a>
+<h1>숨겨진 환자</h1>
+<p>개별 참가자 데이터 메타 분석</p>
+</div>
+<div aria-label="모듈 목록" class="module-list" id="moduleList" role="list"></div>
+<div class="sidebar-footer">
+<div aria-live="polite" id="progressPercent" style="color:var(--gold);margin-bottom:0.5rem;font-weight:600;"></div>
+        "총체적으로 개인은 사라집니다."
+        <br/><br/>
+        모든 환자에게는 이야기가 있습니다. IPD를 사용하면 들을 수 있습니다.
+        <br/><br/>
+<details style="font-size:0.65rem;opacity:0.7;">
+<summary style="cursor:pointer;">Keyboard shortcuts</summary>
+<div style="margin-top:0.5rem;">
+            → / Space: Next slide<br/>
+            ←: Previous slide<br/>
+            홈: 첫 번째 모듈<br/>
+            끝: 마지막 모듈
+          </div>
+</details>
+</div>
+</nav>
+<!-- Main Content -->
+<main class="main-content" role="main">
+<header class="content-header">
+<div class="breadcrumb">
+          IPD Course &gt; <span id="currentModule">The Vanishing</span>
+</div>
+<div aria-label="과정 동작" class="header-actions" role="toolbar">
+<button aria-label="Toggle theme" class="btn" id="themeToggle" onclick="toggleTheme()" title="Toggle light/dark mode">☀️</button>
+<button aria-label="과정 진행 상황 재설정" class="btn" onclick="resetProgress()" title="처음부터 다시 시작">Reset</button>
+<button aria-label="참조 모듈로 이동" class="btn" onclick="goToModule(16)">References</button>
+<button aria-label="Continue to next slide" class="btn primary" onclick="nextSlide()">Continue</button>
+</div>
+</header>
+<div class="content-body">
+<div aria-label="과정 슬라이드" class="slides-container" id="main-content" role="region" tabindex="-1">
+ =========================== 모듈 1: 소멸(IPD가 중요한 이유) ==================== 
+<div class="module-slides active" data-module="1">
+<!-- Slide 1.1: Opening -->
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  어떻게 천 명의 환자가<br/>
+                  can be <em>reduced to a single number</em>,<br/>
+                  그 숫자에서 <em>생명이 지워지는지 보지 못하셨나요</em>?
+                </div>
+</div>
+</div>
+ 슬라이드 1.2: 집계 환상 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">총합 환상</div>
+<div class="story-card animate delay-1">
+<div class="place">EVERY META-ANALYSIS YOU'VE EVER READ</div>
+<div class="narrative">
+                    A meta-analysis reports: "Treatment reduces mortality by 15%."
+                    <br/><br/>
+                    그러나 어떤 환자가 혜택을 받았습니까? 젊은이인가, 늙은이인가? 질병이 경증이거나 중증인 경우? 남자입니까, 여자입니까?
+                    <br/><br/>
+<strong>전체가 답변할 수 없습니다.</strong>
+<br/><br/>
+                    평균적으로 일부 환자는 목숨을 구했고 일부는 피해를 입었습니다.
+                  </div>
+</div>
+</div>
+</div>
+ 슬라이드 1.3: 숨겨진 이질성 
+<div class="slide blood">
+<div class="content text-center">
+<div class="title red animate">What Aggregates Hide</div>
+<div class="patient-grid animate delay-1">
+<span class="patient-icon responder">●</span>
+<span class="patient-icon non-responder">●</span>
+<span class="patient-icon responder">●</span>
+<span class="patient-icon responder">●</span>
+<span class="patient-icon non-responder">●</span>
+<span class="patient-icon responder">●</span>
+<span class="patient-icon non-responder">●</span>
+<span class="patient-icon responder">●</span>
+<span class="patient-icon responder">●</span>
+<span class="patient-icon non-responder">●</span>
+<span class="patient-icon responder">●</span>
+<span class="patient-icon responder">●</span>
+<span class="patient-icon non-responder">●</span>
+<span class="patient-icon responder">●</span>
+<span class="patient-icon responder">●</span>
+<span class="patient-icon non-responder">●</span>
+<span class="patient-icon responder">●</span>
+<span class="patient-icon responder">●</span>
+<span class="patient-icon non-responder">●</span>
+<span class="patient-icon responder">●</span>
+</div>
+<p class="animate delay-2" style="margin-top:1rem;font-size:0.9rem;">
+<span style="color:var(--green);">● Responders</span>  
+                  <span style="color:var(--red);">● Non-responders</span>
+</p>
+<div class="simple-box animate delay-3">
+<div class="simple-title">THE TRAGEDY</div>
+<div class="simple-text">
+                    "Overall benefit: 30%"<br/><br/>
+                    But <strong>who</strong> 30%입니까? 개별 데이터가 없으면 응답자와 비응답자를 식별할 수 없습니다. 우리는 <strong>precision medicine</strong>.
+                  </div>
+</div>
+</div>
+</div>
+<!-- Slide 1.4: The Breast Cancer Revelation -->
+<div class="slide ipd">
+<div class="content text-center">
+<div class="title blue animate">Oxford, 1985</div>
+<div class="story-card animate delay-1">
+<div class="place">EARLY BREAST CANCER TRIALISTS' COLLABORATIVE GROUP</div>
+<div class="narrative">
+                    Richard Peto gathered something unprecedented: the <strong>raw data</strong>
+                    on every woman in every tamoxifen trial.
+                    <br/><br/>
+                    요약을 연습할 수 없습니다. 평균이 아닙니다. <strong>Each patient, each tumor, each outcome.</strong>
+<br/><br/>
+                    What he discovered changed breast cancer treatment forever.
+                  </div>
+<div class="source">Early Breast Cancer Trialists' Collaborative Group. Lancet 1988;2:61-72</div>
+</div>
+</div>
+</div>
+ 슬라이드 1.5: 발견 
+<div class="slide dark">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  게시된 시험에서는 다음과 같이 말했습니다.<br/>
+                  "Tamoxifen works."
+                  <br/><br/>
+                  But the <em>individual data</em> revealed:
+                </div>
+<div class="discovery-box animate delay-2">
+<div class="insight">ER+ vs ER−</div>
+<div class="label">Tamoxifen only worked in estrogen receptor positive tumors</div>
+</div>
+<div class="simple-box animate delay-3">
+<div class="simple-title">숨겨진 내용</div>
+<div class="simple-text">
+                    이 상호 작용을 감지할 만큼 큰 단일 시험은 없습니다. 모든 실험에서 <strong>개별 환자 데이터</strong> 를 결합해야만 진실이 드러날 수 있습니다.<br/><br/>
+<strong>Giving tamoxifen to ER− patients was useless.</strong>
+</div>
+</div>
+</div>
+</div>
+ 슬라이드 1.6: 자제 
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain insight animate">
+                  "총체적으로, 개인은<br/>
+                  개인에게서 진실이 나타난다.<br/>
+                  이것이 우리가 숨은 환자를 찾는 이유이다."
+                </div>
+<div class="gold-line animate delay-2"></div>
+<p class="animate delay-3" style="color:rgba(255,255,255,0.6);font-style:italic;">
+                  이것이 개인 참가자 데이터 메타분석이다.
+                </p>
+</div>
+</div>
+</div>
+ ==================== 모듈 2: AGGREGATE VS IPD ==================== 
+<div class="module-slides" data-module="2">
+<!-- Slide 2.1: Opening -->
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  What is lost when we summarize?<br/>
+                  What is found when we look closer?
+                </div>
+</div>
+</div>
+ 슬라이드 2.2: 두 가지 접근 방식 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Two Ways to Synthesize</div>
+<div class="compare-grid animate delay-1">
+<div class="compare-box aggregate">
+<h4>Aggregate Data (AD)</h4>
+<ul>
+<li>Study-level summaries</li>
+<li>출판물의 효과 크기</li>
+<li>Mean age, % male, etc.</li>
+<li>빠르고 액세스 가능</li>
+<li>Cannot see within-study variation</li>
+</ul>
+</div>
+<div class="compare-box ipd">
+<h4>개별 참가자 데이터(IPD)</h4>
+<ul>
+<li>환자 수준 원시 데이터</li>
+<li>Every participant's characteristics</li>
+<li>Actual ages, actual outcomes</li>
+<li>Time-intensive to obtain</li>
+<li>Can see who responds and who doesn't</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+ 슬라이드 2.3: 생태학적 오류 
+<div class="slide blood">
+<div class="content text-center">
+<div class="title red animate">생태학적 오류</div>
+<div class="story-card animate delay-1">
+<div class="place">집합적 사고의 위험</div>
+<div class="narrative">
+                    Imagine two trials of a drug for heart failure.
+                    <br/><br/>
+                    Trial A: Mean age 55 years, Effect size 0.70 (benefit)<br/>
+                    Trial B: Mean age 75 years, Effect size 0.90 (less benefit)
+                    <br/><br/>
+<strong>Tempting conclusion:</strong> "The drug works better in younger patients."
+                    <br/><br/>
+<strong>But this could be completely wrong.</strong>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 2.4: Why It's Wrong -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">The Trap</div>
+<div class="simple-box animate delay-1">
+<div class="simple-title">ECOLOGICAL FALLACY</div>
+<div class="simple-text">
+                    각 시험 내에서 연령과 치료 효과의 관계는 <strong>completely different</strong> 시험 간 관계에서 비롯될 수 있습니다.
+                    <br/><br/>
+                    Perhaps in Trial A, <em>older</em> patients within that trial responded better.
+                    Perhaps in Trial B, <em>younger</em> patients within that trial responded better.
+                    <br/><br/>
+<strong>개인이 없이는 알 수 없습니다. data.</strong>
+</div>
+</div>
+<div class="formula-box animate delay-2">
+<div class="label">THE RULE</div>
+<div class="formula">Between-study relationships ≠ Within-study relationships</div>
+<div class="label">Aggregate data can only show between-study patterns</div>
+</div>
+</div>
+</div>
+<!-- Slide 2.5: What IPD Enables -->
+<div class="slide ipd">
+<div class="content text-center">
+<div class="title blue animate">What IPD Enables</div>
+<div class="lesson-item animate delay-1">
+<div class="lesson-number" style="background:var(--blue);">1</div>
+<div class="lesson-content">
+<h4>True Effect Modification</h4>
+<p>Test whether treatment effect varies by patient characteristics (age, biomarkers, disease severity)</p>
+</div>
+</div>
+<div class="lesson-item animate delay-2">
+<div class="lesson-number" style="background:var(--blue);">2</div>
+<div class="lesson-content">
+<h4>Time-to-Event Analysis</h4>
+<p>Use actual survival curves, not just hazard ratios. Handle censoring properly.</p>
+</div>
+</div>
+<div class="lesson-item animate delay-3">
+<div class="lesson-number" style="background:var(--blue);">3</div>
+<div class="lesson-content">
+<h4>Consistent Definitions</h4>
+<p>Standardize outcome definitions, exposure timing, covariate categories across studies</p>
+</div>
+</div>
+<div class="lesson-item animate delay-4">
+<div class="lesson-number" style="background:var(--blue);">4</div>
+<div class="lesson-content">
+<h4>Subgroup Credibility</h4>
+<p>생태적 오류를 피하면서 연구 내 상호 작용 테스트</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 2.6: Refrain -->
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  "집계 데이터는 숲을 보여줍니다.<br/>
+                  Individual data shows each tree.<br/>
+                  어떤 나무가 병든지 알아야 하는 경우—<br/>
+                  you must walk among them."
+                </div>
+</div>
+</div>
+</div>
+ ==================== 모듈 3: CTT 계시(STATINS) =================== 
+<div class="module-slides" data-module="3">
+<!-- Slide 3.1: Opening -->
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  어떻게 본 적 없나요? <em>one collaboration</em><br/>
+                  gathered data on <em>170,000 patients</em><br/>
+                  and answered questions no single trial could ask?
+                </div>
+</div>
+</div>
+ 슬라이드 3.2: CTT 
+<div class="slide ipd">
+<div class="content text-center">
+<div class="title blue animate">Oxford, 1994-Present</div>
+<div class="story-card animate delay-1">
+<div class="place">CHOLESTEROL TREATMENT TRIALISTS' COLLABORATION</div>
+<div class="narrative">
+                    CTT가 개별 데이터를 수집하는 방법을 보지 못하셨나요? from <strong>every major statin trial</strong>.
+                    <br/><br/>
+                    27 trials. 174,149 patients. Every baseline characteristic.
+                    Every cardiovascular event. Every death.
+                    <br/><br/>
+                    The published trials asked: "Do statins work?"
+                    <br/><br/>
+                    CTT 질문: <strong>"스타틴은 누구에게 효과가 있습니까?"</strong>
+</div>
+<div class="source">CTT Collaboration. Lancet 2010;376:1670-81</div>
+</div>
+</div>
+</div>
+ 슬라이드 3.3: 숫자 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">IPD 규모</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box">
+<div class="stat-value" style="color:var(--blue);">27</div>
+<div class="stat-label">Trials Combined</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--gold);">174,149</div>
+<div class="stat-label">Individual Patients</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--teal);">5</div>
+<div class="stat-label">데이터 연도 수집</div>
+</div>
+</div>
+<div class="simple-box blue animate delay-2">
+<div class="simple-title">THE INVESTMENT</div>
+<div class="simple-text">
+                    IPD를 수집하려면 수년간의 협상, 데이터 전송, 정리 및 조화가 필요합니다.
+                    <br/><br/>
+                    그러나 답변할 수 있는 질문은 <strong>투자할 가치가 있습니다</strong>.
+                  </div>
+</div>
+</div>
+</div>
+ 슬라이드 3.4: Discovery 
+<div class="slide precision">
+<div class="content text-center">
+<div class="title purple animate">What CTT Discovered</div>
+<div class="lesson-item animate delay-1">
+<div class="lesson-number" style="background:var(--green);">✓</div>
+<div class="lesson-content">
+<h4>Benefit Proportional to LDL Reduction</h4>
+<p>Every 1 mmol/L LDL reduction = 22% lower CV events. True across all subgroups.</p>
+</div>
+</div>
+<div class="lesson-item animate delay-2">
+<div class="lesson-number" style="background:var(--green);">✓</div>
+<div class="lesson-content">
+<h4>No Age Threshold</h4>
+<p>Benefit continues even in patients &gt;75 years (contradicting earlier AD analyses)</p>
+</div>
+</div>
+<div class="lesson-item animate delay-3">
+<div class="lesson-number" style="background:var(--green);">✓</div>
+<div class="lesson-content">
+<h4>Primary Prevention Works</h4>
+<p>Patients without prior CVD benefit proportionally to their baseline risk</p>
+</div>
+</div>
+<div class="lesson-item animate delay-4">
+<div class="lesson-number" style="background:var(--red);">✗</div>
+<div class="lesson-content">
+<h4>No Cancer Signal</h4>
+<p>암을 유발하는 스타틴에 대한 우려는 IPD 후속 조치를 통해 확실하게 반박되었습니다</p>
+</div>
+</div>
+</div>
+</div>
+ 슬라이드 3.5: AD가 응답할 수 없는 이유 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">데이터 집계에 실패한 이유</div>
+<div class="story-card animate delay-1">
+<div class="place">THE LIMITATION</div>
+<div class="narrative">
+                    Published trials categorized patients differently.
+                    <br/><br/>
+                    Trial A: "High risk" = 10-year CVD risk &gt;20%<br/>
+                    Trial B: "High risk" = Prior MI<br/>
+                    Trial C: "High risk" = Diabetes
+                    <br/><br/>
+                    You cannot compare or combine what is defined differently.
+                    <br/><br/>
+<strong>IPD allowed the CTT to redefine everyone consistently.</strong>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 3.6: Refrain -->
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain hope animate">
+                  "When trials speak different languages,<br/>
+                  IPD는<br/>
+                  What seemed contradictory becomes clear:<br/>
+                  the same truth, measured differently."
+                </div>
+</div>
+</div>
+</div>
+<!-- ==================== MODULE 4: WHEN TO PURSUE IPD (DECISION TREE) ==================== -->
+<div class="module-slides" data-module="4">
+<!-- Slide 4.1: Opening -->
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  IPD takes <em>years</em> to gather.<br/>
+                  데이터 집계에 소요되는 시간 <em>weeks</em>.<br/>
+<br/>
+                  언제 투자할 가치가 있습니까?
+                </div>
+</div>
+</div>
+ 슬라이드 4.2: 의사결정 프레임워크 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">결정나무</div>
+<div class="decision-tree animate delay-1">
+<h4>IPD를 추구해야 합니까?</h4>
+<div class="tree-level">
+<div class="tree-node root">치료 효과 수정에 대해 질문이 있으신가요?</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-level" style="gap: 2rem;">
+<div>
+<div class="tree-node yes">YES</div>
+<div class="tree-label">"Who benefits most?"</div>
+</div>
+<div>
+<div class="tree-node no">NO</div>
+<div class="tree-label">"Does it work overall?"</div>
+</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-level" style="gap: 2rem;">
+<div class="tree-node ipd">IPD likely needed</div>
+<div class="tree-node aggregate">AD may suffice</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 4.3: More Criteria -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">When IPD Is Essential</div>
+<div class="lesson-item animate delay-1">
+<div class="lesson-number">1</div>
+<div class="lesson-content">
+<h4>Time-to-Event Outcomes</h4>
+<p>최종 위험 비율뿐만 아니라 생존 곡선이 중요한 경우. 검열을 적절하게 처리해야 하는 경우.</p>
+</div>
+</div>
+<div class="lesson-item animate delay-2">
+<div class="lesson-number">2</div>
+<div class="lesson-content">
+<h4>Continuous Effect Modifiers</h4>
+<p>Testing whether treatment effect varies by age, BMI, biomarker level (not just "high" vs "low")</p>
+</div>
+</div>
+<div class="lesson-item animate delay-3">
+<div class="lesson-number">3</div>
+<div class="lesson-content">
+<h4>Outcome Definition Problems</h4>
+<p>시험에서 결과를 다르게 정의하고 표준화해야 하는 경우</p>
+</div>
+</div>
+<div class="lesson-item animate delay-4">
+<div class="lesson-number">4</div>
+<div class="lesson-content">
+<h4>Longer Follow-Up Available</h4>
+<p>시험자가 발표하지 않은 후속 데이터가 있는 경우 include</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 4.4: Branching Scenario -->
+<div class="slide gradient">
+<div class="content text-center">
+<div class="scenario-panel animate" id="scenario-ipd-decision">
+<div class="scenario-header">
+<span class="scenario-icon">🔀</span>
+<span class="scenario-title">연구 전략 결정</span>
+</div>
+<div class="scenario-situation">
+                    귀사는 공개된 데이터가 포함된 10개의 적격 RCT를 계획하고 있습니다. 동료가 "IPD를 시도해야 할까요, 아니면 그냥 종합 분석을 해야 할까요?"
+                    <br/><br/>
+                    핵심 질문입니다. "질병의 심각도와 치료 시기에 따라 혜택이 달라지나요?"
+                  </div>
+<div class="scenario-question">무엇을 추천하시나요?</div>
+<div class="scenario-choices">
+<div class="scenario-choice" onclick="selectScenarioChoice('ipd-decision', 'a')">
+<span class="choice-letter">A</span>
+<span class="choice-text">AD만 수행하세요. 결과는 빨리 필요하고 IPD는 너무 오래 걸립니다.</span>
+</div>
+<div class="scenario-choice" onclick="selectScenarioChoice('ipd-decision', 'b')">
+<span class="choice-letter">B</span>
+<span class="choice-text">IPD를 추구하세요. 우리의 질문은 환자 특성에 따른 효과 수정에 관한 것입니다.</span>
+</div>
+<div class="scenario-choice" onclick="selectScenarioChoice('ipd-decision', 'c')">
+<span class="choice-letter">C</span>
+<span class="choice-text">하위군 분석을 수행하세요. 출판물의 시험 수준 심각도 범주별</span>
+</div>
+</div>
+<div class="scenario-consequence" id="consequence-ipd-decision"></div>
+</div>
+</div>
+</div>
+<!-- Slide 4.5: When AD Is Enough -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">집계된 데이터가 충분한 경우</div>
+<div class="lesson-item animate delay-1">
+<div class="lesson-number" style="background:var(--orange);">✓</div>
+<div class="lesson-content">
+<h4>Overall Treatment Effect</h4>
+<p>유일한 질문이 "작동합니까?"일 때 "누구를 위해?"가 아닙니다.</p>
+</div>
+</div>
+<div class="lesson-item animate delay-2">
+<div class="lesson-number" style="background:var(--orange);">✓</div>
+<div class="lesson-content">
+<h4>Homogeneous Population</h4>
+<p>When trials enrolled similar patients and effect modification is unlikely</p>
+</div>
+</div>
+<div class="lesson-item animate delay-3">
+<div class="lesson-number" style="background:var(--orange);">✓</div>
+<div class="lesson-content">
+<h4>Binary Outcomes, Short Follow-up</h4>
+<p>검열이 문제가 되지 않고 결과가 단순한 예/아니오인 경우</p>
+</div>
+</div>
+<div class="lesson-item animate delay-4">
+<div class="lesson-number" style="background:var(--orange);">✓</div>
+<div class="lesson-content">
+<h4>IPD Unobtainable</h4>
+<p>시험 참가자가 공유하지 않으면 데이터가 손실되거나 리소스를 사용할 수 없는 경우</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 4.6: Refrain -->
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  "모든 질문에 개인이 필요한 것은 아닙니다.<br/>
+                  그러나 모든 질문에 about <em>which</em> individuals<br/>
+                  데이터에 이들의 존재를 요구합니다."
+                </div>
+</div>
+</div>
+</div>
+ ===================== 모듈 5: 1단계 VS 2단계 =================== 
+<div class="module-slides" data-module="5">
+<!-- Slide 5.1: Opening -->
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  개별 데이터를 수집했습니다.<br/>
+<br/>
+                  이제: 다음과 같이 분석하세요. <em>one combined dataset</em><br/>
+                  or <em>trial by trial, then combine</em>?
+                </div>
+</div>
+</div>
+<!-- Slide 5.2: Two Approaches -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Two Analytical Approaches</div>
+<div class="compare-grid animate delay-1">
+<div class="compare-box aggregate">
+<h4>Two-Stage Approach</h4>
+<ul>
+<li>Stage 1: Analyze each trial separately</li>
+<li>2단계: 결과 메타 분석</li>
+<li>Preserves trial structure</li>
+<li>Familiar (like standard MA)</li>
+<li>Cannot handle sparse data well</li>
+</ul>
+</div>
+<div class="compare-box ipd">
+<h4>One-Stage Approach</h4>
+<ul>
+<li>모든 데이터를 동시에 분석</li>
+<li>Mixed-effects regression model</li>
+<li>클러스터링</li>
+<li>희소 데이터에 더 적합</li>
+<li>More flexible modeling</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 5.3: Two-Stage Explained -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">2단계: 익숙한 경로</div>
+<div class="formula-box animate delay-1">
+<div class="label">STAGE 1 (Within Each Trial)</div>
+<div class="formula">Estimate treatment effect for trial k: θ<sub>k</sub></div>
+<div class="label">해당 시험의 개별 환자 데이터 사용</div>
+</div>
+<div class="formula-box animate delay-2">
+<div class="label">STAGE 2 (Across Trials)</div>
+<div class="formula">Meta-analyze θ<sub>1</sub>, θ<sub>2</sub>, ... θ<sub>K</sub></div>
+<div class="label">표준 무작위 효과 사용 방법</div>
+</div>
+<div class="simple-box animate delay-3">
+<div class="simple-title">ADVANTAGE</div>
+<div class="simple-text">
+                    Easy to understand. Easy to explain.
+                    <br/>
+                    Each trial's estimate is transparent.
+                    <br/>
+                    익숙한 산림 계획과 I<sup>2</sup> statistics.
+                  </div>
+</div>
+</div>
+</div>
+<!-- Slide 5.4: One-Stage Explained -->
+<div class="slide ipd">
+<div class="content text-center">
+<div class="title blue animate">1단계: 강력한 경로</div>
+<div class="formula-box animate delay-1">
+<div class="label">MIXED-EFFECTS MODEL</div>
+<div class="formula">Y<sub>ij</sub> = β<sub>0</sub> + β<sub>1</sub>Treatment<sub>ij</sub> + u<sub>j</sub> + ε<sub>ij</sub></div>
+<div class="label">i = patient, j = trial, u<sub>j</sub> = random trial effect</div>
+</div>
+<div class="simple-box blue animate delay-2">
+<div class="simple-title">ADVANTAGES</div>
+<div class="simple-text">
+<strong>1.</strong> Handles trials with zero events (no continuity corrections)<br/>
+<strong>2.</strong> More powerful for detecting interactions<br/>
+<strong>3.</strong> Can model complex covariate relationships<br/>
+<strong>4.</strong> Exact likelihood (no normal approximations)
+                  </div>
+</div>
+</div>
+</div>
+<!-- Slide 5.5: Decision Tree -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">접근 방식 선택</div>
+<div class="decision-tree animate delay-1">
+<h4>One-Stage or Two-Stage?</h4>
+<div class="tree-level">
+<div class="tree-node question">Do trials have sparse events (rare outcomes)?</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-level" style="gap: 2rem;">
+<div>
+<div class="tree-node yes">YES (sparse)</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node ipd">One-stage preferred</div>
+<div class="tree-label">Avoids zero-cell problems</div>
+</div>
+<div>
+<div class="tree-node no">NO (common events)</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node aggregate">Either works</div>
+<div class="tree-label">결과는 유사해야 합니다</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 5.6: Refrain -->
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  "The two-stage preserves each trial's voice.<br/>
+                  The one-stage hears all voices at once.<br/>
+                  데이터가 희박하고 이벤트가 드문 경우—<br/>
+                  1단계 2단계에서 놓친 부분을 포착합니다."
+                </div>
+</div>
+</div>
+</div>
+ ==================== 모듈 6: 코르티코스테로이드 타이밍 스토리 =================== 
+<div class="module-slides" data-module="6">
+<!-- Slide 6.1: Opening -->
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  아기의 생명을 구한 약물<br/>
+                  —<br/>
+<em>but only if given at the right time</em>?
+                </div>
+</div>
+</div>
+<!-- Slide 6.2: Preterm Birth -->
+<div class="slide ipd">
+<div class="content text-center">
+<div class="title blue animate">미숙아의 역설</div>
+<div class="story-card animate delay-1">
+<div class="place">NEONATAL INTENSIVE CARE UNITS WORLDWIDE</div>
+<div class="narrative">
+                    산전 코르티코스테로이드는 1970년대에 확립되었습니다.
+                    <br/><br/>
+                    But a puzzle remained: <strong>When should they be given?</strong>
+<br/><br/>
+                    24 hours before birth? 48 hours? A week?
+                    <br/><br/>
+                    Published trials couldn't answer—they didn't report timing consistently.
+                  </div>
+<div class="source">Roberts D, et al. Cochrane Database Syst Rev 2017</div>
+</div>
+</div>
+</div>
+ 슬라이드 6.3: IPD 솔루션 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">IPD가 공개한 창</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box" style="border: 2px solid var(--green);">
+<div class="stat-value" style="color:var(--green);">24h-7d</div>
+<div class="stat-label">Optimal Window</div>
+</div>
+<div class="stat-box" style="border: 2px solid var(--red);">
+<div class="stat-value" style="color:var(--red);">&gt;7 days</div>
+<div class="stat-label">Benefit Wanes</div>
+</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">THE DISCOVERY</div>
+<div class="simple-text">
+                    By examining each baby's exact time from steroid to delivery,
+                    IPD meta-analysis showed:
+                    <br/><br/>
+<strong>Maximum benefit:</strong> 24 hours to 7 days before birth<br/>
+<strong>Reduced benefit:</strong> &gt;7 days (lung maturity effect fades)<br/>
+<strong>No benefit:</strong> &lt;24 hours (not enough time to work)
+                  </div>
+</div>
+</div>
+</div>
+<!-- Slide 6.4: Clinical Impact -->
+<div class="slide hope">
+<div class="content text-center">
+<div class="title green animate">Lives Saved, Practice Changed</div>
+<div class="story-card animate delay-1">
+<div class="place">임상적 영향</div>
+<div class="narrative">
+                    IPD 전: 임상의는 스테로이드를 투여하고 최선의 결과를 바랐습니다.
+                    <br/><br/>
+                    After IPD: Guidelines now recommend <strong>repeat dosing</strong>
+                    처음 후 7일 이내에 배송이 이루어지지 않은 경우 물론입니다.
+                    <br/><br/>
+                    개별 데이터 없이는 불가능한 이 정밀도에는 <strong>saved thousands of premature babies</strong>.
+                  </div>
+</div>
+<div class="discovery-box animate delay-2">
+<div class="insight">Timing is Treatment</div>
+<div class="label">동일한 약물이 잘못된 시기에 투여되면 위약이 될 수도 있습니다.</div>
+</div>
+</div>
+</div>
+<!-- Slide 6.5: Why AD Failed -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">집합 데이터가 이를 표시할 수 없는 이유</div>
+<div class="simple-box animate delay-1">
+<div class="simple-title">THE PROBLEM</div>
+<div class="simple-text">
+                    Trial A reported: "Steroid given within 48 hours"<br/>
+                    Trial B reported: "Steroid given antenatally"<br/>
+                    Trial C reported: "Steroid-to-delivery interval: median 3 days"
+                    <br/><br/>
+                    Different categories. Different definitions. <strong>Incompatible summaries.</strong>
+<br/><br/>
+                    Only by examining each baby's actual steroid-to-delivery time
+                    could the optimal window be identified.
+                  </div>
+</div>
+</div>
+</div>
+<!-- Slide 6.6: Refrain -->
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain hope animate">
+                  "이 약물은 다음과 같은 것으로 알려져 있습니다. 일.<br/>
+                  But <em>when</em> 그것을 주는 것은 알 수 없었습니다.<br/>
+                  IPD는 '언젠가'를 '적절한 때'로 바꾸었습니다.<br/>
+                  그리고 그 정확성 속에서 아이들은 살았습니다."
+                </div>
+</div>
+</div>
+</div>
+ ===================== MODULE 7: IPD 획득(퀘스트) ==================== 
+<div class="module-slides" data-module="7">
+<!-- Slide 7.1: Opening -->
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  데이터가 존재합니다.<br/>
+                  어딘가의 파일과 데이터베이스<br/>
+<em>각 환자의 이야기가 기록됩니다.</em>.<br/>
+<br/>
+                  문제는 환자가 이를 공유할 것인가입니다.
+                </div>
+</div>
+</div>
+ 슬라이드 7.2: 퀘스트 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">데이터 탐구</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box">
+<div class="stat-value" style="color:var(--green);">60-80%</div>
+<div class="stat-label">Typical IPD Retrieval Rate</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--red);">6-24</div>
+<div class="stat-label">Months to Gather</div>
+</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">REALITY CHECK</div>
+<div class="simple-text">
+                    아마도 <strong>not</strong> get 100% of trials.
+                    Some investigators will refuse. Some data is lost.
+                    Some companies won't share.
+                    <br/><br/>
+<strong>This is expected.</strong> Plan for it.
+                  </div>
+</div>
+</div>
+</div>
+ 슬라이드 7.3: 데이터 소스 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Where IPD Lives</div>
+<div class="lesson-item animate delay-1">
+<div class="lesson-number">1</div>
+<div class="lesson-content">
+<h4>Trialist Collaboration</h4>
+<p>Direct contact with trial investigators. Build relationships. Offer co-authorship.</p>
+</div>
+</div>
+<div class="lesson-item animate delay-2">
+<div class="lesson-number">2</div>
+<div class="lesson-content">
+<h4>데이터 공유 플랫폼</h4>
+<p>YODA Project, ClinicalStudyDataRequest.com, Vivli, ICPSR</p>
+</div>
+</div>
+<div class="lesson-item animate delay-3">
+<div class="lesson-number">3</div>
+<div class="lesson-content">
+<h4>Regulatory Agencies</h4>
+<p>EMA Policy 0070, FDA (limited), Health Canada</p>
+</div>
+</div>
+<div class="lesson-item animate delay-4">
+<div class="lesson-number">4</div>
+<div class="lesson-content">
+<h4>Journal Requirements</h4>
+<p>Many journals now require data sharing; check supplementary materials</p>
+</div>
+</div>
+</div>
+</div>
+ 슬라이드 7.4: 협업 편지 
+<div class="slide ipd">
+<div class="content text-center">
+<div class="title blue animate">The Approach</div>
+<div class="story-card animate delay-1">
+<div class="place">HOW TO ASK</div>
+<div class="narrative">
+<strong>1. 질문을 시작하세요</strong>—explain why IPD is essential
+                    <br/><br/>
+<strong>2. Offer co-authorship</strong>—make sharing worthwhile
+                    <br/><br/>
+<strong>3. 데이터 보안 설명</strong>—how you'll protect their patients
+                    <br/><br/>
+<strong>4. 데이터 사전 제공</strong>—specify exactly what you need
+                    <br/><br/>
+<strong>5. Set clear timelines</strong>—respect their time
+                  </div>
+</div>
+</div>
+</div>
+<!-- Slide 7.5: Missing IPD Problem -->
+<div class="slide blood">
+<div class="content text-center">
+<div class="title red animate">가용성 편향 함정</div>
+<div class="simple-box animate delay-1">
+<div class="simple-title">THE DANGER</div>
+<div class="simple-text">
+                    시행 <strong>share data</strong> 시스템적으로 다른 시도 <strong>don't share</strong>?
+                    <br/><br/>
+                    Industry trials: less likely to share<br/>
+                    Negative trials: less likely to share<br/>
+                    Older trials: data may be lost
+                    <br/><br/>
+<strong>Your IPD sample may be biased.</strong>
+</div>
+</div>
+<div class="formula-box animate delay-2">
+<div class="label">THE RULE</div>
+<div class="formula">Always compare: IPD trials vs. non-IPD trials</div>
+<div class="label">Do they differ in effect size, sample size, funding source?</div>
+</div>
+</div>
+</div>
+<!-- Slide 7.6: Refrain -->
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  "데이터가 존재하는 경우. 문제는 신뢰입니다.<br/>
+                  Will they share what they have guarded?<br/>
+                  브리지를 구축하세요. 신중하게—<br/>
+                  그 다리 위에서는 환자의 미래가 교차합니다."
+                </div>
+</div>
+</div>
+</div>
+ ==================== 모듈 8: 데이터 조화 =================== 
+<div class="module-slides" data-module="8">
+<!-- Slide 8.1: Opening -->
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  모으셨습니다. 데이터<br/>
+                  from twelve trials, five countries, three decades.<br/>
+<br/>
+                  But Trial A calls it <em>"cardiovascular death"</em><br/>
+                  및 시험 B가 이를 호출 <em>"cardiac mortality"</em>.<br/>
+<br/>
+                  동일합니까?
+                </div>
+</div>
+</div>
+ 슬라이드 8.2: 조화 과제 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">바벨탑 문제</div>
+<div class="story-card animate delay-1">
+<div class="place">EVERY IPD META-ANALYSIS</div>
+<div class="narrative">
+                    Trial from Japan: Age in years since 1900 (e.g., "54" = 1954 birth)<br/>
+                    Trial from USA: Age in decimal years (e.g., 65.7)<br/>
+                    영국의 시험: 연령 밴드 ("65-74")<br/><br/>
+                    Diabetes: HbA1c ≥ 6.5% vs. fasting glucose ≥ 126 vs. "physician diagnosis"<br/><br/>
+                    Outcome: "Major adverse cardiac event" (one trial includes stroke, another doesn't)<br/><br/>
+<strong>분석 전: 모든 것을 조화시키세요.</strong>
+</div>
+</div>
+</div>
+</div>
+ 슬라이드 8.3: 프로세스 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">조화 프로세스</div>
+<div class="lesson-item animate delay-1">
+<div class="lesson-number">1</div>
+<div class="lesson-content">
+<h4>마스터 데이터 생성 사전</h4>
+<p>Define every variable you need: name, type, permitted values, derivation rules</p>
+</div>
+</div>
+<div class="lesson-item animate delay-2">
+<div class="lesson-number">2</div>
+<div class="lesson-content">
+<h4>Map Each Trial's Variables</h4>
+<p>Document how each trial's coding maps to your standardized definitions</p>
+</div>
+</div>
+<div class="lesson-item animate delay-3">
+<div class="lesson-number">3</div>
+<div class="lesson-content">
+<h4>시험 참가자에게 확인</h4>
+<p>해석을 확인하세요. 그들은 당신보다 자신의 데이터를 더 잘 알고 있습니다.</p>
+</div>
+</div>
+<div class="lesson-item animate delay-4">
+<div class="lesson-number">4</div>
+<div class="lesson-content">
+<h4>Validate Transformations</h4>
+<p>IPD에서 게시된 결과를 재현합니다. 일치하지 않으면 조사하십시오.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 8.4: Branching Scenario -->
+<div class="slide gradient">
+<div class="content text-center">
+<div class="scenario-panel animate" id="scenario-harmonization">
+<div class="scenario-header">
+<span class="scenario-icon">🔀</span>
+<span class="scenario-title">정의 딜레마</span>
+</div>
+<div class="scenario-situation">
+                    8개의 당뇨병 임상시험에서 얻은 IPD를 조화시키고 있습니다. 주요 결과는 "심장혈관 사망"입니다.
+                    <br/><br/>
+                    6건의 임상시험에서는 표준 정의(ICD 코드)를 사용했습니다. 1990년대 두 건의 임상시험에서는 표준화된 기준 없이 "시험자가 평가한 심장사"를 사용했습니다. 이 두 가지 실험은 더 큰 치료 효과를 보여줍니다.
+                  </div>
+<div class="scenario-question">이를 어떻게 처리합니까?</div>
+<div class="scenario-choices">
+<div class="scenario-choice" onclick="selectScenarioChoice('harmonization', 'a')">
+<span class="choice-letter">A</span>
+<span class="choice-text">8개 실험을 모두 포함합니다. 데이터가 많을수록 더 좋고 정의가 "충분히 가깝습니다"</span>
+</div>
+<div class="scenario-choice" onclick="selectScenarioChoice('harmonization', 'b')">
+<span class="choice-letter">B</span>
+<span class="choice-text">Exclude the 2 non-standardized trials to maintain outcome consistency</span>
+</div>
+<div class="scenario-choice" onclick="selectScenarioChoice('harmonization', 'c')">
+<span class="choice-letter">C</span>
+<span class="choice-text">일관된 6개 실험을 사용한 1차 분석입니다. 다른 2개를 추가하는 민감도 분석</span>
+</div>
+</div>
+<div class="scenario-consequence" id="consequence-harmonization"></div>
+</div>
+</div>
+</div>
+ 슬라이드 8.5: 검증 단계 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">중요한 검증</div>
+<div class="simple-box animate delay-1">
+<div class="simple-title">THE TEST</div>
+<div class="simple-text">
+<strong>새 분석 전:</strong>
+<br/><br/>
+                    IPD에서 각 시험의 게시된 결과를 재현합니다.
+                    <br/><br/>
+                    분석에서 RR = 0.78이지만 출판물에는 RR = 0.85로 나와 있는 경우
+                    <br/>
+<strong>something is wrong.</strong>
+<br/><br/>
+                    Find the discrepancy. Fix it. Then proceed.
+                  </div>
+</div>
+</div>
+</div>
+<!-- Slide 8.6: Refrain -->
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  "Different languages, different rulers,<br/>
+                  different ways to name the same disease.<br/>
+                  수행하기 전에 결합하려면 번역해야 합니다.<br/>
+                  번역하기 전에 먼저 이해해야 합니다."
+                </div>
+</div>
+</div>
+</div>
+ ===================== 모듈 9: 상호 작용 테스트 =================== 
+<div class="module-slides" data-module="9">
+<!-- Slide 9.1: Opening -->
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  치료 효과가 있습니다 <em>on average</em>.<br/>
+<br/>
+                  그런데 어린이와 노인 모두에게 동일하게 효과가 있나요?<br/>
+                  경증 환자와 중증 환자에게 적용됩니까?<br/>
+                  바이오마커가 있는 사람과 없이?
+                </div>
+</div>
+</div>
+<!-- Slide 9.2: The Tamoxifen Discovery Revisited -->
+<div class="slide ipd">
+<div class="content text-center">
+<div class="title blue animate">종양학을 변화시킨 상호작용</div>
+<div class="story-card animate delay-1">
+<div class="place">EBCTCG, 1985-1998</div>
+<div class="narrative">
+                    The Early Breast Cancer Trialists' Group didn't just ask "Does tamoxifen work?"
+                    <br/><br/>
+                    They asked: <strong>"Does the effect differ by estrogen receptor status?"</strong>
+<br/><br/>
+                    상호작용은 엄청났습니다:
+                    <br/><br/>
+                    ER-positive: 47% reduction in recurrence<br/>
+                    ER-negative: <strong>No benefit at all</strong>
+</div>
+<div class="source">EBCTCG. Lancet 1998;351:1451-67</div>
+</div>
+<div class="discovery-box animate delay-2">
+<div class="insight">p<sub>interaction</sub> &lt; 0.00001</div>
+<div class="label">The most important interaction in cancer medicine</div>
+</div>
+</div>
+</div>
+<!-- Slide 9.3: How to Test Interactions -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Testing Treatment-Covariate Interactions</div>
+<div class="formula-box animate delay-1">
+<div class="label">THE MODEL</div>
+<div class="formula">Outcome = β<sub>1</sub>Treatment + β<sub>2</sub>Covariate + β<sub>3</sub>(Treatment × Covariate)</div>
+<div class="label">β<sub>3</sub> is the interaction term - does treatment effect vary by covariate?</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">INTERPRETATION</div>
+<div class="simple-text">
+                    If β<sub>3</sub> is statistically significant:
+                    <br/><br/>
+                    치료 효과 <strong>differs</strong> between subgroups defined by the covariate.
+                    <br/><br/>
+                    그렇지 않은 경우: 치료 효과는 <strong>similar</strong> across subgroups
+                    (or you lack power to detect a difference).
+                  </div>
+</div>
+</div>
+</div>
+<!-- Slide 9.4: Within vs Between Study Interactions -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">중요한 차이점</div>
+<div class="compare-grid animate delay-1">
+<div class="compare-box aggregate">
+<h4>Between-Study Interaction</h4>
+<ul>
+<li>Compares trial-level averages</li>
+<li>Ecological fallacy risk</li>
+<li>Confounded by trial design</li>
+<li>Low statistical power</li>
+<li>집합으로 할 수 있습니다 데이터</li>
+</ul>
+</div>
+<div class="compare-box ipd">
+<h4>Within-Study Interaction</h4>
+<ul>
+<li>Compares patients within each trial</li>
+<li>No ecological fallacy</li>
+<li>Randomization preserved</li>
+<li>Much higher power</li>
+<li>Requires IPD</li>
+</ul>
+</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">주요 통찰력</div>
+<div class="simple-text">
+                    IPD를 사용하면 테스트할 수 있습니다 <strong>within-study interactions</strong>,
+                    where randomization ensures the comparison is fair.
+                    <br/><br/>
+                    이것은 효과 수정에 대한 표준입니다.
+                  </div>
+</div>
+</div>
+</div>
+<!-- Slide 9.5: Branching Scenario -->
+<div class="slide gradient">
+<div class="content text-center">
+<div class="scenario-panel animate" id="scenario-interaction">
+<div class="scenario-header">
+<span class="scenario-icon">🔀</span>
+<span class="scenario-title">연령 상호 작용 질문</span>
+</div>
+<div class="scenario-situation">
+                    IPD 메타 분석 심방세동에 대한 항응고제에는 12,000명의 환자가 포함되어 있으며 연령 상호작용을 테스트한 결과 p=0.03을 발견했습니다. 75세 이상 환자(RR 0.55)가 75세 미만 환자(RR 0.72)보다 더 큰 이점을 나타냅니다.
+                    <br/><br/>
+                    분석에서 8가지 잠재적 효과 수정자를 테스트했습니다.
+                  </div>
+<div class="scenario-question">해석 방법 이 결과는요?</div>
+<div class="scenario-choices">
+<div class="scenario-choice" onclick="selectScenarioChoice('interaction', 'a')">
+<span class="choice-letter">A</span>
+<span class="choice-text">노인 환자에게 항응고제가 더 효과적이라고 보고합니다. 상호 작용이 중요합니다.</span>
+</div>
+<div class="scenario-choice" onclick="selectScenarioChoice('interaction', 'b')">
+<span class="choice-letter">B</span>
+<span class="choice-text">Apply multiple testing correction; with 8 tests, p=0.03 is likely a false positive</span>
+</div>
+<div class="scenario-choice" onclick="selectScenarioChoice('interaction', 'c')">
+<span class="choice-letter">C</span>
+<span class="choice-text">Report as hypothesis-generating, note the multiple comparisons, request external validation</span>
+</div>
+</div>
+<div class="scenario-consequence" id="consequence-interaction"></div>
+</div>
+</div>
+</div>
+<!-- Slide 9.6: Refrain -->
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  "평균은 상호 작용을 숨깁니다.<br/>
+                  The interaction reveals who benefits.<br/>
+                  연구 사이가 아닌 연구 내에서 테스트하세요.<br/>
+                  진실은 여기에 있습니다. "
+                </div>
+</div>
+</div>
+</div>
+ ===================== 모듈 10: 예후 및 예측 ==================== 
+<div class="module-slides" data-module="10">
+<!-- Slide 10.1: Opening -->
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  IPD는 치료만을 위한 것이 아닙니다.<br/>
+<br/>
+                  찾을 때 <em>predict</em> who will die,<br/>
+                  who will recover, who will relapse—<br/>
+<em>개인이 전부입니다</em>.
+                </div>
+</div>
+</div>
+ 슬라이드 10.2: IMPACT 이야기 
+<div class="slide ipd">
+<div class="content text-center">
+<div class="title blue animate">Predicting Recovery After Brain Injury</div>
+<div class="story-card animate delay-1">
+<div class="place">IMPACT CONSORTIUM, 2005-PRESENT</div>
+<div class="narrative">
+                    외상성 뇌 손상 후 가족들은 충격적인 질문을 합니다.
+                    <br/><br/>
+<strong>"Will they ever wake up?"</strong>
+<br/><br/>
+                    Individual trials were too small to develop accurate prediction models.
+                    <br/><br/>
+                    IMPACT는 11개 연구, 9,205명의 환자로부터 IPD를 수집했으며, 초기 임상 특징에서 6개월 결과를 예측하는 모델을 구축했습니다.
+                  </div>
+<div class="source">IMPACT Study Group. PLoS Med 2008;5:e165</div>
+</div>
+</div>
+</div>
+<!-- Slide 10.3: Why IPD for Prognosis -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Why Prognosis Demands IPD</div>
+<div class="lesson-item animate delay-1">
+<div class="lesson-number">1</div>
+<div class="lesson-content">
+<h4>External Validation Across Populations</h4>
+<p>Develop in some studies, validate in others. True test of generalizability.</p>
+</div>
+</div>
+<div class="lesson-item animate delay-2">
+<div class="lesson-number">2</div>
+<div class="lesson-content">
+<h4>Non-linear Relationships</h4>
+<p>Explore how predictors relate to outcome: linear? threshold? U-shaped?</p>
+</div>
+</div>
+<div class="lesson-item animate delay-3">
+<div class="lesson-number">3</div>
+<div class="lesson-content">
+<h4>Multiple Predictor Interactions</h4>
+<p>Age + GCS + pupil reactivity may interact in ways aggregate data cannot reveal</p>
+</div>
+</div>
+<div class="lesson-item animate delay-4">
+<div class="lesson-number">4</div>
+<div class="lesson-content">
+<h4>Proper Handling of Missing Predictors</h4>
+<p>연구 수준이 아닌 환자 수준에서 다중 대치</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 10.4: The TRIPOD+PRISMA-IPD Framework -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Reporting Standards</div>
+<div class="compare-grid animate delay-1">
+<div class="compare-box aggregate">
+<h4>TRIPOD</h4>
+<ul>
+<li>Prediction model reporting</li>
+<li>개발 및 검증</li>
+<li>보정 및 차별</li>
+<li>22 item checklist</li>
+</ul>
+</div>
+<div class="compare-box ipd">
+<h4>PRISMA-IPD</h4>
+<ul>
+<li>IPD meta-analysis reporting</li>
+<li>데이터 획득 세부 정보</li>
+<li>Harmonization process</li>
+<li>Integrity checking</li>
+</ul>
+</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">IPD 예측 모델의 경우</div>
+<div class="simple-text">
+                    You need <strong>both</strong>: 모델 자체의 경우 TRIPOD, 데이터 합성 프로세스의 경우 PRISMA-IPD.
+                  </div>
+</div>
+</div>
+</div>
+<!-- Slide 10.5: Clinical Impact -->
+<div class="slide hope">
+<div class="content text-center">
+<div class="title green animate">When Prediction Saves Lives</div>
+<div class="story-card animate delay-1">
+<div class="place">임상적 영향</div>
+<div class="narrative">
+                    The IMPACT model is now embedded in clinical decision support systems worldwide.
+                    <br/><br/>
+                    외상성 뇌 손상을 입은 환자가 도착하면 모델은 <strong>probability of survival</strong>
+                    and <strong>probability of favorable outcome</strong>.
+                    <br/><br/>
+                    가족과의 대화를 안내합니다. 이는 치료 강도를 알려줍니다. 이는 ICU 리소스를 할당하는 데 도움이 됩니다.
+                    <br/><br/>
+<strong>개별 데이터로 구축되었습니다. 개별 환자에게 서비스를 제공합니다.</strong>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 10.6: Refrain -->
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain hope animate">
+                  "To predict one patient's future,<br/>
+                  수천 개의 과거로부터 배워야 합니다.<br/>
+                  IPD는 이러한 이야기를 보유하고 있습니다.<br/>
+                  each one a teacher, if you will listen."
+                </div>
+</div>
+</div>
+</div>
+ =================== 모듈 11: 아스피린 역설(ATT) ==================== 
+<div class="module-slides" data-module="11">
+<!-- Slide 11.1: Opening Sign -->
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  작은 흰색 태블릿을 고려하지 않으셨나요?<br/>
+                  그들의 마음을 위해 주어진 작은 흰색 판 <em>millions</em> 을 생각해 보지 않으셨나요?<br/>
+<br/>
+                  그들은 말함: <em>"이것을 가져가세요. 그러면 당신은 보호받을 것입니다."</em><br/>
+<br/>
+                  But was every heart equally in need of protection?
+                </div>
+</div>
+</div>
+ 슬라이드 11.2: Netflix 상 이야기 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Netflix 상 이야기</div>
+<div class="story-card animate delay-1">
+<div class="place">A TRUE STORY</div>
+<div class="narrative">
+                    In 2006, Netflix released 100 million "anonymized" movie ratings for a $1 million prize.
+                    <br/><br/>
+                    Researchers quickly re-identified users by matching ratings with public IMDb reviews.
+                    <br/><br/>
+                    One lawsuit alleged a closeted lesbian was outed through her viewing patterns.
+                    <br/><br/>
+<strong>The lesson: removing names isn't anonymization.</strong>
+<br/><br/>
+                    IPD에는 고유하게 식별할 수 있는 연령, 진단, 치료 반응 및 날짜의 충분한 조합이 포함되어 있습니다. 개인. 개인 정보 보호에는 이름 열을 삭제하는 것 이상이 필요합니다. 즉, 데이터 조합이 지문이 되는 방식을 이해해야 합니다.
+                  </div>
+</div>
+</div>
+</div>
+ 슬라이드 11.3: ATT 협업 
+<div class="slide ipd">
+<div class="content text-center">
+<div class="title blue animate">Oxford, 2009</div>
+<div class="story-card animate delay-1">
+<div class="place">ANTITHROMBOTIC TRIALISTS' COLLABORATION</div>
+<div class="narrative">
+                    ATT는 <strong>95,000 patients</strong>
+                    across 6 primary prevention trials of aspirin.
+                    <br/><br/>
+                    The published trials said: "Aspirin prevents heart attacks."
+                    <br/><br/>
+                    에서 개별 데이터를 수집했지만 ATT는 다음과 같은 금지된 질문을 했습니다.
+                    <br/><br/>
+<strong>"At 비용은 얼마입니까?"</strong>
+</div>
+<div class="source">ATT Collaboration. Lancet 2009;373:1849-60</div>
+</div>
+</div>
+</div>
+ 슬라이드 11.4: 계시 
+<div class="slide blood">
+<div class="content text-center">
+<div class="title red animate">밝혀진 숫자</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box" style="border: 2px solid var(--green);">
+<div class="stat-value" style="color:var(--green);">-12%</div>
+<div class="stat-label">Heart Attacks Prevented</div>
+</div>
+<div class="stat-box" style="border: 2px solid var(--red);">
+<div class="stat-value" style="color:var(--red);">+32%</div>
+<div class="stat-label">Major Bleeds Caused</div>
+</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">THE BALANCE</div>
+<div class="simple-text">
+                    For every <strong>1,000 low-risk patients</strong> 5년간 아스피린 복용:
+                    <br/><br/>
+<span style="color:var(--green);">2-3 heart attacks prevented</span><br/>
+<span style="color:var(--red);">2-3 major bleeds caused</span>
+<br/><br/>
+<strong>혜택과 해로움이 사라집니다. out.</strong>
+</div>
+</div>
+</div>
+</div>
+ 슬라이드 11.5: 의사결정도 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">위험 기반 결정</div>
+<div class="decision-tree animate delay-1">
+<h4>이 환자는 1차 예방을 위해 아스피린을 복용해야 합니까?</h4>
+<div class="tree-level">
+<div class="tree-node root">10-Year CVD Risk?</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-level" style="gap: 1rem;">
+<div>
+<div class="tree-node yes" style="background:rgba(34,197,94,0.3);">&gt;20%</div>
+<div class="tree-label">High Risk</div>
+</div>
+<div>
+<div class="tree-node question">10-20%</div>
+<div class="tree-label">Intermediate</div>
+</div>
+<div>
+<div class="tree-node no" style="background:rgba(197,48,48,0.3);">&lt;10%</div>
+<div class="tree-label">Low Risk</div>
+</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-level" style="gap: 1rem;">
+<div class="tree-node action">Consider aspirin<br/>(benefit &gt; harm)</div>
+<div class="tree-node aggregate">Shared decision<br/>(benefit ≈ harm)</div>
+<div class="tree-node" style="background:rgba(197,48,48,0.5);border-color:var(--red);">Avoid aspirin<br/>(harm &gt; benefit)</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 11.6: Why Aggregate Failed -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  Why did published meta-analyses miss this?
+                </div>
+<div class="simple-box animate delay-1">
+<div class="simple-title">집계</div>
+<div class="simple-text">
+                    Published trials reported <strong>average benefits</strong>.
+                    <br/><br/>
+                    고위험 환자가<br/>
+                    while low-risk patients lost.
+                    <br/><br/>
+                    Only by examining each patient's baseline risk,<br/>
+                    each patient's outcomes,<br/>
+                    could the <strong>interaction</strong> be revealed.
+                  </div>
+</div>
+</div>
+</div>
+<!-- Slide 11.7: Branching Scenario -->
+<div class="slide gradient">
+<div class="content text-center">
+<div class="scenario-panel animate" id="scenario-aspirin">
+<div class="scenario-header">
+<span class="scenario-icon">🔀</span>
+<span class="scenario-title">1차 예방 딜레마</span>
+</div>
+<div class="scenario-situation">
+                    52세 남성이 심장마비 예방을 위한 아스피린에 대해 문의했습니다. 그는 이전에 CVD 병력이 없었고, 콜레스테롤은 경계선에 있으며, 혈압은 조절되고, 비흡연자입니다. 그의 10년간 심혈관 질환 위험은 8%입니다.
+                    <br/><br/>
+                    그는 온라인에서 "아스피린이 심장마비를 예방한다"는 내용을 읽고 조언을 구했습니다.
+                  </div>
+<div class="scenario-question">그에게 무엇을 말합니까?</div>
+<div class="scenario-choices">
+<div class="scenario-choice" onclick="selectScenarioChoice('aspirin', 'a')">
+<span class="choice-letter">A</span>
+<span class="choice-text">"Yes, take aspirin daily - it's proven to prevent heart attacks"</span>
+</div>
+<div class="scenario-choice" onclick="selectScenarioChoice('aspirin', 'b')">
+<span class="choice-letter">B</span>
+<span class="choice-text">"At your risk level, aspirin's bleeding risk roughly equals its heart benefit - I'd recommend against it"</span>
+</div>
+<div class="scenario-choice" onclick="selectScenarioChoice('aspirin', 'c')">
+<span class="choice-letter">C</span>
+<span class="choice-text">"Take baby aspirin - the lower dose is safer"</span>
+</div>
+</div>
+<div class="scenario-consequence" id="consequence-aspirin"></div>
+</div>
+</div>
+</div>
+<!-- Slide 11.8: Refrain -->
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  "멸종 위기에 처한 사람들을 구하는 약은<br/>
+                  안전합니다.<br/>
+<br/>
+                  처방하기 전에 환자의 위험을 파악하십시오.<br/>
+                  이것이 개별 데이터가 우리에게 가르쳐 준 것입니다."
+                </div>
+<div class="gold-line animate delay-2"></div>
+<p class="animate delay-3" style="color:rgba(255,255,255,0.6);font-style:italic;">
+                  95,000 patients. One truth: risk determines benefit.
+                </p>
+</div>
+</div>
+</div>
+ ====================== 모듈 12: 혈압 계시(BPLTTC) ==================== 
+<div class="module-slides" data-module="12">
+<!-- Slide 12.1: Opening -->
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  그들이 수십 년 동안 어떻게 논쟁했는지 보지 못하셨습니까?<br/>
+<em>"노인을 젊은이와 동일하게 대우해야 합니까?"</em><br/>
+<br/>
+                  Some said: "Lower is always better."<br/>
+                  다른 사람들은 말했습니다: "노인은 연약합니다. 조심하세요."<br/>
+<br/>
+                  누가 맞았나요?
+                </div>
+</div>
+</div>
+ 슬라이드 12.2: 논쟁 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">J 곡선 논쟁</div>
+<div class="story-card animate delay-1">
+<div class="place">CARDIOLOGY CONFERENCES, 1980s-2000s</div>
+<div class="narrative">
+                    수년 동안 의사들은 다음과 같이 주장했습니다.
+                    <br/><br/>
+<strong>공격적 진영:</strong> "Every mmHg of BP reduction saves lives.<br/>
+                    Treat everyone to target 120/80."
+                    <br/><br/>
+<strong>보수주의자 캠프:</strong> "In the elderly, low BP causes falls, strokes, death.<br/>
+                    There's a J-curve—too low is dangerous."
+                    <br/><br/>
+                    Individual trials were too small to settle it.
+                    <strong>BPLTTC가 개별 데이터를 수집할 때까지.</strong>
+</div>
+</div>
+</div>
+</div>
+ 슬라이드 12.3: 협업 
+<div class="slide ipd">
+<div class="content text-center">
+<div class="title blue animate">The Blood Pressure Lowering Treatment Trialists</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box">
+<div class="stat-value" style="color:var(--blue);">48</div>
+<div class="stat-label">Trials Combined</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--gold);">344,716</div>
+<div class="stat-label">Individual Patients</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--teal);">15+</div>
+<div class="stat-label">Years of Follow-up</div>
+</div>
+</div>
+<div class="simple-box blue animate delay-2">
+<div class="simple-title">THE QUESTION</div>
+<div class="simple-text">
+                    Does the benefit of BP lowering vary by age?
+                    <br/>
+                    Is there a J-curve at very low pressures?
+                    <br/>
+                    Do the very old (&gt;80 years) still benefit?
+                  </div>
+</div>
+<div class="source animate delay-3" style="color:rgba(255,255,255,0.5);font-size:0.8rem;margin-top:1rem;">
+                  BPLTTC. Lancet 2021;397:1625-36
+                </div>
+</div>
+</div>
+ 슬라이드 12.4: 답변 
+<div class="slide hope">
+<div class="content text-center">
+<div class="title green animate">답, At 마지막</div>
+<div class="discovery-box animate delay-1">
+<div class="insight">Benefit at Every Age</div>
+<div class="label">비례적 위험 감소는 55세부터 85세 이상까지 일관되게</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">WHAT IPD SHOWED</div>
+<div class="simple-text">
+<strong>Every 5 mmHg BP reduction:</strong>
+<br/><br/>
+                    Age 55-64: 10% lower major CV events<br/>
+                    Age 65-74: 10% lower major CV events<br/>
+                    Age 75-84: 10% lower major CV events<br/>
+                    Age ≥85: <strong>Still 10% lower</strong>
+<br/><br/>
+<em>p</em><sub>interaction</sub> = 0.85였습니다. 연령 수정에 대한 증거가 없습니다.
+                  </div>
+</div>
+</div>
+</div>
+ 슬라이드 12.5: J 곡선에 대한 오해 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">J 곡선은 어떻습니까?</div>
+<div class="story-card animate delay-1">
+<div class="place">THE RESOLUTION</div>
+<div class="narrative">
+                    환자 검사를 통해 J 곡선에 대해 테스트한 BPLTTC<br/>
+                    who achieved very low blood pressures.
+                    <br/><br/>
+<strong>Result:</strong> No J-curve in randomized comparisons.
+                    <br/><br/>
+                    명백한 사실 관찰 데이터의 J-곡선은 <em>reverse causation</em>—
+                    sick patients have low BP because they're sick,
+                    not sick because their BP is low.
+                    <br/><br/>
+<strong>RCT의 IPD만이 이를 풀 수 있었습니다.</strong>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 12.6: Decision Tree -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Treating Hypertension by Age</div>
+<div class="decision-tree animate delay-1">
+<h4>Should This Elderly Patient Get BP Treatment?</h4>
+<div class="tree-level">
+<div class="tree-node root">Patient Age?</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-level" style="gap: 2rem;">
+<div class="tree-node yes" style="min-width:80px;">55-74</div>
+<div class="tree-node yes" style="min-width:80px;">75-84</div>
+<div class="tree-node yes" style="min-width:80px;">85+</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-level">
+<div class="tree-node action" style="background:var(--green);min-width:300px;">
+                      Treat if BP elevated<br/>
+<span style="font-size:0.75rem;">Proportional benefit maintained across all ages</span>
+</div>
+</div>
+</div>
+<div class="simple-box animate delay-2" style="margin-top:1.5rem;">
+<div class="simple-title">THE LESSON</div>
+<div class="simple-text">
+                    Age alone is not a reason to withhold treatment.
+                    <br/>
+                    Consider frailty, life expectancy, patient preference—but not age.
+                  </div>
+</div>
+</div>
+</div>
+<!-- Slide 12.7: Branching Scenario -->
+<div class="slide gradient">
+<div class="content text-center">
+<div class="scenario-panel animate" id="scenario-elderly-bp">
+<div class="scenario-header">
+<span class="scenario-icon">🔀</span>
+<span class="scenario-title">82세 노인의 혈압</span>
+</div>
+<div class="scenario-situation">
+                    82세 여성의 혈압은 158/88입니다. 그녀는 독립적이고 인지적으로 손상되지 않았으며 낙상 이력이 없습니다. 동료의 말: "그녀는 공격적인 혈압 치료를 하기에는 너무 늙었습니다. J-곡선, 아시죠."
+                    <br/><br/>
+                    BPLTTC IPD 메타 분석을 기억하시나요?
+                  </div>
+<div class="scenario-question">What do you do?</div>
+<div class="scenario-choices">
+<div class="scenario-choice" onclick="selectScenarioChoice('elderly-bp', 'a')">
+<span class="choice-letter">A</span>
+<span class="choice-text">동료의 의견에 동의하세요. 노인을 위한 더 높은 혈압 목표를 받아들입니다.</span>
+</div>
+<div class="scenario-choice" onclick="selectScenarioChoice('elderly-bp', 'b')">
+<span class="choice-letter">B</span>
+<span class="choice-text">혜택이 계속된다는 BPLTTC 증거를 인용하세요. 매우 노인의 경우 치료를 시작합니다</span>
+</div>
+<div class="scenario-choice" onclick="selectScenarioChoice('elderly-bp', 'c')">
+<span class="choice-letter">C</span>
+<span class="choice-text">Wait for a cardiovascular event before treating</span>
+</div>
+</div>
+<div class="scenario-consequence" id="consequence-elderly-bp"></div>
+</div>
+</div>
+</div>
+<!-- Slide 12.8: Refrain -->
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain hope animate">
+                  "그들은 노인들이 약을 먹기에는 너무 취약하다고 말했습니다.<br/>
+                  그러나 개별 데이터는 그렇지 않은 것으로 나타났습니다.<br/>
+<br/>
+                  At every age, the benefit endures.<br/>
+                  Do not let age alone deny protection."
+                </div>
+</div>
+</div>
+</div>
+ ==================== 모듈 13: 스트로크 시간 창 ==================== 
+<div class="module-slides" data-module="13">
+<!-- Slide 13.1: Opening Sign -->
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  시간과의 경쟁을 목격하지 않으셨습니까?<br/>
+                  when a clot blocks the brain?<br/>
+<br/>
+                  Every minute, <em>two million neurons die</em>.<br/>
+<br/>
+                  But when does the window close?<br/>
+                  When is it too late to intervene?
+                </div>
+</div>
+</div>
+ 슬라이드 13.2: 위험 
+<div class="slide blood">
+<div class="content text-center">
+<div class="title red animate">Time Is Brain</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box" style="border: 2px solid var(--red);">
+<div class="stat-value" style="color:var(--red);">1.9M</div>
+<div class="stat-label">Neurons Lost Per Minute</div>
+</div>
+<div class="stat-box" style="border: 2px solid var(--orange);">
+<div class="stat-value" style="color:var(--orange);">14B</div>
+<div class="stat-label">Synapses Lost Per Minute</div>
+</div>
+</div>
+<div class="story-card animate delay-2">
+<div class="place">THE QUESTION</div>
+<div class="narrative">
+                    혈전 용해제는 혈전을 용해시키고 혈액을 회복시킬 수 있습니다 flow.
+                    <br/><br/>
+                    But given too late, it causes bleeding into dying brain tissue.
+                    <br/><br/>
+<strong>What is the time window? 3 hours? 4.5 hours? 6 hours?</strong>
+<br/><br/>
+                    Individual trials disagreed. Guidelines were uncertain.
+                  </div>
+</div>
+</div>
+</div>
+ 슬라이드 13.3: IPD 솔루션 
+<div class="slide ipd">
+<div class="content text-center">
+<div class="title blue animate">뇌졸중 혈전용해 임상 시험자</div>
+<div class="story-card animate delay-1">
+<div class="place">STT COLLABORATIVE GROUP, 2014</div>
+<div class="narrative">
+                    STT는 <strong>6,756 patients</strong>
+                    across 9 major alteplase trials.
+                    <br/><br/>
+                    They knew <em>exactly</em> when each patient's stroke began.
+                    They knew <em>exactly</em> when thrombolysis was given.
+                    They knew <em>exactly</em> who lived, who died, who recovered.
+                    <br/><br/>
+<strong>They could map benefit against time, minute by minute.</strong>
+</div>
+<div class="source">STT Collaborative Group. Lancet 2014;384:1929-35</div>
+</div>
+</div>
+</div>
+ 슬라이드 13.4: 시간에서 개별 데이터를 수집했습니다. 곡선 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">페이딩 창</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box" style="border: 2px solid var(--green);">
+<div class="stat-value" style="color:var(--green);">0-3h</div>
+<div class="stat-label">또는 좋은 결과를 위한 1.75</div>
+</div>
+<div class="stat-box" style="border: 2px solid var(--teal);">
+<div class="stat-value" style="color:var(--teal);">3-4.5h</div>
+<div class="stat-label">또는 좋은 결과를 위한 1.26</div>
+</div>
+<div class="stat-box" style="border: 2px solid var(--orange);">
+<div class="stat-value" style="color:var(--orange);">4.5-6h</div>
+<div class="stat-label">OR 1.15 (not significant)</div>
+</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">혜택의 감소</div>
+<div class="simple-text">
+                    Every 15 minutes of delay reduced the benefit.
+                    <br/><br/>
+                    Treated at 90 min: <strong>1 in 4</strong> achieve excellent outcome<br/>
+                    Treated at 180 min: <strong>1 in 7</strong> achieve excellent outcome<br/>
+                    Treated at 270 min: <strong>1 in 14</strong> achieve excellent outcome
+                  </div>
+</div>
+</div>
+</div>
+<!-- Slide 13.5: Decision Tree -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">혈전용해 결정</div>
+<div class="decision-tree animate delay-1">
+<h4>Acute Ischemic Stroke: Give Thrombolysis?</h4>
+<div class="tree-level">
+<div class="tree-node root">Time Since Symptom Onset?</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-level" style="gap: 0.75rem;">
+<div>
+<div class="tree-node yes" style="background:rgba(34,197,94,0.5);min-width:90px;">0-3h</div>
+<div class="tree-label">Strong benefit</div>
+</div>
+<div>
+<div class="tree-node yes" style="background:rgba(0,212,170,0.4);min-width:90px;">3-4.5h</div>
+<div class="tree-label">Moderate benefit</div>
+</div>
+<div>
+<div class="tree-node question" style="min-width:90px;">4.5-6h</div>
+<div class="tree-label">Uncertain</div>
+</div>
+<div>
+<div class="tree-node no" style="background:rgba(197,48,48,0.5);min-width:90px;">&gt;6h</div>
+<div class="tree-label">Harm likely</div>
+</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-level" style="gap: 0.75rem;">
+<div class="tree-node action" style="font-size:0.7rem;padding:0.5rem;">TREAT<br/>URGENTLY</div>
+<div class="tree-node action" style="font-size:0.7rem;padding:0.5rem;">TREAT<br/>if eligible</div>
+<div class="tree-node aggregate" style="font-size:0.7rem;padding:0.5rem;">Consider<br/>imaging</div>
+<div class="tree-node" style="background:rgba(197,48,48,0.5);font-size:0.7rem;padding:0.5rem;">Generally<br/>avoid</div>
+</div>
+</div>
+</div>
+</div>
+ 슬라이드 13.6: AD가 응답할 수 없는 이유 
+<div class="slide dark">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  Why did we need individual data?
+                </div>
+<div class="simple-box animate delay-1">
+<div class="simple-title">평균의 한계</div>
+<div class="simple-text">
+                    Trial A: "Patients treated within 3 hours" (average: 2.1 hours)<br/>
+                    Trial B: "Patients treated within 6 hours" (average: 4.2 hours)
+                    <br/><br/>
+                    These <em>overlapping, inconsistent windows</em> couldn't be compared.
+                    <br/><br/>
+                    Only by knowing <strong>each patient's exact time</strong><br/>
+                    could the continuous decay of benefit be mapped.
+                  </div>
+</div>
+</div>
+</div>
+<!-- Slide 13.7: Branching Scenario -->
+<div class="slide gradient">
+<div class="content text-center">
+<div class="scenario-panel animate" id="scenario-stroke">
+<div class="scenario-header">
+<span class="scenario-icon">🔀</span>
+<span class="scenario-title">4시간 뇌졸중</span>
+</div>
+<div class="scenario-situation">
+                    68세 노인이 급성 뇌졸중 증상을 보였습니다. 발병은 4시간 전이었습니다. CT에서는 출혈이 없었고, NIHSS 점수는 12(중등도)였습니다. 가족은 "혈전 용해제를 투여하기에는 너무 늦었나요?"라고 묻습니다.
+                    <br/><br/>
+                    Door-to-needle time will add 30 minutes, making total time ~4.5 hours.
+                  </div>
+<div class="scenario-question">What do you do?</div>
+<div class="scenario-choices">
+<div class="scenario-choice" onclick="selectScenarioChoice('stroke', 'a')">
+<span class="choice-letter">A</span>
+<span class="choice-text">"It's too late - the 3-hour window has passed"</span>
+</div>
+<div class="scenario-choice" onclick="selectScenarioChoice('stroke', 'b')">
+<span class="choice-letter">B</span>
+<span class="choice-text">"아직 4.5시간 이내입니다. 긴급하게 혈전용해술을 진행하세요."</span>
+</div>
+<div class="scenario-choice" onclick="selectScenarioChoice('stroke', 'c')">
+<span class="choice-letter">C</span>
+<span class="choice-text">"Wait for MRI to see if there's salvageable tissue"</span>
+</div>
+</div>
+<div class="scenario-consequence" id="consequence-stroke"></div>
+</div>
+</div>
+</div>
+<!-- Slide 13.8: Refrain -->
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  "Every minute the clot remains,<br/>
+                  two million neurons perish.<br/>
+<br/>
+                  IPD는 우리에게 페이딩 윈도우를 보여주었습니다.<br/>
+                  Act quickly, or the window closes forever."
+                </div>
+</div>
+</div>
+</div>
+ ===================== 모듈 14: IPD의 데이터 누락 ===================== 
+<div class="module-slides" data-module="14">
+<!-- Slide 14.1: Opening -->
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  개별 데이터를 수집했습니다.<br/>
+                  당신은 희망을 가지고 파일을 엽니다.<br/>
+<br/>
+                  그러면 다음과 같이 보입니다. <em>empty cells</em>.<br/>
+<br/>
+                  Age: 67. Sex: Male. Smoking status: <em>missing</em>.<br/>
+                  Outcome at 1 year: <em>missing</em>.<br/>
+<br/>
+                  What now?
+                </div>
+</div>
+</div>
+ 슬라이드 14.2: 세 가지 유형 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">세 가지 종류의 실종</div>
+<div class="lesson-item animate delay-1">
+<div class="lesson-number" style="background:var(--green);">1</div>
+<div class="lesson-content">
+<h4>Missing Completely at Random (MCAR)</h4>
+<p>Lab machine broke randomly. No relation to patient characteristics. <strong>Safe to ignore (but wasteful).</strong></p>
+</div>
+</div>
+<div class="lesson-item animate delay-2">
+<div class="lesson-number" style="background:var(--orange);">2</div>
+<div class="lesson-content">
+<h4>Missing at Random (MAR)</h4>
+<p>Older patients more likely to miss follow-up. Missingness related to <em>observed</em> variables. <strong>Imputation can help.</strong></p>
+</div>
+</div>
+<div class="lesson-item animate delay-3">
+<div class="lesson-number" style="background:var(--red);">3</div>
+<div class="lesson-content">
+<h4>무작위로 누락되지 않음(MNAR)</h4>
+<p>결과가 좋지 않은 환자는 탈락합니다. 관련 누락 <em>missing value itself</em>. <strong>위험한. 민감도 분석이 필요합니다.</strong></p>
+</div>
+</div>
+</div>
+</div>
+ 슬라이드 14.3: 의사결정나무 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">누락된 데이터 처리</div>
+<div class="decision-tree animate delay-1">
+<h4>누락된 값으로 무엇을 해야 합니까?</h4>
+<div class="tree-level">
+<div class="tree-node root">How much is missing?</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-level" style="gap: 1.5rem;">
+<div>
+<div class="tree-node yes" style="background:rgba(34,197,94,0.3);">&lt;5%</div>
+<div class="tree-label">Minor</div>
+</div>
+<div>
+<div class="tree-node question">5-20%</div>
+<div class="tree-label">Moderate</div>
+</div>
+<div>
+<div class="tree-node no" style="background:rgba(197,48,48,0.3);">&gt;20%</div>
+<div class="tree-label">Substantial</div>
+</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-level" style="gap: 1.5rem;">
+<div class="tree-node action" style="font-size:0.75rem;">Complete case<br/>may suffice</div>
+<div class="tree-node ipd" style="font-size:0.75rem;">Multiple<br/>imputation</div>
+<div class="tree-node aggregate" style="font-size:0.75rem;">Impute +<br/>sensitivity</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 14.4: Multiple Imputation -->
+<div class="slide ipd">
+<div class="content text-center">
+<div class="title blue animate">다중 대치: 표준</div>
+<div class="formula-box animate delay-1">
+<div class="label">THE PROCESS</div>
+<div class="formula">1. Impute → 2. Analyze → 3. Pool</div>
+<div class="label">Create M imputed datasets, analyze each, combine using Rubin's rules</div>
+</div>
+<div class="simple-box blue animate delay-2">
+<div class="simple-title">WHY MULTIPLE?</div>
+<div class="simple-text">
+                    단일 대체는 누락된 값을 알고 있는 것처럼 가장합니다.
+                    <br/><br/>
+                    Multiple imputation (M=20-50 datasets) reflects <strong>uncertainty</strong>
+                    누락된 값이 무엇인지에 대해 설명합니다.
+                    <br/><br/>
+                    이는 유효한 표준 오류와 p-값을 유지합니다.
+                  </div>
+</div>
+</div>
+</div>
+<!-- Slide 14.5: IPD-Specific Issues -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">IPD 관련 누락 데이터 문제</div>
+<div class="lesson-item animate delay-1">
+<div class="lesson-number">1</div>
+<div class="lesson-content">
+<h4>Systematically Missing Variables</h4>
+<p>Trial A measured biomarker X. Trial B didn't. Can't impute what was never collected.</p>
+</div>
+</div>
+<div class="lesson-item animate delay-2">
+<div class="lesson-number">2</div>
+<div class="lesson-content">
+<h4>Multilevel Structure</h4>
+<p>Patients nested within trials. Imputation model must account for clustering.</p>
+</div>
+</div>
+<div class="lesson-item animate delay-3">
+<div class="lesson-number">3</div>
+<div class="lesson-content">
+<h4>Different Follow-up Durations</h4>
+<p>재판 A는 2년 동안 이어졌습니다. 5년 동안 평가판 B. 생존 분석에는주의가 필요합니다.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 14.6: Decision Tree for Systematically Missing -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">When a Variable Is Missing Entirely</div>
+<div class="decision-tree animate delay-1">
+<h4>Trial Didn't Collect Your Key Covariate</h4>
+<div class="tree-level">
+<div class="tree-node root">Is it an effect modifier or confounder?</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-level" style="gap: 2rem;">
+<div>
+<div class="tree-node question">Effect Modifier</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node aggregate" style="font-size:0.75rem;">Restrict interaction<br/>analysis to trials<br/>변수와 함께</div>
+</div>
+<div>
+<div class="tree-node question">Confounder</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node ipd" style="font-size:0.75rem;">Sensitivity analysis<br/>varying assumptions<br/>about unmeasured</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 14.7: Branching Scenario -->
+<div class="slide gradient">
+<div class="content text-center">
+<div class="scenario-panel animate" id="scenario-missing">
+<div class="scenario-header">
+<span class="scenario-icon">🔀</span>
+<span class="scenario-title">사라진 바이오마커</span>
+</div>
+<div class="scenario-situation">
+                    IPD-MA는 바이오마커 양성 환자에게 새로운 항암제가 더 잘 작동하는지 여부를 테스트합니다. 8번의 시도에서 IPD가 발생했습니다. 그러나 3건의 임상시험(환자의 40%)에서는 바이오마커를 전혀 측정하지 못했습니다.
+                    <br/><br/>
+                    이 3가지 시험은 오래되고 규모가 작은 경향이 있습니다.
+                  </div>
+<div class="scenario-question">상호작용을 어떻게 분석하나요?</div>
+<div class="scenario-choices">
+<div class="scenario-choice" onclick="selectScenarioChoice('missing', 'a')">
+<span class="choice-letter">A</span>
+<span class="choice-text">Impute the biomarker status based on other patient characteristics</span>
+</div>
+<div class="scenario-choice" onclick="selectScenarioChoice('missing', 'b')">
+<span class="choice-letter">B</span>
+<span class="choice-text">바이오마커 데이터를 사용하여 5개 시험에서만 상호작용을 분석합니다. 전반적인 효과에 대한 모든 시험을 포함한 민감도 분석</span>
+</div>
+<div class="scenario-choice" onclick="selectScenarioChoice('missing', 'c')">
+<span class="choice-letter">C</span>
+<span class="choice-text">3개의 임상시험을 메타분석에서 완전히 제외</span>
+</div>
+</div>
+<div class="scenario-consequence" id="consequence-missing"></div>
+</div>
+</div>
+</div>
+<!-- Slide 14.8: Refrain -->
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  "빈 셀은 아무것도 아니다.<br/>
+                  It is a question: <em>이것이 왜 알려지지 않았습니까?</em><br/>
+<br/>
+                  공백을 메우기 전에 그 질문에 대답하세요.<br/>
+                  부재의 이유가 해결책을 결정하기 때문이다."
+                </div>
+</div>
+</div>
+</div>
+ ===================== 모듈 15: 가용성 함정 ===================== 
+<div class="module-slides" data-module="15">
+<!-- Slide 15.1: Opening -->
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  연구원을 본 적 없나요?<br/>
+                  누가 데이터를 수집했는가 <em>willing</em> trialists<br/>
+                  그리고 승리를 선언했는가?<br/>
+<br/>
+                  But the <em>unwilling</em> held secrets.<br/>
+                  그리고 그 비밀이 모든 것을 바꾸었습니다.
+                </div>
+</div>
+</div>
+ 슬라이드 15.2: 타미플루 이야기 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">타미플루 이야기</div>
+<div class="story-card animate delay-1">
+<div class="place">A TRUE STORY</div>
+<div class="narrative">
+                    수년 동안 정부는 유행성 독감을 위해 타미플루를 비축하고 수십억 달러를 지출했습니다.
+                    <br/><br/>
+                    Cochrane reviewers requested trial data to verify efficacy. Roche refused, citing confidentiality.
+                    <br/><br/>
+                    5년 동안 BMJ는 투명성을 위한 캠페인을 벌였습니다. 2014년에 마침내 전체 임상 연구 보고서가 발표되었을 때 상황이 바뀌었습니다. 타미플루는 증상 기간을 하루 미만으로 줄였고 합병증을 예방하지 못했습니다.
+                    <br/><br/>
+<strong>완전한 증거가 숨겨져 있는 약물에 수십억 달러를 지출했습니다.</strong>
+<br/><br/>
+                    타미플루 사건은 기대를 변화시켰습니다. 오늘날 임상 시험 투명성은 예외가 아닌 표준이 되고 있습니다.
+                  </div>
+</div>
+</div>
+</div>
+ 슬라이드 15.3: 증거 
+<div class="slide blood">
+<div class="content text-center">
+<div class="title red animate">When IPD Is Selectively Available</div>
+<div class="simple-box animate delay-1">
+<div class="simple-title">경험적 조사</div>
+<div class="simple-text">
+                    연구에서는 IPD를 공유하는 임상시험과 IPD를 공유하는 임상시험을 비교했습니다. 하지 마세요:
+                    <br/><br/>
+<strong>Industry-sponsored trials:</strong> Less likely to share<br/>
+<strong>부정적인 결과가 있는 시험:</strong> Less likely to share<br/>
+<strong>Older trials:</strong> 데이터가 자주 손실됩니다
+                    <br/><br/>
+                    If these trials systematically differ in effect size,<br/>
+<strong>IPD-MA가 편향되어 있습니다.</strong>
+</div>
+</div>
+<div class="source animate delay-2" style="color:rgba(255,255,255,0.5);font-size:0.8rem;margin-top:1rem;">
+                  Ahmed I, et al. BMJ 2012;344:d7762
+                </div>
+</div>
+</div>
+ 슬라이드 15.4: 비교 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Always Compare: IPD vs. Non-IPD Trials</div>
+<div class="decision-tree animate delay-1">
+<h4>Assessing Availability Bias</h4>
+<div class="tree-level">
+<div class="tree-node root">Compare AD effects: trials with IPD vs. without</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-level" style="gap: 2rem;">
+<div>
+<div class="tree-node yes">Similar Effects</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node action" style="font-size:0.75rem;">Low concern<br/>for bias</div>
+</div>
+<div>
+<div class="tree-node no">Different Effects</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node" style="background:rgba(197,48,48,0.5);font-size:0.75rem;">High concern<br/>민감도 분석 필요</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+ 슬라이드 15.5: 체크리스트 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">가용성 편향 체크리스트</div>
+<div class="lesson-item animate delay-1">
+<div class="lesson-number" style="background:var(--green);">✓</div>
+<div class="lesson-content">
+<h4>Report IPD retrieval rate</h4>
+<p>"12/15 시험에서 IPD를 얻었습니다. (80%)"</p>
+</div>
+</div>
+<div class="lesson-item animate delay-2">
+<div class="lesson-number" style="background:var(--green);">✓</div>
+<div class="lesson-content">
+<h4>Compare IPD vs. non-IPD trial characteristics</h4>
+<p>총계 데이터의 표본 크기, 자금, 출판 날짜, 효과 크기</p>
+</div>
+</div>
+<div class="lesson-item animate delay-3">
+<div class="lesson-number" style="background:var(--green);">✓</div>
+<div class="lesson-content">
+<h4>Sensitivity analysis including non-IPD trials</h4>
+<p>비공유 시험의 IPD와 AD를 결합한 2단계 분석</p>
+</div>
+</div>
+<div class="lesson-item animate delay-4">
+<div class="lesson-number" style="background:var(--green);">✓</div>
+<div class="lesson-content">
+<h4>비공유 이유 논의</h4>
+<p>Data lost? Refused? Never requested? Each has different implications.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 15.6: Branching Scenario -->
+<div class="slide gradient">
+<div class="content text-center">
+<div class="scenario-panel animate" id="scenario-availability">
+<div class="scenario-header">
+<span class="scenario-icon">🔀</span>
+<span class="scenario-title">The Reluctant 임상 시험자</span>
+</div>
+<div class="scenario-situation">
+                    외과적 중재에 대한 IPD-MA는 12개 적격 임상시험 중 8개(67%)에서 데이터를 얻었습니다. 4개의 비공유 임상시험은 모두 업계 자금을 지원받았으며 8개의 IPD 임상시험(합동 OR 0.72)에 비해 출판물에서 더 작은 이점(합동 OR 0.95)을 보여줍니다.
+                    <br/><br/>
+                    귀하의 IPD 분석에서는 OR 0.70을 보여줍니다.
+                  </div>
+<div class="scenario-question">보고 방법 이것은?</div>
+<div class="scenario-choices">
+<div class="scenario-choice" onclick="selectScenarioChoice('availability', 'a')">
+<span class="choice-letter">A</span>
+<span class="choice-text">Report IPD result (OR 0.70) as the main finding - IPD is gold standard</span>
+</div>
+<div class="scenario-choice" onclick="selectScenarioChoice('availability', 'b')">
+<span class="choice-letter">B</span>
+<span class="choice-text">비공유 시도의 AD를 포함하여 가용성 편향 및 민감도 분석에 대한 눈에 띄는 경고와 함께 IPD 결과를 보고합니다.</span>
+</div>
+<div class="scenario-choice" onclick="selectScenarioChoice('availability', 'c')">
+<span class="choice-letter">C</span>
+<span class="choice-text">Wait until you get 100% IPD before publishing</span>
+</div>
+</div>
+<div class="scenario-consequence" id="consequence-availability"></div>
+</div>
+</div>
+</div>
+ 슬라이드 15.7: 결합된 접근 방식 
+<div class="slide ipd">
+<div class="content text-center">
+<div class="title blue animate">비IPD의 2단계 하이브리드 솔루션</div>
+<div class="formula-box animate delay-1">
+<div class="label">COMBINING IPD + AD</div>
+<div class="formula">Stage 1: Analyze IPD trials → get θ<sub>IPD</sub></div>
+<div class="formula">Stage 2: Meta-analyze θ<sub>IPD</sub> + θ<sub>AD</sub> 시도</div>
+<div class="label">Uses all available evidence, even when IPD incomplete</div>
+</div>
+<div class="simple-box blue animate delay-2">
+<div class="simple-title">THE PRINCIPLE</div>
+<div class="simple-text">
+<strong>IPD는 전부 아니면 전무가 아닙니다.</strong>
+<br/><br/>
+                    IPD가 있는 곳에서 사용하세요(상호작용 테스트용).<br/>
+                    전체 효과 추정을 위해 AD를 보완하세요.<br/>
+                    결과에 대한 투명성 where.
+                  </div>
+</div>
+</div>
+</div>
+<!-- Slide 15.8: Refrain -->
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  "의지가 전체를 대표할 수는 없습니다.<br/>
+                  열린 문은 잠긴 문 뒤에 진실을 숨길 수 있습니다.<br/>
+<br/>
+                  Always ask: Who refused to share?<br/>
+                  And what might they be hiding?"
+                </div>
+</div>
+</div>
+</div>
+ ==================== 모듈 16: 퀴즈 및 참조 =================== 
+<div class="module-slides" data-module="16">
+<!-- Slide 11.1: Quiz 1 -->
+<div class="slide dark active">
+<div class="content text-center">
+<div class="quiz-container animate">
+<div class="quiz-question">초기 유방암 시험자 그룹은 개별 시험이 불가능하다는 것을 무엇으로 발견했습니까?</div>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkAnswer(this, false)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">Tamoxifen works better than placebo</div>
+<div class="quiz-option" onclick="checkAnswer(this, true)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">Tamoxifen only works in estrogen receptor positive tumors</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">Tamoxifen has significant side effects</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">Tamoxifen works better in younger women</div>
+</div>
+<div class="quiz-feedback"></div>
+</div>
+</div>
+</div>
+<!-- Slide 11.2: Quiz 2 -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="quiz-container animate">
+<div class="quiz-question">What is the "ecological fallacy" in meta-analysis?</div>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkAnswer(this, false)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">Assuming environmental factors don't affect treatment</div>
+<div class="quiz-option" onclick="checkAnswer(this, true)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">Assuming between-study relationships apply to within-study (individual) relationships</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">다양한 생태학적 지역의 통합 연구</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">Using outdated trials in modern meta-analyses</div>
+</div>
+<div class="quiz-feedback"></div>
+</div>
+</div>
+</div>
+<!-- Slide 11.3: Quiz 3 -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="quiz-container animate">
+<div class="quiz-question">1단계 IPD 분석이 더 선호되는 때는 언제입니까? 2단계?</div>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkAnswer(this, true)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">When trials have sparse events or rare outcomes</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">When you have many large trials</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">When you want to create forest plots</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">결과가 공통적이고 후속 조치가 짧은 경우</div>
+</div>
+<div class="quiz-feedback"></div>
+</div>
+</div>
+</div>
+<!-- Slide 11.4: Quiz 4 -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="quiz-container animate">
+<div class="quiz-question">여러 시험에서 IPD를 분석하기 전에 무엇을 해야 합니까?</div>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkAnswer(this, false)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">즉시 모든 데이터를 모으고 주요 분석을 실행</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">Exclude trials with missing variables</div>
+<div class="quiz-option" onclick="checkAnswer(this, true)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">데이터 검증을 위해 IPD에서 각 시험의 게시된 결과를 재현합니다. 무결성</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button" tabindex="0">Convert all continuous variables to categorical</div>
+</div>
+<div class="quiz-feedback"></div>
+</div>
+</div>
+</div>
+<!-- Slide 11.5: References -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">References</div>
+<div class="references animate delay-1">
+<h4>여기에 인용된 주요 출처 과정</h4>
+<ol>
+<li>Riley RD, et al. <span class="journal">개별 참가자 데이터 메타 분석: 의료 연구를 위한 핸드북</span> Wiley, 2021.</li>
+<li>Stewart LA, et al. PRISMA-IPD: 개별 참가자 데이터의 체계적인 검토 및 메타 분석을 위해 선호되는 보고 항목입니다. <span class="journal">JAMA</span> 2015;313:1657-65.</li>
+<li>Early Breast Cancer Trialists' Collaborative Group. Tamoxifen for early breast cancer. <span class="journal">Cochrane Database Syst Rev</span> 2001.</li>
+<li>Cholesterol Treatment Trialists' Collaboration. Efficacy and safety of LDL-lowering therapy. <span class="journal">Lancet</span> 2010;376:1670-81.</li>
+<li>Roberts D, et al. Antenatal corticosteroids for accelerating fetal lung maturation. <span class="journal">Cochrane Database Syst Rev</span> 2017.</li>
+<li>IMPACT Study Group. Predicting outcome after traumatic brain injury. <span class="journal">PLoS Med</span> 2008;5:e165.</li>
+<li>Debray TPA, et al. Get real in individual participant data meta-analysis. <span class="journal">Int J Epidemiol</span> 2015;44:1287-97.</li>
+<li>Burke DL, et al. Meta-analysis using individual participant data. <span class="journal">Stat Med</span> 2017;36:320-38.</li>
+</ol>
+</div>
+</div>
+</div>
+<!-- Slide 11.6: Completion -->
+<div class="slide hope">
+<div class="content text-center">
+<div class="big-number green animate" style="font-size:5rem;">✔</div>
+<div class="title green animate delay-1">Course Complete</div>
+<div class="gold-line animate delay-2"></div>
+<div class="refrain hope animate delay-3">
+                  "총체적으로, 개인은<br/>
+                  But you have learned to find them.<br/>
+                  You have learned to ask: Who benefits? Who is harmed?<br/>
+<br/>
+                  이제 시작하세요. 평균에서 환자가 사라지지 않도록 하세요."
+                </div>
+<p class="animate delay-4" style="color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:1.2rem;margin-top:1.5rem;">
+                  숨겨진 환자 — 이제 그들을 볼 수 있습니다.
+                </p>
+<button aria-label="수료증을 받으세요" class="btn primary animate delay-5" onclick="showCertificate()" style="margin-top:2rem;padding:1rem 2rem;font-size:1.1rem;">
+                  🎓 인증서 받기
+                </button>
+</div>
+</div>
+</div>
+<!-- Navigation -->
+<nav aria-label="Slide navigation" class="slide-nav" role="navigation">
+<button aria-label="Previous slide" class="nav-btn" onclick="prevSlide()" title="Previous slide (Left arrow)">←</button>
+<div class="nav-center">
+<div aria-atomic="true" aria-live="polite" class="slide-counter" id="slideCounter">1 / 6</div>
+<div aria-label="Slide indicators" class="progress" id="progressDots" role="tablist"></div>
+</div>
+<button aria-label="Next slide" class="nav-btn" onclick="nextSlide()" title="Next slide (Right arrow or Space)">→</button>
+</nav>
+</div>
+</div>
+</main>
+</div>
+<script>
+    function toggleSidebar() {
+      document.querySelector('.sidebar').classList.toggle('open');
+      var overlay = document.querySelector('.sidebar-overlay');
+      if (overlay) overlay.classList.toggle('show');
+      var btn = document.querySelector('.mobile-menu-toggle, .sidebar-toggle, .hamburger');
+      if (btn) btn.setAttribute('aria-expanded', btn.getAttribute('aria-expanded') === 'true' ? 'false' : 'true');
+    }
+
+    const modules = [
+      { id: 1, title: "The Vanishing", subtitle: "Why IPD matters", slides: 6 },
+      { id: 2, title: "Aggregate vs IPD", subtitle: "생태학적 오류", slides: 6 },
+      { id: 3, title: "CTT 폭로", subtitle: "Statins for 170,000", slides: 6 },
+      { id: 4, title: "When to Pursue IPD", subtitle: "의사결정 트리", slides: 6 },
+      { id: 5, title: "One-Stage vs Two-Stage", subtitle: "Analysis approaches", slides: 6 },
+      { id: 6, title: "타이밍 발견", subtitle: "Corticosteroids & preterm birth", slides: 6 },
+      { id: 7, title: "Obtaining IPD", subtitle: "데이터 탐구", slides: 6 },
+      { id: 8, title: "Data Harmonization", subtitle: "Speaking one language", slides: 6 },
+      { id: 9, title: "Testing Interactions", subtitle: "Who benefits most?", slides: 6 },
+      { id: 10, title: "Prognosis & Prediction", subtitle: "IMPACT 및 너머", slides: 6 },
+      { id: 11, title: "아스피린 역설", subtitle: "ATT: Risk determines benefit", slides: 8 },
+      { id: 12, title: "The BP Revelation", subtitle: "BPLTTC: 나이는 장벽이 아닙니다", slides: 8 },
+      { id: 13, title: "획 창", subtitle: "Time is brain", slides: 8 },
+      { id: 14, title: "Missing Data", subtitle: "빈 셀", slides: 8 },
+      { id: 15, title: "가용성 함정", subtitle: "Who refused to share?", slides: 8 },
+      { id: 16, title: "Quiz & Sources", subtitle: "지식 테스트", slides: 6 }
+    ];
+
+    // State management with localStorage persistence
+    const STORAGE_KEY = 'ipd-course-progress';
+
+    function loadProgress() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const data = JSON.parse(saved);
+          return {
+            currentModule: Math.min(Math.max(1, data.currentModule || 1), modules.length),
+            currentSlide: Math.max(1, data.currentSlide || 1),
+            completedModules: new Set(data.completedModules || [])
+          };
+        }
+      } catch (e) {
+        console.warn('Could not load progress:', e);
+      }
+      return { currentModule: 1, currentSlide: 1, completedModules: new Set() };
+    }
+
+    function saveProgress() {
+      try {
+        const data = {
+          currentModule,
+          currentSlide,
+          completedModules: Array.from(completedModules)
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      } catch (e) {
+        console.warn('Could not save progress:', e);
+      }
+    }
+
+    // Initialize state from localStorage or defaults
+    const savedState = loadProgress();
+    let currentModule = savedState.currentModule;
+    let currentSlide = savedState.currentSlide;
+    const completedModules = savedState.completedModules;
+
+    // Branching scenarios
+    const scenarios = {
+      'ipd-decision': {
+        correct: 'b',
+        consequences: {
+          'a': { type: 'bad', text: '위험한 지름길! WHO REACT 실무 그룹은 코로나19 스테로이드에 대한 IPD를 추구하고 중요한 상호 작용을 발견했습니다. 산소가 필요한 환자에게서 이점이 가장 분명했습니다. 종합 분석에서는 임상 실습을 형성하는 이러한 미묘한 차이를 놓쳤을 것입니다.', lesson: '질문이 "누가 혜택을 받는가"에 관한 경우 IPD는 선택 사항이 아닙니다.' },
+          'b': { type: 'good', text: '맞습니다! 심각도 및 시기에 따른 효과 수정에 대한 귀하의 질문에는 환자 수준의 데이터가 필요합니다. REACT 그룹의 IPD 분석에 따르면 덱사메타손 혜택은 산소에 집중된 환자에게 집중되어 표적 치료를 유도하는 것으로 나타났습니다.' , lesson: 'IPD is essential when testing treatment-covariate interactions.' },
+          'c': { type: 'neutral', text: '매혹적이지만 결함이 있습니다. 시험 수준 범주는 다릅니다. 시험 A의 "심각함"은 시험 B의 "보통"일 수 있습니다. 당신은 사과와 오렌지를 비교하고 있을 것입니다. IPD만이 모든 환자에 대해 일관된 심각도 정의를 적용할 수 있습니다.', lesson: '전체 하위 그룹 분석은 생태학적 오류로 인해 어려움을 겪습니다.' }
+        }
+      },
+      'harmonization': {
+        correct: 'c',
+        consequences: {
+          'a': { type: 'bad', text: '위험합니다! 다양한 결과 정의는 해당 시험에서 더 큰 효과를 설명할 수 있습니다(느슨한 정의는 더 많은 이벤트를 포착합니다). 승인 없이 포함하면 통합 추정치가 부풀려질 수 있습니다.', lesson: 'Definition heterogeneity is a form of bias. Acknowledge it.' },
+          'b': { type: 'neutral', text: '보수적이지만 귀중한 정보가 손실될 수 있습니다. 1990년대 실험에는 연구할 가치가 있는 다양한 모집단이 있을 수 있습니다. 완전한 배제는 반사적인 것이 아니라 정당화되어야 합니다.', lesson: '제외는 결과가 따르는 결정입니다. 추론을 문서로 기록하세요.' },
+          'c': { type: 'good', text: '맞습니다! 이 접근 방식은 견고성을 탐색하면서 깨끗한 기본 추정치를 제공합니다. 비표준 시험으로 결과가 크게 변하는 경우 이는 결과 정의에 대한 민감도에 대한 중요한 정보입니다.', lesson: 'Sensitivity analyses reveal what depends on your assumptions.' }
+        }
+      },
+      'interaction': {
+        correct: 'c',
+        consequences: {
+          'a': { type: 'bad', text: 'Overinterpretation! With 8 tests at alpha=0.05, you expect ~0.4 false positives by chance. A single p=0.03 after multiple testing is not compelling evidence of true effect modification.', lesson: 'Multiple testing inflates false positive risk. Adjust or acknowledge.' },
+          'b': { type: 'neutral', text: 'Statistically appropriate (Bonferroni: 0.05/8 = 0.006 threshold) but perhaps too rigid. Biological plausibility matters too - older patients have higher stroke risk, so larger relative benefit is mechanistically sensible.', lesson: 'Statistics and biology should inform each other.' },
+          'c': { type: 'good', text: '맞습니다! 탐색적 성격에 대한 투명한 보고, 다양한 테스트 인정, 외부 검증 요구는 과학적 접근 방식입니다. 이 결과는 흥미롭지만 확정적이지는 않습니다.', lesson: 'Subgroup findings require replication before changing practice.' }
+        }
+      },
+      'aspirin': {
+        correct: 'b',
+        consequences: {
+          'a': { type: 'bad', text: '과도한 단순화는 위험합니다! 95,000명의 환자를 대상으로 한 ATT IPD 분석에서는 위험이 낮은 개인(예: 10년 위험이 8%인 이 환자)의 경우 출혈 위험이 심혈관 혜택과 거의 동일하다는 것을 보여주었습니다. 당신은 그 사람을 출혈 위험에 노출시키지만 순 이익은 미미할 것입니다.', lesson: 'Average benefit masks risk-stratified truth. Not everyone benefits equally.' },
+          'b': { type: 'good', text: '맞습니다! ATT IPD-MA는 아스피린의 유익-해로움 균형이 기본 CVD 위험에 따라 달라진다는 것을 보여주었습니다. 8%의 10년 위험에서는 치료에 필요한 숫자와 피해에 필요한 숫자가 비슷합니다. 현재 지침(AHA 2019)은 저위험 일차 예방에서 일반 아스피린 사용을 권장하지 않습니다.', lesson: 'IPD는 숨겨진 위험-이익 상호작용을 밝혀냈습니다.' },
+          'c': { type: 'bad', text: '복용량은 근본적인 문제를 바꾸지 않습니다. 저용량 아스피린은 여전히 ​​출혈을 증가시킵니다. ATT는 유익성-위해성 균형이 복용량이 아닌 기본 위험에 달려 있음을 보여주었습니다. CVD 위험이 낮은 경우 유아용 아스피린도 득보다 실이 더 많습니다.', lesson: 'Changing the dose doesn\'t fix an indication problem.' }
+        }
+      },
+      'elderly-bp': {
+        correct: 'b',
+        consequences: {
+          'a': { type: 'bad', text: 'J 곡선 신화는 IPD 증거에 의해 거짓임이 드러났습니다. 344,716명의 환자를 대상으로 한 BPLTTC 메타 분석에서는 85세 이상의 환자에서도 혈압 강하의 비례적 이점이 유지되는 것으로 나타났습니다. 연령 기반 치료 허무주의는 가장 많은 혜택을 받을 수 있는 사람들에게 효과적인 예방을 거부합니다(절대 위험이 더 높음).', lesson: '관찰 데이터의 J 곡선은 치료 피해가 아닌 역인과관계였습니다.' },
+          'b': { type: 'good', text: 'Correct! The BPLTTC IPD-MA found no interaction between age and treatment benefit (p=0.85). A fit 82-year-old with elevated BP stands to gain from treatment. Consider frailty and life expectancy, but not age alone.', lesson: 'RCT의 IPD는 관찰 연구의 생태학적 연관성보다 우선합니다.' },
+          'c': { type: 'bad', text: '치료하기 전에 뇌졸중이나 MI를 기다리는 것은 예방 목적을 무너뜨리는 것입니다. BPLTTC는 모든 연령층에서 1차 예방 활동을 보여주었습니다. 명확한 징후가 있는 환자를 조심스럽게 기다리는 것은 해롭습니다.', lesson: '예방은 사건 이후가 아니라 사건 이전에 치료하는 것을 의미합니다.' }
+        }
+      },
+      'stroke': {
+        correct: 'b',
+        consequences: {
+          'a': { type: 'bad', text: 'Outdated thinking! The STT IPD analysis showed benefit extends to 4.5 hours, and the 2018 guidelines expanded the window. The 3-hour cutoff was from earlier, smaller trials. Every minute counts, but 4 hours is not too late.', lesson: 'IPD allowed continuous modeling of time-benefit relationship.' },
+          'b': { type: 'good', text: '맞습니다! STT IPD-MA는 혈전용해 효과가 감소하기는 하지만 최대 4.5시간까지 지속된다는 사실을 입증했습니다. 4~4.5시간에서 좋은 결과에 대한 OR은 여전히 ​​~1.26입니다. 긴급하게 진행하세요. 1분이 더 지연될 때마다 이점이 줄어듭니다.', lesson: 'IPD는 개별 시험 기간이 모호한 붕괴 곡선을 공개했습니다.' },
+          'c': { type: 'bad', text: 'Dangerous delay! MRI takes time you don\'t have. The STT showed benefit declines continuously with time. At 4 hours, you\'re already in the diminishing returns zone. Standard CT to rule out hemorrhage is sufficient; adding MRI delays treatment when every minute costs neurons.', lesson: 'Perfect is the enemy of good when time is brain.' }
+        }
+      },
+      'missing': {
+        correct: 'b',
+        consequences: {
+          'a': { type: 'bad', text: '위험한 전가! 다른 특성을 기반으로 한 번도 측정되지 않은 바이오마커는 신뢰할 수 있게 귀속될 수 없습니다. 이는 "체계적으로 누락된" 데이터입니다. 전가는 분석으로 위장한 추측이 됩니다. 누락 메커니즘은 MNAR입니다(측정하지 않은 시도에는 이유가 있을 수 있음).', lesson: '수집되지 않은 내용은 귀속될 수 없습니다. 그것은 전가가 아니라 조작입니다.' },
+          'b': { type: 'good', text: 'Correct! Interaction analysis should be restricted to trials with the data. For the overall effect, you can include all trials (two-stage: IPD from 5 trials + AD from 3 trials). This maximizes appropriate use of available data while maintaining validity for each analysis type.', lesson: '다른 질문은 데이터의 다른 하위 집합을 사용할 수 있습니다.' },
+          'c': { type: 'neutral', text: '너무 공격적입니다! 이 3가지 시험은 바이오마커 상호작용을 알 수 없더라도 전반적인 치료 효과에 대한 유효한 정보를 제공합니다. 이들을 제외하는 것은 증거를 완전히 낭비하는 것이며 체계적으로 다를 경우 선택 편향이 발생할 수 있습니다.', lesson: 'Exclusion should be proportionate to the problem.' }
+        }
+      },
+      'availability': {
+        correct: 'b',
+        consequences: {
+          'a': { type: 'bad', text: '가용성 편향 경고! 비공유 시험에서는 효과가 훨씬 더 작습니다(OR 0.95 대 0.70). 이러한 불일치를 인정하지 않고 IPD 결과만 보고하는 것은 치료 효과를 과장하는 것입니다. 업계 시험에서는 부정적인 데이터를 공유하지 않는 경우가 많습니다.', lesson: 'Available IPD may be a biased sample of all evidence.' },
+          'b': { type: 'good', text: 'Correct! Transparent reporting includes: (1) IPD retrieval rate, (2) comparison of IPD vs non-IPD trial characteristics and effects, (3) sensitivity analysis combining IPD + AD. This lets readers judge the impact of availability bias.', lesson: 'IPD quality cannot compensate for selection bias in which trials share.' },
+          'c': { type: 'neutral', text: '100% IPD가 이상적이지만 거의 달성할 수 없습니다. 무기한 대기한다는 것은 증거가 결코 합성되지 않는다는 것을 의미합니다. 완벽함을 선의 적으로 두는 것보다 적절한 주의 사항과 민감도 분석을 진행하는 것이 더 좋습니다.', lesson: 'Some IPD with caveats beats no synthesis at all.' }
+        }
+      }
+    };
+
+    let scenarioState = {};
+
+    function selectScenarioChoice(scenarioId, choice) {
+      if (scenarioState[scenarioId]) return;
+
+      scenarioState[scenarioId] = choice;
+      const scenario = scenarios[scenarioId];
+      const consequence = scenario.consequences[choice];
+      const isCorrect = choice === scenario.correct;
+
+      // Update choice styling
+      const panel = document.getElementById(`scenario-${scenarioId}`);
+      const choices = panel.querySelectorAll('.scenario-choice');
+      choices.forEach(c => {
+        c.classList.add('answered');
+        const letter = c.querySelector('.choice-letter').textContent.toLowerCase();
+        if (letter === scenario.correct) c.classList.add('correct');
+        if (letter === choice && !isCorrect) c.classList.add('incorrect');
+      });
+
+      // Show consequence
+      const conseqDiv = document.getElementById(`consequence-${scenarioId}`);
+      conseqDiv.innerHTML = `
+        <div class="consequence-title">${isCorrect ? '&#10003; Good decision!' : '&#10007; Problematic decision'}</div>
+        <div class="consequence-text">${consequence.text}</div>
+        <div class="consequence-lesson">"${consequence.lesson}"</div>
+      `;
+      conseqDiv.classList.add('visible', consequence.type);
+    }
+
+    function init() {
+      // Restore saved progress - activate correct module and slide
+      if (currentModule > 1 || currentSlide > 1) {
+        // Deactivate default first module
+        document.querySelectorAll('.module-slides').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.slide').forEach(el => el.classList.remove('active'));
+
+        // Activate saved module
+        const targetModuleEl = document.querySelector(`.module-slides[data-module="${currentModule}"]`);
+        if (targetModuleEl) {
+          targetModuleEl.classList.add('active');
+
+          // Activate saved slide within module
+          const slides = targetModuleEl.querySelectorAll('.slide');
+          const targetSlideIndex = Math.min(currentSlide - 1, slides.length - 1);
+          if (slides[targetSlideIndex]) {
+            slides[targetSlideIndex].classList.add('active');
+          }
+        }
+
+        // Update breadcrumb
+        const moduleTitle = modules[currentModule - 1];
+        if (moduleTitle) {
+          document.getElementById('currentModule').textContent = moduleTitle.title;
+        }
+
+        // Progress restored: Module ${currentModule}, Slide ${currentSlide}
+      }
+
+      renderModuleList();
+      updateSlideNav();
+
+      // Keyboard navigation
+      document.addEventListener('keydown', (e) => {
+        // Don't intercept if user is in an input/interactive field
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' ||
+            e.target.tagName === 'SELECT' || e.target.tagName === 'BUTTON' ||
+            e.target.tagName === 'A' ||
+            (e.target.getAttribute && e.target.getAttribute('role') === 'button')) return;
+
+        if (e.key === 'ArrowRight' || e.key === ' ') {
+          e.preventDefault();
+          nextSlide();
+        } else if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          prevSlide();
+        } else if (e.key === 'Home') {
+          e.preventDefault();
+          goToModule(1);
+        } else if (e.key === 'End') {
+          e.preventDefault();
+          goToModule(modules.length);
+        }
+      });
+
+      // Touch swipe support for mobile
+      let touchStartX = 0;
+      let touchEndX = 0;
+      const slidesContainer = document.getElementById('main-content');
+
+      if (slidesContainer) {
+        slidesContainer.addEventListener('touchstart', (e) => {
+          touchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+
+        slidesContainer.addEventListener('touchend', (e) => {
+          touchEndX = e.changedTouches[0].screenX;
+          handleSwipe();
+        }, { passive: true });
+      }
+
+      function handleSwipe() {
+        const swipeThreshold = 50;
+        const diff = touchStartX - touchEndX;
+        if (Math.abs(diff) > swipeThreshold) {
+          if (diff > 0) {
+            nextSlide(); // Swipe left = next
+          } else {
+            prevSlide(); // Swipe right = prev
+          }
+        }
+      }
+
+      // Save progress before user leaves
+      window.addEventListener('beforeunload', saveProgress);
+
+      // Announce initial slide to screen readers
+      announceSlide();
+
+      // Show initial progress percentage
+      updateProgressPercent();
+    }
+
+    // Accessibility: Announce slide changes to screen readers
+    function announceSlide() {
+      const module = modules[currentModule - 1];
+      if (!module) return;
+
+      const announcement = `Module ${currentModule}: ${module.title}. Slide ${currentSlide} of ${module.slides}.`;
+      const liveRegion = document.getElementById('ariaLiveRegion');
+      if (liveRegion) {
+        liveRegion.textContent = announcement;
+      }
+
+      updateProgressPercent();
+    }
+
+    // Update completion percentage display
+    function updateProgressPercent() {
+      const totalSlides = modules.reduce((sum, m) => sum + m.slides, 0);
+      let completedSlides = 0;
+
+      // Count slides in completed modules
+      completedModules.forEach(moduleId => {
+        const mod = modules.find(m => m.id === moduleId);
+        if (mod) completedSlides += mod.slides;
+      });
+
+      // Add current progress in current module
+      completedSlides += currentSlide - 1;
+
+      const percent = Math.round((completedSlides / totalSlides) * 100);
+      const progressEl = document.getElementById('progressPercent');
+      if (progressEl) {
+        progressEl.textContent = `Progress: ${percent}%`;
+      }
+    }
+
+    function renderModuleList() {
+      const list = document.getElementById('moduleList');
+      list.innerHTML = modules.map(m => `
+        <div class="module-item ${m.id === currentModule ? 'active' : ''} ${completedModules.has(m.id) ? 'completed' : ''}"
+             onclick="goToModule(${m.id})"
+             onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();goToModule(${m.id});}"
+             role="listitem"
+             tabindex="0"
+             aria-label="Module ${m.id}: ${m.title}. ${m.subtitle}. ${completedModules.has(m.id) ? 'Completed.' : ''} ${m.id === currentModule ? 'Current module.' : ''}"
+             aria-current="${m.id === currentModule ? 'true' : 'false'}">
+          <div class="module-number" aria-hidden="true">${completedModules.has(m.id) ? '&#10003;' : m.id}</div>
+          <div class="module-info">
+            <div class="module-title">${m.title}</div>
+            <div class="module-subtitle">${m.subtitle}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function goToModule(moduleId) {
+      // Bounds checking
+      if (moduleId < 1 || moduleId > modules.length) {
+        console.warn(`Invalid module ID: ${moduleId}. Must be between 1 and ${modules.length}.`);
+        return;
+      }
+
+      if (moduleId > currentModule) completedModules.add(currentModule);
+      currentModule = moduleId;
+
+      // Ensure slide is within bounds for new module
+      const targetModule = modules[moduleId - 1];
+      currentSlide = Math.min(Math.max(1, currentSlide), targetModule.slides);
+      currentSlide = 1; // Start at first slide of new module
+
+      document.querySelectorAll('.module-slides').forEach(el => el.classList.remove('active'));
+      const targetModuleEl = document.querySelector(`.module-slides[data-module="${moduleId}"]`);
+      if (targetModuleEl) {
+        targetModuleEl.classList.add('active');
+      }
+
+      updateSlideVisibility();
+      updateSlideNav();
+      renderModuleList();
+
+      const moduleTitle = modules[moduleId - 1];
+      if (moduleTitle) {
+        document.getElementById('currentModule').textContent = moduleTitle.title;
+      }
+
+      saveProgress();
+      announceSlide();
+    }
+
+    function updateSlideVisibility() {
+      const moduleSlides = document.querySelector(`.module-slides[data-module="${currentModule}"]`);
+      if (!moduleSlides) {
+        console.warn(`Module slides not found for module ${currentModule}`);
+        return;
+      }
+      const slides = moduleSlides.querySelectorAll('.slide');
+      slides.forEach((slide, index) => slide.classList.toggle('active', index + 1 === currentSlide));
+    }
+
+    function updateSlideNav() {
+      const module = modules[currentModule - 1];
+      if (!module) {
+        console.warn(`Module data not found for index ${currentModule - 1}`);
+        return;
+      }
+      const slideCounter = document.getElementById('slideCounter');
+      const progressDots = document.getElementById('progressDots');
+      if (slideCounter) {
+        slideCounter.textContent = `${currentSlide} / ${module.slides}`;
+      }
+      if (progressDots) {
+        progressDots.innerHTML = Array.from({ length: module.slides }, (_, i) =>
+          `<div class="progress-dot ${i + 1 === currentSlide ? 'active' : ''}"
+                onclick="goToSlide(${i + 1})"
+                onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();goToSlide(${i + 1});}"
+                role="tab"
+                tabindex="${i + 1 === currentSlide ? '0' : '-1'}"
+                aria-selected="${i + 1 === currentSlide ? 'true' : 'false'}"
+                aria-label="Go to slide ${i + 1}"></div>`
+        ).join('');
+      }
+    }
+
+    // Reset progress function (can be called from console or UI)
+    function resetProgress() {
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+        currentModule = 1;
+        currentSlide = 1;
+        completedModules.clear();
+
+        // Reset UI
+        document.querySelectorAll('.module-slides').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.slide').forEach(el => el.classList.remove('active'));
+
+        const firstModule = document.querySelector('.module-slides[data-module="1"]');
+        if (firstModule) {
+          firstModule.classList.add('active');
+          const firstSlide = firstModule.querySelector('.slide');
+          if (firstSlide) firstSlide.classList.add('active');
+        }
+
+        document.getElementById('currentModule').textContent = modules[0].title;
+        renderModuleList();
+        updateSlideNav();
+        updateProgressPercent();
+        announceSlide();
+
+        // Progress reset successfully
+      } catch (e) {
+        console.error('Failed to reset progress:', e);
+      }
+    }
+
+    function goToSlide(slideNum) {
+      // Bounds checking
+      const module = modules[currentModule - 1];
+      if (!module || slideNum < 1 || slideNum > module.slides) {
+        console.warn(`Invalid slide number: ${slideNum}. Must be between 1 and ${module ? module.slides : '?'}.`);
+        return;
+      }
+
+      currentSlide = slideNum;
+      updateSlideVisibility();
+      updateSlideNav();
+      saveProgress();
+      announceSlide();
+    }
+
+    function nextSlide() {
+      // Bounds checking
+      if (currentModule < 1 || currentModule > modules.length) {
+        console.warn('Invalid current module state');
+        currentModule = 1;
+        currentSlide = 1;
+        saveProgress();
+        return;
+      }
+
+      const module = modules[currentModule - 1];
+      if (!module) return;
+
+      if (currentSlide < module.slides) {
+        currentSlide++;
+        updateSlideVisibility();
+        updateSlideNav();
+        saveProgress();
+        announceSlide();
+      } else if (currentModule < modules.length) {
+        goToModule(currentModule + 1);
+      }
+      // If at last slide of last module, do nothing (already handled)
+    }
+
+    function prevSlide() {
+      // Bounds checking
+      if (currentModule < 1 || currentModule > modules.length) {
+        console.warn('Invalid current module state');
+        currentModule = 1;
+        currentSlide = 1;
+        saveProgress();
+        return;
+      }
+
+      if (currentSlide > 1) {
+        currentSlide--;
+        updateSlideVisibility();
+        updateSlideNav();
+        saveProgress();
+        announceSlide();
+      } else if (currentModule > 1) {
+        // Bounds check for previous module
+        const prevModuleIndex = currentModule - 2;
+        if (prevModuleIndex < 0 || prevModuleIndex >= modules.length) {
+          console.warn('Invalid previous module index');
+          return;
+        }
+
+        const prevModuleSlides = modules[prevModuleIndex].slides;
+        currentModule--;
+        currentSlide = prevModuleSlides;
+
+        document.querySelectorAll('.module-slides').forEach(el => el.classList.remove('active'));
+        const targetModuleEl = document.querySelector(`.module-slides[data-module="${currentModule}"]`);
+        if (targetModuleEl) {
+          targetModuleEl.classList.add('active');
+        }
+
+        updateSlideVisibility();
+        updateSlideNav();
+        renderModuleList();
+
+        const moduleTitle = modules[currentModule - 1];
+        if (moduleTitle) {
+          document.getElementById('currentModule').textContent = moduleTitle.title;
+        }
+
+        saveProgress();
+        announceSlide();
+      }
+      // If at first slide of first module, do nothing (already handled)
+    }
+
+    function checkAnswer(element, isCorrect) {
+      const container = element.closest('.quiz-container');
+      const options = container.querySelectorAll('.quiz-option');
+      const feedback = container.querySelector('.quiz-feedback');
+
+      options.forEach(opt => {
+        opt.style.pointerEvents = 'none';
+        if (opt === element) opt.classList.add(isCorrect ? 'correct' : 'incorrect');
+      });
+
+      feedback.classList.add('show', isCorrect ? 'correct' : 'incorrect');
+      feedback.innerHTML = isCorrect
+        ? '<strong>Correct!</strong> You understand the key concept.'
+        : '<strong>Not quite.</strong> Review the module to understand why.';
+    }
+
+    // ==================== THEME TOGGLE ====================
+    function toggleTheme() {
+      const body = document.body;
+      const themeBtn = document.getElementById('themeToggle');
+      const isLight = body.classList.toggle('light-theme');
+
+      // Update button icon
+      if (themeBtn) {
+        themeBtn.textContent = isLight ? '🌙' : '☀️';
+        themeBtn.setAttribute('aria-label', isLight ? 'Switch to dark mode' : 'Switch to light mode');
+      }
+
+      // Save preference
+      try {
+        localStorage.setItem('ipd-course-theme', isLight ? 'light' : 'dark');
+      } catch (e) {
+        console.warn('Could not save theme preference');
+      }
+    }
+
+    function loadTheme() {
+      try {
+        const savedTheme = localStorage.getItem('ipd-course-theme');
+        const themeBtn = document.getElementById('themeToggle');
+
+        if (savedTheme === 'light') {
+          document.body.classList.add('light-theme');
+          if (themeBtn) {
+            themeBtn.textContent = '🌙';
+            themeBtn.setAttribute('aria-label', 'Switch to dark mode');
+          }
+        }
+      } catch (e) {
+        console.warn('Could not load theme preference');
+      }
+    }
+
+    // ==================== CERTIFICATE ====================
+    function showCertificate() {
+      const modal = document.getElementById('certificateModal');
+      const dateEl = document.getElementById('certDate');
+
+      if (modal) {
+        modal.classList.add('visible');
+
+        // Set current date
+        if (dateEl) {
+          const now = new Date();
+          const options = { year: 'numeric', month: 'long', day: 'numeric' };
+          dateEl.textContent = `Completed on ${now.toLocaleDateString('en-US', options)}`;
+        }
+
+        // Focus the name input
+        const nameInput = document.getElementById('certName');
+        if (nameInput) {
+          setTimeout(() => nameInput.focus(), 100);
+        }
+      }
+    }
+
+    function closeCertificate() {
+      const modal = document.getElementById('certificateModal');
+      if (modal) {
+        modal.classList.remove('visible');
+      }
+    }
+
+    function printCertificate() {
+      const name = document.getElementById('certName')?.value || 'Course Participant';
+      const certContent = document.getElementById('certificateContent');
+
+      if (!certContent) return;
+
+      // Temporarily replace input with name text
+      const nameInput = document.getElementById('certName');
+      const originalHTML = nameInput?.outerHTML;
+      if (nameInput) {
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'certificate-name';
+        nameSpan.textContent = name;
+        nameInput.replaceWith(nameSpan);
+      }
+
+      // Hide action buttons for print
+      const actions = certContent.querySelector('.certificate-actions');
+      const closeBtn = certContent.querySelector('.certificate-close');
+      if (actions) actions.style.display = 'none';
+      if (closeBtn) closeBtn.style.display = 'none';
+
+      // Print
+      const printWindow = window.open('', '_blank');
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Certificate - IPD Meta-Analysis Course</title>
+          <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&display=swap" rel="stylesheet">
+          <style>
+            body { margin: 0; padding: 2rem; font-family: 'Cormorant Garamond', Georgia, serif; }
+            .certificate {
+              background: linear-gradient(135deg, #faf8f5 0%, #fff 100%);
+              border: 8px solid #D4AF37;
+              border-radius: 12px;
+              padding: 3rem;
+              max-width: 700px;
+              margin: 0 auto;
+              text-align: center;
+            }
+            .certificate-header { font-size: 2.5rem; color: #1E2761; margin-bottom: 0.5rem; }
+            .certificate-subtitle { font-size: 1rem; color: #718096; margin-bottom: 2rem; letter-spacing: 0.2em; text-transform: uppercase; }
+            .certificate-body { font-size: 1.2rem; color: #2D3748; line-height: 1.8; margin-bottom: 2rem; }
+            .certificate-name { font-size: 2rem; font-weight: 700; color: #1E2761; border-bottom: 2px solid #D4AF37; display: inline-block; padding: 0 2rem 0.5rem; margin: 1rem 0; }
+            .certificate-date { font-size: 0.9rem; color: #718096; margin-top: 1.5rem; }
+            .certificate-seal { width: 80px; height: 80px; background: linear-gradient(135deg, #D4AF37, #B8860B); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 1.5rem auto 0; color: white; font-size: 2rem; }
+          </style>
+        </head>
+        <body>
+          ${certContent.innerHTML}
+        </body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.print();
+
+      // Restore original state
+      if (actions) actions.style.display = '';
+      if (closeBtn) closeBtn.style.display = '';
+      const nameSpan = certContent.querySelector('.certificate-name');
+      if (nameSpan && originalHTML) {
+        nameSpan.outerHTML = originalHTML;
+      }
+    }
+
+    function downloadCertificate() {
+      const name = document.getElementById('certName')?.value || 'Course Participant';
+      const dateEl = document.getElementById('certDate')?.textContent || '';
+
+      // Create a canvas-based certificate image
+      const canvas = document.createElement('canvas');
+      canvas.width = 1000;
+      canvas.height = 700;
+      const ctx = canvas.getContext('2d');
+
+      // Background gradient
+      const gradient = ctx.createLinearGradient(0, 0, 1000, 700);
+      gradient.addColorStop(0, '#faf8f5');
+      gradient.addColorStop(1, '#ffffff');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, 1000, 700);
+
+      // Border
+      ctx.strokeStyle = '#D4AF37';
+      ctx.lineWidth = 16;
+      ctx.strokeRect(20, 20, 960, 660);
+
+      // Inner border
+      ctx.strokeStyle = '#1E2761';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(40, 40, 920, 620);
+
+      // Header
+      ctx.fillStyle = '#1E2761';
+      ctx.font = 'bold 48px Georgia, serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Certificate of Completion', 500, 120);
+
+      // Subtitle
+      ctx.fillStyle = '#718096';
+      ctx.font = '18px Arial, sans-serif';
+      ctx.letterSpacing = '0.2em';
+      ctx.fillText('INDIVIDUAL PARTICIPANT DATA META-ANALYSIS', 500, 160);
+
+      // Body text
+      ctx.fillStyle = '#2D3748';
+      ctx.font = '22px Georgia, serif';
+      ctx.fillText('This certifies that', 500, 240);
+
+      // Name
+      ctx.fillStyle = '#1E2761';
+      ctx.font = 'bold 36px Georgia, serif';
+      ctx.fillText(name, 500, 300);
+
+      // Name underline
+      const nameWidth = ctx.measureText(name).width;
+      ctx.strokeStyle = '#D4AF37';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(500 - nameWidth/2 - 20, 315);
+      ctx.lineTo(500 + nameWidth/2 + 20, 315);
+      ctx.stroke();
+
+      // More body text
+      ctx.fillStyle = '#2D3748';
+      ctx.font = '22px Georgia, serif';
+      ctx.fillText('has successfully completed the course', 500, 380);
+      ctx.font = 'bold 24px Georgia, serif';
+      ctx.fillText('"The Hidden Patient: IPD Meta-Analysis"', 500, 420);
+      ctx.font = '18px Georgia, serif';
+      ctx.fillText('demonstrating understanding of individual participant data', 500, 460);
+      ctx.fillText('synthesis methods and their clinical applications.', 500, 485);
+
+      // Date
+      ctx.fillStyle = '#718096';
+      ctx.font = '16px Arial, sans-serif';
+      ctx.fillText(dateEl, 500, 540);
+
+      // Seal
+      ctx.fillStyle = '#D4AF37';
+      ctx.beginPath();
+      ctx.arc(500, 610, 40, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = 'white';
+      ctx.font = 'bold 36px Arial, sans-serif';
+      ctx.fillText('✓', 500, 625);
+
+      // Download
+      const link = document.createElement('a');
+      link.download = `IPD-Certificate-${name.replace(/[^a-zA-Z0-9\s-]/g, '').replace(/\s+/g, '-')}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+
+    // Close certificate with Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeCertificate();
+      }
+    });
+
+    // Close certificate when clicking outside
+    document.getElementById('certificateModal')?.addEventListener('click', (e) => {
+      if (e.target.id === 'certificateModal') {
+        closeCertificate();
+      }
+    });
+
+    // ==================== INIT ====================
+    init();
+    loadTheme();
+  </script>
+</body>
+</html>

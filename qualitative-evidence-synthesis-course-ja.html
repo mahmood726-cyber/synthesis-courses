@@ -1,0 +1,3227 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>定性的証拠の合成: 理由の理解</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&amp;family=Source+Sans+Pro:wght@300;400;600;700&amp;display=swap" rel="stylesheet"/>
+<style>
+    :root {
+      --navy: #1E2761;
+      --deep-navy: #141B3D;
+      --gold: #D4AF37;
+      --cream: #FAF8F5;
+      --light-cream: #FFFFFF;
+      --text: #2D3748;
+      --light-text: #718096;
+      --red: #C53030;
+      --green: #22c55e;
+      --teal: #0f766e;
+      --purple: #7c3aed;
+      --orange: #f59e0b;
+      --transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      height: 100%;
+      font-family: 'Source Sans Pro', sans-serif;
+      background: var(--deep-navy);
+      color: var(--cream);
+    }
+
+    .course-container { display: flex; height: 100vh; overflow: hidden; }
+
+    /* Skip Link */
+    .skip-link {
+      position: absolute;
+      top: -40px;
+      left: 0;
+      background: var(--gold);
+      color: var(--navy);
+      padding: 8px 16px;
+      z-index: 10000;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .skip-link:focus { top: 0; }
+
+    /* Sidebar */
+    .sidebar {
+      width: 300px;
+      background: linear-gradient(180deg, var(--deep-navy) 0%, #0a0f1a 100%);
+      border-right: 1px solid rgba(212,175,55,0.2);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    .sidebar-header {
+      padding: 1.25rem;
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+      text-align: center;
+    }
+    .sidebar-header h1 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--gold);
+    }
+    .sidebar-header p {
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.6);
+    }
+
+    .stats-panel {
+      padding: 1rem;
+      background: rgba(212,175,55,0.1);
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+    }
+    .level-display {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+    .level-badge {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, var(--gold), #f0c040);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      box-shadow: 0 2px 8px rgba(212,175,55,0.4);
+    }
+    .level-info { flex: 1; }
+    .level-title { font-weight: 700; font-size: 0.9rem; color: var(--gold); }
+    .level-subtitle { font-size: 0.7rem; color: rgba(255,255,255,0.6); }
+    .xp-bar {
+      height: 8px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 0.5rem;
+    }
+    .xp-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--gold), var(--orange));
+      border-radius: 4px;
+      transition: width 0.5s ease;
+    }
+    .xp-text {
+      font-size: 0.65rem;
+      color: rgba(255,255,255,0.5);
+      text-align: right;
+      margin-top: 0.25rem;
+    }
+    .quick-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+    }
+    .quick-stat {
+      background: rgba(0,0,0,0.2);
+      padding: 0.5rem;
+      border-radius: 6px;
+      text-align: center;
+    }
+    .quick-stat-value {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--gold);
+    }
+    .quick-stat-label {
+      font-size: 0.6rem;
+      color: rgba(255,255,255,0.5);
+    }
+
+    .course-progress {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+      background: rgba(0,0,0,0.2);
+    }
+    .course-progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.6);
+      margin-bottom: 0.35rem;
+    }
+    .course-progress-bar {
+      height: 6px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .course-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--green), #22d3ee);
+      border-radius: 3px;
+      transition: width 0.5s ease;
+    }
+
+    .module-list { flex: 1; overflow-y: auto; padding: 0.5rem 0; }
+    .module-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.6rem 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      border-left: 3px solid transparent;
+    }
+    .module-item:hover { background: rgba(212,175,55,0.1); }
+    .module-item.active { background: rgba(212,175,55,0.15); border-left-color: var(--gold); }
+    .module-item.completed .module-number { background: var(--green); color: white; }
+    .module-item.locked { opacity: 0.5; cursor: not-allowed; }
+    .module-number {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .module-item.active .module-number { background: var(--gold); color: var(--navy); }
+    .module-info { flex: 1; min-width: 0; }
+    .module-title { font-size: 0.8rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .module-subtitle { font-size: 0.65rem; color: rgba(255,255,255,0.5); }
+    .module-xp { font-size: 0.6rem; color: var(--gold); }
+    .module-time { font-size: 0.55rem; color: rgba(255,255,255,0.4); display: flex; align-items: center; gap: 0.25rem; margin-top: 0.15rem; }
+
+    .badges-panel {
+      padding: 1rem;
+      border-top: 1px solid rgba(212,175,55,0.2);
+    }
+    .badges-title { font-size: 0.75rem; font-weight: 600; color: var(--gold); margin-bottom: 0.5rem; }
+    .badges-grid { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+    .badge-item {
+      width: 32px;
+      height: 32px;
+      background: rgba(255,255,255,0.05);
+      border: 2px solid rgba(255,255,255,0.1);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      opacity: 0.3;
+      transition: all 0.3s;
+      cursor: help;
+      position: relative;
+    }
+    .badge-item.earned { opacity: 1; background: rgba(212,175,55,0.2); border-color: var(--gold); }
+    .badge-item:hover::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--navy);
+      color: white;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.6rem;
+      white-space: nowrap;
+      z-index: 100;
+    }
+
+    /* Main Content */
+    .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .content-header {
+      padding: 0.75rem 1.5rem;
+      background: rgba(0,0,0,0.3);
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .breadcrumb { font-size: 0.85rem; color: rgba(255,255,255,0.6); }
+    .breadcrumb span { color: var(--gold); }
+    .header-actions { display: flex; gap: 0.5rem; align-items: center; }
+    .streak-display {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: rgba(239,68,68,0.2);
+      border: 1px solid rgba(239,68,68,0.4);
+      padding: 0.35rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+    }
+    .streak-display.active { background: rgba(249,115,22,0.2); border-color: var(--orange); }
+    .streak-flame { font-size: 1rem; }
+    .streak-count { font-weight: 700; color: var(--orange); }
+
+    .btn {
+      padding: 0.5rem 1rem;
+      border: 1px solid rgba(212,175,55,0.3);
+      border-radius: 6px;
+      background: rgba(255,255,255,0.05);
+      color: var(--cream);
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn:hover { background: rgba(212,175,55,0.2); border-color: var(--gold); }
+    .btn.primary { background: var(--gold); color: var(--navy); border-color: var(--gold); font-weight: 600; }
+
+    .content-body { flex: 1; overflow: hidden; display: flex; }
+
+    /* Slides */
+    .slides-container { flex: 1; position: relative; overflow: hidden; }
+    .module-slides { display: none; width: 100%; height: 100%; }
+    .module-slides.active { display: block; }
+
+    .slide {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      padding: 2rem 2rem 4rem;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity var(--transition), visibility var(--transition);
+      overflow-y: auto;
+    }
+    .slide.active { opacity: 1; visibility: visible; }
+    .slide.dark { background: var(--deep-navy); }
+    .slide.light { background: var(--cream); color: var(--text); }
+    .slide.black { background: #000; }
+    .slide.red-bg { background: linear-gradient(135deg, #7f1d1d, #450a0a); }
+    .slide.green-bg { background: linear-gradient(135deg, #14532d, #052e16); }
+    .slide.purple-bg { background: linear-gradient(135deg, #4c1d95, #2e1065); }
+    .slide.orange-bg { background: linear-gradient(135deg, #9a3412, #431407); }
+    .slide.teal-bg { background: linear-gradient(135deg, #0f766e, #042f2e); }
+
+    .slide-progress-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--gold), var(--orange));
+      transition: width 0.3s ease;
+      z-index: 50;
+    }
+
+    .serif { font-family: 'Cormorant Garamond', Georgia, serif; }
+    .title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      font-weight: 700;
+      margin-bottom: 1rem;
+      line-height: 1.2;
+      text-align: center;
+    }
+    .title.gold { color: var(--gold); }
+    .title.navy { color: var(--navy); }
+    .subtitle {
+      font-size: clamp(0.9rem, 2vw, 1.3rem);
+      color: rgba(255,255,255,0.7);
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .slide.light .subtitle { color: var(--light-text); }
+
+    .big-number {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(4rem, 12vw, 8rem);
+      font-weight: 700;
+      line-height: 1;
+    }
+    .big-number.gold { color: var(--gold); }
+    .big-number.red { color: var(--red); }
+
+    .refrain {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(1.3rem, 3vw, 2rem);
+      font-style: italic;
+      color: var(--gold);
+      text-align: center;
+      max-width: 700px;
+    }
+
+    .content { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 850px; }
+
+    /* Cards */
+    .card {
+      background: var(--light-cream);
+      border: 1px solid var(--gold);
+      padding: 1.25rem 1.5rem;
+      margin: 0.5rem 0;
+      max-width: 750px;
+      width: 100%;
+      border-radius: 8px;
+    }
+    .card.navy-bg { background: var(--navy); color: var(--cream); }
+    .card-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 0.05em;
+      margin-bottom: 0.4rem;
+      text-transform: uppercase;
+    }
+    .card-text { font-size: 0.95rem; line-height: 1.6; }
+    .card.navy-bg .card-text { color: var(--cream); }
+
+    /* Story box */
+    .story-box {
+      background: linear-gradient(135deg, rgba(197,48,48,0.15), rgba(30,39,97,0.2));
+      border-left: 4px solid var(--red);
+      padding: 1.25rem;
+      margin: 0.75rem 0;
+      max-width: 750px;
+      width: 100%;
+      border-radius: 0 8px 8px 0;
+    }
+    .story-box.success { background: linear-gradient(135deg, rgba(34,197,94,0.15), rgba(30,39,97,0.2)); border-left-color: var(--green); }
+    .story-box.warning { background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(30,39,97,0.2)); border-left-color: var(--orange); }
+    .story-box.teal { background: linear-gradient(135deg, rgba(15,118,110,0.15), rgba(30,39,97,0.2)); border-left-color: var(--teal); }
+    .story-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: var(--red);
+      margin-bottom: 0.4rem;
+      text-transform: uppercase;
+    }
+    .story-box.success .story-label { color: var(--green); }
+    .story-box.warning .story-label { color: var(--orange); }
+    .story-box.teal .story-label { color: var(--teal); }
+    .story-text { font-size: 0.95rem; line-height: 1.6; }
+
+    /* CERQual Confidence Colors */
+    .cerqual-high { background: linear-gradient(135deg, rgba(34,197,94,0.2), rgba(30,39,97,0.2)); border-color: var(--green); }
+    .cerqual-moderate { background: linear-gradient(135deg, rgba(59,130,246,0.2), rgba(30,39,97,0.2)); border-color: #3b82f6; }
+    .cerqual-low { background: linear-gradient(135deg, rgba(245,158,11,0.2), rgba(30,39,97,0.2)); border-color: var(--orange); }
+    .cerqual-very-low { background: linear-gradient(135deg, rgba(197,48,48,0.2), rgba(30,39,97,0.2)); border-color: var(--red); }
+
+    .cerqual-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .cerqual-badge.high { background: var(--green); color: white; }
+    .cerqual-badge.moderate { background: #3b82f6; color: white; }
+    .cerqual-badge.low { background: var(--orange); color: white; }
+    .cerqual-badge.very-low { background: var(--red); color: white; }
+
+    /* Stats */
+    .stats-grid {
+      display: flex;
+      gap: 0.75rem;
+      margin: 1rem 0;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .stat-box {
+      background: var(--navy);
+      color: var(--cream);
+      padding: 1rem 1.25rem;
+      text-align: center;
+      min-width: 120px;
+      border-radius: 8px;
+    }
+    .stat-value {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.3rem, 2.5vw, 2rem);
+      font-weight: 700;
+    }
+    .stat-value.gold { color: var(--gold); }
+    .stat-value.red { color: var(--red); }
+    .stat-value.green { color: var(--green); }
+    .stat-label { font-size: 0.75rem; opacity: 0.8; margin-top: 0.2rem; }
+
+    /* Timeline */
+    .timeline { display: flex; flex-direction: column; gap: 0.4rem; width: 100%; max-width: 650px; }
+    .timeline-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.6rem 0.75rem;
+      background: rgba(255,255,255,0.05);
+      border-radius: 6px;
+      border-left: 4px solid var(--gold);
+    }
+    .timeline-days { font-weight: 700; font-size: 0.8rem; min-width: 70px; color: var(--gold); }
+    .timeline-content { flex: 1; }
+    .timeline-title { font-weight: 600; font-size: 0.9rem; }
+    .timeline-desc { font-size: 0.75rem; opacity: 0.7; }
+
+    /* Checklist */
+    .checklist { display: flex; flex-direction: column; gap: 0.4rem; width: 100%; max-width: 650px; }
+    .checklist-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+      padding: 0.6rem 0.75rem;
+      background: rgba(255,255,255,0.05);
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .check-icon {
+      width: 20px;
+      height: 20px;
+      background: var(--green);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      color: white;
+      flex-shrink: 0;
+    }
+    .checklist-text { font-size: 0.9rem; }
+
+    /* Decision Tree */
+    .decision-tree {
+      background: linear-gradient(135deg, rgba(124,58,237,0.1), rgba(30,39,97,0.2));
+      border: 2px solid var(--purple);
+      border-radius: 12px;
+      padding: 1.25rem;
+      width: 100%;
+      max-width: 700px;
+    }
+    .decision-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    .decision-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--purple);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+    }
+    .decision-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+    .decision-xp {
+      margin-left: auto;
+      background: rgba(212,175,55,0.2);
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      color: var(--gold);
+      font-weight: 600;
+    }
+    .decision-scenario {
+      background: rgba(0,0,0,0.2);
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+    .decision-question {
+      font-weight: 600;
+      color: var(--gold);
+      margin-bottom: 0.75rem;
+      font-size: 1rem;
+    }
+    .decision-options { display: flex; flex-direction: column; gap: 0.5rem; }
+    .decision-option {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      background: rgba(255,255,255,0.05);
+      border: 2px solid rgba(255,255,255,0.15);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .decision-option:hover { background: rgba(124,58,237,0.2); border-color: var(--purple); }
+    .decision-option.selected { background: rgba(124,58,237,0.3); border-color: var(--purple); }
+    .decision-option.correct { background: rgba(34,197,94,0.2); border-color: var(--green); }
+    .decision-option.incorrect { background: rgba(239,68,68,0.15); border-color: var(--red); }
+    .decision-option.disabled { pointer-events: none; opacity: 0.7; }
+    .decision-option:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+    .option-letter {
+      width: 24px;
+      height: 24px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.8rem;
+      flex-shrink: 0;
+    }
+    .decision-option.correct .option-letter { background: var(--green); color: white; }
+    .decision-option.incorrect .option-letter { background: var(--red); color: white; }
+    .option-text { font-size: 0.9rem; }
+    .decision-feedback {
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: 8px;
+      display: none;
+    }
+    .decision-feedback.show { display: block; }
+    .decision-feedback.correct { background: rgba(34,197,94,0.2); border: 1px solid var(--green); }
+    .decision-feedback.incorrect { background: rgba(239,68,68,0.15); border: 1px solid var(--red); }
+    .feedback-title { font-weight: 700; margin-bottom: 0.5rem; }
+    .feedback-text { font-size: 0.9rem; line-height: 1.5; }
+
+    /* Quiz */
+    .quiz-container { width: 100%; max-width: 650px; }
+    .quiz-question {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.2rem;
+      margin-bottom: 1.25rem;
+      text-align: center;
+    }
+    .quiz-options { display: flex; flex-direction: column; gap: 0.5rem; }
+    .quiz-option {
+      padding: 0.75rem 1rem;
+      background: rgba(255,255,255,0.05);
+      border: 2px solid rgba(255,255,255,0.2);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+    .quiz-option:hover { background: rgba(212,175,55,0.15); border-color: var(--gold); }
+    .quiz-option.correct { background: rgba(34,197,94,0.2); border-color: var(--green); }
+    .quiz-option.incorrect { background: rgba(239,68,68,0.15); border-color: var(--red); }
+    .quiz-option.disabled { pointer-events: none; }
+    .quiz-option:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+    .quiz-feedback {
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: 8px;
+      display: none;
+      font-size: 0.9rem;
+    }
+    .quiz-feedback.show { display: block; }
+    .quiz-feedback.correct { background: rgba(34,197,94,0.2); border: 1px solid var(--green); }
+    .quiz-feedback.incorrect { background: rgba(239,68,68,0.15); border: 1px solid var(--red); }
+
+    /* Learning Objectives */
+    .objectives-box {
+      background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(30,39,97,0.25));
+      border: 2px solid #3b82f6;
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin: 0.75rem 0;
+      max-width: 700px;
+      width: 100%;
+    }
+    .objectives-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+    .objectives-icon {
+      width: 36px;
+      height: 36px;
+      background: #3b82f6;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+    }
+    .objectives-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #60a5fa;
+    }
+    .objectives-list { list-style: none; padding: 0; }
+    .objectives-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      padding: 0.4rem 0;
+      font-size: 0.9rem;
+    }
+    .objectives-list li::before { content: '○'; color: #3b82f6; font-weight: bold; }
+
+    /* Animation */
+    .slide.active .animate { animation: fadeUp 0.5s ease-out forwards; }
+    .slide.active .animate.delay-1 { animation-delay: 0.1s; }
+    .slide.active .animate.delay-2 { animation-delay: 0.2s; }
+    .slide.active .animate.delay-3 { animation-delay: 0.3s; }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate { opacity: 0; }
+
+    /* XP Popup */
+    .xp-popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      background: linear-gradient(135deg, var(--gold), #f0c040);
+      color: var(--navy);
+      padding: 1.5rem 2.5rem;
+      border-radius: 12px;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2rem;
+      font-weight: 700;
+      z-index: 1000;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+      transition: transform 0.3s ease;
+    }
+    .xp-popup.show { transform: translate(-50%, -50%) scale(1); }
+    .xp-popup .xp-amount { font-size: 3rem; display: block; }
+
+    /* Badge Modal */
+    .badge-modal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.85);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1001;
+    }
+    .badge-modal.show { display: flex; }
+    .badge-modal-content {
+      background: linear-gradient(135deg, var(--deep-navy), #0a0f1a);
+      border: 2px solid var(--gold);
+      border-radius: 16px;
+      padding: 2rem;
+      text-align: center;
+      max-width: 350px;
+    }
+    .badge-modal-icon { font-size: 4rem; margin-bottom: 1rem; }
+    .badge-modal-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.5rem;
+      color: var(--gold);
+      margin-bottom: 0.5rem;
+    }
+    .badge-modal-desc { font-size: 0.9rem; opacity: 0.8; margin-bottom: 1rem; }
+    .badge-modal-close {
+      padding: 0.5rem 1.5rem;
+      background: var(--gold);
+      color: var(--navy);
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* Confetti */
+    .confetti-container {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 999;
+      overflow: hidden;
+    }
+    .confetti {
+      position: absolute;
+      width: 10px; height: 10px;
+      opacity: 0;
+      animation: confetti-fall 3s ease-out forwards;
+    }
+    @keyframes confetti-fall {
+      0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .confetti { animation: none; display: none; }
+      .xp-popup { transition: none; }
+      .slide { transition: none; }
+    }
+
+    /* Nav */
+    .slide-nav {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      padding: 0.75rem 1rem 1.25rem;
+      z-index: 100;
+      pointer-events: none;
+    }
+    .nav-btn {
+      background: rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: white;
+      font-size: 1.1rem;
+      cursor: pointer;
+      opacity: 0.6;
+      transition: all 0.2s;
+      padding: 0.4rem 0.6rem;
+      border-radius: 6px;
+      pointer-events: auto;
+    }
+    .nav-btn:hover { opacity: 1; background: rgba(0,0,0,0.7); border-color: var(--gold); }
+    .nav-btn:disabled { opacity: 0.2; cursor: not-allowed; }
+    .nav-btn:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+    .nav-center { display: flex; flex-direction: column; align-items: center; gap: 0.2rem; pointer-events: auto; }
+    .slide-counter { font-size: 0.7rem; opacity: 0.5; }
+    .progress-dots { display: flex; gap: 3px; }
+    .progress-dot {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.25);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .progress-dot.active { background: var(--gold); transform: scale(1.3); }
+
+    /* Mobile */
+    @media (max-width: 768px) {
+      .sidebar {
+        position: fixed;
+        left: -300px;
+        top: 0;
+        bottom: 0;
+        z-index: 1000;
+        transition: left 0.3s ease;
+      }
+      .sidebar.open { left: 0; }
+      .sidebar-toggle {
+        display: flex;
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        z-index: 1001;
+        width: 40px;
+        height: 40px;
+        background: var(--gold);
+        color: var(--navy);
+        border: none;
+        border-radius: 8px;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        cursor: pointer;
+      }
+      .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 999;
+      }
+      .sidebar-overlay.show { display: block; }
+    }
+    @media (min-width: 769px) {
+      .sidebar-toggle { display: none; }
+      .sidebar-overlay { display: none !important; }
+    }
+
+    /* Combo Counter */
+    .combo-display {
+      position: fixed;
+      top: 80px;
+      right: 20px;
+      background: linear-gradient(135deg, var(--orange), #ef4444);
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      z-index: 500;
+      transform: scale(0);
+      transition: transform 0.3s ease;
+      box-shadow: 0 4px 15px rgba(239,68,68,0.4);
+    }
+    .combo-display.show { transform: scale(1); }
+
+    /* Quote Block */
+    .quote-block {
+      background: linear-gradient(135deg, rgba(15,118,110,0.2), rgba(30,39,97,0.2));
+      border-left: 4px solid var(--teal);
+      padding: 1.25rem;
+      margin: 0.75rem 0;
+      max-width: 700px;
+      width: 100%;
+      border-radius: 0 8px 8px 0;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      font-style: italic;
+    }
+    .quote-attribution {
+      margin-top: 0.75rem;
+      font-size: 0.85rem;
+      font-style: normal;
+      color: var(--teal);
+    }
+
+    /* Key Takeaways */
+    .takeaways-container {
+      background: linear-gradient(135deg, rgba(34,197,94,0.15), rgba(30,39,97,0.2));
+      border: 2px solid var(--green);
+      border-radius: 12px;
+      padding: 1.5rem;
+      width: 100%;
+      max-width: 700px;
+      text-align: center;
+    }
+    .takeaways-icon {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .takeaways-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--green);
+      margin-bottom: 1rem;
+    }
+    .takeaways-list {
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+    .takeaway-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.6rem 0.75rem;
+      background: rgba(0,0,0,0.2);
+      border-radius: 6px;
+    }
+    .takeaway-bullet {
+      color: var(--green);
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .takeaway-text {
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+    .takeaways-remember {
+      margin-top: 1rem;
+      padding: 0.75rem;
+      background: rgba(212,175,55,0.15);
+      border-left: 3px solid var(--gold);
+      border-radius: 0 6px 6px 0;
+      font-size: 0.9rem;
+      text-align: left;
+    }
+
+    /* Mobile progress dots - larger touch targets */
+    @media (max-width: 768px) {
+      .progress-dot {
+        width: 8px;
+        height: 8px;
+        min-width: 8px;
+        min-height: 8px;
+      }
+      .progress-dots { gap: 6px; }
+    }
+
+    /* Print Styles */
+    @media print {
+      body {
+        background: white;
+        color: black;
+        font-size: 12pt;
+      }
+      .sidebar, .sidebar-toggle, .sidebar-overlay,
+      .xp-popup, .combo-display, .confetti-container,
+      .badge-modal, .nav-btn, .progress-dots, .slide-counter,
+      .header-actions, .streak-display, .content-header {
+        display: none !important;
+      }
+      .course-container {
+        display: block;
+      }
+      .main-content {
+        width: 100%;
+        max-width: 100%;
+        padding: 0;
+      }
+      .slide {
+        display: block !important;
+        opacity: 1 !important;
+        page-break-inside: avoid;
+        margin-bottom: 2rem;
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 1rem;
+      }
+      .story-box, .decision-tree, .quiz-container {
+        background: #f5f5f5 !important;
+        border-color: #333 !important;
+        color: black !important;
+      }
+      .decision-option, .quiz-option {
+        background: white !important;
+        border: 1px solid #333 !important;
+        color: black !important;
+      }
+      .decision-option.correct, .quiz-option.correct {
+        background: #d4edda !important;
+        border: 2px solid #28a745 !important;
+      }
+      .decision-option.correct::after, .quiz-option.correct::after {
+        content: " ✓ CORRECT";
+        font-weight: bold;
+        color: #28a745;
+      }
+      .slide-title, .decision-title {
+        color: black !important;
+      }
+      .decision-feedback, .quiz-feedback {
+        display: block !important;
+        background: #f8f9fa !important;
+        border: 1px solid #333 !important;
+        color: black !important;
+        padding: 1rem !important;
+        margin-top: 1rem !important;
+      }
+      .takeaways-container {
+        background: #f0fff0 !important;
+        border-color: #28a745 !important;
+        color: black !important;
+      }
+      .takeaways-title {
+        color: #155724 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<div class="course-container">
+<!-- Sidebar -->
+<nav aria-label="コースナビゲーション" class="sidebar" role="navigation">
+<div class="sidebar-header">
+<a href="index.html" onmouseout="this.style.color='rgba(212,175,55,0.7)'" onmouseover="this.style.color='#D4AF37'" style="display:block;font-size:0.7rem;color:rgba(212,175,55,0.7);text-decoration:none;margin-bottom:0.5rem;">← Course Library</a>
+<h1>Qualitative Synthesis</h1>
+<p>理由の理解</p>
+</div>
+<div class="stats-panel">
+<div class="level-display">
+<div class="level-badge" id="levelIcon">🎙️</div>
+<div class="level-info">
+<div class="level-title" id="levelTitle">Novice Listener</div>
+<div class="level-subtitle">Level <span id="levelNum">1</span></div>
+</div>
+</div>
+<div class="xp-bar"><div class="xp-fill" id="xpFill" style="width: 0%"></div></div>
+<div class="xp-text"><span id="xpCurrent">0</span> / <span id="xpNeeded">100</span> XP</div>
+<div class="quick-stats">
+<div class="quick-stat">
+<div class="quick-stat-value" id="correctCount">0</div>
+<div class="quick-stat-label">Correct</div>
+</div>
+<div class="quick-stat">
+<div class="quick-stat-value" id="decisionCount">0</div>
+<div class="quick-stat-label">Decisions</div>
+</div>
+<div class="quick-stat">
+<div class="quick-stat-value" id="synthesisCount">0</div>
+<div class="quick-stat-label">Synthesized</div>
+</div>
+</div>
+</div>
+<div class="course-progress">
+<div class="course-progress-label">
+<span>Course Progress</span>
+<span id="courseProgressPct">0%</span>
+</div>
+<div class="course-progress-bar">
+<div class="course-progress-fill" id="courseProgressFill" style="width: 0%"></div>
+</div>
+</div>
+<div class="module-list" id="moduleList"></div>
+<div class="badges-panel">
+<div class="badges-title">Achievements</div>
+<div class="badges-grid" id="badgesGrid"></div>
+</div>
+</nav>
+<!-- Main Content -->
+<main class="main-content" id="main-content">
+<header class="content-header">
+<div class="breadcrumb">QES Mastery / <span id="currentModule">Module 1</span></div>
+<div class="header-actions">
+<div class="streak-display" id="streakDisplay">
+<span class="streak-flame">🔥</span>
+<span class="streak-count" id="streakCount">0</span>
+<span>day streak</span>
+</div>
+<button class="btn" onclick="resetProgress()">Reset</button>
+</div>
+</header>
+<div class="content-body">
+<div class="slides-container" id="slidesContainer"></div>
+</div>
+</main>
+</div>
+<!-- XP Popup -->
+<div aria-atomic="true" aria-live="polite" class="xp-popup" id="xpPopup" role="status">
+<span class="xp-amount" id="xpAmount">+25</span>
+    XP
+  </div>
+<!-- Badge Modal -->
+<div aria-labelledby="badgeModalTitle" aria-modal="true" class="badge-modal" id="badgeModal" role="dialog">
+<div class="badge-modal-content">
+<div class="badge-modal-icon" id="badgeModalIcon">🏆</div>
+<div class="badge-modal-title" id="badgeModalTitle">Badge Earned!</div>
+<div class="badge-modal-desc" id="badgeModalDesc">新しい実績のロックを解除しました</div>
+<button class="badge-modal-close" onclick="closeBadgeModal()">Awesome!</button>
+</div>
+</div>
+<!-- Confetti Container -->
+<div class="confetti-container" id="confettiContainer"></div>
+<!-- Combo Counter -->
+<div aria-live="polite" class="combo-display" id="comboDisplay" role="status">🔥 <span id="comboCount">0</span>x Combo!</div>
+<!-- Mobile Sidebar Toggle -->
+<button aria-expanded="false" aria-label="Toggle menu" class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<script>
+// ===== GAMIFICATION STATE =====
+const DEFAULT_STATE = {
+  xp: 0,
+  level: 1,
+  streak: 0,
+  lastActive: null,
+  correctAnswers: 0,
+  decisionsCompleted: 0,
+  synthesisCount: 0,
+  badges: [],
+  completedModules: [],
+  perfectModules: [],
+  answeredQuestions: {}
+};
+
+function safeGetStorage(key, fallback) {
+  try {
+    const item = localStorage.getItem(key);
+    return item ? JSON.parse(item) : fallback;
+  } catch (e) {
+    return fallback;
+  }
+}
+
+function safeSetStorage(key, value) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch (e) {}
+}
+
+let gameState = safeGetStorage('qesGame', DEFAULT_STATE);
+
+const LEVELS = [
+  { level: 1, title: "Novice Listener", icon: "🎙️", xp: 0 },
+  { level: 2, title: "Voice Gatherer", icon: "📝", xp: 100 },
+  { level: 3, title: "Pattern Seeker", icon: "🔍", xp: 250 },
+  { level: 4, title: "Theme Weaver", icon: "🧵", xp: 450 },
+  { level: 5, title: "CERQual Apprentice", icon: "📊", xp: 700 },
+  { level: 6, title: "Synthesis Scholar", icon: "📚", xp: 1000 },
+  { level: 7, title: "Meta-Ethnographer", icon: "🌍", xp: 1400 },
+  { level: 8, title: "Qualitative Sage", icon: "👑", xp: 1900 }
+];
+
+const BADGES = [
+  { id: "first_synthesis", icon: "🎙️", name: "First Voice", desc: "最初の合成シナリオを完了します" },
+  { id: "qual_curious", icon: "🔍", name: "Qual Curious", desc: "「質的問題の理由」モジュールを完了します" },
+  { id: "cerqual_initiate", icon: "📋", name: "CERQual Initiate", desc: "CERQual Framework モジュールを完了します" },
+  { id: "method_master", icon: "🔬", name: "Method Master", desc: "方法論的制限モジュールを完了します" },
+  { id: "coherence_king", icon: "🧩", name: "Coherence King", desc: "Coherence モジュールを完了します" },
+  { id: "adequacy_ace", icon: "📊", name: "Adequacy Ace", desc: "「十分性」を完了しますモジュール" },
+  { id: "relevance_ranger", icon: "🎯", name: "Relevance Ranger", desc: "関連性モジュールを完了" },
+  { id: "thematic_thinker", icon: "🧵", name: "Thematic Thinker", desc: "テーマ合成モジュールを完了" },
+  { id: "ethnographer", icon: "🌍", name: "Meta-Ethnographer", desc: "メタエスノグラフィーモジュールを完了" },
+  { id: "integrator", icon: "🔄", name: "The Integrator", desc: "混合手法モジュールを完了" },
+  { id: "perfect_5", icon: "⭐", name: "Five Star", desc: "Get 5 correct answers in a row" },
+  { id: "voice_of_ten", icon: "🗣️", name: "Voice of Ten", desc: "10 個の合成を完了シナリオ" },
+  { id: "decision_maker", icon: "⚖️", name: "Decision Maker", desc: "15 の決定を完了木" },
+  { id: "halfway_hero", icon: "🛤️", name: "Halfway Hero", desc: "Complete 5 modules" },
+  { id: "perfect_module", icon: "💎", name: "Perfectionist", desc: "モジュールを 100% の精度で完了する" },
+  { id: "finisher", icon: "🏁", name: "Course Complete", desc: "コース全体を完了する" },
+  { id: "streak_3", icon: "🔥", name: "On Fire", desc: "Maintain a 3-day streak" },
+  { id: "streak_7", icon: "💫", name: "Weekly Warrior", desc: "Maintain a 7-day streak" },
+  { id: "qes_master", icon: "👑", name: "QES Master", desc: "最終評価を完了する" }
+];
+
+// ===== MODULES DATA =====
+const MODULES = [
+  {
+    id: 1, title: "Why Qualitative Matters", subtitle: "Numbers can't hear patients cry", xp: 150,
+    slides: [
+      { type: "title", theme: "teal-bg", content: { title: "定性的証拠が重要な理由", subtitle: "When numbers fail to capture truth" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "Understand why quantitative evidence alone is insufficient",
+          "Recognize when qualitative evidence answers questions RCTs cannot",
+          "Learn from implementation failures caused by ignoring patient experience",
+          "定性的証拠と定量的証拠の補完的な性質を理解する"
+        ],
+        tip: "このモジュールは、「ゴールドスタンダード」RCT が重要なことを見逃しがちな理由を明らかにします"
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "Key Terms Glossary",
+        subtitle: "このコースの必須語彙",
+        text: "<strong>Qualitative Evidence:</strong> Non-numerical data exploring experiences, meanings, and context (interviews, focus groups, observations)<br><br><strong>Qualitative Synthesis:</strong> Systematic methods for combining findings from multiple qualitative studies<br><br><strong>GRADE-CERQual:</strong> Framework for assessing confidence in qualitative review findings<br><br><strong>Thematic Synthesis:</strong> Method using coding and theme development to synthesize qualitative studies<br><br><strong>Meta-Ethnography:</strong> Synthesis method that 'translates' studies into each other to build new understanding",
+        highlight: "これらの用語は、コース全体を通じて詳しく説明します。"
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "HIV アドヒアランス パズル", title: "When 95% Efficacy Met 50% Reality",
+        text: "Antiretroviral therapy (ART) transformed HIV from death sentence to manageable condition. Clinical trials showed <strong>95% viral suppression</strong> when taken correctly. Health systems worldwide rolled out ART programs expecting to end the epidemic. The numbers were perfect. The science was settled.",
+        followup: "But in sub-Saharan Africa, adherence rates averaged just <strong>50-70%</strong>. Patients who could access life-saving medication weren't taking it. Quantitative studies measured adherence rates but couldn't explain them. It took <strong>qualitative research</strong>—actually asking patients—to reveal the truth: stigma so severe that patients hid medications, pill schedules incompatible with agricultural work, fears of disclosure to partners. The RCTs proved ART worked. Qualitative evidence explained why it didn't."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "💊", title: "シナリオ: アドヒアランスの謎",
+        xp: 25,
+        scenario: "あなたの HIVこのプログラムでは、無料の投薬にもかかわらず 40% の遵守率が示されています。定量的データによると、25～35歳の既婚女性の遵守率が最も低いことが示されています。同僚は、より多くのリマインダーと薬の数をカウントすることでこの層をターゲットにすることを提案しています。",
+        question: "What approach would best explain the adherence gap?",
+        options: [
+          { letter: "A", text: "More rigorous pill counting and electronic monitoring", correct: false },
+          { letter: "B", text: "In-depth interviews exploring barriers in women's own words", correct: true },
+          { letter: "C", text: "Randomized trial of different reminder systems", correct: false },
+          { letter: "D", text: "人口統計予測因子の統計分析", correct: false }
+        ],
+        feedback: {
+          correct: "Correct! Qualitative research revealed that married women feared domestic violence if husbands discovered their HIV status. Pill reminders couldn't solve this—safe disclosure support could. Numbers identified the 'who'; qualitative research explained the 'why.'",
+          incorrect: "これ以上測定しても行動は説明できません。定量的手法では服薬遵守パターンを追跡できますが、なぜ既婚女性が特に苦しんでいるのかを理解するには、定性的調査を通じて彼女たちの生きた経験、恐怖、社会的背景を探る必要があります。"
+        }
+      }},
+      { type: "story", theme: "dark", content: {
+        label: "糖尿病アプリの惨事", title: "患者が削除した300万ドル",
+        text: "A major health system spent <strong>$3 million</strong> developing a diabetes self-management app. Usability testing showed 95% task completion. Focus groups loved the interface. The RCT showed significant HbA1c improvement at 3 months. Leadership celebrated. The app launched to 50,000 patients.",
+        followup: "Within 6 months, <strong>82% had deleted it</strong>. The quantitative metrics had measured everything except what mattered: patients found the app judgmental, the tracking felt like surveillance, and the 'motivational' messages triggered shame. Post-implementation qualitative research revealed these experiences—too late. A single round of in-depth interviews <em>before</em> the RCT could have predicted the failure."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "📱", title: "Scenario: The Digital Health Intervention",
+        xp: 25,
+        scenario: "You're designing a digital intervention for chronic disease. You have budget for either: (A) a larger RCT with 2,000 patients, or (B) a smaller RCT with 800 patients plus embedded qualitative research exploring patient experience throughout the trial.",
+        question: "Which design better ensures implementation success?",
+        options: [
+          { letter: "A", text: "Larger RCT—more statistical power means more reliable efficacy estimates", correct: false },
+          { letter: "B", text: "定性的な小規模RCT - 「理由」の理解が導入を妨げる失敗", correct: true },
+          { letter: "C", text: "Neither—do the large RCT first, then qualitative if problems emerge", correct: false },
+          { letter: "D", text: "どちらでもない — トライアル前のフォーカス グループで十分", correct: false }
+        ],
+        feedback: {
+          correct: "正解です。この 300 万ドルのアプリには統計的に有意な効果がありました。それでもユーザーの 82% によって削除されました。埋め込まれた定性調査により、治験中の障壁と促進要因が特定され、現実世界への適応が可能になります。介入が実施時に失敗した場合、統計力は何の意味もありません。",
+          incorrect: "糖尿病アプリには優れた定量的データがありましたが、実際には完全に失敗しました。実施中に収集された定性的証拠により、効果的な介入が現実世界の状況で成功するか失敗するのかが明らかになります。この理解は、持続可能な効果を得るために不可欠です。"
+        }
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "転倒防止の失敗", title: "Evidence-Based Exercise Nobody Would Do",
+        text: "The Otago Exercise Programme reduced falls in older adults by <strong>35%</strong> in RCTs. It became a cornerstone of falls prevention guidelines worldwide. NHS England rolled it out to <strong>250,000</strong> older adults. The evidence was Level 1A—systematic review of RCTs.",
+        followup: "Uptake was <strong>under 10%</strong>. Those who started, stopped within weeks. Qualitative synthesis of 23 studies revealed why: older adults perceived the exercises as 'for frail people' and felt stigmatized. They wanted to maintain independence, not be reminded of decline. Group classes felt like 'old people's homes.' The intervention that worked in trials required redesign—reframed as 'strength and balance,' delivered in community centers alongside younger adults. The qualitative evidence didn't contradict the RCTs—it explained why they couldn't be implemented."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "🚶", title: "シナリオ: 証拠と実践のギャップ",
+        xp: 25,
+        scenario: "介入には強力な RCT 証拠 (転倒の場合 OR 0.65) がありますが、普及率はわずか 10% です。ガイドライン委員会はこれにどのように対処するかを決定する必要があります。一部のメンバーは、支持率に関係なく、証拠の強さが「強い推奨」を正当化すると主張しています。",
+        question: "パネルは実装の証拠をどのように組み込むべきですか?",
+        options: [
+          { letter: "A", text: "強い推奨 - 実装は証拠の強さとは別の問題です", correct: false },
+          { letter: "B", text: "Conditional recommendation noting that implementation barriers may require intervention adaptation", correct: true },
+          { letter: "C", text: "Strong recommendation with separate implementation guidance", correct: false },
+          { letter: "D", text: "No recommendation until uptake improves", correct: false }
+        ],
+        feedback: {
+          correct: "正解です! GRADE ガイダンスでは、実装に関する考慮事項が推奨の強度に影響を与えると明示的に記載されています。誰も利用しない介入は誰も助けません。障壁に関する定性的証拠は、単なる実装ガイドではなく、推奨事項に情報を提供する必要があります。",
+          incorrect: "証拠の強度と実装可能性は関連しています。 10% の摂取率を達成するものに対する「強い推奨」は空約束です。障壁に関する定性的証拠は、推奨の強さと介入設計の両方に影響を与える必要があります。"
+        }
+      }},
+      { type: "stats", theme: "dark", content: {
+        title: "定性的証拠のギャップ",
+        stats: [
+          { value: "70%", label: "Implementation failures cite 'context'" },
+          { value: "15%", label: "Cochrane reviews include qual evidence" },
+          { value: "82%", label: "Digital health app deletion rate" },
+          { value: "3x", label: "Better uptake with qual-informed design" }
+        ],
+        caption: "定量的な証拠は、何が機能するかを教えてくれます。定性的証拠は、なぜ、誰のためかを教えてくれます。"
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "定性的証拠が提供するもの",
+        subtitle: "Understanding that numbers cannot capture",
+        text: "Qualitative evidence answers questions RCTs cannot:<br><br>• <strong>Why</strong> do patients adhere or not?<br>• <strong>How</strong> do people experience interventions?<br>• <strong>What</strong> contextual factors enable or prevent success?<br>• <strong>Which</strong> components matter to patients vs. researchers?",
+        highlight: "問題は「定性か定量か」ではなく、「どのような質問をしているのか?」です"
+      }},
+      { type: "story", theme: "green-bg", content: {
+        label: "マタニティの成功", title: "When Listening Changed Everything",
+        text: "Group antenatal care (Centering Pregnancy) showed mixed results in RCTs—some positive, some null. A realist synthesis combining quantitative outcomes with qualitative process data revealed the mechanism: it wasn't the <em>information</em> that helped, it was <strong>peer support reducing isolation</strong>.",
+        followup: "Programs that emphasized the social component saw <strong>40% better outcomes</strong>. Programs focused on information delivery matched usual care. The qualitative evidence didn't just explain the mechanism—it revealed which version of the intervention actually worked. Without qualitative synthesis, guidelines might have recommended a hollow version of the intervention."
+      }},
+      { type: "refrain", theme: "black", content: { text: "Numbers measure what happened. Qualitative evidence explains why it matters." }},
+      { type: "takeaways", theme: "dark", content: {
+        title: "Key Takeaways: Why Qualitative Matters",
+        items: [
+          "RCT は「効果があるか?」という質問に答えます。でも「なぜ？」ではない。または「誰のために？」または「どのような条件下で?」",
+          "実装の失敗は、患者の視点や背景を無視することが原因であることがよくあります",
+          "定性的証拠により、定量的手法では検出できない障壁（アイデンティティ、意味、社会的要因）が明らかになります",
+          "問題は「定性か定量か」ではありません - 両方の答えは本質的に異なります質問",
+          "効果的なガイドラインは、現実世界への影響を考慮して両方の証拠タイプを統合しています"
+        ],
+        remember: "証拠に基づいた実践では、何が効果があるかだけでなく、なぜ効果があるのか、実際に効果を発揮する方法を理解する必要があります。"
+      }},
+      { type: "quiz", theme: "dark", content: {
+        question: "なぜオタゴ運動プログラムはレベル 1A にもかかわらず、10% の摂取しか達成できなかったのですか証拠は?",
+        options: [
+          { text: "RCT の実施が不十分であった", correct: false },
+          { text: "高齢者は演習が非難されるものであると認識し、演習を避けた", correct: true },
+          { text: "演習は難しすぎて実施できなかった", correct: false },
+          { text: "Healthcare providers didn't recommend it", correct: false }
+        ],
+        xp: 20,
+        feedback: {
+          correct: "その通りです。定性的総合により、患者は転倒予防運動を自分が「虚弱」であると認識していることが明らかになった。障壁となったのは、身体的な能力や提供者の行動ではなく、意味とアイデンティティでした。これを捉えることができるのは定性的証拠のみです。",
+          incorrect: "RCT は確実でした。演習は実行可能でした。問題は認識だった。高齢者は転倒予防と衰弱や依存を結びつけていた。定性的調査により、定量的測定では捉えることができなかったこのアイデンティティの脅威が明らかになりました。"
+        }
+      }}
+    ]
+  },
+  {
+    id: 2, title: "GRADE-CERQual Framework", subtitle: "Confidence in qualitative findings", xp: 160,
+    slides: [
+      { type: "title", theme: "dark", content: { title: "GRADE-CERQual フレームワーク", subtitle: "定性的証拠に対する体系的な信頼" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "Understand the four CERQual components",
+          "信頼水準とその意味を学ぶ",
+          "Apply CERQual assessment to real findings",
+          "混合証拠については CERQual を GRADE に接続してくださいレビュー"
+        ],
+        tip: "CERQual は、GRADE が定量的証拠にもたらすのと同じ厳密さを定性的証拠にもたらします。"
+      }},
+      { type: "story", theme: "dark", content: {
+        label: "CERQual の誕生", title: "意見からシステムへ",
+        text: "2015 年以前、システマティックレビューにおける定性的証拠は混乱していました。査読者の中には、調査結果を物語的に要約した人もいます。他の人は定性的証拠を完全に除外しました。定性的証拠が含まれている場合、信頼性を評価する標準的な方法はありませんでした。各レビューは独自のアプローチを考案しました。",
+        followup: "Simon Lewin, Claire Glenton, and colleagues developed <strong>GRADE-CERQual</strong> (Confidence in the Evidence from Reviews of Qualitative research). Like GRADE for quantitative evidence, CERQual provides a structured, transparent framework. It asks: 'How confident are we that this qualitative finding represents the phenomenon of interest?' The framework now appears in <strong>Cochrane reviews, WHO guidelines, and NICE guidance</strong>."
+      }},
+      { type: "stats", theme: "dark", content: {
+        title: "4 つの CERQual コンポーネント",
+        stats: [
+          { value: "M", label: "Methodological Limitations" },
+          { value: "C", label: "Coherence" },
+          { value: "A", label: "Adequacy of Data" },
+          { value: "R", label: "Relevance" }
+        ],
+        caption: "Each component can reduce confidence from HIGH to MODERATE, LOW, or VERY LOW."
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "CERQual Confidence Levels",
+        subtitle: "What each level means for decision-making",
+        checkpoints: [
+          { day: "HIGH", event: "結果が合理的な表現である可能性が非常に高い" },
+          { day: "MODERATE", event: "結果は合理的である可能性が高いが、一部に疑問があります" },
+          { day: "LOW", event: "結果は合理的である可能性がありますが、実質的です疑い" },
+          { day: "VERY LOW", event: "Finding is not a reasonable representation; very uncertain" }
+        ]
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "ワクチン接種躊躇レビュー", title: "34件の研究、1つの重要な発見",
+        text: "A Cochrane qualitative review synthesized <strong>34 studies</strong> exploring parents' vaccination decisions. One key finding emerged: parents wanted to feel like <strong>active partners</strong> in decisions, not passive recipients of expert mandates. But how confident could we be in this finding?",
+        followup: "CERQual assessment: <strong>Methodological limitations:</strong> Minor concerns—most studies used rigorous methods but some lacked reflexivity statements. <strong>Coherence:</strong> No concerns—finding consistent across studies and contexts. <strong>Adequacy:</strong> No concerns—rich data from multiple sources. <strong>Relevance:</strong> No concerns—studies directly addressed vaccination decision-making in target populations. <strong>Final confidence: HIGH.</strong> This finding shaped WHO communication guidance for vaccination programs worldwide."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "💉", title: "Scenario: Assessing a Qualitative Finding",
+        xp: 25,
+        scenario: "A qualitative synthesis finds: 'Parents feared vaccine side effects more than disease.' The finding comes from 8 studies, but 3 had significant methodological limitations, and 2 were conducted only in high-income settings while your guideline targets LMICs.",
+        question: "What confidence level is appropriate?",
+        options: [
+          { letter: "A", text: "高 - 8件の研究は実質的な証拠ベース", correct: false },
+          { letter: "B", text: "中程度 - 方法論的な制限と関連性のため格下げ懸念事項", correct: true },
+          { letter: "C", text: "LOW—too many concerns across domains", correct: false },
+          { letter: "D", text: "VERY LOW—cannot trust findings from limited contexts", correct: false }
+        ],
+        feedback: {
+          correct: "正解です。 3/8 の研究における方法論的な制限により、1 つの格下げが正当化されます。関連性に関する懸念（LMIC ガイドラインに対する HIC 研究）は検討を正当化しますが、他の研究が文脈をカバーしている場合は完全な格下げを必要としない可能性があります。全体的に: 中程度の信頼度が適切です。",
+          incorrect: "2 つの CERQual ドメイン (方法論と関連性) に懸念があるため、高い信頼度を維持することは正当化されません。ただし、この結果には複数の研究からの裏付けデータがあるため、「非常に低い」は厳しすぎます。 MODERATE は、適切な不確実性を捉えます。"
+        }
+      }},
+      { type: "story", theme: "dark", content: {
+        label: "適用された MCAR フレームワーク", title: "4 つのドメインの記憶",
+        text: "The CERQual developers offer a mnemonic: <strong>MCAR</strong>—Methodological limitations, Coherence, Adequacy, Relevance. But what does each domain actually ask?",
+        followup: "<strong>Methodological Limitations:</strong> Are the underlying studies trustworthy? (data collection, analysis quality)<br><br><strong>Coherence:</strong> Does the finding hold together? Do studies tell a consistent story?<br><br><strong>Adequacy:</strong> Is there enough data? Are the descriptions rich enough to support the finding?<br><br><strong>Relevance:</strong> Do the studies directly address the review question for the relevant population/context?"
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "🧩", title: "シナリオ: 一貫性の問題",
+        xp: 25,
+        scenario: "A synthesis finds: 'Patients prefer shared decision-making.' However, 4 studies describe patients wanting full autonomy, 3 describe patients deferring to physicians, and 2 describe context-dependent preferences. The synthesis author argues these all represent 'shared decision-making.'",
+        question: "What coherence concern exists?",
+        options: [
+          { letter: "A", text: "心配する必要はありません。これらは共有のバリエーションです。意思決定", correct: false },
+          { letter: "B", text: "Minor concern—normal variation within a construct", correct: false },
+          { letter: "C", text: "Moderate/serious concern—the finding may conflate distinct preferences", correct: true },
+          { letter: "D", text: "Cannot assess coherence without more data", correct: false }
+        ],
+        feedback: {
+          correct: "正解です!完全な自律性、医師の服従、共有された意思決定は概念的に異なります。それらを 1 つの所見に統合すると、一貫性が低下します。統合では、一貫性が存在しない場合に一貫性を強制するのではなく、これらを個別の結果として提示する必要がある場合があります。",
+          incorrect: "これらは 1 つの現象のバリエーションではなく、患者の 3 つの異なる好みです。彼らに「意思決定の共有」を強制すると、調査結果の妥当性が低下します。 CERQual では、基になるデータが合成された結果と競合する場合、一貫性を保つためにダウングレードする必要があります。"
+        }
+      }},
+      { type: "checklist", theme: "dark", content: {
+        title: "CERQual Assessment Process",
+        items: [
+          "Identify each review finding to be assessed",
+          "List all studies contributing to each finding",
+          "Assess each CERQual component separately",
+          "Make overall confidence judgment (don't just add downgrades)",
+          "Document reasoning transparently in Evidence Profile"
+        ]
+      }},
+      { type: "story", theme: "green-bg", content: {
+        label: "CERQual in Action", title: "WHO Antenatal Care Guidelines",
+        text: "The WHO guideline on antenatal care used GRADE-CERQual for qualitative evidence alongside GRADE for effectiveness. For 'positive pregnancy experience,' qualitative synthesis identified what women valued: <strong>continuity of care, respectful treatment, and involvement in decisions</strong>.",
+        followup: "CERQual assessment found HIGH confidence in these findings—strong methods across studies, coherent patterns, rich data, directly relevant populations. The guideline integrated this with effectiveness evidence: interventions that improved clinical outcomes but reduced positive experience were not recommended. Qualitative evidence directly shaped recommendations alongside RCT evidence."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "📋", title: "シナリオ: GRADE との統合",
+        xp: 25,
+        scenario: "For pain management, quantitative evidence shows Intervention A is slightly more effective (GRADE: MODERATE). Qualitative evidence shows patients strongly prefer Intervention B because it preserves daily function (CERQual: HIGH). The guideline panel must make a recommendation.",
+        question: "定性的証拠と定量的証拠をどのように比較検討する必要がありますか?",
+        options: [
+          { letter: "A", text: "Recommend A—quantitative efficacy trumps qualitative preferences", correct: false },
+          { letter: "B", text: "Recommend B—HIGH confidence qualitative evidence outweighs MODERATE quantitative", correct: false },
+          { letter: "C", text: "Conditional recommendation acknowledging trade-off between efficacy and patient values", correct: true },
+          { letter: "D", text: "No recommendation—conflicting evidence prevents guidance", correct: false }
+        ],
+        feedback: {
+          correct: "正解です。 GRADE には、推奨事項の作成に患者の価値観が明示的に含まれます。患者が何を重視しているかについての信頼性の高い定性的証拠は、有効性を「無効にする」ものではなく、何が重要かを知らせます。条件付き推奨はトレードオフを認識し、共有の意思決定を可能にします。",
+          incorrect: "Neither evidence type 'trumps' the other—they answer different questions. Quantitative evidence addresses efficacy; qualitative evidence addresses patient values. GRADE-informed guidelines integrate both, with conditional recommendations when values vary or trade-offs exist."
+        }
+      }},
+      { type: "takeaways", theme: "dark", content: {
+        title: "Key Takeaways: GRADE-CERQual",
+        items: [
+          "CERQual は、個別の研究の品質ではなく、定性的総合結果の信頼性を評価します",
+          "MCAR: Methodological limitations, Coherence, Adequacy, Relevance",
+          "Four confidence levels: HIGH, MODERATE, LOW, VERY LOW (same as GRADE)",
+          "Start at HIGH confidence, then consider whether to downgrade based on concerns in each domain",
+          "CERQual は、証拠から意思決定までのフレームワークの GRADE と統合されています"
+        ],
+        remember: "CERQual は次のように答えます。現実を反映しているか?'"
+      }},
+      { type: "quiz", theme: "dark", content: {
+        question: "What does the 'R' in CERQual's MCAR assess?",
+        options: [
+          { text: "合成方法の信頼性", correct: false },
+          { text: "レビューの質問および文脈に対する研究の関連性", correct: true },
+          { text: "研究全体にわたる結果の再現性", correct: false },
+          { text: "定性的な厳密さ分析", correct: false }
+        ],
+        xp: 20,
+        feedback: {
+          correct: "その通りです。関連性では、研究が関心のある母集団/文脈に関するレビューの質問に実際に対処しているかどうかが問われます。スウェーデンにおけるワクチン接種に対する態度に関する研究は、その方法論的な質に関係なく、アフリカの農村部を対象としたガイドラインとの関連性が限られている可能性があります。",
+          incorrect: "関連性とは適用可能性に関するものであり、研究は適切な状況で適切な人々に対する適切な質問に取り組んでいますか?これは、方法論 (「M」でキャプチャ) やパターンの一貫性 (「C」でキャプチャ) とは異なります。"
+        }
+      }}
+    ]
+  },
+  {
+    id: 3, title: "Methodological Limitations", subtitle: "研究を信頼できますか?", xp: 170,
+    slides: [
+      { type: "title", theme: "purple-bg", content: { title: "Methodological Limitations", subtitle: "定性的研究の信頼性の評価" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "Understand key quality criteria for qualitative research",
+          "Apply CASP and related checklists appropriately",
+          "Distinguish minor from serious methodological concerns",
+          "Avoid common errors in qualitative quality assessment"
+        ],
+        tip: "Methodological limitations in qualitative research look different from quantitative bias—learn to recognize them."
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "再帰性ギャップ", title: "When Researchers Become Invisible",
+        text: "A large qualitative study of cancer patients' treatment preferences was widely cited. <strong>127 interviews</strong> across 15 sites. But a critical detail was missing: the study never mentioned who the researchers were, what their backgrounds were, or how their perspectives might have shaped the findings.",
+        followup: "This matters because the lead researcher was a surgical oncologist with known advocacy for aggressive treatment. The finding—that patients wanted 'everything possible done'—aligned suspiciously with this perspective. Without reflexivity statements, readers couldn't assess whether patients truly expressed these views or whether the researcher's framing shaped both questions and interpretations. The absence of reflexivity is a <strong>serious methodological limitation</strong>."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "🔍", title: "Scenario: Missing Reflexivity",
+        xp: 25,
+        scenario: "あなたは、製薬会社の従業員が投薬経験について患者にインタビューした研究を評価しています。この研究では、ポジティブな経験のみが報告されています。会社への所属がデータ収集や解釈にどのような影響を与えるかを議論する再帰性の記述はありません。",
+        question: "How serious is this methodological limitation?",
+        options: [
+          { letter: "A", text: "Minor—company employees may still conduct good research", correct: false },
+          { letter: "B", text: "Moderate—some concern but findings may still be valid", correct: false },
+          { letter: "C", text: "Serious—critical lack of reflexivity combined with obvious conflict of interest", correct: true },
+          { letter: "D", text: "Cannot assess without seeing the actual interviews", correct: false }
+        ],
+        feedback: {
+          correct: "正解です。反射性はまさにこのような状況のために存在します。企業の従業員が自社の製品についてインタビューし、自分たちの役割が研究にどのような影響を与えるかを認識せずに、肯定的な結果だけを報告することは、重大な信頼性の脅威です。大幅に格下げします。",
+          incorrect: "再帰性がなければ、研究者の立場が研究にどのような影響を与えたかを評価できません。その立場に肯定的な結果に対する直接的な経済的利益が含まれており、肯定的な結果のみが表示される場合、これは大幅な格下げを必要とする深刻な方法論上の制限です。"
+        }
+      }},
+      { type: "story", theme: "dark", content: {
+        label: "コンビニエンスサンプルの問題", title: "When 'Patients' Means 'Advocates'",
+        text: "A study of patient perspectives on telehealth recruited participants through a patient advocacy organization's social media. The finding: '<strong>Patients overwhelmingly prefer telehealth</strong> to in-person care.' The sample was 45 articulate, digitally-engaged advocates.",
+        followup: "This is not 'patients.' It's a highly selected subset already comfortable with digital technology, connected to advocacy networks, and motivated to promote telehealth. The finding may be true for this group—but claiming it represents 'patients' is a serious methodological limitation. Sampling in qualitative research must achieve <strong>conceptual diversity</strong>, not just accumulate voices from convenient sources."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "👥", title: "Scenario: Evaluating Sampling",
+        xp: 25,
+        scenario: "A study claims to explore 'barriers to diabetes self-management.' Sampling: recruited from a diabetes education center, excluded non-English speakers, interviewed only those attending appointments. Finding: 'Patients report excellent access to education.'",
+        question: "What sampling concern limits this finding?",
+        options: [
+          { letter: "A", text: "Sample size may be too small", correct: false },
+          { letter: "B", text: "サンプルは、研究が調査すると主張する障壁に直面しているものを除外しています", correct: true },
+          { letter: "C", text: "Convenience sampling is acceptable in qualitative research", correct: false },
+          { letter: "D", text: "Language exclusion is a minor limitation", correct: false }
+        ],
+        feedback: {
+          correct: "Correct! A study of 'barriers' that excludes non-English speakers, non-attenders, and those not in education programs has systematically excluded the people most likely to experience barriers. The finding tells us about the experience of successful patients, not about barriers. This is a serious sampling limitation.",
+          incorrect: "The sample systematically excludes those experiencing barriers: non-English speakers, non-attenders, people outside diabetes education. Finding that this selected group has 'excellent access' doesn't address the research question. This is a critical sampling flaw."
+        }
+      }},
+      { type: "checklist", theme: "dark", content: {
+        title: "Key Methodological Considerations",
+        items: [
+          "定性的な調査に適した明確な研究質問方法?",
+          "Sampling strategy achieves conceptual diversity?",
+          "データ収集方法が説明されており、適切ですか?",
+          "Relationship between researcher and participants addressed?",
+          "分析方法が明確かつ厳密ですか?",
+          "Reflexivity statement included?",
+          "根拠となる引用符付きのデータに基づく調査結果?"
+        ]
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "CASP: The Critical Appraisal Skills Programme",
+        subtitle: "A structured approach to quality assessment",
+        text: "The <strong>CASP Qualitative Checklist</strong> is widely used to assess methodological quality in qualitative synthesis. It includes 10 questions across three sections:<br><br><strong>Section A (Validity):</strong> Clear aims? Appropriate methodology? Appropriate design? Appropriate recruitment? Appropriate data collection? Researcher-participant relationship considered?<br><br><strong>Section B (Results):</strong> Ethical issues considered? Rigorous analysis? Clear findings?<br><br><strong>Section C (Value):</strong> How valuable is the research?",
+        highlight: "CASP はガイドであり、スコアリング システムではありません。品質スコアを計算するためではなく、懸念事項を特定するために使用します。"
+      }},
+      { type: "story", theme: "dark", content: {
+        label: "分析ブラック ボックス", title: "Findings Without Foundations",
+        text: "A qualitative study reported that patients experienced '<strong>six distinct phases of recovery</strong>' from cardiac events. The abstract presented this as a validated model. Citations followed. It became textbook content.",
+        followup: "But the methods section revealed a critical gap: no description of how the analysis produced these six phases. No coding process. No theme development. No disconfirming case analysis. The 'findings' appeared fully formed with no visible analytical work. Were these phases in the data, or imposed by the researcher? Without analytical transparency, we cannot know. This is a <strong>serious methodological limitation</strong>—findings disconnected from visible analysis."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "📊", title: "シナリオ: 分析の評価",
+        xp: 30,
+        scenario: "ある研究では、4 つのドメインと 12 のサブテーマによる患者エクスペリエンスの「フレームワーク」が示されています。方法には、「インタビューはテーマ別に分析された」と記載されています。コーディングプロセスについては説明されていません。テーマがどのようにして現れたかについての例はありません。矛盾するデータについては議論しません。",
+        question: "What is the primary methodological concern?",
+        options: [
+          { letter: "A", text: "テーマ分析が十分に厳密ではありません", correct: false },
+          { letter: "B", text: "Insufficient analytical transparency—cannot assess how findings emerged", correct: true },
+          { letter: "C", text: "Framework should have more domains", correct: false },
+          { letter: "D", text: "Need member checking to validate findings", correct: false }
+        ],
+        feedback: {
+          correct: "正しい！問題は方法の選択ではなく、ブラックボックスです。コードがどのように展開され、テーマがどのように構成され、矛盾がどのように処理されるかを見なければ、その枠組みがデータや研究者の先入観を反映しているかどうかを評価することはできません。分析の透明性は不可欠です。",
+          incorrect: "テーマ分析は定性的研究に適しています。問題は目に見えないプロセスです。これがどのように起こったかを示さずに「テーマ別に分析した」と述べると、読者は結果の信頼性を評価できなくなります。"
+        }
+      }},
+      { type: "story", theme: "green-bg", content: {
+        label: "ゴールドスタンダード研究", title: "信頼を築く透明性",
+        text: "慢性疼痛管理の定性的研究が、完全なコーディングフレームワーク、監査証跡、および反射性ステートメントを公開しました。主任研究者は、疼痛心理学における彼女の背景を認め、それが彼女の最初の仮定をどのように形作ったかを説明しました。",
+        followup: "The study showed how disconfirming cases led to framework revisions. Quotes supported every sub-theme with clear data-to-interpretation links. Two researchers coded independently, with disagreements resolved through discussion. This transparency doesn't guarantee correct findings—but it allows assessment. Readers can evaluate the interpretive process. This is how methodological rigor supports confidence."
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "方法論的制限によるダウングレード",
+        subtitle: "How concerns translate to confidence",
+        text: "Not all limitations require downgrading. Consider:<br><br>• <strong>Minor concerns:</strong> Some studies have minor issues but overall pattern is strong → No/minor downgrade<br><br>• <strong>Moderate concerns:</strong> Several studies with moderate limitations or pattern of issues → Downgrade one level<br><br>• <strong>Serious concerns:</strong> Most studies have serious limitations OR key contributing study is fundamentally flawed → Downgrade one or two levels",
+        highlight: "CERQual は、各研究を個別に評価するのではなく、一連の証拠を評価します。"
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "⚖️", title: "Scenario: Overall Assessment",
+        xp: 25,
+        scenario: "A finding is supported by 6 studies. Assessment: Study 1 (minor limitations), Study 2 (minor), Study 3 (serious—no reflexivity, convenience sample), Study 4 (moderate), Study 5 (minor), Study 6 (serious—analysis black box).",
+        question: "What overall methodological limitations assessment is appropriate?",
+        options: [
+          { letter: "A", text: "Minor concerns—most studies have only minor limitations", correct: false },
+          { letter: "B", text: "中程度の懸念 - 品質と 2 つの深刻な懸念の組み合わせ研究", correct: true },
+          { letter: "C", text: "Serious concerns—two studies have serious limitations", correct: false },
+          { letter: "D", text: "不十分な 2 つの研究を除外し、残りの 4 つに基づいて評価します", correct: false }
+        ],
+        feedback: {
+          correct: "正解です。全体的なパターンが重要です。軽度または中程度の問題を伴う 4 つの研究は合理的な裏付けを提供しますが、2 つの重大な欠陥のある研究は、制限を無視することはできないことを意味します。適度な懸念は、この混合状況を適切に捉えています。",
+          incorrect: "CERQual は、貢献する研究全体のパターンを調べます。 4 つのより良い研究と並んで 2 つの深刻な懸念がある研究は、全体として中程度の懸念を示唆しています。この研究結果は、合理的な研究によるある程度の裏付けがありますが、部分的に疑わしい基礎に基づいて構築されています。"
+        }
+      }},
+      { type: "takeaways", theme: "dark", content: {
+        title: "Key Takeaways: Methodological Limitations",
+        items: [
+          "再帰性: 研究者の視点が研究結果をどのように形成するかを研究は認識していますか?",
+          "Sampling: Does the sample achieve conceptual diversity, not just convenience?",
+          "分析の透明性: データから研究結果までの経路を追跡できますか?",
+          "Use CASP as a guide to identify concerns, not as a scoring checklist",
+          "一連の証拠を評価するのではなく、評価します。それぞれの研究を個別に行う"
+        ],
+        remember: "定性的研究では、研究者が道具です。透明性は、信頼性を評価する方法です。"
+      }},
+      { type: "quiz", theme: "dark", content: {
+        question: "Why is reflexivity especially important in qualitative research?",
+        options: [
+          { text: "It increases sample size", correct: false },
+          { text: "It allows readers to assess how researcher perspective may have shaped findings", correct: true },
+          { text: "結果が一般化可能であることを保証します", correct: false },
+          { text: "コーディング フレームワークを検証します", correct: false }
+        ],
+        xp: 20,
+        feedback: {
+          correct: "その通りです。標準化された手段が距離を生み出す定量的研究とは異なり、定性的研究者は手段です。彼らの背景、仮定、立場によってデータの収集と解釈が決まります。再帰性により、この影響は可視化され、評価可能になります。",
+          incorrect: "定性的研究では、研究者は、どのような質問をするか、参加者がどのように応答するか、データをどのように解釈するかを決定します。再帰性はこれを解決するものではありません。透明性を高め、読者が調査結果に対する潜在的な影響を評価できるようにします。"
+        }
+      }}
+    ]
+  },
+  {
+    id: 4, title: "Coherence", subtitle: "証拠は一貫したストーリーを伝えていますか?", xp: 180,
+    slides: [
+      { type: "title", theme: "gold-bg", content: { title: "Coherence", subtitle: "When findings fit together—and when they don't" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "Understand what coherence means in qualitative synthesis",
+          "研究全体にわたる一貫性と一貫性のないパターンを特定します",
+          "Distinguish legitimate variation from fundamental contradiction",
+          "Apply coherence assessment to real synthesis findings"
+        ],
+        tip: "一貫性とは、すべての研究が同じことを言っているということではなく、相違点を区別できるかどうかです。"
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "強制合成", title: "When Different Became 'Same'",
+        text: "Dr. Sarah Mendez, University of Melbourne, 2019. Her team synthesized <strong>23 studies</strong> on patient experiences with telehealth. The synthesis concluded: 'Patients universally valued telehealth convenience.' This finding shaped <strong>$4.2 million</strong> in healthcare policy.",
+        followup: "But a re-analysis revealed the truth. <strong>8 studies</strong> found patients valued convenience. <strong>7 studies</strong> found patients felt abandoned by remote care. <strong>5 studies</strong> described elderly patients unable to use the technology. <strong>3 studies</strong> showed rural patients preferring telehealth due to travel barriers. These weren't variations of one finding—they were <strong>four distinct findings</strong> forced into false unity. The synthesis had a <strong>serious coherence problem</strong>."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "🔍", title: "Scenario: Assessing the Telehealth Synthesis",
+        xp: 30,
+        scenario: "上記の遠隔医療合成を確認しています。著者らは、「見捨てられたと感じる」ことは「利便性を重視する」ことのマイナス面にすぎないと主張します。見捨てられたと感じた患者は、単に遠隔医療のさらなる利便性を望んでいただけです。",
+        question: "この一貫性の正当化にどのように対応すべきですか?",
+        options: [
+          { letter: "A", text: "Accept the argument—opposite findings can be two sides of one phenomenon", correct: false },
+          { letter: "B", text: "その議論を拒否します-見捨てられたと利便性は概念的に異なる患者体験です", correct: true },
+          { letter: "C", text: "Request more data before making a coherence judgment", correct: false },
+          { letter: "D", text: "「見捨てられたと感じる」研究は異常値である", correct: false }
+        ],
+        feedback: {
+          correct: "正解です! 「見捨てられたと感じる」のは利便性の欠如ではなく、ケアの質の低下を示す明らかな経験です。概念的に異なる発見を強制的に 1 つの構成要素に組み込むと、一貫性が損なわれます。統合では、これらを個別の結果として提示する必要があり、1 つの強制的な統合ではありません。",
+          incorrect: "These are genuinely different patient experiences. Convenience relates to logistics; abandonment relates to therapeutic relationship quality. Good qualitative synthesis respects these distinctions rather than collapsing them for a cleaner narrative."
+        }
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "What Coherence Assesses",
+        subtitle: "The 'C' in MCAR",
+        text: "Coherence examines whether the review finding is a reasonable interpretation of the underlying data:<br><br>• <strong>Pattern consistency:</strong> Do studies converge on similar themes, or contradict each other?<br><br>• <strong>Explainable variation:</strong> Can differences be explained by context, population, or setting?<br><br>• <strong>Fit between data and finding:</strong> Does the synthesized finding accurately represent the underlying studies?",
+        highlight: "Coherence is compromised when synthesis forces unity where genuine diversity exists."
+      }},
+      { type: "story", theme: "green-bg", content: {
+        label: "Good Coherence Assessment", title: "糖尿病自己管理総合",
+        text: "コクラン定性総合では、糖尿病の自己管理に関する患者の経験を調査しました。調査結果: 「患者は食事の推奨と社会的/文化的な食事習慣の間に緊張を経験しています。」",
+        followup: "The underlying studies showed remarkable coherence despite different contexts. Korean patients described tension with rice traditions. Mexican patients described tension with family celebrations. British South Asian patients described tension with community events. Different foods, different cultures—but the <strong>same underlying tension</strong>. This is HIGH coherence: consistent pattern across diverse contexts, with variation that strengthens rather than undermines the finding."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "🧩", title: "Scenario: Variation or Contradiction?",
+        xp: 30,
+        scenario: "A synthesis of healthcare worker experiences during COVID-19 finds: 'HCWs experienced moral distress.' Study 1: HCWs felt guilty about infection risk to families. Study 2: HCWs felt distress about rationing care. Study 3: HCWs felt burned out from workload. Study 4: HCWs felt proud of contribution despite hardship.",
+        question: "この調査結果の一貫性はどのような状態ですか?",
+        options: [
+          { letter: "A", text: "HIGH coherence—all describe aspects of pandemic healthcare experience", correct: false },
+          { letter: "B", text: "MODERATE coherence—moral distress is supported but Study 4 shows variation", correct: true },
+          { letter: "C", text: "LOW coherence—four different experiences cannot support one finding", correct: false },
+          { letter: "D", text: "Cannot assess—need more studies", correct: false }
+        ],
+        feedback: {
+          correct: "Correct! Studies 1-3 coherently support 'moral distress' through different manifestations of the same construct. Study 4 (pride despite hardship) introduces legitimate variation—some HCWs coped through meaning-making. This doesn't invalidate the finding but suggests nuance needed. MODERATE coherence is appropriate.",
+          incorrect: "最初の 3 つの研究は、同じ現象 (道徳的苦悩) の異なる原因を示しています。研究 4 では、認識すべき追加のパターン (ポジティブ コーピング) を紹介します。これは管理可能な変動であり、根本的な矛盾ではありません。"
+        }
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "警告の兆候", title: "1,247 Patients, One Conclusion",
+        text: "Dr. James Okonkwo's meta-ethnography on cancer survivorship interviewed data from <strong>1,247 patients</strong> across <strong>34 studies</strong>. The final synthesis presented <strong>one universal finding</strong>: 'Cancer survivors experience biographical disruption and reconstruction.'",
+        followup: "Peer reviewers flagged the coherence problem: the 34 studies described <strong>wildly different experiences</strong>. Some survivors reported no disruption. Others never achieved reconstruction. The synthesis author had selected quotes supporting the theory while ignoring contradictory data. When forced to examine disconfirming cases, he found <strong>11 studies</strong> that didn't fit the model at all. The finding's coherence was <strong>artificially manufactured</strong>."
+      }},
+      { type: "checklist", theme: "dark", content: {
+        title: "Coherence Red Flags",
+        items: [
+          "Synthesis finding covers very diverse underlying experiences",
+          "Studies contradict each other but finding presents unity",
+          "Disconfirming cases are absent or unexplained",
+          "Very broad finding ('patients experience challenges') that could fit anything",
+          "著者は、それに抵抗するデータに理論的枠組みを押し付けています"
+        ]
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "⚠️", title: "Scenario: The Overly Broad Finding",
+        xp: 25,
+        scenario: "A synthesis concludes: 'Patients value good communication with healthcare providers.' Supporting studies describe: wanting information, wanting emotional support, wanting autonomy, wanting providers to make decisions, wanting shorter appointments, wanting longer appointments.",
+        question: "What is the coherence problem here?",
+        options: [
+          { letter: "A", text: "No problem—all relate to patient-provider communication", correct: false },
+          { letter: "B", text: "The finding is so broad it cannot be incoherent—or meaningful", correct: true },
+          { letter: "C", text: "矛盾した研究を除外する必要があります", correct: false },
+          { letter: "D", text: "Add more studies to reach saturation", correct: false }
+        ],
+        feedback: {
+          correct: "Correct! 'Good communication' is so vague it can absorb contradictory preferences (short vs long appointments, autonomy vs deference). This isn't coherence—it's vacuous synthesis. The finding is unfalsifiable and therefore uninformative. Better synthesis would present distinct communication preferences.",
+          incorrect: "短い約束や長い約束を求めることは、「良い」のバリエーションではありませんコミュニケーション」 - それらは正反対の好みです。この調査結果の幅広さは、真の矛盾を覆い隠している。有用な統合は、これらを別個の所見として提示します。"
+        }
+      }},
+      { type: "story", theme: "gold-bg", content: {
+        label: "Coherence Done Right", title: "The Mental Health Pathway Synthesis",
+        text: "A qualitative synthesis of pathways to mental health care examined <strong>42 studies</strong> across <strong>12 countries</strong>. Rather than forcing one finding, the team identified <strong>three distinct pathway patterns</strong>:",
+        followup: "<strong>Pattern 1:</strong> Crisis-driven entry (12 studies)—patients sought help only after acute episodes.<br><strong>Pattern 2:</strong> Gradual recognition (18 studies)—slow awareness leading to help-seeking.<br><strong>Pattern 3:</strong> Third-party initiation (12 studies)—family/friends drove help-seeking.<br><br>Each pattern had HIGH coherence internally. The synthesis acknowledged variation rather than forcing false unity. This transparent approach <strong>maximized usefulness</strong> while maintaining credibility."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "✅", title: "Scenario: Final Coherence Assessment",
+        xp: 30,
+        scenario: "A synthesis finds: 'Young people with chronic illness navigate identity tensions between normalcy and illness accommodation.' Studies from US, UK, Australia, and Germany consistently describe teenagers wanting to 'fit in' while managing visible treatments. Minor variation exists in HOW teens navigate this tension.",
+        question: "What confidence level is appropriate for coherence?",
+        options: [
+          { letter: "A", text: "No or very minor concerns—strong consistency across diverse contexts", correct: true },
+          { letter: "B", text: "Minor concerns—geographic variation suggests caution", correct: false },
+          { letter: "C", text: "Moderate concerns—only Western countries represented", correct: false },
+          { letter: "D", text: "Serious concerns—tension is too vague a construct", correct: false }
+        ],
+        feedback: {
+          correct: "Correct! The finding shows excellent coherence—the same core phenomenon (identity tension) appearing consistently across multiple high-income Western contexts. Variation in HOW teens navigate this tension actually strengthens the finding by showing robust pattern despite individual differences. No downgrade for coherence.",
+          incorrect: "地理的制限は、一貫性 (所見の内部一貫性) ではなく、関連性 (他のコンテキストへの適用性) に関係します。一貫性は強力です。研究は一貫して同一性緊張構造を支持しています。"
+        }
+      }},
+      { type: "takeaways", theme: "dark", content: {
+        title: "Key Takeaways: Coherence",
+        items: [
+          "一貫性は尋ねます: 合成された結果は基礎となるデータに適合しますか?",
+          "Legitimate variation can be explained by context—incoherence cannot",
+          "個別の現象を誤った単一性に崩壊させる「強制合成」に注意してください",
+          "Overly broad findings ('patients value good care') mask genuine incoherence",
+          "Better to present multiple findings than force one incoherent synthesis"
+        ],
+        remember: "一貫性とは、すべての研究が一致することではなく、相違点があるかどうかが重要です。"
+      }},
+      { type: "quiz", theme: "dark", content: {
+        question: "What distinguishes legitimate variation from problematic incoherence?",
+        options: [
+          { text: "Legitimate variation can be explained by context; incoherence cannot", correct: true },
+          { text: "正当な変動は質の高い研究のみから得られる", correct: false },
+          { text: "Legitimate variation involves minor differences; incoherence involves major ones", correct: false },
+          { text: "Legitimate variation requires at least 10 studies", correct: false }
+        ],
+        xp: 20,
+        feedback: {
+          correct: "Exactly. Variation that can be explained by population, setting, or context strengthens synthesis by showing how findings apply differently. Incoherence occurs when studies genuinely contradict each other in ways that context cannot explain—forcing fundamentally different findings into one synthesis.",
+          incorrect: "重要な問題は、違いを理解して説明できるかどうかです。コンテキストを考慮すると意味のあるさまざまな体験を示す研究は、正当なバリエーションを表しています。同様の文脈で矛盾した結果を示した研究は、一貫性のないことを示しています。"
+        }
+      }}
+    ]
+  },
+  {
+    id: 5, title: "Adequacy of Data", subtitle: "十分な証拠はありますか?", xp: 175,
+    slides: [
+      { type: "title", theme: "purple-bg", content: { title: "Adequacy of Data", subtitle: "When thin evidence supports thick claims" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "Understand what 'adequacy' means in qualitative evidence",
+          "サンプルサイズからデータの豊富さを区別します",
+          "Identify thin vs rich supporting data",
+          "Apply adequacy assessment to synthesis findings"
+        ],
+        tip: "定性的総合では、適切性は研究の数を数えるだけではなく、データの豊富さによって決まります。"
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "The Thin財団", title: "32 Studies, 47 Words",
+        text: "Dr. Maria Santos published a widely-cited qualitative synthesis on patient experiences with medication adherence. The synthesis included <strong>32 studies</strong> and produced a key finding: 'Patients experience medication-taking as a burden on daily life.'",
+        followup: "A methodologist examined the evidence supporting this finding. Across 32 studies, the actual data consisted of <strong>47 words of patient quotes</strong>—fewer than this paragraph. The finding was supported by author interpretations, not primary data. The synthesis claimed rich understanding from <strong>desperately thin evidence</strong>. This is an <strong>adequacy failure</strong>."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "📊", title: "シナリオ: データの適切性の評価",
+        xp: 30,
+        scenario: "合成結果は 8 つの研究によって裏付けられています。調べてみると: 3 つの研究には広範な引用と分厚い説明が記載されています。 2 つの研究では、文脈のない短い引用が提供されています。 3 つの研究は、一次データなしで著者の解釈のみを提供しています。",
+        question: "How should adequacy be assessed?",
+        options: [
+          { letter: "A", text: "高い適切性 - 8 つの研究で十分です", correct: false },
+          { letter: "B", text: "中程度の適切性 - 3 つの研究からの豊富なデータと他の人からのより薄いサポート", correct: true },
+          { letter: "C", text: "低い適切性 - 実際のデータを提供するのは 3 つの研究のみ", correct: false },
+          { letter: "D", text: "Cannot assess without seeing the actual quotes", correct: false }
+        ],
+        feedback: {
+          correct: "正解です。適切かどうかは、研究数だけではなく、データの豊富さに依存します。分厚い説明を持つ 3 つの研究は、特に他の研究による薄いデータで補足された場合、適切な裏付けを提供できます。中程度の適切性は、強みと限界の両方を認識しています。",
+          incorrect: "調査の集計だけでは適切性を評価できません。少数の研究から得られた豊富なデータは、多くの研究から得られた薄いデータよりも適切である可能性があります。広範な引用を伴う 3 つの研究は十分な裏付けとなる可能性がありますが、他の研究による内容が薄いため、ある程度の懸念が必要です。"
+        }
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "データを「適切」にするものは何ですか?",
+        subtitle: "The 'A' in MCAR",
+        text: "Adequacy assesses whether there is sufficient data to support the finding:<br><br>• <strong>Richness:</strong> Is the primary data detailed and descriptive, or thin and superficial?<br><br>• <strong>Quantity:</strong> How many studies contribute, and what data do they provide?<br><br>• <strong>Depth:</strong> Do the data allow understanding of the phenomenon, or just mention it?",
+        highlight: "2 つの豊富な研究は、10 件の内容の薄い研究よりも適切である可能性があります。データの品質は重要です。"
+      }},
+      { type: "story", theme: "gold-bg", content: {
+        label: "インタビュー調査", title: "Dr. Kofi Mensah's 847 Hours",
+        text: "In 2018, Dr. Kofi Mensah at University of Ghana conducted a qualitative synthesis on community health worker experiences. The 12 contributing studies contained <strong>847 hours of interview data</strong> and <strong>234 pages of field notes</strong>.",
+        followup: "The synthesis finding—'CHWs experience role conflict between community membership and health system demands'—was supported by extensive, detailed accounts from multiple contexts. Quotes showed nuanced experiences: the tensions, the coping strategies, the emotional toll. This richness allowed confident interpretation. The data were <strong>highly adequate</strong>."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "📝", title: "シナリオ: 調査アドオン",
+        xp: 25,
+        scenario: "合成には 15 件の調査が含まれます。 12 は、1 つの自由回答形式の質問 (「他にコメントはありますか?」) を含む定量的調査です。 3 は詳細な定性的研究です。総合的な結果は、15 の研究すべてに等しく基づいています。",
+        question: "What adequacy concern exists?",
+        options: [
+          { letter: "A", text: "心配ありません - 15 の研究で十分なデータが得られます", correct: false },
+          { letter: "B", text: "Minor concern—survey responses add to qualitative depth", correct: false },
+          { letter: "C", text: "Moderate concern—single open-ended questions rarely provide rich qualitative data", correct: true },
+          { letter: "D", text: "深刻な懸念 - 調査の回答は定性的なデータではありません", correct: false }
+        ],
+        feedback: {
+          correct: "正しい！ 「他にコメントはありますか？」通常、回答は簡潔で文脈から切り離されており、定性的な深みはほとんどありません。この発見の妥当性は、実際には 3 つの詳細な研究に基づいています。 15 件すべてを均等に扱うと、薄い実際のデータが隠蔽されながら、見かけの妥当性が誇張されます。",
+          incorrect: "自由回答形式のアンケートの質問では定性的なデータが生成されますが、定性的な深さはほとんど得られません。短い書面による回答には、インタビュー データのような詳細な調査、文脈、豊富さが欠けています。適切性評価では、研究を平等に数えるのではなく、データの豊富さによって重み付けする必要があります。"
+        }
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "飽和錯視", title: "When More Studies Added Nothing",
+        text: "A systematic review team kept adding studies to their qualitative synthesis, eventually reaching <strong>67 studies</strong>. They argued this extensive evidence base demonstrated high adequacy.",
+        followup: "But examination revealed a pattern: the last <strong>41 studies</strong> added no new data to the findings. They repeated the same thin quotes and secondhand interpretations. The synthesis had achieved 'saturation' at 26 studies—everything after was redundant noise. Study count had become a proxy for rigor, masking that the actual <strong>unique data remained thin</strong>."
+      }},
+      { type: "checklist", theme: "dark", content: {
+        title: "Adequacy Assessment Questions",
+        items: [
+          "この調査結果に一次データ (引用、観察) が寄与している研究は何件ありますか?",
+          "データは豊富 (詳細な説明) ですか、それとも薄い (簡潔) ですか?言及)?",
+          "研究はデータのコンテキストを提供しますか?それとも単に引用だけですか?",
+          "研究を削除すると証拠は大幅に弱まりますか?",
+          "調査結果の複雑さはデータの豊富さと一致していますか?"
+        ]
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "⚖️", title: "Scenario: Complex Finding, Simple Data",
+        xp: 30,
+        scenario: "合成により、6 つのドメインと、 「慢性疾患を乗り越える患者の旅」を説明する 18 のサブテーマ。裏付けとなるデータは 9 件の研究からの短い引用で構成されており、ほとんどが明白な点を示しています。",
+        question: "What is the primary adequacy concern?",
+        options: [
+          { letter: "A", text: "研究数が不十分です", correct: false },
+          { letter: "B", text: "複雑さの発見とデータの深さの間の不一致", correct: true },
+          { letter: "C", text: "Need more diverse patient populations", correct: false },
+          { letter: "D", text: "The model should have fewer domains", correct: false }
+        ],
+        feedback: {
+          correct: "正解です。 18 のサブテーマ モデルには、その複雑さをサポートするための豊富で深いデータが必要です。 「明白な点」を裏付ける短い引用は、精緻な概念アーキテクチャを正当化することはできません。この結果は、データがサポートできる範囲を超えています。これは根本的な適切性の問題です。",
+          incorrect: "問題は研究数や多様性ではありません。精緻な結果と根拠の薄いデータとの間のギャップです。複雑なモデルには、微妙なパターンを示す豊富なデータが必要です。短い引用だけでは 18 のサブテーマを正当化できません。"
+        }
+      }},
+      { type: "story", theme: "green-bg", content: {
+        label: "Transparent Adequacy", title: "緩和ケア総合",
+        text: "A Cochrane qualitative synthesis on family experiences with palliative care explicitly reported data adequacy for each finding:",
+        followup: "<strong>Finding 1:</strong> 'Families want honest information' — Supported by thick data from 14 studies (HIGH adequacy)<br><br><strong>Finding 2:</strong> 'Families experience anticipatory grief' — Supported by moderate data from 7 studies (MODERATE adequacy)<br><br><strong>Finding 3:</strong> 'Cultural factors shape information preferences' — Supported by thin data from 3 studies (LOW adequacy)<br><br>This transparency allowed guideline panels to weight findings appropriately. <strong>Honest adequacy assessment</strong> serves users better than false confidence."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "🎯", title: "Scenario: Final Adequacy Judgment",
+        xp: 30,
+        scenario: "A finding is supported by 4 studies: Study A (12 in-depth interviews with rich quotes), Study B (6 focus groups with detailed transcripts), Study C (ethnographic fieldwork with extensive field notes), Study D (5 brief phone interviews with minimal data).",
+        question: "What is the overall adequacy assessment?",
+        options: [
+          { letter: "A", text: "非常に小さな懸念 — 3 つの研究が豊富なデータを提供しています", correct: true },
+          { letter: "B", text: "Minor concerns—only 4 studies total", correct: false },
+          { letter: "C", text: "Moderate concerns—Study D contributes little", correct: false },
+          { letter: "D", text: "Serious concerns—too few studies", correct: false }
+        ],
+        feedback: {
+          correct: "正解です!研究 A、B、C を合わせると、複数の収集方法からかなり豊富なデータが得られます。研究 D の貢献が薄いからといって、強固な基盤が損なわれることはありません。全体的な適切性は高く、D の貢献が限られていることについては、せいぜい小さな懸念です。",
+          incorrect: "適切性とは、研究数ではなく、データの豊富さに関するものです。豊富な定性データ (インタビュー、フォーカス グループ、民族誌) を備えた 3 つの研究は、優れた妥当性を示しています。研究 D の弱点は、他の研究による強力な根拠を考えると無関係です。"
+        }
+      }},
+      { type: "takeaways", theme: "dark", content: {
+        title: "Key Takeaways: Adequacy",
+        items: [
+          "妥当性とは、研究数ではなく、データの豊富さが重要です",
+          "5 件の豊富な研究は、50 件の薄い研究よりも適切である可能性があります",
+          "Complex findings require proportionally rich data to support them",
+          "飽和錯覚に注意してください。新たな貢献がない研究を追加してくださいデータ",
+          "Open-ended survey questions rarely provide qualitative depth"
+        ],
+        remember: "Thin data multiplied is still thin. Depth beats breadth in qualitative adequacy."
+      }},
+      { type: "quiz", theme: "dark", content: {
+        question: "薄いデータを使用した 50 件の研究と豊富なデータを使用した 5 件の研究によって裏付けられた結果—妥当性はどちらが優れていますか?",
+        options: [
+          { text: "50 件の研究—証拠は多い方が常に優れています", correct: false },
+          { text: "5 つの研究—豊富なデータは多くの薄いデータよりも優れた裏付けを提供します", correct: true },
+          { text: "Cannot compare—different types of adequacy", correct: false },
+          { text: "Equal adequacy—quality and quantity balance out", correct: false }
+        ],
+        xp: 20,
+        feedback: {
+          correct: "その通りです。内容の薄い引用を繰り返す 50 の研究は、蓄積されて豊かな理解にはなりません。詳細な文脈データを含む 5 つの研究により、現象に対する真の洞察が可能になります。定性的総合における適切性は、幅よりも深さを重視します。",
+          incorrect: "これは、定性的適切性の基本原則であり、幅よりも深さが重要です。薄いデータを掛け合わせても薄いままです。少ないソースからの豊富なデータにより、定性合成に必要な詳細な理解が得られます。"
+        }
+      }}
+    ]
+  },
+  {
+    id: 6, title: "Relevance", subtitle: "証拠はあなたの質問に当てはまりますか?", xp: 170,
+    slides: [
+      { type: "title", theme: "green-bg", content: { title: "Relevance", subtitle: "証拠が別の質問に答える場合" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "Understand relevance in qualitative synthesis context",
+          "Assess population, setting, and phenomenon relevance",
+          "Identify partial relevance and its implications",
+          "Apply relevance assessment to real scenarios"
+        ],
+        tip: "間違った質問に答える質の高い証拠は依然として無関係です。"
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "誤用証拠", title: "間違った集団に1,200万ドル",
+        text: "In 2017, the Ministry of Health in Tanzania commissioned a qualitative synthesis to inform community health programs. The synthesis included <strong>28 high-quality studies</strong> on community health worker motivation—excellent methods, rich data, coherent findings.",
+        followup: "There was one problem: <strong>24 studies</strong> were from the United States, UK, and Australia. Only <strong>4 studies</strong> came from sub-Saharan Africa. The findings—about professional development opportunities, institutional recognition, career ladders—reflected high-income health system contexts. Tanzanian village health workers faced entirely different realities: unpaid roles, agricultural competing demands, status in traditional hierarchies. The synthesis had <strong>excellent quality but poor relevance</strong>."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "🌍", title: "Scenario: Geographic Mismatch",
+        xp: 30,
+        scenario: "You're developing guidelines for refugee mental health services in Jordan. A qualitative synthesis on 'barriers to mental health care access' includes 20 studies: 15 from Western Europe, 3 from North America, 2 from the Middle East.",
+        question: "How should relevance be assessed?",
+        options: [
+          { letter: "A", text: "High relevance—mental health barriers are universal", correct: false },
+          { letter: "B", text: "Moderate relevance—some barriers may transfer, but context differs substantially", correct: false },
+          { letter: "C", text: "Low relevance—refugee mental health in Jordan has unique cultural and systemic factors", correct: true },
+          { letter: "D", text: "研究を読まないと関連性を評価できない", correct: false }
+        ],
+        feedback: {
+          correct: "正しい！メンタルヘルスに関する難民の経験は、文化的背景、医療制度の構造、偏見のパターン、利用可能なサービスによって深く形成されます。西ヨーロッパの発見を単純にヨルダンに移すことはできません。この地域での研究は 20 件中 20 件しかなく、関連性は低いです。",
+          incorrect: "メンタルヘルスの障壁は文化や背景によって大きく異なります。スティグマの運営方法は異なり、サービスの構造も異なり、難民の経験も異なります。欧米主導の証拠は、中東の難民の状況との関連性が限られています。"
+        }
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "Dimensions of Relevance",
+        subtitle: "The 'R' in MCAR",
+        text: "Relevance assesses whether the evidence applies to the review question:<br><br>• <strong>Population:</strong> Are study participants similar to the target population?<br><br>• <strong>Phenomenon:</strong> Do studies examine the same phenomenon you're synthesizing?<br><br>• <strong>Setting:</strong> Are the contexts comparable (health system, culture, resources)?<br><br>• <strong>Perspective:</strong> Do studies capture the perspectives you need (patients vs providers)?",
+        highlight: "研究は方法論的に優れていても、別の質問に答える場合は無関係である可能性があります。"
+      }},
+      { type: "story", theme: "gold-bg", content: {
+        label: "現象の不一致", title: "Adherence vs Concordance",
+        text: "Dr. Fatima Al-Hassan led a synthesis on 'patient medication concordance'—the collaborative process of patients and providers agreeing on treatment. The team searched thoroughly and found <strong>45 relevant studies</strong>.",
+        followup: "On analysis, <strong>38 studies</strong> examined 'adherence'—whether patients followed instructions. Only <strong>7 studies</strong> examined concordance—the shared decision-making process. Adherence assumes provider authority; concordance assumes partnership. The synthesis needed to downgrade relevance severely: most evidence addressed a <strong>related but different phenomenon</strong>."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "👥", title: "Scenario: Perspective Mismatch",
+        xp: 25,
+        scenario: "Your review question asks: 'What do patients value in palliative care?' The synthesis includes 12 studies: 8 interview patients, 4 interview family members about what they think patients value.",
+        question: "家族調査にはどのような関連性の懸念がありますか?",
+        options: [
+          { letter: "A", text: "No concern—family members know what patients value", correct: false },
+          { letter: "B", text: "Minor concern—family perspectives add context", correct: false },
+          { letter: "C", text: "Moderate concern—family members report proxy views, not direct patient perspectives", correct: true },
+          { letter: "D", text: "Serious concern—exclude family member studies entirely", correct: false }
+        ],
+        feedback: {
+          correct: "Correct! The question asks what PATIENTS value, not what others think patients value. Family perspectives are proxy data—valuable but not the direct perspective requested. Moderate concern is appropriate; the 4 studies contribute indirectly.",
+          incorrect: "Family members may misunderstand or project their own values. If the question asks what patients value, studies of patient perspectives are directly relevant; proxy reports are only partially relevant."
+        }
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "タイム ワープ", title: "1990 年代の 2023 ガイドライン データ",
+        text: "A 2023 guideline on telehealth implementation cited a qualitative synthesis to support its recommendations on 'patient acceptance.' The synthesis seemed robust: <strong>18 studies</strong>, diverse settings, coherent findings.",
+        followup: "But the studies dated from <strong>1995-2008</strong>—before smartphones, before widespread broadband, before video calling became routine. The synthesis described patients struggling with dial-up connections and fax machines. The COVID-19 pandemic had transformed telehealth acceptance, but the evidence base was <strong>two decades obsolete</strong>. Temporal relevance is relevance too."
+      }},
+      { type: "checklist", theme: "dark", content: {
+        title: "Relevance Assessment Checklist",
+        items: [
+          "研究対象集団は対象集団と一致していますか?",
+          "Are settings comparable (health system, resources, culture)?",
+          "研究は同じ現象、または関連する現象を調査していますか?",
+          "証拠は時間的に関連していますか (そうではありません)古い)?",
+          "研究は質問に必要な視点を捉えていますか?"
+        ]
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "🏥", title: "Scenario: Partial Relevance",
+        xp: 30,
+        scenario: "「電子医療記録を使用した看護師の経験」に関する総合には 15 件の研究が含まれています。 10人は病院、3人はプライマリ・ケア・クリニック、2人は介護施設からの出身である。ガイドラインはプライマリ ケアの実施に関するものです。",
+        question: "病院での研究はどのように扱われるべきですか?",
+        options: [
+          { letter: "A", text: "Full relevance—nurses are nurses regardless of setting", correct: false },
+          { letter: "B", text: "Partial relevance—some findings may transfer but workflow differs substantially", correct: true },
+          { letter: "C", text: "No relevance—exclude hospital studies entirely", correct: false },
+          { letter: "D", text: "病院での研究とプライマリ ケアの研究を同等に重視します", correct: false }
+        ],
+        feedback: {
+          correct: "Correct! Hospital and primary care EHR use differ substantially in workflow, documentation burden, and team structure. Some findings (e.g., training needs) may transfer; others (e.g., shift handoff documentation) won't. Acknowledge partial relevance rather than assuming full transferability.",
+          incorrect: "EHR エクスペリエンスの設定が重要です。病院のワークフロー、チーム構造、文書化のパターンはプライマリケアとは異なります。一部の洞察は伝達されますが、完全な関連性を仮定すると、重要な文脈の違いが無視されます。"
+        }
+      }},
+      { type: "story", theme: "green-bg", content: {
+        label: "Relevance Done Right", title: "HIV 検査総合",
+        text: "A qualitative synthesis for WHO guidelines on HIV testing examined patient experiences. The team explicitly assessed relevance for their target context: <strong>resource-limited settings</strong> in sub-Saharan Africa.",
+        followup: "They found 40 studies total but classified them: <strong>22 directly relevant</strong> (sub-Saharan Africa, resource-limited), <strong>12 partially relevant</strong> (other LMICs or relevant populations in HICs), <strong>6 low relevance</strong> (HIC general populations). Findings from directly relevant studies received more weight. This <strong>transparent relevance stratification</strong> produced guidelines actually applicable to the target context."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "🎯", title: "Scenario: High Quality, Low Relevance",
+        xp: 30,
+        scenario: "方法論的に優れた研究 (明確な反射性、透明性のある分析、豊富なデータ) は、日本のがん患者の経験を調査しています。あなたの合成はオーストラリアのガイドラインに準拠しています。研究の質は高いです。関連性についてはどうですか?",
+        question: "この研究はあなたの総合にどのように貢献するべきですか?",
+        options: [
+          { letter: "A", text: "Include with full weight—quality trumps context", correct: false },
+          { letter: "B", text: "Include but acknowledge transferability uncertainty due to cultural and health system differences", correct: true },
+          { letter: "C", text: "Exclude—different country means no relevance", correct: false },
+          { letter: "D", text: "Include only if findings match other Australian studies", correct: false }
+        ],
+        feedback: {
+          correct: "正解です。方法論的な品質と関連性は独立した評価です。日本の質の高い研究は貴重な洞察を提供するかもしれないが、オーストラリアへの移転可能性については不確実性がある。証拠を含めますが、関連性の制限については透明にしてください。",
+          incorrect: "品質は関連性を保証しません。日本とオーストラリアのがん治療の状況は、医療制度の構造、コミュニケーション規範、家族の関与パターンにおいて異なります。証拠は貴重ですが、関連性についての注意が必要です。"
+        }
+      }},
+      { type: "takeaways", theme: "dark", content: {
+        title: "Key Takeaways: Relevance",
+        items: [
+          "間違った質問に答える質の高い証拠は依然として無関係です",
+          "Assess: population, phenomenon, setting, perspective, and time",
+          "品質と関連性は独立しています。研究は優れている場合もありますが、無関係である可能性があります",
+          "Partial relevance is common; be transparent about transferability",
+          "Relevance is a gateway criterion—low relevance limits overall confidence"
+        ],
+        remember: "別の質問に答える証拠は、方法論的に正しいというだけでは関連性がありません。強力です。"
+      }},
+      { type: "quiz", theme: "dark", content: {
+        question: "方法、一貫性、適切性については高いと評価されていますが、関連性については低いと評価されている合成結果は、全体的な信頼度はどれくらいになりますか?",
+        options: [
+          { text: "HIGH—three of four domains are strong", correct: false },
+          { text: "MODERATE—average across domains", correct: false },
+          { text: "LOW or VERY LOW—relevance failure undermines the finding's applicability", correct: true },
+          { text: "Cannot determine—domains cannot be combined", correct: false }
+        ],
+        xp: 20,
+        feedback: {
+          correct: "その通りです。証拠があなたの質問に当てはまらない場合、その方法論的な品質は無関係です。関連性が低いとは、その結果が元の文脈で十分に裏付けられているにもかかわらず、特定のガイドラインの質問を自信を持って伝えることができないことを意味します。関連性はゲートウェイ基準です。",
+          incorrect: "CERQual ドメインは平均化されません。関連性が低いということは、証拠が別の質問に答えていることを意味します。方法論の卓越性は、間違った質問への答えを補うことはできません。全体的な信頼度は、この基本的な制限を反映している必要があります。"
+        }
+      }}
+    ]
+  },
+  {
+    id: 7, title: "Thematic Synthesis", subtitle: "定性データからテーマを構築する", xp: 190,
+    slides: [
+      { type: "title", theme: "red-bg", content: { title: "Thematic Synthesis", subtitle: "Systematic approach to qualitative evidence synthesis" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "Understand the three stages of thematic synthesis",
+          "Distinguish descriptive from analytical themes",
+          "Apply line-by-line coding to qualitative data",
+          "Recognize common errors in thematic synthesis"
+        ],
+        tip: "テーマの総合は、物語のレビューと定量的なメタ分析の間のギャップを埋めます。"
+      }},
+      { type: "story", theme: "gold-bg", content: {
+        label: "起源の物語", title: "Thomas & Harden, 2008",
+        text: "EPPI センターのジェームス トーマス博士とアンジェラ ハーデン博士は、医療政策に関する質問に対する質的研究を体系的に統合する方法という課題に直面していました。物語のレビューは主観的すぎました。メタ分析は定性データには適合しませんでした。",
+        followup: "They developed thematic synthesis—a method with <strong>three transparent stages</strong>: (1) line-by-line coding of primary study findings, (2) organizing codes into descriptive themes, and (3) generating analytical themes that answer the review question. Their 2008 paper has been cited over <strong>15,000 times</strong>. Thematic synthesis became the dominant method for qualitative synthesis in systematic reviews."
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "3 つの段階",
+        subtitle: "データから洞察へ",
+        text: "<strong>Stage 1: Line-by-line coding</strong><br>Code every finding, quote, and author interpretation from primary studies. Stay close to original meaning.<br><br><strong>Stage 2: Descriptive themes</strong><br>Group related codes into broader themes that describe patterns across studies. Still grounded in the data.<br><br><strong>Stage 3: Analytical themes</strong><br>Generate higher-order themes that answer your review question. This is the interpretive leap—going beyond what studies explicitly say.",
+        highlight: "記述テーマから分析テーマへのジャンプでは、合成が要約を超えた価値を追加します。"
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "コーディング災害", title: "When Categories Came First",
+        text: "Dr. Elena Volkov's team synthesized <strong>34 studies</strong> on patient experiences with diabetes apps. Before reading any data, they created <strong>12 predetermined codes</strong> based on behavior change theory: 'self-efficacy,' 'social support,' 'goal-setting,' and so on.",
+        followup: "Every piece of data was forced into these boxes. Patients' frustrations with app design became 'low self-efficacy.' Concerns about data privacy became 'trust issues.' The synthesis confirmed the theory—because it was designed to. It missed the most important finding hidden in <strong>23 studies</strong>: patients felt infantilized by apps designed for newly-diagnosed users when they had decades of experience. The <strong>predetermined categories blinded them to the actual data</strong>."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "📝", title: "Scenario: Coding Approach",
+        xp: 30,
+        scenario: "がん検診の障壁に関するテーマの総合を開始しています。同僚は、健康信念モデルのカテゴリ (認識された感受性、認識された重症度、認識された障壁、認識された利点) から始めることを提案しています。",
+        question: "どのように対応すればよいですか?",
+        options: [
+          { letter: "A", text: "Good idea—established frameworks ensure comprehensive coding", correct: false },
+          { letter: "B", text: "Start with inductive line-by-line coding, then see if HBM concepts emerge", correct: true },
+          { letter: "C", text: "研究の半分に HBM を使用し、半分に帰納的コーディングを使用します", correct: false },
+          { letter: "D", text: "Reject theoretical frameworks entirely in qualitative synthesis", correct: false }
+        ],
+        feedback: {
+          correct: "正解です。テーマの合成では、まず帰納的コーディングが必要です。つまり、データを所定のカテゴリーに強制するのではなく、データからテーマを浮かび上がらせます。理論的フレームワークは、後の分析テーマの開発に情報を提供できますが、最初のコーディングを制限すべきではありません。",
+          incorrect: "事前に決められたカテゴリから始めると、データが実際に示す内容を見逃してしまう危険があります。帰納的コーディングにより、予期せぬ発見が得られます。理論は後の解釈に情報を与えることができますが、データとの最初の遭遇を制約すべきではありません。"
+        }
+      }},
+      { type: "story", theme: "green-bg", content: {
+        label: "Exemplary Synthesis", title: "子供の健康体重調査",
+        text: "A thematic synthesis examined children's perspectives on healthy eating and physical activity. The team coded <strong>17 studies</strong> inductively, generating <strong>247 initial codes</strong>.",
+        followup: "Codes were grouped into descriptive themes: 'taste preferences,' 'peer influence,' 'family food rules,' 'body image concerns.' But the analytical leap was crucial: these descriptive themes generated the finding that <strong>children experienced a fundamental tension between 'being healthy' and 'being normal'</strong>. This went beyond any single study—it was the synthesis insight. Guidelines could now address this tension directly, rather than just providing health information children already knew."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "🎯", title: "Scenario: Descriptive vs Analytical",
+        xp: 30,
+        scenario: "Your descriptive themes from a synthesis on medication adherence include: 'forgetting doses,' 'side effect concerns,' 'cost barriers,' 'complex regimens,' and 'feeling better stopping early.' What analytical theme might unite these?",
+        question: "Which represents an appropriate analytical theme?",
+        options: [
+          { letter: "A", text: "'Non-adherence has multiple causes'—summarizes the descriptive themes", correct: false },
+          { letter: "B", text: "'Patients weigh medication burden against perceived necessity'—interprets the pattern", correct: true },
+          { letter: "C", text: "'Healthcare providers should address adherence barriers'—recommends action", correct: false },
+          { letter: "D", text: "'Adherence interventions are needed'—identifies a gap", correct: false }
+        ],
+        feedback: {
+          correct: "Correct! The analytical theme identifies an underlying mechanism: patients conduct ongoing cost-benefit analysis of medications. This explains why forgetting, side effects, cost, complexity, and early stopping all matter—they're part of a coherent decision-making process. This insight can guide intervention design.",
+          incorrect: "分析テーマは、単にパターンを要約する (A)、推奨するアクション (C)、ギャップを特定する (D) だけではなく、パターンを解釈する必要があります。分析テーマの価値は、記述パターンが存在する理由を説明することです。"
+        }
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "透明性の失敗", title: "どこからともなく出てくるテーマ",
+        text: "A highly-cited synthesis on 'patient empowerment' presented <strong>five elegant themes</strong>: knowledge acquisition, self-advocacy, partnership, emotional processing, and identity integration. The synthesis shaped hospital policies across three countries.",
+        followup: "A replication attempt failed catastrophically. The team found no audit trail from codes to themes. The original authors couldn't explain how <strong>127 initial codes</strong> became exactly five themes. When pressed, they admitted the themes came from a framework paper by the senior author, published in 1998. The synthesis had reverse-engineered data to fit predetermined conclusions. <strong>Zero transparency</strong> meant zero credibility."
+      }},
+      { type: "checklist", theme: "dark", content: {
+        title: "Thematic Synthesis Quality Markers",
+        items: [
+          "Line-by-line coding of primary data visible in supplementary materials",
+          "Clear audit trail from codes to descriptive themes to analytical themes",
+          "Multiple researchers involved in coding with disagreement resolution documented",
+          "Analytical themes go beyond summarizing to generate new insight",
+          "確認され対処されたデータの否定"
+        ]
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "ENTREQ: Reporting Standards",
+        subtitle: "Enhancing Transparency in Reporting Qualitative Research Synthesis",
+        text: "The <strong>ENTREQ statement</strong> provides 21 items for transparent reporting of qualitative synthesis. Key items include:<br><br>• <strong>Search strategy:</strong> How studies were identified<br>• <strong>Study selection:</strong> Inclusion/exclusion criteria and process<br>• <strong>Quality appraisal:</strong> How methodological quality was assessed<br>• <strong>Data extraction:</strong> What data were extracted and by whom<br>• <strong>Synthesis methodology:</strong> Which method used and why",
+        highlight: "ENTREQ は、読者があなたの合成が信頼できるかどうかを評価するのに役立ちます。"
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "⚠️", title: "シナリオ: 的外れ",
+        xp: 25,
+        scenario: "合成では、慢性疼痛を伴う患者の経験に関する 8 つの記述テーマが提示されます。分析テーマは提供されません。ディスカッションでは次のように述べられています。「これらのテーマは、患者の経験を包括的に説明しています。」",
+        question: "この統合には何が欠けていますか?",
+        options: [
+          { letter: "A", text: "飽和状態に達するためのさらなる研究", correct: false },
+          { letter: "B", text: "実用的な洞察を生み出す解釈作業", correct: true },
+          { letter: "C", text: "テーマの統計分析頻度", correct: false },
+          { letter: "D", text: "何もありません。説明的なテーマが目標です", correct: false }
+        ],
+        feedback: {
+          correct: "正解です。分析テーマがなければ、単なる整理された説明に過ぎません。 「このパターンはレビューの質問にとって何を意味するのか?」という解釈の飛躍こそが、総合を政策と実践にとって価値のあるものにするのです。説明で停止すると、メソッドの目的が失われます。",
+          incorrect: "Thematic synthesis requires moving beyond description to analytical interpretation. Descriptive themes summarize; analytical themes explain and generate new understanding that individual studies couldn't provide."
+        }
+      }},
+      { type: "takeaways", theme: "dark", content: {
+        title: "Key Takeaways: Thematic Synthesis",
+        items: [
+          "Three stages: line-by-line coding → descriptive themes → analytical themes",
+          "誘導コーディングから始めます。データを所定のカテゴリに強制的に分類しないでください",
+          "Descriptive themes summarize; analytical themes INTERPRET",
+          "The interpretive leap (Stage 3) is where synthesis adds value beyond summarizing",
+          "Maintain transparent audit trail from codes to themes"
+        ],
+        remember: "説明で停止すると、整理はできていますが、統合されていません。"
+      }},
+      { type: "story", theme: "gold-bg", content: {
+        label: "Best Practice", title: "禁煙合成",
+        text: "A Cochrane qualitative synthesis on smoking cessation barriers took transparency seriously. They published their <strong>full coding framework</strong>, showing how 342 codes collapsed into 28 descriptive themes.",
+        followup: "The audit trail was explicit: each analytical theme listed the descriptive themes it drew from, the codes within those themes, and the studies contributing to each code. Readers could trace any finding back to source data. The three analytical themes—<strong>'addiction as identity threat,' 'cessation as social navigation,' and 'healthcare encounters as missed opportunities'</strong>—each carried a complete evidence trail. This is how thematic synthesis builds credibility."
+      }},
+      { type: "quiz", theme: "dark", content: {
+        question: "What distinguishes analytical themes from descriptive themes?",
+        options: [
+          { text: "Analytical themes are more detailed than descriptive themes", correct: false },
+          { text: "Analytical themes interpret patterns to generate new understanding", correct: true },
+          { text: "分析テーマは研究著者によって検証されています", correct: false },
+          { text: "Analytical themes require more supporting studies", correct: false }
+        ],
+        xp: 20,
+        feedback: {
+          correct: "その通りです。説明的なテーマは、研究全体のデータ パターンを整理して要約します。分析テーマは解釈の飛躍を遂げ、それらのパターンが何を意味するか、なぜそれらが発生するのか、そしてレビューの質問に何を暗示するのかを説明します。ここで、合成は収集を超えた価値を付加します。",
+          incorrect: "区別は詳細や検証に関するものではなく、解釈に関するものです。分析テーマは「だから何?」という質問に答えます。個々の研究が明示的に述べたことを超える理解を生み出すことによって。"
+        }
+      }}
+    ]
+  },
+  {
+    id: 8, title: "Meta-Ethnography", subtitle: "研究を相互に翻訳する", xp: 195,
+    slides: [
+      { type: "title", theme: "purple-bg", content: { title: "Meta-Ethnography", subtitle: "Noblit & Hare's approach to qualitative synthesis" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "Understand the seven phases of meta-ethnography",
+          "Distinguish reciprocal translation, refutational synthesis, and line of argument",
+          "Apply translation concepts to real synthesis scenarios",
+          "Recognize appropriate use cases for meta-ethnography"
+        ],
+        tip: "メタエスノグラフィーは、各研究を、集約されるデータではなく、翻訳されるテキストとして扱います。"
+      }},
+      { type: "story", theme: "gold-bg", content: {
+        label: "基礎テキスト", title: "Noblit & Hare, 1988",
+        text: "Sociologists George Noblit and Dwight Hare were frustrated. Educational research produced hundreds of qualitative studies that sat isolated, unable to accumulate into broader understanding. They asked: <strong>how do we synthesize interpretive research?</strong>",
+        followup: "Their solution drew on translation theory. Rather than extracting 'data' from studies, they proposed <strong>translating studies into each other</strong>—preserving the interpretive nature of qualitative research while building cumulative understanding. Their 1988 book 'Meta-Ethnography' created an entirely new approach to synthesis, now widely used in health research."
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "ザ・セブンフェーズ",
+        subtitle: "Noblit & Hare's framework",
+        text: "<strong>1. Getting started:</strong> Identify your area of interest<br><strong>2. Deciding what is relevant:</strong> Define inclusion criteria<br><strong>3. Reading the studies:</strong> Repeated, deep engagement<br><strong>4. Determining how studies relate:</strong> Reciprocal, refutational, or line of argument<br><strong>5. Translating studies:</strong> Express concepts from one study in terms of another<br><strong>6. Synthesizing translations:</strong> Create overarching interpretation<br><strong>7. Expressing the synthesis:</strong> Communicate findings appropriately",
+        highlight: "フェーズ 4 は重要な決定点です。これらの研究は相互にどのように関連しているのでしょうか?"
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "ロスト・イン・トランスレーション", title: "47 研究、ゼロ合成",
+        text: "Dr. Benjamin Okafor's team attempted a meta-ethnography of patient experiences with organ transplantation. They collected <strong>47 studies</strong> and dutifully extracted themes. Then they hit a wall.",
+        followup: "Each study used different concepts: 'gift of life,' 'bodily integrity,' 'survivor guilt,' 'identity reconstruction,' 'medicalization.' The team couldn't see how to translate these into each other. After <strong>18 months</strong>, they published a thematic summary—but it wasn't a meta-ethnography. They had skipped the translation step that defines the method. The result was organized description, not synthetic interpretation."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "🔄", title: "Scenario: Reciprocal Translation",
+        xp: 30,
+        scenario: "研究 A では、がん患者が「伝記的破壊」を経験していることが判明しました。研究Bでは、がん患者が「アイデンティティの変容」を経験していることが判明した。研究Cでは、がん患者が「ライフコースの中断」を経験していることが判明した。これらは関連しているように見えますが、異なる用語が使用されています。",
+        question: "What type of synthesis relationship is this?",
+        options: [
+          { letter: "A", text: "反駁—研究は相互に矛盾しています", correct: false },
+          { letter: "B", text: "Reciprocal translation—similar concepts with different terminology", correct: true },
+          { letter: "C", text: "Line of argument—studies build a progression", correct: false },
+          { letter: "D", text: "Cannot determine—need more studies", correct: false }
+        ],
+        feedback: {
+          correct: "Correct! These studies describe similar phenomena using different conceptual language. Reciprocal translation involves expressing one study's concepts in terms of another's—recognizing that 'biographical disruption,' 'identity transformation,' and 'life course interruption' may be different lenses on the same experience.",
+          incorrect: "これらは矛盾 (反駁) や議論の構築 (一連の議論) ではありません。これらは異なる語彙を使用した並列解釈です。相互翻訳はこの類似性を認識し、共通点を特定しながらニュアンスを尊重する統合を作成します。"
+        }
+      }},
+      { type: "story", theme: "green-bg", content: {
+        label: "Successful Translation", title: "慢性疾患メタエスノグラフィー",
+        text: "Dr. Frances Rapport's team synthesized <strong>38 studies</strong> on living with chronic fatigue syndrome. They identified key concepts from each study: 'loss of self,' 'invisible illness,' 'delegitimization,' 'illness identity,' 'biographical work.'",
+        followup: "Through careful translation, they showed how 'loss of self' (one study) could be understood as related to 'biographical work' (another study)—both addressing the process of identity reconstruction. The synthesis produced a new conceptual model: <strong>'the self in chronic illness as continuously negotiated rather than lost.'</strong> This insight emerged from translation, not extraction."
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "Three Types of Synthesis",
+        subtitle: "How studies relate determines approach",
+        text: "<strong>Reciprocal Translation:</strong> Studies broadly agree. Translate concepts between them to develop a fuller understanding.<br><br><strong>Refutational Synthesis:</strong> Studies contradict. Explore and explain the contradictions rather than forcing agreement.<br><br><strong>Line of Argument:</strong> Studies address different aspects that together tell a larger story. Build an interpretive argument from the pieces.",
+        highlight: "Most meta-ethnographies use reciprocal translation. Refutational synthesis is rare but valuable when genuine contradiction exists."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "⚔️", title: "Scenario: Refutational Synthesis",
+        xp: 35,
+        scenario: "遠隔医療による患者体験の統合: 5 つの研究で、患者はリモート アクセスによって力を与えられていると感じていることがわかりました。 4 つの研究で、患者は対面ケアの喪失により見捨てられたと感じていることがわかりました。これらは異なる側面ではなく、正反対の経験です。",
+        question: "What synthesis approach is appropriate?",
+        options: [
+          { letter: "A", text: "Reciprocal translation—find the common ground", correct: false },
+          { letter: "B", text: "議論の内容-これらはプロセスの段階です", correct: false },
+          { letter: "C", text: "Refutational synthesis—explore what explains the contradiction", correct: true },
+          { letter: "D", text: "Exclude outlier studies to achieve coherence", correct: false }
+        ],
+        feedback: {
+          correct: "正解です。これらの研究はまったく矛盾しています。反駁統合は、同意を強制することでこの問題を解決するのではなく、なぜ患者が反対の経験をするのかを探ります。コンテキスト、人口、または実装の違いによって反論が説明される可能性があります。矛盾を尊重することで、総合はより豊かになります。",
+          incorrect: "Don't force coherence where genuine disagreement exists. Refutational synthesis acknowledges and explores contradiction. The finding becomes: 'patient experience with telehealth is variable, depending on [factors that explain the contradiction].'"
+        }
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "議論の系統", title: "Building a Trajectory",
+        text: "Dr. Khadija Mahmoud synthesized <strong>23 studies</strong> on refugee health service use. Individual studies focused on different moments: pre-migration health experiences, arrival challenges, navigation difficulties, long-term integration.",
+        followup: "No single study covered the whole journey, but together they told a story. Using line of argument synthesis, she constructed a <strong>trajectory model</strong>: pre-migration health capital → arrival-related disruption → system navigation as skilled work → eventual (partial) integration. Each study contributed a piece; the synthesis built the whole. This is line of argument at its best—<strong>the whole exceeds the sum of parts</strong>."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "🧭", title: "Scenario: Identifying Synthesis Type",
+        xp: 30,
+        scenario: "医療従事者の燃え尽き症候群に関する定性的研究を総合しています。研究 A はキャリア初期のストレスを対象としています。研究 B では、キャリア半ばでの幻滅について取り上げています。研究Cでは、キャリア後期の対処戦略を取り上げています。研究 D では、キャリアのすべての段階における組織的要因がカバーされています。",
+        question: "What synthesis approach fits best?",
+        options: [
+          { letter: "A", text: "Reciprocal translation—all about burnout", correct: false },
+          { letter: "B", text: "Refutational synthesis—different career stages contradict", correct: false },
+          { letter: "C", text: "Line of argument—build a career trajectory model of burnout", correct: true },
+          { letter: "D", text: "Separate syntheses for each career stage", correct: false }
+        ],
+        feedback: {
+          correct: "Correct! Studies A, B, and C address different aspects of a phenomenon that unfolds over time. Line of argument synthesis can build a developmental model of burnout across career stages, with Study D providing cross-cutting organizational context. The synthesis creates understanding none could provide alone.",
+          incorrect: "これらは矛盾したもの (反駁) ではなく、同じことを別の言い方をしている (相互的) ものでもありません。それらはより大きな全体像の一部です。議論の統合ラインは、相補的な部分から全体を構築します。"
+        }
+      }},
+      { type: "checklist", theme: "dark", content: {
+        title: "Meta-Ethnography Quality Indicators",
+        items: [
+          "深く関与して複数回読み込まれた研究",
+          "各研究から抽出された重要な概念/比喩",
+          "研究の関係性についての明確な推論 (相互/反証/ライン引数)",
+          "翻訳プロセスの説明 - さまざまな研究の概念がどのように関連していたのか",
+          "Synthesis goes beyond description to produce new interpretation",
+          "Original study interpretations preserved while building higher-order understanding"
+        ]
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "Alternative: JBI Methodology",
+        subtitle: "Joanna Briggs Institute approach to qualitative synthesis",
+        text: "The <strong>JBI (Joanna Briggs Institute)</strong> offers an alternative systematic approach:<br><br>• <strong>Meta-aggregation:</strong> Preserves original meanings by aggregating findings rather than re-interpreting<br>• <strong>ConQual:</strong> JBI's approach to assessing confidence (similar to CERQual)<br>• <strong>SUMARI software:</strong> Dedicated tool for JBI systematic reviews<br><br>JBI is particularly popular in nursing and allied health research.",
+        highlight: "Choose your method based on purpose: meta-ethnography for theory-building, thematic synthesis for policy, JBI meta-aggregation for preserving original meanings."
+      }},
+      { type: "story", theme: "gold-bg", content: {
+        label: "Meta-Ethnography Excellence", title: "キャンベル共同レビュー",
+        text: "A Campbell Collaboration review used meta-ethnography to synthesize <strong>51 studies</strong> on community responses to environmental disasters. The team published their translation table showing exactly how they connected concepts across studies.",
+        followup: "The table showed: 'collective efficacy' (Study 3) was translated as relating to 'community resilience' (Study 7) and 'social capital mobilization' (Study 12). Different terms, related concepts. The final synthesis produced a model of <strong>'community coherence'</strong>—a new concept that captured what individual studies approached from different angles. This is the power of meta-ethnography: creating conceptual vocabulary that transcends any single study."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "✅", title: "シナリオ: 手法の選択",
+        xp: 25,
+        scenario: "臨床ガイドライン用に 15 件の定性的研究を統合する必要があります。研究では多様な方法（インタビュー、フォーカスグループ、民族誌）と多少異なる概念的枠組みが使用されています。実践には実用的な調査結果が必要です。",
+        question: "メタエスノグラフィーは最良のアプローチですか?",
+        options: [
+          { letter: "A", text: "Yes—meta-ethnography works for all qualitative synthesis", correct: false },
+          { letter: "B", text: "No—thematic synthesis is more appropriate for guideline-focused reviews", correct: true },
+          { letter: "C", text: "Yes—diverse methods require sophisticated synthesis", correct: false },
+          { letter: "D", text: "Neither—use framework synthesis instead", correct: false }
+        ],
+        feedback: {
+          correct: "Correct! Meta-ethnography excels at conceptual development and theory-building but may be less suitable for applied guideline questions requiring actionable findings. Thematic synthesis was designed specifically for policy/practice questions, producing findings more readily translated into recommendations.",
+          incorrect: "方法の選択は目的に合ったものでなければなりません。メタエスノグラフィーでは、概念の翻訳と理論的発展が優先されます。実用的な所見を必要とする臨床ガイドラインの場合、テーマ別統合は、より直接的に実用的な出力を提供することがよくあります。"
+        }
+      }},
+      { type: "takeaways", theme: "dark", content: {
+        title: "Key Takeaways: Meta-Ethnography",
+        items: [
+          "ノブリット＆ヘアの 7 つのフェーズ: 開始から統合の表現まで",
+          "Phase 4 is crucial: How do studies relate? (reciprocal, refutational, line of argument)",
+          "Translation = expressing one study's concepts in terms of another's",
+          "Reciprocal translation: similar concepts, different vocabulary",
+          "Line of argument: building a larger picture from complementary pieces"
+        ],
+        remember: "メタエスノグラフィーは、研究を集約するデータではなく、翻訳するテキストとして扱います。"
+      }},
+      { type: "quiz", theme: "dark", content: {
+        question: "What does 'translation' mean in meta-ethnography?",
+        options: [
+          { text: "研究を他の言語から日本語", correct: false },
+          { text: "ある研究の概念を別の研究の観点から表現する", correct: true },
+          { text: "Summarizing each study's main findings", correct: false },
+          { text: "定性的なデータを定量的なコードに変換する", correct: false }
+        ],
+        xp: 20,
+        feedback: {
+          correct: "その通りです。メタエスノグラフィーにおける翻訳とは、異なる研究が関連する現象に対して異なる概念的語彙を使用している可能性があることを認識し、ある研究の概念を別の研究の概念で表現することを意味します。これにより、比較が可能になりながら、解釈の豊かさが保たれます。",
+          incorrect: "ここでの翻訳は比喩的なものであり、言語翻訳ではなく、研究間の概念的な翻訳を指します。目標は、異なる用語が関連する現象を説明する場合を認識し、この関係を明示的に表現することです。"
+        }
+      }}
+    ]
+  },
+  {
+    id: 9, title: "Integrating Qualitative & Quantitative", subtitle: "混合手法の合成", xp: 185,
+    slides: [
+      { type: "title", theme: "gold-bg", content: { title: "定性証拠と定量証拠の統合", subtitle: "When numbers and narratives meet" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "定性証拠と定量証拠を統合する時期と理由を理解する",
+          "Apply different integration models (segregated, integrated, contingent)",
+          "Use qualitative evidence to explain quantitative findings",
+          "Navigate certainty/confidence mismatches between evidence types"
+        ],
+        tip: "統合とは、定性証拠を定量的と「同等に」良くすることではなく、どちらかだけでは答えられない質問に答えることです。"
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "統合の失敗", title: "Two Reviews, One Question, No Answers",
+        text: "A WHO guideline team commissioned two systematic reviews on school-based mental health interventions. The quantitative review found: <strong>SMD 0.32, 95% CI 0.18-0.46</strong>—interventions worked. The qualitative review found: <strong>students described interventions as embarrassing and unhelpful</strong>.",
+        followup: "The guideline panel was stuck. How could interventions 'work' statistically while students reported negative experiences? The reviews were conducted separately by different teams who never communicated. Without integration, the guideline panel couldn't reconcile the findings. They issued a <strong>weak recommendation</strong> noting 'conflicting evidence'—when proper integration could have explained the apparent contradiction."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "🔗", title: "シナリオ: 矛盾の解釈",
+        xp: 30,
+        scenario: "Returning to the school mental health example: RCTs show positive effects on symptom scores, but qualitative studies show students dislike the interventions. How might integration explain this?",
+        question: "What integration insight might resolve this contradiction?",
+        options: [
+          { letter: "A", text: "定性的研究は間違っています—RCT データの方が信頼性があります", correct: false },
+          { letter: "B", text: "RCT は間違っています—患者の経験は統計よりも優先されるべきです", correct: false },
+          { letter: "C", text: "Interventions may produce measurable symptom change while damaging therapeutic alliance and future help-seeking", correct: true },
+          { letter: "D", text: "Different populations—RCTs studied different students than qualitative studies", correct: false }
+        ],
+        feedback: {
+          correct: "Correct! Integration reveals that both can be true: interventions may reduce symptoms (quantitative) while creating negative associations with mental health help (qualitative). Long-term harm (reduced future help-seeking) may outweigh short-term symptom gains. This insight requires both evidence types.",
+          incorrect: "Neither evidence type is 'wrong.' They answer different questions. Quantitative evidence shows symptom change; qualitative evidence shows the experience of receiving help. Integration asks: what happens when both are true?"
+        }
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "Integration Models",
+        subtitle: "組み合わせるための 3 つのアプローチ証拠",
+        text: "<strong>Segregated:</strong> Conduct separate qualitative and quantitative syntheses, then juxtapose findings in discussion/recommendations.<br><br><strong>Integrated:</strong> Transform one evidence type to combine with the other (e.g., quantify qualitative findings OR narrativize quantitative data).<br><br><strong>Contingent:</strong> Use findings from one synthesis to design the other (e.g., qualitative findings identify subgroups for quantitative analysis).",
+        highlight: "GRADE uses a segregated model: GRADE for quantitative evidence, CERQual for qualitative, combined in Evidence to Decision frameworks."
+      }},
+      { type: "story", theme: "green-bg", content: {
+        label: "Integration Success", title: "The HIV Pre-Exposure Prophylaxis Guidelines",
+        text: "WHO guidelines on HIV PrEP integrated evidence masterfully. Quantitative synthesis showed: <strong>RR 0.27 (0.19-0.39)</strong>—PrEP dramatically reduced HIV acquisition. High certainty evidence.",
+        followup: "Qualitative synthesis revealed why real-world effectiveness might differ: stigma around PrEP use, daily pill-taking burden, fear of being 'outed' as high-risk. The integration insight: <strong>efficacy data couldn't be directly translated to effectiveness without addressing implementation barriers</strong>. Guidelines recommended PrEP with implementation support addressing the qualitative findings. Neither evidence type alone could inform this nuanced recommendation."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "⚖️", title: "Scenario: Certainty Mismatch",
+        xp: 30,
+        scenario: "介入の場合: 定量的証拠は中程度の効果を示しています (グレード: 高確実性)。定性的証拠は、実装に重大な障壁があることを示しています (CERQual: 高信頼度)。ガイドラインパネルはこれらを統合する必要があります。",
+        question: "How should certainty/confidence ratings influence the recommendation?",
+        options: [
+          { letter: "A", text: "強い推奨 - どちらの証拠タイプも確実性/信頼性が高い", correct: false },
+          { letter: "B", text: "Conditional recommendation—high-certainty efficacy but context-dependent implementation success", correct: true },
+          { letter: "C", text: "Reject the intervention—implementation barriers override efficacy", correct: false },
+          { letter: "D", text: "Average the certainty levels to get overall confidence", correct: false }
+        ],
+        feedback: {
+          correct: "Correct! High certainty that it works + high confidence that implementation faces barriers = conditional recommendation depending on whether barriers can be addressed. The integration acknowledges both pieces of evidence rather than letting one override the other.",
+          incorrect: "異なる証拠タイプを平均することはできません。確実性の高い有効性に加えて、信頼性の高い実装障壁があるということは、介入は機能しますが、状況に注意を払わなければ成功しない可能性があることを意味します。条件付き推奨は、このニュアンスを捉えています。"
+        }
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "定量化の罠", title: "When Numbers Devour Narratives",
+        text: "A research team attempted to 'integrate' qualitative and quantitative evidence on patient satisfaction. Their approach: code qualitative data, count code frequencies, and include in meta-analysis as 'proportion reporting satisfaction.'",
+        followup: "They converted rich narrative data into percentages: '73% of qualitative participants mentioned positive staff interactions.' This destroyed the qualitative contribution. <strong>Why</strong> patients valued staff interactions, <strong>how</strong> this manifested, <strong>what</strong> it meant to them—all lost. The 'integration' was actually <strong>destruction disguised as rigor</strong>. Qualitative evidence's value lies in depth, not countability."
+      }},
+      { type: "checklist", theme: "dark", content: {
+        title: "Integration Questions for Mixed Reviews",
+        items: [
+          "各証拠タイプはどのような質問に答えますか?",
+          "Do findings converge, complement, or contradict?",
+          "Can qualitative findings explain quantitative heterogeneity?",
+          "Can quantitative findings validate qualitative transferability?",
+          "What new insights emerge from considering both together?",
+          "How should different certainty/confidence ratings affect conclusions?"
+        ]
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "🔍", title: "Scenario: Using Qual to Explain Quant",
+        xp: 35,
+        scenario: "A meta-analysis of hand hygiene interventions shows I² = 89%—extreme heterogeneity. Some interventions show large effects, others show none. A qualitative synthesis of healthcare worker experiences exists.",
+        question: "定性的証拠はこの異質性をどのように説明できますか?",
+        options: [
+          { letter: "A", text: "Qualitative evidence can't explain statistical heterogeneity", correct: false },
+          { letter: "B", text: "コンテキスト、文化、実装に関する定性的調査結果により、一部の設定が成功し、その他の設定が成功する理由が明らかになる可能性があります。失敗", correct: true },
+          { letter: "C", text: "Run subgroup analysis by qualitative theme", correct: false },
+          { letter: "D", text: "異種混合の研究を除外", correct: false }
+        ],
+        feedback: {
+          correct: "Correct! This is a key integration function. Qualitative evidence may reveal that successful interventions were implemented with cultural sensitivity, leadership support, or adequate resources. Failed interventions may have ignored local norms. Heterogeneity becomes interpretable through qualitative lens.",
+          incorrect: "定性的証拠は、定量的パターンが存在する理由を説明するのに優れています。異質性が高いということは、多くの場合、コンテキストが重要であることを意味し、定性的な証拠によってコンテキストが明らかになります。この統合により、統計だけでは説明できない変動が説明されます。"
+        }
+      }},
+      { type: "story", theme: "gold-bg", content: {
+        label: "GRADE 証拠から決定まで", title: "Where Integration Happens",
+        text: "GRADE Evidence to Decision (EtD) フレームワークは、統合への構造化されたアプローチを提供します。利益と害に関する定量的証拠を提示した後、フレームワークには定性的証拠の専用セクションが含まれています。",
+        followup: "<strong>Values and preferences:</strong> What do affected people value? (qualitative evidence)<br><strong>Acceptability:</strong> Will stakeholders accept this intervention? (qualitative evidence)<br><strong>Feasibility:</strong> Can this be implemented? (qualitative evidence)<br><br>The EtD framework doesn't average evidence types—it gives each its appropriate role in shaping recommendations. Quantitative evidence informs effect estimates; qualitative evidence informs everything else."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "📊", title: "シナリオ: 補足証拠",
+        xp: 30,
+        scenario: "Quantitative evidence shows breastfeeding support interventions increase exclusive breastfeeding rates (RR 1.4). Qualitative evidence identifies implementation requirements: trained supporters, protected time, cultural adaptation, family involvement.",
+        question: "How should these be integrated in guidelines?",
+        options: [
+          { letter: "A", text: "Recommend intervention; include qualitative findings as implementation guidance", correct: true },
+          { letter: "B", text: "Recommend intervention only where qualitative conditions are met", correct: false },
+          { letter: "C", text: "Delay recommendation until intervention is tested with qualitative components", correct: false },
+          { letter: "D", text: "Present separately—guideline users will integrate themselves", correct: false }
+        ],
+        feedback: {
+          correct: "Correct! Quantitative evidence justifies recommending the intervention (it works). Qualitative evidence shapes HOW to implement it (what makes it work). Integration means the recommendation includes both: implement breastfeeding support, with attention to training, time, cultural adaptation, and family involvement.",
+          incorrect: "Evidence types have complementary roles. Quantitative evidence informs WHAT to recommend; qualitative evidence informs HOW to implement it. Integration packages these together, not sequentially or conditionally."
+        }
+      }},
+      { type: "takeaways", theme: "dark", content: {
+        title: "Key Takeaways: Integration",
+        items: [
+          "Quant answers 'does it work?' — Qual answers 'why/how/for whom?'",
+          "どちらの証拠タイプも他方を「上回る」ことはなく、異なる質問に答えます",
+          "Integration models: Segregated, Integrated, Contingent",
+          "Qualitative evidence can explain quantitative heterogeneity",
+          "グレード証拠から決定までの構造 (EtD) は、以下の構造を提供します。統合"
+        ],
+        remember: "実際の意思決定には、「かどうか」と「どのように/なぜ」の両方を理解する必要があります。"
+      }},
+      { type: "quiz", theme: "dark", content: {
+        question: "定性的証拠と定量的証拠を統合する主な価値は何ですか?",
+        options: [
+          { text: "証拠の総量を増やす", correct: false },
+          { text: "どちらの証拠タイプでも答えられない質問に答える単独", correct: true },
+          { text: "Making qualitative evidence more rigorous", correct: false },
+          { text: "より強力な証拠を選択して矛盾を解決する", correct: false }
+        ],
+        xp: 20,
+        feedback: {
+          correct: "その通りです。定量的な証拠が「効果があるかどうか」に答えます。定性的証拠は、「誰にとって、どのような条件下でどのように機能するか?」に対する答えになります。統合は、効果とエクスペリエンスの両方を理解する必要がある現実世界の実装に関する質問に答えます。",
+          incorrect: "統合は量や厳密な階層ではなく、完全性を重視します。実際の質問では、「かどうか」(定量的) と「どのように/なぜ」(定性的) の両方を理解する必要があります。どちらか一方だけでは十分ではありません。"
+        }
+      }}
+    ]
+  },
+  {
+    id: 10, title: "Final Assessment", subtitle: "Putting it all together", xp: 250,
+    slides: [
+      { type: "title", theme: "red-bg", content: { title: "Final Assessment", subtitle: "定性的証拠の合成技術を習得します" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "Apply GRADE-CERQual to realistic scenarios",
+          "さまざまな質問に対して適切な合成方法を選択します",
+          "定性的証拠と定量的証拠を統合します",
+          "Recognize common errors and quality issues"
+        ],
+        tip: "このモジュールでは、これまでに学んだすべてをテストします。各シナリオに時間をかけて取り組んでください。"
+      }},
+      { type: "story", theme: "gold-bg", content: {
+        label: "The Challenge", title: "あなたがレビュー担当者です",
+        text: "最終評価に到達しましたことおめでとうございます。 CERQual の MCAR フレームワーク、テーマ別統合、メタエスノグラフィー、および証拠の統合について学習しました。今度はこれらのスキルを適用します。",
+        followup: "次のシナリオでは、複数のドメインにわたる判断力がテストされます。簡単な答えはありません。どの答えも、これまでに学んだ原則を統合する必要があります。回答する前に各質問を慎重に検討してください。"
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "📋", title: "Case 1: The Diabetes App Synthesis",
+        xp: 40,
+        scenario: "A qualitative synthesis examines patient experiences with diabetes self-management apps. Finding: 'Patients value apps that integrate with daily routines.' Supporting data: 18 studies, 14 from US/UK, 4 from middle-income countries. 12 studies have minor methodological concerns. Studies consistently show the finding across contexts. Data is moderately rich.",
+        question: "What overall CERQual confidence is appropriate?",
+        options: [
+          { letter: "A", text: "高 - 一貫した結果が得られた 18 件の研究", correct: false },
+          { letter: "B", text: "中 - 方法論上の軽微な懸念と LMIC コンテキストの関連性の制限", correct: true },
+          { letter: "C", text: "LOW—too many US/UK studies limits generalizability", correct: false },
+          { letter: "D", text: "VERY LOW—methodology concerns across most studies", correct: false }
+        ],
+        feedback: {
+          correct: "正解!一貫性が強い (一貫したパターン)。適切性は中程度です (中程度に豊富なデータ)。方法論には若干の懸念があります (12/18 研究)。関連性は LMIC に限定されます (HIC からの 14/18)。深刻な格下げを保証するドメインはありませんが、複数の軽微な懸念により、全体的に中程度の信頼が示唆されています。",
+          incorrect: "Consider all four MCAR domains: Methodology (minor concerns), Coherence (strong—consistent pattern), Adequacy (moderate), Relevance (HIC-dominated). The combination suggests MODERATE confidence—not HIGH enough to ignore minor issues, not LOW enough to dismiss 18 consistent studies."
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "🎯", title: "ケース 2: 方法の選択",
+        xp: 40,
+        scenario: "精神医療におけるタスク シフティングに関する WHO ガイドラインの定性的証拠を総合しています。さまざまな定性的手法を使用した 32 件の研究があります。ガイドラインパネルには、実装の障壁と促進者に関する実用的な調査結果が必要です。",
+        question: "Which synthesis method is most appropriate?",
+        options: [
+          { letter: "A", text: "Meta-ethnography—most rigorous qualitative synthesis method", correct: false },
+          { letter: "B", text: "Thematic synthesis—designed for policy/practice questions, produces actionable themes", correct: true },
+          { letter: "C", text: "Framework synthesis—uses predetermined categories for structured findings", correct: false },
+          { letter: "D", text: "Narrative summary—most accessible for guideline panels", correct: false }
+        ],
+        feedback: {
+          correct: "Correct! Thematic synthesis was developed specifically for health policy questions requiring actionable findings. It produces clear themes about barriers and facilitators that guideline panels can translate into recommendations. Meta-ethnography prioritizes conceptual development over practical application.",
+          incorrect: "方法の選択は目的に合致している必要があります。実装関連の調査結果を必要とするガイドラインに焦点を当てたレビューの場合、テーマ別統合は最も直接的に実用的な出力を提供します。厳密さとアクセシビリティは、目的にはあまり適合しません。"
+        }
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "ケース 3: 問題のある合成", title: "問題を特定できますか?",
+        text: "この合成の説明をよく読んでください。チームは、電子医療記録に関する医療従事者のエクスペリエンスに関する定性的総合を実施しました。 45 件の研究が含まれ、主題分析が使用されました。",
+        followup: "<strong>Their process:</strong> Created 8 themes based on technology acceptance model before reading studies. Coded all data into these categories. Two researchers coded independently with 94% agreement. Final themes: 'perceived usefulness,' 'perceived ease of use,' 'social influence,' 'facilitating conditions,' 'behavioral intention,' 'actual use,' 'training adequacy,' 'management support.' They present these as their 'findings.'"
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "⚠️", title: "Case 3 continued: What's Wrong?",
+        xp: 45,
+        scenario: "上記の合成の説明に基づいて、主要な方法論的問題を特定します。",
+        question: "この合成における最も重大なエラーは何ですか?",
+        options: [
+          { letter: "A", text: "94% agreement is suspiciously high for qualitative coding", correct: false },
+          { letter: "B", text: "深く関与するには 45 件の研究が多すぎる可能性があります", correct: false },
+          { letter: "C", text: "Predetermined categories prevented data-driven theme development", correct: true },
+          { letter: "D", text: "テクノロジー受け入れモデルは適切ではありませんヘルスケア研究向け", correct: false }
+        ],
+        feedback: {
+          correct: "Correct! Using predetermined theoretical categories violates the inductive principle of thematic synthesis. The 'findings' were decided before reading the data. High inter-rater agreement confirms coders applied the same framework—but doesn't validate that framework's fit to data. This is theory imposition, not synthesis.",
+          incorrect: "根本的な間違いは、理論からデータに逆算することです。テーマ合成では、まず帰納的コーディングが必要です。つまり、データからテーマを浮かび上がらせます。事前に決定されたカテゴリを使用するということは、データが実際に示したものではなく、合成が設計されたものを見つけたことを意味します。"
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "🔗", title: "Case 4: Integration Challenge",
+        xp: 45,
+        scenario: "定量的証拠は、地域の医療従事者プログラムが妊産婦の転帰を改善することを示しています (グレード: 中)。定性的証拠は、CHW が深刻な燃え尽き症候群と役割の衝突を経験していることを示しています (CERQual: 高)。ガイドライン委員会は次のように尋ねます: 「CHW プログラムの規模を拡大することを推奨すべきか?」",
+        question: "推奨のために証拠をどのように統合する必要がありますか?",
+        options: [
+          { letter: "A", text: "規模拡大を推奨します—母親の結果が主な結果です", correct: false },
+          { letter: "B", text: "Recommend against scaling—workforce sustainability concerns override benefits", correct: false },
+          { letter: "C", text: "強制的な労働力サポートによる規模の拡大に関する条件付き推奨介入", correct: true },
+          { letter: "D", text: "Request more research before making any recommendation", correct: false }
+        ],
+        feedback: {
+          correct: "Correct! Integration means neither evidence type 'wins.' Programs improve outcomes (quantitative) but aren't sustainable without addressing CHW wellbeing (qualitative). The recommendation integrates both: scale up CHW programs, but implement workforce support as a condition. This honors both evidence streams.",
+          incorrect: "Integration isn't about choosing between evidence types. Both are valid: programs work (quantitative) AND create workforce problems (qualitative). Recommendations must address both—scaling with sustainability measures, not scaling without them or not scaling at all."
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "🧩", title: "Case 5: Coherence Assessment",
+        xp: 40,
+        scenario: "総合すると、「患者は治療決定への関与を望んでいる」ことがわかります。基礎的な研究は次のことを示しています: 4 つの研究 - 患者は完全な自律性を望んでいます。 3 つの研究 - 患者は共有された意思決定を望んでいます。 5 つの研究 - 患者は医師の指導を好みます。 2 つの研究 - 好みは病気の重症度によって異なります。",
+        question: "How should coherence be assessed?",
+        options: [
+          { letter: "A", text: "High coherence—all relate to decision involvement", correct: false },
+          { letter: "B", text: "Moderate coherence—variation exists but patterns are explainable", correct: false },
+          { letter: "C", text: "Low coherence—the finding conflates three distinct preferences", correct: true },
+          { letter: "D", text: "Cannot assess—studies use different terminology", correct: false }
+        ],
+        feedback: {
+          correct: "Correct! Full autonomy, shared decision-making, and physician guidance are conceptually distinct—not variations of 'involvement.' The synthesis forces incoherent data into a misleadingly unified finding. CERQual would require serious downgrade for coherence, or better: present these as three separate findings.",
+          incorrect: "これらは 1 つの好みのバリエーションではなく、意思決定への関与に関する 3 つの異なる好みです。 「関与を望んでいる」というのは非常に曖昧なので支離滅裂にはなりませんが、その曖昧さは有用性を破壊します。総合では、誤った統一性を強制するのではなく、明確な結果を提示する必要があります。"
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "📊", title: "Case 6: Adequacy Assessment",
+        xp: 40,
+        scenario: "A synthesis produces a complex conceptual model with 7 domains and 23 sub-themes describing 'the patient journey through cancer treatment.' The evidence base: 8 studies contributing brief quotes, with most data coming from author interpretations rather than participant voices.",
+        question: "What adequacy rating is appropriate?",
+        options: [
+          { letter: "A", text: "高 - 23 のサブテーマを含む 8 件の研究が包括的な範囲を示している", correct: false },
+          { letter: "B", text: "中 - 一部のテーマには十分だが、他のテーマには不十分", correct: false },
+          { letter: "C", text: "Low—finding complexity exceeds supporting data richness", correct: true },
+          { letter: "D", text: "非常に低い - 著者の解釈は有効な定性データではない", correct: false }
+        ],
+        feedback: {
+          correct: "正解! 23 のサブテーマ モデルには、その複雑さを正当化するために豊富で深いデータが必要です。短い引用や著者の解釈では、そのような精緻な概念構造をサポートすることはできません。この調査結果は、データが確実に裏付けることができるものを超えており、十分性に関する重大な懸念があり、低評価が正当化されます。",
+          incorrect: "適切性は、データの豊富さが発見の複雑さと一致するかどうかを評価します。短い引用と受け売り解釈による 23 のサブテーマは、過剰解釈を表しています。モデルはエレガントかもしれませんが、データ基盤が薄すぎて自信を持ってサポートできません。"
+        }
+      }},
+      { type: "story", theme: "green-bg", content: {
+        label: "Reflection", title: "定性的合成の芸術と科学",
+        text: "これで、定性的証拠合成コースが完了しました。 CERQual を使用して信頼性を評価し、適切な合成方法を選択し、定性的証拠を定量的証拠と統合することができます。",
+        followup: "Remember: qualitative synthesis is both art and science. The frameworks (CERQual, thematic synthesis, meta-ethnography) provide structure, but judgment remains essential. No checklist replaces thoughtful engagement with the evidence. Your role is to make complex qualitative evidence useful for decisions—while honestly representing its strengths and limitations."
+      }},
+      { type: "quiz", theme: "dark", content: {
+        question: "What is the fundamental purpose of GRADE-CERQual?",
+        options: [
+          { text: "定量的証拠と同じくらい厳密な定性的証拠を作成するには", correct: false },
+          { text: "意思決定のための定性的レビュー結果の信頼性を評価するには", correct: true },
+          { text: "体系的な研究から低品質の定性的研究を除外するにはレビュー", correct: false },
+          { text: "To convert qualitative findings into numerical ratings", correct: false }
+        ],
+        xp: 25,
+        feedback: {
+          correct: "Exactly. CERQual doesn't judge qualitative evidence against quantitative standards—it assesses confidence that qualitative review findings are a reasonable representation of the phenomenon. This confidence rating helps guideline panels appropriately weight qualitative evidence alongside other evidence types.",
+          incorrect: "CERQual doesn't exclude studies or create numerical conversions. It provides a systematic approach to asking: how confident can we be that this qualitative synthesis finding is trustworthy? This supports transparent, accountable use of qualitative evidence in guidelines."
+        }
+      }},
+      { type: "quiz", theme: "dark", content: {
+        question: "定量的証拠の確実性が高い場合でも、定性的証拠が推奨事項に影響を与えるのはどのような場合ですか?",
+        options: [
+          { text: "Never—quantitative evidence determines recommendations", correct: false },
+          { text: "定性的証拠により、現実世界の有効性に影響を与える実装の障壁や患者の価値観が特定される場合", correct: true },
+          { text: "Only when quantitative evidence shows harm", correct: false },
+          { text: "When qualitative evidence contradicts quantitative findings", correct: false }
+        ],
+        xp: 25,
+        feedback: {
+          correct: "その通りです。確実性の高い定量的証拠は、介入が効果があることを示しています。定性的証拠は、実装の障壁、患者の価値観、受け入れ可能性の懸念、実現可能性の問題を明らかにすることで、それが実際に機能するかどうかを示します。どちらも推奨事項のさまざまな側面を伝えます。",
+          incorrect: "Qualitative and quantitative evidence answer different questions. Quantitative addresses efficacy; qualitative addresses values, feasibility, and real-world conditions. Recommendations must consider both, regardless of certainty levels. An efficacious intervention patients won't use isn't effective."
+        }
+      }},
+      { type: "takeaways", theme: "green-bg", content: {
+        title: "コース完了: これで QES プラクティショナーになりました",
+        items: [
+          "現実世界への影響に定性的証拠が不可欠である理由を理解しました",
+          "You can apply GRADE-CERQual (MCAR) to assess confidence in qualitative findings",
+          "テーマ別統合とメタエスノグラフィーのどちらを選択するかを理解しました",
+          "定性的証拠と定量的証拠を統合できますガイドラインについて",
+          "あなたは定性合成における品質マーカーと一般的なエラーを認識しています"
+        ],
+        remember: "世界は、数値と物語の両方を理解する証拠合成者を必要としています。これで、そのギャップを埋める準備が整いました。"
+      }},
+      { type: "story", theme: "gold-bg", content: {
+        label: "Your Journey", title: "初心者から QES マスターまで",
+        text: "You began this course understanding that RCTs measure efficacy. You now understand that <strong>qualitative evidence explains why interventions succeed or fail</strong> in real contexts, with real people, facing real barriers.",
+        followup: "Whether you're conducting systematic reviews, developing clinical guidelines, or evaluating programs, you now have the tools to ensure qualitative evidence gets the rigorous treatment it deserves. Go forth and synthesize—the patients whose voices fill qualitative studies are counting on you to make their experiences matter in healthcare decisions."
+      }}
+    ]
+  }
+];
+
+// ===== NAVIGATION STATE =====
+let currentModule = 0;
+let currentSlide = 0;
+let consecutiveCorrect = 0;
+
+// ===== SAVE/LOAD =====
+function saveGame() {
+  safeSetStorage('qesGame', gameState);
+}
+
+function resetProgress() {
+  if (confirm('Reset all progress and achievements?')) {
+    gameState = { ...DEFAULT_STATE, answeredQuestions: {}, badges: [], completedModules: [], perfectModules: [] };
+    saveGame();
+    currentModule = 0;
+    currentSlide = 0;
+    renderAll();
+  }
+}
+
+// ===== COURSE PROGRESS =====
+function updateCourseProgress() {
+  const totalModules = MODULES.length;
+  const completedCount = gameState.completedModules.length;
+  const pct = Math.round((completedCount / totalModules) * 100);
+  const fillEl = document.getElementById('courseProgressFill');
+  const pctEl = document.getElementById('courseProgressPct');
+  if (fillEl) fillEl.style.width = pct + '%';
+  if (pctEl) pctEl.textContent = pct + '%';
+}
+
+// ===== XP & LEVELING =====
+function addXP(amount) {
+  gameState.xp += amount;
+  checkLevelUp();
+  saveGame();
+  updateStatsDisplay();
+  showXPPopup(amount);
+}
+
+function checkLevelUp() {
+  for (let i = LEVELS.length - 1; i >= 0; i--) {
+    if (gameState.xp >= LEVELS[i].xp && gameState.level < LEVELS[i].level) {
+      gameState.level = LEVELS[i].level;
+      showLevelUp(LEVELS[i]);
+      break;
+    }
+  }
+}
+
+function showXPPopup(amount) {
+  const popup = document.getElementById('xpPopup');
+  document.getElementById('xpAmount').textContent = `+${amount}`;
+  popup.classList.add('show');
+  setTimeout(() => popup.classList.remove('show'), 1500);
+}
+
+function showLevelUp(levelData) {
+  triggerConfetti();
+}
+
+// ===== BADGES =====
+function awardBadge(badgeId) {
+  if (gameState.badges.includes(badgeId)) return;
+  gameState.badges.push(badgeId);
+  saveGame();
+  const badge = BADGES.find(b => b.id === badgeId);
+  if (badge) showBadgeModal(badge);
+  updateBadges();
+}
+
+function showBadgeModal(badge) {
+  // Save current focus for restoration
+  window.lastFocusedElement = document.activeElement;
+  document.getElementById('badgeModalIcon').textContent = badge.icon;
+  document.getElementById('badgeModalTitle').textContent = badge.name;
+  document.getElementById('badgeModalDesc').textContent = badge.desc;
+  document.getElementById('badgeModal').classList.add('show');
+  triggerConfetti();
+  // Focus the close button for accessibility
+  setTimeout(() => {
+    document.querySelector('.badge-modal-close').focus();
+  }, 100);
+}
+
+function closeBadgeModal() {
+  document.getElementById('badgeModal').classList.remove('show');
+  // Restore focus to main content
+  if (window.lastFocusedElement) {
+    window.lastFocusedElement.focus();
+  }
+}
+
+// Focus trap for badge modal
+document.addEventListener('keydown', (e) => {
+  const modal = document.getElementById('badgeModal');
+  if (!modal.classList.contains('show')) return;
+
+  if (e.key === 'Tab') {
+    const closeBtn = modal.querySelector('.badge-modal-close');
+    // Keep focus on the close button
+    if (document.activeElement !== closeBtn) {
+      e.preventDefault();
+      closeBtn.focus();
+    }
+  }
+});
+
+// ===== STREAK =====
+function updateStreak() {
+  const today = new Date().toDateString();
+  if (gameState.lastActive !== today) {
+    const yesterday = new Date(Date.now() - 86400000).toDateString();
+    if (gameState.lastActive === yesterday) {
+      gameState.streak++;
+      if (gameState.streak >= 3) awardBadge('streak_3');
+      if (gameState.streak >= 7) awardBadge('streak_7');
+    } else if (gameState.lastActive) {
+      gameState.streak = 1;
+    } else {
+      gameState.streak = 1;
+    }
+    gameState.lastActive = today;
+    saveGame();
+  }
+}
+
+// ===== CONFETTI =====
+function triggerConfetti() {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const container = document.getElementById('confettiContainer');
+  const colors = ['#D4AF37', '#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#0f766e'];
+  for (let i = 0; i < 50; i++) {
+    const confetti = document.createElement('div');
+    confetti.className = 'confetti';
+    confetti.style.left = Math.random() * 100 + '%';
+    confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+    confetti.style.animationDelay = Math.random() * 0.5 + 's';
+    container.appendChild(confetti);
+    setTimeout(() => confetti.remove(), 3500);
+  }
+}
+
+// ===== COMBO =====
+function updateComboDisplay() {
+  const comboEl = document.getElementById('comboDisplay');
+  const countEl = document.getElementById('comboCount');
+  if (consecutiveCorrect >= 2) {
+    countEl.textContent = consecutiveCorrect;
+    comboEl.classList.add('show');
+  } else {
+    comboEl.classList.remove('show');
+  }
+}
+
+// ===== MOBILE SIDEBAR =====
+function toggleSidebar() {
+  document.querySelector('.sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('show');
+  var btn = document.querySelector('.sidebar-toggle, .hamburger, .mobile-menu-btn'); if (btn) btn.setAttribute('aria-expanded', btn.getAttribute('aria-expanded') === 'true' ? 'false' : 'true');
+}
+
+// ===== RENDER =====
+function renderAll() {
+  // Restore consecutiveCorrect from saved state
+  consecutiveCorrect = gameState.consecutiveCorrect || 0;
+  updateStreak();
+  renderSidebar();
+  renderSlides();
+  updateStatsDisplay();
+  updateBadges();
+  updateCourseProgress();
+}
+
+function updateStatsDisplay() {
+  const levelData = LEVELS.find(l => l.level === gameState.level) || LEVELS[0];
+  const nextLevel = LEVELS.find(l => l.level === gameState.level + 1);
+
+  document.getElementById('levelIcon').textContent = levelData.icon;
+  document.getElementById('levelTitle').textContent = levelData.title;
+  document.getElementById('levelNum').textContent = gameState.level;
+
+  const currentXP = gameState.xp - levelData.xp;
+  const neededXP = nextLevel ? (nextLevel.xp - levelData.xp) : 500;
+  const pct = Math.min(100, (currentXP / neededXP) * 100);
+
+  document.getElementById('xpFill').style.width = pct + '%';
+  document.getElementById('xpCurrent').textContent = currentXP;
+  document.getElementById('xpNeeded').textContent = neededXP;
+
+  document.getElementById('correctCount').textContent = gameState.correctAnswers;
+  document.getElementById('decisionCount').textContent = gameState.decisionsCompleted;
+  document.getElementById('synthesisCount').textContent = gameState.synthesisCount || 0;
+  document.getElementById('streakCount').textContent = gameState.streak;
+
+  const streakEl = document.getElementById('streakDisplay');
+  streakEl.classList.toggle('active', gameState.streak > 0);
+}
+
+function updateBadges() {
+  const grid = document.getElementById('badgesGrid');
+  grid.innerHTML = BADGES.map(b => {
+    const earned = gameState.badges.includes(b.id);
+    return `<div class="badge-item ${earned ? 'earned' : ''}" data-tooltip="${b.name}: ${b.desc}">${b.icon}</div>`;
+  }).join('');
+}
+
+function renderSidebar() {
+  const list = document.getElementById('moduleList');
+  list.innerHTML = MODULES.map((mod, i) => {
+    const completed = gameState.completedModules.includes(mod.id);
+    const locked = i > 0 && !gameState.completedModules.includes(MODULES[i-1].id);
+    const estMins = Math.round(mod.slides.length * 1.5);
+    const isActive = i === currentModule;
+    return `
+      <div class="module-item ${isActive ? 'active' : ''} ${completed ? 'completed' : ''} ${locked ? 'locked' : ''}"
+           onclick="${locked ? '' : `goToModule(${i})`}"
+           tabindex="${locked ? -1 : 0}"
+           role="button"
+           ${isActive ? 'aria-current="true"' : ''}>
+        <div class="module-number">${completed ? '✓' : (locked ? '🔒' : mod.id)}</div>
+        <div class="module-info">
+          <div class="module-title">${mod.title}</div>
+          <div class="module-subtitle">${mod.subtitle}</div>
+          <div class="module-xp">+${mod.xp} XP</div>
+          <div class="module-time">~${estMins} min</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderSlides() {
+  const container = document.getElementById('slidesContainer');
+  container.innerHTML = MODULES.map((mod, mi) => {
+    const progressPct = ((currentSlide + 1) / mod.slides.length) * 100;
+    return `
+    <div class="module-slides ${mi === currentModule ? 'active' : ''}" data-module="${mi}">
+      <div class="slide-progress-bar" style="width: ${mi === currentModule ? progressPct : 0}%"></div>
+      ${mod.slides.map((slide, si) => renderSlide(slide, si, mi)).join('')}
+      <div class="slide-nav">
+        <button class="nav-btn" onclick="prevSlide()" ${currentSlide === 0 ? 'disabled' : ''} aria-label="Previous slide">←</button>
+        <div class="nav-center">
+          <div class="slide-counter">${currentSlide + 1} / ${mod.slides.length}</div>
+          <div class="progress-dots">
+            ${mod.slides.map((_, i) => `<div class="progress-dot ${i === currentSlide ? 'active' : ''}" onclick="goToSlide(${i})"></div>`).join('')}
+          </div>
+        </div>
+        <button class="nav-btn" onclick="nextSlide()" aria-label="Next slide">→</button>
+      </div>
+      <div class="keyboard-hint" style="position:absolute;bottom:5px;left:50%;transform:translateX(-50%);font-size:0.6rem;opacity:0.4;">← → arrows or swipe to navigate</div>
+    </div>
+  `;
+  }).join('');
+  document.getElementById('currentModule').textContent = MODULES[currentModule].title;
+  updateSlideVisibility();
+}
+
+function renderSlide(slide, index, moduleIndex) {
+  const theme = slide.theme || 'dark';
+  let html = `<div class="slide ${theme} ${index === currentSlide ? 'active' : ''}" data-slide="${index}">`;
+
+  switch(slide.type) {
+    case 'title':
+      html += `<div class="content"><h1 class="title gold animate">${slide.content.title}</h1><p class="subtitle animate delay-1">${slide.content.subtitle}</p></div>`;
+      break;
+
+    case 'objectives':
+      html += `<div class="content">
+        <div class="objectives-box animate">
+          <div class="objectives-header">
+            <div class="objectives-icon">🎯</div>
+            <div class="objectives-title">Learning Objectives</div>
+          </div>
+          <ul class="objectives-list">
+            ${slide.content.objectives.map(obj => `<li>${obj}</li>`).join('')}
+          </ul>
+        </div>
+        ${slide.content.tip ? `<p class="subtitle animate delay-1" style="font-size:0.85rem;max-width:600px">${slide.content.tip}</p>` : ''}
+      </div>`;
+      break;
+
+    case 'story':
+      html += `<div class="content">
+        <article class="story-box ${slide.content.success ? 'success' : ''} ${slide.content.warning ? 'warning' : ''} ${slide.content.teal ? 'teal' : ''} animate" role="article">
+          <div class="story-label">${slide.content.label}</div>
+          ${slide.content.title ? `<h2 class="title gold" style="font-size:1.8rem;margin-bottom:0.75rem">${slide.content.title}</h2>` : ''}
+          <p class="story-text">${slide.content.text}</p>
+          ${slide.content.followup ? `<p class="story-text" style="margin-top:0.75rem;font-style:italic;opacity:0.9">${slide.content.followup}</p>` : ''}
+        </article>
+      </div>`;
+      break;
+
+    case 'stats':
+      html += `<div class="content">
+        ${slide.content.title ? `<h2 class="title gold animate">${slide.content.title}</h2>` : ''}
+        ${slide.content.subtitle ? `<p class="subtitle animate delay-1">${slide.content.subtitle}</p>` : ''}
+        <div class="stats-grid animate delay-2">
+          ${slide.content.stats.map(s => `<div class="stat-box"><div class="stat-value gold">${s.value}</div><div class="stat-label">${s.label}</div></div>`).join('')}
+        </div>
+        ${slide.content.caption ? `<p class="subtitle animate delay-3" style="font-size:0.85rem;margin-top:0.75rem">${slide.content.caption}</p>` : ''}
+      </div>`;
+      break;
+
+    case 'refrain':
+      html += `<div class="content" style="justify-content:center;height:100%"><p class="refrain animate">"${slide.content.text}"</p></div>`;
+      break;
+
+    case 'concept':
+      html += `<div class="content">
+        <h2 class="title ${theme === 'light' ? 'navy' : 'gold'} animate">${slide.content.title}</h2>
+        ${slide.content.subtitle ? `<p class="subtitle animate delay-1">${slide.content.subtitle}</p>` : ''}
+        ${slide.content.text ? `<div class="card ${theme === 'light' ? '' : 'navy-bg'} animate delay-2"><p class="card-text">${slide.content.text}</p></div>` : ''}
+        ${slide.content.highlight ? `<div class="story-box warning animate delay-3"><div class="story-label">Key Insight</div><p class="story-text">${slide.content.highlight}</p></div>` : ''}
+        ${slide.content.checkpoints ? `
+          <div class="timeline animate delay-2" style="margin-top:0.75rem">
+            ${slide.content.checkpoints.map(cp => `
+              <div class="timeline-item"><div class="timeline-days">${cp.day}</div><div class="timeline-content"><div class="timeline-title">${cp.event}</div></div></div>
+            `).join('')}
+          </div>
+        ` : ''}
+      </div>`;
+      break;
+
+    case 'checklist':
+      html += `<div class="content">
+        <h2 class="title gold animate">${slide.content.title}</h2>
+        <div class="checklist animate delay-1">
+          ${slide.content.items.map(item => `
+            <div class="checklist-item">
+              <div class="check-icon">✓</div>
+              <div class="checklist-text">${item}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>`;
+      break;
+
+    case 'decision':
+      const did = `dec_${moduleIndex}_${index}`;
+      const answered = gameState.answeredQuestions[did];
+      html += `<div class="content">
+        <div class="decision-tree animate">
+          <div class="decision-header">
+            <div class="decision-icon">${slide.content.icon}</div>
+            <div class="decision-title">${slide.content.title}</div>
+            <div class="decision-xp">+${slide.content.xp} XP</div>
+          </div>
+          <div class="decision-scenario">${slide.content.scenario}</div>
+          <div class="decision-question">${slide.content.question}</div>
+          <div class="decision-options">
+            ${slide.content.options.map(opt => {
+              const isSelected = answered === opt.letter;
+              const showCorrect = answered && opt.correct;
+              const showIncorrect = answered && isSelected && !opt.correct;
+              return `
+                <div class="decision-option ${isSelected ? 'selected' : ''} ${showCorrect ? 'correct' : ''} ${showIncorrect ? 'incorrect' : ''} ${answered ? 'disabled' : ''}"
+                     onclick="answerDecision('${did}', '${opt.letter}', ${opt.correct}, ${slide.content.xp})"
+                     tabindex="${answered ? '-1' : '0'}"
+                     role="button"
+                     ${answered ? 'aria-disabled="true"' : ''}>
+                  <div class="option-letter">${opt.letter}</div>
+                  <div class="option-text">${opt.text}</div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+          <div class="decision-feedback ${answered ? 'show' : ''} ${answered && slide.content.options.find(o => o.letter === answered)?.correct ? 'correct' : 'incorrect'}" role="alert" aria-live="polite">
+            <div class="feedback-title">${answered && slide.content.options.find(o => o.letter === answered)?.correct ? '✓ Correct!' : '✗ Not quite'}</div>
+            <div class="feedback-text">${answered && slide.content.options.find(o => o.letter === answered)?.correct ? slide.content.feedback.correct : slide.content.feedback.incorrect}</div>
+          </div>
+        </div>
+      </div>`;
+      break;
+
+    case 'quiz':
+      const qid = `quiz_${moduleIndex}_${index}`;
+      const qAnswered = gameState.answeredQuestions[qid];
+      html += `<div class="content">
+        <div class="quiz-container animate">
+          <div class="quiz-question">${slide.content.question}</div>
+          <div class="quiz-options">
+            ${slide.content.options.map((opt, oi) => {
+              const isSelected = qAnswered === oi;
+              const showCorrect = qAnswered !== undefined && opt.correct;
+              const showIncorrect = qAnswered !== undefined && isSelected && !opt.correct;
+              return `
+                <div class="quiz-option ${showCorrect ? 'correct' : ''} ${showIncorrect ? 'incorrect' : ''} ${qAnswered !== undefined ? 'disabled' : ''}"
+                     onclick="answerQuiz('${qid}', ${oi}, ${opt.correct}, ${slide.content.xp})"
+                     tabindex="${qAnswered !== undefined ? '-1' : '0'}"
+                     role="button"
+                     ${qAnswered !== undefined ? 'aria-disabled="true"' : ''}>
+                  ${opt.text}
+                </div>
+              `;
+            }).join('')}
+          </div>
+          <div class="quiz-feedback ${qAnswered !== undefined ? 'show' : ''} ${qAnswered !== undefined && slide.content.options[qAnswered]?.correct ? 'correct' : 'incorrect'}" role="alert" aria-live="polite">
+            ${qAnswered !== undefined && slide.content.options[qAnswered]?.correct ? slide.content.feedback.correct : slide.content.feedback.incorrect}
+          </div>
+        </div>
+      </div>`;
+      break;
+
+    case 'takeaways':
+      html += `<div class="content">
+        <div class="takeaways-container animate" role="region" aria-labelledby="takeaways-title-${moduleIndex}-${index}">
+          <div class="takeaways-icon" aria-hidden="true">📌</div>
+          <div class="takeaways-title" id="takeaways-title-${moduleIndex}-${index}">${slide.content.title || 'Key Takeaways'}</div>
+          <div class="takeaways-list">
+            ${slide.content.items.map(item => `
+              <div class="takeaway-item">
+                <div class="takeaway-bullet">✓</div>
+                <div class="takeaway-text">${item}</div>
+              </div>
+            `).join('')}
+          </div>
+          ${slide.content.remember ? `<div class="takeaways-remember"><strong>Remember:</strong> ${slide.content.remember}</div>` : ''}
+        </div>
+      </div>`;
+      break;
+  }
+
+  html += '</div>';
+  return html;
+}
+
+function updateSlideVisibility() {
+  const container = document.querySelector('.module-slides.active');
+  if (!container) return;
+
+  container.querySelectorAll('.slide').forEach((slide, i) => {
+    slide.classList.toggle('active', i === currentSlide);
+  });
+
+  const progressBar = container.querySelector('.slide-progress-bar');
+  if (progressBar) {
+    const pct = ((currentSlide + 1) / MODULES[currentModule].slides.length) * 100;
+    progressBar.style.width = pct + '%';
+  }
+
+  container.querySelector('.slide-counter').textContent = `${currentSlide + 1} / ${MODULES[currentModule].slides.length}`;
+  container.querySelectorAll('.progress-dot').forEach((dot, i) => {
+    dot.classList.toggle('active', i === currentSlide);
+  });
+  container.querySelector('.nav-btn').disabled = currentSlide === 0;
+}
+
+// ===== ANSWERS =====
+function answerDecision(did, letter, correct, xp) {
+  if (gameState.answeredQuestions[did] !== undefined) return;
+  gameState.answeredQuestions[did] = letter;
+  gameState.decisionsCompleted++;
+  gameState.synthesisCount = (gameState.synthesisCount || 0) + 1;
+
+  if (gameState.decisionsCompleted === 1) awardBadge('first_synthesis');
+  if (gameState.synthesisCount >= 10) awardBadge('voice_of_ten');
+
+  if (correct) {
+    gameState.correctAnswers++;
+    consecutiveCorrect++;
+    gameState.consecutiveCorrect = consecutiveCorrect;
+    addXP(xp);
+    if (consecutiveCorrect >= 5) awardBadge('perfect_5');
+    if (gameState.decisionsCompleted >= 15) awardBadge('decision_maker');
+  } else {
+    consecutiveCorrect = 0;
+    gameState.consecutiveCorrect = 0;
+  }
+  saveGame();
+  renderSlides();
+  updateComboDisplay();
+  updateStatsDisplay();
+}
+
+function answerQuiz(qid, choice, correct, xp) {
+  if (gameState.answeredQuestions[qid] !== undefined) return;
+  gameState.answeredQuestions[qid] = choice;
+
+  if (correct) {
+    gameState.correctAnswers++;
+    consecutiveCorrect++;
+    gameState.consecutiveCorrect = consecutiveCorrect;
+    addXP(xp);
+    if (consecutiveCorrect >= 5) awardBadge('perfect_5');
+  } else {
+    consecutiveCorrect = 0;
+    gameState.consecutiveCorrect = 0;
+  }
+  saveGame();
+  renderSlides();
+  updateComboDisplay();
+  updateStatsDisplay();
+}
+
+// ===== NAVIGATION =====
+function goToModule(index) {
+  if (index > 0 && !gameState.completedModules.includes(MODULES[index-1].id)) return;
+  currentModule = index;
+  currentSlide = 0;
+  renderSlides();
+  renderSidebar();
+}
+
+function goToSlide(index) {
+  currentSlide = index;
+  updateSlideVisibility();
+}
+
+function nextSlide() {
+  const mod = MODULES[currentModule];
+  if (currentSlide < mod.slides.length - 1) {
+    currentSlide++;
+    updateSlideVisibility();
+  } else {
+    completeModule();
+  }
+}
+
+function prevSlide() {
+  if (currentSlide > 0) {
+    currentSlide--;
+    updateSlideVisibility();
+  }
+}
+
+function completeModule() {
+  const mod = MODULES[currentModule];
+  if (!gameState.completedModules.includes(mod.id)) {
+    gameState.completedModules.push(mod.id);
+    addXP(mod.xp);
+
+    // Check for perfect module (all answers correct in this module)
+    // Use regex to precisely match module index to avoid _1_ matching _10_
+    const modulePattern = new RegExp(`^(dec|quiz)_${currentModule}_\\d+$`);
+    const moduleQuestions = Object.keys(gameState.answeredQuestions).filter(k =>
+      modulePattern.test(k)
+    );
+    if (moduleQuestions.length > 0) {
+      const allCorrect = moduleQuestions.every(qid => {
+        const slideIndex = parseInt(qid.split('_')[2]);
+        const slide = mod.slides[slideIndex];
+        if (!slide || (slide.type !== 'decision' && slide.type !== 'quiz')) return true;
+        const answer = gameState.answeredQuestions[qid];
+        if (slide.type === 'decision') {
+          return slide.content.options.find(o => o.letter === answer)?.correct;
+        } else {
+          return slide.content.options[answer]?.correct;
+        }
+      });
+      if (allCorrect && !gameState.perfectModules.includes(mod.id)) {
+        gameState.perfectModules.push(mod.id);
+        awardBadge('perfect_module');
+      }
+    }
+
+    // Module-specific badges
+    if (mod.id === 1) awardBadge('qual_curious');
+    if (mod.id === 2) awardBadge('cerqual_initiate');
+    if (mod.id === 3) awardBadge('method_master');
+    if (mod.id === 4) awardBadge('coherence_king');
+    if (mod.id === 5) awardBadge('adequacy_ace');
+    if (mod.id === 6) awardBadge('relevance_ranger');
+    if (mod.id === 7) awardBadge('thematic_thinker');
+    if (mod.id === 8) awardBadge('ethnographer');
+    if (mod.id === 9) awardBadge('integrator');
+    if (mod.id === 10) awardBadge('qes_master');
+
+    // Milestone badges
+    if (gameState.completedModules.length >= 5) awardBadge('halfway_hero');
+    if (gameState.completedModules.length === MODULES.length) awardBadge('finisher');
+
+    saveGame();
+    triggerConfetti();
+    updateCourseProgress();
+  }
+
+  if (currentModule < MODULES.length - 1) {
+    goToModule(currentModule + 1);
+  }
+}
+
+// ===== KEYBOARD =====
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    document.getElementById('badgeModal').classList.remove('show');
+    document.querySelector('.sidebar').classList.remove('open');
+    document.getElementById('sidebarOverlay').classList.remove('show');
+    return;
+  }
+  if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextSlide(); }
+  else if (e.key === 'ArrowLeft') { e.preventDefault(); prevSlide(); }
+});
+
+document.addEventListener('keydown', (e) => {
+  if ((e.target.classList.contains('module-item') || e.target.classList.contains('decision-option') || e.target.classList.contains('quiz-option')) && e.key === 'Enter') {
+    e.target.click();
+  }
+});
+
+// ===== TOUCH =====
+let touchStartX = 0;
+document.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
+document.addEventListener('touchend', (e) => {
+  const diff = touchStartX - e.changedTouches[0].screenX;
+  if (Math.abs(diff) > 50) { diff > 0 ? nextSlide() : prevSlide(); }
+}, { passive: true });
+
+// ===== INIT =====
+renderAll();
+</script>
+</body>
+</html>

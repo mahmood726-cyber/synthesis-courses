@@ -1,0 +1,1439 @@
+HTML
+<html lang="fr">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>GRADE : L'Art d'Évaluer les Preuves</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&amp;family=Source+Sans+Pro:wght@300;400;600;700&amp;display=swap" rel="stylesheet"/>
+<style>
+    :root {
+      --navy: #1E2761;
+      --deep-navy: #141B3D;
+      --gold: #D4AF37;
+      --cream: #FAF8F5;
+      --light-cream: #FFFFFF;
+      --text: #2D3748;
+      --light-text: #718096;
+      --red: #C53030;
+      --green: #22c55e;
+      --teal: #0f766e;
+      --purple: #7c3aed;
+      --orange: #f59e0b;
+      --transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      height: 100%;
+      font-family: 'Source Sans Pro', sans-serif;
+      background: var(--deep-navy);
+      color: var(--cream);
+    }
+
+    .course-container { display: flex; height: 100vh; overflow: hidden; }
+
+    .skip-link {
+      position: absolute;
+      top: -40px;
+      left: 0;
+      background: var(--gold);
+      color: var(--navy);
+      padding: 8px 16px;
+      z-index: 10000;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .skip-link:focus { top: 0; }
+
+    .sidebar {
+      width: 300px;
+      background: linear-gradient(180deg, var(--deep-navy) 0%, #0a0f1a 100%);
+      border-right: 1px solid rgba(212,175,55,0.2);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    .sidebar-header {
+      padding: 1.25rem;
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+      text-align: center;
+    }
+    .sidebar-header h1 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--gold);
+    }
+    .sidebar-header p {
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.6);
+    }
+
+    .stats-panel {
+      padding: 1rem;
+      background: rgba(212,175,55,0.1);
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+    }
+    .level-display {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+    .level-badge {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, var(--gold), #f0c040);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      box-shadow: 0 2px 8px rgba(212,175,55,0.4);
+    }
+    .level-info { flex: 1; }
+    .level-title { font-weight: 700; font-size: 0.9rem; color: var(--gold); }
+    .level-subtitle { font-size: 0.7rem; color: rgba(255,255,255,0.6); }
+    .xp-bar {
+      height: 8px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 0.5rem;
+    }
+    .xp-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--gold), var(--orange));
+      border-radius: 4px;
+      transition: width 0.5s ease;
+    }
+    .xp-text {
+      font-size: 0.65rem;
+      color: rgba(255,255,255,0.5);
+      text-align: right;
+      margin-top: 0.25rem;
+    }
+    .quick-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+    }
+    .quick-stat {
+      background: rgba(0,0,0,0.2);
+      padding: 0.5rem;
+      border-radius: 6px;
+      text-align: center;
+    }
+    .quick-stat-value {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--gold);
+    }
+    .quick-stat-label {
+      font-size: 0.6rem;
+      color: rgba(255,255,255,0.5);
+    }
+
+    .course-progress {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+      background: rgba(0,0,0,0.2);
+    }
+    .course-progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.6);
+      margin-bottom: 0.35rem;
+    }
+    .course-progress-bar {
+      height: 6px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .course-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--green), #22d3ee);
+      border-radius: 3px;
+      transition: width 0.5s ease;
+    }
+
+    .module-list { flex: 1; overflow-y: auto; padding: 0.5rem 0; }
+    .module-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.6rem 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      border-left: 3px solid transparent;
+    }
+    .module-item:hover { background: rgba(212,175,55,0.1); }
+    .module-item.active { background: rgba(212,175,55,0.15); border-left-color: var(--gold); }
+    .module-item.completed .module-number { background: var(--green); color: white; }
+    .module-item.locked { opacity: 0.5; cursor: not-allowed; }
+    .module-number {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .module-item.active .module-number { background: var(--gold); color: var(--navy); }
+    .module-info { flex: 1; min-width: 0; }
+    .module-title { font-size: 0.8rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .module-subtitle { font-size: 0.65rem; color: rgba(255,255,255,0.5); }
+    .module-xp { font-size: 0.6rem; color: var(--gold); }
+    .module-time { font-size: 0.55rem; color: rgba(255,255,255,0.4); display: flex; align-items: center; gap: 0.25rem; margin-top: 0.15rem; }
+
+    .badges-panel {
+      padding: 1rem;
+      border-top: 1px solid rgba(212,175,55,0.2);
+    }
+    .badges-title { font-size: 0.75rem; font-weight: 600; color: var(--gold); margin-bottom: 0.5rem; }
+    .badges-grid { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+    .badge-item {
+      width: 32px;
+      height: 32px;
+      background: rgba(255,255,255,0.05);
+      border: 2px solid rgba(255,255,255,0.1);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      opacity: 0.3;
+      transition: all 0.3s;
+      cursor: help;
+      position: relative;
+    }
+    .badge-item.earned { opacity: 1; background: rgba(212,175,55,0.2); border-color: var(--gold); }
+    .badge-item:hover::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--navy);
+      color: white;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.6rem;
+      white-space: nowrap;
+      z-index: 100;
+    }
+
+    .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .content-header {
+      padding: 0.75rem 1.5rem;
+      background: rgba(0,0,0,0.3);
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .breadcrumb { font-size: 0.85rem; color: rgba(255,255,255,0.6); }
+    .breadcrumb span { color: var(--gold); }
+    .header-actions { display: flex; gap: 0.5rem; align-items: center; }
+    .streak-display {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: rgba(239,68,68,0.2);
+      border: 1px solid rgba(239,68,68,0.4);
+      padding: 0.35rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+    }
+    .streak-display.active { background: rgba(249,115,22,0.2); border-color: var(--orange); }
+    .streak-flame { font-size: 1rem; }
+    .streak-count { font-weight: 700; color: var(--orange); }
+
+    .btn {
+      padding: 0.5rem 1rem;
+      border: 1px solid rgba(212,175,55,0.3);
+      border-radius: 6px;
+      background: rgba(255,255,255,0.05);
+      color: var(--cream);
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn:hover { background: rgba(212,175,55,0.2); border-color: var(--gold); }
+    .btn.primary { background: var(--gold); color: var(--navy); border-color: var(--gold); font-weight: 600; }
+
+    .content-body { flex: 1; overflow: hidden; display: flex; }
+
+    .slides-container { flex: 1; position: relative; overflow: hidden; }
+    .module-slides { display: none; width: 100%; height: 100%; }
+    .module-slides.active { display: block; }
+
+    .slide {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      padding: 2rem 2rem 4rem;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity var(--transition), visibility var(--transition);
+      overflow-y: auto;
+    }
+    .slide.active { opacity: 1; visibility: visible; }
+    .slide.dark { background: var(--deep-navy); }
+    .slide.light { background: var(--cream); color: var(--text); }
+    .slide.black { background: #000; }
+    .slide.red-bg { background: linear-gradient(135deg, #7f1d1d, #450a0a); }
+    .slide.green-bg { background: linear-gradient(135deg, #14532d, #052e16); }
+    .slide.purple-bg { background: linear-gradient(135deg, #4c1d95, #2e1065); }
+    .slide.orange-bg { background: linear-gradient(135deg, #9a3412, #431407); }
+
+    .slide-progress-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--gold), var(--orange));
+      transition: width 0.3s ease;
+      z-index: 50;
+    }
+
+    .serif { font-family: 'Cormorant Garamond', Georgia, serif; }
+    .title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      font-weight: 700;
+      margin-bottom: 1rem;
+      line-height: 1.2;
+      text-align: center;
+    }
+    .title.gold { color: var(--gold); }
+    .title.navy { color: var(--navy); }
+    .subtitle {
+      font-size: clamp(0.9rem, 2vw, 1.3rem);
+      color: rgba(255,255,255,0.7);
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .slide.light .subtitle { color: var(--light-text); }
+
+    .big-number {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(4rem, 12vw, 8rem);
+      font-weight: 700;
+      line-height: 1;
+    }
+    .big-number.gold { color: var(--gold); }
+    .big-number.red { color: var(--red); }
+
+    .refrain {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(1.3rem, 3vw, 2rem);
+      font-style: italic;
+      color: var(--gold);
+      text-align: center;
+      max-width: 700px;
+    }
+
+    .content { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 850px; }
+
+    .card {
+      background: var(--light-cream);
+      border: 1px solid var(--gold);
+      padding: 1.25rem 1.5rem;
+      margin: 0.5rem 0;
+      max-width: 750px;
+      width: 100%;
+      border-radius: 8px;
+    }
+    .card.navy-bg { background: var(--navy); color: var(--cream); }
+    .card.red-border { border: 2px solid var(--red); }
+    .card.green-border { border: 2px solid var(--green); }
+    .card-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 0.05em;
+      margin-bottom: 0.4rem;
+      text-transform: uppercase;
+    }
+    .card-text { font-size: 0.95rem; line-height: 1.6; }
+    .card.navy-bg .card-text { color: var(--cream); }
+
+    .story-box {
+      background: linear-gradient(135deg, rgba(197,48,48,0.15), rgba(30,39,97,0.2));
+      border-left: 4px solid var(--red);
+      padding: 1.25rem;
+      margin: 0.75rem 0;
+      max-width: 750px;
+      width: 100%;
+      border-radius: 0 8px 8px 0;
+    }
+    .story-box.success { background: linear-gradient(135deg, rgba(34,197,94,0.15), rgba(30,39,97,0.2)); border-left-color: var(--green); }
+    .story-box.warning { background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(30,39,97,0.2)); border-left-color: var(--orange); }
+    .story-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: var(--red);
+      margin-bottom: 0.4rem;
+      text-transform: uppercase;
+    }
+    .story-box.success .story-label { color: var(--green); }
+    .story-box.warning .story-label { color: var(--orange); }
+    .story-text { font-size: 0.95rem; line-height: 1.6; }
+
+    .story-box.epic {
+      background: linear-gradient(135deg, rgba(20,27,61,0.95), rgba(0,0,0,0.9));
+      border-left: 4px solid var(--gold);
+      border-top: 1px solid rgba(212,175,55,0.3);
+      border-right: 1px solid rgba(212,175,55,0.2);
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+      padding: 1.5rem;
+      position: relative;
+    }
+    .story-box.epic::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--gold), transparent);
+    }
+    .story-box.epic .story-label { color: var(--gold); font-size: 0.65rem; letter-spacing: 0.15em; }
+    .story-box.epic .story-text { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.05rem; line-height: 1.7; }
+
+    .grade-high { background: linear-gradient(135deg, rgba(34,197,94,0.2), rgba(30,39,97,0.2)); border-color: var(--green); }
+    .grade-moderate { background: linear-gradient(135deg, rgba(59,130,246,0.2), rgba(30,39,97,0.2)); border-color: #3b82f6; }
+    .grade-low { background: linear-gradient(135deg, rgba(245,158,11,0.2), rgba(30,39,97,0.2)); border-color: var(--orange); }
+    .grade-very-low { background: linear-gradient(135deg, rgba(197,48,48,0.2), rgba(30,39,97,0.2)); border-color: var(--red); }
+
+    .grade-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .grade-badge.high { background: var(--green); color: white; }
+    .grade-badge.moderate { background: #3b82f6; color: white; }
+    .grade-badge.low { background: var(--orange); color: white; }
+    .grade-badge.very-low { background: var(--red); color: white; }
+
+    .stats-grid {
+      display: flex;
+      gap: 0.75rem;
+      margin: 1rem 0;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .stat-box {
+      background: var(--navy);
+      color: var(--cream);
+      padding: 1rem 1.25rem;
+      text-align: center;
+      min-width: 120px;
+      border-radius: 8px;
+    }
+    .stat-box.light { background: var(--light-cream); color: var(--navy); border: 1px solid var(--gold); }
+    .stat-value {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.3rem, 2.5vw, 2rem);
+      font-weight: 700;
+    }
+    .stat-value.gold { color: var(--gold); }
+    .stat-value.red { color: var(--red); }
+    .stat-value.green { color: var(--green); }
+    .stat-label { font-size: 0.75rem; opacity: 0.8; margin-top: 0.2rem; }
+
+    .timeline { display: flex; flex-direction: column; gap: 0.4rem; width: 100%; max-width: 650px; }
+    .timeline-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.6rem 0.75rem;
+      background: rgba(255,255,255,0.05);
+      border-radius: 6px;
+      border-left: 4px solid var(--gold);
+    }
+    .timeline-days { font-weight: 700; font-size: 0.8rem; min-width: 70px; color: var(--gold); }
+    .timeline-content { flex: 1; }
+    .timeline-title { font-weight: 600; font-size: 0.9rem; }
+    .timeline-desc { font-size: 0.75rem; opacity: 0.7; }
+
+    .checklist { display: flex; flex-direction: column; gap: 0.4rem; width: 100%; max-width: 650px; }
+    .checklist-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+      padding: 0.6rem 0.75rem;
+      background: rgba(255,255,255,0.05);
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .check-icon {
+      width: 22px;
+      height: 22px;
+      background: var(--gold);
+      color: var(--navy);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.75rem;
+      flex-shrink: 0;
+    }
+    .checklist-text { font-size: 0.9rem; line-height: 1.4; }
+
+    .lesson-item { display: flex; align-items: flex-start; gap: 0.75rem; margin: 0.5rem 0; max-width: 700px; }
+    .lesson-number {
+      background: var(--gold);
+      color: var(--navy);
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+    .lesson-content h4 { font-size: 1rem; font-weight: 700; margin-bottom: 0.2rem; }
+    .lesson-content p { font-size: 0.85rem; opacity: 0.8; }
+
+    .decision-tree {
+      width: 100%;
+      max-width: 700px;
+      background: linear-gradient(135deg, rgba(124,58,237,0.15), rgba(30,39,97,0.25));
+      border: 2px solid var(--purple);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 0.75rem 0;
+    }
+    .decision-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    .decision-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--purple);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+    }
+    .decision-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+    .decision-xp {
+      margin-left: auto;
+      background: rgba(212,175,55,0.2);
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      color: var(--gold);
+      font-weight: 600;
+    }
+    .decision-scenario {
+      background: rgba(0,0,0,0.2);
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+    .decision-question {
+      font-weight: 600;
+      color: var(--gold);
+      margin-bottom: 0.75rem;
+      font-size: 1rem;
+    }
+    .decision-options { display: flex; flex-direction: column; gap: 0.5rem; }
+    .decision-option {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      background: rgba(255,255,255,0.05);
+      border: 2px solid rgba(255,255,255,0.15);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .decision-option:hover { background: rgba(124,58,237,0.2); border-color: var(--purple); }
+    .decision-option.selected { background: rgba(124,58,237,0.3); border-color: var(--purple); }
+    .decision-option.correct { background: rgba(34,197,94,0.2); border-color: var(--green); }
+    .decision-option.incorrect { background: rgba(239,68,68,0.15); border-color: var(--red); }
+    .decision-option.disabled { pointer-events: none; opacity: 0.7; }
+    .decision-option:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+    .option-letter {
+      width: 24px;
+      height: 24px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.8rem;
+      flex-shrink: 0;
+    }
+    .decision-option.correct .option-letter { background: var(--green); color: white; }
+    .decision-option.incorrect .option-letter { background: var(--red); color: white; }
+    .option-text { font-size: 0.9rem; }
+    .decision-feedback {
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: 8px;
+      display: none;
+    }
+    .decision-feedback.show { display: block; }
+    .decision-feedback.correct { background: rgba(34,197,94,0.2); border: 1px solid var(--green); }
+    .decision-feedback.incorrect { background: rgba(239,68,68,0.15); border: 1px solid var(--red); }
+    .feedback-title { font-weight: 700; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
+    .feedback-text { font-size: 0.9rem; line-height: 1.5; }
+
+    .quiz-container { width: 100%; max-width: 650px; }
+    .quiz-question {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.2rem;
+      margin-bottom: 1.25rem;
+      text-align: center;
+    }
+    .quiz-options { display: flex; flex-direction: column; gap: 0.5rem; }
+    .quiz-option {
+      padding: 0.75rem 1rem;
+      background: rgba(255,255,255,0.05);
+      border: 2px solid rgba(255,255,255,0.2);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+    .quiz-option:hover { background: rgba(212,175,55,0.15); border-color: var(--gold); }
+    .quiz-option.correct { background: rgba(34,197,94,0.2); border-color: var(--green); }
+    .quiz-option.incorrect { background: rgba(239,68,68,0.15); border-color: var(--red); }
+    .quiz-option.disabled { pointer-events: none; }
+    .quiz-option:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+    .quiz-feedback {
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: 8px;
+      display: none;
+      font-size: 0.9rem;
+    }
+    .quiz-feedback.show { display: block; }
+    .quiz-feedback.correct { background: rgba(34,197,94,0.2); border: 1px solid var(--green); }
+    .quiz-feedback.incorrect { background: rgba(239,68,68,0.15); border: 1px solid var(--red); }
+
+    .objectives-box {
+      background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(30,39,97,0.25));
+      border: 2px solid #3b82f6;
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin: 0.75rem 0;
+      max-width: 700px;
+      width: 100%;
+    }
+    .objectives-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+    .objectives-icon {
+      width: 36px;
+      height: 36px;
+      background: #3b82f6;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+    }
+    .objectives-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #60a5fa;
+    }
+    .objectives-list { list-style: none; padding: 0; }
+    .objectives-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      padding: 0.4rem 0;
+      font-size: 0.9rem;
+    }
+    .objectives-list li::before { content: '○'; color: #3b82f6; font-weight: bold; }
+
+    .slide.active .animate { animation: fadeUp 0.5s ease-out forwards; }
+    .slide.active .animate.delay-1 { animation-delay: 0.1s; }
+    .slide.active .animate.delay-2 { animation-delay: 0.2s; }
+    .slide.active .animate.delay-3 { animation-delay: 0.3s; }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate { opacity: 0; }
+
+    .xp-popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      background: linear-gradient(135deg, var(--gold), #f0c040);
+      color: var(--navy);
+      padding: 1.5rem 2.5rem;
+      border-radius: 12px;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2rem;
+      font-weight: 700;
+      z-index: 1000;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+      transition: transform 0.3s ease;
+    }
+    .xp-popup.show { transform: translate(-50%, -50%) scale(1); }
+    .xp-popup .xp-amount { font-size: 3rem; display: block; }
+
+    .badge-modal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.85);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1001;
+    }
+    .badge-modal.show { display: flex; }
+    .badge-modal-content {
+      background: linear-gradient(135deg, var(--deep-navy), #0a0f1a);
+      border: 2px solid var(--gold);
+      border-radius: 16px;
+      padding: 2rem;
+      text-align: center;
+      max-width: 350px;
+    }
+    .badge-modal-icon { font-size: 4rem; margin-bottom: 1rem; }
+    .badge-modal-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.5rem;
+      color: var(--gold);
+      margin-bottom: 0.5rem;
+    }
+    .badge-modal-desc { font-size: 0.9rem; opacity: 0.8; margin-bottom: 1rem; }
+    .badge-modal-close {
+      padding: 0.5rem 1.5rem;
+      background: var(--gold);
+      color: var(--navy);
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .confetti-container {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 999;
+      overflow: hidden;
+    }
+    .confetti {
+      position: absolute;
+      width: 10px; height: 10px;
+      opacity: 0;
+      animation: confetti-fall 3s ease-out forwards;
+    }
+    @keyframes confetti-fall {
+      0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .confetti { animation: none; display: none; }
+      .xp-popup { transition: none; }
+      .slide { transition: none; }
+    }
+
+    .slide-nav {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      padding: 0.75rem 1rem 1.25rem;
+      z-index: 100;
+      pointer-events: none;
+    }
+    .nav-btn {
+      background: rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: white;
+      font-size: 1.1rem;
+      cursor: pointer;
+      opacity: 0.6;
+      transition: all 0.2s;
+      padding: 0.4rem 0.6rem;
+      border-radius: 6px;
+      pointer-events: auto;
+    }
+    .nav-btn:hover { opacity: 1; background: rgba(0,0,0,0.7); border-color: var(--gold); }
+    .nav-btn:disabled { opacity: 0.2; cursor: not-allowed; }
+    .nav-btn:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+    .nav-center { display: flex; flex-direction: column; align-items: center; gap: 0.2rem; pointer-events: auto; }
+    .slide-counter { font-size: 0.7rem; opacity: 0.5; }
+    .progress-dots { display: flex; gap: 3px; }
+    .progress-dot {
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .progress-dot::after {
+      content: '';
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--text-muted, rgba(255,255,255,0.25));
+      transition: all 0.2s ease;
+    }
+    .progress-dot.active::after,
+    .progress-dot.completed::after {
+      background: var(--gold);
+      width: 14px;
+      height: 14px;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        position: fixed;
+        left: -300px;
+        top: 0;
+        bottom: 0;
+        z-index: 1000;
+        transition: left 0.3s ease;
+      }
+      .sidebar.open { left: 0; }
+      .sidebar-toggle {
+        display: flex;
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        z-index: 1001;
+        width: 40px;
+        height: 40px;
+        background: var(--gold);
+        color: var(--navy);
+        border: none;
+        border-radius: 8px;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        cursor: pointer;
+      }
+      .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 999;
+      }
+      .sidebar-overlay.show { display: block; }
+    }
+    @media (min-width: 769px) {
+      .sidebar-toggle { display: none; }
+      .sidebar-overlay { display: none !important; }
+    }
+
+    .combo-display {
+      position: fixed;
+      top: 80px;
+      right: 20px;
+      background: linear-gradient(135deg, var(--orange), #ef4444);
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      z-index: 500;
+      transform: scale(0);
+      transition: transform 0.3s ease;
+      box-shadow: 0 4px 15px rgba(239,68,68,0.4);
+    }
+    .combo-display.show { transform: scale(1); }
+  </style>
+</head>
+<body>
+<a class="skip-link" href="#main-content">Aller au contenu principal</a>
+<div class="course-container">
+<nav aria-label="Navigation du cours" class="sidebar" role="navigation">
+<div class="sidebar-header">
+<a href="index.html" onmouseout="this.style.color='rgba(212,175,55,0.7)'" onmouseover="this.style.color='#D4AF37'" style="display:block;font-size:0.7rem;color:rgba(212,175,55,0.7);text-decoration:none;margin-bottom:0.5rem;">← Bibliothèque des cours</a>
+<h1>Maîtrise GRADE</h1>
+<p>L'Art d'Évaluer les Preuves</p>
+</div>
+<div class="stats-panel">
+<div class="level-display">
+<div class="level-badge" id="levelIcon">📊</div>
+<div class="level-info">
+<div class="level-title" id="levelTitle">Évaluateur Novice</div>
+<div class="level-subtitle">Niveau <span id="levelNum">1</span></div>
+</div>
+</div>
+<div class="xp-bar"><div class="xp-fill" id="xpFill" style="width: 0%"></div></div>
+<div class="xp-text"><span id="xpCurrent">0</span> / <span id="xpNeeded">100</span> XP</div>
+<div class="quick-stats">
+<div class="quick-stat">
+<div class="quick-stat-value" id="correctCount">0</div>
+<div class="quick-stat-label">Corriger</div>
+</div>
+<div class="quick-stat">
+<div class="quick-stat-value" id="decisionCount">0</div>
+<div class="quick-stat-label">Décisions</div>
+</div>
+<div class="quick-stat">
+<div class="quick-stat-value" id="gradesCount">0</div>
+<div class="quick-stat-label">Évalués</div>
+</div>
+</div>
+</div>
+<div class="course-progress">
+<div class="course-progress-label">
+<span>Progression du cours</span>
+<span id="courseProgressPct">0%</span>
+</div>
+<div class="course-progress-bar">
+<div class="course-progress-fill" id="courseProgressFill" style="width: 0%"></div>
+</div>
+</div>
+<div class="module-list" id="moduleList"></div>
+<div class="badges-panel">
+<div class="badges-title">Récompenses</div>
+<div class="badges-grid" id="badgesGrid"></div>
+</div>
+</nav>
+<main class="main-content" id="main-content">
+<header class="content-header">
+<div class="breadcrumb">Maîtrise GRADE / <span id="currentModule">Module 1</span></div>
+<div class="header-actions">
+<div class="streak-display" id="streakDisplay">
+<span class="streak-flame">🔥</span>
+<span class="streak-count" id="streakCount">0</span>
+<span>jours consécutifs</span>
+</div>
+<button class="btn" onclick="resetProgress()">Réinitialiser</button>
+</div>
+</header>
+<div class="content-body">
+<div class="slides-container" id="slidesContainer"></div>
+</div>
+</main>
+</div>
+<div aria-atomic="true" aria-live="polite" class="xp-popup" id="xpPopup" role="status">
+<span class="xp-amount" id="xpAmount">+25</span>
+    XP
+  </div>
+<div aria-labelledby="badgeModalTitle" aria-modal="true" class="badge-modal" id="badgeModal" role="dialog">
+<div class="badge-modal-content">
+<div class="badge-modal-icon" id="badgeModalIcon">🏆</div>
+<div class="badge-modal-title" id="badgeModalTitle">Badge Obtenu !</div>
+<div class="badge-modal-desc" id="badgeModalDesc">Vous avez débloqué une nouvelle récompense</div>
+<button class="badge-modal-close" onclick="closeBadgeModal()">Formidable !</button>
+</div>
+</div>
+<div class="confetti-container" id="confettiContainer"></div>
+<div aria-live="polite" class="combo-display" id="comboDisplay" role="status">🔥 <span id="comboCount">0</span>x Combo !</div>
+<button aria-expanded="false" aria-label="Basculer le menu" class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<script>
+const DEFAULT_STATE = {
+  xp: 0,
+  level: 1,
+  streak: 0,
+  lastActive: null,
+  correctAnswers: 0,
+  decisionsCompleted: 0,
+  gradesAssigned: 0,
+  badges: [],
+  completedModules: [],
+  answeredQuestions: {}
+};
+
+function safeGetStorage(key, fallback) {
+  try {
+    const item = localStorage.getItem(key);
+    return item ? JSON.parse(item) : fallback;
+  } catch (e) {
+    return fallback;
+  }
+}
+
+function safeSetStorage(key, value) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch (e) {}
+}
+
+(function migrateStorage() {
+  try {
+    const oldData = localStorage.getItem('gradeGameFr');
+    if (oldData && !localStorage.getItem('gradeGameFr_v1')) {
+      localStorage.setItem('gradeGameFr_v1', oldData);
+      localStorage.removeItem('gradeGameFr');
+    }
+  } catch (e) {}
+})();
+
+let gameState = safeGetStorage('gradeGameFr_v1', DEFAULT_STATE);
+
+const LEVELS = [
+  { level: 1, title: "Évaluateur Novice", icon: "📊", xp: 0 },
+  { level: 2, title: "Détecteur de Biais", icon: "🔍", xp: 100 },
+  { level: 3, title: "Chercheur de Certitude", icon: "⚖️", xp: 250 },
+  { level: 4, title: "Évaluateur de Preuves", icon: "📋", xp: 450 },
+  { level: 5, title: "Apprenti GRADE", icon: "🎓", xp: 700 },
+  { level: 6, title: "Gardien de la Certitude", icon: "🛡️", xp: 1000 },
+  { level: 7, title: "Maître des Preuves", icon: "🏆", xp: 1400 },
+  { level: 8, title: "Sage GRADE", icon: "👑", xp: 1900 }
+];
+
+const BADGES = [
+  { id: "first_grade", icon: "📊", name: "Première Évaluation", desc: "Attribuez votre première évaluation GRADE" },
+  { id: "bias_hunter", icon: "🔍", name: "Chasseur de Biais", desc: "Complétez le module Risque de Biais" },
+  { id: "precision_master", icon: "🎯", name: "Maître de la Précision", desc: "Complétez le module Imprécision" },
+  { id: "consistency_king", icon: "🔗", name: "Roi de la Cohérence", desc: "Complétez le module Incohérence" },
+  { id: "directness_detective", icon: "🎪", name: "Détective de la Directitude", desc: "Complétez le module Caractère Indirect" },
+  { id: "publication_sleuth", icon: "📰", name: "Limier des Publications", desc: "Complétez le module Biais de Publication" },
+  { id: "upgrader", icon: "⬆️", name: "L'Améliorateur", desc: "Apprenez tous les facteurs de rehaussement" },
+  { id: "perfect_5", icon: "⭐", name: "Cinq Étoiles", desc: "Obtenez 5 bonnes réponses consécutives" },
+  { id: "decision_maker", icon: "⚖️", name: "Décideur", desc: "Complétez 15 arbres de décision" },
+  { id: "finisher", icon: "🏁", name: "Cours Terminé", desc: "Terminez l'ensemble du cours" },
+  { id: "streak_3", icon: "🔥", name: "En Feu", desc: "Maintenez une série de 3 jours" },
+  { id: "streak_7", icon: "💫", name: "Guerrier Hebdomadaire", desc: "Maintenez une série de 7 jours" },
+  { id: "grade_master", icon: "👑", name: "Maître GRADE", desc: "Complétez l'Évaluation Finale" }
+];
+
+const MODULES = [
+  {
+    id: 1, title: "Pourquoi la Certitude Compte", subtitle: "Quand la confiance tue", xp: 150,
+    slides: [
+      { type: "title", theme: "dark", content: { title: "Pourquoi la Certitude Compte", subtitle: "Quand l'excès de confiance dans les preuves tue des patients" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "Comprendre pourquoi la certitude des preuves détermine les résultats pour les patients",
+          "Apprendre des recommandations qui ont tué parce que la certitude était mal évaluée",
+          "Reconnaître la différence entre 'les preuves existent' et 'les preuves sont fiables'",
+          "Comprendre ce que GRADE apporte que les revues traditionnelles n'apportent pas"
+        ],
+        tip: "Ce module montre pourquoi se tromper sur la certitude a des conséquences réelles."
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "La Catastrophe des Bêta-Bloquants", title: "Des Recommandations Basées sur un Menteur",
+        text: "Pendant deux décennies, les recommandations cliniques du monde entier préconisaient les <strong>bêta-bloquants avant une chirurgie non cardiaque</strong> pour prévenir les crises cardiaques. La recommandation était 'forte'—haute certitude de bénéfice. Des millions de patients ont reçu ces médicaments avant des opérations. Les preuves provenaient largement d'un seul homme : <strong>Don Poldermans</strong>, qui a contribué 15 études montrant des bénéfices spectaculaires.",
+        followup: "En 2011, Poldermans a été reconnu coupable de fraude scientifique. Ses données étaient fabriquées. Lorsque ses études ont été retirées des méta-analyses, les calculs se sont inversés : les bêta-bloquants ne prévenaient pas les crises cardiaques—ils les causaient. Les chercheurs ont calculé le coût : suivre des recommandations basées sur cette preuve frauduleuse de 'haute certitude' a pu <strong>tuer 800 000 patients</strong> sur une décennie. L'évaluation de la certitude était erronée. Les patients ont payé de leur vie."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "⚠️", title: "Scénario : La Recommandation Forte",
+        xp: 25,
+        scenario: "Un panel de recommandations évalue les preuves comme 'haute certitude' et émet une 'recommandation forte' pour un traitement préventif. Vous remarquez que 60% des preuves proviennent d'un seul groupe de recherche dont les résultats n'ont jamais été répliqués de manière indépendante.",
+        question: "Quelle préoccupation devriez-vous soulever concernant l'évaluation de la certitude ?",
+        options: [
+          { letter: "A", text: "Aucune—les études évaluées par les pairs sont fiables", correct: false },
+          { letter: "B", text: "La certitude devrait être abaissée pour risque de biais et manque de réplication", correct: true },
+          { letter: "C", text: "Demander plus d'études du même groupe pour confirmer", correct: false },
+          { letter: "D", text: "La recommandation forte compense toute incertitude", correct: false }
+        ],
+        feedback: {
+          correct: "Correct ! Les résultats non répliqués de Poldermans ont été évalués comme 'haute certitude' malgré leur dépendance à une seule source. GRADE exige d'abaisser le niveau lorsque les preuves dépendent fortement de sources potentiellement biaisées qui manquent de confirmation indépendante.",
+          incorrect: "800 000 décès ont résulté de la confiance accordée à des preuves non répliquées provenant d'une seule source. La haute certitude exige une réplication indépendante. La concentration dans un seul groupe de recherche est un risque de biais critique."
+        }
+      }},
+      { type: "story", theme: "dark", content: {
+        label: "L'Inversion Hormonale", title: "Deux Millions de Femmes Trahies",
+        text: "Pendant quarante ans, les médecins ont prescrit le <strong>traitement hormonal substitutif (THS)</strong> pour prévenir les maladies cardiaques chez les femmes ménopausées. Les preuves semblaient accablantes : les études observationnelles montraient <strong>50% moins de crises cardiaques</strong>. Les experts étaient certains. Les recommandations étaient fortes. Deux millions de femmes américaines prenaient le THS spécifiquement pour la protection cardiaque.",
+        followup: "En 2002, l'essai Women's Health Initiative a rendu un verdict qui a brisé des décennies de certitude. Le THS ne prévenait pas les maladies cardiaques—il <strong>augmentait les crises cardiaques de 29%</strong>, les AVC de 41% et le cancer du sein de 26%. Les preuves observationnelles avaient été confondues : les femmes en bonne santé choisissaient le THS, créant une illusion de bénéfice. La certitude avait été basée sur le mauvais type de preuves. Deux millions de femmes avaient pris un médicament qui leur nuisait, prescrit par des médecins certains de les aider."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "📊", title: "Scénario : Observationnel vs. ECR",
+        xp: 25,
+        scenario: "Vingt grandes études observationnelles montrent qu'un traitement réduit les décès cardiovasculaires de 45%. Deux petits ECR ne montrent aucun effet. Un panel de recommandations doit évaluer la certitude des preuves de bénéfice.",
+        question: "Quelle évaluation de certitude est appropriée ?",
+        options: [
+          { letter: "A", text: "Élevée—20 études l'emportent sur 2 études", correct: false },
+          { letter: "B", text: "Modérée—des preuves mixtes exigent la prudence", correct: false },
+          { letter: "C", text: "Faible—les ECR prévalent sur les études observationnelles; la confusion explique probablement la divergence", correct: true },
+          { letter: "D", text: "Très faible—aucune conclusion n'est possible", correct: false }
+        ],
+        feedback: {
+          correct: "Correct ! Le désastre du THS nous a enseigné exactement cette leçon. Les études observationnelles montrant 50% de bénéfice ont été contredites par des ECR montrant un préjudice. Lorsque les ECR contredisent les données observationnelles, la confusion est l'explication probable. GRADE commence les ECR à élevé, les observationnels à faible.",
+          incorrect: "Les études observationnelles du THS montraient 50% de bénéfice; l'ECR a montré 29% de préjudice. La divergence était due à la confusion—les femmes en bonne santé choisissaient le THS. Les preuves d'ECR, même de petites études, fournissent une certitude plus élevée que les preuves observationnelles pour les questions causales."
+        }
+      }},
+      { type: "stats", theme: "dark", content: {
+        title: "Le Coût d'une Mauvaise Certitude",
+        stats: [
+          { value: "800K", label: "Décès de la fraude Poldermans" },
+          { value: "2M", label: "Femmes lésées par le THS" },
+          { value: "50K", label: "Décès des médicaments CAST" },
+          { value: "83K", label: "Crises cardiaques Avandia" }
+        ],
+        caption: "Chaque désastre impliquait des recommandations qui étaient 'certaines' basées sur une évaluation défectueuse des preuves."
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "Le Désastre du Glucose Intensif", title: "ACCORD : Quand le Contrôle Strict a Tué",
+        text: "Les diabétologues étaient certains : si un taux élevé de sucre dans le sang causait des complications, alors un contrôle glycémique plus strict devait les prévenir. La logique semblait irréfutable. Les recommandations préconisaient des <strong>objectifs agressifs</strong>. L'essai ACCORD a recruté 10 251 patients pour prouver ce que tout le monde 'savait' déjà—le contrôle glycémique intensif sauve des vies.",
+        followup: "En février 2008, l'essai a été arrêté prématurément. Pas pour bénéfice—<strong>pour préjudice</strong>. Le contrôle glycémique intensif augmentait les décès de 22%. La certitude avait été basée sur la plausibilité biologique, pas sur des données de résultats réels. Le critère de substitution (niveaux de glucose) s'améliorait tandis que le critère important pour le patient (survie) se dégradait. 257 décès excédentaires sont survenus dans le groupe intensif. Les recommandations avaient été confiantes. La confiance était mal placée."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "🎯", title: "Scénario : Le Traitement Logique",
+        xp: 25,
+        scenario: "Un traitement améliore spectaculairement un biomarqueur (valeur de laboratoire) connu pour causer une maladie. Aucun essai n'a encore mesuré les résultats cliniques réels comme la mort ou l'hospitalisation. Un collègue argue que la certitude du bénéfice est 'élevée' parce que le mécanisme est bien compris.",
+        question: "Quelle évaluation de certitude devrait s'appliquer ?",
+        options: [
+          { letter: "A", text: "Élevée—un mécanisme clair implique un bénéfice clair", correct: false },
+          { letter: "B", text: "Modérée—le mécanisme est supportif mais pas définitif", correct: false },
+          { letter: "C", text: "Faible ou Très faible—les critères de substitution ne garantissent pas les bénéfices importants pour le patient", correct: true },
+          { letter: "D", text: "Impossible à évaluer tant que les essais ne sont pas terminés", correct: false }
+        ],
+        feedback: {
+          correct: "Correct ! ACCORD, CAST et d'innombrables autres désastres ont suivi le sophisme du 'mécanisme logique'. Améliorer les substituts peut aggraver les résultats. GRADE exige d'abaisser le niveau pour le caractère indirect lorsque seuls des critères de substitution sont mesurés.",
+          incorrect: "La thérapie intensive ACCORD améliorait parfaitement le glucose tout en tuant des patients. Les médicaments CAST corrigeaient les ECG tout en triplant les décès. La plausibilité biologique n'est pas une preuve clinique. Des critères importants pour le patient sont requis pour une haute certitude."
+        }
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "Ce que GRADE Apporte",
+        subtitle: "Un cadre systématique pour la certitude",
+        text: "GRADE (Grading of Recommendations Assessment, Development and Evaluation) fournit une méthode structurée et transparente pour évaluer le degré de confiance que nous devrions accorder aux preuves. Il sépare 'les preuves existent' de 'les preuves sont fiables'.",
+        highlight: "GRADE demande : 'Quelle est notre confiance que l'effet réel est proche de l'effet estimé ?'"
+      }},
+      { type: "story", theme: "dark", content: {
+        label: "La Révélation de l'Arthroscopie", title: "Un Placebo d'un Milliard de Dollars",
+        text: "L'arthroscopie du genou pour l'arthrose était l'une des procédures orthopédiques les plus courantes au monde. <strong>700 000 Américains</strong> la subissaient annuellement pour un coût de 3 milliards de dollars. Les chirurgiens étaient certains que ça marchait—ils voyaient les patients s'améliorer. L'assurance la couvrait. Les recommandations la préconisaient.",
+        followup: "Puis sont venus les essais de chirurgie factice. Les patients ont été randomisés pour recevoir une vraie arthroscopie ou une fausse chirurgie (incisions mais pas de procédure réelle). Le résultat : <strong>aucune différence</strong>. Les patients s'amélioraient également qu'ils aient reçu une vraie chirurgie ou un placebo. Des décennies de certitude, des milliards de dollars, des millions de chirurgies—tout basé sur l'effet placebo que les chirurgiens ne pouvaient pas voir. La certitude avait été basée sur des observations non contrôlées. Les essais contrôlés ont révélé la vérité."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "🔬", title: "Scénario : Le Chirurgien Expérimenté",
+        xp: 25,
+        scenario: "Un chirurgien senior argue qu'une procédure 'fonctionne définitivement' parce qu'elle l'a réalisée 2 000 fois et 'a vu les patients s'améliorer'. Aucun essai randomisé n'existe. Elle veut que la recommandation évalue la certitude comme 'modérée' basée sur l'expérience clinique.",
+        question: "Quelle évaluation de certitude est appropriée ?",
+        options: [
+          { letter: "A", text: "Modérée—2 000 cas est une expérience substantielle", correct: false },
+          { letter: "B", text: "Faible—les observations non contrôlées ne peuvent pas distinguer l'effet du traitement du placebo", correct: true },
+          { letter: "C", text: "Élevée—l'expérience des experts est la forme la plus élevée de preuve", correct: false },
+          { letter: "D", text: "Très faible—les anecdotes ne sont pas des preuves", correct: false }
+        ],
+        feedback: {
+          correct: "Correct ! Les chirurgiens de l'arthroscopie du genou ont 'vu' les patients s'améliorer pendant des décennies—puis les essais de chirurgie factice ont montré que c'était un placebo. L'expérience des experts ne peut pas détecter les effets placebo. GRADE évalue les observations non contrôlées comme certitude très faible.",
+          incorrect: "Les chirurgiens ont réalisé 700 000 arthroscopies par an, 'voyant' le bénéfice—c'était entièrement un placebo. L'expérience clinique, aussi étendue soit-elle, ne peut pas distinguer les effets du traitement de l'amélioration naturelle ou du placebo. Les ECR sont essentiels."
+        }
+      }},
+      { type: "refrain", theme: "black", content: { text: "La certitude ne concerne pas la quantité de preuves existantes. Elle concerne le degré de confiance que nous devrions leur accorder." }},
+      { type: "quiz", theme: "dark", content: {
+        question: "Pourquoi les études observationnelles du THS ont-elles induit les médecins en erreur pendant 40 ans ?",
+        options: [
+          { text: "Les études étaient fabriquées", correct: false },
+          { text: "Les femmes en bonne santé étaient plus susceptibles de choisir le THS, créant une confusion", correct: true },
+          { text: "Les ECR utilisaient des doses différentes", correct: false },
+          { text: "Les définitions des maladies cardiaques ont changé au fil du temps", correct: false }
+        ],
+        xp: 20,
+        feedback: {
+          correct: "Exactement. La confusion par indication—les femmes en bonne santé choisissaient le THS—a créé une illusion de bénéfice. C'est pourquoi GRADE évalue les études observationnelles plus bas que les ECR pour les questions causales.",
+          incorrect: "Les études étaient réelles, mais confondues. Les femmes en bonne santé étaient plus susceptibles de prendre le THS, le faisant paraître bénéfique. Les ECR randomisent cette confusion, révélant l'effet réel."
+        }
+      }}
+    ]
+  },
+  {
+    id: 2, title: "Le Cadre GRADE", subtitle: "De élevé à très faible", xp: 120,
+    slides: [
+      { type: "title", theme: "dark", content: { title: "Le Cadre GRADE", subtitle: "Quatre niveaux de certitude, cinq raisons de douter" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "Apprendre les quatre niveaux de certitude GRADE et leur signification",
+          "Comprendre les points de départ : ECR vs études observationnelles",
+          "Connaître les cinq domaines pour abaisser la certitude",
+          "Connaître les trois facteurs pour rehausser les preuves observationnelles"
+        ],
+        tip: "Ce module fournit le cadre que vous appliquerez tout au long du cours."
+      }},
+      { type: "stats", theme: "dark", content: {
+        title: "Les Quatre Niveaux de Certitude",
+        stats: [
+          { value: "⊕⊕⊕⊕", label: "ÉLEVÉE" },
+          { value: "⊕⊕⊕○", label: "MODÉRÉE" },
+          { value: "⊕⊕○○", label: "FAIBLE" },
+          { value: "⊕○○○", label: "TRÈS FAIBLE" }
+        ],
+        caption: "Chaque niveau indique aux décideurs le degré de confiance à accorder aux preuves."
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "Ce que Chaque Niveau Signifie",
+        subtitle: "Interprétation pratique",
+        checkpoints: [
+          { day: "ÉLEVÉE", event: "Très confiant que l'effet réel est proche de l'estimation" },
+          { day: "MODÉRÉE", event: "Modérément confiant; l'effet réel est probablement proche mais peut différer" },
+          { day: "FAIBLE", event: "Confiance limitée; l'effet réel peut être substantiellement différent" },
+          { day: "TRÈS FAIBLE", event: "Très peu de confiance; l'effet réel est probablement substantiellement différent" }
+        ]
+      }},
+      { type: "story", theme: "dark", content: {
+        label: "Le Principe du Point de Départ", title: "Pourquoi les ECR Commencent Plus Haut",
+        text: "En 1747, James Lind a mené ce que beaucoup considèrent comme le premier essai contrôlé. Douze marins atteints de scorbut ont été divisés en six paires, chacune recevant un traitement différent. <strong>Seuls les deux qui ont reçu des agrumes se sont rétablis.</strong> Cette simple comparaison—traité vs. non traité dans des conditions similaires—a révélé une vérité que des siècles d'observation avaient manquée.",
+        followup: "La randomisation est le grand égalisateur. Elle équilibre les facteurs de confusion connus et inconnus entre les groupes. Lorsque les patients sont randomisés, les différences de résultats peuvent être attribuées au traitement, pas aux différences entre les patients. C'est pourquoi GRADE commence les preuves d'ECR à <strong>ÉLEVÉE</strong> certitude et les preuves observationnelles à <strong>FAIBLE</strong>—la conception de l'étude elle-même détermine combien la confusion pourrait fausser les résultats."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "🎲", title: "Scénario : Le Point de Départ",
+        xp: 25,
+        scenario: "Vous évaluez les preuves pour un nouveau médicament. Vous avez trois ECR (total n=1 200) et cinq études de cohorte (total n=45 000). Un collègue argue que les études de cohorte devraient commencer au même niveau de certitude parce qu'elles ont plus de patients.",
+        question: "Quel est le point de départ correct pour chaque type de preuve ?",
+        options: [
+          { letter: "A", text: "Les deux commencent à ÉLEVÉE—la taille de l'échantillon détermine la certitude", correct: false },
+          { letter: "B", text: "Les ECR commencent ÉLEVÉE, les cohortes commencent FAIBLE—la conception détermine le point de départ", correct: true },
+          { letter: "C", text: "Les cohortes commencent MODÉRÉE en raison de la grande taille d'échantillon", correct: false },
+          { letter: "D", text: "Les deux commencent à MODÉRÉE et s'ajustent à partir de là", correct: false }
+        ],
+        feedback: {
+          correct: "Correct ! Les points de départ GRADE sont basés sur la conception de l'étude, pas sur la taille de l'échantillon. Les ECR commencent ÉLEVÉE parce que la randomisation contrôle la confusion. Les études observationnelles commencent FAIBLE parce que la confusion ne peut pas être éliminée, quelle que soit la taille.",
+          incorrect: "La taille de l'échantillon affecte la précision, pas la confusion. Les études de cohorte du THS avaient des millions de patients mais étaient quand même fausses à cause de la confusion. Les ECR commencent ÉLEVÉE; les études observationnelles commencent FAIBLE."
+        }
+      }},
+      { type: "checklist", theme: "dark", content: {
+        title: "Cinq Domaines pour Abaisser le Niveau",
+        items: [
+          "Risque de Biais — Les études sont-elles à haut risque de biais ?",
+          "Incohérence — Les résultats varient-ils inexplicablement entre les études ?",
+          "Caractère Indirect — Les preuves répondent-elles directement à notre question ?",
+          "Imprécision — L'estimation de l'effet est-elle suffisamment précise ?",
+          "Biais de Publication — Des études manquent-elles dans la base de preuves ?"
+        ]
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "La Saga du Tamiflu", title: "Quand les Cinq Domaines ont Échoué",
+        text: "En 2009, les gouvernements ont stocké du Tamiflu pour la grippe pandémique. Le Royaume-Uni a dépensé <strong>473 millions de livres</strong>. Les preuves semblaient solides : les essais publiés montraient une réduction des complications. Mais les examinateurs Cochrane ont remarqué des problèmes dans chaque domaine GRADE.",
+        followup: "<strong>Risque de biais :</strong> Essais financés par l'industrie avec des méthodes peu claires. <strong>Incohérence :</strong> Les résultats variaient entre les études publiées et non publiées. <strong>Caractère indirect :</strong> Les 'complications' étaient mal définies. <strong>Imprécision :</strong> Les intervalles de confiance étaient larges. <strong>Biais de publication :</strong> 60% des données des patients n'ont jamais été publiées. Lorsque Roche a finalement publié les données brutes après cinq ans, la vérité a émergé : le Tamiflu réduisait la durée des symptômes de moins d'un jour et n'avait aucun effet prouvé sur les hospitalisations ou les complications. Un demi-milliard de livres dépensé pour des preuves qui auraient dû être évaluées TRÈS FAIBLE."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "📉", title: "Scénario : Le Problème Multi-Domaines",
+        xp: 25,
+        scenario: "Vous évaluez les preuves de 5 ECR. Vous trouvez : dissimulation de l'allocation peu claire (risque de biais), I² = 75% sans explication (incohérence), et la moitié des essais n'ont jamais été publiés (biais de publication). Les essais eux-mêmes sont précis et directs.",
+        question: "De combien de niveaux devriez-vous abaisser depuis ÉLEVÉE ?",
+        options: [
+          { letter: "A", text: "Un niveau—plusieurs préoccupations mineures égalent une baisse", correct: false },
+          { letter: "B", text: "Deux niveaux—préoccupations sérieuses dans deux domaines", correct: false },
+          { letter: "C", text: "Trois niveaux—préoccupations sérieuses dans trois domaines (à TRÈS FAIBLE)", correct: true },
+          { letter: "D", text: "Impossible d'abaisser les ECR—ils sont toujours ÉLEVÉE", correct: false }
+        ],
+        feedback: {
+          correct: "Correct ! Des préoccupations sérieuses dans chaque domaine justifient généralement une baisse d'un niveau chacun. Risque de biais (−1), incohérence (−1), et biais de publication (−1) feraient passer ÉLEVÉE à TRÈS FAIBLE. Plusieurs domaines peuvent se cumuler.",
+          incorrect: "Chaque domaine avec des préoccupations sérieuses justifie généralement une baisse d'un niveau. Trois préoccupations sérieuses de domaines = trois baisses. ÉLEVÉE − 3 = TRÈS FAIBLE. GRADE est cumulatif."
+        }
+      }},
+      { type: "checklist", theme: "dark", content: {
+        title: "Trois Facteurs pour Rehausser (Observationnel Seulement)",
+        items: [
+          "Grand Effet — Très grande magnitude d'effet (RR > 2 ou < 0,5)",
+          "Relation Dose-Réponse — Gradient clair entre exposition et résultat",
+          "Confusion — Toute confusion plausible réduirait l'effet"
+        ]
+      }},
+      { type: "story", theme: "green-bg", content: {
+        label: "Les Preuves du Tabagisme", title: "Quand l'Observation a Mérité la Certitude",
+        text: "Dans les années 1950, Richard Doll et Austin Bradford Hill ont publié des études observationnelles liant les cigarettes au cancer du poumon. Aucun ECR n'existait—on ne peut pas randomiser les gens pour fumer. Pourtant les preuves sont devenues <strong>HAUTE certitude</strong>. Pourquoi ?",
+        followup: "Chaque critère de rehaussement était rempli. <strong>Grand effet :</strong> Les fumeurs avaient des taux de cancer du poumon 10-30x plus élevés—une taille d'effet que la confusion seule ne peut pas expliquer. <strong>Dose-réponse :</strong> Plus de cigarettes = plus de cancer dans un gradient clair. <strong>Direction de la confusion :</strong> Tout facteur de confusion non mesuré qui causerait à la fois le tabagisme et le cancer devrait être invraisemblablement puissant pour expliquer l'effet. Lorsque les preuves observationnelles remplissent les trois critères de rehaussement, elles peuvent atteindre une certitude qui rivalise avec les ECR."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "⬆️", title: "Scénario : La Question du Rehaussement",
+        xp: 25,
+        scenario: "Une étude observationnelle montre qu'un traitement augmente la survie avec RR = 1,3 (augmentation relative de 30%). L'association est statistiquement significative avec des intervalles de confiance étroits. Les auteurs arguent que cela devrait être rehaussé de FAIBLE à MODÉRÉE.",
+        question: "Ces preuves devraient-elles être rehaussées ?",
+        options: [
+          { letter: "A", text: "Oui—la significativité statistique justifie le rehaussement", correct: false },
+          { letter: "B", text: "Oui—les intervalles de confiance étroits justifient le rehaussement", correct: false },
+          { letter: "C", text: "Non—RR 1,3 n'est pas assez grand; la confusion pourrait facilement l'expliquer", correct: true },
+          { letter: "D", text: "Non—les preuves observationnelles ne peuvent jamais être rehaussées", correct: false }
+        ],
+        feedback: {
+          correct: "Correct ! RR 1,3 est bien dans la plage que la confusion peut produire. Le rehaussement pour grand effet nécessite généralement RR > 2 ou < 0,5—des effets si grands que la confusion seule est une explication invraisemblable. La significativité statistique et la précision ne sont pas des critères de rehaussement.",
+          incorrect: "Une augmentation relative de 30% (RR 1,3) peut facilement résulter d'une confusion modeste. Les études du THS ont montré RR 0,5 pour la protection cardiaque—entièrement dû à la confusion. Le rehaussement pour grand effet nécessite des effets que la confusion ne peut pas plausiblement expliquer (généralement RR > 2 ou < 0,5)."
+        }
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "Le Mnémonique GRADE : RIIPP",
+        subtitle: "Mémorisez les 5 domaines d'abaissement",
+        text: "<strong style='color:var(--gold);font-size:1.5rem'>R</strong>isque de biais — Peut-on faire confiance aux études ?<br><br><strong style='color:var(--gold);font-size:1.5rem'>I</strong>ncohérence — Les études sont-elles d'accord ?<br><br><strong style='color:var(--gold);font-size:1.5rem'>I</strong>ndirect — Les preuves correspondent-elles à notre question ?<br><br><strong style='color:var(--gold);font-size:1.5rem'>I</strong>mprécision — L'estimation est-elle précise ?<br><br><strong style='color:var(--gold);font-size:1.5rem'>P</strong>ublication bias — Des preuves manquent-elles ?",
+        highlight: "RIIPP — Souvenez-vous : 'Les preuves d'ECR peuvent se RIIPP-er si ces domaines ont des problèmes sérieux.'"
+      }},
+      { type: "quiz", theme: "dark", content: {
+        question: "Pourquoi les études observationnelles commencent-elles à FAIBLE certitude dans GRADE ?",
+        options: [
+          { text: "Elles ont généralement des tailles d'échantillon plus petites", correct: false },
+          { text: "Elles ne peuvent pas contrôler la confusion non mesurée", correct: true },
+          { text: "Elles sont plus souvent financées par l'industrie", correct: false },
+          { text: "Elles prennent plus de temps à compléter", correct: false }
+        ],
+        xp: 20,
+        feedback: {
+          correct: "Exactement. La randomisation équilibre les facteurs de confusion entre les groupes. Sans elle, les différences de résultats pourraient refléter des différences entre les patients, pas des effets de traitement. Les études du THS avec des millions de patients étaient quand même fausses à cause de la confusion.",
+          incorrect: "Le problème est la confusion, pas la taille de l'échantillon. Les études observationnelles ne peuvent pas équilibrer les facteurs de confusion inconnus comme la randomisation le fait. Cette limitation fondamentale détermine le point de départ."
+        }
+      }}
+    ]
+  },
+  {
+    id: 3, title: "Risque de Biais", subtitle: "Quand les études mentent", xp: 180,
+    slides: [
+      { type: "title", theme: "purple-bg", content: { title: "Risque de Biais", subtitle: "Le premier domaine : Peut-on faire confiance à ces études ?" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "Identifier les domaines clés de biais dans les ECR et études observationnelles",
+          "Reconnaître comment le biais gonfle ou dégonfle les effets du traitement",
+          "Appliquer l'évaluation du risque de biais à des exemples réels",
+          "Décider quand abaisser la certitude pour biais"
+        ],
+        tip: "Complétez tous les scénarios de décision pour gagner le badge Chasseur de Biais !"
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "La Tromperie VIGOR", title: "Quand Merck a Choisi la Date Limite",
+        text: "En 2000, Merck a publié l'essai VIGOR comparant le Vioxx au naproxène. Le New England Journal of Medicine a rapporté une augmentation de 4 fois des crises cardiaques avec le Vioxx. Mais l'article publié cachait quelque chose : <strong>trois crises cardiaques supplémentaires</strong> sont survenues dans le groupe Vioxx après la date limite des données. Les scientifiques de Merck le savaient.",
+        followup: "Ces trois crises cardiaques comptaient. Les inclure aurait changé le ratio de risque de 'préoccupant' à 'alarmant'. Au lieu de cela, la date limite choisie par Merck—une décision méthodologique prise après avoir vu les données—a obscurci le vrai risque. Le NEJM a plus tard publié une 'expression de préoccupation', qualifiant l'article d''inexact et incomplet'. D'ici là, des dizaines de milliers avaient souffert de crises cardiaques d'un médicament dont le danger avait été caché par un reporting sélectif. Le biais n'était pas dans la conception de l'essai—il était dans la façon dont les données ont été analysées et présentées."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "✂️", title: "Scénario : La Date Limite Mobile",
+        xp: 30,
+        scenario: "Vous évaluez un essai qui a changé son point d'analyse principal après le début de l'étude—de 12 mois à 6 mois. Les résultats à 6 mois favorisent le traitement. Les auteurs disent que le changement a été fait pour des 'raisons administratives' sans rapport avec les résultats.",
+        question: "Comment cela devrait-il affecter votre évaluation du risque de biais ?",
+        options: [
+          { letter: "A", text: "Aucune préoccupation—les changements administratifs arrivent", correct: false },
+          { letter: "B", text: "Haut risque de biais pour reporting sélectif—les changements de point de temps après avoir vu les données sont suspects", correct: true },
+          { letter: "C", text: "Faible risque si les données de 12 mois sont également rapportées", correct: false },
+          { letter: "D", text: "Risque peu clair—nous ne pouvons pas connaître leur vraie motivation", correct: false }
+        ],
+        feedback: {
+          correct: "Correct ! Les changements post-hoc aux plans d'analyse sont à haut risque de reporting sélectif. La date limite de VIGOR était une 'décision méthodologique' qui a caché trois crises cardiaques. Lorsque les points de temps changent après l'accumulation des données, supposez le pire.",
+          incorrect: "La date limite 'méthodologique' de Merck a caché des crises cardiaques fatales. Les changements d'analyse post-hoc—surtout quand les résultats favorisent le traitement—sont un reporting sélectif classique. GRADE exige du scepticisme envers les modifications post-hoc."
+        }
+      }},
+      { type: "story", theme: "dark", content: {
+        label: "Le Problème de l'Étude Ouverte", title: "Quand Savoir Change Tout",
+        text: "L'essai ASCOT-LLA a comparé l'atorvastatine au placebo pour la prévention cardiovasculaire. Le critère principal était l'IM non fatal plus la mort coronarienne fatale—des <strong>résultats objectifs</strong> qui ne devraient pas dépendre de si les médecins savaient quel traitement les patients recevaient.",
+        followup: "Mais les médecins savaient. L'essai a été arrêté prématurément lorsque le Comité de Surveillance de la Sécurité des Données a vu le bénéfice. Le problème : certains résultats ont été adjugés par des comités qui <strong>n'étaient pas en aveugle</strong> quant à l'affectation du traitement. Savoir qu'un patient était sous statine affectait-il la classification des IM limites ? Les études comparant l'évaluation en aveugle vs. non en aveugle montrent des différences systématiques. Les conceptions en ouvert peuvent gonfler les bénéfices apparents de 10-20% même pour des résultats 'objectifs'. ASCOT-LLA a été abaissé pour risque de biais malgré le fait que c'était un ECR."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "👁️", title: "Scénario : Les Évaluateurs Non en Aveugle",
+        xp: 25,
+        scenario: "Un ECR d'une intervention chirurgicale rapporte une réduction de 30% des 'événements cardiovasculaires majeurs'. L'essai était nécessairement non en aveugle (les patients savaient s'ils avaient eu une chirurgie). Les évaluateurs des résultats étaient également non en aveugle. Les événements ont été adjugés par un comité qui connaissait les affectations de traitement.",
+        question: "Quel est le risque de biais pour le biais de détection ?",
+        options: [
+          { letter: "A", text: "Faible—les événements cardiovasculaires sont objectifs", correct: false },
+          { letter: "B", text: "Élevé—l'évaluation non en aveugle des événements cardiovasculaires gonfle les effets", correct: true },
+          { letter: "C", text: "Peu clair—nous avons besoin de plus d'informations sur le comité", correct: false },
+          { letter: "D", text: "Non applicable—les essais chirurgicaux ne peuvent pas être en aveugle", correct: false }
+        ],
+        feedback: {
+          correct: "Correct ! Même les résultats 'objectifs' comme l'IM impliquent des jugements (troponines limites, interprétations d'ECG). Les études montrent que l'évaluation non en aveugle gonfle les effets de 10-20%. Les évaluateurs des résultats devraient toujours être en aveugle quand c'est possible, quelle que soit la mise en aveugle de l'intervention.",
+          incorrect: "Les événements cardiovasculaires nécessitent une interprétation—élévations de troponine limites, changements d'ECG, classification des symptômes. Les évaluateurs non en aveugle favorisent systématiquement l'intervention. L'évaluation des résultats devrait être en aveugle même lorsque la mise en aveugle de l'intervention est impossible."
+        }
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "La Violation de l'ITT", title: "Les Patients Manquants de Roche",
+        text: "Dans les essais du Tamiflu, Roche a exclu des patients de l'analyse après la randomisation. Certains ont été exclus pour 'violations du protocole'—mais les violations se produisaient souvent <strong>après</strong> que les patients aient pris le médicament et ressenti des effets secondaires. Les patients qui ont développé des complications ont été rétroactivement considérés comme des 'violateurs du protocole' et retirés.",
+        followup: "L'analyse en intention de traiter (ITT) existe précisément pour empêcher cela. Une fois randomisé, toujours analysé—peu importe ce qui se passe ensuite. Exclure des patients après la randomisation détruit l'équilibre que la randomisation a créé. Les exclusions sélectives de Roche ont retiré les patients qui avaient des résultats défavorables, faisant paraître le Tamiflu plus sûr et plus efficace qu'il ne l'était. La revue Cochrane a abaissé la certitude spécifiquement pour ces violations de l'ITT."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "🚪", title: "Scénario : Les Exclusions Post-Randomisation",
+        xp: 25,
+        scenario: "Un essai randomise 500 patients par bras. L'article rapporte les résultats pour 420 vs. 380 patients, avec 80 et 120 exclusions respectivement. Les raisons incluent : 'retrait du consentement', 'perdu de vue', et 'déviation du protocole'. Plus de patients ont été exclus du bras contrôle.",
+        question: "Quelle préoccupation de risque de biais cela soulève-t-il ?",
+        options: [
+          { letter: "A", text: "Aucune préoccupation—les exclusions arrivent dans chaque essai", correct: false },
+          { letter: "B", text: "Haut risque de biais d'attrition—les exclusions différentielles détruisent l'équilibre de randomisation", correct: true },
+          { letter: "C", text: "Faible risque si les raisons sont documentées", correct: false },
+          { letter: "D", text: "Peu clair—nous devons savoir pourquoi les contrôles ont été plus exclus", correct: false }
+        ],
+        feedback: {
+          correct: "Correct ! L'attrition différentielle (120 vs. 80 exclusions) suggère que les groupes ne sont plus comparables. Si les patients contrôles qui ne s'amélioraient pas étaient plus susceptibles d'abandonner, les contrôles restants semblent plus sains qu'ils ne devraient l'être. Cela gonfle le bénéfice apparent du traitement.",
+          incorrect: "Les exclusions différentielles (120 vs. 80) brisent la randomisation. Les groupes restants ne sont plus équilibrés. Si les patients contrôles plus malades ont abandonné, le groupe contrôle semble artificiellement sain. GRADE exige d'abaisser pour une attrition différentielle substantielle."
+        }
+      }},
+      { type: "story", theme: "dark", content: {
+        label: "L'Écart d'Enregistrement", title: "Les Résultats Qui Ont Disparu",
+        text: "Une revue systématique de l'enregistrement des essais a trouvé que <strong>31% des essais</strong> changeaient leur critère principal entre l'enregistrement et la publication. Les changements n'étaient pas aléatoires—ils favorisaient systématiquement les résultats positifs. Les résultats qui montraient un bénéfice étaient promus au rang de principaux; les résultats ne montrant aucun effet étaient rétrogradés ou disparaissaient.",
+        followup: "Le reporting sélectif des résultats est invisible sans comparaison avec l'enregistrement. Un essai pourrait enregistrer cinq résultats, trouver un bénéfice dans un seul, et publier seulement celui-ci comme résultat 'principal'. Le lecteur voit un essai positif. La réalité : 4 des 5 résultats n'ont rien montré. L'enregistrement PROSPERO pour les revues systématiques et ClinicalTrials.gov pour les essais existent spécifiquement pour combattre cela. Lors de l'évaluation du risque de biais, comparez toujours les résultats publiés aux protocoles enregistrés."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "📋", title: "Scénario : Le Changement de Critère Principal",
+        xp: 25,
+        scenario: "Vous comparez un essai publié à son enregistrement. L'enregistrement liste 'décès cardiovasculaire' comme principal. La publication liste 'composite de décès CV, IM ou AVC' comme principal et le rapporte comme significatif. Le décès cardiovasculaire seul est enterré dans un tableau et ne montre aucune différence significative.",
+        question: "Quelle évaluation du risque de biais est appropriée ?",
+        options: [
+          { letter: "A", text: "Faible—les critères composites sont cliniquement raisonnables", correct: false },
+          { letter: "B", text: "Élevé—c'est un changement de critère pour atteindre la significativité", correct: true },
+          { letter: "C", text: "Peu clair—les auteurs peuvent avoir eu de bonnes raisons", correct: false },
+          { letter: "D", text: "Faible si le composite était pré-spécifié dans le protocole", correct: false }
+        ],
+        feedback: {
+          correct: "Correct ! Passer d'un critère étroit (décès CV) à un composite plus large (décès CV/IM/AVC) après avoir vu que le critère étroit a échoué est un changement de critère classique. Les 31% des essais qui font cela gonflent systématiquement les résultats positifs.",
+          incorrect: "C'est un changement de critère—le critère principal enregistré a échoué, donc un composite plus large a été promu. La significativité du composite peut être entièrement due aux composants moins importants. Comparez chaque publication à son enregistrement."
+        }
+      }},
+      { type: "checklist", theme: "dark", content: {
+        title: "Domaines du Risque de Biais (ECR)",
+        items: [
+          "Génération de séquence aléatoire — La randomisation était-elle vraiment aléatoire ?",
+          "Dissimulation de l'allocation — Quelqu'un pouvait-il prédire les affectations ?",
+          "Mise en aveugle des participants/personnel — Savaient-ils le traitement ?",
+          "Mise en aveugle de l'évaluation des résultats — Les évaluateurs savaient-ils le traitement ?",
+          "Données de résultats incomplètes — L'attrition était-elle équilibrée et expliquée ?",
+          "Reporting sélectif — Tous les résultats enregistrés sont-ils rapportés ?",
+          "Autre biais — Déséquilibres de base, arrêt précoce, etc."
+        ]
+      }},
+      { type: "quiz", theme: "dark", content: {
+        question: "Pourquoi GRADE abaisse-t-il pour l'évaluation des résultats en ouvert même quand les résultats semblent 'objectifs' ?",
+        options: [
+          { text: "Les essais en ouvert sont toujours de qualité inférieure", correct: false },
+          { text: "Même les résultats objectifs impliquent des jugements affectés par la connaissance du traitement", correct: true },
+          { text: "Les réglementations exigent une évaluation en aveugle", correct: false },
+          { text: "C'est une convention conservatrice, pas basée sur des preuves", correct: false }
+        ],
+        xp: 20,
+        feedback: {
+          correct: "Exact ! IM limite, symptômes d'AVC incertains, changements d'ECG discutables—tous impliquent une interprétation. Les études montrent que l'évaluation non en aveugle favorise systématiquement le traitement connu de 10-20% même pour des critères 'durs'.",
+          incorrect: "La recherche montre que l'évaluation non en aveugle gonfle les effets même pour des résultats qui semblent objectifs. Les cas limites sont interprétés en faveur de l'effet attendu. C'est le biais de détection."
+        }
+      }}
+    ]
+  }
+];
+</script>
+</body>
+</html>

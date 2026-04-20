@@ -1,0 +1,2915 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>जब परीक्षण झूठ बोलता है: अल्टीमेट डीटीए कोर्स (V3)</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&amp;family=Source+Sans+Pro:wght@300;400;600;700&amp;display=swap" rel="stylesheet"/>
+<style>
+    :root {
+      --navy: #1E2761;
+      --deep-navy: #141B3D;
+      --gold: #D4AF37;
+      --cream: #FAF8F5;
+      --text: #2D3748;
+      --light-text: #718096;
+      --red: #C53030;
+      --green: #22c55e;
+      --teal: #00D4AA;
+      --purple: #A855F7;
+      --orange: #F97316;
+      --blood-red: #8B0000;
+      --pink: #EC4899;
+      --transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      height: 100%;
+      font-family: 'Source Sans Pro', sans-serif;
+      background: var(--deep-navy);
+      color: var(--cream);
+    }
+
+    .course-container { display: flex; height: 100vh; overflow: hidden; }
+
+    .sidebar {
+      width: 280px;
+      background: linear-gradient(180deg, var(--deep-navy) 0%, #0a0f1a 100%);
+      border-right: 1px solid rgba(212,175,55,0.2);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    /* mobile sidebar handled by hamburger toggle below */
+
+    .sidebar-header { padding: 1.25rem; border-bottom: 1px solid rgba(212,175,55,0.2); }
+    .sidebar-header h1 { font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; font-weight: 700; color: var(--gold); }
+    .sidebar-header p { font-size: 0.7rem; color: rgba(255,255,255,0.6); }
+
+    .module-list { flex: 1; overflow-y: auto; padding: 0.5rem 0; }
+
+    .module-item {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.5rem 0.75rem; cursor: pointer;
+      border-left: 3px solid transparent; transition: all 0.2s;
+    }
+    .module-item:hover { background: rgba(212,175,55,0.1); }
+    .module-item.active { background: rgba(212,175,55,0.15); border-left-color: var(--gold); }
+    .module-item.completed .module-number { background: var(--green); color: white; }
+
+    .module-number {
+      width: 22px; height: 22px; border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.65rem; font-weight: 700; flex-shrink: 0;
+    }
+    .module-item.active .module-number { background: var(--gold); color: var(--navy); }
+
+    .module-info { flex: 1; min-width: 0; }
+    .module-title { font-size: 0.75rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .module-subtitle { font-size: 0.6rem; color: rgba(255,255,255,0.5); }
+
+    .sidebar-footer {
+      padding: 0.6rem 0.75rem; border-top: 1px solid rgba(212,175,55,0.2);
+      font-size: 0.6rem; color: rgba(255,255,255,0.4); line-height: 1.4;
+    }
+
+    .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+    .content-header {
+      padding: 0.6rem 1.25rem;
+      background: rgba(0,0,0,0.3);
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .breadcrumb { font-size: 0.75rem; color: rgba(255,255,255,0.6); }
+    .breadcrumb span { color: var(--gold); }
+    .header-actions { display: flex; gap: 0.4rem; }
+
+    .btn {
+      padding: 0.35rem 0.7rem; border: 1px solid rgba(212,175,55,0.3);
+      border-radius: 6px; background: rgba(255,255,255,0.05);
+      color: var(--cream); font-size: 0.7rem; cursor: pointer; transition: all 0.2s;
+    }
+    .btn:hover { background: rgba(212,175,55,0.2); border-color: var(--gold); }
+    .btn.primary { background: var(--gold); color: var(--navy); border-color: var(--gold); font-weight: 600; }
+
+    .content-body { flex: 1; overflow: hidden; display: flex; }
+    .slides-container { flex: 1; position: relative; overflow: hidden; }
+    .module-slides { display: none; width: 100%; height: 100%; }
+    .module-slides.active { display: block; }
+
+    .slide {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      display: flex; flex-direction: column; justify-content: flex-start; align-items: center;
+      padding: 1.25rem 1.25rem 3rem 1.25rem; padding-top: 1.5rem;
+      opacity: 0; visibility: hidden;
+      transition: opacity var(--transition), visibility var(--transition);
+      overflow-y: auto; overflow-x: hidden;
+    }
+    .slide .content { margin-top: auto; margin-bottom: auto; }
+    .slide.active { opacity: 1; visibility: visible; }
+    .slide.dark { background: var(--deep-navy); }
+    .slide.black { background: #000; }
+    .slide.gradient { background: linear-gradient(135deg, var(--deep-navy) 0%, #2a1a4a 100%); }
+    .slide.blood { background: linear-gradient(135deg, #1a0a0a 0%, #2d1515 100%); }
+    .slide.hope { background: linear-gradient(135deg, #0a1a0a 0%, #152d15 100%); }
+    .slide.fraud { background: linear-gradient(135deg, #1a1a0a 0%, #2d2515 100%); }
+    .slide.tb { background: linear-gradient(135deg, #0a0a1a 0%, #15152d 100%); }
+    .slide.des { background: linear-gradient(135deg, #1a0a1a 0%, #2d152d 100%); }
+
+    .title { font-family: 'Cormorant Garamond', serif; font-size: clamp(1.4rem, 3.5vw, 2.4rem); font-weight: 700; margin-bottom: 0.6rem; line-height: 1.2; }
+    .title.gold { color: var(--gold); }
+    .title.red { color: var(--red); }
+    .title.green { color: var(--green); }
+    .title.pink { color: var(--pink); }
+
+    .subtitle { font-size: clamp(0.85rem, 1.8vw, 1.1rem); color: rgba(255,255,255,0.7); margin-bottom: 1.25rem; }
+
+    .big-number { font-family: 'Cormorant Garamond', serif; font-size: clamp(2.5rem, 10vw, 6rem); font-weight: 700; line-height: 1; }
+    .big-number.red { color: var(--red); }
+    .big-number.gold { color: var(--gold); }
+    .big-number.green { color: var(--green); }
+
+    .refrain {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.1rem, 2.5vw, 1.7rem);
+      font-style: italic; color: var(--gold);
+      text-align: center; max-width: 700px; line-height: 1.4;
+    }
+    .refrain.warning { color: var(--red); border-left: 4px solid var(--red); padding-left: 1.25rem; text-align: left; }
+    .refrain.hope { color: var(--green); }
+
+    .rhetorical {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1rem, 2.2vw, 1.5rem);
+      color: rgba(255,255,255,0.9);
+      text-align: center; max-width: 600px; line-height: 1.5;
+    }
+    .rhetorical em { color: var(--gold); font-style: normal; }
+
+    .simple-box {
+      background: linear-gradient(135deg, rgba(0,212,170,0.1), rgba(0,0,0,0.2));
+      border: 2px solid var(--teal); border-radius: 10px;
+      padding: 1rem; max-width: 520px; margin: 0.6rem 0;
+    }
+    .simple-box .simple-title { color: var(--teal); font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; margin-bottom: 0.4rem; }
+    .simple-box .simple-text { font-size: 0.9rem; line-height: 1.5; }
+    .simple-box .simple-text strong { color: var(--gold); }
+
+    .story-card {
+      background: rgba(0,0,0,0.3); border-left: 4px solid var(--gold);
+      padding: 1rem 1.25rem; max-width: 600px; margin: 0.6rem 0;
+    }
+    .story-card .place { font-size: 0.65rem; color: var(--gold); letter-spacing: 0.1em; margin-bottom: 0.35rem; }
+    .story-card .narrative { font-family: 'Cormorant Garamond', serif; font-size: 0.95rem; line-height: 1.5; color: rgba(255,255,255,0.9); }
+    .story-card .source { font-size: 0.6rem; color: rgba(255,255,255,0.5); margin-top: 0.6rem; font-style: italic; }
+    .story-card.pink { border-left-color: var(--pink); }
+    .story-card.pink .place { color: var(--pink); }
+
+    /* DECISION TREES */
+    .decision-tree {
+      background: rgba(0,0,0,0.4); border: 2px solid var(--gold);
+      border-radius: 12px; padding: 1rem; max-width: 650px; width: 100%;
+    }
+    .decision-tree h4 { color: var(--gold); font-family: 'Cormorant Garamond', serif; font-size: 0.9rem; margin-bottom: 0.75rem; text-align: center; }
+
+    .tree-row { display: flex; justify-content: center; gap: 0.4rem; margin: 0.3rem 0; flex-wrap: wrap; }
+    .tree-node {
+      background: var(--navy); border: 2px solid var(--gold);
+      border-radius: 6px; padding: 0.4rem 0.6rem;
+      text-align: center; min-width: 70px; font-size: 0.7rem;
+    }
+    .tree-node.root { background: var(--gold); color: var(--navy); font-weight: 700; }
+    .tree-node.question { background: var(--purple); color: white; border-color: var(--purple); }
+    .tree-node.positive { background: rgba(197,48,48,0.3); border-color: var(--red); }
+    .tree-node.negative { background: rgba(34,197,94,0.3); border-color: var(--green); }
+    .tree-node.action { background: var(--teal); color: var(--navy); border-color: var(--teal); }
+    .tree-node.warning { background: var(--orange); color: white; border-color: var(--orange); }
+    .tree-node.tp { background: var(--green); color: white; border-color: var(--green); }
+    .tree-node.fp { background: var(--red); color: white; border-color: var(--red); }
+    .tree-node.fn { background: var(--orange); color: white; border-color: var(--orange); }
+    .tree-node.tn { background: var(--teal); color: var(--navy); border-color: var(--teal); }
+    .tree-node.pink { background: var(--pink); color: white; border-color: var(--pink); }
+    .tree-node small { display: block; font-size: 0.55rem; opacity: 0.85; margin-top: 0.15rem; }
+
+    .tree-arrow { color: var(--gold); font-size: 1rem; text-align: center; margin: 0.15rem 0; }
+    .tree-branch { display: flex; gap: 1.5rem; justify-content: center; margin-top: 0.25rem; flex-wrap: wrap; }
+    .tree-branch-item { display: flex; flex-direction: column; align-items: center; }
+    .tree-label { font-size: 0.55rem; color: rgba(255,255,255,0.6); margin: 0.15rem 0; }
+
+    /* SROC Visualization */
+    .sroc-container {
+      background: rgba(0,0,0,0.5); border: 2px solid var(--purple);
+      border-radius: 12px; padding: 1rem; max-width: 400px; width: 100%;
+    }
+    .sroc-container h4 { color: var(--purple); text-align: center; margin-bottom: 0.75rem; font-family: 'Cormorant Garamond', serif; font-size: 0.9rem; }
+    .sroc-plot {
+      position: relative; width: 100%; height: 200px;
+      background: linear-gradient(135deg, rgba(168,85,247,0.1) 0%, rgba(0,0,0,0.3) 100%);
+      border: 1px solid rgba(255,255,255,0.2); border-radius: 8px;
+    }
+    .sroc-axis-label { position: absolute; font-size: 0.55rem; color: rgba(255,255,255,0.6); }
+    .sroc-axis-label.x { bottom: -18px; left: 50%; transform: translateX(-50%); }
+    .sroc-axis-label.y { top: 50%; left: -40px; transform: rotate(-90deg) translateX(-50%); transform-origin: center; }
+    .sroc-curve { position: absolute; top: 10%; left: 10%; width: 80%; height: 80%; }
+    .sroc-curve svg { width: 100%; height: 100%; }
+    .sroc-dot { position: absolute; width: 8px; height: 8px; background: var(--gold); border-radius: 50%; transform: translate(-50%, -50%); }
+    .sroc-legend { display: flex; gap: 1rem; justify-content: center; margin-top: 0.5rem; font-size: 0.6rem; }
+    .sroc-legend-item { display: flex; align-items: center; gap: 0.25rem; }
+    .sroc-legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+    /* Fagan Nomogram */
+    .fagan-container {
+      background: rgba(0,0,0,0.4); border: 2px solid var(--purple);
+      border-radius: 12px; padding: 1rem; max-width: 550px; width: 100%;
+    }
+    .fagan-container h4 { color: var(--purple); text-align: center; margin-bottom: 0.75rem; font-family: 'Cormorant Garamond', serif; font-size: 0.9rem; }
+    .fagan-visual {
+      display: flex; justify-content: space-between; align-items: stretch;
+      height: 180px; position: relative; padding: 0 0.75rem;
+    }
+    .fagan-scale {
+      display: flex; flex-direction: column; justify-content: space-between;
+      font-size: 0.6rem; color: rgba(255,255,255,0.7); width: 55px; text-align: center;
+    }
+    .fagan-scale-title { font-size: 0.55rem; color: var(--gold); margin-bottom: 0.2rem; }
+    .fagan-line { width: 2px; background: var(--gold); position: relative; }
+    .fagan-marker {
+      position: absolute; width: 10px; height: 10px; border-radius: 50%;
+      background: var(--gold); left: -4px; transform: translateY(-50%);
+    }
+    .fagan-result { font-size: 0.65rem; text-align: center; margin-top: 0.4rem; color: rgba(255,255,255,0.8); }
+
+    /* Interactive Calculator */
+    .calculator {
+      background: rgba(0,0,0,0.4); border: 2px solid var(--teal);
+      border-radius: 12px; padding: 1rem; max-width: 500px; width: 100%;
+    }
+    .calculator h4 { color: var(--teal); text-align: center; margin-bottom: 0.75rem; font-family: 'Cormorant Garamond', serif; font-size: 0.9rem; }
+    .calc-row { display: flex; align-items: center; gap: 0.75rem; margin: 0.5rem 0; }
+    .calc-label { font-size: 0.75rem; min-width: 100px; }
+    .calc-slider { flex: 1; -webkit-appearance: none; height: 6px; border-radius: 3px; background: rgba(255,255,255,0.2); }
+    .calc-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--gold); cursor: pointer; }
+    .calc-value { font-size: 0.8rem; font-weight: 700; color: var(--gold); min-width: 50px; text-align: right; }
+    .calc-result { background: rgba(34,197,94,0.2); padding: 0.75rem; border-radius: 8px; margin-top: 0.75rem; text-align: center; }
+    .calc-result .big { font-size: 1.5rem; font-weight: 700; color: var(--gold); }
+    .calc-result .label { font-size: 0.7rem; color: rgba(255,255,255,0.7); }
+
+    /* 2x2 Table */
+    .matrix-container { background: rgba(0,0,0,0.3); border-radius: 10px; padding: 0.75rem; max-width: 420px; }
+    .matrix-container h4 { color: var(--gold); text-align: center; margin-bottom: 0.6rem; font-family: 'Cormorant Garamond', serif; font-size: 0.85rem; }
+    .matrix-table { width: 100%; border-collapse: collapse; font-size: 0.75rem; }
+    .matrix-table th, .matrix-table td { border: 1px solid rgba(255,255,255,0.2); padding: 0.5rem; text-align: center; }
+    .matrix-table th { background: var(--navy); color: var(--gold); font-size: 0.65rem; }
+    .matrix-table .tp { background: rgba(34,197,94,0.3); }
+    .matrix-table .fp { background: rgba(197,48,48,0.3); }
+    .matrix-table .fn { background: rgba(249,115,22,0.3); }
+    .matrix-table .tn { background: rgba(0,212,170,0.3); }
+
+    /* Worked Example */
+    .worked-example {
+      background: rgba(0,0,0,0.4); border: 2px solid var(--teal);
+      border-radius: 10px; padding: 1rem; max-width: 550px; width: 100%;
+    }
+    .worked-example h4 { color: var(--teal); font-size: 0.85rem; margin-bottom: 0.6rem; }
+    .worked-example .step { margin: 0.4rem 0; font-size: 0.8rem; }
+    .worked-example .step-num { color: var(--gold); font-weight: 700; }
+    .worked-example .calculation { font-family: 'Cormorant Garamond', serif; font-size: 0.95rem; color: var(--gold); margin: 0.25rem 0; }
+    .worked-example .result { background: rgba(34,197,94,0.2); padding: 0.4rem; border-radius: 6px; margin-top: 0.4rem; }
+
+    /* QUADAS-2 */
+    .quadas-container {
+      background: rgba(0,0,0,0.4); border: 2px solid var(--pink);
+      border-radius: 12px; padding: 1rem; max-width: 600px; width: 100%;
+    }
+    .quadas-container h4 { color: var(--pink); text-align: center; margin-bottom: 0.75rem; font-family: 'Cormorant Garamond', serif; font-size: 0.9rem; }
+    .quadas-domain {
+      display: flex; align-items: flex-start; gap: 0.6rem; margin: 0.5rem 0;
+      padding: 0.5rem; background: rgba(255,255,255,0.05); border-radius: 6px;
+    }
+    .quadas-icon { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; flex-shrink: 0; }
+    .quadas-icon.risk { background: var(--red); }
+    .quadas-icon.concern { background: var(--orange); }
+    .quadas-content h5 { font-size: 0.8rem; color: var(--cream); margin-bottom: 0.15rem; }
+    .quadas-content p { font-size: 0.7rem; color: rgba(255,255,255,0.7); }
+
+    .stats-grid { display: flex; gap: 0.6rem; margin: 0.75rem 0; flex-wrap: wrap; justify-content: center; }
+    .stat-box { background: var(--navy); padding: 0.6rem 0.8rem; text-align: center; min-width: 90px; border-radius: 8px; }
+    .stat-value { font-family: 'Cormorant Garamond', serif; font-size: clamp(1.1rem, 2.2vw, 1.4rem); font-weight: 700; }
+    .stat-label { font-size: 0.6rem; opacity: 0.8; margin-top: 0.15rem; }
+
+    .death-toll {
+      background: linear-gradient(135deg, rgba(197,48,48,0.3), rgba(0,0,0,0.5));
+      border: 2px solid var(--red); padding: 1.25rem; text-align: center;
+      max-width: 320px; border-radius: 10px;
+    }
+    .death-toll .number { font-family: 'Cormorant Garamond', serif; font-size: 2.5rem; font-weight: 700; color: var(--red); }
+    .death-toll .label { font-size: 0.8rem; color: rgba(255,255,255,0.8); margin-top: 0.35rem; }
+
+    .lesson-item { display: flex; align-items: flex-start; gap: 0.6rem; margin: 0.4rem 0; max-width: 650px; text-align: left; }
+    .lesson-number {
+      background: var(--gold); color: var(--navy);
+      width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
+      font-weight: 700; flex-shrink: 0; border-radius: 4px; font-size: 0.7rem;
+    }
+    .lesson-content h4 { font-size: 0.85rem; font-weight: 700; color: var(--cream); margin-bottom: 0.1rem; }
+    .lesson-content p { font-size: 0.75rem; color: rgba(255,255,255,0.7); }
+
+    .formula-box {
+      background: rgba(0,0,0,0.4); border: 1px solid var(--purple);
+      border-radius: 8px; padding: 0.6rem 1rem;
+      font-family: 'Cormorant Garamond', serif; font-size: 1rem;
+      text-align: center; max-width: 420px; margin: 0.6rem 0;
+    }
+    .formula-box .formula { color: var(--gold); margin: 0.3rem 0; }
+    .formula-box .label { font-size: 0.7rem; color: rgba(255,255,255,0.6); font-family: 'Source Sans Pro', sans-serif; }
+
+    .gold-line { width: 100px; height: 2px; background: var(--gold); margin: 0.75rem auto; }
+
+    .content { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 850px; }
+
+    .slide.active .animate { animation: fadeUp 0.5s ease-out forwards; }
+    .slide.active .animate.delay-1 { animation-delay: 0.1s; }
+    .slide.active .animate.delay-2 { animation-delay: 0.2s; }
+    .slide.active .animate.delay-3 { animation-delay: 0.3s; }
+    .slide.active .animate.delay-4 { animation-delay: 0.4s; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+    .animate { opacity: 0; }
+
+    .slide-nav {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      display: flex; justify-content: space-between; align-items: flex-end;
+      padding: 0.6rem 0.75rem 0.75rem 0.75rem; z-index: 100; pointer-events: none;
+    }
+    .nav-btn {
+      background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2);
+      color: white; font-size: 1rem; cursor: pointer; opacity: 0.6;
+      padding: 0.35rem 0.5rem; border-radius: 6px; pointer-events: auto; transition: all 0.2s;
+    }
+    .nav-btn:hover { opacity: 1; border-color: var(--gold); }
+    .nav-center { display: flex; flex-direction: column; align-items: center; gap: 0.15rem; pointer-events: auto; }
+    .slide-counter { color: rgba(255,255,255,0.6); font-size: 0.7rem; }
+    .progress { display: flex; gap: 2px; flex-wrap: wrap; justify-content: center; max-width: 160px; }
+    .progress-dot { width: 4px; height: 4px; border-radius: 50%; background: rgba(255,255,255,0.25); cursor: pointer; }
+    .progress-dot.active { background: var(--gold); transform: scale(1.2); }
+
+    .quiz-container { background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.3); padding: 1rem; max-width: 600px; width: 100%; border-radius: 8px; }
+    .quiz-question { font-family: 'Cormorant Garamond', serif; font-size: 1rem; margin-bottom: 0.6rem; color: var(--gold); line-height: 1.4; }
+    .quiz-options { display: flex; flex-direction: column; gap: 0.35rem; }
+    .quiz-option { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); padding: 0.5rem 0.75rem; cursor: pointer; border-radius: 6px; font-size: 0.8rem; text-align: left; }
+    .quiz-option:hover { background: rgba(212,175,55,0.1); border-color: var(--gold); }
+    .quiz-option.correct { background: rgba(34,197,94,0.2); border-color: var(--green); }
+    .quiz-option.incorrect { background: rgba(197,48,48,0.2); border-color: var(--red); }
+    .quiz-feedback { margin-top: 0.6rem; padding: 0.6rem; border-radius: 6px; display: none; font-size: 0.8rem; }
+    .quiz-feedback.show { display: block; }
+    .quiz-feedback.correct { background: rgba(34,197,94,0.2); border: 1px solid var(--green); }
+    .quiz-feedback.incorrect { background: rgba(197,48,48,0.2); border: 1px solid var(--red); }
+
+    .references { background: rgba(0,0,0,0.3); border: 1px solid rgba(212,175,55,0.3); border-radius: 8px; padding: 1rem; max-width: 600px; text-align: left; font-size: 0.65rem; line-height: 1.6; }
+    .references h4 { color: var(--gold); font-size: 0.8rem; margin-bottom: 0.6rem; }
+    .references ol { padding-left: 1rem; }
+    .references li { margin-bottom: 0.3rem; color: rgba(255,255,255,0.8); }
+
+    /* Patient Decision Aid */
+    .decision-aid {
+      background: linear-gradient(135deg, rgba(212,175,55,0.1), rgba(0,0,0,0.3));
+      border: 2px solid var(--gold); border-radius: 12px; padding: 1rem; max-width: 600px; width: 100%;
+    }
+    .decision-aid h4 { color: var(--gold); text-align: center; margin-bottom: 0.75rem; font-family: 'Cormorant Garamond', serif; font-size: 0.9rem; }
+    .decision-aid-row { display: flex; justify-content: space-between; margin: 0.5rem 0; padding: 0.5rem; background: rgba(0,0,0,0.2); border-radius: 6px; }
+    .decision-aid-label { font-size: 0.75rem; }
+    .decision-aid-value { font-size: 0.75rem; font-weight: 700; }
+    .decision-aid-value.benefit { color: var(--green); }
+    .decision-aid-value.harm { color: var(--red); }
+    .decision-aid-question { text-align: center; margin-top: 0.75rem; font-style: italic; color: var(--gold); font-size: 0.85rem; }
+
+    .text-center { text-align: center; }
+    .mobile-menu-toggle{display:none;position:fixed;top:12px;left:12px;z-index:1001;background:#1E2761;border:1px solid #D4AF37;color:#D4AF37;width:40px;height:40px;border-radius:8px;font-size:1.2rem;cursor:pointer;align-items:center;justify-content:center;}
+    @media(max-width:768px){.mobile-menu-toggle{display:flex;}.sidebar{transform:translateX(-100%);transition:transform 0.3s ease;position:fixed;z-index:1000;height:100vh;}.sidebar.open{transform:translateX(0);}.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:999;}.sidebar-overlay.show{display:block;}}
+    .skip-link{position:absolute;top:-40px;left:0;background:#D4AF37;color:#1E2761;padding:8px 16px;z-index:100;transition:top 0.3s;font-family:'Source Sans Pro',sans-serif;text-decoration:none;font-weight:600;}.skip-link:focus{top:0;}
+
+    /* Focus-visible styles for keyboard navigation */
+    :focus-visible {
+      outline: 2px solid var(--gold, #D4AF37);
+      outline-offset: 2px;
+    }
+
+    :focus:not(:focus-visible) {
+      outline: none;
+    }
+
+    button:focus-visible,
+    a:focus-visible,
+    [role="button"]:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible {
+      outline: 2px solid var(--gold, #D4AF37);
+      outline-offset: 2px;
+      box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.3);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<button aria-expanded="false" aria-label="Toggle navigation menu" class="mobile-menu-toggle" onclick="toggleSidebar()">☰</button>
+<div class="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show');"></div>
+<div class="course-container">
+<nav aria-label="पाठ्यक्रम नेविगेशन" class="sidebar" role="navigation">
+<div class="sidebar-header">
+<a href="index.html" onmouseout="this.style.color='rgba(212,175,55,0.7)'" onmouseover="this.style.color='#D4AF37'" style="display:block;font-size:0.7rem;color:rgba(212,175,55,0.7);text-decoration:none;margin-bottom:0.5rem;">← Course Library</a>
+<h1>जब परीक्षण झूठ बोलता है</h1>
+<p>अल्टीमेट डीटीए कोर्स (V3)</p>
+</div>
+<div class="module-list" id="moduleList"></div>
+<div class="sidebar-footer">
+        "Every positive has a price.<br/>Every negative has a cost."
+      </div>
+</nav>
+<main class="main-content" id="main-content">
+<header class="content-header">
+<div class="breadcrumb">DTA &gt; <span id="currentModule">The Fraud</span></div>
+<div class="header-actions">
+<button class="btn" onclick="goToModule(24)">References</button>
+<button class="btn primary" onclick="nextSlide()">Continue</button>
+</div>
+</header>
+<div class="content-body">
+<div class="slides-container">
+ ==================== मॉड्यूल 1: धोखाधड़ी (थेरानोस) ==================== 
+<div class="module-slides active" data-module="1">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  क्या आपने उस महिला की कहानी नहीं सुनी है<br/>
+                  who promised to <em>खून की एक बूंद से बदल जाती है दुनिया</em>,<br/>
+                  who raised billions on a test that <em>never worked</em>?
+                </div>
+</div>
+</div>
+<div class="slide fraud">
+<div class="content text-center">
+<div class="title gold animate">Palo Alto, 2003</div>
+<div class="story-card animate delay-1">
+<div class="place">STANFORD UNIVERSITY</div>
+<div class="narrative">
+                    एक उन्नीस वर्षीय व्यक्ति ने एक दृष्टि के साथ पढ़ाई छोड़ दी: एक बूंद से सैकड़ों रक्त परीक्षण।
+                    <br/><br/>
+                    Investors believed. Walgreens believed. The Pentagon believed.
+                    <br/><br/>
+<strong>They gave her $9 billion.</strong>
+<br/><br/>
+                    लेकिन परीक्षण में गलत नतीजे आये. मरीजों को बताया गया कि उन्हें एचआईवी है जबकि उन्हें एचआईवी नहीं था। मरीजों को बताया गया कि जब वे थे तो उनका रक्त सामान्य था <strong>dying</strong>.
+                  </div>
+<div class="source">Carreyrou J. Bad Blood. 2018</div>
+</div>
+</div>
+</div>
+<div class="slide blood">
+<div class="content text-center">
+<div class="title red animate">धोखे का निर्णय वृक्ष</div>
+<div class="decision-tree animate delay-1">
+<h4>What Theranos Did vs. What Should Happen</h4>
+<div class="tree-row">
+<div class="tree-node root">New Diagnostic Test</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">SHOULD DO</div>
+<div class="tree-node action">Validate Against Gold Standard</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node action">Publish TP/FP/FN/TN</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node tp">FDA Approval</div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">THERANOS DID</div>
+<div class="tree-node warning">Skip Validation</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node warning">Hide Failures</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node fp">Harm Patients</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  "और परीक्षण में झूठ बोला गया,<br/>
+                  और झूठ को निश्चितता का जामा पहनाया गया,<br/>
+                  और किसी ने 2×2 टेबल के लिए नहीं पूछा।"
+                </div>
+<div class="gold-line animate delay-2"></div>
+<p class="animate delay-3" style="color:rgba(255,255,255,0.6);font-style:italic;font-size:0.85rem;">
+                  यही कारण है कि हम डायग्नोस्टिक टेस्ट सटीकता का अध्ययन करते हैं।
+                </p>
+</div>
+</div>
+</div>
+ ==================== मॉड्यूल 2: चार परिणाम =================== 
+<div class="module-slides" data-module="2">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  When a test speaks,<br/>
+                  केवल <em>four possible truths</em>.
+                  <br/><br/>
+                  दो ही आशीर्वाद हैं। दो अभिशाप हैं।
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">परिणामों का वृक्ष</div>
+<div class="decision-tree animate delay-1">
+<h4>Every Test Result Has a Reality Behind It</h4>
+<div class="tree-row"><div class="tree-node root">Patient Tested</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">सत्य क्या है?</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">Has Disease</div>
+<div class="tree-node positive">D+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row" style="gap:0.4rem;">
+<div class="tree-node tp">TP<small>Test +</small></div>
+<div class="tree-node fn">FN<small>Test -</small></div>
+</div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">No Disease</div>
+<div class="tree-node negative">D-</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row" style="gap:0.4rem;">
+<div class="tree-node fp">FP<small>Test +</small></div>
+<div class="tree-node tn">TN<small>Test -</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">पवित्र 2×2 टेबल</div>
+<div class="matrix-container animate delay-1">
+<h4>HIV Rapid Test Example (Real Data)</h4>
+<table class="matrix-table">
+<tr><th></th><th>HIV+</th><th>HIV-</th><th>Total</th></tr>
+<tr><th>Test +</th><td class="tp"><strong>98</strong></td><td class="fp"><strong>3</strong></td><td>101</td></tr>
+<tr><th>Test -</th><td class="fn"><strong>2</strong></td><td class="tn"><strong>895</strong></td><td>897</td></tr>
+<tr><th>Total</th><td>100</td><td>898</td><td>998</td></tr>
+</table>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">इस तालिका से सारा सत्य आता है</div>
+<div class="simple-text">
+<strong>Sensitivity</strong> = 98/100 = 98%<br/>
+<strong>Specificity</strong> = 895/898 = 99.7%
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  "Two outcomes save. Two outcomes harm.<br/>
+                  टीपी, टीएन: परीक्षण बोला गया सच।<br/>
+                  एफपी, एफएन: परीक्षण झूठ बोला।<br/>
+                  Know them by name, for they determine fate."
+                </div>
+</div>
+</div>
+</div>
+ ==================== मॉड्यूल 3: एचआईवी विंडो अवधि ==================== 
+<div class="module-slides" data-module="3">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  क्या तुमने उस खून के बारे में नहीं सुना जिसका परीक्षण किया गया था,<br/>
+                  found <em>clean</em>,<br/>
+                  और हजारों को दिया गया-<br/>
+                  while <em>death swam within it</em>?
+                </div>
+</div>
+</div>
+<div class="slide blood">
+<div class="content text-center">
+<div class="title red animate">रक्त आपूर्ति संकट, 1985</div>
+<div class="story-card animate delay-1">
+<div class="place">UNITED STATES</div>
+<div class="narrative">
+                    When HIV testing began, doctors celebrated: they could now screen the blood supply.
+                    <br/><br/>
+                    लेकिन परीक्षण में एक था <strong>window period</strong>-संक्रमण के कुछ सप्ताह बाद जब वायरस मौजूद था लेकिन <strong>undetectable</strong>.
+                    <br/><br/>
+                    खून की जांच की गई. रक्त "नकारात्मक" था. खून चढ़ाया गया.
+                    <br/><br/>
+<strong>8,000-12,000 Americans</strong> बेहतर परीक्षणों से खिड़की बंद होने से पहले ट्रांसफ़्यूज़न के माध्यम से संक्रमित हो गए थे।
+                  </div>
+<div class="source">CDC. MMWR. 1987;36(49):833-840</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">The Window Period Decision Tree</div>
+<div class="decision-tree animate delay-1">
+<h4>Why False Negatives Are Deadly</h4>
+<div class="tree-row"><div class="tree-node root">Person Recently Infected</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">Time Since Infection?</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">&lt; 2 weeks</div>
+<div class="tree-node fn">Test NEGATIVE<small>Virus present!</small></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node fp" style="background:var(--blood-red);">Blood Donated<small>Others infected</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">&gt; 4 weeks</div>
+<div class="tree-node tp">Test POSITIVE<small>Correctly detected</small></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node action">Blood Discarded<small>Supply safe</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">समय के साथ संवेदनशीलता बदलती है</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box">
+<div class="stat-value" style="color:var(--red);">0%</div>
+<div class="stat-label">Day 1-7<br/>Eclipse period</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--orange);">~50%</div>
+<div class="stat-label">Day 14<br/>Seroconversion</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--gold);">~95%</div>
+<div class="stat-label">Day 21<br/>Most detected</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--green);">99.9%</div>
+<div class="stat-label">Day 45+<br/>Window closed</div>
+</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">THE LESSON</div>
+<div class="simple-text">
+<strong>संवेदनशीलता निश्चित नहीं है.</strong> It depends on <em>when</em> you test.
+                    A "99% sensitive" test may be 0% sensitive in early infection.
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  "और परीक्षण ने कहा 'साफ़','<br/>
+                  क्योंकि वायरस ने अभी तक अपना चेहरा नहीं दिखाया था।<br/>
+                  और खून बांटा गया,<br/>
+                  और संक्रमण मासूमों में फैल गया।”
+                </div>
+</div>
+</div>
+</div>
+ ==================== मॉड्यूल 4: देस त्रासदी ==================== 
+<div class="module-slides" data-module="4">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  क्या आपने मांओं को दी जाने वाली गोली के बारे में नहीं सुना है<br/>
+                  to <em>protect their pregnancies</em>,<br/>
+                  that planted <em>cancer in their daughters</em><br/>
+                  twenty years before it bloomed?
+                </div>
+</div>
+</div>
+<div class="slide des">
+<div class="content text-center">
+<div class="title pink animate">डेस त्रासदी, 1938-1971</div>
+<div class="story-card pink animate delay-1">
+<div class="place">UNITED STATES &amp; EUROPE</div>
+<div class="narrative">
+                    Diethylstilbestrol (DES) was given to millions of pregnant women to prevent miscarriage.
+                    <br/><br/>
+                    No proper clinical trial was ever conducted. Doctors <strong>assumed</strong> it worked
+                    because it seemed reasonable.
+                    <br/><br/>
+                    Decades later, their daughters developed a rare cancer: <strong>clear cell adenocarcinoma
+                    of the vagina</strong>. A cancer so rare it was a diagnostic signal in itself.
+                    <br/><br/>
+<strong>5-10 million women</strong> उजागर हुए. पीढ़ियों तक नुकसान हुआ।
+                  </div>
+<div class="source">Herbst AL et al. N Engl J Med. 1971;284:878-881</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">मान्यता निर्णय वृक्ष</div>
+<div class="decision-tree animate delay-1">
+<h4>What Should Have Happened</h4>
+<div class="tree-row"><div class="tree-node root">New Medical Intervention</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">क्या इसका उचित परीक्षण किया गया?</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">YES</div>
+<div class="tree-node action">Randomized Trial</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node action">Long-term Follow-up</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node tp">Know True Effects<small>लाभ और हानि</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">NO (DES)</div>
+<div class="tree-node warning">Assumption Only</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node warning">Widespread Use</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node fp">Hidden Harm<small>Discovered too late</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">डायग्नोस्टिक सिग्नल</div>
+<div class="simple-box animate delay-1">
+<div class="simple-title">जब दुर्लभता साक्ष्य बन जाती है</div>
+<div class="simple-text">
+                    युवा महिलाओं में योनि का क्लियर सेल एडेनोकार्सिनोमा इतना दुर्लभ था
+                    <strong>7 cases in one hospital</strong> triggered an investigation.
+                    <br/><br/>
+                    क्लस्टर स्वयं ही निदान परीक्षण था:
+                    <br/><strong>Sensitivity to DES exposure: nearly 100%</strong>
+<br/>यदि आपको इस उम्र में यह कैंसर है, तो आप लगभग निश्चित रूप से इसके संपर्क में आ चुके हैं।
+                  </div>
+</div>
+<div class="stats-grid animate delay-2">
+<div class="stat-box" style="background:var(--pink);">
+<div class="stat-value" style="color:white;">1:1000</div>
+<div class="stat-label">Risk of clear cell<br/>cancer in DES daughters</div>
+</div>
+<div class="stat-box" style="background:var(--red);">
+<div class="stat-value" style="color:white;">5-10M</div>
+<div class="stat-label">Women exposed<br/>worldwide</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  "और माताओं ने आशा से गोली ले ली,<br/>
+                  और बेटियाँ छाया में बड़ी हुईं,<br/>
+                  और बीस साल बाद कैंसर पनपा-<br/>
+                  a diagnosis that indicted a generation of medicine."
+                </div>
+</div>
+</div>
+</div>
+ ==================== मॉड्यूल 5: संवेदनशीलता और विशिष्टता ==================== 
+<div class="module-slides" data-module="5">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  A test has two virtues and two vices.
+                  <br/><br/>
+<em>Sensitivity</em>: क्या यह बीमारों को ढूंढ सकता है?
+                  <br/><br/>
+<em>Specificity</em>: क्या यह स्वस्थ को बचा सकता है?
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">संवेदनशीलता: शिकारी</div>
+<div class="formula-box animate delay-1">
+<div class="label">THE FORMULA</div>
+<div class="formula">Sensitivity = TP / (TP + FN)</div>
+<div class="label">"Of all the sick, how many did we catch?"</div>
+</div>
+<div class="worked-example animate delay-2">
+<h4>Worked Example: COVID PCR Test</h4>
+<div class="step"><span class="step-num">Given:</span> 200 infected patients tested</div>
+<div class="step">TP = 196 (correctly positive), FN = 4 (missed)</div>
+<div class="calculation">Sensitivity = 196 / (196 + 4) = 196/200 = <strong>98%</strong></div>
+<div class="result">Interpretation: Test catches 98 of every 100 infected people</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">विशिष्टता: अभिभावक</div>
+<div class="formula-box animate delay-1">
+<div class="label">THE FORMULA</div>
+<div class="formula">Specificity = TN / (TN + FP)</div>
+<div class="label">"Of all the healthy, how many did we spare?"</div>
+</div>
+<div class="worked-example animate delay-2">
+<h4>Worked Example: Same COVID PCR Test</h4>
+<div class="step"><span class="step-num">Given:</span> 1000 uninfected people tested</div>
+<div class="step">TN = 999 (correctly negative), FP = 1 (false alarm)</div>
+<div class="calculation">Specificity = 999 / (999 + 1) = 999/1000 = <strong>99.9%</strong></div>
+<div class="result">Interpretation: Test correctly clears 999 of every 1000 healthy people</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">स्मृति नियम</div>
+<div class="decision-tree animate delay-1">
+<h4>When to Use Which Test</h4>
+<div class="tree-row"><div class="tree-node question">आपको किस चीज़ की जरूरत है?</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">RULE OUT disease</div>
+<div class="tree-node action">Use HIGH SENSITIVITY</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node tp" style="font-size:0.6rem;">SnNout<small>Sensitive Negative = OUT</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">RULE IN disease</div>
+<div class="tree-node action">Use HIGH SPECIFICITY</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node tp" style="font-size:0.6rem;">SpPin<small>Specific Positive = IN</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  "संवेदनशीलता बीमार को पकड़ लेती है।<br/>
+                  विशिष्टता कुएं को बचाती है।<br/>
+                  But no test masters both perfectly—<br/>
+                  यह वह बोझ है जो हम उठाते हैं।"
+                </div>
+</div>
+</div>
+</div>
+ ==================== मॉड्यूल 6: आधार दर भ्रांति ==================== 
+<div class="module-slides" data-module="6">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  क्या तुमने वैद्य को नहीं देखा?<br/>
+                  who saw <em>99% accurate</em><br/>
+                  and believed a positive result meant <em>99% certainty</em>?
+                  <br/><br/>
+<em>यह चिकित्सा जगत की सबसे घातक त्रुटि है।</em>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">आधार दर की भ्रांति</div>
+<div class="story-card animate delay-1">
+<div class="place">THE PUZZLE</div>
+<div class="narrative">
+                    A disease affects 1 in 1000 people.<br/>
+                    एक परीक्षण 99% संवेदनशील और 99% विशिष्ट होता है।<br/>
+                    A patient tests positive.
+                    <br/><br/>
+<strong>क्या संभावना है कि उन्हें यह बीमारी है?</strong>
+<br/><br/>
+                    Most doctors say ~99%. <em>वास्तविक उत्तर लगभग 9% है।</em>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">गणित का खुलासा</div>
+<div class="worked-example animate delay-1">
+<h4>Testing 100,000 People (Prevalence 1/1000)</h4>
+<div class="step"><span class="step-num">Step 1:</span> 100 have disease, 99,900 healthy</div>
+<div class="step"><span class="step-num">Step 2:</span> Of 100 sick: 99 test positive (TP), 1 negative (FN)</div>
+<div class="step"><span class="step-num">Step 3:</span> Of 99,900 healthy: 999 test positive (FP), 98,901 negative (TN)</div>
+<div class="step"><span class="step-num">Step 4:</span> Total positives = 99 + 999 = <strong>1,098</strong></div>
+<div class="calculation">PPV = TP / All Positives = 99 / 1,098 = <strong>9%</strong></div>
+<div class="result">91% सकारात्मक परिणाम झूठे सकारात्मक हैं!</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Interactive Base Rate Calculator</div>
+<div class="calculator animate delay-1">
+<h4>See How Prevalence Changes PPV</h4>
+<div class="calc-row">
+<div class="calc-label">Prevalence:</div>
+<input class="calc-slider" id="prevSlider" max="50" min="0.1" oninput="updateCalc()" step="0.1" type="range" value="1"/>
+<div class="calc-value" id="prevValue">1%</div>
+</div>
+<div class="calc-row">
+<div class="calc-label">Sensitivity:</div>
+<input class="calc-slider" id="sensSlider" max="100" min="50" oninput="updateCalc()" step="1" type="range" value="99"/>
+<div class="calc-value" id="sensValue">99%</div>
+</div>
+<div class="calc-row">
+<div class="calc-label">Specificity:</div>
+<input class="calc-slider" id="specSlider" max="100" min="50" oninput="updateCalc()" step="1" type="range" value="99"/>
+<div class="calc-value" id="specValue">99%</div>
+</div>
+<div class="calc-result">
+<div class="big" id="ppvResult">9%</div>
+<div class="label">Positive Predictive Value (PPV)</div>
+<div id="fpRate" style="font-size:0.7rem;color:rgba(255,255,255,0.6);margin-top:0.3rem;">91% सकारात्मकताएं गलत अलार्म हैं</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">व्यापकता का निर्णय वृक्ष</div>
+<div class="decision-tree animate delay-1">
+<h4>Same Test, Different Settings</h4>
+<div class="tree-row"><div class="tree-node root">Test: 99% Sens, 99% Spec</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">Where Is Testing Done?</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">General Pop<br/>0.1%</div>
+<div class="tree-node warning">PPV = 9%<small>91% false +</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">High-Risk<br/>10%</div>
+<div class="tree-node action">PPV = 92%<small>8% false +</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">Confirmatory<br/>50%</div>
+<div class="tree-node tp">PPV = 99%<small>1% false +</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  "और डॉक्टर ने कहा '99% सटीक,'<br/>
+                  और मरीज़ ने सुना '99% निश्चित,'<br/>
+                  और दोनों को धोखा दिया गया-<br/>
+                  क्योंकि वे पूछना भूल गए: यह बीमारी कितनी दुर्लभ है?"
+                </div>
+</div>
+</div>
+</div>
+<!-- ==================== MODULE 7: TB GeneXpert ==================== -->
+<div class="module-slides" data-module="7">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  क्या आपने मशीन के बारे में नहीं सुना है<br/>
+                  that could find TB in two hours,<br/>
+                  जिसे बुलाया गया था <em>revolutionary</em>—<br/>
+                  लेकिन चूक गये <em>drug-resistant</em> strains?
+                </div>
+</div>
+</div>
+<div class="slide tb">
+<div class="content text-center">
+<div class="title gold animate">द जीनएक्सपर्ट स्टोरी, दक्षिण अफ्रीका</div>
+<div class="story-card animate delay-1">
+<div class="place">CAPE TOWN, 2010</div>
+<div class="narrative">
+                    एक सदी तक, टीबी के निदान के लिए हफ्तों तक बढ़ते बैक्टीरिया की आवश्यकता होती थी। फिर आया GeneXpert: परिणाम <strong>2 hours</strong>.
+                    <br/><br/>
+                    South Africa deployed it nationwide. The WHO endorsed it.
+                    <br/><br/>
+                    लेकिन रोगियों में <strong>low bacterial loads</strong>—often HIV co-infected—
+                    sensitivity dropped to <strong>67%</strong>. One in three cases missed.
+                    <br/><br/>
+                    और रिफैम्पिसिन प्रतिरोध का पता लगाने के लिए, यह चूक गया <strong>5%</strong> प्रतिरोधी मामलों का. उन मरीजों को गलत इलाज मिला. प्रतिरोधी टीबी फैल गई।
+                  </div>
+<div class="source">Steingart KR et al. Cochrane Database Syst Rev. 2014;1:CD009593</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">TB Diagnosis Decision Tree</div>
+<div class="decision-tree animate delay-1">
+<h4>जब जीनएक्सपर्ट पर्याप्त नहीं है</h4>
+<div class="tree-row"><div class="tree-node root">Suspected TB Patient</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node action">GeneXpert Test</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node tp">Positive</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node question">Rifampicin?</div>
+<div class="tree-branch" style="gap:0.3rem;">
+<div class="tree-branch-item">
+<div class="tree-node tp" style="font-size:0.55rem;">Sensitive<small>Standard Tx</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node fp" style="font-size:0.55rem;">Resistant<small>MDR-TB Tx</small></div>
+</div>
+</div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node warning">Negative</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node question">HIV+ or High Suspicion?</div>
+<div class="tree-branch" style="gap:0.3rem;">
+<div class="tree-branch-item">
+<div class="tree-node action" style="font-size:0.55rem;">Yes<small>Culture needed</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node tn" style="font-size:0.55rem;">No<small>Likely negative</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Sensitivity by Patient Type</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box" style="background:var(--green);">
+<div class="stat-value" style="color:white;">98%</div>
+<div class="stat-label">Smear-positive<br/>(high bacterial load)</div>
+</div>
+<div class="stat-box" style="background:var(--orange);">
+<div class="stat-value" style="color:white;">67%</div>
+<div class="stat-label">Smear-negative<br/>(low bacterial load)</div>
+</div>
+<div class="stat-box" style="background:var(--red);">
+<div class="stat-value" style="color:white;">61%</div>
+<div class="stat-label">HIV co-infected<br/>(immune suppressed)</div>
+</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">THE LESSON</div>
+<div class="simple-text">
+                    नैदानिक ​​​​परीक्षणों में किसी परीक्षण की संवेदनशीलता आपके रोगियों में इसकी संवेदनशीलता से मेल नहीं खा सकती है।
+                    <strong>अपनी जनसंख्या जानें.</strong>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  "और मशीन ने कहा 'नकारात्मक,'<br/>
+                  और डॉक्टर को मशीन पर विश्वास हो गया,<br/>
+                  और मरीज फेफड़ों में टीबी लेकर घर चला गया,<br/>
+                  दुनिया में खांसी का प्रतिरोध।"
+                </div>
+</div>
+</div>
+</div>
+ ==================== मॉड्यूल 8: पीएसए विवाद ==================== 
+<div class="module-slides" data-module="8">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  क्या आपने पुरुषों के लिए होने वाले टेस्ट के बारे में नहीं सुना है<br/>
+                  ऐसा कैंसर पाया गया जो होगा <em>never kill</em>,<br/>
+                  और उपचार का नेतृत्व किया <em>destroyed lives</em>?
+                </div>
+</div>
+</div>
+<div class="slide blood">
+<div class="content text-center">
+<div class="title red animate">पीएसए स्क्रीनिंग त्रासदी</div>
+<div class="story-card animate delay-1">
+<div class="place">UNITED STATES, 1990s-2010s</div>
+<div class="narrative">
+                    PSA (Prostate-Specific Antigen) could detect prostate cancer early.
+                    <br/><br/>
+                    डॉक्टरों ने लाखों पुरुषों की जांच की। कैंसर पाया गया. प्रोस्टेट हटा दिए गए.
+                    <br/><br/>
+                    लेकिन इनमें से कई "कैंसर" कभी भी लक्षण पैदा नहीं करते। सर्जरी का कारण बना <strong>नपुंसकता और असंयम</strong> in men who
+                    <strong>would have died of old age, not cancer</strong>.
+                  </div>
+<div class="source">Moyer VA. Ann Intern Med. 2012;157:120-134</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">नुकसान की संख्या</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box" style="background:var(--green);">
+<div class="stat-value" style="color:white;">1</div>
+<div class="stat-label">से जान बच गई<br/>prostate cancer<br/>per 1000 screened</div>
+</div>
+<div class="stat-box" style="background:var(--red);">
+<div class="stat-value" style="color:white;">30-40</div>
+<div class="stat-label">Men made impotent<br/>or incontinent<br/>per 1000 screened</div>
+</div>
+<div class="stat-box" style="background:var(--orange);">
+<div class="stat-value" style="color:white;">100+</div>
+<div class="stat-label">False positives<br/>(biopsies, anxiety)<br/>per 1000 screened</div>
+</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">THE REVERSAL</div>
+<div class="simple-text">
+                    In 2012, the US Preventive Services Task Force recommended <strong>against</strong>
+                    नियमित पीएसए स्क्रीनिंग। परीक्षण में इतना अधिक पाया जा रहा था कि खोजने की आवश्यकता नहीं थी।
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Patient Decision Aid: PSA Screening</div>
+<div class="decision-aid animate delay-1">
+<h4>यदि 55-69 आयु वर्ग के 1,000 पुरुषों की 13 वर्षों तक जांच की जाती है</h4>
+<div class="decision-aid-row">
+<div class="decision-aid-label">Deaths from prostate cancer prevented</div>
+<div class="decision-aid-value benefit">1-2 men</div>
+</div>
+<div class="decision-aid-row">
+<div class="decision-aid-label">Men who will have false positive requiring biopsy</div>
+<div class="decision-aid-value harm">100-120 men</div>
+</div>
+<div class="decision-aid-row">
+<div class="decision-aid-label">पुरुषों को कैंसर का पता चला है जो उन्हें कभी नुकसान नहीं पहुंचाएगा</div>
+<div class="decision-aid-value harm">20-50 men</div>
+</div>
+<div class="decision-aid-row">
+<div class="decision-aid-label">Men left impotent or incontinent from treatment</div>
+<div class="decision-aid-value harm">30-40 men</div>
+</div>
+<div class="decision-aid-question">क्या यह समझौता आपके लिए स्वीकार्य है?</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  "और परीक्षण में छाया मिली,<br/>
+                  और सर्जन ने काट दिया,<br/>
+                  और वह आदमी जीवित रहा—नपुंसक, असंयमी—<br/>
+                  ऐसे कैंसर से जो कभी जाग नहीं पाता।"
+                </div>
+</div>
+</div>
+</div>
+ ==================== मॉड्यूल 9: ट्रोपोनिन और दिल का दौरा =================== 
+<div class="module-slides" data-module="9">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  क्या आपने सीने में दर्द वाले उस आदमी के बारे में नहीं सुना है<br/>
+                  जिसका पहला ट्रोपोनिन था <em>normal</em>,<br/>
+                  जिसे घर भेज दिया गया था-<br/>
+                  और पहले ही मर गया सुबह?
+                </div>
+</div>
+</div>
+<div class="slide blood">
+<div class="content text-center">
+<div class="title red animate">ट्रोपोनिन समय समस्या</div>
+<div class="story-card animate delay-1">
+<div class="place">EMERGENCY DEPARTMENTS WORLDWIDE</div>
+<div class="narrative">
+                    ट्रोपोनिन दिल के दौरे के निदान के लिए स्वर्ण मानक है। लेकिन इसमें <strong>3-6 hours</strong> to rise after myocardial injury.
+                    <br/><br/>
+                    A patient arrives one hour after chest pain begins.
+                    Troponin is tested: <strong>normal</strong>.
+                    "You're fine. Go home."
+                    <br/><br/>
+                    दिल मर रहा था। प्रोटीन अभी तक लीक नहीं हुआ था।
+                    <br/><br/>
+                    Studies show <strong>2-5%</strong> of MI patients sent home from ED die within 30 days.
+                  </div>
+<div class="source">Pope JH et al. N Engl J Med. 2000;342:1163-1170</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Serial Testing Decision Tree</div>
+<div class="decision-tree animate delay-1">
+<h4>दो-ट्रोपोनिन प्रोटोकॉल</h4>
+<div class="tree-row"><div class="tree-node root">Chest Pain Patient</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node action">First Troponin</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node tp">Elevated</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node action">Treat as MI</div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node warning">Normal</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node question">When Did Pain Start?</div>
+<div class="tree-branch" style="gap:0.3rem;">
+<div class="tree-branch-item">
+<div class="tree-label">&lt;6 hrs</div>
+<div class="tree-node action" style="font-size:0.55rem;">Wait 3 hrs<small>Repeat troponin</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">&gt;6 hrs</div>
+<div class="tree-node tn" style="font-size:0.55rem;">Low risk<small>Consider d/c</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">High-Sensitivity Troponin</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box">
+<div class="stat-value" style="color:var(--orange);">~70%</div>
+<div class="stat-label">Conventional troponin<br/>sensitivity at 0 hrs</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--green);">~95%</div>
+<div class="stat-label">hs-Troponin<br/>sensitivity at 0 hrs</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--gold);">99%</div>
+<div class="stat-label">hs-Troponin<br/>at 3 hrs serial</div>
+</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">THE TRADE-OFF</div>
+<div class="simple-text">
+                    High-sensitivity troponin catches more heart attacks early.
+                    But it also has more false positives—elevated in kidney disease,
+                    heart failure, sepsis, and marathon runners.
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  "और परीक्षण ने 'सामान्य' बताया,<br/>
+                  क्योंकि हृदय अभी मरना शुरू हुआ था।<br/>
+                  और मरीज था आश्वस्त,<br/>
+                  and went home to finish dying."
+                </div>
+</div>
+</div>
+</div>
+ ===================== मॉड्यूल 10: संभावना अनुपात =================== 
+<div class="module-slides" data-module="10">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  संवेदनशीलता परीक्षण का वर्णन करती है।<br/>
+                  विशिष्टता परीक्षण का वर्णन करती है।<br/>
+<br/>
+                  लेकिन मरीज़ पूछता है:<br/>
+<em>"I tested positive. What are MY chances?"</em>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Likelihood Ratios</div>
+<div class="formula-box animate delay-1">
+<div class="label">POSITIVE LIKELIHOOD RATIO</div>
+<div class="formula">LR+ = Sensitivity / (1 - Specificity)</div>
+<div class="label">How much more likely is a + result in sick vs healthy?</div>
+</div>
+<div class="formula-box animate delay-2">
+<div class="label">NEGATIVE LIKELIHOOD RATIO</div>
+<div class="formula">LR- = (1 - Sensitivity) / Specificity</div>
+<div class="label">How much more likely is a - result in sick vs healthy?</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">फगन नॉमोग्राम</div>
+<div class="fagan-container animate delay-1">
+<h4>प्री-टेस्ट से लेकर पोस्ट-टेस्ट संभाव्यता तक</h4>
+<div class="fagan-visual">
+<div class="fagan-scale">
+<div class="fagan-scale-title">Pre-Test<br/>Probability</div>
+<div>99%</div><div>50%</div><div>20%</div><div>5%</div><div>1%</div>
+</div>
+<div class="fagan-line"><div class="fagan-marker" style="top:70%;"></div></div>
+<div class="fagan-scale">
+<div class="fagan-scale-title">Likelihood<br/>Ratio</div>
+<div>100</div><div>10</div><div>1</div><div>0.1</div><div>0.01</div>
+</div>
+<div class="fagan-line"><div class="fagan-marker" style="top:30%;"></div></div>
+<div class="fagan-scale">
+<div class="fagan-scale-title">Post-Test<br/>Probability</div>
+<div>99%</div><div>80%</div><div>50%</div><div>20%</div><div>1%</div>
+</div>
+</div>
+<div class="fagan-result">
+                    Draw a line from pre-test through LR to find post-test probability
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Interpreting Likelihood Ratios</div>
+<div class="decision-tree animate delay-1">
+<h4>यह परीक्षण कितना शक्तिशाली है?</h4>
+<div class="tree-row"><div class="tree-node question">LR+ Value?</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node tp">LR+ &gt; 10<small>Strong rule-in</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node action">5-10<small>Moderate</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node warning">2-5<small>Weak</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node fn">1-2<small>Useless</small></div>
+</div>
+</div>
+<div style="margin-top:0.75rem;"></div>
+<div class="tree-row"><div class="tree-node question">LR- Value?</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node tp">&lt; 0.1<small>Strong rule-out</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node action">0.1-0.2<small>Moderate</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node warning">0.2-0.5<small>Weak</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node fn">0.5-1<small>Useless</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  "संवेदनशीलता बीमारों के बारे में बताती है।<br/>
+                  कुएं की विशिष्टता बताती है.<br/>
+                  But the likelihood ratio answers:<br/>
+<em>इस रोगी के लिए इस परिणाम का क्या अर्थ है?</em>"
+                </div>
+</div>
+</div>
+</div>
+ =================== मॉड्यूल 11: मलेरिया आरडीटी =================== 
+<div class="module-slides" data-module="11">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  क्या तुमने गाँव में बुखार से पीड़ित बच्चे को नहीं देखा?<br/>
+                  रैपिड टेस्ट ने कहा <em>negative</em>,<br/>
+                  and the <em>Plasmodium</em> जो बढ़ता ही गया?
+                </div>
+</div>
+</div>
+<div class="slide blood">
+<div class="content text-center">
+<div class="title red animate">मलेरिया आरडीटी समस्या</div>
+<div class="story-card animate delay-1">
+<div class="place">SUB-SAHARAN AFRICA</div>
+<div class="narrative">
+                    Malaria kills 600,000 people yearly, mostly children under 5.
+                    <br/><br/>
+                    Rapid Diagnostic Tests were meant to guide treatment in remote areas
+                    without microscopes or laboratories.
+                    <br/><br/>
+                    But when parasitemia is low—<strong>आरडीटी मामलों को भूल जाता है</strong>.
+                    And when <em>P. falciparum</em> HRP2 जीन को हटाता है-
+                    <strong>the RDT sees nothing at all</strong>.
+                  </div>
+<div class="source">WHO. Malaria RDT Performance. 2022</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">नैदानिक ​​निर्णय वृक्ष</div>
+<div class="decision-tree animate delay-1">
+<h4>Child with Fever in Malaria-Endemic Area</h4>
+<div class="tree-row"><div class="tree-node root">Febrile Child</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node action">Perform RDT</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node tp">RDT Positive</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node action">मलेरिया का इलाज करें</div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node warning">RDT Negative</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">Clinical Suspicion?</div></div>
+<div class="tree-branch" style="gap:0.4rem;">
+<div class="tree-branch-item">
+<div class="tree-label">High</div>
+<div class="tree-node action" style="font-size:0.55rem;">Treat Anyway<small>or Microscopy</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">Low</div>
+<div class="tree-node tn" style="font-size:0.55rem;">Look for<small>Other Cause</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Sensitivity Varies by Parasitemia</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box" style="background:var(--green);">
+<div class="stat-value" style="color:white;">95%</div>
+<div class="stat-label">High parasitemia<br/>(&gt;200/μL)</div>
+</div>
+<div class="stat-box" style="background:var(--gold);">
+<div class="stat-value" style="color:var(--navy);">75%</div>
+<div class="stat-label">Low parasitemia<br/>(100-200/μL)</div>
+</div>
+<div class="stat-box" style="background:var(--red);">
+<div class="stat-value" style="color:white;">50%</div>
+<div class="stat-label">Very low<br/>(&lt;100/μL)</div>
+</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">क्लिनिकल पाठ</div>
+<div class="simple-text">
+                    A negative RDT does not rule out malaria in endemic areas.
+                    <strong>Clinical judgment must override the test</strong> when suspicion is high.
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  "और परीक्षण ने 'नकारात्मक' कहा,<br/>
+                  और बच्चे को घर भेज दिया गया,<br/>
+                  और परजीवी अँधेरे में बहुत बढ़ गए,<br/>
+                  और सुबह तक बच्चा जाग नहीं सका।”
+                </div>
+</div>
+</div>
+</div>
+ =================== मॉड्यूल 12: कोविड रैपिड टेस्ट ===================== 
+<div class="module-slides" data-module="12">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  महामारी के वर्ष में,<br/>
+                  दुनिया को एक ऐसे परीक्षण की आवश्यकता थी जो था <em>fast</em>.
+                  <br/><br/>
+                  लेकिन व्रत वैसा नहीं है <em>accurate</em>.
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">कोक्रेन निर्णय</div>
+<div class="matrix-container animate delay-1">
+<h4>COVID-19 Rapid Antigen Tests (155 Studies)</h4>
+<table class="matrix-table">
+<tr><th>Population</th><th>Sensitivity</th><th>Missed</th></tr>
+<tr><td>Symptomatic</td><td style="color:var(--gold);">73%</td><td style="color:var(--red);">27%</td></tr>
+<tr><td>Asymptomatic</td><td style="color:var(--orange);">55%</td><td style="color:var(--red);">45%</td></tr>
+<tr><td>First 7 days</td><td style="color:var(--green);">80%</td><td style="color:var(--orange);">20%</td></tr>
+</table>
+</div>
+<p class="animate delay-2" style="font-size:0.65rem;color:rgba(255,255,255,0.5);margin-top:0.4rem;">
+                  Dinnes J et al. Cochrane Database Syst Rev. 2022;7:CD013705
+                </p>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">The False Security Decision Tree</div>
+<div class="decision-tree animate delay-1">
+<h4>Thanksgiving 2020: What Happened</h4>
+<div class="tree-row"><div class="tree-node root">Family Member Tests Negative</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">Truly Negative?</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">55% if asymptomatic</div>
+<div class="tree-node tn">True Negative<small>Safe to gather</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">45% if asymptomatic</div>
+<div class="tree-node fn">FALSE Negative<small>Infectious!</small></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node fp" style="background:var(--blood-red);">परिवार के साथ एकत्रित होते हैं<small>Grandparents infected</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  "और परीक्षण ने 'नकारात्मक' कहा,<br/>
+                  और परिवार ने गले लगा लिया,<br/>
+                  और सर्दियों के अंत तक,<br/>
+                  दादाजी को दफनाया गया था।"
+                </div>
+</div>
+</div>
+</div>
+<!-- ==================== MODULE 13: MAMMOGRAPHY ==================== -->
+<div class="module-slides" data-module="13">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  क्या आपने स्क्रीनिंग के बारे में नहीं सुना है<br/>
+                  उसमें कैंसर पाया गया <em>would never kill</em>,<br/>
+                  और उपचार का नेतृत्व किया <em>caused more harm than the disease</em>?
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">अति निदान समस्या</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box" style="background:var(--green);">
+<div class="stat-value" style="color:white;">3-4</div>
+<div class="stat-label">Lives saved<br/>per 10,000 screened</div>
+</div>
+<div class="stat-box" style="background:var(--red);">
+<div class="stat-value" style="color:white;">~15</div>
+<div class="stat-label">Overdiagnosed<br/>(treated unnecessarily)</div>
+</div>
+<div class="stat-box" style="background:var(--orange);">
+<div class="stat-value" style="color:white;">~500</div>
+<div class="stat-label">False alarms<br/>(anxiety, biopsies)</div>
+</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">THE QUESTION</div>
+<div class="simple-text">
+                    3-4 लोगों की जान बचाने के लिए, ~15 महिलाओं को कैंसर के लिए सर्जरी, विकिरण और कीमोथेरेपी दी जाती है, जिससे उन्हें कभी कोई नुकसान नहीं होता।
+                    <br/><br/><strong>क्या यह समझौता इसके लायक है?</strong>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Patient Decision Aid: Mammography</div>
+<div class="decision-aid animate delay-1">
+<h4>यदि 50-69 आयु वर्ग की 10,000 महिलाओं की 10 वर्षों तक जांच की जाती है</h4>
+<div class="decision-aid-row">
+<div class="decision-aid-label">Deaths from breast cancer prevented</div>
+<div class="decision-aid-value benefit">3-4 women</div>
+</div>
+<div class="decision-aid-row">
+<div class="decision-aid-label">Women called back for false alarms</div>
+<div class="decision-aid-value harm">~500 women</div>
+</div>
+<div class="decision-aid-row">
+<div class="decision-aid-label">Unnecessary biopsies</div>
+<div class="decision-aid-value harm">~200 women</div>
+</div>
+<div class="decision-aid-row">
+<div class="decision-aid-label">महिलाओं का कैंसर का इलाज किया जाता है जो उन्हें कभी नुकसान नहीं पहुंचाएगा</div>
+<div class="decision-aid-value harm">~15 women</div>
+</div>
+<div class="decision-aid-question">क्या स्क्रीनिंग आपके लिए सही है?</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">The Screening Cascade Decision Tree</div>
+<div class="decision-tree animate delay-1">
+<h4>10 वर्षों में 10,000 महिलाओं की जांच की गई</h4>
+<div class="tree-row"><div class="tree-node root">10,000 Women</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node warning">~1,000 Recalled<small>Abnormal</small></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-branch" style="gap:0.25rem;">
+<div class="tree-branch-item">
+<div class="tree-node fp" style="font-size:0.5rem;">~500 False<br/>Alarm</div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node warning" style="font-size:0.5rem;">~500 Biopsy<br/>~50 cancer</div>
+</div>
+</div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node tn">~9,000 Cleared</div>
+</div>
+</div>
+<div style="margin-top:0.4rem;">
+<div class="tree-row"><div class="tree-node question" style="font-size:0.6rem;">Of ~50 Cancers Found</div></div>
+<div class="tree-branch" style="gap:0.5rem;">
+<div class="tree-branch-item">
+<div class="tree-node tp" style="font-size:0.5rem;">~35 Would Kill<small>3-4 saved</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node fn" style="font-size:0.5rem;">~15 Would Never Kill<small>Overdiagnosed</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  "और परीक्षण में छाया मिली,<br/>
+                  और इसे कैंसर कहा,<br/>
+                  और स्त्री को काटा और जला दिया गया—<br/>
+                  एक ऐसी छाया के लिए जिसने उसके दिन कभी अंधकारमय न किये होंगे।"
+                </div>
+</div>
+</div>
+</div>
+ ==================== मॉड्यूल 14: अल्जाइमर अमाइलॉइड =================== 
+<div class="module-slides" data-module="14">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  क्या आपने स्कैन के बारे में नहीं सुना है<br/>
+                  जो मस्तिष्क में प्लाक का पता लगाता है,<br/>
+                  लेकिन आपको नहीं बता सकता<br/>
+                  अगर दिमाग <em>fade</em>?
+                </div>
+</div>
+</div>
+<div class="slide gradient">
+<div class="content text-center">
+<div class="title gold animate">अमाइलॉइड पैराडॉक्स</div>
+<div class="story-card animate delay-1">
+<div class="place">ALZHEIMER'S RESEARCH, 2010s-2020s</div>
+<div class="narrative">
+                    PET scans can now detect amyloid plaques—the hallmark of Alzheimer's.
+                    <br/><br/>
+                    But <strong>30% of cognitively normal elderly</strong> have amyloid plaques.
+                    They may never develop dementia.
+                    <br/><br/>
+                    And <strong>डिमेंशिया से पीड़ित 10-20% लोग</strong> have no amyloid.
+                    <br/><br/>
+                    परीक्षण से प्लाक का पता चलता है, लेकिन प्लाक कोई बीमारी नहीं है।
+                    <strong>हम सरोगेट के लिए परीक्षण कर रहे हैं, न कि सरोगेट के लिए। परिणाम।</strong>
+</div>
+<div class="source">Jack CR et al. Lancet Neurol. 2018;17:760-773</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Surrogate vs. Outcome Decision Tree</div>
+<div class="decision-tree animate delay-1">
+<h4>हम वास्तव में किस लिए परीक्षण कर रहे हैं?</h4>
+<div class="tree-row"><div class="tree-node root">Diagnostic Test</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">What Does It Detect?</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">Outcome itself</div>
+<div class="tree-node tp">Direct Diagnosis<small>उदाहरण के लिए, कैंसर के लिए बायोप्सी</small></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node action">High clinical value</div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">Surrogate marker</div>
+<div class="tree-node warning">Indirect Signal<small>उदाहरण के लिए, मनोभ्रंश के लिए अमाइलॉइड</small></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node question">Validated link?</div>
+<div class="tree-branch" style="gap:0.3rem;">
+<div class="tree-branch-item">
+<div class="tree-node action" style="font-size:0.5rem;">Yes<small>Use cautiously</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node fn" style="font-size:0.5rem;">No<small>Limited value</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  "और स्कैन में पाया गया प्लाक,<br/>
+                  और डॉक्टर ने इसे अल्जाइमर नाम दिया,<br/>
+                  और मरीज दहशत में रहता था-<br/>
+                  of a forgetting that might never come."
+                </div>
+</div>
+</div>
+</div>
+ ==================== मॉड्यूल 15: क्वाडास-2 गुणवत्ता =================== 
+<div class="module-slides" data-module="15">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  सभी अध्ययन समान नहीं बनाए गए हैं।
+                  <br/><br/>
+                  Some are <em>biased</em>.<br/>
+                  Some are <em>poorly designed</em>.<br/>
+                  कुछ नहीं होने चाहिए <em>trusted</em>.
+                  <br/><br/>
+                  हम गेहूं को भूसी से कैसे अलग करते हैं?
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">QUADAS-2: गुणवत्ता जांच सूची</div>
+<div class="quadas-container animate delay-1">
+<h4>Four Domains of Risk of Bias</h4>
+<div class="quadas-domain">
+<div class="quadas-icon risk">1</div>
+<div class="quadas-content">
+<h5>Patient Selection</h5>
+<p>क्या लगातार या यादृच्छिक नमूना नामांकित किया गया था? क्या केस-कंट्रोल डिज़ाइन से बचा गया था?</p>
+</div>
+</div>
+<div class="quadas-domain">
+<div class="quadas-icon risk">2</div>
+<div class="quadas-content">
+<h5>Index Test</h5>
+<p>क्या संदर्भ मानक की जानकारी के बिना परीक्षण की व्याख्या की गई? क्या सीमा पूर्व-निर्दिष्ट थी?</p>
+</div>
+</div>
+<div class="quadas-domain">
+<div class="quadas-icon risk">3</div>
+<div class="quadas-content">
+<h5>Reference Standard</h5>
+<p>क्या संदर्भ मानक स्थिति को सही ढंग से वर्गीकृत करने की संभावना है? क्या इसकी अंधी व्याख्या की गई?</p>
+</div>
+</div>
+<div class="quadas-domain">
+<div class="quadas-icon concern">4</div>
+<div class="quadas-content">
+<h5>प्रवाह और समय</h5>
+<p>क्या परीक्षणों के बीच उचित अंतराल था? क्या सभी रोगियों को समान संदर्भ मानक प्राप्त हुए?</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">QUADAS-2 Decision Tree</div>
+<div class="decision-tree animate delay-1">
+<h4>क्या आपको इस अध्ययन पर भरोसा करना चाहिए?</h4>
+<div class="tree-row"><div class="tree-node root">DTA Study</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">Check All 4 Domains</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">All Low Risk</div>
+<div class="tree-node tp">High Quality<small>Trust results</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">Some Unclear</div>
+<div class="tree-node warning">Moderate<small>सावधानी के साथ प्रयोग करें</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">Any High Risk</div>
+<div class="tree-node fp">Low Quality<small>परिणाम पक्षपातपूर्ण हो सकते हैं</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">डीटीए अध्ययन में सामान्य पूर्वाग्रह</div>
+<div class="lesson-item animate delay-1">
+<div class="lesson-number" style="background:var(--red);">!</div>
+<div class="lesson-content">
+<h4>Verification Bias</h4>
+<p>Only positive tests get the reference standard → inflates sensitivity</p>
+</div>
+</div>
+<div class="lesson-item animate delay-2">
+<div class="lesson-number" style="background:var(--red);">!</div>
+<div class="lesson-content">
+<h4>Spectrum Bias</h4>
+<p>अध्ययन की जनसंख्या नैदानिक ​​वास्तविकता से भिन्न है → परिणाम सामान्यीकृत नहीं होते हैं</p>
+</div>
+</div>
+<div class="lesson-item animate delay-3">
+<div class="lesson-number" style="background:var(--orange);">!</div>
+<div class="lesson-content">
+<h4>Incorporation Bias</h4>
+<p>Index test is part of reference standard → artificially high accuracy</p>
+</div>
+</div>
+<div class="lesson-item animate delay-4">
+<div class="lesson-number" style="background:var(--orange);">!</div>
+<div class="lesson-content">
+<h4>Review Bias</h4>
+<p>Index test interpreted knowing reference result → inflates both metrics</p>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  "इससे पहले कि आप संख्याओं पर भरोसा करें,<br/>
+                  ask: How were they gathered?<br/>
+                  एक पक्षपातपूर्ण अध्ययन आत्मविश्वास से बोलता है-<br/>
+                  but its confidence is a lie."
+                </div>
+</div>
+</div>
+</div>
+ ==================== मॉड्यूल 16: मेटा-विश्लेषण और SROC ==================== 
+<div class="module-slides" data-module="16">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  एक अध्ययन धोखा दे सकता है.<br/>
+                  एक अध्ययन चापलूसी कर सकता है।
+                  <br/><br/>
+                  लेकिन जब आप इकट्ठे होते हैं <em>सारे सबूत</em>—<br/>
+                  the truth becomes harder to hide.
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Why DTA Meta-Analysis Is Different</div>
+<div class="simple-box animate delay-1">
+<div class="simple-title">THE PROBLEM</div>
+<div class="simple-text">
+                    संवेदनशीलता और विशिष्टता हैं <strong>correlated</strong>.
+                    When one goes up, the other tends to go down.
+                    <br/><br/>
+                    आप उन्हें उपचार प्रभावों की तरह अलग से एकत्रित नहीं कर सकते। आपको चाहिए <strong>bivariate model</strong>.
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">एसआरओसी वक्र</div>
+<div class="sroc-container animate delay-1">
+<h4>Summary Receiver Operating Characteristic</h4>
+<div class="sroc-plot">
+<div class="sroc-axis-label y">Sensitivity</div>
+<div class="sroc-axis-label x">1 - Specificity (False Positive Rate)</div>
+<svg class="sroc-curve" preserveaspectratio="none" viewbox="0 0 100 100">
+<!-- Diagonal line (useless test) -->
+<line stroke="rgba(255,255,255,0.2)" stroke-dasharray="4" stroke-width="1" x1="0" x2="100" y1="100" y2="0"></line>
+<!-- SROC curve -->
+<path d="M 5 5 Q 10 40, 30 60 Q 50 80, 95 95" fill="none" stroke="var(--gold)" stroke-width="3"></path>
+<!-- Confidence region (simplified ellipse) -->
+<ellipse cx="25" cy="25" fill="rgba(212,175,55,0.2)" rx="15" ry="10" stroke="var(--gold)" stroke-width="1"></ellipse>
+</svg>
+<!-- Study dots -->
+<div class="sroc-dot" style="left:15%;top:20%;"></div>
+<div class="sroc-dot" style="left:20%;top:25%;"></div>
+<div class="sroc-dot" style="left:25%;top:22%;"></div>
+<div class="sroc-dot" style="left:18%;top:28%;"></div>
+<div class="sroc-dot" style="left:30%;top:30%;"></div>
+</div>
+<div class="sroc-legend">
+<div class="sroc-legend-item"><div class="sroc-legend-dot" style="background:var(--gold);"></div>Individual studies</div>
+<div class="sroc-legend-item"><div class="sroc-legend-dot" style="background:rgba(212,175,55,0.5);"></div>Summary estimate</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">एसआरओसी पढ़ना</div>
+<div class="decision-tree animate delay-1">
+<h4>वक्र आपको क्या बताता है?</h4>
+<div class="tree-row"><div class="tree-node root">SROC Curve Position</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">Top-Left Corner</div>
+<div class="tree-node tp">Excellent Test<small>High sens + spec</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">Near Diagonal</div>
+<div class="tree-node fn">Useless Test<small>No better than chance</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">Points Scattered</div>
+<div class="tree-node warning">High Heterogeneity<small>Investigate sources</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain hope animate">
+                  "एक अध्ययन धोखा दे सकता है।<br/>
+                  कई अध्ययनों को एक साथ तौला गया,<br/>
+                  सत्य का मार्ग खोजो-<br/>
+                  एसआरओसी वक्र जो बताता है कि परीक्षण वास्तव में क्या कर सकता है।"
+                </div>
+</div>
+</div>
+</div>
+<!-- ==================== MODULE 17: HETEROGENEITY ==================== -->
+<div class="module-slides" data-module="17">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  लेकिन पढ़ाई से क्या होगा <em>disagree</em>?
+                  <br/><br/>
+                  One says sensitivity is 95%.<br/>
+                  Another says 60%.
+                  <br/><br/>
+<em>आप किस सत्य पर विश्वास करते हैं?</em>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Sources of Heterogeneity</div>
+<div class="decision-tree animate delay-1">
+<h4>अध्ययन असहमत क्यों हैं</h4>
+<div class="tree-row"><div class="tree-node question">एक ही परीक्षा, अलग-अलग परिणाम?</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node warning">Threshold<small>Different cutoffs</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node warning">Population<small>Severity, age</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node warning">Setting<small>Primary vs specialist</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node warning">Quality<small>Bias, blinding</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Measuring Disagreement: I²</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box" style="background:var(--green);">
+<div class="stat-value" style="color:white;">I² &lt; 25%</div>
+<div class="stat-label">Low<br/>Studies agree</div>
+</div>
+<div class="stat-box" style="background:var(--gold);">
+<div class="stat-value" style="color:var(--navy);">I² 25-75%</div>
+<div class="stat-label">Moderate<br/>Some variation</div>
+</div>
+<div class="stat-box" style="background:var(--red);">
+<div class="stat-value" style="color:white;">I² &gt; 75%</div>
+<div class="stat-label">High<br/>Major disagreement</div>
+</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">THE WARNING</div>
+<div class="simple-text">
+                    When I² &gt; 75%, the pooled estimate may be <strong>meaningless</strong>.
+                    Explain the disagreement before averaging.
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  "जब अध्ययन असहमत हों, तो<br/>
+                  असहमति को चुप न कराएं।<br/>
+                  Ask: Why do they see differently?<br/>
+                  असहमति ही सिखाती है।"
+                </div>
+</div>
+</div>
+</div>
+ ==================== मॉड्यूल 18: टूलकिट ==================== 
+<div class="module-slides" data-module="18">
+<div class="slide gradient active">
+<div class="content text-center">
+<div class="title gold animate">आपका DTA टूलकिट</div>
+<div class="subtitle animate delay-1">आवश्यक उपाय और उनका उपयोग कब करें</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">The Checklist</div>
+<div class="lesson-item animate delay-1">
+<div class="lesson-number" style="background:var(--green);">✓</div>
+<div class="lesson-content">
+<h4>Was there a valid reference standard?</h4>
+<p>Gold standard applied to ALL patients?</p>
+</div>
+</div>
+<div class="lesson-item animate delay-2">
+<div class="lesson-number" style="background:var(--green);">✓</div>
+<div class="lesson-content">
+<h4>क्या दुभाषियों को अंधा कर दिया गया था?</h4>
+<p>Test readers unaware of diagnosis?</p>
+</div>
+</div>
+<div class="lesson-item animate delay-3">
+<div class="lesson-number" style="background:var(--green);">✓</div>
+<div class="lesson-content">
+<h4>क्या स्पेक्ट्रम था उपयुक्त?</h4>
+<p>आपकी आबादी के समान मरीज़?</p>
+</div>
+</div>
+<div class="lesson-item animate delay-4">
+<div class="lesson-number" style="background:var(--green);">✓</div>
+<div class="lesson-content">
+<h4>क्या सीमा पूर्व-निर्दिष्ट थी?</h4>
+<p>या परिणामों को अधिकतम करने के लिए चुना गया?</p>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">When Results Don't Match Suspicion</div>
+<div class="decision-tree animate delay-1">
+<h4>The Clinical Override Decision Tree</h4>
+<div class="tree-row"><div class="tree-node warning">Test Negative, High Suspicion</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">What Is the LR-?</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">LR- &lt; 0.1</div>
+<div class="tree-node tp">Strong rule-out<small>Accept negative</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">LR- 0.1-0.5</div>
+<div class="tree-node action">Repeat test<small>Or different test</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">LR- &gt; 0.5</div>
+<div class="tree-node warning">Trust judgment<small>Test is weak</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Sequential Testing Decision Tree</div>
+<div class="decision-tree animate delay-1">
+<h4>When One Test Isn't Enough</h4>
+<div class="tree-row"><div class="tree-node root">Initial Screening Test</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node tp">Positive</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node action">Confirmatory Test<small>High specificity</small></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-branch" style="gap:0.3rem;">
+<div class="tree-branch-item">
+<div class="tree-node tp" style="font-size:0.5rem;">Positive<small>Diagnose</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node fn" style="font-size:0.5rem;">Negative<small>False alarm</small></div>
+</div>
+</div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node tn">Negative</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node action">Likely negative<small>If high sens screen</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide hope">
+<div class="content text-center">
+<div class="refrain hope animate">
+                  "Armed with sensitivity, specificity, likelihood,<br/>
+                  SROC और समझौते के माप से लैस,<br/>
+                  आप झूठ के पार देख सकते हैं परीक्षण करें—<br/>
+                  और इसकी सच्चाई का आकलन स्वयं करें।"
+                </div>
+</div>
+</div>
+</div>
+ ==================== मॉड्यूल 19: रक्त आधान त्रुटियां ==================== 
+<div class="module-slides" data-module="19">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  क्या तुमने मरीज़ के बारे में नहीं सुना?<br/>
+                  जिसने प्राप्त किया <em>wrong blood</em>,<br/>
+                  इसलिए नहीं कि परीक्षण ग़लत था,<br/>
+                  but because <em>no one performed it</em>?
+                </div>
+</div>
+</div>
+<div class="slide blood">
+<div class="content text-center">
+<div class="title red animate">वह परीक्षण जो पूरा नहीं हुआ</div>
+<div class="story-card animate delay-1">
+<div class="place">HOSPITALS WORLDWIDE</div>
+<div class="narrative">
+                    ABO blood typing is nearly 100% accurate when performed.
+                    <br/><br/>
+                    Yet <strong>transfusion reactions still kill</strong>- परीक्षण विफलता से नहीं, बल्कि से <strong>human failure</strong>:
+                    <br/><br/>
+                    • Wrong blood drawn from wrong patient<br/>
+                    • लैब में लेबल स्विच किए गए<br/>
+                    • Bedside check skipped in emergency<br/>
+<br/>
+                    In the UK, <strong>1 in 13,000 transfusions</strong> गलत मरीज के पास चला जाता है. परीक्षण काम कर गया. सिस्टम फेल हो गया.
+                  </div>
+<div class="source">Bolton-Maggs PHB. Transfus Med. 2016;26:303-311</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Test vs. System Decision Tree</div>
+<div class="decision-tree animate delay-1">
+<h4>Where Can Things Go Wrong?</h4>
+<div class="tree-row"><div class="tree-node root">Diagnostic Process</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">Error Source?</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">Test itself</div>
+<div class="tree-node warning">Analytical Error<small>Sens/Spec issue</small></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node action">Better test needed</div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">Pre-analytical</div>
+<div class="tree-node fp">Wrong sample<small>ID error</small></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node action">System fix needed</div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">Post-analytical</div>
+<div class="tree-node fp">Wrong action<small>Reporting error</small></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node action">Process fix needed</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  "The perfect test means nothing<br/>
+                  यदि गलत रक्त निकाला गया है,<br/>
+                  गलत लेबल लगाया गया है,<br/>
+                  गलत बैग लटका दिया है।"
+                </div>
+<div class="gold-line animate delay-2"></div>
+<p class="animate delay-3" style="color:rgba(255,255,255,0.6);font-style:italic;font-size:0.8rem;">
+                  डीटीए अध्ययन परीक्षण सटीकता को मापता है। वे सिस्टम सटीकता को मापते नहीं हैं.
+                </p>
+</div>
+</div>
+</div>
+<!-- ==================== MODULE 20: AI/ML DIAGNOSTICS ==================== -->
+<div class="module-slides" data-module="20">
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  क्या आपने एल्गोरिथम नहीं देखा<br/>
+                  जिससे सीखा <em>biased data</em>,<br/>
+                  और उस पूर्वाग्रह को फैलाया<br/>
+                  to <em>every patient it touched</em>?
+                </div>
+</div>
+</div>
+<div class="slide gradient">
+<div class="content text-center">
+<div class="title gold animate">एआई डायग्नोस्टिक क्रांति</div>
+<div class="story-card animate delay-1">
+<div class="place">STANFORD &amp; BEYOND, 2017-PRESENT</div>
+<div class="narrative">
+                    Deep learning algorithms now match dermatologists at detecting skin cancer.
+                    <br/><br/>
+                    लेकिन प्रशिक्षण डेटा था <strong>predominantly light skin</strong>.
+                    On dark skin, performance dropped significantly.
+                    <br/><br/>
+                    एल्गोरिथम ने पैटर्न सीखे-लेकिन यह भी <strong>biases</strong>.
+                    <br/><br/>
+                    और जब बाहरी सत्यापन के बिना तैनात किया गया, तो इसने अपेक्षा से अधिक खराब प्रदर्शन किया क्योंकि <strong>training population didn't match the clinical population</strong>.
+                  </div>
+<div class="source">Esteva A et al. Nature. 2017;542:115-118; Adamson AS. JAMA Dermatol. 2018</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">AI Validation Decision Tree</div>
+<div class="decision-tree animate delay-1">
+<h4>क्या यह AI नैदानिक ​​उपयोग के लिए तैयार है?</h4>
+<div class="tree-row"><div class="tree-node root">AI Diagnostic Tool</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">Validation Type?</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">Internal only</div>
+<div class="tree-node warning">High Risk<small>Overfitting likely</small></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node fp">Not ready</div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">External validation</div>
+<div class="tree-node action">Better<small>But check population</small></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node question">आपके मरीजों से मेल खाता है?</div>
+<div class="tree-branch" style="gap:0.3rem;">
+<div class="tree-branch-item">
+<div class="tree-node tp" style="font-size:0.5rem;">Yes<small>Consider use</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node warning" style="font-size:0.5rem;">No<small>Caution</small></div>
+</div>
+</div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">Prospective RCT</div>
+<div class="tree-node tp">Gold Standard<small>Patient outcomes</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">एआई कैलिब्रेशन: द हिडन प्रॉब्लम</div>
+<div class="simple-box animate delay-1">
+<div class="simple-title">DISCRIMINATION VS. CALIBRATION</div>
+<div class="simple-text">
+<strong>Discrimination</strong> (AUC/ROC): Can the AI rank patients by risk?
+                    <br/><br/>
+<strong>Calibration</strong>: When the AI says "80% risk," do 80% actually have disease?
+                    <br/><br/>
+                    कई एआई उपकरण हैं <strong>good AUC but poor calibration</strong>. यह एल्गोरिथम रूप में आधार दर की भ्रांति है।
+                  </div>
+</div>
+<div class="stats-grid animate delay-2">
+<div class="stat-box" style="background:var(--green);">
+<div class="stat-value" style="color:white;">AUC</div>
+<div class="stat-label">Can it rank?<br/>(usually reported)</div>
+</div>
+<div class="stat-box" style="background:var(--orange);">
+<div class="stat-value" style="color:white;">CAL</div>
+<div class="stat-label">Is probability accurate?<br/>(often ignored)</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  "और एल्गोरिदम डेटा से सीखा,<br/>
+                  और डेटा पक्षपातपूर्ण था,<br/>
+                  और पूर्वाग्रह हर भविष्यवाणी तक फैल गया-<br/>
+                  और किसी ने नहीं पूछा: प्रशिक्षण सेट से कौन गायब था?"
+                </div>
+</div>
+</div>
+</div>
+ ==================== मॉड्यूल 21: रोगी संचार ==================== 
+<div class="module-slides" data-module="21">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  रोगी पूछता है: <em>"Is my test positive?"</em>
+<br/><br/>
+                  But what they mean is:<br/>
+<em>"क्या मुझे यह बीमारी है?"</em>
+<br/><br/>
+                  आप इस अंतर को कैसे पाटेंगे?
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Communication Scripts</div>
+<div class="story-card animate delay-1">
+<div class="place">SCRIPT 1: EXPLAINING A POSITIVE RESULT</div>
+<div class="narrative" style="font-size:0.85rem;">
+                    "आपका परीक्षण सकारात्मक आया। लेकिन मैं समझाना चाहता हूं कि इसका क्या मतलब है।"
+                    <br/><br/>
+                    "यह परीक्षण इस स्थिति वाले लोगों का पता लगाने में अच्छा है, लेकिन इसमें गलत अलार्म भी हैं।"
+                    <br/><br/>
+                    "आपके जोखिम कारकों के आधार पर, लगभग एक है <strong>[X]%</strong> संभावना है कि यह सचमुच सकारात्मक है।"
+                    <br/><br/>
+                    "We'll do a confirmatory test to be certain before any treatment."
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Communication Scripts</div>
+<div class="story-card animate delay-1">
+<div class="place">SCRIPT 2: EXPLAINING A NEGATIVE RESULT (HIGH SUSPICION)</div>
+<div class="narrative" style="font-size:0.85rem;">
+                    "Your test came back negative, but I'm still concerned."
+                    <br/><br/>
+                    "यह परीक्षण मामलों को मिस कर सकता है, खासकर बीमारी की शुरुआत में।"
+                    <br/><br/>
+                    "आपके लक्षणों को देखते हुए, मैं या तो कुछ दिनों में परीक्षण दोहराना चाहूंगा, या एक अलग परीक्षण का प्रयास करूंगा।"
+                    <br/><br/>
+                    "A negative test doesn't always mean you're clear—<strong>आपके लक्षण भी मायने रखते हैं</strong>."
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Communication Decision Tree</div>
+<div class="decision-tree animate delay-1">
+<h4>परीक्षण परिणामों की व्याख्या कैसे करें</h4>
+<div class="tree-row"><div class="tree-node root">Test Result</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-node tp">Positive</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node question">PPV?</div>
+<div class="tree-branch" style="gap:0.3rem;">
+<div class="tree-branch-item">
+<div class="tree-node tp" style="font-size:0.5rem;">&gt;90%<small>"Very likely true"</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node warning" style="font-size:0.5rem;">&lt;90%<small>"Need to confirm"</small></div>
+</div>
+</div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node tn">Negative</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-node question">NPV?</div>
+<div class="tree-branch" style="gap:0.3rem;">
+<div class="tree-branch-item">
+<div class="tree-node tp" style="font-size:0.5rem;">&gt;95%<small>"Very reassuring"</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-node warning" style="font-size:0.5rem;">&lt;95%<small>"Still watch symptoms"</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">अपने डॉक्टर से पूछने के लिए प्रश्न</div>
+<div class="lesson-item animate delay-1">
+<div class="lesson-number">1</div>
+<div class="lesson-content">
+<h4>"यह परीक्षण कितना सटीक है?"</h4>
+<p>सरल भाषा में संवेदनशीलता और विशिष्टता के बारे में पूछें</p>
+</div>
+</div>
+<div class="lesson-item animate delay-2">
+<div class="lesson-number">2</div>
+<div class="lesson-content">
+<h4>"क्या होगा यदि परिणाम गलत है?"</h4>
+<p>झूठी सकारात्मकता और नकारात्मकता के परिणामों को समझें</p>
+</div>
+</div>
+<div class="lesson-item animate delay-3">
+<div class="lesson-number">3</div>
+<div class="lesson-content">
+<h4>"What happens next?"</h4>
+<p>Will there be a confirmatory test? Repeat test? Treatment?</p>
+</div>
+</div>
+<div class="lesson-item animate delay-4">
+<div class="lesson-number">4</div>
+<div class="lesson-content">
+<h4>"What if I don't get tested at all?"</h4>
+<p>परीक्षण बनाम परीक्षण न करने के बीच के अंतर को समझें</p>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  "परीक्षण संख्याओं में बोलता है।<br/>
+                  रोगी भय और आशा में सुनता है।<br/>
+                  उपचारकर्ता का कार्य अनुवाद है-<br/>
+                  सांख्यिकी और आत्मा के बीच के अंतर को पाटने के लिए।"
+                </div>
+</div>
+</div>
+</div>
+ ==================== मॉड्यूल 22: लागत-प्रभावशीलता और ग्रेड ==================== 
+<div class="module-slides" data-module="22">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  A test may be accurate.<br/>
+                  But is it <em>worth it</em>?
+                  <br/><br/>
+                  What does it cost—in money,<br/>
+                  in anxiety, in harm?
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">परीक्षण-उपचार सीमा</div>
+<div class="decision-tree animate delay-1">
+<h4>When Is Testing Worthwhile?</h4>
+<div class="tree-row"><div class="tree-node root">Pre-Test Probability</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">Very Low</div>
+<div class="tree-node tn">Below Test Threshold<small>Don't test, reassure</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">Intermediate</div>
+<div class="tree-node action">Testing Zone<small>Test will change management</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">Very High</div>
+<div class="tree-node tp">Above Treat Threshold<small>Don't test, treat</small></div>
+</div>
+</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">THE PRINCIPLE</div>
+<div class="simple-text">
+                    Test only when the result will <strong>आप जो करते हैं उसे बदलें</strong>.
+                    If you'd treat regardless, or not treat regardless—why test?
+                  </div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">ग्रेड साक्ष्य गुणवत्ता</div>
+<div class="quadas-container animate delay-1" style="border-color:var(--gold);">
+<h4 style="color:var(--gold);">ग्रेडिंग डीटीए साक्ष्य</h4>
+<div class="quadas-domain">
+<div class="quadas-icon" style="background:var(--green);">⊕⊕⊕⊕</div>
+<div class="quadas-content">
+<h5>HIGH</h5>
+<p>एकाधिक उच्च-गुणवत्ता वाले अध्ययन, लगातार परिणाम, सीधे लागू</p>
+</div>
+</div>
+<div class="quadas-domain">
+<div class="quadas-icon" style="background:var(--gold);">⊕⊕⊕○</div>
+<div class="quadas-content">
+<h5>MODERATE</h5>
+<p>Some limitations in study quality, consistency, or applicability</p>
+</div>
+</div>
+<div class="quadas-domain">
+<div class="quadas-icon" style="background:var(--orange);">⊕⊕○○</div>
+<div class="quadas-content">
+<h5>LOW</h5>
+<p>Serious limitations—may need to downgrade recommendations</p>
+</div>
+</div>
+<div class="quadas-domain">
+<div class="quadas-icon" style="background:var(--red);">⊕○○○</div>
+<div class="quadas-content">
+<h5>VERY LOW</h5>
+<p>Very serious limitations—evidence uncertain</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Cost-Consequence Analysis</div>
+<div class="decision-aid animate delay-1">
+<h4>Example: Universal vs. Targeted Screening</h4>
+<div class="decision-aid-row">
+<div class="decision-aid-label">Cost per case detected (universal)</div>
+<div class="decision-aid-value harm">$50,000</div>
+</div>
+<div class="decision-aid-row">
+<div class="decision-aid-label">Cost per case detected (high-risk only)</div>
+<div class="decision-aid-value benefit">$5,000</div>
+</div>
+<div class="decision-aid-row">
+<div class="decision-aid-label">Cases missed by targeted approach</div>
+<div class="decision-aid-value harm">~10%</div>
+</div>
+<div class="decision-aid-row">
+<div class="decision-aid-label">False positives avoided by targeted</div>
+<div class="decision-aid-value benefit">~90%</div>
+</div>
+<div class="decision-aid-question">आपकी आबादी के लिए कौन सा दृष्टिकोण सही है?</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  "A test is not just accurate or inaccurate.<br/>
+                  It has costs—in money, in worry, in harm.<br/>
+                  बुद्धिमान चिकित्सक इन सबका मूल्यांकन करता है-<br/>
+                  और परीक्षण केवल तभी किया जाता है जब परीक्षण रोगी की सेवा करता है।"
+                </div>
+</div>
+</div>
+</div>
+ ==================== मॉड्यूल 23: उन्नत SROC ==================== 
+<div class="module-slides" data-module="23">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  SROC वक्र दर्शाता है <em>where</em> परीक्षण करता है.
+                  <br/><br/>
+                  But how <em>certain</em> are we?<br/>
+                  और कितना होगा <em>vary</em> in practice?
+                </div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Confidence vs. Prediction Regions</div>
+<div class="sroc-container animate delay-1" style="max-width:500px;">
+<h4>Two Types of Uncertainty</h4>
+<div class="sroc-plot" style="height:220px;">
+<svg class="sroc-curve" preserveaspectratio="none" viewbox="0 0 100 100">
+<!-- Diagonal line -->
+<line stroke="rgba(255,255,255,0.2)" stroke-dasharray="4" stroke-width="1" x1="0" x2="100" y1="100" y2="0"></line>
+<!-- Prediction region (larger, outer) -->
+<ellipse cx="25" cy="25" fill="rgba(249,115,22,0.15)" rx="25" ry="18" stroke="var(--orange)" stroke-dasharray="4" stroke-width="1"></ellipse>
+<!-- Confidence region (smaller, inner) -->
+<ellipse cx="25" cy="25" fill="rgba(34,197,94,0.2)" rx="12" ry="8" stroke="var(--green)" stroke-width="2"></ellipse>
+<!-- Summary point -->
+<circle cx="25" cy="25" fill="var(--gold)" r="4"></circle>
+<!-- SROC curve -->
+<path d="M 5 5 Q 15 35, 35 55 Q 55 75, 95 95" fill="none" stroke="var(--gold)" stroke-width="2"></path>
+</svg>
+</div>
+<div class="sroc-legend" style="margin-top:0.75rem;">
+<div class="sroc-legend-item"><div class="sroc-legend-dot" style="background:var(--green);"></div>95% CI (summary estimate)</div>
+<div class="sroc-legend-item"><div class="sroc-legend-dot" style="background:var(--orange);"></div>95% भविष्यवाणी (भविष्य के अध्ययन)</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">What Each Region Tells You</div>
+<div class="lesson-item animate delay-1">
+<div class="lesson-number" style="background:var(--green);">CI</div>
+<div class="lesson-content">
+<h4>Confidence Region (smaller ellipse)</h4>
+<p>जहां हम 95% आश्वस्त हैं <strong>true average</strong> संवेदनशीलता/विशिष्टता निहित है। सारांश अनुमान के बारे में अनिश्चितता.</p>
+</div>
+</div>
+<div class="lesson-item animate delay-2">
+<div class="lesson-number" style="background:var(--orange);">PI</div>
+<div class="lesson-content">
+<h4>Prediction Region (larger ellipse)</h4>
+<p>Where we expect <strong>95% of future studies</strong> गिरने के लिये। पढ़ाई के बीच विविधता का लेखा-जोखा।</p>
+</div>
+</div>
+<div class="simple-box animate delay-3">
+<div class="simple-title">CLINICAL IMPLICATION</div>
+<div class="simple-text">
+                    यदि पूर्वानुमान क्षेत्र बड़ा है, तो परीक्षण आपकी सेटिंग में औसत से बहुत भिन्न प्रदर्शन कर सकता है।
+                    <strong>Wide prediction = high heterogeneity = investigate sources.</strong>
+</div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Bivariate Model Interpretation</div>
+<div class="decision-tree animate delay-1">
+<h4>मेटा-विश्लेषण परिणाम पढ़ना</h4>
+<div class="tree-row"><div class="tree-node root">Summary Sens/Spec</div></div>
+<div class="tree-arrow">↓</div>
+<div class="tree-row"><div class="tree-node question">Check Regions</div></div>
+<div class="tree-branch">
+<div class="tree-branch-item">
+<div class="tree-label">CI narrow, PI narrow</div>
+<div class="tree-node tp">Consistent<small>औसत पर भरोसा रखें</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">CI narrow, PI wide</div>
+<div class="tree-node warning">Heterogeneous<small>औसत लागू नहीं हो सकता</small></div>
+</div>
+<div class="tree-branch-item">
+<div class="tree-label">CI wide</div>
+<div class="tree-node fp">Uncertain<small>अधिक अध्ययन की आवश्यकता है</small></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  "विश्वास क्षेत्र आपको बताता है: हम कितने आश्वस्त हैं?<br/>
+                  पूर्वानुमान क्षेत्र आपको बताता है: यह कितना भिन्न होगा?<br/>
+                  Both questions matter—<br/>
+                  क्योंकि कल आपके द्वारा उपयोग किया जाने वाला परीक्षण औसत नहीं हो सकता है।"
+                </div>
+</div>
+</div>
+</div>
+ ==================== मॉड्यूल 24: प्रश्नोत्तरी और संदर्भ ==================== 
+<div class="module-slides" data-module="24">
+<div class="slide dark active">
+<div class="content text-center">
+<div class="title gold animate">References</div>
+<div class="references animate delay-1">
+<h4>Key Sources</h4>
+<ol>
+<li>Carreyrou J. Bad Blood. Knopf, 2018. [Theranos]</li>
+<li>CDC. MMWR. 1987;36(49):833-840. [HIV blood supply]</li>
+<li>Herbst AL et al. N Engl J Med. 1971;284:878-881. [DES]</li>
+<li>Moyer VA. Ann Intern Med. 2012;157:120-134. [PSA]</li>
+<li>Pope JH et al. N Engl J Med. 2000;342:1163-1170. [Troponin]</li>
+<li>Steingart KR et al. Cochrane 2014;1:CD009593. [GeneXpert]</li>
+<li>Dinnes J et al. Cochrane 2022;7:CD013705. [COVID RAT]</li>
+<li>UK Panel. Lancet. 2012;380:1778-1786. [Mammography]</li>
+<li>Jack CR et al. Lancet Neurol. 2018;17:760-773. [Amyloid]</li>
+<li>WHO. Malaria RDT Performance. 2022.</li>
+<li>Reitsma JB et al. J Clin Epidemiol. 2005;58:982-990. [Bivariate]</li>
+<li>Whiting PF et al. Ann Intern Med. 2011;155:529-536. [QUADAS-2]</li>
+<li>Bolton-Maggs PHB. Transfus Med. 2016;26:303-311.</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="quiz-container animate">
+<div class="quiz-question">एक परीक्षण 99% संवेदनशील और 99% विशिष्ट होता है। रोग की व्यापकता 1/1000 है। एक मरीज का परीक्षण सकारात्मक है। क्या संभावना है कि उन्हें यह बीमारी है?</div>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkAnswer(this, false)">99%</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)">90%</div>
+<div class="quiz-option" onclick="checkAnswer(this, true)">About 9%</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)">50%</div>
+</div>
+<div class="quiz-feedback"></div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="quiz-container animate">
+<div class="quiz-question">What does "SnNout" mean?</div>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkAnswer(this, true)">A highly Sensitive test, when Negative, rules OUT disease</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)">A highly Specific test, when Negative, rules OUT disease</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)">Sensitivity should be used for screening</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)">Specificity should be above 90%</div>
+</div>
+<div class="quiz-feedback"></div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="quiz-container animate">
+<div class="quiz-question">परीक्षण के बावजूद रक्त आपूर्ति एचआईवी से दूषित क्यों हो गई?</div>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkAnswer(this, false)">The tests had low specificity</div>
+<div class="quiz-option" onclick="checkAnswer(this, true)">Tests had a window period with zero sensitivity in early infection</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)">परीक्षण सही ढंग से नहीं किए गए थे</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)">परीक्षण बहुत महंगे थे</div>
+</div>
+<div class="quiz-feedback"></div>
+</div>
+</div>
+</div>
+<div class="slide dark">
+<div class="content text-center">
+<div class="quiz-container animate">
+<div class="quiz-question">कौन सा QUADAS-2 डोमेन यह आकलन करता है कि क्या निदान को जाने बिना परीक्षण की व्याख्या की गई थी?</div>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkAnswer(this, false)">Patient Selection</div>
+<div class="quiz-option" onclick="checkAnswer(this, true)">Index Test</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)">Reference Standard</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)">प्रवाह और समय</div>
+</div>
+<div class="quiz-feedback"></div>
+</div>
+</div>
+</div>
+<div class="slide hope">
+<div class="content text-center">
+<div class="big-number green animate" style="font-size:3.5rem;">✔</div>
+<div class="title green animate delay-1">Course Complete</div>
+<div class="gold-line animate delay-2"></div>
+<div class="refrain hope animate delay-3">
+                  "अब आप चार परिणामों को जानते हैं,<br/>
+                  एक परीक्षण के दो गुण,<br/>
+                  आधार की भ्रांति दर,<br/>
+                  साक्ष्य एकत्र करने की कला,<br/>
+                  और पूर्वाग्रह जो सच्चाई को छिपाते हैं।<br/>
+<br/>
+                  जब अगला परीक्षण आपके सामने होता है -<br/>
+<em>आपको पता चल जाएगा।</em>"
+                </div>
+</div>
+</div>
+</div>
+<div class="slide-nav">
+<button class="nav-btn" onclick="prevSlide()">←</button>
+<div class="nav-center">
+<div class="slide-counter" id="slideCounter">1 / 4</div>
+<div class="progress" id="progressDots"></div>
+</div>
+<button class="nav-btn" onclick="nextSlide()">→</button>
+</div>
+</div>
+</div>
+</main>
+</div>
+<script>
+    const modules = [
+      { id: 1, title: "The Fraud", subtitle: "Theranos", slides: 4 },
+      { id: 2, title: "Four Outcomes", subtitle: "TP/FP/FN/TN", slides: 4 },
+      { id: 3, title: "HIV Window", subtitle: "Blood supply crisis", slides: 5 },
+      { id: 4, title: "DES Tragedy", subtitle: "Cancer in daughters", slides: 5 },
+      { id: 5, title: "Sens & Spec", subtitle: "दो गुण", slides: 5 },
+      { id: 6, title: "Base Rate Fallacy", subtitle: "सबसे घातक त्रुटि", slides: 6 },
+      { id: 7, title: "TB GeneXpert", subtitle: "Missed resistance", slides: 5 },
+      { id: 8, title: "PSA Tragedy", subtitle: "Overdiagnosis", slides: 5 },
+      { id: 9, title: "Troponin", subtitle: "Timing matters", slides: 5 },
+      { id: 10, title: "Likelihood Ratios", subtitle: "परिणामों का क्या मतलब है", slides: 5 },
+      { id: 11, title: "Malaria RDTs", subtitle: "When tests miss", slides: 5 },
+      { id: 12, title: "COVID Tests", subtitle: "False security", slides: 4 },
+      { id: 13, title: "Mammography", subtitle: "Finding too much", slides: 5 },
+      { id: 14, title: "Amyloid Testing", subtitle: "Surrogate markers", slides: 4 },
+      { id: 15, title: "QUADAS-2", subtitle: "Quality assessment", slides: 5 },
+      { id: 16, title: "Meta-Analysis", subtitle: "SROC curves", slides: 5 },
+      { id: 17, title: "Heterogeneity", subtitle: "जब अध्ययन असहमत हों", slides: 4 },
+      { id: 18, title: "The Toolkit", subtitle: "Clinical decisions", slides: 5 },
+      { id: 19, title: "System Errors", subtitle: "परीक्षण से परे", slides: 4 },
+      { id: 20, title: "AI Diagnostics", subtitle: "Algorithmic bias", slides: 5 },
+      { id: 21, title: "Communication", subtitle: "Talking to patients", slides: 6 },
+      { id: 22, title: "Cost & GRADE", subtitle: "Is testing worth it?", slides: 5 },
+      { id: 23, title: "Advanced SROC", subtitle: "CI vs. prediction", slides: 5 },
+      { id: 24, title: "Quiz & Sources", subtitle: "Test yourself", slides: 6 }
+    ];
+
+    let currentModule = 1;
+    let currentSlide = 1;
+    const completedModules = new Set();
+
+    function init() {
+      renderModuleList();
+      updateSlideNav();
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextSlide(); }
+        else if (e.key === 'ArrowLeft') { e.preventDefault(); prevSlide(); }
+      });
+    }
+
+    function renderModuleList() {
+      const list = document.getElementById('moduleList');
+      list.innerHTML = modules.map(m => `
+        <div class="module-item ${m.id === currentModule ? 'active' : ''} ${completedModules.has(m.id) ? 'completed' : ''}" onclick="goToModule(${m.id})">
+          <div class="module-number">${completedModules.has(m.id) ? '✓' : m.id}</div>
+          <div class="module-info">
+            <div class="module-title">${m.title}</div>
+            <div class="module-subtitle">${m.subtitle}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function goToModule(moduleId) {
+      if (moduleId > currentModule) completedModules.add(currentModule);
+      currentModule = moduleId;
+      currentSlide = 1;
+      document.querySelectorAll('.module-slides').forEach(el => el.classList.remove('active'));
+      document.querySelector(`.module-slides[data-module="${moduleId}"]`).classList.add('active');
+      updateSlideVisibility();
+      updateSlideNav();
+      renderModuleList();
+      document.getElementById('currentModule').textContent = modules[moduleId - 1].title;
+    }
+
+    function updateSlideVisibility() {
+      const moduleSlides = document.querySelector(`.module-slides[data-module="${currentModule}"]`);
+      const slides = moduleSlides.querySelectorAll('.slide');
+      slides.forEach((slide, index) => slide.classList.toggle('active', index + 1 === currentSlide));
+    }
+
+    function updateSlideNav() {
+      const module = modules[currentModule - 1];
+      document.getElementById('slideCounter').textContent = `${currentSlide} / ${module.slides}`;
+      document.getElementById('progressDots').innerHTML = Array.from({ length: module.slides }, (_, i) =>
+        `<div class="progress-dot ${i + 1 === currentSlide ? 'active' : ''}" onclick="goToSlide(${i + 1})"></div>`
+      ).join('');
+    }
+
+    function goToSlide(slideNum) { currentSlide = slideNum; updateSlideVisibility(); updateSlideNav(); }
+
+    function nextSlide() {
+      const module = modules[currentModule - 1];
+      if (currentSlide < module.slides) { currentSlide++; updateSlideVisibility(); updateSlideNav(); }
+      else if (currentModule < modules.length) { goToModule(currentModule + 1); }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 1) { currentSlide--; updateSlideVisibility(); updateSlideNav(); }
+      else if (currentModule > 1) {
+        const prevModuleSlides = modules[currentModule - 2].slides;
+        currentModule--;
+        currentSlide = prevModuleSlides;
+        document.querySelectorAll('.module-slides').forEach(el => el.classList.remove('active'));
+        document.querySelector(`.module-slides[data-module="${currentModule}"]`).classList.add('active');
+        updateSlideVisibility();
+        updateSlideNav();
+        renderModuleList();
+        document.getElementById('currentModule').textContent = modules[currentModule - 1].title;
+      }
+    }
+
+    function checkAnswer(element, isCorrect) {
+      const container = element.closest('.quiz-container');
+      const options = container.querySelectorAll('.quiz-option');
+      const feedback = container.querySelector('.quiz-feedback');
+      options.forEach(opt => { opt.style.pointerEvents = 'none'; if (opt === element) opt.classList.add(isCorrect ? 'correct' : 'incorrect'); });
+      feedback.classList.add('show', isCorrect ? 'correct' : 'incorrect');
+      feedback.textContent = isCorrect ? 'सही। आप समझ गये।' : 'बिल्कुल नहीं। आपने जो कहानियाँ सुनी हैं उन पर विचार करें।';
+    }
+
+    // Interactive Base Rate Calculator
+    function updateCalc() {
+      const prev = parseFloat(document.getElementById('prevSlider').value);
+      const sens = parseFloat(document.getElementById('sensSlider').value);
+      const spec = parseFloat(document.getElementById('specSlider').value);
+
+      document.getElementById('prevValue').textContent = prev.toFixed(1) + '%';
+      document.getElementById('sensValue').textContent = sens + '%';
+      document.getElementById('specValue').textContent = spec + '%';
+
+      // Calculate PPV
+      const prevDecimal = prev / 100;
+      const sensDecimal = sens / 100;
+      const specDecimal = spec / 100;
+
+      const tp = prevDecimal * sensDecimal;
+      const fp = (1 - prevDecimal) * (1 - specDecimal);
+      const ppv = tp / (tp + fp) * 100;
+
+      document.getElementById('ppvResult').textContent = ppv.toFixed(1) + '%';
+      document.getElementById('fpRate').textContent = (100 - ppv).toFixed(0) + '% सकारात्मकताएं गलत अलार्म हैं';
+    }
+
+    init();
+  </script>
+</body>
+</html>

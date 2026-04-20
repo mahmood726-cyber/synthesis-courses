@@ -1,0 +1,2561 @@
+<!DOCTYPE html>
+
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>التحليل التلوي المتقدم: ما وراء الأساسيات</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&amp;family=Source+Sans+Pro:wght@300;400;600;700&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+<script>
+if (typeof Plotly === 'undefined') {
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('[id*="plot"], [id*="chart"], .plotly-graph-div, .js-plotly-plot').forEach(function(el) {
+      el.innerHTML = '<div style="padding:2rem;text-align:center;background:#2a2a4a;border:1px dashed #D4AF37;border-radius:8px;color:#FAF8F5;margin:1rem 0;"><p style="font-size:1.1rem;margin-bottom:0.5rem;">Interactive chart unavailable offline</p><p style="font-size:0.85rem;opacity:0.7;">Connect to the internet to load interactive Plotly.js visualizations</p></div>';
+    });
+  });
+}
+</script>
+<style>
+    :root {
+      --navy: #1E2761;
+      --deep-navy: #141B3D;
+      --gold: #D4AF37;
+      --cream: #FAF8F5;
+      --light-cream: #FFFFFF;
+      --text: #2D3748;
+      --light-text: #718096;
+      --red: #C53030;
+      --green: #22c55e;
+      --teal: #0f5b6a;
+      --purple: #7c3aed;
+      --orange: #f59e0b;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      height: 100%;
+      font-family: 'Source Sans Pro', sans-serif;
+      background: var(--deep-navy);
+      color: var(--cream);
+    }
+    .course-container { display: flex; height: 100vh; overflow: hidden; }
+    .sidebar {
+      width: 320px;
+      background: linear-gradient(180deg, var(--deep-navy) 0%, #0a0f1a 100%);
+      border-left: 1px solid rgba(212,175,55,0.2);
+      display: flex; flex-direction: column; flex-shrink: 0;
+    }
+    .sidebar-header { padding: 1.5rem; border-bottom: 1px solid rgba(212,175,55,0.2); }
+    .sidebar-header h1 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.4rem; font-weight: 700; color: var(--gold); margin-bottom: 0.25rem;
+    }
+    .sidebar-header p { font-size: 0.75rem; color: rgba(255,255,255,0.6); }
+    .sidebar-badge {
+      display: inline-block; padding: 0.25rem 0.5rem;
+      background: linear-gradient(135deg, var(--purple), #9333ea);
+      border-radius: 4px; font-size: 0.65rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.05em; margin-top: 0.5rem;
+    }
+    .module-list { flex: 1; overflow-y: auto; padding: 1rem 0; }
+    .module-item {
+      display: flex; align-items: center; gap: 0.75rem;
+      padding: 0.65rem 1.25rem; cursor: pointer; transition: all 0.2s;
+      border-right: 3px solid transparent;
+    }
+    .module-item:hover { background: rgba(212,175,55,0.1); }
+    .module-item.active { background: rgba(212,175,55,0.15); border-right-color: var(--gold); }
+    .module-item.completed .module-number { background: var(--green); color: white; }
+    .module-number {
+      width: 26px; height: 26px; border-radius: 50%;
+      background: rgba(255,255,255,0.1); display: flex;
+      align-items: center; justify-content: center;
+      font-size: 0.75rem; font-weight: 600; flex-shrink: 0;
+    }
+    .module-info { flex: 1; min-width: 0; }
+    .module-title { font-size: 0.85rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .module-subtitle { font-size: 0.7rem; color: rgba(255,255,255,0.5); }
+    .sidebar-footer { padding: 1rem; border-top: 1px solid rgba(212,175,55,0.2); }
+    .progress-dashboard-btn {
+      width: 100%; padding: 0.75rem;
+      background: rgba(212,175,55,0.15); border: 1px solid rgba(212,175,55,0.3);
+      border-radius: 8px; color: var(--gold); font-weight: 600; cursor: pointer;
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;
+    }
+    .progress-bar-container { margin-top: 0.75rem; }
+    .progress-label { font-size: 0.75rem; color: rgba(255,255,255,0.6); margin-bottom: 0.25rem; }
+    .progress-bar { height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, var(--purple), var(--gold)); border-radius: 3px; transition: width 0.3s; }
+    .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .top-bar {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1rem 2rem; background: rgba(0,0,0,0.2);
+      border-bottom: 1px solid rgba(212,175,55,0.15);
+    }
+    .module-indicator { font-size: 0.9rem; color: rgba(255,255,255,0.7); }
+    .overall-progress { font-size: 0.8rem; color: var(--gold); margin-left: 1rem; }
+    .top-bar-actions { display: flex; gap: 0.75rem; }
+    .top-bar-btn {
+      padding: 0.5rem 1rem; background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2); border-radius: 6px;
+      color: var(--cream); font-size: 0.85rem; cursor: pointer; transition: all 0.2s;
+    }
+    .top-bar-btn:hover { background: rgba(255,255,255,0.15); }
+    .top-bar-btn.primary { background: var(--purple); border-color: var(--purple); }
+    .slide-container { flex: 1; overflow-y: auto; padding: 2rem; }
+    .slide { display: none; max-width: 1000px; margin: 0 auto; }
+    .slide.active { display: block; }
+
+    /* Storytelling Styles */
+    .rhetoric-question {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.6rem; font-style: italic; color: var(--gold);
+      text-align: center; padding: 2rem; line-height: 1.5;
+      border-top: 1px solid rgba(212,175,55,0.3);
+      border-bottom: 1px solid rgba(212,175,55,0.3);
+      margin: 1.5rem 0;
+    }
+    .contrast-container { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0; }
+    .contrast-box {
+      padding: 1.25rem; border-radius: 12px;
+    }
+    .contrast-box.wrong {
+      background: linear-gradient(135deg, rgba(197,48,48,0.15), rgba(30,39,97,0.1));
+      border-right: 4px solid var(--red);
+    }
+    .contrast-box.right {
+      background: linear-gradient(135deg, rgba(34,197,94,0.15), rgba(30,39,97,0.1));
+      border-right: 4px solid var(--green);
+    }
+    .contrast-title { font-weight: 700; margin-bottom: 0.5rem; }
+    .contrast-box.wrong .contrast-title { color: var(--red); }
+    .contrast-box.right .contrast-title { color: var(--green); }
+    .oath-statement {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.4rem; color: var(--cream); text-align: center;
+      padding: 1.5rem; background: rgba(0,0,0,0.3);
+      border-radius: 8px; margin: 1rem 0; line-height: 1.6;
+    }
+    .oath-statement em { color: var(--gold); font-style: normal; }
+    .revelation-sequence {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(212,175,55,0.2);
+      border-radius: 12px; padding: 1.5rem; margin: 1rem 0;
+    }
+    .revelation-step {
+      padding: 1rem; margin: 0.5rem 0;
+      border-right: 3px solid rgba(255,255,255,0.2);
+      transition: all 0.3s;
+    }
+    .revelation-step.revealed {
+      border-right-color: var(--gold);
+      background: rgba(212,175,55,0.1);
+    }
+    .revelation-step .step-number {
+      font-size: 0.75rem; color: var(--gold);
+      text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem;
+    }
+    .cycle-return {
+      background: linear-gradient(135deg, rgba(124,58,237,0.2), rgba(212,175,55,0.1));
+      border: 2px dashed rgba(212,175,55,0.4);
+      border-radius: 12px; padding: 1.25rem; margin: 1.5rem 0;
+      text-align: center;
+    }
+    .cycle-return .principle-recall {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.3rem; font-style: italic; color: var(--gold);
+    }
+    .vivid-consequence {
+      background: linear-gradient(135deg, rgba(197,48,48,0.2), rgba(0,0,0,0.3));
+      border-radius: 12px; padding: 1.5rem; margin: 1rem 0;
+      border-right: 5px solid var(--red);
+    }
+    .vivid-consequence .death-toll {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 2.5rem; font-weight: 700; color: var(--red);
+      text-align: center; margin: 1rem 0;
+    }
+    .vivid-consequence .toll-label {
+      text-align: center; font-size: 0.9rem; color: rgba(255,255,255,0.7);
+    }
+
+    /* Standard content styles */
+    .principle-display { text-align: center; margin-bottom: 2rem; }
+    .principle-text {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 2rem; font-style: italic; color: var(--gold); line-height: 1.4;
+    }
+    .slide-title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 2.2rem; color: var(--gold); margin-bottom: 1.5rem; text-align: center;
+    }
+    .slide-content {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(212,175,55,0.15);
+      border-radius: 12px; padding: 2rem;
+    }
+    .story-box {
+      background: linear-gradient(135deg, rgba(124,58,237,0.15), rgba(30,39,97,0.2));
+      border-right: 4px solid var(--purple);
+      border-radius: 0 12px 12px 0; padding: 1.5rem; margin-bottom: 1.5rem;
+    }
+    .story-label {
+      font-size: 0.75rem; text-transform: uppercase;
+      letter-spacing: 0.1em; color: var(--purple); margin-bottom: 0.5rem;
+    }
+    .story-text { font-size: 1.1rem; line-height: 1.7; color: var(--cream); }
+    .story-hook {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.3rem; font-style: italic; color: var(--gold);
+      margin-top: 1rem; padding-top: 1rem;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+    .method-box {
+      background: linear-gradient(135deg, rgba(15,91,106,0.15), rgba(30,39,97,0.1));
+      border-right: 4px solid var(--teal);
+      border-radius: 0 12px 12px 0; padding: 1.5rem; margin: 1.5rem 0;
+    }
+    .method-label {
+      font-size: 0.75rem; text-transform: uppercase;
+      letter-spacing: 0.1em; color: var(--teal); margin-bottom: 0.5rem;
+    }
+    .method-content h3 { color: var(--cream); margin-bottom: 1rem; font-size: 1.2rem; }
+    .method-content ul { margin-left: 1.5rem; color: rgba(255,255,255,0.85); }
+    .method-content li { margin-bottom: 0.5rem; line-height: 1.5; }
+    .tool-panel {
+      background: var(--light-cream);
+      border-radius: 12px; padding: 1.5rem; margin: 1.5rem 0; color: var(--text);
+    }
+    .tool-header {
+      display: flex; align-items: center; gap: 0.75rem;
+      margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 2px solid var(--purple);
+    }
+    .tool-icon { font-size: 1.5rem; }
+    .tool-title { font-weight: 700; font-size: 1.1rem; color: var(--navy); }
+    .tool-controls { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem; }
+    .tool-control { display: flex; flex-direction: column; gap: 0.25rem; }
+    .tool-control label { font-size: 0.8rem; font-weight: 600; color: var(--navy); }
+    .tool-control input, .tool-control select {
+      padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 0.9rem;
+    }
+    .tool-btn {
+      padding: 0.6rem 1.25rem; background: var(--purple); color: white;
+      border: none; border-radius: 6px; font-weight: 600; cursor: pointer;
+    }
+    .tool-btn:hover { background: #6d28d9; }
+    .plot-area { width: 100%; min-height: 400px; background: white; border-radius: 8px; }
+
+    /* Warning boxes */
+    .warning-box {
+      background: linear-gradient(135deg, rgba(245,158,11,0.2), rgba(30,39,97,0.1));
+      border: 2px solid var(--orange);
+      border-radius: 12px; padding: 1.25rem; margin: 1rem 0;
+    }
+    .warning-box .warning-title {
+      display: flex; align-items: center; gap: 0.5rem;
+      font-weight: 700; color: var(--orange); margin-bottom: 0.5rem;
+    }
+
+    /* Clinical guide box */
+    .clinical-guide {
+      background: linear-gradient(135deg, rgba(34,197,94,0.15), rgba(30,39,97,0.1));
+      border: 2px solid var(--green);
+      border-radius: 12px; padding: 1.5rem; margin: 1.5rem 0;
+    }
+    .clinical-guide .guide-title {
+      display: flex; align-items: center; gap: 0.5rem;
+      font-weight: 700; color: var(--green); margin-bottom: 1rem;
+      font-size: 1.1rem;
+    }
+    .clinical-checklist { list-style: none; margin: 0; padding: 0; }
+    .clinical-checklist li {
+      padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.1);
+      display: flex; align-items: flex-start; gap: 0.5rem;
+    }
+    .clinical-checklist li::before {
+      content: "✓"; color: var(--green); font-weight: 700;
+    }
+
+    /* Story deep dive */
+    .story-deep {
+      background: linear-gradient(135deg, rgba(124,58,237,0.1), rgba(30,39,97,0.15));
+      border-right: 4px solid var(--purple);
+      border-radius: 0 16px 16px 0; padding: 1.5rem; margin: 1.5rem 0;
+    }
+    .story-timeline { position: relative; padding-right: 2rem; margin: 1rem 0; }
+    .story-timeline::before {
+      content: ''; position: absolute; left: 8px; top: 0; bottom: 0;
+      width: 2px; background: rgba(255,255,255,0.2);
+    }
+    .timeline-event { position: relative; margin-bottom: 1.25rem; padding-right: 1rem; }
+    .timeline-event::before {
+      content: ''; position: absolute; left: -1.5rem; top: 0.35rem;
+      width: 12px; height: 12px; border-radius: 50%;
+      background: var(--gold); border: 2px solid rgba(255,255,255,0.3);
+    }
+    .timeline-event.crisis::before { background: var(--red); }
+    .timeline-event.revelation::before { background: var(--green); }
+    .timeline-year { font-weight: 700; color: var(--gold); font-size: 0.85rem; }
+    .timeline-text { color: rgba(255,255,255,0.9); line-height: 1.5; margin-top: 0.25rem; }
+    .real-data-card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(212,175,55,0.3);
+      border-radius: 12px; padding: 1.25rem; margin: 1rem 0;
+    }
+    .real-data-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 1rem; padding-bottom: 0.75rem;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .real-data-source { font-size: 0.75rem; color: rgba(255,255,255,0.6); }
+    .real-data-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+    .real-data-stat { display: flex; flex-direction: column; }
+    .real-data-stat .value {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.4rem; font-weight: 700; color: var(--gold);
+    }
+    .real-data-stat .label { font-size: 0.8rem; color: rgba(255,255,255,0.7); }
+
+    /* Quiz styles */
+    .quiz-container {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(212,175,55,0.2);
+      border-radius: 12px; padding: 1.5rem; margin: 1.5rem 0;
+    }
+    .quiz-question { font-size: 1.1rem; margin-bottom: 1rem; line-height: 1.5; }
+    .quiz-options { display: flex; flex-direction: column; gap: 0.5rem; }
+    .quiz-option {
+      padding: 0.75rem 1rem; background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.2); border-radius: 8px;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .quiz-option:hover { background: rgba(255,255,255,0.1); }
+    .quiz-option.selected { border-color: var(--gold); background: rgba(212,175,55,0.1); }
+    .quiz-option.correct { border-color: var(--green); background: rgba(34,197,94,0.15); }
+    .quiz-option.incorrect { border-color: var(--red); background: rgba(239,68,68,0.1); }
+    .quiz-check-btn {
+      margin-top: 1rem; padding: 0.75rem 1.5rem;
+      background: var(--gold); color: var(--navy);
+      border: none; border-radius: 6px; font-weight: 600; cursor: pointer;
+    }
+    .quiz-explanation {
+      margin-top: 1rem; padding: 1rem;
+      background: rgba(212,175,55,0.1); border-radius: 8px; display: none;
+    }
+    .quiz-explanation.visible { display: block; }
+
+    /* Decision tree */
+    .decision-tree {
+      background: linear-gradient(135deg, rgba(30,39,97,0.1), rgba(20,27,61,0.15));
+      border: 2px solid rgba(212,175,55,0.3);
+      border-radius: 16px; padding: 1.5rem; margin: 1.5rem 0;
+    }
+    .decision-node {
+      background: rgba(255,255,255,0.08);
+      border: 2px solid rgba(255,255,255,0.2);
+      border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem;
+    }
+    .decision-node.active { border-color: var(--gold); background: rgba(212,175,55,0.15); }
+    .decision-question { font-size: 1.1rem; font-weight: 600; color: var(--cream); margin-bottom: 1rem; }
+    .decision-branches { display: flex; flex-direction: column; gap: 0.5rem; }
+    .decision-branch {
+      display: flex; align-items: center; gap: 0.75rem;
+      padding: 0.75rem 1rem; background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.15); border-radius: 8px;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .decision-branch:hover { background: rgba(255,255,255,0.1); border-color: var(--gold); }
+    .decision-branch.selected { background: rgba(212,175,55,0.2); border-color: var(--gold); }
+    .branch-arrow {
+      width: 24px; height: 24px; border-radius: 50%;
+      background: rgba(212,175,55,0.3); display: flex;
+      align-items: center; justify-content: center; font-size: 0.8rem; flex-shrink: 0;
+    }
+    .decision-outcome {
+      margin-top: 1rem; padding: 1rem; border-radius: 8px; display: none;
+    }
+    .decision-outcome.visible { display: block; animation: fadeIn 0.3s ease; }
+    .decision-outcome.good { background: rgba(34,197,94,0.15); border-right: 4px solid var(--green); }
+    .decision-outcome.bad { background: rgba(197,48,48,0.15); border-right: 4px solid var(--red); }
+    .decision-outcome.neutral { background: rgba(245,158,11,0.15); border-right: 4px solid var(--orange); }
+
+    /* Scenario */
+    .scenario-panel {
+      background: linear-gradient(135deg, rgba(124,58,237,0.1), rgba(30,39,97,0.2));
+      border: 2px solid rgba(124,58,237,0.4);
+      border-radius: 16px; padding: 1.5rem; margin: 1.5rem 0;
+    }
+    .scenario-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; }
+    .scenario-icon { font-size: 1.5rem; }
+    .scenario-title { font-weight: 700; font-size: 1.1rem; color: var(--cream); }
+    .scenario-situation {
+      background: rgba(0,0,0,0.2); padding: 1rem;
+      border-radius: 8px; margin-bottom: 1rem; line-height: 1.6;
+    }
+    .scenario-question { font-weight: 600; color: var(--gold); margin-bottom: 1rem; }
+    .scenario-choices { display: flex; flex-direction: column; gap: 0.5rem; }
+    .scenario-choice {
+      display: flex; align-items: flex-start; gap: 0.75rem;
+      padding: 0.75rem 1rem; background: rgba(255,255,255,0.05);
+      border: 2px solid rgba(255,255,255,0.15); border-radius: 8px;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .scenario-choice:hover { background: rgba(255,255,255,0.1); border-color: rgba(124,58,237,0.5); }
+    .scenario-choice.correct { background: rgba(34,197,94,0.15); border-color: var(--green); }
+    .scenario-choice.incorrect { background: rgba(239,68,68,0.1); border-color: var(--red); }
+    .choice-letter {
+      width: 24px; height: 24px; border-radius: 50%;
+      background: rgba(124,58,237,0.3); display: flex;
+      align-items: center; justify-content: center;
+      font-weight: 700; font-size: 0.8rem; flex-shrink: 0;
+    }
+    .scenario-result { margin-top: 1rem; padding: 1rem; border-radius: 8px; display: none; }
+    .scenario-result.visible { display: block; }
+    .scenario-result.good { background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.3); }
+    .scenario-result.bad { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); }
+    .scenario-result.neutral { background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.3); }
+
+    /* Navigation */
+    .slide-nav {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1rem 2rem; background: rgba(0,0,0,0.2);
+      border-top: 1px solid rgba(212,175,55,0.15);
+    }
+    .nav-btn {
+      padding: 0.75rem 1.5rem; background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2); border-radius: 8px;
+      color: var(--cream); font-weight: 600; cursor: pointer; transition: all 0.2s;
+    }
+    .nav-btn:hover { background: rgba(255,255,255,0.15); }
+    .nav-btn.primary { background: var(--gold); border-color: var(--gold); color: var(--navy); }
+    .nav-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .slide-counter { font-size: 0.9rem; color: rgba(255,255,255,0.6); text-align: center; }
+
+    /* Dashboard */
+    .dashboard-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+      display: none; align-items: center; justify-content: center; z-index: 1000;
+    }
+    .dashboard-overlay.open { display: flex; }
+    .dashboard-panel {
+      background: var(--light-cream); border-radius: 16px;
+      width: 90%; max-width: 600px; max-height: 80vh;
+      overflow-y: auto; color: var(--text);
+    }
+    .dashboard-header {
+      padding: 1.5rem; background: linear-gradient(135deg, var(--purple), var(--teal));
+      color: white; border-radius: 16px 16px 0 0; position: relative;
+    }
+    .dashboard-header h2 { font-family: 'Cormorant Garamond', Georgia, serif; margin-bottom: 0.5rem; }
+    .close-btn {
+      position: absolute; top: 1rem; right: 1rem;
+      width: 32px; height: 32px; border-radius: 50%;
+      background: rgba(255,255,255,0.2); border: none;
+      color: white; font-size: 1.2rem; cursor: pointer;
+    }
+    .dashboard-content { padding: 1.5rem; }
+    .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+    .stat-card { text-align: center; padding: 1rem; background: #f7fafc; border-radius: 8px; }
+    .stat-card .stat-value { font-size: 1.8rem; font-weight: 700; color: var(--navy); }
+    .stat-card .stat-label { font-size: 0.75rem; color: var(--light-text); text-transform: uppercase; }
+
+    /* Glossary */
+    .glossary-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+      display: none; align-items: center; justify-content: center; z-index: 1000;
+    }
+    .glossary-overlay.open { display: flex; }
+    .glossary-panel {
+      background: var(--light-cream); border-radius: 16px;
+      width: 90%; max-width: 700px; max-height: 80vh;
+      overflow-y: auto; color: var(--text);
+    }
+    .glossary-header {
+      padding: 1.5rem; background: var(--navy);
+      color: white; border-radius: 16px 16px 0 0; position: relative;
+    }
+    .glossary-search {
+      width: 100%; padding: 0.75rem; border: none;
+      border-radius: 8px; font-size: 1rem; margin-top: 1rem;
+    }
+    .glossary-content { padding: 1.5rem; }
+    .glossary-term { padding: 1rem 0; border-bottom: 1px solid #eee; }
+    .glossary-term strong { color: var(--purple); }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-in { animation: fadeIn 0.4s ease; }
+    .mobile-menu-toggle{display:none;position:fixed;top:12px;right: 12px;z-index:1001;background:#1E2761;border:1px solid #D4AF37;color:#D4AF37;width:40px;height:40px;border-radius:8px;font-size:1.2rem;cursor:pointer;align-items:center;justify-content:center;}
+    @media(max-width:768px){.mobile-menu-toggle{display:flex;}.sidebar{transform:translateX(100%);transition:transform 0.3s ease;position:fixed;z-index:1000;height:100vh;}.sidebar.open{transform:translateX(0);}.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:999;}.sidebar-overlay.show{display:block;}}
+    .skip-link{position:absolute;top:-40px;left:0;background:#D4AF37;color:#1E2761;padding:8px 16px;z-index:100;transition:top 0.3s;font-family:'Source Sans Pro',sans-serif;text-decoration:none;font-weight:600;}.skip-link:focus{top:0;}
+
+    /* Focus-visible styles for keyboard navigation */
+    :focus-visible {
+      outline: 2px solid var(--gold, #D4AF37);
+      outline-offset: 2px;
+    }
+
+    :focus:not(:focus-visible) {
+      outline: none;
+    }
+
+    button:focus-visible,
+    a:focus-visible,
+    [role="button"]:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible {
+      outline: 2px solid var(--gold, #D4AF37);
+      outline-offset: 2px;
+      box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.3);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+<body>
+<a class="skip-link" href="#main-content">انتقل إلى المحتوى الرئيسي</a>
+<button aria-expanded="false" aria-label="Toggle navigation menu" class="mobile-menu-toggle" onclick="toggleSidebar()">☰</button>
+<div class="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show');"></div>
+<div class="course-container">
+<nav class="sidebar">
+<div class="sidebar-header">
+<a href="index-ar.html" onmouseout="this.style.color='rgba(212,175,55,0.7)'" onmouseover="this.style.color='#D4AF37'" style="display:block;font-size:0.7rem;color:rgba(212,175,55,0.7);text-decoration:none;margin-bottom:0.5rem;">← مكتبة الدورة</a>
+<h1>التحليل التلوي المتقدم</h1>
+<p>ما وراء الأساسيات</p>
+<span class="sidebar-badge">المستوى المتقدم</span>
+</div>
+<div aria-label="الملاحة بالطبع" class="module-list" id="moduleList"></div>
+<div class="sidebar-footer">
+<button class="progress-dashboard-btn" onclick="openDashboard()">
+<span>📊 لوحة معلومات التقدم</span>
+<span id="sidebarPoints">0 نقاط</span>
+</button>
+<div class="progress-bar-container">
+<div class="progress-label">التقدم: <span id="progressPercent">0%</span></div>
+<div class="progress-bar">
+<div class="progress-fill" id="progressFill" style="width: 0%"></div>
+</div>
+</div>
+</div>
+</nav>
+<main class="main-content" id="main-content">
+<div class="top-bar">
+<div>
+<span class="module-indicator" id="moduleIndicator">الوحدة 0: البوابة</span>
+<span class="overall-progress" id="overallProgress">الإجمالي: 0%</span>
+</div>
+<div class="top-bar-actions">
+<button class="top-bar-btn" onclick="openGlossary()">📖 المسرد</button>
+<button class="top-bar-btn primary" onclick="goToNextModule()">الوحدة التالية →</button>
+</div>
+</div>
+<div class="slide-container" id="slideContainer"></div>
+<div class="slide-nav">
+<button class="nav-btn" id="prevBtn" onclick="prevSlide()">← Previous</button>
+<div class="slide-counter">
+<span id="slideCounter">1 / 10</span>
+</div>
+<button class="nav-btn primary" id="nextBtn" onclick="nextSlide()">Next →</button>
+</div>
+</main>
+</div>
+ لوحة المعلومات 
+<div class="dashboard-overlay" id="progressDashboard">
+<div class="dashboard-panel">
+<div class="dashboard-header">
+<button class="close-btn" onclick="closeDashboard()">×</button>
+<h2>تقدمك</h2>
+<p id="levelBadge">المستوى 1: المنهجي المتدرب</p>
+</div>
+<div class="dashboard-content">
+<div class="stat-grid">
+<div class="stat-card">
+<div class="stat-value" id="totalPoints">0</div>
+<div class="stat-label">النقاط</div>
+</div>
+<div class="stat-card">
+<div class="stat-value" id="modulesCompleted">0/9</div>
+<div class="stat-label">الوحدات</div>
+</div>
+<div class="stat-card">
+<div class="stat-value" id="toolsUsed">0</div>
+<div class="stat-label">الأدوات المستخدمة</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+ المسرد 
+<div class="glossary-overlay" id="glossaryOverlay">
+<div class="glossary-panel">
+<div class="glossary-header">
+<button class="close-btn" onclick="closeGlossary()">×</button>
+<h2>مسرد المصطلحات</h2>
+<input class="glossary-search" id="glossarySearch" oninput="filterGlossary()" placeholder="Search terms..." type="text"/>
+</div>
+<div class="glossary-content" id="glossaryContent"></div>
+</div>
+</div>
+<script>
+function toggleSidebar() {
+  const sidebar = document.querySelector('.sidebar');
+  const overlay = document.querySelector('.sidebar-overlay');
+  const toggle = document.querySelector('.mobile-menu-toggle');
+  if (!sidebar) return;
+  const isOpen = sidebar.classList.toggle('open');
+  if (overlay) overlay.classList.toggle('show', isOpen);
+  if (toggle) toggle.setAttribute('aria-expanded', String(isOpen));
+}
+
+// ============================================================
+// GLOSSARY DATA
+// ============================================================
+const glossaryTerms = [
+  { term: "التحليل التلوي للشبكة (NMA)", def: "طريقة إحصائية تجمع بين الأدلة المباشرة وغير المباشرة لمقارنة علاجات متعددة في وقت واحد، حتى في حالة عدم وجود تجارب مباشرة." },
+  { term: "Transitivity", def: "الافتراض بأن المرضى في مقارنات مختلفة متشابهون بدرجة كافية (قابلة للتبادل) بحيث تكون المقارنات غير المباشرة من خلال المقارنات المشتركة صحيحة. ليست خاصية رياضية، بل تتعلق بمجموعات المرضى." },
+  { term: "Consistency", def: "الاتفاق بين الأدلة المباشرة (من التجارب المباشرة) والأدلة غير المباشرة (المستنتجة من خلال الشبكة). عدم الاتساق يشير إلى مشاكل محتملة." },
+  { term: "SUCRA", def: "السطح تحت منحنى الترتيب التراكمي. مقياس تصنيف قائم على الاحتمالية في NMA. تحذير: يمكن أن يكون مضللاً عندما تكون فترات العلاج متداخلة." },
+  { term: "IPD Meta-Analysis", def: "التحليل التلوي لبيانات المريض الفردية. يستخدم البيانات الأولية على مستوى المريض بدلاً من الملخصات المنشورة. المعيار الذهبي للكشف عن تأثيرات المجموعة الفرعية." },
+  { term: "مرحلة واحدة مقابل مرحلتين", def: "طريقتان لتحليل IPD. نماذج المرحلة الواحدة لجميع المرضى معًا؛ يتم تحليل كل دراسة على مرحلتين ثم يتم دمجها. مرحلة واحدة تفصل بشكل أفضل داخل الدراسة عن التأثيرات الشاملة للدراسة." },
+  { term: "Ecological Fallacy", def: "الخطأ في افتراض أن الارتباطات على مستوى الدراسة تعكس العلاقات على مستوى المريض. إن دراسة أجريت على مرضى كبار السن تظهر تأثيرات أقل، لا تعني أن كبار السن يستفيدون بشكل أقل." },
+  { term: "HSROC", def: "ملخص الهرمي منحنى ROC. نماذج منحنى ROC الأساسي في التحليل التلوي لدقة الاختبار التشخيصي، مع مراعاة اختلاف العتبة عبر الدراسات." },
+  { term: "Bivariate Model", def: "في التحليل التلوي لـ DTA، يتم وضع نماذج الحساسية والنوعية معًا، مع إدراك أنهما مرتبطان (سلبيًا) عبر الدراسات بسبب اختلافات العتبة." },
+  { term: "Prior Distribution", def: "في التحليل بايزي، يمثل ما اعتقدناه قبل رؤية البيانات. جنبا إلى جنب مع الاحتمالية (البيانات) لإنتاج الخلفي (الاعتقاد المحدث)." },
+  { term: "Posterior Distribution", def: "في التحليل بايزي، التوزيع الاحتمالي المحدث بعد الجمع بين المعتقدات السابقة والبيانات المرصودة. يسمح ببيانات الاحتمالية المباشرة." },
+  { term: "MASEM", def: "نمذجة المعادلات الهيكلية التحليلية الفوقية. تجمع مصفوفات الارتباط عبر الدراسات، ثم تناسب SEM لاختبار المسارات النظرية والوساطة." },
+  { term: "Dose-Response Meta-Analysis", def: "نماذج العلاقة بين مستوى التعرض/الجرعة والنتيجة، بدلاً من المقارنات البسيطة \"المكشوفة مقابل غير المكشوفة\"." },
+  { term: "Greenland-Longnecker Method", def: "تقنية الاستجابة للجرعة والاستجابة MA التي تفسر بشكل صحيح العلاقة بين التقديرات الخاصة بالجرعة ضمن الدراسات التي تتقاسم مجموعة مرجعية مشتركة." },
+  { term: "المراجعة الشاملة", def: "مراجعة منهجية للمراجعات المنهجية/التحليلات التلوية. يقيم التداخل والاتفاق ويطبق معايير المصداقية لرسم خريطة للأدلة." },
+  { term: "GRADE-NMA / CINeMA", def: "ملحقات GRADE للتحليل التلوي للشبكة. أضف مجالات للتعقيدية وعدم الترابط إلى مجالات GRADE الخمسة القياسية." },
+  { term: "Prediction Interval", def: "النطاق الذي من المحتمل أن يقع فيه التأثير الحقيقي في دراسة/إعداد جديد. أوسع من فاصل الثقة لأنه يتضمن عدم التجانس." },
+  { term: "Node-splitting", def: "تقنية للتحقق من اتساق NMA من خلال مقارنة التقديرات المباشرة مقابل غير المباشرة لكل مقارنة على حدة." }
+];
+
+// ============================================================
+// ADVANCED PRINCIPLES - NARRATIVE STORYTELLING STYLE
+// ============================================================
+const advancedPrinciples = [
+  { num: 1, text: "تكشف الشبكة ما لا يستطيع الأزواج رؤيته", short: "Network" },
+  { num: 2, text: "في كل مريض تكمن حقيقة يخفيها المتوسط ", short: "IPD" },
+  { num: 3, text: "التشخيص لا يعني العلاج؛ يوضح المنحنى ما يخفيه الرقم", short: "DTA" },
+  { num: 4, text: "ما كنت تعرفه من قبل له مكان على طاولة الأدلة", short: "Bayesian" },
+  { num: 5, text: "ينير المسار ما تحجبه نقطة النهاية", short: "MASEM" },
+  { num: 6, text: "الجرعة تصنع السم والعلاج", short: "Dose-Response" },
+  { num: 7, text: "لتجميع التوليفات، عليك أولاً أن تعرف ما لا تعرفه", short: "Umbrella" }
+];
+
+// ============================================================
+// MODULES DATA - NARRATIVE STORYTELLING STYLE
+// ============================================================
+const modules = [
+  // MODULE 0: THE GATEWAY
+  {
+    id: 0,
+    title: "البوابة",
+    subtitle: "ما وراء المقارنة الزوجية",
+    principle: null,
+    slides: [
+      {
+        type: 'title',
+        content: {
+          title: "Advanced Meta-Analysis",
+          subtitle: "طرق تجميع الأدلة المعقدة",
+          text: "لقد أتقنت الأساس. تعرف الآن على الأساليب التي تجيب على الأسئلة التي لا يمكن للأساسيات أن تتطرق إليها."
+        }
+      },
+      {
+        type: 'rhetoric',
+        content: {
+          question: "ألم تفكر في الطبيب الذي واجه واحداً وعشرين مضاداً للاكتئاب، ولا سبيل للاختيار بينها؟"
+        }
+      },
+      {
+        type: 'story',
+        content: {
+          label: "قصة الاختيار المستحيل",
+          text: "في عام 2009، وقفت طبيبة نفسية أمام مريضها. يتوفر واحد وعشرون مضادًا للاكتئاب. قارنت التحليلات التلوية التقليدية كل منها بالعلاج الوهمي، لكن العلاج الوهمي لم يكن هو السؤال. كانت بحاجة إلى معرفة: ما هو الدواء المناسب لهذا المريض؟ كانت هناك خمسمائة تجربة. لا شيء مقارنة بكل واحد وعشرين. كانت الأدلة متناثرة عبر سجون زوجية معزولة، وكانت كل محاكمة عبارة عن زنزانة مغلقة لا تستطيع التحدث إلى جيرانها.",
+          hook: "ماذا لو كان من الممكن توصيل الخلايا؟ ماذا لو كان الدليل الذي يقارن A بـ B، وB بـ C، يمكن أن يتحدث إلى A مقابل C؟ هذا هو الوعد الذي ستتعلم الوفاء به."
+        }
+      },
+      {
+        type: 'content',
+        content: {
+          title: "المبادئ السبعة المتقدمة",
+          sections: [
+            {
+              heading: "ما ستتقنه:",
+              items: [
+                "1. الشبكة — عندما يتعذر على الأزواج الرؤية، تنكشف الشبكة",
+                "2. الفرد - في كل مريض تكمن الحقيقة التي يخفيها المتوسط",
+                "3. التشخيص - يوضح المنحنى ما يخفيه الرقم الفردي",
+                "4. السابق - ما كنت تعرفه من قبل موجود على الطاولة",
+                "5. المسار – الآليات مهمة، وليس فقط نقاط النهاية",
+                "6. الجرعة – شكل المنحنى، وليس فقط المنفعة أو الضرر",
+                "7. المظلة — تركيب التركيبات يتطلب التواضع"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        type: 'content',
+        content: {
+          title: "قبل أن تبدأ",
+          sections: [
+            {
+              heading: "المتطلبات الأساسية — لا تستمر بدون هذه:",
+              items: [
+                "✓ أنت تفهم التحليل التلوي للتأثيرات الثابتة والعشوائية",
+                "✓ يمكنك تفسير مخططات الغابات، ومؤامرات القمع، ومقاييس عدم التجانس",
+                "✓ أنت تعرف إطار عمل GRADE لتقييم اليقين",
+                "✓ لقد قمت بإجراء بحث منهجي وتقييم خطر التحيز",
+                "✓ تشعر بثقل المسؤولية التي تأتي مع التوليف"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        type: 'oath',
+        content: {
+          text: "من خلال <em>522 تجربة</em> التي قام سيبرياني بتجميعها، من خلال <em>450.000 امرأة</em> التي جمع EBCTCG بياناتها، ومن خلال <em>50.000 حالة وفاة</em> التي تسبب فيها التركيب المعيب - سوف تتعلم هذه الأساليب ليس من أجل الذكاء، ولكن من أجل المرضى الذين تعتمد حياتهم على صرامتك."
+        }
+      }
+    ]
+  },
+
+  // MODULE 1: THE NETWORK
+  {
+    id: 1,
+    title: "الشبكة",
+    subtitle: "Network Meta-Analysis",
+    principle: 0,
+    slides: [
+      {
+        type: 'principle',
+        content: {
+          text: "تكشف الشبكة ما لا يستطيع الأزواج رؤيته"
+        }
+      },
+      {
+        type: 'rhetoric',
+        content: {
+          question: "ألم تفكر في كيفية تصنيف سيبرياني لـ 21 مضادًا للاكتئاب، في حين لم تقارنها جميعها أي تجربة واحدة؟ تم اختبار كل دواء مقابل الدواء الوهمي، وربط الدواء الوهمي ما لم تفعله التجارب المباشرة على الإطلاق."
+        }
+      },
+      {
+        type: 'story-deep',
+        content: {
+          label: "الوحي: شبكة سيبرياني",
+          source: "لانسيت 2018؛ 391:1357-1366 | 522 تجربة | 116,477 مريض",
+          timeline: [
+            { year: "الظلام", text: "واحد وعشرون مضادًا للاكتئاب. مئات المحاكمات. لم تقارن أي دراسة واحدة بينهم جميعًا. الأطباء يوصفون بالعادة، بالتسويق، بالتخمين.", type: "normal" },
+            { year: "2009", text: "يربط Cipriani 117 تجربة من خلال مقارنات مشتركة. تكشف الشبكة الأولى: من الواضح أن بعض الأدوية أفضل. الترتيب المستحيل يصبح ممكنا.", type: "revelation" },
+            { year: "2018", text: "تتوسع الشبكة: 522 تجربة، 116477 مريضًا. كل دواء مقارنة ببعضه. ارتفاع أغوميلاتين، إسيتالوبرام، ميرتازابين. ريبوكستين، ترازودون فال.", type: "revelation" },
+            { year: "تحديث إرشادات الضوء", text: "في جميع أنحاء العالم. يتلقى المرضى أدوية أفضل. وكشفت الشبكة ما لا يمكن للتجارب الفردية أن تظهره أبدًا.", type: "revelation" }
+          ],
+          realData: {
+            trials: "522 double-blind RCTs",
+            patients: "116,477",
+            treatments: "21 antidepressants",
+            topEfficacy: "أميتريبتيلين (OR 2.13)",
+            topTolerability: "أغوميلاتين (التسرب OR 0.84)"
+          },
+          hook: "خذ بعين الاعتبار: لا توجد تجربة واحدة تقارن أميتريبتيلين مع أغوميلاتين. ومع ذلك، فمن خلال شبكة المقارنات المشتركة، ظهرت مزاياها النسبية. رأت الشبكة ما لم يتمكن أي زوج من رؤيته."
+        }
+      },
+      {
+        type: 'contrast',
+        content: {
+          title: "فهمان للتعدية",
+          wrong: {
+            title: "المغالطة الرياضية",
+            text: "إذا كان A > B وB > C، فإن A > C. جبر بسيط! فقط قم بتوصيل المقارنات رياضيا."
+          },
+          right: {
+            title: "الفهم الحقيقي",
+            text: "العبور يتعلق بالمرضى وليس بالأرقام. هل يمكن تبادل المرضى في تجارب A-vs-B مع المرضى في تجارب B-vs-C؟ هل كان من الممكن أن يكونوا مسجلين في أي منهما؟ إذا لم يكن الأمر كذلك، يفشل الاتصال."
+          }
+        }
+      },
+      {
+        type: 'story-deep',
+        content: {
+          label: "انتهاك العبور: التخثر",
+          source: "تعريف: كالدويل وآخرون. BMJ 2005 — الحالة التي حددت التعقيدية",
+          timeline: [
+            { year: "الإعداد", text: "التحليل التلوي للشبكة من التخثرات في MI الحاد. تعدد الأدوية مقارنة بالستربتوكيناز (SK)، بعضها مقارنة ببعضها البعض. يجب أن تكشف الشبكة عن أفضل وكيل.", type: "normal" },
+            { year: "النتيجة", text: "الأدلة المباشرة: لم تظهر tPA مقابل SK في تجارب ISIS-3 وGISSI-2 أي فرق. تشير الأدلة غير المباشرة من خلال مقارنات أخرى إلى أن tPA أفضل من SK.", type: "normal" },
+            { year: "الشرح", text: "أعطى كل من ISIS-3 وGISSI-2 منشط البلازمينوجين النسيجي كتسريب بطيء بدون الهيبارين. استخدمت تجارب أخرى منشط البلازمينوجين النسيجي المتسارع مع الهيبارين. \"نفس العلاج\" كان في الواقع علاجات مختلفة.", type: "crisis" },
+            { year: "الدرس", text: "فشلت العبورية لأن تصميمات التجارب اختلفت بشكل منهجي. لم يكن المرضى قابلين للاستبدال، ولم تكن البروتوكولات قابلة للمقارنة. شهد المسار غير المباشر للشبكة دواءً مختلفًا.", type: "revelation" }
+          ],
+          realData: {
+            directRR: "tPA مقابل SK مباشر: RR 1.00 (0.91-1.10)",
+            indirectRR: "tPA مقابل SK غير مباشر: RR 0.77 (0.65-0.92)",
+            inconsistency: "p = 0.007 للخلاف",
+            cause: "اختلافات البروتوكول (معدل التسريب، استخدام الهيبارين)"
+          },
+          hook: "لقد رأت الشبكة ما لم يكن موجودًا لأنها كانت متصلة بتجارب لا ينبغي أن تكون متصلة. تتعلق العبورية بقابلية المقارنة السريرية، وليس بالارتباط الإحصائي."
+        }
+      },
+      {
+        type: 'method',
+        content: {
+          label: "THE الطريقة",
+          title: "إجراء التحليل التلوي للشبكة",
+          sections: [
+            {
+              heading: "الخطوة 1: رسم خريطة للشبكة",
+              text: "تحديد كافة العلاجات. حدد ما يعتبر \"نفسه\" (الجرعات؟ التركيبات؟). ارسم الشبكة: العقد عبارة عن علاجات، والحواف عبارة عن مقارنات مباشرة. الشبكة الكثيفة ذات الاتصالات العديدة قوية. يعتمد النجم المتناثر (الكل مقابل الدواء الوهمي) بشكل كبير على العبور."
+            },
+            {
+              heading: "الخطوة 2: تقييم العبورية (قبل التحليل)",
+              text: "ارسم خصائص المريض عبر المقارنات. هل تسجل تجارب A-vs-B مرضى مماثلين مثل تجارب B-vs-C؟ تحقق: العمر، والشدة، والأمراض المصاحبة، والإعداد، وتوقيت النتيجة. وإذا اختلفت بشكل منهجي، فقد تكون الشبكة مضللة."
+            },
+            {
+              heading: "الخطوة 3: تناسب النموذج",
+              text: "التأثيرات العشوائية لحساب عدم التجانس. تتعامل الأساليب البايزية مع البنية الهرمية المعقدة بشكل طبيعي. يقوم النموذج بتقدير جميع المقارنات الزوجية في وقت واحد."
+            },
+            {
+              heading: "الخطوة 4: التحقق من الاتساق (بعد التحليل)",
+              text: "تقسيم العقد: لكل مقارنة مع كل من الأدلة المباشرة وغير المباشرة، قم بمقارنتها. إذا اختلفوا بشكل كبير، فسيتم انتهاك العبور في مكان ما. أبلغ عن الخلاف، ولا تخفيه."
+            },
+            {
+              heading: "الخطوة 5: رتبة مع التواضع",
+              text: "SUCRA أو P-scores يلخص التصنيف العالمي. ولكن: التصنيفات ذات الفواصل الزمنية المتداخلة ذات المصداقية لا تختلف بشكل ملموس. الإبلاغ عن التوزيع الخلفي الكامل. لا تدعي أبدًا أن \"الدواء X هو الأفضل\" عندما يمتد عدم اليقين إلى عدة مراتب."
+            }
+          ]
+        }
+      },
+      {
+        type: 'warning',
+        content: {
+          title: "⚠️ فخ السكرا",
+          text: "قد تبدو قيم SUCRA حاسمة عندما لا تكون كذلك. الدواء أ: سوكرا 78%. الدواء ب: سوكرا 72%. السذج يقولون \"أ هو أفضل!\" ولكن إذا كانت الفواصل الزمنية الموثوقة بنسبة 95% للرتبة تمتد من 1 إلى 8، فإن الفرق سيكون ضجيجًا. افحص دائمًا التوزيع الاحتمالي للرتبة. لا تقم أبدًا بالإبلاغ عن SUCRA دون فترات زمنية موثوقة."
+        }
+      },
+      {
+        type: 'tool-network',
+        content: {
+          id: 'network-visualizer',
+          title: "مصور هندسة الشبكة",
+          description: "بناء شبكات العلاج وتحليلها. انظر كيف تمكن الاتصالات المقارنات غير المباشرة."
+        }
+      },
+      {
+        type: 'decision-tree',
+        content: {
+          title: "معضلة التناقض",
+          situation: "لقد أكملت شبكة التحليل التلوي لخمسة أدوية لضغط الدم. يكشف تقسيم العقد عن مشكلة: الدليل المباشر على الدواء A مقابل الدواء B: RR 0.72 (0.60-0.87) - أفضل بشدة. دليل غير مباشر على الدواء A مقابل B: اختطار نسبي 1.15 (0.95-1.39) - ربما يكون B أفضل. وتشير هذه التقديرات إلى اتجاهات معاكسة.",
+          nodes: [
+            {
+              id: 'start',
+              question: "لقد وجدت تناقضًا كبيرًا. تصنيفك يضع الدواء \"أ\" على أنه الأفضل. ماذا تفعل؟",
+              branches: [
+                { id: 'a', text: "قم بالإبلاغ عن الترتيب – التقدير المختلط يوازن كل شيء", nextNode: 'ignore' },
+                { id: 'b', text: "تحقق من سبب الاختلاف المباشر وغير المباشر", nextNode: 'investigate' },
+                { id: 'c', text: "قم بالإبلاغ عن الأدلة المباشرة فقط - من الواضح أن غير المباشر خطأ", nextNode: 'direct_only' }
+              ]
+            },
+            {
+              id: 'ignore',
+              type: 'outcome',
+              consequence: 'bad',
+              title: "الحساب",
+              text: "تم نشر NMA الخاص بك. وبعد ثلاث سنوات، أكدت تجربة كبيرة وجهاً لوجه أن A مقابل B: RR 1.18 - وهو ما يطابق التقدير غير المباشر. تصنيفك كان خاطئا. لماذا؟ سجلت تجارب A-مقابل الدواء الوهمي مرضى أكثر صحة من تجارب B-مقابل الدواء الوهمي. تم انتهاك العبور. لقد كذبت الشبكة لأنك لم تستمع إلى تحذيرها.",
+              realCase: "تم إلغاء NMAs الحقيقية عندما تم تجاهل التناقض. وكان التناقض الداخلي للشبكة بمثابة صرخة للتحقيق."
+            },
+            {
+              id: 'investigate',
+              question: "أنت تقوم بفحص التجارب. الاكتشاف: سجلت التجارب المباشرة A vs B ارتفاع ضغط الدم الخفيف (BP 140-160). يستخدم المسار غير المباشر ارتفاع ضغط الدم الشديد (BP> 180). اختلف المرضى.",
+              branches: [
+                { id: 'd', text: "تم انتهاك العبور - التقسيم الطبقي حسب الشدة", nextNode: 'stratify' },
+                { id: 'e', text: "الأدلة المباشرة لديها عدد أقل من المرضى - الثقة غير المباشرة", nextNode: 'wrong_choice' }
+              ]
+            },
+            {
+              id: 'stratify',
+              type: 'outcome',
+              consequence: 'good',
+              title: "الحقيقة الدقيقة",
+              text: "أنت تبلغ: 'في ارتفاع ضغط الدم الخفيف (دليل مباشر): أعلى من B، RR 0.72. في ارتفاع ضغط الدم الشديد (دليل غير مباشر): B قد يكون متفوقا، RR 0.87. كشفت الشبكة عن تعديل التأثير. يصبح تحليلك الطبقي دليلاً للعلاج الشخصي.",
+              realCase: "وجد NMA المضاد للاكتئاب من شركة Cipriani أن تصنيفات الفعالية تختلف حسب شدة خط الأساس - ولا يمكن رؤيتها إلا من خلال الاستكشاف الدقيق لعدم الاتساق."
+            },
+            {
+              id: 'wrong_choice',
+              type: 'outcome',
+              consequence: 'bad',
+              title: "لعبة الارقام",
+              text: "المزيد من المرضى لا يعني أدلة أفضل. يحتوي المسار غير المباشر على عدد أكبر من المرضى ولكنه يعتمد على العبور. إذا اختلف المرضى، فإن المزيد من البيانات يعني المزيد من البيانات المتحيزة، وليس بيانات أفضل. لقد خلطت بين الدقة والصلاحية.",
+              realCase: "وقد سجلت تجارب DECREASE الآلاف، وكانت ملفقة. حجم العينة لا يضمن شيئا عن الحقيقة."
+            },
+            {
+              id: 'direct_only',
+              type: 'outcome',
+              consequence: 'neutral',
+              title: "التراجع الحذر",
+              text: "تقوم بالإبلاغ عن النتائج الزوجية فقط، مع الإقرار بعدم استيفاء افتراضات NMA. ورقتك أقل تأثيرًا ولكنها أكثر صدقًا. يظل السؤال السريري مفتوحًا، لكنك لم تقدم إجابة خاطئة. في بعض الأحيان تعلمنا الشبكة ما لا يمكننا معرفته بعد.",
+              realCase: "يرى بعض المنهجيين أن هذا صحيح عندما تفشل العبورية. ويرى آخرون أن استكشاف أسباب فشلها هو أمر أكثر قيمة."
+            }
+          ]
+        }
+      },
+      {
+        type: 'clinical-guide',
+        content: {
+          title: "كيفية قراءة NMA للممارسة السريرية",
+          items: [
+            "ابحث عن جدول الدوري: يعرض هذا جميع المقارنات الزوجية. قراءة الصفوف مقابل الأعمدة.",
+            "التحقق من الاتساق: ابحث عن نتائج تقسيم العقدة. الخلافات الكبرى = أقل جدارة بالثقة.",
+            "افحص التصنيفات بعين الشك: انظر إلى الفواصل الزمنية الموثوقة، وليس فقط SUCRA. إذا تداخلت فترات العلاج، فهي متشابهة سريريًا.",
+            "ملاحظة هندسة الشبكة: تعتمد الشبكات النجمية (جميعها مقابل العلاج الوهمي) بشكل كبير على العبور. الشبكات المتصلة جيدًا أكثر قوة.",
+            "ضع في اعتبارك العبور: هل تم تسجيل مرضى مشابهين عبر المقارنات؟ إذا لم تناقش الورقة هذا الأمر، فكن حذرًا.",
+            "تطبيق GRADE-NMA / CINeMA: معدل اليقين باستخدام المجالات بما في ذلك التعقيد وعدم الترابط."
+          ]
+        }
+      },
+      {
+        type: 'cycle-return',
+        content: {
+          principle: "تكشف الشبكة ما لا تستطيع الأزواج رؤيته - ولكن فقط عندما يكون المرضى عبر المقارنات قابلين للتبادل. الشبكة قوية مثل أضعف افتراضاتها."
+        }
+      },
+      {
+        type: 'quiz',
+        content: {
+          question: "في التحليل التلوي للشبكة، يشير \"عدم الاتساق\" إلى:",
+          options: [
+            { id: 'a', text: "عدم التجانس في أحجام التأثير عبر التجارب لنفس المقارنة", correct: false },
+            { id: 'b', text: "خلاف بين الأدلة المباشرة وغير المباشرة لنفس المقارنة", correct: true },
+            { id: 'c', text: "التباين في أحجام العينات عبر الشبكة", correct: false },
+            { id: 'd', text: "الاختلافات في تعريفات النتائج عبر التجارب", correct: false }
+          ],
+          explanation: "عدم الاتساق هو الخلاف بين ما تخبرنا به التجارب المباشرة وما نستنتجه من خلال الشبكة. عندما تتعارض الأدلة المباشرة وغير المباشرة، قد يتم انتهاك العبور - وقد لا تكون اتصالات الشبكة صالحة. وهذا يختلف عن عدم التجانس (التباين داخل المقارنة) ويشير إلى مشاكل محتملة في بنية الشبكة."
+        }
+      }
+    ]
+  },
+
+  // MODULE 2: THE INDIVIDUAL (IPD)
+  {
+    id: 2,
+    title: "الفرد",
+    subtitle: "IPD Meta-Analysis",
+    principle: 1,
+    slides: [
+      {
+        type: 'principle',
+        content: {
+          text: "في كل مريض تكمن حقيقة يخفيها المتوسط "
+        }
+      },
+      {
+        type: 'rhetoric',
+        content: {
+          question: "ألم تفكر في كيفية اكتشاف EBCTCG أن فائدة عقار تاموكسيفين تضاعفت في المرضى إيجابيي الطوارئ - وهي حقيقة غير مرئية في الملخصات المنشورة، تم الكشف عنها فقط عندما حصلوا على بيانات عن 37000 فرد النساء؟"
+        }
+      },
+      {
+        type: 'story-deep',
+        content: {
+          label: "المعيار الذهبي: EBCTCG",
+          source: "المجموعة التعاونية لمحاكمة سرطان الثدي المبكر | أكثر من 460 تجربة | أكثر من 450,000 امرأة",
+          timeline: [
+            { year: "1985", text: "يقترح ريتشارد بيتو المستحيل: جمع بيانات المرضى الفردية من كل تجربة لسرطان الثدي في جميع أنحاء العالم. يضحك المتعاونون. اللوجستية تتحدى الخيال.", type: "normal" },
+            { year: "1988", text: "تم نشر أول نظرة عامة. 28000 امرأة، 61 تجربة. يكشف IPD ما لم يستطع المجموع أن يفعله: عقار تاموكسيفين يعمل فقط في الأورام الإيجابية للـ ER. قال الإجمالي \"يعمل عقار تاموكسيفين.\" قال IPD \"لمن\".", type: "revelation" },
+            { year: "1995", text: "نظرة عامة على العلاج الكيميائي المتعدد: 18000 امرأة. العمر مهم: العلاج الكيميائي يقلل الوفيات بنسبة 27% تحت سن 50، و11% فقط فوق 50. وأظهرت التجارب المنشورة فائدة \"متوسطة\". أظهر IPD الحقيقة التفاضلية.", type: "revelation" },
+            { year: "Today", text: "أكثر من 460 تجربة، أكثر من 450,000 امرأة. المصدر النهائي لأدلة علاج سرطان الثدي. ما أصبحت عليه رؤية بيتو المستحيلة: إثبات أن البيانات الفردية تكشف ما تخفيه المجاميع.", type: "revelation" }
+          ],
+          realData: {
+            trials: "460+ worldwide",
+            patients: "450,000+ individual records",
+            tamoxifen_ER_pos: "HR 0.61 (فائدة قوية)",
+            tamoxifen_ER_neg: "HR 0.97 (لا فائدة)",
+            invisible: "كان تأثير المجموعة الفرعية هذا غير مرئي في البيانات المجمعة"
+          },
+          hook: "خذ بعين الاعتبار المرأة المصابة بسرطان الثدي السلبي ER والتي تناولت عقار تاموكسيفين لمدة خمس سنوات لأن التحليل التلوي الكلي قال \"إنه يعمل\". وكشفت IPD: بالنسبة لها، لم ينجح الأمر على الإطلاق. أخفى الإجمالي ما كانت ستُظهره البيانات الفردية."
+        }
+      },
+      {
+        type: 'contrast',
+        content: {
+          title: "نوعان من الأدلة",
+          wrong: {
+            title: "AGGREGATE DATA",
+            text: "الملخصات المنشورة. أرقام مستوى الدراسة. أنت تعرف متوسط كل دراسة، ولكن ليس من استفاد منها أو تضرر منها. يتم مسح الفرد."
+          },
+          right: {
+            title: "بيانات المريض الفردية",
+            text: "السجلات الأولية لكل مريض. العمر والجنس والشدة والأمراض المصاحبة والنتائج. ولكم أن تسألوا: من المستفيد؟ من المتضرر؟ هل العمر يغير التأثير؟ أنماط متغيرة الزمن؟ الفرد يتكلم."
+          }
+        }
+      },
+      {
+        type: 'story-deep',
+        content: {
+          label: "الفخ البيئي: الكولسترول وأمراض القلب",
+          source: "روبنسون وجودمان، Int J Epidemiol 1977 — العرض الكلاسيكي",
+          timeline: [
+            { year: "البيانات", text: "المقارنة الدولية: البلدان التي لديها متوسط أعلى من الكولسترول في الدم لديها معدلات أعلى من أمراض القلب التاجية. العلاقة قوية ( ص = 0.8). يبدو قاطعا.", type: "normal" },
+            { year: "المغالطة", text: "وخلص الباحثون إلى أن ارتفاع نسبة الكولسترول يسبب أمراض القلب التاجية على المستوى الفردي. عززت السياسة خفض الكولسترول على مستوى السكان.", type: "normal" },
+            { year: "المشكلة", text: "داخل البلدان، كان الارتباط على المستوى الفردي أضعف. اختلفت البلدان في النظام الغذائي، وممارسة الرياضة، والرعاية الصحية، وعلم الوراثة. لقد أظهر الارتباط على مستوى الدولة أمرًا مربكًا، وليس العلاقة السببية.", type: "crisis" },
+            { year: "الدرس", text: "سجلت الدراسات التي أجريت على متوسط كوليسترول مرتفع مجموعات سكانية ذات اختلافات عديدة - وليس الكولسترول فقط. بالغ الارتباط الكلي في تقدير التأثير الفردي بمقدار 2-3 أضعاف.", type: "revelation" }
+          ],
+          realData: {
+            ecologicalCorr: "r = 0.80 (country-level)",
+            individualCorr: "r = 0.35 (within-country, IPD)",
+            inflation: "~2.3x مبالغة في تقدير التأثير البيئي",
+            confounders: "التدخين، SES، أنماط النظام الغذائي، الوصول إلى الرعاية الصحية"
+          },
+          hook: "تحدث المجموع بصوت عالٍ، لكنه كذب. فقط من خلال فحص الأفراد ضمن الدراسات يمكننا فصل الإشارة عن الضوضاء المربكة."
+        }
+      },
+      {
+        type: 'method',
+        content: {
+          label: "THE الطريقة",
+          title: "تحليل IPD على مرحلة واحدة مقابل تحليل IPD على مرحلتين",
+          sections: [
+            {
+              heading: "Two-Stage Approach",
+              text: "المرحلة 1: تحليل كل تجربة على حدة. احصل على تقديرات التأثير الخاصة بالدراسة. المرحلة 2: التحليل التلوي لهذه التقديرات مثل MA التقليدي. مألوف، ولكن بالنسبة للتفاعلات، يمكن أن يخلط بين الارتباطات داخل الدراسة والجمعيات عبر الدراسة."
+            },
+            {
+              heading: "One-Stage Approach",
+              text: "نموذج لجميع المرضى في وقت واحد. المرضى متداخلون داخل الدراسات. يختلف تأثير العلاج حسب الدراسة (عشوائي). التفاعلات المقدرة على مستوى المريض ضمن الدراسات. أكثر قوة للكشف عن تعديل التأثير. النهج الموصى به عندما تكون التفاعلات مهمة."
+            },
+            {
+              heading: "التمييز الحاسم",
+              text: "التفاعل داخل الدراسة: مقارنة المرضى الأصغر سنا مع المرضى الأكبر سنا في كل تجربة. وهذا أمر سببي، والعشوائية تحميه. جمعية عبر الدراسة: التجارب مع المرضى الأصغر سنا تظهر تأثيرات أكبر. هذا أمر بيئي – محير. مرحلة واحدة تفصلهم. يمكن أن تربكهم المرحلتان."
+            },
+            {
+              heading: "متى تستخدم أي",
+              text: "التأثيرات الرئيسية فقط؟ كلا النهجين يعطي نتائج مماثلة. تفاعلات المجموعة الفرعية؟ يفضل مرحلة واحدة. التأثيرات المتغيرة بمرور الوقت (منحنيات البقاء)؟ مطلوب مرحلة واحدة. بيانات مختلطة (بعض IPD وبعضها مجمعة)؟ توجد طرق خاصة ذات مرحلتين."
+            }
+          ]
+        }
+      },
+      {
+        type: 'tool-ipd',
+        content: {
+          id: 'ipd-simulator',
+          title: "IPD مقابل محاكي التجميع",
+          description: "انظر كيف يمكن لتأثيرات المجموعة الفرعية المرئية في IPD أن تختفي في التحليل الإجمالي"
+        }
+      },
+      {
+        type: 'scenario',
+        content: {
+          title: "المجموعة الفرعية المخفية",
+          situation: "لقد حصلت على IPD من 8 تجارب على أدوية السرطان (العدد = 4800). يُظهر التحليل التلوي الإجمالي المنشور معدل HR 0.82 (0.74-0.91) — وقد نجح الدواء. يكشف تحليل IPD الخاص بك: العمر < 65: معدل ضربات القلب 0.68 (0.58-0.80) - فائدة قوية العمر ≥ 65: معدل ضربات القلب 1.05 (0.91-1.21) - لا فائدة، ضرر محتمل القيمة الاحتمالية للتفاعل: 0.003 تمت الموافقة على الدواء لجميع الأعمار بناءً على التحليل الإجمالي.",
+          question: "ماذا تفعل بهذه النتيجة؟",
+          choices: [
+            {
+              id: 'a',
+              text: "قم بالإبلاغ عنها بشكل بارز – وهذا يغير الممارسة السريرية",
+              consequence: 'good',
+              result: "يكشف تحليل IPD الخاص بك عن البيانات المجمعة المخفية. \"متوسط\" معدل ضربات القلب البالغ 0.82 يخفي الضرر المحتمل لدى المرضى الأكبر سناً. قمت بالإبلاغ عن النتيجة. مراجعة الهيئات التنظيمية. تحديث المبادئ التوجيهية. يتم إعفاء المرضى المسنين من الدواء الذي لا يساعدهم. وهذا هو سبب وجود IPD."
+            },
+            {
+              id: 'b',
+              text: "التقرير كاستكشافي فقط — لم يتم تحديد العمر مسبقًا",
+              consequence: 'neutral',
+              result: "صحة تقنية، ولكن التفاعل قوي (p=0.003)، ومعقول من الناحية البيولوجية (يختلف استقلاب الدواء حسب العمر)، ومتسق عبر التجارب. ومن خلال عدم الإبلاغ عن المرض، يستمر الأطباء في وصف المرضى الذين لا يحصلون على أي شيء. التأطير المحافظ له تكلفة سريرية."
+            },
+            {
+              id: 'c',
+              text: "لا تبلغ - البيانات المجمعة هي ما تمت الموافقة عليه",
+              consequence: 'bad',
+              result: "كان التجميع خاطئًا - ليس خطأ في المتوسط، ولكنه خاطئ لمرضى محددين. يتلقى المرضى المسنون دواءً لا يساعدهم ويسبب آثارًا جانبية. كان لديك البيانات لإظهار هذا. تم جمع IPD على وجه التحديد للعثور على هذه الحقائق. لقد دفنته."
+            }
+          ],
+          correct: 'a'
+        }
+      },
+      {
+        type: 'cycle-return',
+        content: {
+          principle: "في كل مريض تكمن حقيقة يخفيها المتوسط. يتيح التحليل التلوي لـ IPD للأفراد التحدث."
+        }
+      },
+      {
+        type: 'quiz',
+        content: {
+          question: "الميزة الرئيسية للتحليل التلوي IPD أحادي المرحلة مقارنة بالمرحلتين هي:",
+          options: [
+            { id: 'a', text: "إنه أسرع من الناحية الحسابية", correct: false },
+            { id: 'b', text: "إنه يفصل بشكل صحيح داخل الدراسة عن التفاعلات عبر الدراسة", correct: true },
+            { id: 'c', text: "أنها لا تتطلب بيانات المريض الفردية", correct: false },
+            { id: 'd', text: "فهو يعطي دائمًا تقديرات أكثر دقة", correct: false }
+          ],
+          explanation: "يقوم تحليل المرحلة الواحدة بنمذجة البيانات على مستوى المريض مباشرة، مما يسمح لها بالتمييز بين التفاعلات داخل الدراسة (مقارنة المرضى الأصغر سنا مع المرضى الأكبر سنا في كل تجربة - وهذا قابل للتفسير سببيا) من الارتباطات عبر الدراسات (التجارب مع المرضى الأصغر سنا تظهر تأثيرات أكبر - قد يكون هذا مربكا بيئيا). ومن الممكن أن تخلط المقاربات ذات المرحلتين بين هذه الأمور، مما يؤدي إلى استنتاجات مضللة لمجموعة فرعية."
+        }
+      }
+    ]
+  },
+
+  // MODULE 3: THE DIAGNOSIS (DTA)
+  {
+    id: 3,
+    title: "التشخيص",
+    subtitle: "دقة الاختبار التشخيصي",
+    principle: 2,
+    slides: [
+      {
+        type: 'principle',
+        content: {
+          text: "التشخيص لا يعني العلاج؛ يوضح المنحنى ما يخفيه الرقم"
+        }
+      },
+      {
+        type: 'rhetoric',
+        content: {
+          question: "ألم تضع في اعتبارك أن D-dimer يتمتع بـ \"95% حساسية\" للانسداد الرئوي - ومع ذلك فقد أشار تحليلان تلويان إلى خصائص مختلفة، لأنهما جمعا الدراسات باستخدام عتبات مختلفة؟ خدع العدد؛ لكان المنحنى قد قال الحقيقة."
+        }
+      },
+      {
+        type: 'story-deep',
+        content: {
+          label: "السيف ذو الحدين: D-DIMER لـ PE",
+          source: "التحليلات الوصفية المتعددة لـ DTA 2004-2015",
+          timeline: [
+            { year: "الوعد", text: "D-dimer: اختبار دم بسيط للانسداد الرئوي. حساسية عالية — إذا كانت سلبية، يتم استبعاد PE. يحتضنه أطباء الطوارئ.", type: "normal" },
+            { year: "الأرقام", text: "تقرير التحليل التلوي: الحساسية 95%، النوعية 40%. الأطباء يحتفلون: \"يمكننا استبعاد الإصابة بالقذف المبكر بأمان!\"", type: "normal" },
+            { year: "المشكلة", text: "ولكن يتم التبادل بين الحساسية والخصوصية. عتبات مختلفة تعطي أزواج مختلفة. استخدمت الدراسات قطع مختلفة. كانت النسبة المجمعة 95%/40% هي متوسط التفاح والبرتقال.", type: "crisis" },
+            { year: "الحقيقة", text: "عند العتبة التي تعطي حساسية 99% (استبعاد \"آمن\" حقًا)، تنخفض الخصوصية إلى 15%. معظم الاختبارات الإيجابية تصبح إيجابية كاذبة. تصوير الأوعية المقطعية للجميع تقريبًا.", type: "crisis" },
+            { year: "الطريقة", text: "ظهور نماذج HSROC وثنائية المتغير. إنهم لا يجمعون الأرقام، بل إنهم يصممون المنحنى. يكشفون: لا توجد حساسية/خصوصية واحدة. لا يوجد سوى المقايضة.", type: "revelation" }
+          ],
+          realData: {
+            test: "D-dimer للانسداد الرئوي",
+            sensitivity_range: "80-99% حسب العتبة",
+            specificity_range: "10-60% حسب العتبة",
+            tradeoff: "حساسية أعلى = خصوصية أقل",
+            clinical_impact: "يحدد اختيار العتبة العبء الإيجابي الكاذب"
+          },
+          hook: "يبدو الاختبار بحساسية 95% ممتازًا. ولكن ماذا لو أن 95% تأتي مع 20% خصوصية؟ ثمانية من عشرة اختبارات إيجابية ستكون خاطئة. الرقم الواحد خدع. كان من الممكن أن يظهر المنحنى الحقيقة."
+        }
+      },
+      {
+        type: 'tool-roc',
+        content: {
+          id: 'sroc-curve',
+          title: "منحنى SROC التفاعلي",
+          description: "انظر كيف يتم التوفيق بين الحساسية والنوعية. اسحب العتبة وشاهد كلا التغييرين."
+        }
+      },
+      {
+        type: 'method',
+        content: {
+          label: "THE الطريقة",
+          title: "HSROC والنماذج ثنائية المتغير",
+          sections: [
+            {
+              heading: "لماذا يفشل معيار MA DTA",
+              text: "قد تستخدم كل دراسة عتبات مختلفة. إن تجميع الحساسية عبر الدراسات عند عتبات مختلفة لا معنى له، فأنت تقوم بحساب متوسط نقاط مختلفة على منحنيات مختلفة. والنتيجة ليست نقطة تشغيل حقيقية."
+            },
+            {
+              heading: "نموذج التأثيرات العشوائية ثنائية المتغير",
+              text: "نموذج logit(Sens) وlogit(Spec) معًا. إنها ترتبط بشكل سلبي عبر الدراسات (تأثير العتبة). تقدير توزيعها المشترك. الإخراج عبارة عن نقطة ملخص مع منطقة الثقة الخاصة بها - وليس رقمين فقط."
+            },
+            {
+              heading: "HSROC (ملخص التسلسل الهرمي ROC)",
+              text: "قم بنمذجة منحنى ROC الأساسي مباشرة. المعلمات: الدقة (مدى الجودة بشكل عام)، والعتبة (مكان المنحنى)، والشكل (التماثل). ينتج منحنى، وليس نقطة. أفضل لمقارنة الاختبارات التي تستخدم عتبات مختلفة."
+            },
+            {
+              heading: "تفسير للأطباء",
+              text: "لا تُبلغ فقط عن \"Sens 90%, Spec 70%.\" الإبلاغ عن المنحنى. إظهار منطقة التنبؤ. اسأل: عند أي عتبة نحصل على الحساسية التي نحتاجها؟ ما هي الخصوصية التي تأتي معها؟ ما هو PPV في انتشار سكاننا؟"
+            }
+          ]
+        }
+      },
+      {
+        type: 'vivid-consequence',
+        content: {
+          title: "كارثة PPV",
+          text: "اختبار فحص بحساسية 85% ونوعية 92%. يبدو ممتازا. لكن معدل انتشار السرطان بين سكان الفحص هو 0.5%. احسب: من بين كل 100.000 شخص: 500 مصاب بالسرطان، و99.500 غير مصاب. الإيجابيات الحقيقية: 500 × 0.85 = 425 الإيجابيات الكاذبة: 99,500 × 0.08 = 7,960 القيمة التنبؤية الإيجابية = 425 / (425 + 7,960) = 5%",
+          toll: "95%",
+          tollLabel: "من اختبارات الفحص الإيجابية هي إنذارات كاذبة"
+        }
+      },
+      {
+        type: 'clinical-guide',
+        content: {
+          title: "DTA لقواعد القرار السريري",
+          items: [
+            "لا يقف D-dimer بمفرده - فهو يتبع درجة ويلز أو قاعدة PERC",
+            "يعدل الاختبار احتمالية الاختبار المسبق، وليس الإجابات بنعم/لا",
+            "حساسية عالية للاستبعاد (اختبار سلبي = إيقاف الاختبار)",
+            "خصوصية عالية لـ RULE-IN (اختبار إيجابي = التصرف عليه)",
+            "يعتمد PPV على سكانك الانتشار — وليس مجتمع التحليل التلوي",
+            "اسأل: ماذا يحدث للإيجابيات الكاذبة؟ (الإشعاع المقطعي، إصابة التباين، القلق)"
+          ]
+        }
+      },
+      {
+        type: 'cycle-return',
+        content: {
+          principle: "يوضح المنحنى ما يخفيه الرقم. لا توجد حساسية واحدة — فقط المقايضة عند العتبة التي اخترتها."
+        }
+      },
+      {
+        type: 'quiz',
+        content: {
+          question: "تحليلان تلويان لنفس تقرير الاختبار التشخيصي: الدراسة أ: الحساسية 90%، النوعية 70%. الدراسة ب: الحساسية 75%، النوعية 90%. التفسير الأكثر ترجيحًا هو:",
+          options: [
+            { id: 'a', text: "حدث خطأ في التحليل التلوي", correct: false },
+            { id: 'b', text: "تم استخدام عتبات مختلفة عبر الدراسات المشمولة", correct: true },
+            { id: 'c', text: "الاختبارات مختلفة في الواقع", correct: false },
+            { id: 'd', text: "تباين العينات العشوائية", correct: false }
+          ],
+          explanation: "هذا هو تأثير الحد الكلاسيكي. قد يكون كلا التحليلين التلويين \"صحيحين\" ولكنهما يلخصان نقاطًا مختلفة على نفس منحنى ROC. التحليل التلوي دراسات مجمعة تستخدم عتبات أقل (أكثر حساسية وأقل تحديدًا). التحليل التلوي B الدراسات المجمعة باستخدام عتبات أعلى. تفسر نماذج HSROC ذلك بشكل واضح من خلال نمذجة المنحنى الأساسي بدلاً من تجميع النقاط العشوائية."
+        }
+      }
+    ]
+  },
+
+  // Additional modules would continue here...
+  // For brevity, I'سوف تتضمن إطار عمل الوحدات المتبقية // الوحدة 4: THE PRIOR (Bayesian) { id: 4, title: "The Pre"، عنوان فرعي: "التحليل التلوي البايزي"، المبدأ: 3، الشرائح: [ { type:'principle', content: { text: "ما عرفته من قبل له مكان على طاولة الأدلة" } }, { type:'rhetoric', content: { question: "ألم تأخذ في الاعتبار الجدل حول المغنيسيوم - حيث أظهرت سبع تجارب OR 0.44 للوفيات، ثم أظهر ISIS-4 مع 58000 مريض OR 1.06؟ تجاهل المتردد السبعة. سأل بايزي: لماذا يجب أن ننسى ما تعلمناه؟" } }, { type:'story-deep', content: { label: "The Debate: MAGNESIUM AND THE MEGA-TRIAL"، المصدر: "ISIS-4 (Lancet 1995) vs التحليل التلوي السابق | ساحة المعركة البايزية"، الجدول الزمني: [ { year: "1991"، نص: "تشير سبع تجارب صغيرة إلى أن المغنيسيوم الوريدي يقلل الوفيات في MI. التحليل التلوي: OR 0.44 (0,27-0,71). "المتكررون: ISIS-4 نهائي. تجاهل التجارب السابقة. البايزيون: كلاهما دليل. اجمعهما بشكل صحيح. السابق يستحق مكانه.", اكتب: "عادي" }, { year: "التحليل"، نص: "توليف بايزي مع معلومات سابقة من التجارب المبكرة + احتمالية IS-4: خلفي OR ~0.93 (0.79-1.09). لا يزال عدم اليقين قائمًا. ولا'dramatic benefit' nor 'no effect'هو معين."، النوع: "الوحي" } ]، البيانات الحقيقية: { preMA: "OR 0.44 (0.27-0.71) - 7 تجارب، 1301 مريض"، isis4: "OR 1.06 (0.99-1.13) - 58.050 مريض"، bayesPosterior: "OR ~0.93 (0.79-1.09)"، التوتر: "Pr. والاحتمالية تتعارض بشدة" }، خطاف: "يتجاهل المتردد التجارب السبع:'ISIS-4 is bigger.'يسأل بايزي:'Why should we forget what we learned?'لا يعتبر أي من النهجين خاطئًا - لكن تحليل بايزي فقط هو الذي يجعل التوتر واضحًا." } }، { يكتب:'content',
+        content: {
+          title: "Bayesian Primer — The Three Components",
+          sections: [
+            {
+              heading: "THE PRIOR: What you believed before",
+              items: [
+                "Represents knowledge BEFORE seeing current data",
+                "Can be informative (strong belief) or vague (let data speak)",
+                "Must be specified and justified — not hidden"
+              ]
+            },
+            {
+              heading: "THE LIKELIHOOD: What the data says",
+              items: [
+                "The probability of observing this data given each possible truth",
+                "This is what frequentist analysis focuses on exclusively",
+                "It's evidence, but not the whole picture"
+              ]
+            },
+            {
+              heading: "THE POSTERIOR: Updated belief",
+              items: [
+                "Prior × Likelihood = Posterior (simplified)",
+                "Combines what you knew with what you learned",
+                "Allows direct probability statements: 'There's 85% probability the effect is beneficial'"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        type: 'tool-bayes',
+        content: {
+          id: 'bayes-visualizer'، العنوان: "المستكشف البايزي السابق والخلفي"، الوصف: "ضبط الأسبقية ورؤية كيفية دمجها مع البيانات لتكوين الأسبقية" } }، { type:'method'، المحتوى: { label: "THE METHOD"، العنوان: "اختيار وتبرير الأسبقية"، الأقسام: [ { عنوان: "الأسبقية غير الإعلامية (الغامضة)، النص: "دع البيانات'speak for itself.'مسطحة النتائج تقريبية للتحليل المتكرر، ولكنها تضيع المعرفة المسبقة. }, { عنوان: "تقدم معلومات ضعيفة"، نص: "استبعد القيم غير المعقولة بدون تفضيل قوي.'Effect unlikely > 2-fold.'يمنع التقديرات المتطرفة مع البقاء متواضعًا. موصى به للاستخدام الروتيني." }, { العنوان: "معلومات سابقة"، نص: "دمج معرفة مسبقة محددة - التحليلات الوصفية السابقة، والآلية، واعتقاد الخبراء. يجب أن تكون محددة مسبقًا ومبررة. قوية ولكنها تتطلب خيارات يمكن الدفاع عنها." }, { عنوان: "السابقون المتشككون"، النص: "بالنسبة للادعاءات غير العادية: المركز على دقة متوسطة وفارغة. يجب أن تكون البيانات الجديدة'overcome'متشككة. تُستخدم في التجارب الافتراضية لإدارة الغذاء والدواء. تحمي من الإيجابيات الكاذبة." }, { عنوان: "القاعدة الذهبية"، نص: "قم دائمًا بنشر تحليل الحساسية مع رؤساء مختلفين. إذا كانت الاستنتاجات تعتمد بشكل كبير على الاختيار المسبق، فاعترف بذلك. الشفافية بشأن الذاتية أكثر صدقًا من إخفائها في اتفاقيات اعتباطية متكررة." } ] } }, { type:'cycle-return', content: { المبدأ: "ما عرفته من قبل له مكان على الطاولة - ولكن يجب عليك إظهاره بشكل علني، واختبار ما إذا كان استنتاجك يعتمد عليه." } }, { type:'quiz', content: { question: "يستخدم التحليل التلوي البايزي معلومات سابقة بمتوسط 0.7 ودقة معتدلة. تبلغ احتمالية البيانات ذروتها عند 0.4. الإرادة الخلفية:"، options: [ { id:'a'، text: "الذروة عند 0.55 بالضبط (نقطة المنتصف)"، صحيح: false }، { id:'b'، نص: "كن بين 0.4 و0.7، أقرب إلى أيهما أكثر دقة"، صحيح: صحيح }، { المعرف:'c'، النص: "الذروة عند 0.4 لأن البيانات تتجاوز دائمًا الأسبقية"، صحيح: خطأ }، { المعرف:'d'، النص: "الذروة عند 0.7 لأن الأسبقية تهيمن دائمًا"، صحيح: خطأ } ]، التفسير: "الخلفي عبارة عن مزيج مرجح من السابقة والاحتمالية، مع أوزان تتناسب مع الدقة (التباين العكسي). المعلومات الأكثر دقة تسحب بقوة أكبر. إذا كانت البيانات دقيقة للغاية (N كبيرة)، فإن الخلفية تتجه نحو 0.4. وإذا كانت السابقة ضيقة للغاية (اعتقاد قوي)، فإنها تظل بالقرب من 0.7. ويعتمد الموقع الفعلي على الدقة النسبية - التحليل البايزي يجعل هذا واضحًا." } } ] }, // الوحدة 5: المسار (MASEM) { المعرف: 5، العنوان: "المسار"، العنوان الفرعي: "MASEM"، المبدأ: 4، الشرائح: [ { type:'principle', content: { text: "المسار ينير ما تحجبه نقطة النهاية" } }, { type:'rhetoric', content: { question: "أليس كذلك؟ يعتبر أن العلاج السلوكي المعرفي'works'لعلاج الاكتئاب - ولكن لعقود من الزمن، أكد التدريب على إعادة الهيكلة المعرفية، إلى أن كشف MASEM أن العنصر السلوكي كان بنفس القدر من القوة؟ لقد عرفوا نجاح الأمر، ولكن ليس كيفية نجاحه - وقاموا بتدريب المعالجين على نصف الآلية." } }, { type:'story-deep', content: { label: "الصندوق الأسود: العلاج المعرفي'S MECHANISMS",
+          source: "Cuijpers et al. Psychol Med 2019 — The mechanism mystery",
+          timeline: [
+            { year: "The Success", text: "Meta-analyses confirm: Cognitive Behavioral Therapy (CBT) reduces depression (d = 0.70). Guidelines recommend it. Billions spent training therapists. But HOW does it work?", type: "normal" },
+            { year: "The Theory", text: "Beck'نموذج: العلاج السلوكي المعرفي يغير الإدراك المختل ← يقلل من الأفكار التلقائية السلبية ← يحسن المزاج. يبدو المسار واضحًا.", type: "normal" }, { year: "The المشكلة"، text: "عندما اختبر الباحثون هذا: يفسر التغيير المعرفي 25-35٪ فقط من التحسن. ماذا عن الـ 65% الأخرى؟ التنشيط السلوكي؟ تحالف؟ توقع؟ بقي الصندوق أسود."، اكتب: "أزمة" }، { year: "حل MASEM"، نص: "Lemmens et al. مجمعة 12 دراسة، على غرار المسار الكامل. تم العثور على: ساهم التغيير السلوكي (β=0.41) بقدر كبير من التغيير المعرفي (β=0.38). ال'cognitive'في العلاج السلوكي المعرفي كان نصف القصة فقط. قد تكون المكونات أهدافًا على نفس القدر من الأهمية" }، هوك: "على مدى عقود، أكد تدريب العلاج السلوكي المعرفي على إعادة الهيكلة المعرفية. وكشف MASEM أن العنصر السلوكي كان بنفس القدر من القوة. تتم الآن مراجعة برامج التدريب في جميع أنحاء العالم." } }, { type:'story-deep', content: { label: "اللغز: كيف يقلل الوعي من الاكتئاب؟"، المصدر: "Gu et al. (Clin Psychol Rev 2015) + van der Velden et al. (Clin Psychol Rev 2015)"، الجدول الزمني: [ { year: "The Finding"، نص: "تثبت التحليلات التلوية: التدخلات القائمة على اليقظة الذهنية تقلل من انتكاسة الاكتئاب. حجم التأثير حول d = 0.30-0.50. ولكن كيف؟ من خلال أي مسار؟"، اكتب: "طبيعي" }، {السنة: "النظريات المتنافسة"، نص: "النظرية أ: اليقظة الذهنية تقلل من الاجترار (التفكير السلبي المتكرر). النظرية ب: اليقظة الذهنية تزيد من الوعي الفوقي (ملاحظة الأفكار دون اندماج). النظرية ج: جميعها معقولة ولها ارتباطات داعمة نهج MASEM"، النص: "مصفوفات الارتباط المجمعة من 18 دراسة ليس فقط'X predicts Y'لكن الويب الكامل: اليقظة الذهنية↔الاجترار↔الوعي↔التنظيم↔الاكتئاب. تناسب نماذج المعادلات الهيكلية مع المصفوفة المجمعة."، النوع: "الوحي" }، {السنة: "الوحي"، النص: "تكشف معاملات المسار: تقليل الاجترار هو المسار السائد (β = -0.42). يساهم الوعي الفوقي ولكن في المقام الأول من خلال الاجترار. الوعي المباشر → مسار الاكتئاب ضعيف. تم تحديد الآلية.", type: "revelation" } ], realData: { دراسات: "18 دراسة مقطعية/طولية، N = 2,912"، PooledR: "Mindness-Depression r = -0.33"، pathViaRumation: "التأثير غير المباشر β = -0.22 (67% من الإجمالي)"، directPath: "التأثير المباشر β = -0.11 (33% من المجموع)"، الاستنتاج: "يجب أن تستهدف التدخلات الاجترار على وجه التحديد" }، الخطاف: "سيخبرك التحليل التلوي التقليدي'mindfulness works.'يخبرك MASEM'mindfulness works BY REDUCING RUMINATION.'واحد يبلغ السياسة. تصميم التدخل للأدلة الأخرى." } }, { type:'content', content: { title: "MASEM - النهج ذو المرحلتين"، الأقسام: [ { العنوان: "المرحلة 1: تجميع مصفوفات الارتباط"، العناصر: [ "استخرج مصفوفات الارتباط من كل دراسة"، "حساب المتغيرات المختلفة المقاسة عبر الدراسات"، "استخدام التأثيرات الثابتة أو تجميع التأثيرات العشوائية"، "التعامل مع الارتباطات المفقودة (متوفرة بشكل زوجي)"، "تحقق من أن المصفوفة المجمعة إيجابية ومحددة (هل يمكنك بالفعل ملاءمة SEM؟)" ] }, { عنوان: "المرحلة 2: نموذج المعادلات الهيكلية المناسب"، العناصر: ["حدد النموذج النظري (المسارات والمتغيرات الكامنة)"، "تقدير معاملات المسار باستخدام الارتباطات المجمعة"، "استخدم المتوسط التوافقي N أو إجمالي N لـ SEs"، "اختبار ملاءمة النموذج (RMSEA، CFI، SRMR)"، "مقارنة النماذج المتنافسة (AIC، فرق مربع كاي)" ] }، { العنوان: "ماذا يمكن لـ MASEM أن يفعل"، العناصر: ["اختبار الوساطة: هل يؤثر X على Y إلى M؟"، "اختبار الاعتدال (مع امتدادات TSSEM)"، "مقارنة نماذج المسار عبر المجموعات الفرعية"، "قياس التأثيرات غير المباشرة بفواصل الثقة"، "تمييز الارتباط عن التأثير الاتجاهي" ] } ] } }، { النوع:'contrast'، المحتوى: { leftTitle: "التحليل التلوي التقليدي"، leftItems: ["السؤال: هل يتنبأ X بـ Y؟"، "أحجام تأثير المجمعات لعلاقة واحدة"، "لا يمكن التمييز بين التأثيرات المباشرة وغير المباشرة"، "يتعامل مع الآلية كصندوق أسود"، "يبلغ عما إذا كان يجب التدخل"]، rightTitle: "MASEM"، rightItems: [ "يسأل: كيف يرتبط X بـ Y؟"، "ارتباط المجمع بالكامل" المصفوفات"، "يتحلل المسارات المباشرة وغير المباشرة"، "يرسم خريطة للآلية بشكل صريح"، "يبلغ أين في المسار للتدخل" ] } }, { type:'tool-masem',
+        content: {
+          id: 'masem-visualizer'، العنوان: "مستكشف مخطط مسار MASEM"، الوصف: "إنشاء نماذج المسار وتصورها باستخدام الارتباطات المجمعة" } }, { type:'vivid-consequence'، المحتوى: { العنوان: "كارثة المسار الخاطئ"، النص: "يستهدف برنامج الصحة في مكان العمل'employee engagement'لتقليل الإرهاق، استنادًا إلى أدلة التحليل التلوي التي تشير إلى أن المشاركة ترتبط بانخفاض الإرهاق (r = -0.45). الملايين أنفقت على مبادرات المشاركة. الإرهاق دون تغيير. وكشف تحليل MASEM لاحقًا أن: المشاركة والإرهاق كلاهما يمثلان مصدرًا لموارد الوظيفة. المشاركة لا't CAUSE less burnout — they share a common cause. The intervention targeted a correlate, not a cause.",
+          toll: "$2.1M",
+          tollLabel: "spent on wrong intervention target"} }, { النوع: \"شجرة القرار\"، المحتوى: { العنوان:"The MASEM Feasibility Decision",
+          situation: "You want to understand HOW leadership style affects team performance. You have 45 studies measuring leadership, team cohesion, psychological safety, and performance. Not all studies measure all variables. You attempt to pool correlation matrices for MASEM."العقد: [ {المعرف: 'البدء'، السؤال:"Your pooled correlation matrix is NOT positive-definite. The eigenvalue check fails. What do you do?"الفروع: [ {المعرف: 'أ'، النص:"Force it positive-definite using nearest PD approximation"، nextNode: 'force' }، {المعرف: 'b'، النص:"Investigate which correlations are causing the problem"، nextNode: 'investigate' }، {المعرف: 'c'، النص:"Abandon MASEM and do separate bivariate meta-analyses"، nextNode: 'abandon' } ] }، { المعرف: 'force'، النوع: 'outcome'، النتيجة: 'bad'، العنوان:"The Silent Distortion",
+              text: "Forcing a matrix to be positive-definite changes the correlations. Your path coefficients are now based on ALTERED data. The indirect effect of leadership through cohesion is 0.28. But the true pooled correlation was impossible — perhaps because cohesion and safety are nearly collinear, or because a coding error exists. Your model runs but the numbers are artifacts.",
+              realCase: "Cheung (2015) documented MASEM studies where forced PD matrices led to unstable, non-replicable results. The math worked; the meaning didn't."
+            },
+            {
+              id: 'investigate'، سؤال: "لقد قمت بفحص الارتباطات الزوجية. الاكتشاف: ارتباط التماسك والسلامة هو 0.92 في بعض الدراسات، مما يخلق علاقة خطية متداخلة تقريبًا. أيضًا، تم قياس 3 دراسات'leadership'مختلفة تمامًا (التحويلية مقابل المعاملات)."، الفروع: [ { id:'d'، نص: "أزل الدراسات الإشكالية وأعد التشغيل"، nextNode:'remove' },
+                { id: 'e'، نص: "تماسك النموذج وسلامته كبنية كامنة"، nextNode:'collapse' },
+                { id: 'f'، نص: "نماذج القيادة التحويلية والمعاملات المنفصلة"، nextNode:'separate' }
+              ]
+            },
+            {
+              id: 'remove',
+              type: 'outcome',
+              consequence: 'neutral'، العنوان: "معضلة فقدان البيانات"، نص: "لديك الآن 37 دراسة. المصفوفة هي PD. لكنك've excluded studies post-hoc. If those 8 studies differ systematically (perhaps they'هي الدراسات الأعلى جودة، أو من سياقات محددة)، نموذجك متحيز. قم بالإبلاغ عن الاستثناءات وتحليلات الحساسية."، realCase: "يمكن أن يؤدي الاستبعاد المنهجي إلى تحيز الاختيار. تتطلب بعض إرشادات MASEM الآن معايير استبعاد مسجلة مسبقًا." }, { id:'collapse',
+              type: 'outcome',
+              consequence: 'good', title: "المراجعة النظرية"، نص: "أنت تصمم'psychological climate'كعامل كامن يشير إليه كل من التماسك والسلامة. النموذج يناسب جيدًا. القيادة ← المناخ ← الأداء. التأثير غير المباشر هو 0.34. تطور نموذجك النظري بناءً على الواقع التجريبي. أنت تبلغ:'Cohesion and safety were empirically inseparable in these data, suggesting they represent a common psychological climate factor.'"، realCase: "Viswesvaran et al.'s job satisfaction MASEM collapsed related constructs when empirical correlations exceeded theoretical distinctiveness."}, { المعرف: 'منفصل'، النوع: 'النتيجة'، النتيجة: 'جيد'، العنوان: قيادة"The Split Insight",
+              text: "You run two separate MASEMs: one for transformational, one for transactional leadership. Both matrices are PD. Results differ dramatically: Transformational works through inspiration (β=0.41), transactional through structure (β=0.29). The pathway DEPENDS on leadership type. One model would have been wrong for half your question.",
+              realCase: "Judge & Piccolo'فصلت MASEM بين أنواع القيادة، وإيجاد مسارات وساطة مختلفة لكل منها." }, { id:'abandon',
+              type: 'outcome',
+              consequence: 'neutral', title: "The Honest Retreat"، text: "أنت تبلغ عن التحليلات الوصفية ثنائية المتغير: أداء القيادة r=0.31؛ القيادة-التماسك r=0.45؛ أداء التماسك r=0.38. لا يمكنك المطالبة بالوساطة، لكن يمكنك الإبلاغ عن العناصر الأساسية. قد تؤدي الدراسات المستقبلية ذات البيانات الكاملة إلى تمكين MASEM. أنت've avoided false precision.",
+              realCase: "Some argue that bivariate MA with explicit theoretical discussion is more honest than forced MASEM with unstable matrices."} ] } }, { النوع: 'الدليل السريري'، المحتوى: { العنوان:"MASEM Interpretation Checklist",
+          items: [
+            "CHECK: Is the pooled correlation matrix positive-definite? (If not, SEM cannot be fitted properly)",
+            "SPECIFY: Your theoretical model BEFORE running analyses (not data-driven model building)",
+            "REPORT: Both direct and indirect effects with confidence intervals",
+            "TEST: Model fit — CFI > 0.95, RMSEA < 0.06, SRMR < 0.08 as rough guidelines",
+            "COMPARE: Alternative models if theory permits multiple structures",
+            "ACKNOWLEDGE: Cross-sectional data cannot establish causation — only theory does",
+            "TRANSLATE: What does the pathway mean for intervention design?"] } }، { النوع: 'عودة الدورة'، المحتوى: { المبدأ:"The pathway illuminates what the endpoint obscures. Know not just WHETHER, but HOW — for the how determines where to place your intervention."} }، { النوع: 'اختبار'، المحتوى: { سؤال:"A MASEM analysis finds: Job demands → burnout (β = 0.45), burnout → performance (β = -0.30), and job demands → performance (β = -0.05, n.s.). The indirect effect of demands on performance through burnout is significant. This suggests:"، الخيارات: [ { المعرف: 'a'، النص:"Job demands have no effect on performance"، صحيح: خطأ }، {المعرف: 'b'، النص:"Burnout fully mediates the demands-performance relationship"، الصحيح: صحيح }، { المعرف: 'c'، النص:"The model is incorrectly specified"، الصحيح: خطأ }، { المعرف: 'd'، النص:"Demands and burnout are the same construct"، الصحيح: خطأ } ]، شرح:"This is FULL MEDIATION. The direct path (demands → performance) is non-significant, but the indirect path through burnout is significant. Job demands affect performance entirely BY causing burnout. Intervention implication: Don'لا يقتصر الأمر على تقليل الطلبات - استهداف آليات التعافي من الإرهاق." } } ] }, // الوحدة 6: الجرعة (الاستجابة للجرعة) { المعرف: 6، العنوان: "الجرعة"، العنوان الفرعي: "الاستجابة للجرعة"، المبدأ: 5، الشرائح: [ { type:'principle', content: { text: "الجرعة تصنع السم والعلاج" } }, { type:'rhetoric', content: { question: "ألم ترَ كيف تناول المرضى 325 ملغ من الأسبرين'to be safe'- حتى كشف التحليل التلوي للاستجابة للجرعة: 75 ملغ قدمت كل الفوائد القلبية الوعائية، والجرعات الأعلى أضافت النزيف فقط؟ كان للمنحنى الجواب. لقد أخفته المقارنة البسيطة." } }, { type:'story-deep', content: { label: "منحنى الأسبرين الذي غيّر أمراض القلب"، المصدر: "تجارب مضادات التخثر"' Collaboration — Lancet 2009",
+          timeline: [
+            { year: "The Question", text: "Aspirin prevents heart attacks. But how much? Doses varied wildly: 75mg to 1500mg daily. Higher doses = more protection? Or more bleeding?", type: "normal" },
+            { year: "The Linear Thinking", text: "Early trials used high doses (900-1500mg). Seemed to work. Cardiologists reasoned: if some is good, more is better. Patients bled.", type: "normal" },
+            { year: "The Dose-Response MA", text: "Antithrombotic Trialists pooled 287 studies across dose categories. Applied proper within-study correlation methods. Modeled the CURVE, not just presence vs absence.", type: "revelation" },
+            { year: "The Plateau", text: "CVD reduction plateaued at 75-100mg. Higher doses: NO additional benefit, only more GI bleeding. The dose-response curve had a CEILING. 75mg was optimal.", type: "revelation" }
+          ],
+          realData: {
+            at75mg: "RR 0.68 for CVD events",
+            at325mg: "RR 0.68 for CVD events (no additional benefit)",
+            at1500mg: "RR 0.67 for CVD events (still no better)",
+            bleedingAt75: "GI bleed RR 1.5",
+            bleedingAt1500: "GI bleed RR 2.8",
+            conclusion: "Guidelines now recommend 75-100mg, not higher"
+          },
+          hook: "For decades, patients took 325mg or more 'لتكون آمنة.' The dose-response meta-analysis revealed the truth: they bled more without gaining protection. The curve had spoken — but only those who modeled it could hear."} }, { النوع: \"قصة عميقة\"، المحتوى: { التسمية:"THE J-CURVE THAT CONFOUNDED POLICY",
+          source: "Alcohol and Cardiovascular Disease — Di Castelnuovo et al. (Arch Intern Med 2006)",
+          timeline: [
+            { year: "The Observation", text: "Individual studies consistently suggest: Moderate drinkers have LOWER CVD mortality than non-drinkers. The 'French Paradox.' Does alcohol protect the heart?", type: "normal" },
+            { year: "The Linear Fallacy", text: "Some analysts pool 'أي شرب مقابل لا شيء.' OR = 0.75. Alcohol appears protective! Guidelines soften. 'قد يكون الشرب المعتدل مفيدًا.'", type: "crisis" },
+            { year: "The Dose-Response Analysis", text: "Pool 34 prospective studies with dose categories. Don't compare 'any vs none'- نموذج المنحنى. استخدام الخطوط المكعبة المقيدة. حساب ارتباط Greenland-Longnecker."، اكتب: "طبيعي" }، { year: "تم الكشف عن منحنى J"، نص: "تقل المخاطر من 0 إلى ~1 مشروب/يوم (RR نادر ~0.80). ثم يرتفع. عند تناول أكثر من 4 مشروبات/اليوم، يكون معدل الخطر أكبر من 1.0. شرب الخمر بكثرة ضار. ال'protection'موجود فقط في نافذة ضيقة - إذا كان موجودًا على الإطلاق."، اكتب: "الوحي" }، { year: "الخلاف"، نص: "ملاحظة النقاد:'Non-drinkers'تشمل الأشخاص الذين كانوا يشربون الخمر بكثرة سابقًا (التحيز المرضي للإقلاع عن التدخين). قد يكون منحنى J قطعة أثرية. لم تجد الدراسات العشوائية المندلية أي تأثير وقائي. المنحنى's shape depends on who you call 'zero.'", type: "crisis" }
+          ],
+          realData: {
+            studies: "34 prospective studies, 1,015,835 participants",
+            atZero: "Reference category (RR = 1.0)",
+            at1drink: "RR = 0.80 (0.78-0.83)",
+            at4drinks: "RR = 1.13 (1.06-1.21)",
+            nadir: "~12.5 g/day (about 1 drink)"
+          },
+          hook: "A simple meta-analysis would say 'الذين يشربون الخمر لديهم خطر أقل بنسبة 25٪ للإصابة بأمراض القلب والأوعية الدموية.' The dose-response meta-analysis says 'ربما، ولكن عند تناول مشروب واحد فقط في اليوم، وينعكس مع المزيد.' Same data, profoundly different policy implications."} }, { النوع: \"محتوى\"، المحتوى: { العنوان:"Dose-Response Meta-Analysis Methods",
+          sections: [
+            {
+              heading: "The Greenland-Longnecker Method",
+              items: [
+                "Within a study, dose categories are NOT independent",
+                "The low-dose group shares a reference with the high-dose group",
+                "Standard MA would ignore this correlation → wrong SEs",
+                "G-L reconstructs the covariance matrix from published tables",
+                "Requires: cases, person-time or N, RR and CI for each dose level"
+              ]
+            },
+            {
+              heading: "Modeling the Curve Shape",
+              items: [
+                "LINEAR: Assumes every unit of dose has same effect — rarely true",
+                "QUADRATIC: Captures U-shaped or inverse-U relationships",
+                "RESTRICTED CUBIC SPLINES (RCS): Flexible curves with knots",
+                "FRACTIONAL POLYNOMIALS: Data-driven non-linear shapes",
+                "The shape IS the finding — report and interpret the curve"
+              ]
+            },
+            {
+              heading: "Critical Decisions",
+              items: [
+                "What is 'zero dose'? (Never exposed? Low exposure? Former users?)",
+                "How to assign dose values to categories ('1-3 cups' → midpoint?)",
+                "Where to place spline knots? (Typically 3 knots at 10th, 50th, 90th percentiles)",
+                "One-stage vs two-stage approach?"] } ] } }, { النوع: 'أداة-الجرعة'، المحتوى: { المعرف: 'أداة-الاستجابة للجرعة'، العنوان:"Dose-Response Curve Visualizer",
+          description: "Explore how different curve shapes change interpretation"} }, { النوع: \"عواقب حية\"، المحتوى: { العنوان:"THE LINEAR ASSUMPTION KILLS",
+          text: "A meta-analysis of vitamin D supplementation and mortality found 'لا يوجد تأثير كبير' (pooled RR = 0.97, 95% CI: 0.94-1.01). Case closed? No.\n\nDose-response reanalysis revealed: Benefit peaked at 20-40 ng/mL blood levels, then REVERSED at higher levels. The trials gave everyone the SAME dose, pushing some into harmful territory while leaving others deficient. The null overall effect masked a U-shaped curve.",
+          toll: "Hidden",
+          tollLabel: "harms from one-dose-fits-all policy"} }, { النوع: \"الطريقة\"، المحتوى: { التسمية:"THE METHOD",
+          title: "Reading and Reporting Dose-Response Curves",
+          sections: [
+            {
+              heading: "Identify the Nadir/Peak",
+              text: "Where is maximum benefit (or minimum risk)? This is often the policy-relevant number. 'المدخول الأمثل هو حوالي X وحدة / يوم.'"
+            },
+            {
+              heading: "Identify Threshold Effects",
+              text: "Is there a dose below which no effect occurs? Above which harm begins? These thresholds define safe/effective ranges."
+            },
+            {
+              heading: "Report the Curve, Not Just Points",
+              text: "Show the spline with confidence bands. Readers need to see the SHAPE. A table of 'RR في 1، 2، 3، 4 وحدات' loses the curve information."
+            },
+            {
+              heading: "Test for Non-Linearity",
+              text: "Statistical test: Does a non-linear model fit significantly better than linear? If yes, DON'T يُبلغ عن التقدير الخطي — فهو's misleading."
+            },
+            {
+              heading: "Address Reference Category Issues",
+              text: "Who is in the 'zero' group matters enormously. Former users, never users, and minimal users may differ systematically. Sensitivity analysis essential."} ] } }, { النوع: 'شجرة القرار'، المحتوى: { العنوان:"The Reference Group Dilemma",
+          situation: "You'يُجري تحليلًا تلويًا للاستجابة للجرعة لاستهلاك القهوة ووفيات القلب والأوعية الدموية. تشير الدراسات إلى وجود خطر تناول 0، و1-2، و3-4، و5+ أكواب في اليوم. لكن'0 cups'تختلف المجموعات: بعضها'never drinkers,' others include 'former drinkers who quit for health reasons.'",
+          nodes: [
+            {
+              id: 'start'، سؤال: "يظهر تحليلك الأولي منحنى J: 0 أكواب لها RR=1.0 (مرجع)، 2-3 أكواب لها RR=0.85 (فائدة)، 5+ أكواب لها RR=0.95. كيف تتعامل مع الفئة المرجعية غير المتجانسة؟"، الفروع: [ { id:'a', text: "استخدم 0 أكواب كمرجع - ذلك's what the studies reported"، nextNode: 'naive' }، {المعرف: 'b'، النص:"Investigate who is in the '0 cups' category across studies"، nextNode: 'investigate' }، {المعرف: 'c'، النص:"Use the lowest non-zero consumption category as reference"، nextNode: 'shift' } ] }، { المعرف: \"ساذج\"، النوع: \"النتيجة\"، النتيجة: \"سيئ\"، العنوان:"The Sick Quitter Trap",
+              text: "Your J-curve is published. Critics point out: Studies including 'former drinkers' in reference show STRONGER protective effects at moderate doses. Why? Former drinkers quit because of illness — they'إعادة مرضا في الأساس. لقد قارنت شاربي الكحول المعتدلين بمن يشربون الكحول سابقًا مرضى، مما أدى إلى تضخيم الفائدة الواضحة." كامل'moderate drinking benefit'قد يكون ذلك تحيزًا مرضيًا." }, {id:'investigate'سؤال: "أنت طبقي: 15 دراسة محددة'0'نظرًا لكونهم لا يشربون الخمر مطلقًا، كان من بينهم 12 شخصًا يشربون الخمر سابقًا. في دراسات عدم الشرب مطلقًا، يكون المنحنى أكثر تسطيحًا. في دراسات الأشخاص الذين يشربون الخمر سابقًا، يبدو الاستهلاك المعتدل أكثر وقائية.", الفروع: [ { id:'d'، text: "أبلغ عن منحنيات منفصلة واعترف بعدم اليقين"، nextNode:'transparent' },
+                { id: 'e'، text: "استخدم فقط دراسات عدم شرب الخمر كتحليل أولي"، nextNode:'restrict' }
+              ]
+            },
+            {
+              id: 'transparent',
+              type: 'outcome',
+              consequence: 'good'، العنوان: "الشك الصادق"، النص: "لقد أبلغت عن كلا المنحنيين مع الشرح:'When reference includes only never-drinkers, optimal consumption is 2-3 cups/day with RR 0.90. When former drinkers are included, benefit appears larger (RR 0.82). The difference likely reflects sick-quitter bias rather than true effect modification.'"، realCase: "Poole et al.'s coffee meta-analysis explicitly stratified by reference definition, showing how conclusions depend on this methodological choice."}, { المعرف: \"تقييد\"، النوع: \"النتيجة\"، النتيجة: \"محايد\"، العنوان:"The Clean but Limited Analysis",
+              text: "Using only 15 never-drinker studies, your curve shows modest benefit peaking at 3 cups (RR 0.92). Effect is smaller than full pooling, but likely less biased. You lose power but gain validity. Report this as primary, with full pooling as sensitivity analysis.",
+              realCase: "This approach is increasingly recommended for lifestyle dose-response analyses where 'non-users' are heterogeneous."}، { المعرف: \"التحول\"، النوع: \"النتيجة\"، النتيجة: \"محايد\"، العنوان:"The Shifted Perspective",
+              text: "Using 1 cup/day as reference avoids the sick-quitter problem. Now your curve shows 2-3 cups has RR 0.94 vs 1 cup — smaller benefit. But '0 cups' becomes harder to interpret. Different reference, different question, different answer.",
+              realCase: "Some nutritional dose-response MAs use 'moderate intake' as reference, avoiding zero-category problems but changing the clinical question entirely."} ] } }, { النوع: 'الدليل السريري'، المحتوى: { العنوان:"Dose-Response Clinical Translation",
+          items: [
+            "OPTIMAL DOSE: Where does the curve reach maximum benefit?",
+            "CEILING EFFECT: Beyond what dose does no additional benefit accrue?",
+            "THRESHOLD OF HARM: At what dose does benefit reverse to harm?",
+            "THERAPEUTIC WINDOW: What is the range of beneficial doses?",
+            "INDIVIDUAL VARIATION: Curves are AVERAGES — individuals may differ",
+            "REFERENCE GROUP: Who is 'unexposed'? This affects the ENTIRE curve",
+            "BIOLOGICAL PLAUSIBILITY: Does the curve shape make mechanistic sense?"] } }، { النوع: 'عودة الدورة'، المحتوى: { المبدأ:"The dose makes the poison—and the cure. Never ask only 'هل يعمل؟' Ask 'كم وأين تصبح المنفعة ضررا؟'"} }، { النوع: 'اختبار'، المحتوى: { سؤال:"A dose-response meta-analysis of physical activity and mortality shows: Sedentary (reference), Low (RR=0.80), Moderate (RR=0.65), High (RR=0.64), Very High (RR=0.65). What pattern does this suggest?"، الخيارات: [ { المعرف: 'a'، النص:"Linear benefit — more is always better"، صحيح: خطأ }، {المعرف: 'b'، النص:"Ceiling effect — benefit plateaus at moderate activity"، الصحيح: صحيح }، { المعرف: 'c'، النص:"U-shaped — very high activity is harmful"، الصحيح: خطأ }، { المعرف: 'd'، النص:"No relationship — exercise doesn'لا يؤثر على معدل الوفيات"، صحيح: خطأ } ]، شرح: "يظهر هذا تأثير السقف. إن فائدة الانتقال من حالة الجلوس إلى النشاط المنخفض كبيرة (تخفيض بنسبة 20٪). ومن المنخفض إلى المعتدل، هناك مكسب كبير آخر. ولكن من المتوسط إلى المرتفع إلى المرتفع جدًا – يتسطح المنحنى. الآثار المترتبة على السياسة: التركيز على جعل الأشخاص غير المستقرين يتحركون، وليس دفع الأشخاص النشطين إلى بذل المزيد من الجهد.'principle', content: { text: "لتجميع التركيبات، اعرف أولاً ما لا تعرفه" } }, { type:'rhetoric', content: {سؤال: "ألم تلاحظ أن إيوانيديس وجد 264 تحليلًا تلويًا يزعم أن الأطعمة تسبب السرطان أو تمنعه - ومع ذلك عندما طبق معايير المصداقية، كان لدى 5 (2٪) فقط أدلة مقنعة؟ كانت المجلات مليئة بالمعلومات'significant findings.'الحقيقة كانت شبه فارغة." } }, { type:'story-deep', content: { label: "THE BIOMARKER GRAVEYARD: 85% DOWNGRADED"، المصدر: "Ioannidis & Panagiotou, JAMA 2011 - حساب المصداقية"، الجدول الزمني: [ { year: "The Promise"، نص: "تم ادعاء مئات التحليلات التلوية: يتنبأ المؤشر الحيوي X بالمرض Y. CRP يتنبأ بأمراض القلب! IL-6 يتنبأ بالسرطان! فيتامين د يتنبأ بكل شيء! المجلات المنشورة، تم الاستشهاد بالمبادئ التوجيهية."، النوع: "طبيعي" }، { year: "The Umbrella"، النص: "قام Ioannidis بفحص 35 تحليلًا تلويًا لارتباطات العلامات الحيوية بالأمراض'statistically significant'النتائج المجمعة. ولكن كم عدد الحالات التي كانت ذات مصداقية؟"، اكتب: "طبيعي" }، { year: "المعايير"، نص: "مطبق: >1000 حالة، p<10⁻⁶، I²<50%، لا يوجد تحيز للدراسة الصغيرة، الدراسة الأكبر مهمة. هذه هي المعايير الدنيا للاعتقاد بجمع ما."، اكتب: "عادي" }، { year: "الحساب"، نص: "6 فقط من 35 (17%) استوفت جميع المعايير. 29 (83٪) كانت لها آثار متضخمة - متوسط التضخم 1.7 مرة. معظم'proven'كانت ارتباطات العلامات الحيوية عبارة عن ظلال، وليست إشارات.'significant'جمعيات"، ذات مصداقية: "6 فقط (17٪) استوفت جميع معايير المصداقية"، متوسط التضخم: "المبالغة في التقدير بمقدار 1.7 ضعفًا في الدراسات الضعيفة"، ضمنيًا: "معظم المؤشرات الحيوية"'discoveries' don't replicate"
+          },
+          hook: "Every biomarker had a meta-analysis. Every meta-analysis was 'significant.' But when credibility criteria were applied, 83% crumbled. Statistical significance without credibility is a mirage."} }, { النوع: \"قصة عميقة\"، المحتوى: { التسمية:"EVERYTHING WE EAT CAUSES CANCER",
+          source: "Schoenfeld & Ioannidis (Am J Clin Nutr 2013) + Subsequent umbrella reviews",
+          timeline: [
+            { year: "The Problem", text: "Nutritional epidemiology produces hundreds of meta-analyses. Coffee causes cancer. Coffee prevents cancer. Red wine protects. Red wine harms. The public is confused. Policy paralyzed.", type: "normal" },
+            { year: "The Umbrella Approach", text: "Ioannidis and colleagues systematically review meta-analyses OF food-cancer associations. Not individual studies — the meta-analyses themselves. How many are credible?", type: "normal" },
+            { year: "The Sobering Findings", text: "Of 264 meta-analyses examined: Most showed 'statistically significant' associations. But credibility assessment revealed: Only 5 had 'convincing' evidence (>1000 cases, p<10⁻⁶, low heterogeneity, no bias). The vast majority? Weak, contradictory, likely biased.", type: "revelation" },
+            { year: "The Implication", text: "Most published meta-analyses in nutrition are noise, not signal. 'Statistically significant' ≠ credible. Without credibility criteria, we mistake quantity of evidence for quality.", type: "crisis" },
+            { year: "The Pattern", text: "Later umbrella reviews in other fields found similar: 85% of 'significant' biomarker associations downgrade when credibility assessed. Most meta-analyses don't تنجو من التدقيق."، type: "revelation" } ]، realData: { metaAnalyzed: "264 تحليلًا تلويًا لارتباطات سرطان الغذاء"، هام: "أبلغ ~ 80٪ عن نتائج ذات دلالة إحصائية"، مقنع: "5 فقط (2٪) استوفوا جميع معايير المصداقية"، موحية: "18 (7٪) استوفوا'suggestive'معايير"، ضعيف: "91% دليل ضعيف أو غير موثوق" }، خطاف: "يخبرك أحد التحليلات التلوية'this food causes cancer.'تخبرك المراجعة الشاملة'of the 50 foods claimed to cause cancer, only 2 claims are credible.'يكشف مستوى البحث التلوي ما تخفيه التحليلات الوصفية الفردية." } }, { type:'content'، المحتوى: { العنوان: "طرق المراجعة الشاملة"، الأقسام: [ { عنوان: "ما هي المراجعة الشاملة؟"، العناصر: [ "مراجعة منهجية للمراجعات المنهجية والتحليلات الوصفية"، "وحدة التحليل هي التحليل التلوي، وليست الدراسة الأولية"، "يرسم خريطة للأدلة بأكملها حول موضوع ما"، "يحدد الاتفاقات والتناقضات والفجوات"، "يطبق معايير المصداقية لتمييز الإشارة عن الضوضاء" ] }، { العنوان: " معايير المصداقية (يوانيديس وآخرون.)"، العناصر: [ "مقنع: >1000 حالة، p<10⁻⁶، I²<50%، لا يوجد تحيز للدراسة الصغيرة، أكبر دراسة مهمة"، "مقترح للغاية: >1000 حالة، p<10⁻⁶"، "مقترح: >1000 حالة، p<10⁻³"، "ضعيف: p<0.05 ولكنه يفشل فوق المعايير"، "غير مهم: p≥0.05" ] }، { العنوان: "مشكلة التداخل"، العناصر: [ "تتضمن التحليلات الوصفية المتعددة نفس الدراسات الأولية"، "تظهر مستقلة ولكنها تشارك البيانات"، "عدها كدليل منفصل يعد عدًا مزدوجًا"، "استخدام CCA (المنطقة المغطاة المصححة) لتحديد التداخل"، "تداخل طفيف: <5%، معتدل: 6-10%، مرتفع: 11-15%، مرتفع جدًا: >15%" ] } ] } }, { النوع:'contrast'، المحتوى: { leftTitle: "بدون مراجعة شاملة"، leftItems: [ "'Meta-analysis shows significant effect'"، "اختر MA المفضل"، "تجاهل MA المتناقض"، "لا يوجد تقييم للمصداقية"، "الخلط بين الأهمية والحقيقة" ]، rightTitle: "مع المراجعة الشاملة"، rightItems: [ "'Of 12 MAs, only 2 meet credibility criteria'"، "رسم خريطة لجميع التوليفات المتاحة"، "شرح التناقضات بشكل منهجي"، "تطبيق معايير مصداقية متسقة"، "تمييز الأدلة القوية عن الأدلة الضعيفة" ] } }، { type:'tool-umbrella',
+        content: {
+          id: 'credibility-tool'، العنوان: "مقيم مصداقية الأدلة"، الوصف: "تطبيق معايير المصداقية لتقييم أدلة التحليل التلوي" } }, { type:'vivid-consequence'، المحتوى: { العنوان: "فخ التحليلات التلوية المتناقضة"، النص: "مكملات فيتامين هـ: اقترح تحليل تلوي واحد (2004) فائدة للقلب والأوعية الدموية. ووجد تحليل آخر (2005) زيادة في الوفيات الناجمة عن جميع الأسباب. نفس المغذيات، واستنتاجات معاكسة. تأرجحت السياسة. وساد الارتباك. كشفت المراجعة الشاملة: معايير إدراج مختلفة، جرعات مختلفة مجتمعة، تداخل دراسة واسعة النطاق. عندما تم تطبيق معايير المصداقية: لا يوجد مقنع الأدلة في كلتا الحالتين'debate'كان ضجيجًا."، حصيلة: "سنوات"، tollLabel: "ارتباك السياسة الناتج عن قبول MA غير النقدي" } }, { type:'method'، المحتوى: { التسمية: "الطريقة"، العنوان: "إجراء وتفسير المراجعات الشاملة"، الأقسام: [ { العنوان: "تقييم الجودة (AMSTAR-2)"، النص: "قم بتقييم كل تحليل تلوي متضمن للجودة المنهجية. هل قاموا بتسجيل بروتوكول؟ ابحث بشكل شامل؟ قم بتقييم خطر التحيز؟ استخدم الأساليب المناسبة؟ تختلف الجودة بشكل كبير." }, { عنوان: "تقييم التداخل"، نص: "إنشاء مصفوفة استشهاد: ما هي الدراسات الأولية التي تظهر فيها التحليلات الوصفية؟ احسب التداخل. إذا كان مرتفعًا جدًا (> 15%)، تعامل مع المتوسطات الحسابية المتداخلة على أنها نفس الدليل." }, { العنوان: "تقييم التوافق"، نص: "هل تتفق التحليلات الوصفية؟ إذا لم يكن الأمر كذلك، لماذا؟ تواريخ بحث مختلفة؟ معايير إدراج مختلفة؟ مقاييس تأثير مختلفة؟ اشرح الخلاف، لا't just report it."
+            },
+            {
+              heading: "Credibility Grading",
+              text: "Apply the criteria: sample size, statistical significance, heterogeneity, small-study effects, consistency. Grade each association as Convincing, Suggestive, Weak, or Non-credible."
+            },
+            {
+              heading: "Evidence Mapping",
+              text: "Present findings visually: a table or figure showing all associations, their grades, and the overall landscape. Readers should see AT A GLANCE what is credible."} ] } }, { النوع: 'شجرة القرار'، المحتوى: { العنوان:"The Conflicting Meta-Analyses Dilemma",
+          situation: "You'إعادة كتابة المبادئ التوجيهية السريرية لاستخدام الستاتين في الوقاية الأولية. تجد 8 تحليلات تلوية حول الستاتينات والوفيات الناجمة عن جميع الأسباب. تظهر أربعة فائدة كبيرة (RR 0.86-0.91). أربعة تظهر أي تأثير كبير (RR 0،94-1،02). وكلها منشورة في مجلات جيدة. تسأل لجنتك: بماذا نوصي؟"، العقد: [ { id:'start'، سؤال: "ثمانية تحليلات تلوية، مقسمة 4-4 حول ما إذا كانت الستاتينات تقلل معدل الوفيات. كيف يمكنك المتابعة؟"، الفروع: [ { id:'a', text: "تصويت الأغلبية - 4 إظهار المنفعة، 4 دون't, so inconclusive"، nextNode: 'vote' }، {المعرف: 'b'، النص:"Use the largest/most recent meta-analysis"، العقدة التالية: 'الأكبر' }، {المعرف: 'ج'، النص:"Conduct an umbrella review with credibility assessment"، nextNode: 'umbrella' } ] }، { المعرف: 'تصويت'، النوع: 'النتيجة'، النتيجة: 'سيء'، العنوان:"The False Democracy",
+              text: "Your 'inconclusive' finding treats a high-quality Cochrane review with 50,000 patients the same as a low-quality MA with 5,000 patients in a predatory journal. The four 'positive' MAs have 85% study overlap — they'إعادة أساسًا قاعدة أدلة واحدة تم عدها أربع مرات. يتجاهل عد الأصوات الجودة والتداخل والمصداقية. هو - هي's intellectually lazy and often misleading."}, { المعرف: \"الأكبر\"، النوع: \"النتيجة\"، النتيجة: \"محايد\"، العنوان:"The Recency Heuristic",
+              text: "The 2022 meta-analysis with 120,000 patients shows RR 0.91 (0.87-0.95). You cite this. But this MA included industry-funded trials with questionable endpoint adjudication, and its 'all-cause mortality' combined different follow-up periods. Size doesn'ر ضمان الجودة. وجدت مراجعة كوكرين لعام 2019 التي أجريت على 80.000 مريض أن نسبة المخاطر النسبية 0.94 (0.89-1.00) باستخدام معايير أكثر صرامة.'t always better. The CTT Collaboration'استخدمت الستاتين MAs بيانات المرضى الفردية ولكن تم انتقادها بسبب مشاركة الصناعة والتقارير الانتقائية." }, {id:'umbrella'، سؤال: "أنت تجري مراجعة شاملة: تقييم جودة AMSTAR-2، وحساب التداخل (CCA)، وتطبيق معايير المصداقية على التقديرات المجمعة. ماذا تجد؟"، الفروع: [ { id:'d', text: "يُظهر كلا المتوسطين MA عاليي الجودة مع تداخل منخفض فائدة متواضعة"، nextNode:'synthesis' },
+                { id: 'e', text: "جميع MAs بها عيوب خطيرة وتداخل هائل"، nextNode:'uncertainty' }
+              ]
+            },
+            {
+              id: 'synthesis',
+              type: 'outcome',
+              consequence: 'good', title: "الصورة الموضحة"، النص: "بعد AMSTAR-2: 3 MAs فقط ذات جودة عالية. تحليل التداخل: CCA = 65% - تستمد 8 MAs من 2-3 قواعد أدلة مستقلة. تصنيف المصداقية: درجات الارتباط هي'Suggestive'- مهمة p<10⁻³, > 1000 حدث، لكن I² = 45% وبعض تأثيرات الدراسات الصغيرة. تنص إرشاداتك على:'Suggestive evidence of modest mortality benefit (RR ~0.90). Certainty limited by heterogeneity. Individual clinical judgment required.'"، realCase: "قامت تونين وآخرون بتصنيف الأدلة بشكل منهجي، وقدمت توصيات دقيقة." }, { id:'uncertainty',
+              type: 'outcome',
+              consequence: 'neutral', title: "The Honest Unknown"، نص: "مظلتك تكشف: جميع العناصر الثمانية لديها عيوب حرجة في AMSTAR-2 (لا يوجد بروتوكول مسجل، أو عمليات بحث غير مكتملة، أو لا يوجد تقييم RoB). التداخل هو 78% - في الأساس قاعدة أدلة واحدة معاد تدويرها. بعد معايير المصداقية: درجة الأدلة'Weak'. تعترف إرشاداتك بما يلي:'Despite numerous meta-analyses, the evidence base is weaker than quantity suggests. Recommend shared decision-making pending better data.'"، realCase: "تحتوي العديد من الأسئلة السريرية على العشرات من التحليلات التلوية ولكنها تحتوي على أدلة ضعيفة بعد تقييم الجودة. الكمية ≠ الجودة." } ] } }, { type:'clinical-guide', content: { title: "استخدام المراجعات الشاملة للممارسة"، العناصر: [ "ابدأ بالمراجعات الشاملة عند وجودها - فهي've done the mapping",
+            "CHECK the credibility grade before acting on any meta-analytic finding",
+            "WEIGHT convincing evidence heavily, suggestive moderately, weak minimally",
+            "EXPLAIN contradictions — they'عادةً ما تكون منهجية وليست بيولوجية"، "اعترف بالتداخل - قد يكون 20 تحليلًا تلويًا مجرد 3 قواعد أدلة مستقلة"، "قم بتحديث سابقيك: معظم نتائج'significant'في الجودة المنخفضة فازت MAs't replicate",
+            "DEMAND credibility assessment in guidelines — not just citation of 'a meta-analysis'"] } }، { النوع: 'عودة الدورة'، المحتوى: { المبدأ:"To synthesize syntheses, first know what you do not know. Most meta-analyses are noise. Credibility criteria separate signal from shadow."} }، { النوع: 'اختبار'، المحتوى: { سؤال:"An umbrella review finds 15 meta-analyses on supplement X and disease Y. Overlap assessment shows CCA = 45%. Ten MAs show significant benefit, five show null results. What should you conclude?"، الخيارات: [ { المعرف: 'a'، النص:"Strong evidence of benefit (10 vs 5 positive)"، صحيح: خطأ }، {المعرف: 'b'، النص:"The evidence is essentially from one or two independent datasets recycled many times"، الصحيح: صحيح }، { المعرف: 'c'، النص:"The field is hopelessly contradictory"، الصحيح: خطأ }، { المعرف: 'd'، النص:"More meta-analyses are needed"، الصحيح: خطأ } ]، شرح:"CCA of 45% is VERY HIGH overlap — these 15 'independent' meta-analyses are largely analyzing the same primary studies in different combinations. The 10 vs 5 split doesn'بـ 15 اختبارًا مستقلاً - وهي's likely 2-3 independent evidence bases repackaged. You should find the LEAST overlapping, highest quality MAs and weight those, not vote-count all 15."} } ] }, // الوحدة 8: THE CAPSTONE { id: 8, title:"The Capstone",
+    subtitle: "Integration", المبدأ: null, Slides: [ { type: 'title', content: { title:"The Capstone",
+          subtitle: "Integration and Oath",
+          text: "You have walked through the seven principles. Now we seal them with integration and commitment."
+        }
+      },
+      {
+        type: 'rhetoric',
+        content: {
+          question: "Have you not considered that knowledge without wisdom is a blade without a handle — dangerous to the one who wields it?"} }, { النوع: \"محتوى\"، المحتوى: { العنوان:"The Seven Principles Unified",
+          sections: [
+            {
+              heading: "From the Network",
+              items: [
+                "Indirect evidence has power, but transitivity is its foundation",
+                "Never rank treatments without showing uncertainty",
+                "Consistency must be tested, not assumed"
+              ]
+            },
+            {
+              heading: "From the Individual",
+              items: [
+                "Aggregate data conceals individual truth",
+                "IPD reveals what summary data hides",
+                "Ecological fallacy is the price of convenience"
+              ]
+            },
+            {
+              heading: "From the Diagnosis",
+              items: [
+                "The curve tells what the number hides",
+                "Sensitivity and specificity trade on a continuum",
+                "PPV depends on YOUR population"
+              ]
+            },
+            {
+              heading: "From the Prior",
+              items: [
+                "What you knew before has a place at the table",
+                "But you must show it openly",
+                "And test whether conclusions depend on it"
+              ]
+            },
+            {
+              heading: "From the Pathway",
+              items: [
+                "Knowing THAT is not knowing HOW",
+                "The mechanism guides the intervention",
+                "Correlation is not the path"
+              ]
+            },
+            {
+              heading: "From the Dose",
+              items: [
+                "More is not always better",
+                "The curve reveals the window",
+                "The threshold separates cure from poison"
+              ]
+            },
+            {
+              heading: "From the Umbrella",
+              items: [
+                "Most meta-analyses are noise",
+                "Credibility criteria separate signal",
+                "Quantity of evidence ≠ quality of evidence"] } ] } }, { type: 'عواقب حية', content: { title:"THE WEIGHT OF WHAT WE DO",
+          text: "Every number in a meta-analysis represents patients. The pooled effect size is an average across thousands of human lives. The heterogeneity statistic captures how differently real people responded. The confidence interval bounds what we truly know versus what we guess.\n\nWhen we pool carelessly, we deceive. When we ignore heterogeneity, we harm those who differ from the average. When we present certainty we don'لا نملك، نحن نقود الأطباء إلى ثقة زائفة.", حصيلة: "لا تعد ولا تحصى"، tollLabel: "المرضى المتأثرون بجودة تركيب الأدلة" } }, { type:'oath', content: { text: "لن أقوم بتجميع ما لا ينبغي تجميعه مجتمعة.<br><br>لن أخفي عدم التجانس وراء المتوسط.<br><br>لن أقدم يقينًا لا أملكه.<br><br>سوف أتتبع المسار، وأقيس الجرعة، وأقيم المصداقية.<br><br>سأتذكر أنه خلف كل نقطة بيانات يوجد مريض، ووراء كل دراسة مسألة حقيقة.<br><br>سأستخدم هذه الأساليب ليس من أجل الذكاء، وليس من أجل النشر، ولكن من أجل <em>المرضى</em> الذين تعتمد حياتهم على الحقائق التي أساعد في كشفها." } }, { النوع:'cycle-return',
+        content: {
+          principle: "You came seeking methods. You leave with principles. The methods will evolve. The principles endure. Apply them wisely, for the evidence you synthesize shapes the care patients receive."
+        }
+      }
+    ]
+  }
+];
+
+// ============================================================
+// INTERACTIVE TOOLS - Real working implementations
+// ============================================================
+
+// Bayesian Prior-Posterior Visualizer using Plotly
+function renderBayesianTool(containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  container.innerHTML = `
+    <div class="tool-controls">
+      <div class="tool-control">
+        <label>Prior Mean</label>
+        <input type="number" id="priorMean" value="0" step="0.1" onchange="updateBayesPlot()">
+      </div>
+      <div class="tool-control">
+        <label>Prior SD</label>
+        <input type="number" id="priorSD" value="1" step="0.1" min="0.1" onchange="updateBayesPlot()">
+      </div>
+      <div class="tool-control">
+        <label>Data Mean</label>
+        <input type="number" id="dataMean" value="0.5" step="0.1" onchange="updateBayesPlot()">
+      </div>
+      <div class="tool-control">
+        <label>Data SE</label>
+        <input type="number" id="dataSE" value="0.3" step="0.05" min="0.05" onchange="updateBayesPlot()">
+      </div>
+    </div>
+    <div id="bayesPlot" class="plot-area"></div>
+    <div id="bayesInterpretation" style="margin-top:1rem;padding:1rem;background:#f3f4f6;border-radius:8px;font-size:0.9rem;"></div>
+  `;
+
+  updateBayesPlot();
+}
+
+function updateBayesPlot() {
+  const priorMean = parseFloat(document.getElementById('priorMean')?.value || 0);
+  const priorSD = parseFloat(document.getElementById('priorSD')?.value || 1);
+  const dataMean = parseFloat(document.getElementById('dataMean')?.value || 0.5);
+  const dataSE = parseFloat(document.getElementById('dataSE')?.value || 0.3);
+
+  const priorPrec = 1 / (priorSD * priorSD);
+  const dataPrec = 1 / (dataSE * dataSE);
+  const postPrec = priorPrec + dataPrec;
+  const postMean = (priorMean * priorPrec + dataMean * dataPrec) / postPrec;
+  const postSD = Math.sqrt(1 / postPrec);
+
+  const x = [];
+  for (let i = -3; i <= 3; i += 0.05) x.push(i);
+
+  const gaussian = (xVal, mean, sd) => Math.exp(-0.5 * Math.pow((xVal - mean) / sd, 2)) / (sd * Math.sqrt(2 * Math.PI));
+
+  const priorY = x.map(v => gaussian(v, priorMean, priorSD));
+  const likeY = x.map(v => gaussian(v, dataMean, dataSE));
+  const postY = x.map(v => gaussian(v, postMean, postSD));
+
+  const maxY = Math.max(...priorY, ...likeY, ...postY);
+  const normPrior = priorY.map(v => v / maxY);
+  const normLike = likeY.map(v => v / maxY);
+  const normPost = postY.map(v => v / maxY);
+
+  Plotly.newPlot('bayesPlot', [
+    { x, y: normPrior, name: 'Prior', line: { color: '#6b7280', dash: 'dash' } },
+    { x, y: normLike, name: 'Likelihood (Data)', line: { color: '#3b82f6', dash: 'dot' } },
+    { x, y: normPost, name: 'Posterior', line: { color: '#22c55e', width: 3 } }
+  ], {
+    title: 'Bayesian Updating',
+    xaxis: { title: 'Effect Size', Zeroline: صحيح }, yaxis: { title:'Density (normalized)', showticklabels: false },
+    legend: { x: 0.02, y: 0.98 },
+    margin: { t: 50, r: 20, b: 50, l: 50 }
+  }, { responsive: true });
+
+  const interp = document.getElementById('bayesInterpretation');
+  if (interp) {
+    const priorWeight = (priorPrec / postPrec * 100).toFixed(0);
+    const dataWeight = (dataPrec / postPrec * 100).toFixed(0);
+    interp.innerHTML = `
+      <strong>Posterior mean:</strong> ${postMean.toFixed(3)} (95% CI: ${(postMean - 1.96*postSD).toFixed(3)} to ${(postMean + 1.96*postSD).toFixed(3)})<br>
+      <strong>Weight from prior:</strong> ${priorWeight}% | <strong>Weight from data:</strong> ${dataWeight}%<br>
+      <em>The posterior is pulled toward whichever source is more precise.</em>
+    `;
+  }
+}
+
+// SROC Curve Interactive Tool
+function renderSROCTool(containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  container.innerHTML = `
+    <div class="tool-controls">
+      <div class="tool-control">
+        <label>Threshold (0-1)</label>
+        <input type="range" id="srocThreshold" min="0" max="1" step="0.01" value="0.5" oninput="updateSROC()">
+        <span id="thresholdValue">0.50</span>
+      </div>
+      <div class="tool-control">
+        <label>Prevalence (%)</label>
+        <input type="number" id="srocPrevalence" min="0.1" max="50" value="5" step="0.5" onchange="updateSROC()">
+      </div>
+    </div>
+    <div id="srocPlot" class="plot-area"></div>
+    <div id="srocStats" style="margin-top:1rem;display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;"></div>
+  `;
+
+  updateSROC();
+}
+
+function updateSROC() {
+  const threshold = parseFloat(document.getElementById('srocThreshold')?.value || 0.5);
+  const prevalence = parseFloat(document.getElementById('srocPrevalence')?.value || 5) / 100;
+
+  document.getElementById('thresholdValue').textContent = threshold.toFixed(2);
+
+  // Simulated ROC curve (inverted logistic)
+  const fprs = [];
+  const tprs = [];
+  for (let fpr = 0; fpr <= 1; fpr += 0.01) {
+    fprs.push(fpr);
+    // Higher AUC curve
+    const tpr = 1 / (1 + Math.exp(-5 * (fpr - 0.3)));
+    tprs.push(Math.min(1, tpr + 0.1));
+  }
+
+  // Current operating point based on threshold
+  const currentFPR = 1 - threshold;
+  const currentTPR = 1 / (1 + Math.exp(-5 * (currentFPR - 0.3)));
+  const sens = Math.min(0.99, currentTPR + 0.1);
+  const spec = threshold;
+
+  // Calculate PPV, NPV
+  const ppv = (sens * prevalence) / (sens * prevalence + (1 - spec) * (1 - prevalence));
+  const npv = (spec * (1 - prevalence)) / (spec * (1 - prevalence) + (1 - sens) * prevalence);
+
+  Plotly.newPlot('srocPlot', [
+    { x: fprs, y: tprs, name: 'ROC Curve', line: { color: '#3b82f6', width: 2 } },
+    { x: [0, 1], y: [0, 1], name: 'Random', line: { color: '#d1d5db', dash: 'dash'} }, { x: [1-spec], y: [sens], الوضع:'markers', name: 'Current Point'علامة: { الحجم: 14، اللون:'#ef4444' } }
+  ], {
+    title: 'ROC Curve with Operating Point',
+    xaxis: { title: '1 - Specificity (False Positive Rate)'، النطاق: [0، 1] }، yaxis: { العنوان:'Sensitivity (True Positive Rate)', range: [0, 1] },
+    legend: { x: 0.6, y: 0.2 },
+    margin: { t: 50, r: 20, b: 50, l: 60 }
+  }, { responsive: true });
+
+  document.getElementById('srocStats').innerHTML = `
+    <div style="text-align:center;padding:0.5rem;background:#dcfce7;border-radius:8px;">
+      <div style="font-size:1.5rem;font-weight:bold;color:#166534;">${(sens*100).toFixed(1)}%</div>
+      <div style="font-size:0.75rem;color:#166534;">Sensitivity</div>
+    </div>
+    <div style="text-align:center;padding:0.5rem;background:#dbeafe;border-radius:8px;">
+      <div style="font-size:1.5rem;font-weight:bold;color:#1e40af;">${(spec*100).toFixed(1)}%</div>
+      <div style="font-size:0.75rem;color:#1e40af;">Specificity</div>
+    </div>
+    <div style="text-align:center;padding:0.5rem;background:#fef3c7;border-radius:8px;">
+      <div style="font-size:1.5rem;font-weight:bold;color:#92400e;">${(ppv*100).toFixed(1)}%</div>
+      <div style="font-size:0.75rem;color:#92400e;">PPV</div>
+    </div>
+    <div style="text-align:center;padding:0.5rem;background:#f3e8ff;border-radius:8px;">
+      <div style="font-size:1.5rem;font-weight:bold;color:#6b21a8;">${(npv*100).toFixed(1)}%</div>
+      <div style="font-size:0.75rem;color:#6b21a8;">NPV</div>
+    </div>
+  `;
+}
+
+// Network Visualizer
+function renderNetworkTool(containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  container.innerHTML = `
+    <div style="margin-bottom:1rem;">
+      <p style="color:#6b7280;font-size:0.9rem;">This interactive network shows how treatments connect through shared comparators. Click nodes to highlight paths.</p>
+    </div>
+    <div id="networkPlot" class="plot-area"></div>
+    <div id="networkInfo" style="margin-top:1rem;padding:1rem;background:#f3f4f6;border-radius:8px;font-size:0.9rem;"></div>
+  `;
+
+  // Example network data
+  const treatments = ['Placebo', 'Drug A', 'Drug B', 'Drug C', 'Drug D', 'Drug E'];
+  const comparisons = [
+    { from: 0, to: 1, trials: 8 },
+    { from: 0, to: 2, trials: 12 },
+    { from: 0, to: 3, trials: 5 },
+    { from: 1, to: 2, trials: 3 },
+    { from: 1, to: 4, trials: 2 },
+    { from: 2, to: 3, trials: 4 },
+    { from: 3, to: 5, trials: 2 },
+    { from: 4, to: 5, trials: 1 }
+  ];
+
+  // Position nodes in a circle
+  const n = treatments.length;
+  const nodeX = treatments.map((_, i) => Math.cos(2 * Math.PI * i / n - Math.PI/2));
+  const nodeY = treatments.map((_, i) => Math.sin(2 * Math.PI * i / n - Math.PI/2));
+
+  // Create edge traces
+  const edgeTraces = comparisons.map(c => ({
+    x: [nodeX[c.from], nodeX[c.to], null],
+    y: [nodeY[c.from], nodeY[c.to], null],
+    mode: 'lines'، السطر: { العرض: c.trials، اللون:'#93c5fd' },
+    hoverinfo: 'text',
+    text: `${treatments[c.from]} vs ${treatments[c.to]}: ${c.trials} trials`,
+    showlegend: false
+  }));
+
+  // Node trace
+  const nodeTrace = {
+    x: nodeX,
+    y: nodeY,
+    mode: 'markers+text'علامة: { الحجم: 30، اللون:'#3b82f6'، الخط: {العرض: 2، اللون:'#1e40af'} }، النص: العلاجات، موضع النص:'top center',
+    hoverinfo: 'text', أسطورة العرض: خطأ }; بلوتلي.نيوبلوت('networkPlot', [...edgeTraces,nodeTrace], { العنوان:'Treatment Network'، showlegend: false، xaxis: {مرئي: false، النطاق: [-1.5، 1.5] }، yaxis: {مرئي: false، النطاق: [-1.5، 1.5]، المقياس:'x' },
+    margin: { t: 50, r: 20, b: 20, l: 20 }
+  }, { responsive: true });
+
+  document.getElementById('networkInfo').innerHTML = `
+    <strong>Network summary:</strong> ${treatments.length} treatments, ${comparisons.length} direct comparisons, ${comparisons.reduce((s,c) => s+c.trials, 0)} total trials.<br>
+    <strong>Connectivity:</strong> Well-connected network with multiple paths between most treatments.<br>
+    <em>Edge thickness represents number of trials. Thick edges = more direct evidence.</em>
+  `;
+}
+
+// MASEM Path Diagram Visualizer
+function renderMASEMTool(containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  container.innerHTML = `
+    <div style="margin-bottom:1rem;">
+      <p style="color:#6b7280;font-size:0.9rem;">Interactive MASEM path diagram. Adjust path coefficients to see how indirect effects change.</p>
+    </div>
+    <div class="tool-controls">
+      <div class="tool-control">
+        <label>X → M (a path)</label>
+        <input type="range" id="pathA" min="0" max="0.9" step="0.05" value="0.5" oninput="updateMASEMPlot()">
+        <span id="pathAVal">0.50</span>
+      </div>
+      <div class="tool-control">
+        <label>M → Y (b path)</label>
+        <input type="range" id="pathB" min="0" max="0.9" step="0.05" value="0.4" oninput="updateMASEMPlot()">
+        <span id="pathBVal">0.40</span>
+      </div>
+      <div class="tool-control">
+        <label>X → Y direct (c' path)</label>
+        <input type="range" id="pathC" min="-0.3" max="0.5" step="0.05" value="0.1" oninput="updateMASEMPlot()">
+        <span id="pathCVal">0.10</span>
+      </div>
+    </div>
+    <div id="masemDiagram" style="الهامش: 1.5rem 0؛ محاذاة النص: المركز؛"></div>
+    <div id="masemResults" style="padding:1rem;background:#f3f4f6;border-radius:8px;"></div>
+  `;
+
+  updateMASEMPlot();
+}
+
+function updateMASEMPlot() {
+  const a = parseFloat(document.getElementById('pathA').value);
+  const b = parseFloat(document.getElementById('pathB').value);
+  const c = parseFloat(document.getElementById('pathC').value);
+
+  document.getElementById('pathAVal').textContent = a.toFixed(2);
+  document.getElementById('pathBVal').textContent = b.toFixed(2);
+  document.getElementById('pathCVal').textContent = c.toFixed(2);
+
+  const indirect = a * b;
+  const total = indirect + c;
+  const propMediated = total !== 0 ? (indirect / total * 100).toFixed(1) : 0;
+
+  // Draw SVG path diagram
+  document.getElementById('masemDiagram').innerHTML = `
+    <svg width="400" height="200" viewBox="0 0 400 200">
+      <!-- Boxes -->
+      <rect x="30" y="80" width="80" height="40" fill="#3b82f6" rx="5"/>
+      <text x="70" y="105" text-anchor="middle" fill="white" font-weight="bold">X</text>
+
+      <rect x="160" y="20" width="80" height="40" fill="#8b5cf6" rx="5"/>
+      <text x="200" y="45" text-anchor="middle" fill="white" font-weight="bold">M</text>
+
+      <rect x="290" y="80" width="80" height="40" fill="#22c55e" rx="5"/>
+      <text x="330" y="105" text-anchor="middle" fill="white" font-weight="bold">Y</text>
+
+      <!-- Arrows -->
+      <defs>
+        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+          <polygon points="0 0, 10 3.5, 0 7" fill="#374151"/>
+        </marker>
+      </defs>
+
+      <!-- X to M -->
+      <line x1="110" y1="85" x2="160" y2="55" stroke="#374151" stroke-width="2" marker-end="url(#arrowhead)"/>
+      <text x="125" y="60" fill="#374151" font-size="14">a=${a.toFixed(2)}</text>
+
+      <!-- M to Y -->
+      <line x1="240" y1="55" x2="290" y2="85" stroke="#374151" stroke-width="2" marker-end="url(#arrowhead)"/>
+      <text x="265" y="60" fill="#374151" font-size="14">b=${b.toFixed(2)}</text>
+
+      <!-- X to Y direct -->
+      <line x1="110" y1="100" x2="288" y2="100" stroke="#9ca3af" stroke-width="2" stroke-dasharray="5,5" marker-end="url(#arrowhead)"/>
+      <text x="200" y="125" fill="#9ca3af" font-size="14">c'=${c.toFixed(2)}</text>
+    </svg>
+  `;
+
+  const mediationType = c < 0.05 ? 'Full mediation': غير مباشر > Math.abs(c)؟'Partial mediation' : 'No significant mediation';
+
+  document.getElementById('masemResults').innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;">
+      <div>
+        <strong>Indirect effect (a×b):</strong><br>
+        <span style="font-size:1.5rem;color:#8b5cf6;">${indirect.toFixed(3)}</span>
+      </div>
+      <div>
+        <strong>Direct effect (c'):</strong><br>
+        <span style="font-size:1.5rem;color:#9ca3af;">${c.toFixed(3)}</span>
+      </div>
+      <div>
+        <strong>Total effect:</strong><br>
+        <span style="font-size:1.5rem;color:#22c55e;">${total.toFixed(3)}</span>
+      </div>
+      <div>
+        <strong>% Mediated:</strong><br>
+        <span style="font-size:1.5rem;color:#3b82f6;">${propMediated}%</span>
+      </div>
+    </div>
+    <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid #e5e7eb;">
+      <strong>Interpretation:</strong> ${mediationType}<br>
+      <em>${indirect > 0.1 ? 'طريق غير مباشر كبير. قد تكون التدخلات على M فعالة.' : 'طريق غير مباشر ضعيف قد لا يكون M هدفًا مفيدًا للتدخل.'}</em>
+    </div>
+  `;
+}
+
+// Dose-Response Curve Visualizer
+function renderDoseResponseTool(containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  container.innerHTML = `
+    <div style="margin-bottom:1rem;">
+      <p style="color:#6b7280;font-size:0.9rem;">Explore different dose-response curve shapes. See how assumptions change interpretation.</p>
+    </div>
+    <div class="tool-controls">
+      <div class="tool-control">
+        <label>Curve Shape</label>
+        <select id="curveShape" onchange="updateDoseResponsePlot()">
+          <option value="linear">Linear</option>
+          <option value="jcurve" selected>J-Curve</option>
+          <option value="threshold">Threshold</option>
+          <option value="ceiling">Ceiling Effect</option>
+          <option value="ucurve">U-Curve</option>
+        </select>
+      </div>
+      <div class="tool-control">
+        <label>Nadir/Threshold Position</label>
+        <input type="range" id="nadirPos" min="1" max="4" step="0.5" value="2" oninput="updateDoseResponsePlot()">
+        <span id="nadirPosVal">2</span>
+      </div>
+    </div>
+    <div id="doseResponsePlot" class="plot-area"></div>
+    <div id="doseResponseInfo" style="margin-top:1rem;padding:1rem;background:#f3f4f6;border-radius:8px;"></div>
+  `;
+
+  updateDoseResponsePlot();
+}
+
+function updateDoseResponsePlot() {
+  const shape = document.getElementById('curveShape').value;
+  const nadir = parseFloat(document.getElementById('nadirPos').value);
+  document.getElementById('nadirPosVal').textContent = nadir.toFixed(1);
+
+  const doses = [];
+  const rrs = [];
+  const lower = [];
+  const upper = [];
+
+  for (let d = 0; d <= 6; d += 0.2) {
+    doses.push(d);
+    let rr, se;
+
+    switch(shape) {
+      case 'linear':
+        rr = 1 - 0.08 * d;
+        se = 0.03;
+        break;
+      case 'jcurve':
+        rr = 1 - 0.15 * d + 0.04 * d * d;
+        se = 0.02 + 0.01 * d;
+        break;
+      case 'threshold':
+        rr = d < nadir ? 1 : 1 - 0.15 * (d - nadir);
+        se = 0.03;
+        break;
+      case 'ceiling':
+        rr = 1 - 0.25 * (1 - Math.exp(-d / nadir));
+        se = 0.02;
+        break;
+      case 'ucurve':
+        rr = 1 + 0.1 * Math.pow(d - nadir, 2) - 0.15;
+        se = 0.03;
+        break;
+    }
+
+    rrs.push(Math.max(0.4, Math.min(1.4, rr)));
+    lower.push(Math.max(0.3, rr - 1.96 * se));
+    upper.push(Math.min(1.5, rr + 1.96 * se));
+  }
+
+  const traceRR = {
+    x: doses,
+    y: rrs,
+    mode: 'lines',
+    name: 'Relative Risk',
+    line: { color: '#3b82f6', width: 3 }
+  };
+
+  const traceCI = {
+    x: [...doses, ...doses.slice().reverse()],
+    y: [...upper, ...lower.slice().reverse()],
+    fill: 'toself',
+    fillcolor: 'rgba(59,130,246,0.2)',
+    line: { color: 'transparent' },
+    name: '95% CI',
+    showlegend: true,
+    hoverinfo: 'skip'
+  };
+
+  const traceRef = {
+    x: [0, 6],
+    y: [1, 1],
+    mode: 'lines',
+    line: { color: '#ef4444', width: 1, dash: 'dash' },
+    name: 'لا تأثير',
+    showlegend: true
+  };
+
+  Plotly.newPlot('doseResponsePlot', [traceCI, traceRR, traceRef], {
+    title: `Dose-Response Curve (${shape})`,
+    xaxis: { title: 'الجرعة (وحدات / يوم)', range: [0, 6] },
+    yaxis: { title: 'Relative Risk', range: [0.4, 1.4] },
+    showlegend: true,
+    legend: { x: 0.7, y: 0.95 },
+    margin: { t: 50, r: 20, b: 50, l: 60 }
+  }, { responsive: true });
+
+  const minRR = Math.min(...rrs);
+  const optDose = doses[rrs.indexOf(minRR)];
+
+  const interpretations = {
+    linear: 'يفترض النموذج الخطي فائدة ثابتة لكل جرعة وحدة. في كثير من الأحيان المبالغة في التبسيط. قد تبدو الجرعات الأعلى مفيدة بلا حدود.',
+    jcurve: `J-curve shows benefit at low doses, harm at high doses. Optimal dose around ${optDose.toFixed(1)} units. Classic pattern for alcohol/CVD, some nutrients.`,
+    threshold: `No effect until threshold (${nadir} units), then benefit. Suggests minimum effective dose. Below threshold, intervention is wasted.`,
+    ceiling: `Benefit plateaus after ~${nadir} units. Adding more dose provides diminishing returns. Focus on reaching threshold, not maximizing.`,
+    ucurve: `Both low AND high doses harmful. Optimal at ${nadir} units. Deficiency and excess both problematic (e.g., vitamin D, BMI).`
+  };
+
+  document.getElementById('doseResponseInfo').innerHTML = `
+    <strong>Minimum RR:</strong> ${minRR.toFixed(2)} at ${optDose.toFixed(1)} units/day<br><br>
+    <strong>Interpretation:</strong> ${interpretations[shape]}<br><br>
+    <em style="color:#ef4444;">Warning: A linear model would miss the reversal/plateau. Always test for non-linearity.</em>
+  `;
+}
+
+// Umbrella Review Credibility Assessment Tool
+function renderCredibilityTool(containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  container.innerHTML = `
+    <div style="margin-bottom:1rem;">
+      <p style="color:#6b7280;font-size:0.9rem;">Assess the credibility of meta-analytic evidence using established criteria.</p>
+    </div>
+    <div class="tool-controls" style="flex-direction:column;">
+      <div class="tool-control" style="width:100%;">
+        <label>Total cases (or N for continuous)</label>
+        <input type="number" id="credCases" value="1500" oninput="updateCredibilityAssessment()">
+      </div>
+      <div class="tool-control" style="width:100%;">
+        <label>P-value (e.g., 0.001)</label>
+        <input type="number" id="credPval" value="0.0001" step="0.0001" oninput="updateCredibilityAssessment()">
+      </div>
+      <div class="tool-control" style="width:100%;">
+        <label>I² heterogeneity (%)</label>
+        <input type="number" id="credI2" value="35" min="0" max="100" oninput="updateCredibilityAssessment()">
+      </div>
+      <div class="tool-control" style="width:100%;">
+        <label>Small-study bias detected?</label>
+        <select id="credBias" onchange="updateCredibilityAssessment()">
+          <option value="no">No</option>
+          <option value="yes">Yes</option>
+        </select>
+      </div>
+      <div class="tool-control" style="width:100%;">
+        <label>Largest study significant?</label>
+        <select id="credLargest" onchange="updateCredibilityAssessment()">
+          <option value="yes">Yes</option>
+          <option value="no">No</option>
+        </select>
+      </div>
+    </div>
+    <div id="credibilityResult" style="margin-top:1.5rem;padding:1.5rem;border-radius:8px;text-align:center;"></div>
+    <div id="credibilityChecklist" style="margin-top:1rem;padding:1rem;background:#f8fafc;border-radius:8px;font-size:0.9rem;"></div>
+  `;
+
+  updateCredibilityAssessment();
+}
+
+function updateCredibilityAssessment() {
+  const cases = parseInt(document.getElementById('credCases').value) || 0;
+  const pval = parseFloat(document.getElementById('credPval').value) || 1;
+  const i2 = parseInt(document.getElementById('credI2').value) || 0;
+  const hasBias = document.getElementById('credBias').value === 'yes';
+  const largestSig = document.getElementById('credLargest').value === 'yes';
+
+  const checks = {
+    cases1000: cases >= 1000,
+    pHighlySig: pval < 0.000001,
+    pSig: pval < 0.001,
+    pMod: pval < 0.05,
+    lowHet: i2 < 50,
+    noBias: !hasBias,
+    largestSig: largestSig
+  };
+
+  let grade, color, description;
+
+  if (checks.cases1000 && checks.pHighlySig && checks.lowHet && checks.noBias && checks.largestSig) {
+    grade = 'CONVINCING';
+    color = '#22c55e';
+    description = 'بأن جميع المعايير قد تم استيفاؤها. دليل قوي يمكن أن يفيد الممارسة.';
+  } else if (checks.cases1000 && checks.pHighlySig) {
+    grade = 'HIGHLY SUGGESTIVE';
+    color = '#84cc16';
+    description = 'عينة كبيرة ومهمة للغاية، ولكن لم يتم استيفاء المعايير الأخرى. أدلة قوية إلى حد معقول.';
+  } else if (checks.cases1000 && checks.pSig) {
+    grade = 'SUGGESTIVE';
+    color = '#f59e0b';
+    description = 'عينة كافية ومخاوف كبيرة، ولكن تتعلق بعدم التجانس أو التحيز. فسر بحذر.';
+  } else if (checks.pMod) {
+    grade = 'WEAK';
+    color = '#ef4444';
+    description = 'ذات دلالة إحصائية ولكنها تفشل في معايير المصداقية المتعددة. انخفاض الثقة في النتيجة.';
+  } else {
+    grade = 'NON-SIGNIFICANT';
+    color = '#6b7280';
+    description = 'لا يصل إلى دلالة إحصائية. لا يوجد دليل موثوق على وجود تأثير.';
+  }
+
+  document.getElementById('credibilityResult').innerHTML = `
+    <div style="font-size:0.9rem;color:#6b7280;margin-bottom:0.5rem;">EVIDENCE GRADE</div>
+    <div style="font-size:2rem;font-weight:bold;color:${color};">${grade}</div>
+    <div style="margin-top:0.5rem;color:#374151;">${description}</div>
+  `;
+
+  document.getElementById('credibilityChecklist').innerHTML = `
+    <strong>Criteria Checklist:</strong>
+    <ul style="margin-top:0.5rem;list-style:none;padding:0;">
+      <li>${checks.cases1000 ? '✅' : '❌'} Sample size ≥ 1,000 cases (${cases.toLocaleString()})</li>
+      <li>${checks.pHighlySig ? '✅' : (checks.pSig ? '⚠️' : '❌')} P-value < 10⁻⁶ (p = ${pval < 0.0001 ? pval.toExponential(1) : pval})</li>
+      <li>${checks.lowHet ? '✅' : '❌'} I² < 50% (I² = ${i2}%)</li>
+      <li>${checks.noBias ? '✅' : '❌'} No evidence of small-study bias</li>
+      <li>${checks.largestSig ? '✅' : '❌'} Largest study shows significant effect</li>
+    </ul>
+    <div style="margin-top:1rem;padding-top:0.5rem;border-top:1px solid #e5e7eb;font-size:0.85rem;color:#6b7280;">
+      <em>Based on Ioannidis criteria for umbrella reviews. 'Convincing' ≈ top 2% of published associations.</em>
+    </div>
+  `;
+}
+
+// ============================================================
+// CORE COURSE FUNCTIONALITY
+// ============================================================
+const STORAGE_KEY = 'advancedMetaAnalysisCourse_v2';
+
+let state = {
+  currentModule: 0,
+  currentSlide: 0,
+  points: 0,
+  completedModules: [],
+  toolsUsed: [],
+  quizAnswered: {}
+};
+
+function loadState() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) state = { ...state, ...JSON.parse(saved) };
+  } catch (e) {
+    console.warn('فشل تحميل الحالة، باستخدام الإعدادات الافتراضية');
+  }
+}
+
+function saveState() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch (e) {}
+}
+
+function initCourse() {
+  loadState();
+  renderModuleList();
+  renderSlide();
+  updateProgress();
+
+  // Keyboard navigation
+  document.addEventListener('keydown', e => {
+    const tag = e.target.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || e.target.isContentEditable) return;
+    if (e.target.matches('زر، أ، [دور = "زر"]')) {
+        if (e.key === ' ' || e.key === 'Enter') return;
+    }
+    if (e.key === 'Escape') { closeDashboard(); closeGlossary(); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); nextSlide(); }
+    if (e.key === 'ArrowRight') { e.preventDefault(); prevSlide(); }
+  });
+}
+
+function renderModuleList() {
+  const list = document.getElementById('moduleList');
+  list.innerHTML = modules.map((m, i) => `
+    <div class="وحدة البند ${i ===state.currentModule؟ 'نشط' : ''} ${state.CompletedModules.includes(i)؟ 'مكتمل' : ''}"
+         onclick="goToModule(${i})" tabindex="0" role="button" aria-label="Module ${i}: ${m.title}"
+         onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();goToModule(${i});}">
+      <div class="module-number">${i}</div>
+      <div class="module-info">
+        <div class="module-title">${m.title}</div>
+        <div class="module-subtitle">${m.subtitle}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderSlide() {
+  const module = modules[state.currentModule];
+  const slide = module.slides[state.currentSlide];
+  const container = document.getElementById('slideContainer');
+
+  document.getElementById('moduleIndicator').textContent = `Module ${module.id}: ${module.title}`;
+  document.getElementById('slideCounter').textContent = `${state.currentSlide + 1} / ${module.slides.length}`;
+
+  const overallSlides = modules.reduce((s, m) => s + m.slides.length, 0);
+  let currentOverall = 0;
+  for (let i = 0; i < state.currentModule; i++) currentOverall += modules[i].slides.length;
+  currentOverall += state.currentSlide + 1;
+  document.getElementById('overallProgress').textContent = `Overall: ${Math.round(currentOverall/overallSlides*100)}%`;
+
+  container.innerHTML = `<div class="الشريحة النشطة المتحركة">${renderSlideContent(slide)}</div>`;
+
+  document.getElementById('prevBtn').disabled = state.currentSlide === 0;
+  document.getElementById('nextBtn').disabled = state.currentSlide === module.slides.length - 1;
+
+  // Initialize tools if present
+  setTimeout(() => {
+    if (slide.type === 'tool-bayes') renderBayesianTool(slide.content.id);
+    if (slide.type === 'tool-roc') renderSROCTool(slide.content.id);
+    if (slide.type === 'tool-network') renderNetworkTool(slide.content.id);
+    if (slide.type === 'tool-masem') renderMASEMTool(slide.content.id);
+    if (slide.type === 'tool-dose') renderDoseResponseTool(slide.content.id);
+    if (slide.type === 'tool-umbrella') renderCredibilityTool(slide.content.id);
+  }, 100);
+}
+
+function renderSlideContent(slide) {
+  switch(slide.type) {
+    case 'title':
+      return `<div class="slide-content" style="text-align:center;padding:3rem;">
+        <h1 class="slide-title" style="font-size:3rem;margin-bottom:1rem;">${slide.content.title}</h1>
+        <p style="font-size:1.3rem;color:var(--gold);margin-bottom:2rem;">${slide.content.subtitle}</p>
+        <p style="font-size:1.1rem;opacity:0.8;max-width:600px;margin:0 auto;">${slide.content.text}</p>
+      </div>`;
+
+    case 'principle':
+      return `<div class="principle-display" style="padding:4rem 2rem;">
+        <p class="principle-text">"${slide.content.text}"</p>
+      </div>`;
+
+    case 'rhetoric':
+      return `<div class="rhetoric-question">${slide.content.question}</div>`;
+
+    case 'oath':
+      return `<div class="oath-statement">${slide.content.text}</div>`;
+
+    case 'story':
+      return `<div class="story-box">
+        <div class="story-label">${slide.content.label}</div>
+        <div class="story-text">${slide.content.text}</div>
+        <div class="story-hook">${slide.content.hook}</div>
+      </div>`;
+
+    case 'story-deep':
+      return `<div class="story-deep">
+        <div class="story-label">${slide.content.label}</div>
+        <div class="real-data-source">${slide.content.source}</div>
+        <div class="story-timeline">
+          ${slide.content.timeline.map(e => `
+            <div class="timeline-event ${e.type || ''}">
+              <div class="timeline-year">${e.year}</div>
+              <div class="timeline-text">${e.text}</div>
+            </div>
+          `).join('')}
+        </div>
+        ${slide.content.realData ? `
+          <div class="real-data-card">
+            <div class="real-data-header"><strong>Real Data</strong></div>
+            <div class="real-data-grid">
+              ${Object.entries(slide.content.realData).map(([k,v]) => `
+                <div class="real-data-stat">
+                  <span class="label">${k}:</span>
+                  <span class="value">${v}</span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        ` : ''}
+        <div class="story-hook">${slide.content.hook}</div>
+      </div>`;
+
+    case 'content':
+      return `<div class="slide-content">
+        <h2 class="slide-title">${slide.content.title}</h2>
+        ${slide.content.sections.map(s => `
+          <div class="method-box">
+            <h3 style="color:var(--gold);margin-bottom:0.75rem;">${s.heading}</h3>
+            ${s.items ? `<ul>${s.items.map(i => `<li>${i}</li>`).join('')}</ul>` : ''}
+            ${s.text ? `<p style="line-height:1.6;">${s.text}</p>` : ''}
+          </div>
+        `).join('')}
+      </div>`;
+
+    case 'method':
+      return `<div class="method-box">
+        <div class="method-label">${slide.content.label}</div>
+        <div class="method-content">
+          <h3>${slide.content.title}</h3>
+          ${slide.content.sections.map(s => `
+            <div style="margin:1rem 0;">
+              <strong style="color:var(--gold);">${s.heading}</strong>
+              <p style="margin-top:0.5rem;line-height:1.6;">${s.text}</p>
+            </div>
+          `).join('')}
+        </div>
+      </div>`;
+
+    case 'contrast':
+      // Support both formats: wrong/right with text, or leftTitle/rightTitle with items
+      if (slide.content.leftTitle) {
+        return `<div class="slide-content">
+          <h2 class="slide-title">${slide.content.title || 'Comparison'}</h2>
+          <div class="contrast-container">
+            <div class="contrast-box wrong">
+              <div class="contrast-title">${slide.content.leftTitle}</div>
+              <ul style="margin:0;padding-right:1.5rem;">${slide.content.leftItems.map(i => `<li>${i}</li>`).join('')}</ul>
+            </div>
+            <div class="contrast-box right">
+              <div class="contrast-title">${slide.content.rightTitle}</div>
+              <ul style="margin:0;padding-right:1.5rem;">${slide.content.rightItems.map(i => `<li>${i}</li>`).join('')}</ul>
+            </div>
+          </div>
+        </div>`;
+      }
+      return `<div class="slide-content">
+        <h2 class="slide-title">${slide.content.title}</h2>
+        <div class="contrast-container">
+          <div class="contrast-box wrong">
+            <div class="contrast-title">${slide.content.wrong.title}</div>
+            <p>${slide.content.wrong.text}</p>
+          </div>
+          <div class="contrast-box right">
+            <div class="contrast-title">${slide.content.right.title}</div>
+            <p>${slide.content.right.text}</p>
+          </div>
+        </div>
+      </div>`;
+
+    case 'warning':
+      return `<div class="warning-box">
+        <div class="warning-title">${slide.content.title}</div>
+        <p style="line-height:1.6;">${slide.content.text}</p>
+      </div>`;
+
+    case 'vivid-consequence':
+      return `<div class="vivid-consequence">
+        <p style="line-height:1.7;">${slide.content.text}</p>
+        <div class="death-toll">${slide.content.toll}</div>
+        <div class="toll-label">${slide.content.tollLabel}</div>
+      </div>`;
+
+    case 'clinical-guide':
+      return `<div class="clinical-guide">
+        <div class="guide-title">🏥 ${slide.content.title}</div>
+        <ul class="clinical-checklist">
+          ${slide.content.items.map(i => `<li>${i}</li>`).join('')}
+        </ul>
+      </div>`;
+
+    case 'cycle-return':
+      return `<div class="cycle-return">
+        <p style="font-size:0.8rem;color:var(--gold);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.5rem;">Return to the Principle</p>
+        <p class="principle-recall">"${slide.content.principle}"</p>
+      </div>`;
+
+    case 'tool-bayes':
+    case 'tool-roc':
+    case 'tool-network':
+    case 'tool-ipd':
+    case 'tool-masem':
+    case 'tool-dose':
+    case 'tool-umbrella':
+      return `<div class="tool-panel">
+        <div class="tool-header">
+          <span class="tool-icon">🔧</span>
+          <span class="tool-title">${slide.content.title}</span>
+        </div>
+        <p style="margin-bottom:1rem;">${slide.content.description}</p>
+        <div id="${slide.content.id}"></div>
+      </div>`;
+
+    case 'decision-tree':
+      return renderDecisionTree(slide.content);
+
+    case 'scenario':
+      return renderScenario(slide.content);
+
+    case 'quiz':
+      return renderQuiz(slide.content);
+
+    default:
+      return `<div class="slide-content"><p>Slide type: ${slide.type}</p></div>`;
+  }
+}
+
+function renderDecisionTree(content) {
+  const firstNode = content.nodes.find(n => n.id === 'start') || content.nodes[0];
+  return `
+    <div class="decision-tree">
+      <h3 style="color:var(--gold);margin-bottom:1rem;font-family:'Cormorant Garamond',serif;font-size:1.4rem;">${content.title}</h3>
+      <div class="scenario-situation">${content.situation}</div>
+      <div id="decision-container">${renderDecisionNode(firstNode, content.nodes)}</div>
+    </div>`;
+}
+
+function renderDecisionNode(node, allNodes) {
+  if (node.type === 'outcome') {
+    return `<div class="نتيجة القرار مرئية ${node.consequence}">
+      <h4 style="margin-bottom:0.5rem;">${node.title}</h4>
+      <p style="margin-bottom:0.5rem;">${node.text}</p>
+      ${node.realCase ? `<p style="Font-style:italic;opacity:0.8;"><strong>Real case:</strong> ${node.realCase}</p>` : ''}
+    </div>`;
+  }
+  return `<div class="decision-node active">
+    <div class="decision-question">${node.question}</div>
+    <div class="decision-branches">
+      ${node.branches.map(b => `
+        <div class="decision-branch" onclick="SelectBranch('${b.nextNode}', هذا)">
+          <span class="branch-arrow">→</span>
+          <span>${b.text}</span>
+        </div>
+      `).join('')}
+    </div>
+  </div>`;
+}
+
+function selectBranch(nextNodeId, element) {
+  const module = modules[state.currentModule];
+  const slide = module.slides[state.currentSlide];
+  const nodes = slide.content.nodes;
+  const nextNode = nodes.find(n => n.id === nextNodeId);
+  if (nextNode) {
+    element.classList.add('selected');
+    document.getElementById('decision-container').innerHTML += renderDecisionNode(nextNode, nodes);
+    if (nextNode.type === 'outcome' && nextNode.consequence === 'good') addPoints(15);
+  }
+}
+
+function renderScenario(content) {
+  return `<div class="scenario-panel">
+    <div class="scenario-header">
+      <span class="scenario-icon">🔀</span>
+      <span class="scenario-title">${content.title}</span>
+    </div>
+    <div class="scenario-situation">${content.situation}</div>
+    <div class="scenario-question">${content.question}</div>
+    <div class="scenario-choices">
+      ${content.choices.map(c => `
+        <div class="scenario-choice" data-id="${c.id}" onclick="SelectScenarioChoice('${c.id}', '${c.consequence}', '${content.correct}', هذا)">
+          <span class="choice-letter">${c.id.toUpperCase()}</span>
+          <span>${c.text}</span>
+        </div>
+      `).join('')}
+    </div>
+    <div id="scenario-result" class="scenario-result"></div>
+  </div>`;
+}
+
+function selectScenarioChoice(id, consequence, correct, element) {
+  document.querySelectorAll('.scenario-choice').forEach(c => {
+    c.style.pointerEvents = 'none';
+    if (c.dataset.id === correct) c.classList.add('correct');
+  });
+  if (id !== correct) element.classList.add('incorrect');
+
+  const module = modules[state.currentModule];
+  const slide = module.slides[state.currentSlide];
+  const choice = slide.content.choices.find(c => c.id === id);
+
+  const result = document.getElementById('scenario-result');
+  result.className = `scenario-result visible ${consequence}`;
+  result.innerHTML = `<p>${choice.result}</p>`;
+
+  if (consequence === 'good') addPoints(15);
+}
+
+function renderQuiz(content) {
+  const quizKey = `${state.currentModule}-${state.currentSlide}`;
+  const answered = state.quizAnswered[quizKey];
+
+  return `<div class="quiz-container">
+    <div class="quiz-question">${content.question}</div>
+    <div class="quiz-options">
+      ${content.options.map(o => `
+        <div class="خيار الاختبار ${answered ? (o.correct ? 'correct' : Answer === o.id && !o.correct ? 'incorrect' : '') : ''}"
+             data-id="${o.id}" ${answered ? '' : `onclick="SelectQuizOption('${o.id}', ${o.correct}, هذا)"`}
+             style="${answered ? \"أحداث المؤشر: لا شيء؛\" : ''}">${o.text}</div>
+      `).join('')}
+    </div>
+    <div class="شرح الاختبار ${answered ? \"مرئي\": ''}">${content.explanation}</div>
+  </div>`;
+}
+
+function selectQuizOption(id, correct, element) {
+  const quizKey = `${state.currentModule}-${state.currentSlide}`;
+  state.quizAnswered[quizKey] = id;
+  saveState();
+
+  document.querySelectorAll('.quiz-option').forEach(o => {
+    o.style.pointerEvents = 'none';
+    const module = modules[state.currentModule];
+    const slide = module.slides[state.currentSlide];
+    const opt = slide.content.options.find(op => op.id === o.dataset.id);
+    if (opt?.correct) o.classList.add('correct');
+  });
+
+  if (!correct) element.classList.add('incorrect');
+  document.querySelector('.quiz-explanation').classList.add('visible');
+
+  if (correct) addPoints(20);
+}
+
+function addPoints(pts) {
+  state.points += pts;
+  document.getElementById('sidebarPoints').textContent = `${state.points} pts`;
+  saveState();
+}
+
+function prevSlide() {
+  if (state.currentSlide > 0) {
+    state.currentSlide--;
+    renderSlide();
+    saveState();
+  } else if (state.currentModule > 0) {
+    state.currentModule--;
+    state.currentSlide = modules[state.currentModule].slides.length - 1;
+    renderModuleList();
+    renderSlide();
+    saveState();
+  }
+}
+
+function nextSlide() {
+  const module = modules[state.currentModule];
+  if (state.currentSlide < module.slides.length - 1) {
+    state.currentSlide++;
+    renderSlide();
+    saveState();
+  } else if (state.currentModule < modules.length - 1) {
+    if (!state.completedModules.includes(state.currentModule)) state.completedModules.push(state.currentModule);
+    state.currentModule++;
+    state.currentSlide = 0;
+    renderModuleList();
+    renderSlide();
+    saveState();
+  }
+}
+
+function goToModule(index) {
+  if (index !== state.currentModule) {
+    const prev = modules[state.currentModule];
+    if (state.currentSlide === prev.slides.length - 1 && !state.completedModules.includes(state.currentModule)) {
+      state.completedModules.push(state.currentModule);
+    }
+    state.currentModule = index;
+    state.currentSlide = 0;
+    renderModuleList();
+    renderSlide();
+    updateProgress();
+    saveState();
+  }
+}
+
+function goToNextModule() {
+  if (state.currentModule < modules.length - 1) goToModule(state.currentModule + 1);
+}
+
+function updateProgress() {
+  const percent = Math.round((state.completedModules.length / modules.length) * 100);
+  document.getElementById('progressPercent').textContent = `${percent}%`;
+  document.getElementById('progressFill').style.width = `${percent}%`;
+}
+
+function openDashboard() {
+  document.getElementById('progressDashboard').classList.add('open');
+  document.getElementById('totalPoints').textContent = state.points;
+  document.getElementById('modulesCompleted').textContent = `${state.completedModules.length}/${modules.length}`;
+  document.getElementById('toolsUsed').textContent = state.toolsUsed.length;
+}
+
+function closeDashboard() {
+  document.getElementById('progressDashboard').classList.remove('open');
+}
+
+function openGlossary() {
+  document.getElementById('glossaryOverlay').classList.add('open');
+  renderGlossary();
+}
+
+function closeGlossary() {
+  document.getElementById('glossaryOverlay').classList.remove('open');
+}
+
+function renderGlossary(filter = '') {
+  const filtered = glossaryTerms.filter(t =>
+    t.term.toLowerCase().includes(filter.toLowerCase()) ||
+    t.def.toLowerCase().includes(filter.toLowerCase())
+  );
+  document.getElementById('glossaryContent').innerHTML = filtered.map(t => `
+    <div class="glossary-term">
+      <strong>${t.term}</strong><br>
+      <span style="color:#4b5563;">${t.def}</span>
+    </div>
+  `).join('');
+}
+
+function filterGlossary() {
+  const query = document.getElementById('glossarySearch').value;
+  renderGlossary(query);
+}
+
+document.addEventListener('DOMContentLoaded', initCourse);
+</script>
+</body>
+</html>

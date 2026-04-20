@@ -1,0 +1,2591 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>जब परीक्षण झूठ बोलता है: नैदानिक परीक्षण सटीकता पर एक कोर्स</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&amp;family=Source+Sans+Pro:wght@300;400;600;700&amp;display=swap" rel="stylesheet"/>
+<style>
+    :root {
+      --navy: #1E2761;
+      --deep-navy: #141B3D;
+      --gold: #D4AF37;
+      --cream: #FAF8F5;
+      --light-cream: #FFFFFF;
+      --text: #2D3748;
+      --light-text: #718096;
+      --red: #C53030;
+      --green: #22c55e;
+      --teal: #00D4AA;
+      --purple: #A855F7;
+      --orange: #F97316;
+      --blood-red: #8B0000;
+      --transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      height: 100%;
+      font-family: 'Source Sans Pro', sans-serif;
+      background: var(--deep-navy);
+      color: var(--cream);
+    }
+
+    .course-container {
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 300px;
+      background: linear-gradient(180deg, var(--deep-navy) 0%, #0a0f1a 100%);
+      border-right: 1px solid rgba(212,175,55,0.2);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    /* mobile sidebar handled by hamburger toggle below */
+
+    .sidebar-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+    }
+
+    .sidebar-header h1 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--gold);
+      margin-bottom: 0.25rem;
+    }
+
+    .sidebar-header p {
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.6);
+    }
+
+    .module-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem 0;
+    }
+
+    .module-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      border-left: 3px solid transparent;
+    }
+
+    .module-item:hover { background: rgba(212,175,55,0.1); }
+    .module-item.active { background: rgba(212,175,55,0.15); border-left-color: var(--gold); }
+    .module-item.completed .module-number { background: var(--green); color: white; }
+
+    .module-number {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .module-item.active .module-number { background: var(--gold); color: var(--navy); }
+
+    .module-info { flex: 1; min-width: 0; }
+    .module-title { font-size: 0.85rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .module-subtitle { font-size: 0.7rem; color: rgba(255,255,255,0.7); }
+
+    .sidebar-footer {
+      padding: 1rem 1.5rem;
+      border-top: 1px solid rgba(212,175,55,0.2);
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.4);
+      line-height: 1.4;
+    }
+
+    /* Main Content */
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .content-header {
+      padding: 1rem 2rem;
+      background: rgba(0,0,0,0.3);
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .breadcrumb { font-size: 0.85rem; color: rgba(255,255,255,0.6); }
+    .breadcrumb span { color: var(--gold); }
+
+    .header-actions { display: flex; gap: 0.5rem; }
+
+    .btn {
+      padding: 0.5rem 1rem;
+      border: 1px solid rgba(212,175,55,0.3);
+      border-radius: 6px;
+      background: rgba(255,255,255,0.05);
+      color: var(--cream);
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn:hover { background: rgba(212,175,55,0.2); border-color: var(--gold); }
+    .btn.primary { background: var(--gold); color: var(--navy); border-color: var(--gold); font-weight: 600; }
+
+    .content-body { flex: 1; overflow: hidden; display: flex; }
+
+    /* Slides */
+    .slides-container { flex: 1; position: relative; overflow: hidden; }
+
+    .module-slides { display: none; width: 100%; height: 100%; }
+    .module-slides.active { display: block; }
+
+    .slide {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      padding: 2rem 2rem 4rem 2rem;
+      padding-top: 3rem;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity var(--transition), visibility var(--transition);
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .slide .content { margin-top: auto; margin-bottom: auto; }
+    .slide > * { max-width: 100%; word-wrap: break-word; }
+    .slide.active { opacity: 1; visibility: visible; }
+
+    .slide.dark { background: var(--deep-navy); color: var(--cream); }
+    .slide.light { background: var(--cream); color: var(--text); }
+    .slide.black { background: #000; color: var(--cream); }
+    .slide.gradient { background: linear-gradient(135deg, var(--deep-navy) 0%, #2a1a4a 100%); color: var(--cream); }
+    .slide.blood { background: linear-gradient(135deg, #1a0a0a 0%, #2d1515 100%); color: var(--cream); }
+    .slide.hope { background: linear-gradient(135deg, #0a1a0a 0%, #152d15 100%); color: var(--cream); }
+    .slide.fraud { background: linear-gradient(135deg, #1a1a0a 0%, #2d2515 100%); color: var(--cream); }
+
+    /* Typography */
+    .serif { font-family: 'Cormorant Garamond', Georgia, serif; }
+
+    .title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(1.8rem, 5vw, 3.5rem);
+      font-weight: 700;
+      margin-bottom: 1rem;
+      line-height: 1.2;
+    }
+
+    .title.navy { color: var(--navy); }
+    .title.gold { color: var(--gold); }
+    .title.cream { color: var(--cream); }
+    .title.red { color: var(--red); }
+    .title.green { color: var(--green); }
+
+    .subtitle {
+      font-size: clamp(1rem, 2vw, 1.5rem);
+      color: var(--light-text);
+      margin-bottom: 2rem;
+    }
+
+    .slide.dark .subtitle { color: rgba(255,255,255,0.7); }
+
+    .big-number {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(4rem, 15vw, 10rem);
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .big-number.navy { color: var(--navy); }
+    .big-number.gold { color: var(--gold); }
+    .big-number.red { color: var(--red); }
+    .big-number.green { color: var(--green); }
+
+    /* Refrain */
+    .refrain {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(1.4rem, 4vw, 2.5rem);
+      font-style: italic;
+      color: var(--gold);
+      text-align: center;
+      max-width: 800px;
+      line-height: 1.4;
+    }
+
+    .refrain.warning {
+      color: var(--red);
+      border-left: 4px solid var(--red);
+      padding-left: 1.5rem;
+      text-align: left;
+    }
+
+    .refrain.hope { color: var(--green); }
+
+    /* Rhetorical */
+    .rhetorical {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(1.2rem, 3vw, 2rem);
+      color: rgba(255,255,255,0.9);
+      text-align: center;
+      max-width: 700px;
+      line-height: 1.5;
+    }
+
+    .rhetorical em { color: var(--gold); font-style: normal; }
+
+    /* Simple explanation box */
+    .simple-box {
+      background: linear-gradient(135deg, rgba(0,212,170,0.1), rgba(0,0,0,0.2));
+      border: 2px solid var(--teal);
+      border-radius: 12px;
+      padding: 1.5rem;
+      max-width: 600px;
+      margin: 1rem 0;
+    }
+
+    .simple-box .simple-title {
+      color: var(--teal);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.75rem;
+    }
+
+    .simple-box .simple-text {
+      font-size: 1.1rem;
+      line-height: 1.6;
+    }
+
+    .simple-box .simple-text strong { color: var(--gold); }
+
+    /* Story card */
+    .story-card {
+      background: rgba(0,0,0,0.3);
+      border-left: 4px solid var(--gold);
+      padding: 1.5rem 2rem;
+      max-width: 700px;
+      margin: 1rem 0;
+    }
+
+    .story-card .place {
+      font-size: 0.75rem;
+      color: var(--gold);
+      letter-spacing: 0.1em;
+      margin-bottom: 0.5rem;
+    }
+
+    .story-card .narrative {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      line-height: 1.6;
+      color: rgba(255,255,255,0.9);
+    }
+
+    .story-card .source {
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.5);
+      margin-top: 1rem;
+      font-style: italic;
+    }
+
+    /* Decision Tree */
+    .decision-tree {
+      background: rgba(0,0,0,0.3);
+      border: 2px solid var(--gold);
+      border-radius: 12px;
+      padding: 1.5rem;
+      max-width: 700px;
+      width: 100%;
+    }
+
+    .decision-tree h4 {
+      color: var(--gold);
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+
+    .tree-level {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      margin: 0.5rem 0;
+      position: relative;
+    }
+
+    .tree-node {
+      background: var(--navy);
+      border: 2px solid var(--gold);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      text-align: center;
+      min-width: 100px;
+      font-size: 0.8rem;
+    }
+
+    .tree-node.root { background: var(--gold); color: var(--navy); font-weight: 700; }
+    .tree-node.positive { background: rgba(197,48,48,0.3); border-color: var(--red); }
+    .tree-node.negative { background: rgba(34,197,94,0.3); border-color: var(--green); }
+    .tree-node.tp { background: var(--green); color: white; }
+    .tree-node.fp { background: var(--red); color: white; }
+    .tree-node.fn { background: var(--orange); color: white; }
+    .tree-node.tn { background: var(--teal); color: var(--navy); }
+
+    .tree-arrow {
+      color: var(--gold);
+      font-size: 1.5rem;
+      text-align: center;
+    }
+
+    .tree-label {
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.7);
+      text-align: center;
+      margin-top: 0.25rem;
+    }
+
+    /* 2x2 Table */
+    .confusion-matrix {
+      background: rgba(0,0,0,0.3);
+      border-radius: 12px;
+      padding: 1.5rem;
+      max-width: 500px;
+    }
+
+    .confusion-matrix h4 {
+      color: var(--gold);
+      text-align: center;
+      margin-bottom: 1rem;
+      font-family: 'Cormorant Garamond', serif;
+    }
+
+    .matrix-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .matrix-table th, .matrix-table td {
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 0.75rem;
+      text-align: center;
+      font-size: 0.85rem;
+    }
+
+    .matrix-table th {
+      background: var(--navy);
+      color: var(--gold);
+    }
+
+    .matrix-table .tp { background: rgba(34,197,94,0.3); }
+    .matrix-table .fp { background: rgba(197,48,48,0.3); }
+    .matrix-table .fn { background: rgba(249,115,22,0.3); }
+    .matrix-table .tn { background: rgba(0,212,170,0.3); }
+
+    /* Stats */
+    .stats-grid {
+      display: flex;
+      gap: 1rem;
+      margin: 1.5rem 0;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .stat-box {
+      background: var(--navy);
+      color: var(--cream);
+      padding: 1rem 1.5rem;
+      text-align: center;
+      min-width: 130px;
+      border-radius: 8px;
+    }
+
+    .stat-value {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(1.4rem, 3vw, 2rem);
+      font-weight: 700;
+    }
+
+    .stat-label { font-size: 0.7rem; opacity: 0.8; margin-top: 0.25rem; }
+
+    /* Death toll */
+    .death-toll {
+      background: linear-gradient(135deg, rgba(197,48,48,0.3), rgba(0,0,0,0.5));
+      border: 2px solid var(--red);
+      padding: 2rem;
+      text-align: center;
+      max-width: 400px;
+      border-radius: 12px;
+    }
+
+    .death-toll .number {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 4rem;
+      font-weight: 700;
+      color: var(--red);
+    }
+
+    .death-toll .label {
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.8);
+      margin-top: 0.5rem;
+    }
+
+    /* Fraud box */
+    .fraud-box {
+      background: linear-gradient(135deg, rgba(139,0,0,0.3), rgba(0,0,0,0.5));
+      border: 2px solid var(--blood-red);
+      padding: 2rem;
+      text-align: center;
+      max-width: 400px;
+      border-radius: 12px;
+    }
+
+    .fraud-box .amount {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 3rem;
+      font-weight: 700;
+      color: var(--gold);
+    }
+
+    .fraud-box .label {
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.8);
+      margin-top: 0.5rem;
+    }
+
+    /* Lesson items */
+    .lesson-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      margin: 0.6rem 0;
+      max-width: 800px;
+      text-align: left;
+    }
+
+    .lesson-number {
+      background: var(--gold);
+      color: var(--navy);
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      flex-shrink: 0;
+      border-radius: 4px;
+    }
+
+    .lesson-content h4 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--cream);
+      margin-bottom: 0.2rem;
+    }
+
+    .lesson-content p { font-size: 0.85rem; color: rgba(255,255,255,0.7); }
+
+    /* Formula box */
+    .formula-box {
+      background: rgba(0,0,0,0.4);
+      border: 1px solid var(--purple);
+      border-radius: 8px;
+      padding: 1rem 1.5rem;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.2rem;
+      text-align: center;
+      max-width: 500px;
+      margin: 1rem 0;
+    }
+
+    .formula-box .formula {
+      color: var(--gold);
+      margin: 0.5rem 0;
+    }
+
+    .formula-box .label {
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.6);
+      font-family: 'Source Sans Pro', sans-serif;
+    }
+
+    /* ROC visualization */
+    .roc-visual {
+      background: rgba(0,0,0,0.3);
+      border: 2px solid var(--purple);
+      border-radius: 12px;
+      padding: 1.5rem;
+      max-width: 400px;
+    }
+
+    .roc-visual h4 {
+      color: var(--purple);
+      text-align: center;
+      margin-bottom: 1rem;
+      font-family: 'Cormorant Garamond', serif;
+    }
+
+    .roc-canvas {
+      width: 100%;
+      height: 250px;
+      position: relative;
+      background: linear-gradient(135deg, rgba(0,0,0,0.3), rgba(168,85,247,0.1));
+      border: 1px solid rgba(168,85,247,0.3);
+      border-radius: 8px;
+    }
+
+    /* Card */
+    .card {
+      background: var(--light-cream);
+      border: 1px solid var(--gold);
+      padding: 1.5rem 2rem;
+      margin: 0.75rem 0;
+      max-width: 800px;
+      width: 100%;
+      border-radius: 8px;
+    }
+
+    .card.navy-bg { background: var(--navy); color: var(--cream); }
+    .card.dark-bg { background: rgba(0,0,0,0.4); color: var(--cream); border-color: rgba(212,175,55,0.3); }
+    .card.red-border { border: 2px solid var(--red); }
+    .card.green-border { border: 2px solid var(--green); }
+
+    .card-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+    }
+
+    .card-text { font-size: clamp(0.9rem, 1.8vw, 1.1rem); line-height: 1.6; }
+
+    /* Certainty badges */
+    .certainty-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.75rem;
+      max-width: 700px;
+    }
+
+    @media (max-width: 600px) { .certainty-grid { grid-template-columns: 1fr; } }
+
+    .certainty-badge {
+      padding: 1rem;
+      text-align: center;
+      border-radius: 8px;
+    }
+
+    .certainty-badge.tp-badge { background: linear-gradient(135deg, rgba(34,197,94,0.3), rgba(34,197,94,0.1)); border: 2px solid var(--green); }
+    .certainty-badge.fp-badge { background: linear-gradient(135deg, rgba(197,48,48,0.3), rgba(197,48,48,0.1)); border: 2px solid var(--red); }
+    .certainty-badge.fn-badge { background: linear-gradient(135deg, rgba(249,115,22,0.3), rgba(249,115,22,0.1)); border: 2px solid var(--orange); }
+    .certainty-badge.tn-badge { background: linear-gradient(135deg, rgba(0,212,170,0.3), rgba(0,212,170,0.1)); border: 2px solid var(--teal); }
+
+    .certainty-badge h4 { font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; margin-bottom: 0.4rem; }
+    .certainty-badge p { font-size: 0.7rem; opacity: 0.9; }
+
+    /* Timeline */
+    .timeline {
+      max-width: 600px;
+      width: 100%;
+    }
+
+    .timeline-item {
+      display: flex;
+      gap: 1rem;
+      margin: 1rem 0;
+      padding-left: 1rem;
+      border-left: 3px solid var(--gold);
+    }
+
+    .timeline-year {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--gold);
+      min-width: 60px;
+    }
+
+    .timeline-content {
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.8);
+    }
+
+    /* Gold line */
+    .gold-line { width: 150px; height: 2px; background: var(--gold); margin: 1.5rem auto; }
+
+    /* Content wrapper */
+    .content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: 1000px;
+    }
+
+    /* Animation */
+    .slide.active .animate { animation: fadeUp 0.6s ease-out forwards; }
+    .slide.active .animate.delay-1 { animation-delay: 0.1s; }
+    .slide.active .animate.delay-2 { animation-delay: 0.2s; }
+    .slide.active .animate.delay-3 { animation-delay: 0.3s; }
+    .slide.active .animate.delay-4 { animation-delay: 0.4s; }
+    .slide.active .animate.delay-5 { animation-delay: 0.5s; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate { opacity: 0; }
+
+    /* Slide Nav */
+    .slide-nav {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      padding: 1rem 1rem 1.5rem 1rem;
+      z-index: 100;
+      pointer-events: none;
+    }
+
+    .nav-btn {
+      background: rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: white;
+      font-size: 1.25rem;
+      cursor: pointer;
+      opacity: 0.6;
+      transition: all 0.2s;
+      padding: 0.5rem 0.75rem;
+      border-radius: 8px;
+      pointer-events: auto;
+    }
+
+    .nav-btn:hover { opacity: 1; background: rgba(0,0,0,0.7); border-color: var(--gold); }
+
+    .nav-center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.25rem;
+      pointer-events: auto;
+    }
+
+    .slide-counter { color: rgba(255,255,255,0.6); font-size: 0.85rem; min-width: 50px; text-align: center; }
+    .progress { display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; max-width: 200px; }
+
+    .progress-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.25);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .progress-dot.active { background: var(--gold); transform: scale(1.3); }
+    .progress-dot:hover { background: rgba(255,255,255,0.6); }
+
+    /* Quiz */
+    .quiz-container {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(212,175,55,0.3);
+      padding: 1.5rem;
+      max-width: 700px;
+      width: 100%;
+      border-radius: 8px;
+    }
+
+    .quiz-question {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+      color: var(--gold);
+      line-height: 1.4;
+    }
+
+    .quiz-options { display: flex; flex-direction: column; gap: 0.5rem; }
+
+    .quiz-option {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: left;
+      border-radius: 6px;
+      font-size: 0.9rem;
+    }
+
+    .quiz-option:hover { background: rgba(212,175,55,0.1); border-color: var(--gold); }
+    .quiz-option.correct { background: rgba(34,197,94,0.2); border-color: var(--green); }
+    .quiz-option.incorrect { background: rgba(197,48,48,0.2); border-color: var(--red); }
+
+    .quiz-feedback {
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: 8px;
+      display: none;
+      font-size: 0.9rem;
+    }
+
+    .quiz-feedback.show { display: block; }
+    .quiz-feedback.correct { background: rgba(34,197,94,0.2); border: 1px solid var(--green); }
+    .quiz-feedback.incorrect { background: rgba(197,48,48,0.2); border: 1px solid var(--red); }
+
+    /* References */
+    .references {
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(212,175,55,0.3);
+      border-radius: 8px;
+      padding: 1.5rem;
+      max-width: 700px;
+      text-align: left;
+      font-size: 0.75rem;
+      line-height: 1.8;
+    }
+
+    .references h4 {
+      color: var(--gold);
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+    }
+
+    .references ol { padding-left: 1.5rem; }
+    .references li { margin-bottom: 0.5rem; color: rgba(255,255,255,0.8); }
+    .references .journal { font-style: italic; }
+
+    .text-center { text-align: center; }
+    .mb-1 { margin-bottom: 1rem; }
+    .mb-2 { margin-bottom: 2rem; }
+    .mt-1 { margin-top: 1rem; }
+    .mt-2 { margin-top: 2rem; }
+    .mobile-menu-toggle{display:none;position:fixed;top:12px;left:12px;z-index:1001;background:#1E2761;border:1px solid #D4AF37;color:#D4AF37;width:40px;height:40px;border-radius:8px;font-size:1.2rem;cursor:pointer;align-items:center;justify-content:center;}
+    @media(max-width:768px){.mobile-menu-toggle{display:flex;}.sidebar{transform:translateX(-100%);transition:transform 0.3s ease;position:fixed;z-index:1000;height:100vh;}.sidebar.open{transform:translateX(0);}.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:999;}.sidebar-overlay.show{display:block;}}
+    .skip-link{position:absolute;top:-40px;left:0;background:#D4AF37;color:#1E2761;padding:8px 16px;z-index:100;transition:top 0.3s;font-family:'Source Sans Pro',sans-serif;text-decoration:none;font-weight:600;}.skip-link:focus{top:0;}
+
+    /* Focus-visible styles for keyboard navigation */
+    :focus-visible {
+      outline: 2px solid var(--gold, #D4AF37);
+      outline-offset: 2px;
+    }
+
+    :focus:not(:focus-visible) {
+      outline: none;
+    }
+
+    button:focus-visible,
+    a:focus-visible,
+    [role="button"]:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible {
+      outline: 2px solid var(--gold, #D4AF37);
+      outline-offset: 2px;
+      box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.3);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<button aria-expanded="false" aria-label="Toggle navigation menu" class="mobile-menu-toggle" onclick="toggleSidebar()">☰</button>
+<div class="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show');"></div>
+<div class="course-container">
+<!-- Sidebar -->
+<nav aria-label="पाठ्यक्रम नेविगेशन" class="sidebar" role="navigation">
+<div class="sidebar-header">
+<a href="index.html" onmouseout="this.style.color='rgba(212,175,55,0.7)'" onmouseover="this.style.color='#D4AF37'" style="display:block;font-size:0.7rem;color:rgba(212,175,55,0.7);text-decoration:none;margin-bottom:0.5rem;">← Course Library</a>
+<h1>जब परीक्षण झूठ बोलता है</h1>
+<p>Diagnostic Test Accuracy Meta-Analysis</p>
+</div>
+<div class="module-list" id="moduleList"></div>
+<div class="sidebar-footer">
+        "A test is only as trustworthy as its validation."
+        <br/><br/>
+        Every positive has a price. Every negative has a cost.
+      </div>
+</nav>
+<!-- Main Content -->
+<main class="main-content" id="main-content">
+<header class="content-header">
+<div class="breadcrumb">
+          DTA Course &gt; <span id="currentModule">The Fraud</span>
+</div>
+<div class="header-actions">
+<button class="btn" onclick="goToModule(11)">References</button>
+<button class="btn primary" onclick="nextSlide()">Continue</button>
+</div>
+</header>
+<div class="content-body">
+<div class="slides-container">
+ ==================== मॉड्यूल 1: धोखाधड़ी (थेरानोस) =================== 
+<div class="module-slides active" data-module="1">
+<!-- Slide 1.1: Opening -->
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  क्या आपने उस महिला की कहानी नहीं सुनी है<br/>
+                  who promised to <em>खून की एक बूंद से बदल जाती है दुनिया</em>,<br/>
+                  who raised billions on a test that <em>never worked</em>?
+                </div>
+</div>
+</div>
+ स्लाइड 1.2: थेरानोस स्टोरी 
+<div class="slide fraud">
+<div class="content text-center">
+<div class="title gold animate">Palo Alto, 2003</div>
+<div class="story-card animate delay-1">
+<div class="place">STANFORD UNIVERSITY</div>
+<div class="narrative">
+                    A उन्नीस वर्षीय ने एक सपने के साथ कॉलेज छोड़ दिया: एक उपकरण जो उंगली से दर्द रहित तरीके से एक बूंद से सैकड़ों रक्त परीक्षण कर सकता है।
+                    <br/><br/>
+                    No more needles. No more vials. No more waiting.
+                    <br/><br/>
+                    Investors believed. Walgreens believed. The Pentagon believed.
+                    <br/><br/>
+<strong>They gave her $9 billion.</strong>
+</div>
+<div class="source">Carreyrou J. Bad Blood: Secrets and Lies in a Silicon Valley Startup. 2018</div>
+</div>
+</div>
+</div>
+ स्लाइड 1.3: धोखाधड़ी 
+<div class="slide blood">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  लेकिन परीक्षण <em>lied</em>.
+                </div>
+<div class="fraud-box animate delay-2">
+<div class="amount">$9 Billion</div>
+<div class="label">Built on a test that didn't work</div>
+</div>
+<div class="simple-box animate delay-3">
+<div class="simple-title">WHAT HAPPENED</div>
+<div class="simple-text">
+                    थेरानोस मशीनें दिया <strong>wrong results</strong>. मरीजों को बताया गया कि उन्हें एचआईवी है जबकि उन्हें एचआईवी नहीं था। मरीजों को बताया गया कि जब वे <strong>dying</strong>थे तो उनका रक्त सामान्य था। कंपनी ने सच्चाई छुपाई <strong>15 years</strong>.
+                  </div>
+</div>
+</div>
+</div>
+ स्लाइड 1.4: पीड़ित 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title red animate">The Victims</div>
+<div class="story-card animate delay-1">
+<div class="place">PHOENIX, ARIZONA</div>
+<div class="narrative">
+                    एक गर्भवती महिला को बताया गया कि उसका बच्चा क्रोमोसोमल असामान्यता के साथ पैदा होगा। वह सबसे बुरे के लिए तैयारी कर रही थी। वह शोक मना रही थी।
+                    <br/><br/>
+                    परीक्षण गलत था। बच्चा स्वस्थ था।
+                    <br/><br/>
+                    But how many women, receiving the same news, made <strong>different decisions</strong>?
+                  </div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">THE QUESTION</div>
+<div class="simple-text">
+                    How do we know when a test is telling the truth?
+                    How do we <strong>measure</strong> a test's honesty?
+                  </div>
+</div>
+</div>
+</div>
+ स्लाइड 1.5: बचना 
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  "और परीक्षण में झूठ बोला गया,<br/>
+                  और झूठ को निश्चितता का जामा पहनाया गया,<br/>
+                  और किसी ने सवाल नहीं उठाया संख्याएं।"
+                </div>
+<div class="gold-line animate delay-2"></div>
+<p class="animate delay-3" style="color:rgba(255,255,255,0.6);font-style:italic;">
+                  यही कारण है कि हम डायग्नोस्टिक टेस्ट सटीकता का अध्ययन करते हैं।
+                </p>
+</div>
+</div>
+</div>
+ ==================== मॉड्यूल 2: चार परिणाम =================== 
+<div class="module-slides" data-module="2">
+<!-- Slide 2.1: Opening -->
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  When a test gives a result,<br/>
+                  केवल <em>four possible truths</em>.
+                  <br/><br/>
+                  दो ही आशीर्वाद हैं। दो अभिशाप हैं।
+                </div>
+</div>
+</div>
+ स्लाइड 2.2: निर्णय वृक्ष 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">परिणामों का वृक्ष</div>
+<div class="decision-tree animate delay-1">
+<h4>Every Test Result Has a Reality Behind It</h4>
+<div class="tree-level">
+<div class="tree-node root">Patient Tested</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-level" style="gap: 3rem;">
+<div>
+<div class="tree-node positive">Test Says: POSITIVE</div>
+<div class="tree-label">"You have it"</div>
+</div>
+<div>
+<div class="tree-node negative">Test Says: NEGATIVE</div>
+<div class="tree-label">"You're clear"</div>
+</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-level" style="gap: 1rem;">
+<div class="tree-node tp">TP</div>
+<div class="tree-node fp">FP</div>
+<div class="tree-node fn">FN</div>
+<div class="tree-node tn">TN</div>
+</div>
+<div class="tree-level" style="gap: 1rem; margin-top: 0.5rem;">
+<div class="tree-label" style="min-width:70px;">Has disease<br/>Test: Positive</div>
+<div class="tree-label" style="min-width:70px;">No disease<br/>Test: Positive</div>
+<div class="tree-label" style="min-width:70px;">Has disease<br/>Test: Negative</div>
+<div class="tree-label" style="min-width:70px;">No disease<br/>Test: Negative</div>
+</div>
+</div>
+</div>
+</div>
+ स्लाइड 2.3: चार चतुर्थांश 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">चार सच्चाई</div>
+<div class="certainty-grid animate delay-1">
+<div class="certainty-badge tp-badge">
+<h4 style="color:var(--green);">True Positive (TP)</h4>
+<p>Sick person correctly identified.<br/><strong>परीक्षण ने सच बताया।</strong></p>
+</div>
+<div class="certainty-badge fp-badge">
+<h4 style="color:var(--red);">False Positive (FP)</h4>
+<p>Healthy person wrongly alarmed.<br/><strong>परीक्षण ने झूठ बोला।</strong></p>
+</div>
+<div class="certainty-badge fn-badge">
+<h4 style="color:var(--orange);">False Negative (FN)</h4>
+<p>Sick person wrongly reassured.<br/><strong>सबसे घातक झूठ।</strong></p>
+</div>
+<div class="certainty-badge tn-badge">
+<h4 style="color:var(--teal);">True Negative (TN)</h4>
+<p>Healthy person correctly cleared.<br/><strong>परीक्षण ने सच बताया।</strong></p>
+</div>
+</div>
+</div>
+</div>
+ स्लाइड 2.4: 2x2 तालिका 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">पवित्र तालिका</div>
+<div class="confusion-matrix animate delay-1">
+<h4>2x2 कन्फ्यूजन मैट्रिक्स</h4>
+<table class="matrix-table">
+<tr>
+<th></th>
+<th>Disease Present</th>
+<th>Disease Absent</th>
+</tr>
+<tr>
+<th>Test Positive</th>
+<td class="tp"><strong>TP</strong><br/>True Positive</td>
+<td class="fp"><strong>FP</strong><br/>False Positive</td>
+</tr>
+<tr>
+<th>Test Negative</th>
+<td class="fn"><strong>FN</strong><br/>False Negative</td>
+<td class="tn"><strong>TN</strong><br/>True Negative</td>
+</tr>
+</table>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">REMEMBER</div>
+<div class="simple-text">
+                    प्रत्येक नैदानिक ​​अध्ययन को ये रिपोर्ट करनी चाहिए <strong>four numbers</strong>.
+                    Without them, you cannot judge a test.
+                  </div>
+</div>
+</div>
+</div>
+ स्लाइड 2.5: बचना 
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  "Two outcomes save. Two outcomes harm.<br/>
+                  Know them by name.<br/>
+                  टीपी, टीएन: परीक्षण बोला गया सच।<br/>
+                  FP, FN: परीक्षण झूठ बोला।"
+                </div>
+</div>
+</div>
+</div>
+ ==================== मॉड्यूल 3: संवेदनशीलता और विशिष्टता ==================== 
+<div class="module-slides" data-module="3">
+<!-- Slide 3.1: Opening -->
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  A test has two virtues and two vices.
+                  <br/><br/>
+<em>Sensitivity</em> asks: Can it find the sick?
+                  <br/><br/>
+<em>Specificity</em> asks: Can it spare the healthy?
+                </div>
+</div>
+</div>
+<!-- Slide 3.2: Sensitivity -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Sensitivity</div>
+<div class="subtitle animate delay-1">"सभी बीमारों में से कितनों को परीक्षण ने पकड़ लिया?"</div>
+<div class="formula-box animate delay-2">
+<div class="label">THE FORMULA</div>
+<div class="formula">Sensitivity = TP / (TP + FN)</div>
+<div class="label">True Positives divided by All Diseased</div>
+</div>
+<div class="simple-box animate delay-3">
+<div class="simple-title">IN SIMPLE WORDS</div>
+<div class="simple-text">
+                    यदि 100 लोगों को कैंसर है, और परीक्षण उनमें से 90 को पकड़ लेता है,
+                    <strong>sensitivity = 90%</strong>.
+                    <br/><br/>
+                    High sensitivity = few false negatives = <strong>few missed cases</strong>.
+                  </div>
+</div>
+</div>
+</div>
+<!-- Slide 3.3: Specificity -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Specificity</div>
+<div class="subtitle animate delay-1">"सभी स्वस्थ लोगों में से, परीक्षण में कितने बचे?"</div>
+<div class="formula-box animate delay-2">
+<div class="label">THE FORMULA</div>
+<div class="formula">Specificity = TN / (TN + FP)</div>
+<div class="label">True Negatives divided by All Non-Diseased</div>
+</div>
+<div class="simple-box animate delay-3">
+<div class="simple-title">IN SIMPLE WORDS</div>
+<div class="simple-text">
+                    यदि 100 लोग स्वस्थ हैं, और परीक्षण सही ढंग से उनमें से 95 के लिए "नकारात्मक" बताता है,
+                    <strong>specificity = 95%</strong>.
+                    <br/><br/>
+                    High specificity = few false positives = <strong>few false alarms</strong>.
+                  </div>
+</div>
+</div>
+</div>
+ स्लाइड 3.4: समझौता 
+<div class="slide blood">
+<div class="content text-center">
+<div class="title red animate">क्रूर व्यापार-बंद</div>
+<div class="story-card animate delay-1">
+<div class="place">THE DILEMMA</div>
+<div class="narrative">
+                    A test cannot have both perfect sensitivity AND perfect specificity.
+                    <br/><br/>
+                    Lower the threshold to catch more sick people?
+                    <strong>You'll alarm more healthy people.</strong>
+<br/><br/>
+                    Raise the threshold to spare healthy people?
+                    <strong>You'll miss more sick people.</strong>
+<br/><br/>
+                    This is the <em>threshold effect</em>- निदान का झूला।
+                  </div>
+</div>
+</div>
+</div>
+ स्लाइड 3.5: स्नाउट और एसपीपिन 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">स्मृति नियम</div>
+<div class="lesson-item animate delay-1">
+<div class="lesson-number" style="background:var(--green);">Sn</div>
+<div class="lesson-content">
+<h4>SnNout: Sensitive tests rule OUT</h4>
+<p>A highly sensitive test, when negative, rules out disease. If it didn't find it, it's probably not there.</p>
+</div>
+</div>
+<div class="lesson-item animate delay-2">
+<div class="lesson-number" style="background:var(--red);">Sp</div>
+<div class="lesson-content">
+<h4>SpPin: Specific tests rule IN</h4>
+<p>एक अत्यधिक विशिष्ट परीक्षण, सकारात्मक होने पर, रोग में नियम बनाता है। यदि यह कहता है कि आपके पास यह है, तो संभवतः आपके पास है।</p>
+</div>
+</div>
+<div class="simple-box animate delay-3">
+<div class="simple-title">REMEMBER</div>
+<div class="simple-text">
+<strong>SnNout:</strong> Sensitive Negative rules OUT<br/>
+<strong>SpPin:</strong> Specific Positive rules IN
+                  </div>
+</div>
+</div>
+</div>
+<!-- Slide 3.6: Refrain -->
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  "संवेदनशीलता बीमार को पकड़ लेती है।<br/>
+                  विशिष्टता कुएं को बचाती है।<br/>
+                  But no test masters both perfectly—<br/>
+                  यह वह बोझ है जिसे हमें उठाना होगा।"
+                </div>
+</div>
+</div>
+</div>
+ ==================== मॉड्यूल 4: कोविड परीक्षण घोटाला ==================== 
+<div class="module-slides" data-module="4">
+<!-- Slide 4.1: Opening -->
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  साल 2020 में जब धरती पर महामारी का प्रकोप हुआ.<br/>
+                  दुनिया को एक ऐसे परीक्षण की आवश्यकता थी जो कर सके <em>संक्रमित को जल्दी ढूंढो</em>.
+                  <br/><br/>
+                  But what if the rapid test <em>missed too many</em>?
+                </div>
+</div>
+</div>
+ स्लाइड 4.2: वादा 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">त्वरित परीक्षण का वादा</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box">
+<div class="stat-value" style="color:var(--gold);">15 min</div>
+<div class="stat-label">Results Time</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--teal);">$5</div>
+<div class="stat-label">Cost per Test</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--purple);">Home</div>
+<div class="stat-label">Self-Administered</div>
+</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">THE HOPE</div>
+<div class="simple-text">
+                    Rapid antigen tests could be used at home, at work, before gatherings.
+                    They could <strong>stop outbreaks before they started</strong>.
+                  </div>
+</div>
+</div>
+</div>
+ स्लाइड 4.3: वास्तविकता 
+<div class="slide blood">
+<div class="content text-center">
+<div class="title red animate">The Reality</div>
+<div class="story-card animate delay-1">
+<div class="place">कोक्रेन व्यवस्थित समीक्षा, 2022</div>
+<div class="narrative">
+                    जब शोधकर्ताओं ने COVID-19 रैपिड एंटीजन परीक्षणों पर 155 अध्ययनों से डेटा एकत्र किया:
+                    <br/><br/>
+<strong>लक्षण वाले लोगों में:</strong><br/>
+                    Sensitivity: 73% (missed 27% of cases)
+                    <br/><br/>
+<strong>In people WITHOUT symptoms:</strong><br/>
+                    Sensitivity: 55% (missed 45% of cases)
+                    <br/><br/>
+<em>लगभग आधे संक्रमित स्पर्शोन्मुख लोगों को बताया गया कि वे स्पष्ट हैं।</em>
+</div>
+<div class="source">Dinnes J et al. Cochrane Database Syst Rev. 2022;7:CD013705</div>
+</div>
+</div>
+</div>
+ स्लाइड 4.4: परिणाम 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">झूठी नकारात्मक बातें फैलती हैं</div>
+<div class="lesson-item animate delay-1">
+<div class="lesson-number" style="background:var(--red);">1</div>
+<div class="lesson-content">
+<h4>Thanksgiving Dinners</h4>
+<p>Families tested negative in the morning, gathered indoors, unknowingly infected grandparents</p>
+</div>
+</div>
+<div class="lesson-item animate delay-2">
+<div class="lesson-number" style="background:var(--red);">2</div>
+<div class="lesson-content">
+<h4>Workplace Outbreaks</h4>
+<p>Workers tested negative, came to work, infected colleagues in the break room</p>
+</div>
+</div>
+<div class="lesson-item animate delay-3">
+<div class="lesson-number" style="background:var(--red);">3</div>
+<div class="lesson-content">
+<h4>Hospital Transmission</h4>
+<p>Patients tested negative, admitted to wards, infected vulnerable patients</p>
+</div>
+</div>
+<div class="simple-box animate delay-4">
+<div class="simple-title">THE LESSON</div>
+<div class="simple-text">
+                    A 55% sensitivity means <strong>45% false negative rate</strong>.
+                    False negatives are invisible. They feel safe. They spread disease.
+                  </div>
+</div>
+</div>
+</div>
+<!-- Slide 4.5: Refrain -->
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  "और परीक्षण ने 'नकारात्मक' कहा,<br/>
+                  और परिवार इकट्ठा हुआ,<br/>
+                  और दादाजी ने अपने पोते-पोतियों को गले लगा लिया,<br/>
+                  और सर्दियों के अंत तक, वह चला गया।"
+                </div>
+</div>
+</div>
+</div>
+ ==================== मॉड्यूल 5: संभावना अनुपात ==================== 
+<div class="module-slides" data-module="5">
+<!-- Slide 5.1: Opening -->
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  संवेदनशीलता और विशिष्टता परीक्षण का वर्णन करती है।
+                  <br/><br/>
+                  लेकिन मरीज़ एक अलग सवाल पूछता है:
+                  <br/><br/>
+<em>"I tested positive. What are my chances?"</em>
+</div>
+</div>
+</div>
+ स्लाइड 5.2: सेंस/स्पेक के साथ समस्या 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">The Disconnect</div>
+<div class="story-card animate delay-1">
+<div class="place">A DOCTOR'S DILEMMA</div>
+<div class="narrative">
+                    A test has 99% sensitivity and 95% specificity. Sounds excellent.
+                    <br/><br/>
+                    आपके मरीज का परीक्षण एक दुर्लभ बीमारी (प्रचलन 1000 में 1) के लिए सकारात्मक है।
+                    <br/><br/>
+<strong>Question:</strong> क्या संभावना है कि उन्हें वास्तव में यह बीमारी है?
+                    <br/><br/>
+                    अधिकांश डॉक्टर 95% कहते हैं। असली उत्तर? <strong>About 2%.</strong>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 5.3: Likelihood Ratios -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Likelihood Ratios</div>
+<div class="subtitle animate delay-1">How much a test result changes the odds</div>
+<div class="formula-box animate delay-2">
+<div class="label">POSITIVE LIKELIHOOD RATIO</div>
+<div class="formula">LR+ = Sensitivity / (1 - Specificity)</div>
+<div class="label">How much more likely is a positive result in sick vs healthy?</div>
+</div>
+<div class="formula-box animate delay-3">
+<div class="label">NEGATIVE LIKELIHOOD RATIO</div>
+<div class="formula">LR- = (1 - Sensitivity) / Specificity</div>
+<div class="label">How much more likely is a negative result in sick vs healthy?</div>
+</div>
+</div>
+</div>
+<!-- Slide 5.4: Interpreting LRs -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">What Good LRs Look Like</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box" style="background:var(--green);">
+<div class="stat-value" style="color:white;">LR+ &gt; 10</div>
+<div class="stat-label">Strong rule-in</div>
+</div>
+<div class="stat-box" style="background:var(--gold);">
+<div class="stat-value" style="color:var(--navy);">LR+ 5-10</div>
+<div class="stat-label">Moderate rule-in</div>
+</div>
+<div class="stat-box" style="background:var(--orange);">
+<div class="stat-value" style="color:white;">LR+ 2-5</div>
+<div class="stat-label">Weak evidence</div>
+</div>
+</div>
+<div class="stats-grid animate delay-2">
+<div class="stat-box" style="background:var(--green);">
+<div class="stat-value" style="color:white;">LR- &lt; 0.1</div>
+<div class="stat-label">Strong rule-out</div>
+</div>
+<div class="stat-box" style="background:var(--gold);">
+<div class="stat-value" style="color:var(--navy);">LR- 0.1-0.2</div>
+<div class="stat-label">Moderate rule-out</div>
+</div>
+<div class="stat-box" style="background:var(--orange);">
+<div class="stat-value" style="color:white;">LR- 0.2-0.5</div>
+<div class="stat-label">Weak evidence</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 5.5: Refrain -->
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate">
+                  "Sensitivity tells how many sick the test will catch.<br/>
+                  Specificity tells how many well it will spare.<br/>
+                  But only the likelihood ratio answers:<br/>
+<em>इस रोगी के लिए इस परिणाम का क्या अर्थ है?</em>"
+                </div>
+</div>
+</div>
+</div>
+ ==================== मॉड्यूल 6: मैमोग्राफी विवाद ==================== 
+<div class="module-slides" data-module="6">
+<!-- Slide 6.1: Opening -->
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  क्या आपने स्क्रीनिंग का विवाद नहीं सुना<br/>
+                  that <em>found too much</em>?
+                  <br/><br/>
+                  When does finding disease become <em>causing harm</em>?
+                </div>
+</div>
+</div>
+ स्लाइड 6.2: स्क्रीनिंग का वादा 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">जल्दी पता लगाने का सपना</div>
+<div class="story-card animate delay-1">
+<div class="place">1970s - PRESENT</div>
+<div class="narrative">
+                    तर्क सुंदर था: कैंसर का शीघ्र पता लगाएं, इसका शीघ्र उपचार करें, जीवन बचाएं।
+                    <br/><br/>
+                    Mammography could detect tumors too small to feel.
+                    <br/><br/>
+                    महिलाओं से कहा गया: <strong>"Annual mammograms save lives."</strong>
+<br/><br/>
+                    But what if some of those "cancers" would never have killed?
+                  </div>
+</div>
+</div>
+</div>
+<!-- Slide 6.3: Overdiagnosis -->
+<div class="slide blood">
+<div class="content text-center">
+<div class="title red animate">अति निदान का अभिशाप</div>
+<div class="death-toll animate delay-1">
+<div class="number" style="font-size:3rem;">19-30%</div>
+<div class="label">of screen-detected breast cancers may be overdiagnosed</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">WHAT IS OVERDIAGNOSIS?</div>
+<div class="simple-text">
+                    एक ऐसा "कैंसर" ढूंढना जो ऐसा कर सके <strong>never have caused symptoms or death</strong>
+                    व्यक्ति के जीवनकाल के दौरान.
+                    <br/><br/>
+                    महिला का निदान किया जाता है, सर्जरी, विकिरण, कीमोथेरेपी से इलाज किया जाता है-
+                    <strong>एक ऐसी बीमारी के लिए जिसने उसे कभी नुकसान नहीं पहुंचाया होगा।</strong>
+</div>
+</div>
+<p class="animate delay-3" style="font-size:0.7rem;color:rgba(255,255,255,0.5);">
+                  Independent UK Panel on Breast Cancer Screening. Lancet. 2012;380:1778-1786
+                </p>
+</div>
+</div>
+ स्लाइड 6.4: संख्याएँ 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">प्रत्येक 10,000 महिलाओं की जांच की गई</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box" style="background:var(--green);">
+<div class="stat-value" style="color:white;">3-4</div>
+<div class="stat-label">Lives saved<br/>स्तन कैंसर से</div>
+</div>
+<div class="stat-box" style="background:var(--red);">
+<div class="stat-value" style="color:white;">~15</div>
+<div class="stat-label">Overdiagnosed<br/>(treated unnecessarily)</div>
+</div>
+<div class="stat-box" style="background:var(--orange);">
+<div class="stat-value" style="color:white;">~500</div>
+<div class="stat-label">False alarms<br/>(anxiety, biopsies)</div>
+</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">THE TRADE-OFF</div>
+<div class="simple-text">
+                    To save <strong>3-4 lives</strong>, आपको इसे स्वीकार करना होगा <strong>~15 women</strong>
+                    उन कैंसरों का इलाज किया जाएगा जिनसे उन्हें कभी नुकसान नहीं हुआ होगा, और <strong>~500 women</strong> will experience false alarms.
+                    <br/><br/>
+<strong>क्या यह एक अच्छा व्यापार है?</strong> उत्तर केवल संख्याओं पर नहीं, बल्कि मूल्यों पर निर्भर करता है।
+                  </div>
+</div>
+</div>
+</div>
+<!-- Slide 6.5: Refrain -->
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  "और परीक्षण में वह पाया गया जो छिपा हुआ था,<br/>
+                  और इसे बीमारी कहा,<br/>
+                  और स्त्री को काटा गया, जलाया गया और ज़हर दिया गया—<br/>
+                  एक ऐसी छाया के लिए जिसने उसके दिन कभी अंधकारमय न किये होंगे।"
+                </div>
+<div class="gold-line animate delay-2"></div>
+<p class="animate delay-3" style="color:rgba(255,255,255,0.6);font-style:italic;">
+                  यह अति निदान की समस्या है.
+                </p>
+</div>
+</div>
+</div>
+ ==================== मॉड्यूल 7: डीटीए का मेटा-विश्लेषण ==================== 
+<div class="module-slides" data-module="7">
+<!-- Slide 7.1: Opening -->
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  एक अध्ययन झूठ बोल सकता है। एक अध्ययन चापलूसी कर सकता है।
+                  <br/><br/>
+                  लेकिन जब आप इकट्ठे होते हैं <em>सारी पढ़ाई</em>,<br/>
+                  जब आप उनके साक्ष्यों को एक साथ तौलते हैं-
+                  <br/><br/>
+<em>The truth becomes harder to hide.</em>
+</div>
+</div>
+</div>
+<!-- Slide 7.2: Why Meta-Analysis -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">साक्ष्य एकत्रित क्यों करें?</div>
+<div class="lesson-item animate delay-1">
+<div class="lesson-number">1</div>
+<div class="lesson-content">
+<h4>More Precision</h4>
+<p>Combining studies gives narrower confidence intervals, reducing uncertainty</p>
+</div>
+</div>
+<div class="lesson-item animate delay-2">
+<div class="lesson-number">2</div>
+<div class="lesson-content">
+<h4>Detect Heterogeneity</h4>
+<p>Why do different studies give different answers? Setting? Population? Threshold?</p>
+</div>
+</div>
+<div class="lesson-item animate delay-3">
+<div class="lesson-number">3</div>
+<div class="lesson-content">
+<h4>Expose Publication Bias</h4>
+<p>क्या नकारात्मक अध्ययनों को छुपाया जा रहा है? फ़नल प्लॉट विषमता को प्रकट करते हैं</p>
+</div>
+</div>
+<div class="lesson-item animate delay-4">
+<div class="lesson-number">4</div>
+<div class="lesson-content">
+<h4>Explore Thresholds</h4>
+<p>Build SROC curves to understand the sensitivity-specificity trade-off</p>
+</div>
+</div>
+</div>
+</div>
+ स्लाइड 7.3: द्विचर मॉडल 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">द्विचर मॉडल</div>
+<div class="simple-box animate delay-1">
+<div class="simple-title">WHY IT'S SPECIAL</div>
+<div class="simple-text">
+                    आप संवेदनशीलता और विशिष्टता को अलग-अलग एकत्रित नहीं कर सकते।
+                    <br/><br/>
+                    They are <strong>correlated</strong>: जब एक ऊपर जाता है, तो दूसरा नीचे जाने लगता है (दहलीज प्रभाव)।
+                    <br/><br/>
+                    The <strong>bivariate model</strong> इस सहसंबंध के लिए खाते, वैध एकत्रित अनुमान देते हैं।
+                  </div>
+</div>
+<p class="animate delay-2" style="font-size:0.75rem;color:rgba(255,255,255,0.5);margin-top:1rem;">
+                  Reitsma JB et al. J Clin Epidemiol. 2005;58:982-990
+                </p>
+</div>
+</div>
+<!-- Slide 7.4: SROC Curve -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">सारांश आरओसी वक्र</div>
+<div class="roc-visual animate delay-1">
+<h4>ROC Space</h4>
+<div class="roc-canvas" style="display:flex;flex-direction:column;justify-content:space-between;padding:1rem;">
+<div style="display:flex;justify-content:space-between;">
+<span style="font-size:0.7rem;color:var(--gold);">Perfect test</span>
+<span style="font-size:0.7rem;color:rgba(255,255,255,0.5);">1-Specificity (FPR) →</span>
+</div>
+<div style="text-align:center;color:var(--purple);font-style:italic;">
+                      प्रत्येक बिन्दु = एक अध्ययन<br/>
+                      वक्र व्यापार-बंद को दर्शाता है<br/>
+                      Higher = better test
+                    </div>
+<div style="display:flex;justify-content:space-between;">
+<span style="font-size:0.7rem;color:rgba(255,255,255,0.5);">↓ Sensitivity</span>
+<span style="font-size:0.7rem;color:var(--red);">Useless test (chance line)</span>
+</div>
+</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">एसआरसी पढ़ना</div>
+<div class="simple-text">
+<strong>Top-left corner</strong> = perfect test (100% sens, 100% spec)<br/>
+<strong>Diagonal line</strong> = useless test (random guessing)<br/>
+<strong>The curve</strong> = सभी अध्ययनों के प्रदर्शन का सारांश
+                  </div>
+</div>
+</div>
+</div>
+<!-- Slide 7.5: Refrain -->
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain hope animate">
+                  "एक अध्ययन धोखा दे सकता है। एक साथ तौले गए कई अध्ययन,<br/>
+                  सच्चाई उजागर करना शुरू करें.<br/>
+                  SROC वक्र साक्ष्य का मार्ग है-<br/>
+                  showing what the test can truly do."
+                </div>
+</div>
+</div>
+</div>
+<!-- ==================== MODULE 8: HETEROGENEITY ==================== -->
+<div class="module-slides" data-module="8">
+<!-- Slide 8.1: Opening -->
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  लेकिन पढ़ाई से क्या होगा <em>disagree</em>?
+                  <br/><br/>
+                  एक अध्ययन कहता है कि संवेदनशीलता 95% है।<br/>
+                  Another says 60%.
+                  <br/><br/>
+<em>आप किस सत्य पर विश्वास करते हैं?</em>
+</div>
+</div>
+</div>
+<!-- Slide 8.2: What is Heterogeneity -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">विषमता: असहमति</div>
+<div class="simple-box animate delay-1">
+<div class="simple-title">DEFINITION</div>
+<div class="simple-text">
+<strong>Heterogeneity</strong> अध्ययनों के बीच भिन्नता है जिसे अकेले संयोग से नहीं समझाया जा सकता है।
+                    <br/><br/>
+                    High heterogeneity means <strong>अध्ययन अलग-अलग माप रहे हैं चीज़ें</strong>—
+                    or the test performs differently in different settings.
+                  </div>
+</div>
+</div>
+</div>
+<!-- Slide 8.3: Sources of Heterogeneity -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">अध्ययन असहमत क्यों हैं</div>
+<div class="lesson-item animate delay-1">
+<div class="lesson-number" style="background:var(--purple);">T</div>
+<div class="lesson-content">
+<h4>Threshold Differences</h4>
+<p>"सकारात्मक" परिणाम के लिए अलग-अलग कटऑफ (उदाहरण के लिए, मधुमेह के लिए अलग HbA1c सीमाएँ)</p>
+</div>
+</div>
+<div class="lesson-item animate delay-2">
+<div class="lesson-number" style="background:var(--teal);">P</div>
+<div class="lesson-content">
+<h4>Population Differences</h4>
+<p>Disease severity, age, comorbidities differ between studies</p>
+</div>
+</div>
+<div class="lesson-item animate delay-3">
+<div class="lesson-number" style="background:var(--gold);">S</div>
+<div class="lesson-content">
+<h4>Setting Differences</h4>
+<p>Primary care vs. specialist clinic vs. emergency room</p>
+</div>
+</div>
+<div class="lesson-item animate delay-4">
+<div class="lesson-number" style="background:var(--orange);">Q</div>
+<div class="lesson-content">
+<h4>Quality Differences</h4>
+<p>Risk of bias, verification bias, spectrum bias</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 8.4: Measuring Heterogeneity -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">असहमति को मापना</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box">
+<div class="stat-value" style="color:var(--green);">I² &lt; 25%</div>
+<div class="stat-label">Low heterogeneity<br/>Studies agree</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--gold);">I² 25-75%</div>
+<div class="stat-label">Moderate<br/>Some disagreement</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--red);">I² &gt; 75%</div>
+<div class="stat-label">High heterogeneity<br/>Major disagreement</div>
+</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">THE WARNING</div>
+<div class="simple-text">
+                    When I² &gt; 75%, the pooled estimate may be <strong>meaningless</strong>.
+                    <br/><br/>
+                    आप सेब और संतरे का औसत नहीं कर सकते। आपको <strong>explain</strong> why studies differ
+                    before pooling them.
+                  </div>
+</div>
+</div>
+</div>
+<!-- Slide 8.5: Refrain -->
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  "जब अध्ययन असहमत हों, तो<br/>
+                  असहमति को चुप न कराएं।<br/>
+                  Ask: Why do they see differently?<br/>
+                  असहमति ही सिखाती है।"
+                </div>
+</div>
+</div>
+</div>
+ =================== मॉड्यूल 9: डीटीए टूलकिट =================== 
+<div class="module-slides" data-module="9">
+<!-- Slide 9.1: Opening -->
+<div class="slide gradient active">
+<div class="content text-center">
+<div class="title gold animate">आपका DTA टूलकिट</div>
+<div class="subtitle animate delay-1">आवश्यक उपाय और उनका उपयोग कब करें</div>
+</div>
+</div>
+ स्लाइड 9.2: उपाय 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">Essential Metrics</div>
+<div class="lesson-item animate delay-1">
+<div class="lesson-number">1</div>
+<div class="lesson-content">
+<h4>Sensitivity &amp; Specificity</h4>
+<p>How well the test performs on sick vs. healthy people</p>
+</div>
+</div>
+<div class="lesson-item animate delay-2">
+<div class="lesson-number">2</div>
+<div class="lesson-content">
+<h4>Likelihood Ratios (LR+, LR-)</h4>
+<p>How much a result changes the probability of disease</p>
+</div>
+</div>
+<div class="lesson-item animate delay-3">
+<div class="lesson-number">3</div>
+<div class="lesson-content">
+<h4>Diagnostic Odds Ratio (DOR)</h4>
+<p>Single measure of test discrimination (DOR = LR+ / LR-)</p>
+</div>
+</div>
+<div class="lesson-item animate delay-4">
+<div class="lesson-number">4</div>
+<div class="lesson-content">
+<h4>के अंतर्गत क्षेत्र SROC कर्व (AUC)</h4>
+<p>Overall test performance across all thresholds (0.5 = useless, 1.0 = perfect)</p>
+</div>
+</div>
+</div>
+</div>
+ स्लाइड 9.3: उपकरण और सॉफ्टवेयर 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">व्यापार के उपकरण</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box">
+<div class="stat-value" style="color:var(--teal);font-size:1.3rem;">mada</div>
+<div class="stat-label">R package for<br/>bivariate meta-analysis</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--gold);font-size:1.3rem;">metaDTA</div>
+<div class="stat-label">Stata module<br/>DTA समीक्षाओं के लिए</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--purple);font-size:1.3rem;">DTA Pro</div>
+<div class="stat-label">Browser-based<br/>ओपन एक्सेस टूल</div>
+</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">द मानक संदर्भ</div>
+<div class="simple-text">
+<strong>Reitsma et al. 2005</strong> - Bivariate model<br/>
+<strong>Rutter &amp; Gatsonis 2001</strong> - HSROC model<br/>
+<strong>Cochrane Handbook Ch. 10</strong> - DTA methods
+                  </div>
+</div>
+</div>
+</div>
+ स्लाइड 9.4: चेकलिस्ट 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">इससे पहले कि आप किसी DTA अध्ययन पर भरोसा करें</div>
+<div class="lesson-item animate delay-1">
+<div class="lesson-number" style="background:var(--green);">✓</div>
+<div class="lesson-content">
+<h4>Was there a valid reference standard?</h4>
+<p>Gold standard test applied to all patients?</p>
+</div>
+</div>
+<div class="lesson-item animate delay-2">
+<div class="lesson-number" style="background:var(--green);">✓</div>
+<div class="lesson-content">
+<h4>क्या दुभाषियों को अंधा कर दिया गया था?</h4>
+<p>Test readers unaware of diagnosis, and vice versa?</p>
+</div>
+</div>
+<div class="lesson-item animate delay-3">
+<div class="lesson-number" style="background:var(--green);">✓</div>
+<div class="lesson-content">
+<h4>क्या स्पेक्ट्रम था उपयुक्त?</h4>
+<p>Patients similar to your clinical population?</p>
+</div>
+</div>
+<div class="lesson-item animate delay-4">
+<div class="lesson-number" style="background:var(--green);">✓</div>
+<div class="lesson-content">
+<h4>क्या सीमा पूर्व-निर्दिष्ट थी?</h4>
+<p>या इसे परिणामों को अधिकतम करने के लिए चुना गया था?</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 9.5: Refrain -->
+<div class="slide hope">
+<div class="content text-center">
+<div class="refrain hope animate">
+                  "Armed with sensitivity, specificity, likelihood,<br/>
+                  SROC और समझौते के माप से लैस,<br/>
+                  आप झूठ के पार देख सकते हैं परीक्षण करें—<br/>
+                  और इसकी सच्चाई का आकलन स्वयं करें।"
+                </div>
+</div>
+</div>
+</div>
+ ==================== मॉड्यूल 10: वास्तविक-विश्व निर्णय कहानियां =================== 
+<div class="module-slides" data-module="10">
+ ========== कहानी 1: थेरानोस मृगतृष्णा ========== 
+<!-- Slide 10.1: Opening Rhetorical -->
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  Have you considered what happens when a test <em>promises everything</em>?
+                  <br/><br/>
+                  When a machine claims to see what no other machine can see,<br/>
+                  और कोई नहीं पूछता: <em>"मुझे दिखाओ सबूत"</em>?
+                </div>
+</div>
+</div>
+ स्लाइड 10.2: वास्तविक डेटा बॉक्स 
+<div class="slide fraud">
+<div class="content text-center">
+<div class="title red animate">थेरानोस मिराज</div>
+<div class="card dark-bg red-border animate delay-1">
+<div class="card-label" style="color:var(--red);">REAL DATA: FDA INSPECTION FINDINGS</div>
+<div class="card-text">
+<strong style="color:var(--gold);">Theranos claimed:</strong> 200+ tests from a single finger prick<br/><br/>
+<strong style="color:var(--red);">FDA found:</strong><br/>
+                    • Results varied by <strong>146%</strong> between runs on the same sample<br/>
+                    • Edison machines failed <strong>87%</strong> of proficiency tests<br/>
+                    • <strong>Zero</strong> सहकर्मी-समीक्षित सत्यापन अध्ययन प्रकाशित<br/>
+                    • मरीजों को उन नमूनों के लिए एचआईवी-सकारात्मक परिणाम प्राप्त हुए जो थे नकारात्मक
+                  </div>
+</div>
+<p class="animate delay-2" style="font-size:0.7rem;color:rgba(255,255,255,0.5);margin-top:1rem;">
+                  Sources: FDA Warning Letter 2016; Carreyrou J. Bad Blood. 2018; CMS Inspection Reports.
+                </p>
+</div>
+</div>
+<!-- Slide 10.3: Decision Tree -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">निर्णय वृक्ष</div>
+<div class="subtitle animate delay-1">आप एक अस्पताल प्रशासक हैं. थेरानोस आपको एक अनुबंध प्रदान करता है।</div>
+<div class="decision-tree animate delay-2" style="max-width:800px;">
+<h4>आप क्या चयन करेंगे?</h4>
+<div class="tree-level">
+<div class="tree-node root">Theranos Contract Offered</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-level" style="gap: 2rem;">
+<div style="flex:1;">
+<div class="tree-node positive" style="background:rgba(197,48,48,0.4);">PATH A: Trust Marketing Claims</div>
+<div class="tree-label" style="margin-top:0.5rem;">↓</div>
+<div class="tree-node fp" style="margin-top:0.5rem;">अनुबंध पत्र पर हस्ताक्षर कीजिये</div>
+<div class="tree-label" style="margin-top:0.5rem;">↓</div>
+<div class="tree-node" style="background:var(--blood-red);color:white;margin-top:0.5rem;">
+                        Misdiagnose thousands<br/>Face lawsuits<br/>Harm patients
+                      </div>
+</div>
+<div style="flex:1;">
+<div class="tree-node negative" style="background:rgba(34,197,94,0.4);">पथ बी: मांग सत्यापन डेटा</div>
+<div class="tree-label" style="margin-top:0.5rem;">↓</div>
+<div class="tree-node tn" style="margin-top:0.5rem;">कोई सहकर्मी-समीक्षित अध्ययन न खोजें</div>
+<div class="tree-label" style="margin-top:0.5rem;">↓</div>
+<div class="tree-node" style="background:var(--green);color:white;margin-top:0.5rem;">
+                        अनुबंध अस्वीकार करें<br/>अपने मरीजों की रक्षा करें<br/>Avoid Scandal
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+ स्लाइड 10.4: रहस्योद्घाटन 
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate" style="color:var(--gold);font-size:clamp(1.2rem,3vw,1.8rem);">
+                  THE REVELATION
+                </div>
+<div class="gold-line animate delay-1"></div>
+<div class="story-card animate delay-2">
+<div class="narrative" style="font-size:1.2rem;">
+                    Elizabeth Holmes never validated a single test externally.<br/><br/>
+                    A <strong style="color:var(--gold);">$9 billion valuation</strong> became a <strong style="color:var(--red);">criminal fraud conviction</strong>.<br/><br/>
+                    प्रत्येक अस्पताल जिसने हस्ताक्षर करने से पहले सत्यापन डेटा की मांग की<br/>
+<em>झूठ से बचाया गया.</em><br/><br/>
+                    हर अस्पताल जिसने मार्केटिंग पर भरोसा किया<br/>
+<em>became complicit in harming patients.</em>
+</div>
+</div>
+<div class="simple-box animate delay-3">
+<div class="simple-title" style="color:var(--gold);">THE LESSON</div>
+<div class="simple-text">
+<strong>No peer-reviewed validation = No trust.</strong><br/>
+                    साक्ष्य का अभाव कोई मार्केटिंग समस्या नहीं है.<br/>
+                    It is a <strong style="color:var(--red);">patient safety emergency</strong>.
+                  </div>
+</div>
+</div>
+</div>
+ ========== कहानी 2: कोविड रैपिड टेस्ट अराजकता ========== 
+<!-- Slide 10.5: Opening Rhetorical -->
+<div class="slide black">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  When speed defeats accuracy,<br/>
+<em>कीमत कौन चुकाता है?</em>
+<br/><br/>
+                  The test result comes in 15 minutes.<br/>
+                  लेकिन नतीजा क्या हो तो क्या होगा <em>15 minutes of false confidence</em>?
+                </div>
+</div>
+</div>
+ स्लाइड 10.6: वास्तविक डेटा बॉक्स 
+<div class="slide blood">
+<div class="content text-center">
+<div class="title red animate">The COVID Rapid Test Chaos</div>
+<div class="card dark-bg red-border animate delay-1">
+<div class="card-label" style="color:var(--red);">वास्तविक डेटा: निर्माता बनाम। वास्तविकता</div>
+<div class="card-text">
+<strong style="color:var(--gold);">Manufacturer claims:</strong> 97% sensitivity<br/><br/>
+<strong style="color:var(--red);">Real-world performance (Cochrane 2022):</strong><br/>
+                    • Symptomatic individuals: <strong>73% sensitivity</strong> (missed 27%)<br/>
+                    • Asymptomatic individuals: <strong>58% sensitivity</strong> (missed 42%)<br/>
+                    • Early infection (days 0-3): <strong>~50% sensitivity</strong><br/><br/>
+<em style="color:rgba(255,255,255,0.7);">लगभग आधे संक्रमित स्पर्शोन्मुख लोगों को बताया गया कि वे "स्पष्ट" थे।</em>
+</div>
+</div>
+<p class="animate delay-2" style="font-size:0.7rem;color:rgba(255,255,255,0.5);margin-top:1rem;">
+                  Source: Dinnes J et al. Cochrane Database Syst Rev. 2022;7:CD013705
+                </p>
+</div>
+</div>
+<!-- Slide 10.7: Decision Tree -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">निर्णय वृक्ष</div>
+<div class="subtitle animate delay-1">आप एक COVID उछाल के दौरान एक स्कूल नर्स हैं। रैपिड टेस्ट में रोगसूचक शिक्षक का परीक्षण नकारात्मक आया।</div>
+<div class="decision-tree animate delay-2" style="max-width:800px;">
+<h4>आप क्या चयन करेंगे?</h4>
+<div class="tree-level">
+<div class="tree-node root">Symptomatic Teacher + Negative Rapid Test</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-level" style="gap: 2rem;">
+<div style="flex:1;">
+<div class="tree-node positive" style="background:rgba(197,48,48,0.4);">PATH A: Trust the Negative Result</div>
+<div class="tree-label" style="margin-top:0.5rem;">↓</div>
+<div class="tree-node fp" style="margin-top:0.5rem;">Send Teacher to Class</div>
+<div class="tree-label" style="margin-top:0.5rem;">↓</div>
+<div class="tree-node" style="background:var(--blood-red);color:white;margin-top:0.5rem;">
+                        Outbreak infects 30 students<br/>School closure<br/>Three hospitalizations
+                      </div>
+</div>
+<div style="flex:1;">
+<div class="tree-node negative" style="background:rgba(34,197,94,0.4);">PATH B: Remember Sensitivity Limits</div>
+<div class="tree-label" style="margin-top:0.5rem;">↓</div>
+<div class="tree-node tn" style="margin-top:0.5rem;">Require PCR Confirmation</div>
+<div class="tree-label" style="margin-top:0.5rem;">↓</div>
+<div class="tree-node" style="background:var(--green);color:white;margin-top:0.5rem;">
+                        PCR positive confirmed<br/>Teacher isolates<br/>Outbreak prevented
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+ स्लाइड 10.8: रहस्योद्घाटन 
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate" style="color:var(--gold);font-size:clamp(1.2rem,3vw,1.8rem);">
+                  THE REVELATION
+                </div>
+<div class="gold-line animate delay-1"></div>
+<div class="story-card animate delay-2">
+<div class="narrative" style="font-size:1.2rem;">
+                    A <strong style="color:var(--red);">negative test</strong> यह अर्थ नहीं <strong>no infection</strong>.<br/><br/>
+                    It means: <em>"not detected."</em><br/><br/>
+                    इन दोनों वाक्यांशों के बीच अंतर<br/>
+                    is measured in <strong style="color:var(--gold);">lives</strong>.
+                  </div>
+</div>
+<div class="simple-box animate delay-3">
+<div class="simple-title" style="color:var(--gold);">THE LESSON</div>
+<div class="simple-text">
+                    When sensitivity is 58%, a negative result in a symptomatic person<br/>
+                    is <strong>almost meaningless</strong>.<br/><br/>
+<strong style="color:var(--green);">SnNout only works when sensitivity is HIGH.</strong><br/>
+                    Know your test's limits before trusting its verdict.
+                  </div>
+</div>
+</div>
+</div>
+ ========== कहानी 3: मैमोग्राफी विवाद ========== 
+<!-- Slide 10.9: Opening Rhetorical -->
+<div class="slide black">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  क्या कोई इसका परीक्षण कर सकता है? <em>finds cancer</em><br/>
+                  still <em>cause harm</em>?
+                  <br/><br/>
+                  क्या होगा अगर यह कैंसर मिल जाए<br/>
+                  would never have hurt you?
+                </div>
+</div>
+</div>
+ स्लाइड 10.10: वास्तविक डेटा बॉक्स 
+<div class="slide blood">
+<div class="content text-center">
+<div class="title red animate">मैमोग्राफी विवाद</div>
+<div class="card dark-bg red-border animate delay-1">
+<div class="card-label" style="color:var(--red);">वास्तविक डेटा: स्क्रीनिंग विरोधाभास</div>
+<div class="card-text">
+<strong style="color:var(--gold);">Test characteristics:</strong><br/>
+                    Sensitivity: ~85% | Specificity: ~90%<br/><br/>
+<strong style="color:var(--red);">10 वर्षों तक प्रति वर्ष 1,000 महिलाओं की जांच:</strong><br/>
+                    • <strong style="color:var(--green);">1 death prevented</strong> स्तन कैंसर से<br/>
+                    • <strong style="color:var(--orange);">5 women overtreated</strong> उन कैंसरों के लिए जिन्होंने उन्हें कभी नुकसान नहीं पहुँचाया होगा<br/>
+                    • <strong style="color:var(--red);">100-500 false alarms</strong> leading to biopsies, anxiety, repeat imaging<br/><br/>
+<em style="color:rgba(255,255,255,0.7);">Overdiagnosis rate: 19-30% of screen-detected cancers</em>
+</div>
+</div>
+<p class="animate delay-2" style="font-size:0.7rem;color:rgba(255,255,255,0.5);margin-top:1rem;">
+                  Source: Independent UK Panel on Breast Cancer Screening. Lancet. 2012;380:1778-1786
+                </p>
+</div>
+</div>
+<!-- Slide 10.11: Decision Tree -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">निर्णय वृक्ष</div>
+<div class="subtitle animate delay-1">A 45-year-old woman asks your advice on mammography screening.</div>
+<div class="decision-tree animate delay-2" style="max-width:800px;">
+<h4>आप क्या चयन करेंगे?</h4>
+<div class="tree-level">
+<div class="tree-node root">Patient Asks: "Should I Get Annual Mammograms?"</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-level" style="gap: 2rem;">
+<div style="flex:1;">
+<div class="tree-node positive" style="background:rgba(197,48,48,0.4);">PATH A: Recommend Without Context</div>
+<div class="tree-label" style="margin-top:0.5rem;">↓</div>
+<div class="tree-node fp" style="margin-top:0.5rem;">Small Tumor Found</div>
+<div class="tree-label" style="margin-top:0.5rem;">↓</div>
+<div class="tree-node" style="background:var(--blood-red);color:white;margin-top:0.5rem;">
+                        Mastectomy performed<br/>ट्यूमर निष्क्रिय था (DCIS)<br/>Would never have harmed her
+                      </div>
+</div>
+<div style="flex:1;">
+<div class="tree-node negative" style="background:rgba(34,197,94,0.4);">PATH B: Explain Trade-offs</div>
+<div class="tree-label" style="margin-top:0.5rem;">↓</div>
+<div class="tree-node tn" style="margin-top:0.5rem;">Shared Decision-Making</div>
+<div class="tree-label" style="margin-top:0.5rem;">↓</div>
+<div class="tree-node" style="background:var(--green);color:white;margin-top:0.5rem;">
+                        Patient makes informed choice<br/>लाभ और हानि को समझता है<br/>Autonomy preserved
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+ स्लाइड 10.12: रहस्योद्घाटन 
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate" style="color:var(--gold);font-size:clamp(1.2rem,3vw,1.8rem);">
+                  THE REVELATION
+                </div>
+<div class="gold-line animate delay-1"></div>
+<div class="story-card animate delay-2">
+<div class="narrative" style="font-size:1.2rem;">
+<strong style="color:var(--gold);">परीक्षण सटीकता ही एकमात्र मीट्रिक नहीं है.</strong><br/><br/>
+                    A test can be <em>accurate</em> और अभी भी कारण है <em>harm</em>.<br/><br/>
+                    When overdiagnosis exceeds lives saved,<br/>
+                    we must ask: <strong style="color:var(--red);">Is finding always helping?</strong>
+</div>
+</div>
+<div class="simple-box animate delay-3">
+<div class="simple-title" style="color:var(--gold);">THE LESSON</div>
+<div class="simple-text">
+                    से हानि <strong>झूठी सकारात्मकता और अति निदान</strong><br/>
+                    से लाभ अधिक हो सकता है <strong>true positives</strong>.<br/><br/>
+<strong style="color:var(--green);">Always weigh benefits against harms.</strong><br/>
+                    स्क्रीनिंग हमेशा बचत नहीं होती.
+                  </div>
+</div>
+</div>
+</div>
+ ========== कहानी 4: पीएसए विरोधाभास ========== 
+<!-- Slide 10.13: Opening Rhetorical -->
+<div class="slide black">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  What if <em>finding</em> the disease<br/>
+                  is worse than <em>missing</em> it?
+                  <br/><br/>
+                  What if the treatment causes more suffering<br/>
+                  than the disease ever would?
+                </div>
+</div>
+</div>
+ स्लाइड 10.14: वास्तविक डेटा बॉक्स 
+<div class="slide blood">
+<div class="content text-center">
+<div class="title red animate">PSA विरोधाभास</div>
+<div class="card dark-bg red-border animate delay-1">
+<div class="card-label" style="color:var(--red);">वास्तविक डेटा: दहलीज जाल</div>
+<div class="card-text">
+<strong style="color:var(--gold);">PSA cutoff of 4.0 ng/mL:</strong><br/>
+                    • उच्च श्रेणी के कैंसर के लिए संवेदनशीलता: <strong>21%</strong><br/>
+                    • Detects many indolent cancers that would never harm<br/><br/>
+<strong style="color:var(--gold);">Lower cutoff to 2.5 ng/mL:</strong><br/>
+                    • Sensitivity rises to: <strong>40%</strong><br/>
+                    • But overdiagnosis <strong>doubles</strong><br/><br/>
+<strong style="color:var(--red);">Treatment consequences:</strong><br/>
+                    • 20-30% of men experience incontinence after prostatectomy<br/>
+                    • 30-70% experience erectile dysfunction
+                  </div>
+</div>
+<p class="animate delay-2" style="font-size:0.7rem;color:rgba(255,255,255,0.5);margin-top:1rem;">
+                  Source: US Preventive Services Task Force. JAMA. 2018;319(18):1901-1913
+                </p>
+</div>
+</div>
+<!-- Slide 10.15: Decision Tree -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">निर्णय वृक्ष</div>
+<div class="subtitle animate delay-1">आप स्वास्थ्य के लिए PSA स्क्रीनिंग नीति निर्धारित कर रहे हैं प्रणाली. आपके सामने तीन रास्ते हैं।</div>
+<div class="decision-tree animate delay-2" style="max-width:900px;">
+<h4>आप क्या सीमा चुनते हैं?</h4>
+<div class="tree-level">
+<div class="tree-node root">PSA Screening Policy Decision</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-level" style="gap: 1rem;flex-wrap:wrap;">
+<div style="flex:1;min-width:200px;">
+<div class="tree-node positive" style="background:rgba(197,48,48,0.4);font-size:0.75rem;">PATH A: Low Threshold (2.5)</div>
+<div class="tree-label" style="margin-top:0.5rem;font-size:0.65rem;">↓</div>
+<div class="tree-node" style="background:var(--blood-red);color:white;margin-top:0.5rem;font-size:0.7rem;">
+                        Maximize sensitivity<br/>Thousands of unnecessary<br/>बायोप्सी और उपचार
+                      </div>
+</div>
+<div style="flex:1;min-width:200px;">
+<div class="tree-node" style="background:rgba(249,115,22,0.4);border-color:var(--orange);font-size:0.75rem;">PATH B: High Threshold (4.0)</div>
+<div class="tree-label" style="margin-top:0.5rem;font-size:0.65rem;">↓</div>
+<div class="tree-node" style="background:var(--orange);color:white;margin-top:0.5rem;font-size:0.7rem;">
+                        Miss some cancers<br/>But most missed are indolent<br/>Fewer unnecessary treatments
+                      </div>
+</div>
+<div style="flex:1;min-width:200px;">
+<div class="tree-node negative" style="background:rgba(168,85,247,0.4);border-color:var(--purple);font-size:0.75rem;">PATH C: Abandon PSA Screening</div>
+<div class="tree-label" style="margin-top:0.5rem;font-size:0.65rem;">↓</div>
+<div class="tree-node" style="background:var(--purple);color:white;margin-top:0.5rem;font-size:0.7rem;">
+                        Miss aggressive cancers<br/>Some preventable deaths<br/>No overtreatment harm
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+ स्लाइड 10.16: रहस्योद्घाटन 
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate" style="color:var(--gold);font-size:clamp(1.2rem,3vw,1.8rem);">
+                  THE REVELATION
+                </div>
+<div class="gold-line animate delay-1"></div>
+<div class="story-card animate delay-2">
+<div class="narrative" style="font-size:1.2rem;">
+                    There is <strong style="color:var(--red);">no "right" cutoff</strong>.<br/><br/>
+                    Every threshold trades <strong style="color:var(--gold);">के लिए संवेदनशीलता विशिष्टता</strong>,<br/>
+<strong style="color:var(--green);">अति निदान का पता लगाना</strong>.<br/><br/>
+                    विकल्प चिकित्सा नहीं है। यह <em>ethical</em>.<br/>
+                    यह इस बात पर निर्भर करता है कि आप क्या नुकसान स्वीकार करना चाहते हैं।
+                  </div>
+</div>
+<div class="simple-box animate delay-3">
+<div class="simple-title" style="color:var(--gold);">THE LESSON</div>
+<div class="simple-text">
+<strong>दहलीज प्रभाव कोई तकनीकी समस्या नहीं है।</strong><br/>
+                    It is a values problem.<br/><br/>
+                    Before choosing a cutoff, ask:<br/>
+<em>What is worse: missing disease or overtreating the healthy?</em>
+</div>
+</div>
+</div>
+</div>
+ ========== कहानी 5: दो आबादी में टीबी परीक्षण ========== 
+<!-- Slide 10.17: Opening Rhetorical -->
+<div class="slide black">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  वही परीक्षण। वही कटऑफ।<br/>
+<em>Different truths.</em>
+<br/><br/>
+                  How can identical numbers<br/>
+                  mean opposite things?
+                </div>
+</div>
+</div>
+ स्लाइड 10.18: वास्तविक डेटा बॉक्स 
+<div class="slide blood">
+<div class="content text-center">
+<div class="title red animate">दो आबादी में टीबी परीक्षण</div>
+<div class="card dark-bg red-border animate delay-1">
+<div class="card-label" style="color:var(--red);">REAL DATA: SAME TEST, DIFFERENT MEANING</div>
+<div class="card-text">
+<strong style="color:var(--gold);">Tuberculin Skin Test (10mm cutoff)</strong><br/>
+                    Sensitivity: ~80% | Specificity: ~95%<br/><br/>
+<strong style="color:var(--green);">In high-prevalence setting (TB prevalence 10%):</strong><br/>
+                    • Positive Predictive Value: <strong>85%</strong><br/>
+                    • A positive test <em>usually means TB</em><br/><br/>
+<strong style="color:var(--red);">In low-prevalence setting (TB prevalence 0.1%):</strong><br/>
+                    • Positive Predictive Value: <strong>15%</strong><br/>
+                    • A positive test is <em>usually a false positive</em>
+</div>
+</div>
+<p class="animate delay-2" style="font-size:0.7rem;color:rgba(255,255,255,0.5);margin-top:1rem;">
+                  Source: Pai M et al. Lancet Infect Dis. 2014;14(8):765-773
+                </p>
+</div>
+</div>
+<!-- Slide 10.19: Decision Tree -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">निर्णय वृक्ष</div>
+<div class="subtitle animate delay-1">आप लंदन में एक चिकित्सक हैं जो उच्च टीबी वाले देश के एक आप्रवासी को देख रहे हैं। टीएसटी सकारात्मक है।</div>
+<div class="decision-tree animate delay-2" style="max-width:800px;">
+<h4>आप क्या निष्कर्ष निकालते हैं?</h4>
+<div class="tree-level">
+<div class="tree-node root">Positive TST in Immigrant Patient</div>
+</div>
+<div class="tree-arrow">↓</div>
+<div class="tree-level" style="gap: 2rem;">
+<div style="flex:1;">
+<div class="tree-node positive" style="background:rgba(197,48,48,0.4);">PATH A: Apply UK Population PPV</div>
+<div class="tree-label" style="margin-top:0.5rem;">↓</div>
+<div class="tree-node fp" style="margin-top:0.5rem;">Assume "Probably False Positive"</div>
+<div class="tree-label" style="margin-top:0.5rem;">↓</div>
+<div class="tree-node" style="background:var(--blood-red);color:white;margin-top:0.5rem;">
+                        Miss active TB<br/>Patient infects family<br/>महीनों तक निदान में देरी
+                      </div>
+</div>
+<div style="flex:1;">
+<div class="tree-node negative" style="background:rgba(34,197,94,0.4);">PATH B: Consider Patient's Pre-Test Probability</div>
+<div class="tree-label" style="margin-top:0.5rem;">↓</div>
+<div class="tree-node tn" style="margin-top:0.5rem;">Recognize PPV Depends on Prevalence</div>
+<div class="tree-label" style="margin-top:0.5rem;">↓</div>
+<div class="tree-node" style="background:var(--green);color:white;margin-top:0.5rem;">
+                        Investigate further<br/>Chest X-ray, sputum<br/>Treat early if confirmed
+                      </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+ स्लाइड 10.20: रहस्योद्घाटन 
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain animate" style="color:var(--gold);font-size:clamp(1.2rem,3vw,1.8rem);">
+                  THE REVELATION
+                </div>
+<div class="gold-line animate delay-1"></div>
+<div class="story-card animate delay-2">
+<div class="narrative" style="font-size:1.2rem;">
+<strong style="color:var(--gold);">संवेदनशीलता और विशिष्टता</strong> are properties of <em>the test</em>.<br/><br/>
+<strong style="color:var(--gold);">PPV और NPV</strong> are properties of <em>the population</em>.<br/><br/>
+                    समान परिणाम का अर्थ है <strong style="color:var(--red);">different things</strong><br/>
+                    in different people.
+                  </div>
+</div>
+<div class="simple-box animate delay-3">
+<div class="simple-title" style="color:var(--gold);">THE LESSON</div>
+<div class="simple-text">
+<strong>Never interpret a test result without knowing the pre-test probability.</strong><br/><br/>
+                    A positive test in a high-risk patient means disease.<br/>
+                    The same positive in a low-risk patient means <em>probably nothing</em>.<br/><br/>
+<strong style="color:var(--green);">Context is everything.</strong>
+</div>
+</div>
+</div>
+</div>
+ स्लाइड 10.21: मॉड्यूल सारांश 
+<div class="slide gradient">
+<div class="content text-center">
+<div class="title gold animate">Five Stories, Five Lessons</div>
+<div class="lesson-item animate delay-1">
+<div class="lesson-number" style="background:var(--red);">1</div>
+<div class="lesson-content">
+<h4>Theranos: Demand Validation</h4>
+<p>No peer-reviewed data = no trust, regardless of marketing claims</p>
+</div>
+</div>
+<div class="lesson-item animate delay-2">
+<div class="lesson-number" style="background:var(--orange);">2</div>
+<div class="lesson-content">
+<h4>COVID Rapid Tests: Know Sensitivity Limits</h4>
+<p>"पता नहीं चला" "नहीं" के समान नहीं है संक्रमित"</p>
+</div>
+</div>
+<div class="lesson-item animate delay-3">
+<div class="lesson-number" style="background:var(--purple);">3</div>
+<div class="lesson-content">
+<h4>Mammography: Weigh Benefits vs. Harms</h4>
+<p>Finding is not always helping; overdiagnosis causes real harm</p>
+</div>
+</div>
+<div class="lesson-item animate delay-4">
+<div class="lesson-number" style="background:var(--teal);">4</div>
+<div class="lesson-content">
+<h4>PSA: The Threshold is a Values Choice</h4>
+<p>प्रत्येक कटऑफ विशिष्टता के लिए संवेदनशीलता का व्यापार करता है; कोई "सही" उत्तर नहीं है</p>
+</div>
+</div>
+<div class="lesson-item animate delay-5">
+<div class="lesson-number" style="background:var(--gold);color:var(--navy);">5</div>
+<div class="lesson-content">
+<h4>TB Test: Context Determines Meaning</h4>
+<p>The same result means different things in different populations</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+ ==================== मॉड्यूल 11: संदर्भ और प्रश्नोत्तरी =================== 
+<div class="module-slides" data-module="11">
+<!-- Slide 10.1: References -->
+<div class="slide dark active">
+<div class="content text-center">
+<div class="title gold animate">References</div>
+<div class="references animate delay-1">
+<h4>इसमें उद्धृत मुख्य स्रोत कोर्स</h4>
+<ol>
+<li>Carreyrou J. <span class="journal">Bad Blood: Secrets and Lies in a Silicon Valley Startup.</span> Knopf, 2018.</li>
+<li>Dinnes J, et al. Rapid, point-of-care antigen tests for diagnosis of SARS-CoV-2 infection. <span class="journal">Cochrane Database Syst Rev.</span> 2022;7:CD013705.</li>
+<li>स्तन कैंसर स्क्रीनिंग पर स्वतंत्र यूके पैनल। स्तन कैंसर स्क्रीनिंग के लाभ और हानि। <span class="journal">Lancet.</span> 2012;380:1778-1786.</li>
+<li>रेइट्स्मा जेबी, एट अल। संवेदनशीलता और विशिष्टता का द्विचर विश्लेषण नैदानिक ​​समीक्षाओं में जानकारीपूर्ण सारांश उपाय तैयार करता है। <span class="journal">J Clin Epidemiol.</span> 2005;58:982-990.</li>
+<li>Rutter CM, Gatsonis CA. A hierarchical regression approach to meta-analysis of diagnostic test accuracy evaluations. <span class="journal">Stat Med.</span> 2001;20:2865-2884.</li>
+<li>Deeks JJ, et al. The performance of tests of publication bias in systematic reviews of diagnostic test accuracy. <span class="journal">J Clin Epidemiol.</span> 2005;58:882-893.</li>
+<li>Macaskill P, et al. Cochrane Handbook for Systematic Reviews of Diagnostic Test Accuracy. Chapter 10. 2023.</li>
+<li>Higgins JPT, Thompson SG. Quantifying heterogeneity in a meta-analysis. <span class="journal">Stat Med.</span> 2002;21:1539-1558.</li>
+<li>US Food and Drug Administration. Warning Letter to Theranos Inc. 2016.</li>
+<li>US Preventive Services Task Force. Screening for Prostate Cancer. <span class="journal">JAMA.</span> 2018;319(18):1901-1913.</li>
+<li>Pai M, et al. Tuberculosis. <span class="journal">Lancet Infect Dis.</span> 2014;14(8):765-773.</li>
+</ol>
+</div>
+</div>
+</div>
+<!-- Slide 10.2: Quiz 1 -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="quiz-container animate">
+<div class="quiz-question">थेरानोस कहानी में, उनके रक्त परीक्षणों में मूलभूत समस्या क्या थी?</div>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkAnswer(this, false)">वे बहुत महंगे थे</div>
+<div class="quiz-option" onclick="checkAnswer(this, true)">उन्होंने गलत परिणाम दिए जो रोगियों को नुकसान पहुंचा सकते थे</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)">वे बहुत अधिक थे धीमा</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)">They required too much blood</div>
+</div>
+<div class="quiz-feedback"></div>
+</div>
+</div>
+</div>
+<!-- Slide 10.3: Quiz 2 -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="quiz-container animate">
+<div class="quiz-question">A COVID rapid test has 55% sensitivity in asymptomatic people. What does this mean?</div>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkAnswer(this, false)">55% सकारात्मक परिणाम सही हैं</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)">परीक्षण 55% समय काम करता है</div>
+<div class="quiz-option" onclick="checkAnswer(this, true)">The test misses 45% of infected asymptomatic people</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)">55% नकारात्मक परिणाम गलत हैं</div>
+</div>
+<div class="quiz-feedback"></div>
+</div>
+</div>
+</div>
+<!-- Slide 10.4: Quiz 3 -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="quiz-container animate">
+<div class="quiz-question">What does "SnNout" mean?</div>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkAnswer(this, true)">A highly Sensitive test, when Negative, rules OUT disease</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)">A highly Specific test, when Negative, rules OUT disease</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)">A sensitive test should be used for screening</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)">संवेदनशीलता और विशिष्टता नकारात्मक है सहसंबद्ध</div>
+</div>
+<div class="quiz-feedback"></div>
+</div>
+</div>
+</div>
+<!-- Slide 10.5: Quiz 4 -->
+<div class="slide dark">
+<div class="content text-center">
+<div class="quiz-container animate">
+<div class="quiz-question">आप मेटा-विश्लेषण में संवेदनशीलता और विशिष्टता को अलग-अलग पूल क्यों नहीं कर सकते?</div>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkAnswer(this, false)">They use different scales</div>
+<div class="quiz-option" onclick="checkAnswer(this, true)">वे सीमा प्रभाव के कारण सहसंबद्ध हैं</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)">They come from different populations</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)">It's computationally too difficult</div>
+</div>
+<div class="quiz-feedback"></div>
+</div>
+</div>
+</div>
+<!-- Slide 10.6: Completion -->
+<div class="slide hope">
+<div class="content text-center">
+<div class="big-number green animate" style="font-size:5rem;">✔</div>
+<div class="title green animate delay-1">Course Complete</div>
+<div class="gold-line animate delay-2"></div>
+<div class="refrain hope animate delay-3">
+                  "अब आप चार परिणामों को जानते हैं,<br/>
+                  एक परीक्षण के दो गुण,<br/>
+                  सीमा का क्रूर व्यापार-बंद,<br/>
+                  और पूलिंग की कला सबूत।<br/>
+<br/>
+                  जब अगला परीक्षण आपके सामने होता है -<br/>
+                  you will know how to see through it."
+                </div>
+<p class="animate delay-4" style="color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:1.2rem;margin-top:1.5rem;">
+                  जब परीक्षण झूठ बोलता है - अब आप जानते हैं।
+                </p>
+</div>
+</div>
+</div>
+<!-- Navigation -->
+<div class="slide-nav">
+<button class="nav-btn" onclick="prevSlide()">←</button>
+<div class="nav-center">
+<div class="slide-counter" id="slideCounter">1 / 5</div>
+<div class="progress" id="progressDots"></div>
+</div>
+<button class="nav-btn" onclick="nextSlide()">→</button>
+</div>
+</div>
+</div>
+</main>
+</div>
+<script>
+    function toggleSidebar() {
+      document.querySelector('.sidebar').classList.toggle('open');
+      var overlay = document.querySelector('.sidebar-overlay');
+      if (overlay) overlay.classList.toggle('show');
+      var btn = document.querySelector('.mobile-menu-toggle, .sidebar-toggle, .hamburger');
+      if (btn) btn.setAttribute('aria-expanded', btn.getAttribute('aria-expanded') === 'true' ? 'false' : 'true');
+    }
+
+    const modules = [
+      { id: 1, title: "The Fraud", subtitle: "Theranos: $9B on a lie", slides: 5 },
+      { id: 2, title: "चार परिणाम", subtitle: "TP, FP, FN, TN", slides: 5 },
+      { id: 3, title: "Sensitivity & Specificity", subtitle: "दो गुण", slides: 6 },
+      { id: 4, title: "कोविड घोटाला", subtitle: "When rapid tests failed", slides: 5 },
+      { id: 5, title: "Likelihood Ratios", subtitle: "परिणामों का वास्तव में क्या मतलब है", slides: 5 },
+      { id: 6, title: "मैमोग्राफी बहस", subtitle: "Finding too much", slides: 5 },
+      { id: 7, title: "DTA Meta-Analysis", subtitle: "एकीकरण साक्ष्य", slides: 5 },
+      { id: 8, title: "Heterogeneity", subtitle: "जब अध्ययन असहमत हों", slides: 5 },
+      { id: 9, title: "DTA टूलकिट", subtitle: "Essential measures", slides: 5 },
+      { id: 10, title: "Decision Stories", subtitle: "Five real-world cases", slides: 21 },
+      { id: 11, title: "Test & Sources", subtitle: "Quiz + references", slides: 6 }
+    ];
+
+    let currentModule = 1;
+    let currentSlide = 1;
+    const completedModules = new Set();
+
+    function init() {
+      renderModuleList();
+      updateSlideNav();
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === ' ') {
+          e.preventDefault();
+          nextSlide();
+        } else if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          prevSlide();
+        }
+      });
+    }
+
+    function renderModuleList() {
+      const list = document.getElementById('moduleList');
+      list.innerHTML = modules.map(m => `
+        <div class="module-item ${m.id === currentModule ? 'active' : ''} ${completedModules.has(m.id) ? 'completed' : ''}"
+             onclick="goToModule(${m.id})">
+          <div class="module-number">${completedModules.has(m.id) ? '&#10003;' : m.id}</div>
+          <div class="module-info">
+            <div class="module-title">${m.title}</div>
+            <div class="module-subtitle">${m.subtitle}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function goToModule(moduleId) {
+      if (moduleId > currentModule) completedModules.add(currentModule);
+      currentModule = moduleId;
+      currentSlide = 1;
+
+      document.querySelectorAll('.module-slides').forEach(el => el.classList.remove('active'));
+      document.querySelector(`.module-slides[data-module="${moduleId}"]`).classList.add('active');
+
+      updateSlideVisibility();
+      updateSlideNav();
+      renderModuleList();
+      document.getElementById('currentModule').textContent = modules[moduleId - 1].title;
+    }
+
+    function updateSlideVisibility() {
+      const moduleSlides = document.querySelector(`.module-slides[data-module="${currentModule}"]`);
+      const slides = moduleSlides.querySelectorAll('.slide');
+      slides.forEach((slide, index) => slide.classList.toggle('active', index + 1 === currentSlide));
+    }
+
+    function updateSlideNav() {
+      const module = modules[currentModule - 1];
+      document.getElementById('slideCounter').textContent = `${currentSlide} / ${module.slides}`;
+      document.getElementById('progressDots').innerHTML = Array.from({ length: module.slides }, (_, i) =>
+        `<div class="progress-dot ${i + 1 === currentSlide ? 'active' : ''}" onclick="goToSlide(${i + 1})"></div>`
+      ).join('');
+    }
+
+    function goToSlide(slideNum) {
+      currentSlide = slideNum;
+      updateSlideVisibility();
+      updateSlideNav();
+    }
+
+    function nextSlide() {
+      const module = modules[currentModule - 1];
+      if (currentSlide < module.slides) {
+        currentSlide++;
+        updateSlideVisibility();
+        updateSlideNav();
+      } else if (currentModule < modules.length) {
+        goToModule(currentModule + 1);
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 1) {
+        currentSlide--;
+        updateSlideVisibility();
+        updateSlideNav();
+      } else if (currentModule > 1) {
+        const prevModuleSlides = modules[currentModule - 2].slides;
+        currentModule--;
+        currentSlide = prevModuleSlides;
+
+        document.querySelectorAll('.module-slides').forEach(el => el.classList.remove('active'));
+        document.querySelector(`.module-slides[data-module="${currentModule}"]`).classList.add('active');
+
+        updateSlideVisibility();
+        updateSlideNav();
+        renderModuleList();
+        document.getElementById('currentModule').textContent = modules[currentModule - 1].title;
+      }
+    }
+
+    function checkAnswer(element, isCorrect) {
+      const container = element.closest('.quiz-container');
+      const options = container.querySelectorAll('.quiz-option');
+      const feedback = container.querySelector('.quiz-feedback');
+
+      options.forEach(opt => {
+        opt.style.pointerEvents = 'none';
+        if (opt === element) opt.classList.add(isCorrect ? 'correct' : 'incorrect');
+      });
+
+      feedback.classList.add('show', isCorrect ? 'correct' : 'incorrect');
+      feedback.textContent = isCorrect
+        ? 'सही। आप समझ गये।'
+        : 'बिल्कुल नहीं। आपने जो कहानियाँ सुनी हैं उन पर विचार करें।';
+    }
+
+    init();
+  </script>
+</body>
+</html>

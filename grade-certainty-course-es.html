@@ -1,0 +1,2604 @@
+HTML
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>GRADE: El Arte de Evaluar la Evidencia</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&amp;family=Source+Sans+Pro:wght@300;400;600;700&amp;display=swap" rel="stylesheet"/>
+<style>
+    :root {
+      --navy: #1E2761;
+      --deep-navy: #141B3D;
+      --gold: #D4AF37;
+      --cream: #FAF8F5;
+      --light-cream: #FFFFFF;
+      --text: #2D3748;
+      --light-text: #718096;
+      --red: #C53030;
+      --green: #22c55e;
+      --teal: #0f766e;
+      --purple: #7c3aed;
+      --orange: #f59e0b;
+      --transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      height: 100%;
+      font-family: 'Source Sans Pro', sans-serif;
+      background: var(--deep-navy);
+      color: var(--cream);
+    }
+
+    .course-container { display: flex; height: 100vh; overflow: hidden; }
+
+    /* Skip Link for Accessibility */
+    .skip-link {
+      position: absolute;
+      top: -40px;
+      left: 0;
+      background: var(--gold);
+      color: var(--navy);
+      padding: 8px 16px;
+      z-index: 10000;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .skip-link:focus { top: 0; }
+
+    /* ====== SIDEBAR ====== */
+    .sidebar {
+      width: 300px;
+      background: linear-gradient(180deg, var(--deep-navy) 0%, #0a0f1a 100%);
+      border-right: 1px solid rgba(212,175,55,0.2);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    .sidebar-header {
+      padding: 1.25rem;
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+      text-align: center;
+    }
+    .sidebar-header h1 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--gold);
+    }
+    .sidebar-header p {
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.6);
+    }
+
+    /* Gamification Stats Panel */
+    .stats-panel {
+      padding: 1rem;
+      background: rgba(212,175,55,0.1);
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+    }
+    .level-display {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+    .level-badge {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, var(--gold), #f0c040);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      box-shadow: 0 2px 8px rgba(212,175,55,0.4);
+    }
+    .level-info { flex: 1; }
+    .level-title { font-weight: 700; font-size: 0.9rem; color: var(--gold); }
+    .level-subtitle { font-size: 0.7rem; color: rgba(255,255,255,0.6); }
+    .xp-bar {
+      height: 8px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 0.5rem;
+    }
+    .xp-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--gold), var(--orange));
+      border-radius: 4px;
+      transition: width 0.5s ease;
+    }
+    .xp-text {
+      font-size: 0.65rem;
+      color: rgba(255,255,255,0.5);
+      text-align: right;
+      margin-top: 0.25rem;
+    }
+    .quick-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+    }
+    .quick-stat {
+      background: rgba(0,0,0,0.2);
+      padding: 0.5rem;
+      border-radius: 6px;
+      text-align: center;
+    }
+    .quick-stat-value {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--gold);
+    }
+    .quick-stat-label {
+      font-size: 0.6rem;
+      color: rgba(255,255,255,0.5);
+    }
+
+    /* Course Progress */
+    .course-progress {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+      background: rgba(0,0,0,0.2);
+    }
+    .course-progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.6);
+      margin-bottom: 0.35rem;
+    }
+    .course-progress-bar {
+      height: 6px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .course-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--green), #22d3ee);
+      border-radius: 3px;
+      transition: width 0.5s ease;
+    }
+
+    .module-list { flex: 1; overflow-y: auto; padding: 0.5rem 0; }
+    .module-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.6rem 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      border-left: 3px solid transparent;
+    }
+    .module-item:hover { background: rgba(212,175,55,0.1); }
+    .module-item.active { background: rgba(212,175,55,0.15); border-left-color: var(--gold); }
+    .module-item.completed .module-number { background: var(--green); color: white; }
+    .module-item.locked { opacity: 0.5; cursor: not-allowed; }
+    .module-number {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .module-item.active .module-number { background: var(--gold); color: var(--navy); }
+    .module-info { flex: 1; min-width: 0; }
+    .module-title { font-size: 0.8rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .module-subtitle { font-size: 0.65rem; color: rgba(255,255,255,0.5); }
+    .module-xp { font-size: 0.6rem; color: var(--gold); }
+    .module-time { font-size: 0.55rem; color: rgba(255,255,255,0.4); display: flex; align-items: center; gap: 0.25rem; margin-top: 0.15rem; }
+
+    /* Badges Panel */
+    .badges-panel {
+      padding: 1rem;
+      border-top: 1px solid rgba(212,175,55,0.2);
+    }
+    .badges-title { font-size: 0.75rem; font-weight: 600; color: var(--gold); margin-bottom: 0.5rem; }
+    .badges-grid { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+    .badge-item {
+      width: 32px;
+      height: 32px;
+      background: rgba(255,255,255,0.05);
+      border: 2px solid rgba(255,255,255,0.1);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      opacity: 0.3;
+      transition: all 0.3s;
+      cursor: help;
+      position: relative;
+    }
+    .badge-item.earned { opacity: 1; background: rgba(212,175,55,0.2); border-color: var(--gold); }
+    .badge-item:hover::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--navy);
+      color: white;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.6rem;
+      white-space: nowrap;
+      z-index: 100;
+    }
+
+    /* ====== MAIN CONTENT ====== */
+    .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .content-header {
+      padding: 0.75rem 1.5rem;
+      background: rgba(0,0,0,0.3);
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .breadcrumb { font-size: 0.85rem; color: rgba(255,255,255,0.6); }
+    .breadcrumb span { color: var(--gold); }
+    .header-actions { display: flex; gap: 0.5rem; align-items: center; }
+    .streak-display {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: rgba(239,68,68,0.2);
+      border: 1px solid rgba(239,68,68,0.4);
+      padding: 0.35rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+    }
+    .streak-display.active { background: rgba(249,115,22,0.2); border-color: var(--orange); }
+    .streak-flame { font-size: 1rem; }
+    .streak-count { font-weight: 700; color: var(--orange); }
+
+    .btn {
+      padding: 0.5rem 1rem;
+      border: 1px solid rgba(212,175,55,0.3);
+      border-radius: 6px;
+      background: rgba(255,255,255,0.05);
+      color: var(--cream);
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn:hover { background: rgba(212,175,55,0.2); border-color: var(--gold); }
+    .btn.primary { background: var(--gold); color: var(--navy); border-color: var(--gold); font-weight: 600; }
+
+    .content-body { flex: 1; overflow: hidden; display: flex; }
+
+    /* ====== SLIDES ====== */
+    .slides-container { flex: 1; position: relative; overflow: hidden; }
+    .module-slides { display: none; width: 100%; height: 100%; }
+    .module-slides.active { display: block; }
+
+    .slide {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      padding: 2rem 2rem 4rem;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity var(--transition), visibility var(--transition);
+      overflow-y: auto;
+    }
+    .slide.active { opacity: 1; visibility: visible; }
+    .slide.dark { background: var(--deep-navy); }
+    .slide.light { background: var(--cream); color: var(--text); }
+    .slide.black { background: #000; }
+    .slide.red-bg { background: linear-gradient(135deg, #7f1d1d, #450a0a); }
+    .slide.green-bg { background: linear-gradient(135deg, #14532d, #052e16); }
+    .slide.purple-bg { background: linear-gradient(135deg, #4c1d95, #2e1065); }
+    .slide.orange-bg { background: linear-gradient(135deg, #9a3412, #431407); }
+
+    .slide-progress-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--gold), var(--orange));
+      transition: width 0.3s ease;
+      z-index: 50;
+    }
+
+    .serif { font-family: 'Cormorant Garamond', Georgia, serif; }
+    .title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      font-weight: 700;
+      margin-bottom: 1rem;
+      line-height: 1.2;
+      text-align: center;
+    }
+    .title.gold { color: var(--gold); }
+    .title.navy { color: var(--navy); }
+    .subtitle {
+      font-size: clamp(0.9rem, 2vw, 1.3rem);
+      color: rgba(255,255,255,0.7);
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .slide.light .subtitle { color: var(--light-text); }
+
+    .big-number {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(4rem, 12vw, 8rem);
+      font-weight: 700;
+      line-height: 1;
+    }
+    .big-number.gold { color: var(--gold); }
+    .big-number.red { color: var(--red); }
+
+    .refrain {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(1.3rem, 3vw, 2rem);
+      font-style: italic;
+      color: var(--gold);
+      text-align: center;
+      max-width: 700px;
+    }
+
+    .content { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 850px; }
+
+    /* Cards */
+    .card {
+      background: var(--light-cream);
+      border: 1px solid var(--gold);
+      padding: 1.25rem 1.5rem;
+      margin: 0.5rem 0;
+      max-width: 750px;
+      width: 100%;
+      border-radius: 8px;
+    }
+    .card.navy-bg { background: var(--navy); color: var(--cream); }
+    .card.red-border { border: 2px solid var(--red); }
+    .card.green-border { border: 2px solid var(--green); }
+    .card-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 0.05em;
+      margin-bottom: 0.4rem;
+      text-transform: uppercase;
+    }
+    .card-text { font-size: 0.95rem; line-height: 1.6; }
+    .card.navy-bg .card-text { color: var(--cream); }
+
+    /* Story box */
+    .story-box {
+      background: linear-gradient(135deg, rgba(197,48,48,0.15), rgba(30,39,97,0.2));
+      border-left: 4px solid var(--red);
+      padding: 1.25rem;
+      margin: 0.75rem 0;
+      max-width: 750px;
+      width: 100%;
+      border-radius: 0 8px 8px 0;
+    }
+    .story-box.success { background: linear-gradient(135deg, rgba(34,197,94,0.15), rgba(30,39,97,0.2)); border-left-color: var(--green); }
+    .story-box.warning { background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(30,39,97,0.2)); border-left-color: var(--orange); }
+    .story-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: var(--red);
+      margin-bottom: 0.4rem;
+      text-transform: uppercase;
+    }
+    .story-box.success .story-label { color: var(--green); }
+    .story-box.warning .story-label { color: var(--orange); }
+    .story-text { font-size: 0.95rem; line-height: 1.6; }
+
+    /* Epic Story Box */
+    .story-box.epic {
+      background: linear-gradient(135deg, rgba(20,27,61,0.95), rgba(0,0,0,0.9));
+      border-left: 4px solid var(--gold);
+      border-top: 1px solid rgba(212,175,55,0.3);
+      border-right: 1px solid rgba(212,175,55,0.2);
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+      padding: 1.5rem;
+      position: relative;
+    }
+    .story-box.epic::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--gold), transparent);
+    }
+    .story-box.epic .story-label { color: var(--gold); font-size: 0.65rem; letter-spacing: 0.15em; }
+    .story-box.epic .story-text { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.05rem; line-height: 1.7; }
+
+    /* GRADE Certainty Colors */
+    .grade-high { background: linear-gradient(135deg, rgba(34,197,94,0.2), rgba(30,39,97,0.2)); border-color: var(--green); }
+    .grade-moderate { background: linear-gradient(135deg, rgba(59,130,246,0.2), rgba(30,39,97,0.2)); border-color: #3b82f6; }
+    .grade-low { background: linear-gradient(135deg, rgba(245,158,11,0.2), rgba(30,39,97,0.2)); border-color: var(--orange); }
+    .grade-very-low { background: linear-gradient(135deg, rgba(197,48,48,0.2), rgba(30,39,97,0.2)); border-color: var(--red); }
+
+    .grade-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .grade-badge.high { background: var(--green); color: white; }
+    .grade-badge.moderate { background: #3b82f6; color: white; }
+    .grade-badge.low { background: var(--orange); color: white; }
+    .grade-badge.very-low { background: var(--red); color: white; }
+
+    /* Stats */
+    .stats-grid {
+      display: flex;
+      gap: 0.75rem;
+      margin: 1rem 0;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .stat-box {
+      background: var(--navy);
+      color: var(--cream);
+      padding: 1rem 1.25rem;
+      text-align: center;
+      min-width: 120px;
+      border-radius: 8px;
+    }
+    .stat-box.light { background: var(--light-cream); color: var(--navy); border: 1px solid var(--gold); }
+    .stat-value {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.3rem, 2.5vw, 2rem);
+      font-weight: 700;
+    }
+    .stat-value.gold { color: var(--gold); }
+    .stat-value.red { color: var(--red); }
+    .stat-value.green { color: var(--green); }
+    .stat-label { font-size: 0.75rem; opacity: 0.8; margin-top: 0.2rem; }
+
+    /* Timeline */
+    .timeline { display: flex; flex-direction: column; gap: 0.4rem; width: 100%; max-width: 650px; }
+    .timeline-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.6rem 0.75rem;
+      background: rgba(255,255,255,0.05);
+      border-radius: 6px;
+      border-left: 4px solid var(--gold);
+    }
+    .timeline-days { font-weight: 700; font-size: 0.8rem; min-width: 70px; color: var(--gold); }
+    .timeline-content { flex: 1; }
+    .timeline-title { font-weight: 600; font-size: 0.9rem; }
+    .timeline-desc { font-size: 0.75rem; opacity: 0.7; }
+
+    /* Checklist */
+    .checklist { display: flex; flex-direction: column; gap: 0.4rem; width: 100%; max-width: 650px; }
+    .checklist-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+      padding: 0.6rem 0.75rem;
+      background: rgba(255,255,255,0.05);
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .check-icon {
+      width: 22px;
+      height: 22px;
+      background: var(--gold);
+      color: var(--navy);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.75rem;
+      flex-shrink: 0;
+    }
+    .checklist-text { font-size: 0.9rem; line-height: 1.4; }
+
+    /* Lessons */
+    .lesson-item { display: flex; align-items: flex-start; gap: 0.75rem; margin: 0.5rem 0; max-width: 700px; }
+    .lesson-number {
+      background: var(--gold);
+      color: var(--navy);
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+    .lesson-content h4 { font-size: 1rem; font-weight: 700; margin-bottom: 0.2rem; }
+    .lesson-content p { font-size: 0.85rem; opacity: 0.8; }
+
+    /* ====== DECISION TREE ====== */
+    .decision-tree {
+      width: 100%;
+      max-width: 700px;
+      background: linear-gradient(135deg, rgba(124,58,237,0.15), rgba(30,39,97,0.25));
+      border: 2px solid var(--purple);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 0.75rem 0;
+    }
+    .decision-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    .decision-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--purple);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+    }
+    .decision-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+    .decision-xp {
+      margin-left: auto;
+      background: rgba(212,175,55,0.2);
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      color: var(--gold);
+      font-weight: 600;
+    }
+    .decision-scenario {
+      background: rgba(0,0,0,0.2);
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+    .decision-question {
+      font-weight: 600;
+      color: var(--gold);
+      margin-bottom: 0.75rem;
+      font-size: 1rem;
+    }
+    .decision-options { display: flex; flex-direction: column; gap: 0.5rem; }
+    .decision-option {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      background: rgba(255,255,255,0.05);
+      border: 2px solid rgba(255,255,255,0.15);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .decision-option:hover { background: rgba(124,58,237,0.2); border-color: var(--purple); }
+    .decision-option.selected { background: rgba(124,58,237,0.3); border-color: var(--purple); }
+    .decision-option.correct { background: rgba(34,197,94,0.2); border-color: var(--green); }
+    .decision-option.incorrect { background: rgba(239,68,68,0.15); border-color: var(--red); }
+    .decision-option.disabled { pointer-events: none; opacity: 0.7; }
+    .decision-option:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+    .option-letter {
+      width: 24px;
+      height: 24px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.8rem;
+      flex-shrink: 0;
+    }
+    .decision-option.correct .option-letter { background: var(--green); color: white; }
+    .decision-option.incorrect .option-letter { background: var(--red); color: white; }
+    .option-text { font-size: 0.9rem; }
+    .decision-feedback {
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: 8px;
+      display: none;
+    }
+    .decision-feedback.show { display: block; }
+    .decision-feedback.correct { background: rgba(34,197,94,0.2); border: 1px solid var(--green); }
+    .decision-feedback.incorrect { background: rgba(239,68,68,0.15); border: 1px solid var(--red); }
+    .feedback-title { font-weight: 700; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
+    .feedback-text { font-size: 0.9rem; line-height: 1.5; }
+
+    /* ====== QUIZ ====== */
+    .quiz-container { width: 100%; max-width: 650px; }
+    .quiz-question {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.2rem;
+      margin-bottom: 1.25rem;
+      text-align: center;
+    }
+    .quiz-options { display: flex; flex-direction: column; gap: 0.5rem; }
+    .quiz-option {
+      padding: 0.75rem 1rem;
+      background: rgba(255,255,255,0.05);
+      border: 2px solid rgba(255,255,255,0.2);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+    .quiz-option:hover { background: rgba(212,175,55,0.15); border-color: var(--gold); }
+    .quiz-option.correct { background: rgba(34,197,94,0.2); border-color: var(--green); }
+    .quiz-option.incorrect { background: rgba(239,68,68,0.15); border-color: var(--red); }
+    .quiz-option.disabled { pointer-events: none; }
+    .quiz-option:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+    .quiz-feedback {
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: 8px;
+      display: none;
+      font-size: 0.9rem;
+    }
+    .quiz-feedback.show { display: block; }
+    .quiz-feedback.correct { background: rgba(34,197,94,0.2); border: 1px solid var(--green); }
+    .quiz-feedback.incorrect { background: rgba(239,68,68,0.15); border: 1px solid var(--red); }
+
+    /* Learning Objectives */
+    .objectives-box {
+      background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(30,39,97,0.25));
+      border: 2px solid #3b82f6;
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin: 0.75rem 0;
+      max-width: 700px;
+      width: 100%;
+    }
+    .objectives-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+    .objectives-icon {
+      width: 36px;
+      height: 36px;
+      background: #3b82f6;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+    }
+    .objectives-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #60a5fa;
+    }
+    .objectives-list { list-style: none; padding: 0; }
+    .objectives-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      padding: 0.4rem 0;
+      font-size: 0.9rem;
+    }
+    .objectives-list li::before { content: '○'; color: #3b82f6; font-weight: bold; }
+
+    /* Animation */
+    .slide.active .animate { animation: fadeUp 0.5s ease-out forwards; }
+    .slide.active .animate.delay-1 { animation-delay: 0.1s; }
+    .slide.active .animate.delay-2 { animation-delay: 0.2s; }
+    .slide.active .animate.delay-3 { animation-delay: 0.3s; }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate { opacity: 0; }
+
+    /* XP Popup */
+    .xp-popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      background: linear-gradient(135deg, var(--gold), #f0c040);
+      color: var(--navy);
+      padding: 1.5rem 2.5rem;
+      border-radius: 12px;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2rem;
+      font-weight: 700;
+      z-index: 1000;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+      transition: transform 0.3s ease;
+    }
+    .xp-popup.show { transform: translate(-50%, -50%) scale(1); }
+    .xp-popup .xp-amount { font-size: 3rem; display: block; }
+
+    /* Badge Earned Modal */
+    .badge-modal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.85);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1001;
+    }
+    .badge-modal.show { display: flex; }
+    .badge-modal-content {
+      background: linear-gradient(135deg, var(--deep-navy), #0a0f1a);
+      border: 2px solid var(--gold);
+      border-radius: 16px;
+      padding: 2rem;
+      text-align: center;
+      max-width: 350px;
+    }
+    .badge-modal-icon { font-size: 4rem; margin-bottom: 1rem; }
+    .badge-modal-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.5rem;
+      color: var(--gold);
+      margin-bottom: 0.5rem;
+    }
+    .badge-modal-desc { font-size: 0.9rem; opacity: 0.8; margin-bottom: 1rem; }
+    .badge-modal-close {
+      padding: 0.5rem 1.5rem;
+      background: var(--gold);
+      color: var(--navy);
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* Confetti */
+    .confetti-container {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 999;
+      overflow: hidden;
+    }
+    .confetti {
+      position: absolute;
+      width: 10px; height: 10px;
+      opacity: 0;
+      animation: confetti-fall 3s ease-out forwards;
+    }
+    @keyframes confetti-fall {
+      0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .confetti { animation: none; display: none; }
+      .xp-popup { transition: none; }
+      .slide { transition: none; }
+    }
+
+    /* Nav */
+    .slide-nav {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      padding: 0.75rem 1rem 1.25rem;
+      z-index: 100;
+      pointer-events: none;
+    }
+    .nav-btn {
+      background: rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: white;
+      font-size: 1.1rem;
+      cursor: pointer;
+      opacity: 0.6;
+      transition: all 0.2s;
+      padding: 0.4rem 0.6rem;
+      border-radius: 6px;
+      pointer-events: auto;
+    }
+    .nav-btn:hover { opacity: 1; background: rgba(0,0,0,0.7); border-color: var(--gold); }
+    .nav-btn:disabled { opacity: 0.2; cursor: not-allowed; }
+    .nav-btn:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+    .nav-center { display: flex; flex-direction: column; align-items: center; gap: 0.2rem; pointer-events: auto; }
+    .slide-counter { font-size: 0.7rem; opacity: 0.5; }
+    .progress-dots { display: flex; gap: 3px; }
+    .progress-dot {
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .progress-dot::after {
+      content: '';
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--text-muted, rgba(255,255,255,0.25));
+      transition: all 0.2s ease;
+    }
+    .progress-dot.active::after,
+    .progress-dot.completed::after {
+      background: var(--gold);
+      width: 14px;
+      height: 14px;
+    }
+
+    /* Mobile */
+    @media (max-width: 768px) {
+      .sidebar {
+        position: fixed;
+        left: -300px;
+        top: 0;
+        bottom: 0;
+        z-index: 1000;
+        transition: left 0.3s ease;
+      }
+      .sidebar.open { left: 0; }
+      .sidebar-toggle {
+        display: flex;
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        z-index: 1001;
+        width: 40px;
+        height: 40px;
+        background: var(--gold);
+        color: var(--navy);
+        border: none;
+        border-radius: 8px;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        cursor: pointer;
+      }
+      .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 999;
+      }
+      .sidebar-overlay.show { display: block; }
+    }
+    @media (min-width: 769px) {
+      .sidebar-toggle { display: none; }
+      .sidebar-overlay { display: none !important; }
+    }
+
+    /* Combo Counter */
+    .combo-display {
+      position: fixed;
+      top: 80px;
+      right: 20px;
+      background: linear-gradient(135deg, var(--orange), #ef4444);
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      z-index: 500;
+      transform: scale(0);
+      transition: transform 0.3s ease;
+      box-shadow: 0 4px 15px rgba(239,68,68,0.4);
+    }
+    .combo-display.show { transform: scale(1); }
+  </style>
+</head>
+<body>
+<a class="skip-link" href="#main-content">Ir al contenido principal</a>
+<div class="course-container">
+<!-- Sidebar -->
+<nav aria-label="Navegacion del curso" class="sidebar" role="navigation">
+<div class="sidebar-header">
+<a href="index.html" onmouseout="this.style.color='rgba(212,175,55,0.7)'" onmouseover="this.style.color='#D4AF37'" style="display:block;font-size:0.7rem;color:rgba(212,175,55,0.7);text-decoration:none;margin-bottom:0.5rem;">← Biblioteca de Cursos</a>
+<h1>Dominio de GRADE</h1>
+<p>El Arte de Evaluar la Evidencia</p>
+</div>
+<div class="stats-panel">
+<div class="level-display">
+<div class="level-badge" id="levelIcon">📊</div>
+<div class="level-info">
+<div class="level-title" id="levelTitle">Evaluador Novato</div>
+<div class="level-subtitle">Nivel <span id="levelNum">1</span></div>
+</div>
+</div>
+<div class="xp-bar"><div class="xp-fill" id="xpFill" style="width: 0%"></div></div>
+<div class="xp-text"><span id="xpCurrent">0</span> / <span id="xpNeeded">100</span> XP</div>
+<div class="quick-stats">
+<div class="quick-stat">
+<div class="quick-stat-value" id="correctCount">0</div>
+<div class="quick-stat-label">Correctas</div>
+</div>
+<div class="quick-stat">
+<div class="quick-stat-value" id="decisionCount">0</div>
+<div class="quick-stat-label">Decisiones</div>
+</div>
+<div class="quick-stat">
+<div class="quick-stat-value" id="gradesCount">0</div>
+<div class="quick-stat-label">Calificadas</div>
+</div>
+</div>
+</div>
+<div class="course-progress">
+<div class="course-progress-label">
+<span>Progreso del Curso</span>
+<span id="courseProgressPct">0%</span>
+</div>
+<div class="course-progress-bar">
+<div class="course-progress-fill" id="courseProgressFill" style="width: 0%"></div>
+</div>
+</div>
+<div class="module-list" id="moduleList"></div>
+<div class="badges-panel">
+<div class="badges-title">Logros</div>
+<div class="badges-grid" id="badgesGrid"></div>
+</div>
+</nav>
+<!-- Main Content -->
+<main class="main-content" id="main-content">
+<header class="content-header">
+<div class="breadcrumb">Dominio de GRADE / <span id="currentModule">Modulo 1</span></div>
+<div class="header-actions">
+<div class="streak-display" id="streakDisplay">
+<span class="streak-flame">🔥</span>
+<span class="streak-count" id="streakCount">0</span>
+<span>dias de racha</span>
+</div>
+<button class="btn" onclick="resetProgress()">Reiniciar</button>
+</div>
+</header>
+<div class="content-body">
+<div class="slides-container" id="slidesContainer"></div>
+</div>
+</main>
+</div>
+<!-- XP Popup -->
+<div aria-atomic="true" aria-live="polite" class="xp-popup" id="xpPopup" role="status">
+<span class="xp-amount" id="xpAmount">+25</span>
+    XP
+  </div>
+<!-- Badge Modal -->
+<div aria-labelledby="badgeModalTitle" aria-modal="true" class="badge-modal" id="badgeModal" role="dialog">
+<div class="badge-modal-content">
+<div class="badge-modal-icon" id="badgeModalIcon">🏆</div>
+<div class="badge-modal-title" id="badgeModalTitle">¡Insignia Obtenida!</div>
+<div class="badge-modal-desc" id="badgeModalDesc">Has desbloqueado un nuevo logro</div>
+<button class="badge-modal-close" onclick="closeBadgeModal()">¡Excelente!</button>
+</div>
+</div>
+<!-- Confetti Container -->
+<div class="confetti-container" id="confettiContainer"></div>
+<!-- Combo Counter -->
+<div aria-live="polite" class="combo-display" id="comboDisplay" role="status">🔥 ¡<span id="comboCount">0</span>x ¡Combinación!</div>
+<!-- Mobile Sidebar Toggle -->
+<button aria-expanded="false" aria-label="Alternar menu" class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<script>
+// ===== GAMIFICATION STATE =====
+const DEFAULT_STATE = {
+  xp: 0,
+  level: 1,
+  streak: 0,
+  lastActive: null,
+  correctAnswers: 0,
+  decisionsCompleted: 0,
+  gradesAssigned: 0,
+  badges: [],
+  completedModules: [],
+  answeredQuestions: {}
+};
+
+function safeGetStorage(key, fallback) {
+  try {
+    const item = localStorage.getItem(key);
+    return item ? JSON.parse(item) : fallback;
+  } catch (e) {
+    return fallback;
+  }
+}
+
+function safeSetStorage(key, value) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch (e) {}
+}
+
+// Migration from old storage key to versioned key
+(function migrateStorage() {
+  try {
+    const oldData = localStorage.getItem('gradeGame_es');
+    if (oldData && !localStorage.getItem('gradeGame_es_v1')) {
+      localStorage.setItem('gradeGame_es_v1', oldData);
+      localStorage.removeItem('gradeGame_es');
+    }
+  } catch (e) {}
+})();
+
+let gameState = safeGetStorage('gradeGame_es_v1', DEFAULT_STATE);
+
+const LEVELS = [
+  { level: 1, title: "Evaluador Novato", icon: "📊", xp: 0 },
+  { level: 2, title: "Detector de Sesgos", icon: "🔍", xp: 100 },
+  { level: 3, title: "Buscador de Certeza", icon: "⚖️", xp: 250 },
+  { level: 4, title: "Evaluador de Evidencia", icon: "📋", xp: 450 },
+  { level: 5, title: "Aprendiz de GRADE", icon: "🎓", xp: 700 },
+  { level: 6, title: "Guardian de la Certeza", icon: "🛡️", xp: 1000 },
+  { level: 7, title: "Maestro de la Evidencia", icon: "🏆", xp: 1400 },
+  { level: 8, title: "Sabio de GRADE", icon: "👑", xp: 1900 }
+];
+
+const BADGES = [
+  { id: "first_grade", icon: "📊", name: "Primera Calificacion", desc: "Asigna tu primera calificacion GRADE" },
+  { id: "bias_hunter", icon: "🔍", name: "Cazador de Sesgos", desc: "Completa el modulo de Riesgo de Sesgo" },
+  { id: "precision_master", icon: "🎯", name: "Maestro de la Precision", desc: "Completa el modulo de Imprecision" },
+  { id: "consistency_king", icon: "🔗", name: "Rey de la Consistencia", desc: "Completa el modulo de Inconsistencia" },
+  { id: "directness_detective", icon: "🎪", name: "Detective de la Direccionalidad", desc: "Completa el modulo de Evidencia Indirecta" },
+  { id: "publication_sleuth", icon: "📰", name: "Investigador de Publicaciones", desc: "Completa el modulo de Sesgo de Publicacion" },
+  { id: "upgrader", icon: "⬆️", name: "El Elevador", desc: "Aprende todos los factores de mejora" },
+  { id: "perfect_5", icon: "⭐", name: "Cinco Estrellas", desc: "Obtén 5 respuestas correctas seguidas" },
+  { id: "decision_maker", icon: "⚖️", name: "Tomador de Decisiones", desc: "Completa 15 arboles de decision" },
+  { id: "finisher", icon: "🏁", name: "Curso Completado", desc: "Termina el curso completo" },
+  { id: "streak_3", icon: "🔥", name: "En Llamas", desc: "Mantén una racha de 3 dias" },
+  { id: "streak_7", icon: "💫", name: "Guerrero Semanal", desc: "Mantén una racha de 7 dias" },
+  { id: "grade_master", icon: "👑", name: "Maestro GRADE", desc: "Completa la Evaluacion Final" }
+];
+
+// ===== MODULES DATA =====
+const MODULES = [
+  {
+    id: 1, title: "Por Que Importa la Certeza", subtitle: "Cuando la confianza mata", xp: 150,
+    slides: [
+      { type: "title", theme: "dark", content: { title: "Por Que Importa la Certeza", subtitle: "Cuando el exceso de confianza en la evidencia mata pacientes" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "Comprender por que la certeza de la evidencia determina los resultados en pacientes",
+          "Aprender de guias que mataron porque la certeza fue mal evaluada",
+          "Reconocer la diferencia entre 'existe evidencia' y 'la evidencia es confiable'",
+          "Entender que proporciona GRADE que las revisiones tradicionales no"
+        ],
+        tip: "Este modulo muestra por que equivocarse en la certeza tiene consecuencias reales."
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "La Catastrofe de los Betabloqueadores", title: "Guias Basadas en un Mentiroso",
+        text: "Durante dos decadas, las guias clinicas de todo el mundo recomendaron <strong>betabloqueadores antes de cirugia no cardiaca</strong> para prevenir infartos. La recomendacion fue calificada como 'fuerte'—alta certeza de beneficio. Millones de pacientes recibieron los farmacos antes de operaciones. La evidencia provenia principalmente de un hombre: <strong>Don Poldermans</strong>, quien contribuyo con 15 estudios mostrando beneficios dramaticos.",
+        followup: "En 2011, Poldermans fue declarado culpable de mala conducta en investigacion. Sus datos fueron fabricados. Cuando sus estudios fueron eliminados de los metaanalisis, las matematicas se invirtieron: los betabloqueadores no prevenian infartos—los causaban. Los investigadores calcularon el costo: seguir guias basadas en esta evidencia fraudulenta de 'alta certeza' pudo haber <strong>matado a 800,000 pacientes</strong> en una decada. La calificacion de certeza fue erronea. Los pacientes pagaron con sus vidas."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "⚠️", title: "Escenario: La Recomendacion Fuerte",
+        xp: 25,
+        scenario: "Un panel de guias califica la evidencia como 'alta certeza' y emite una 'recomendacion fuerte' para un tratamiento preventivo. Notas que el 60% de la evidencia proviene de un solo grupo de investigacion cuyos hallazgos nunca han sido replicados independientemente.",
+        question: "¿Que preocupacion deberias plantear sobre la calificacion de certeza?",
+        options: [
+          { letter: "A", text: "Ninguna—los estudios revisados por pares son confiables", correct: false },
+          { letter: "B", text: "La certeza deberia reducirse por riesgo de sesgo y falta de replicacion", correct: true },
+          { letter: "C", text: "Solicitar mas estudios del mismo grupo para confirmar", correct: false },
+          { letter: "D", text: "La recomendacion fuerte compensa cualquier incertidumbre", correct: false }
+        ],
+        feedback: {
+          correct: "¡Correcto! Los hallazgos no replicados de Poldermans fueron calificados como 'alta certeza' a pesar de depender de una sola fuente. GRADE requiere reducir cuando la evidencia depende en gran medida de fuentes potencialmente sesgadas que carecen de confirmacion independiente.",
+          incorrect: "800,000 muertes resultaron de confiar en evidencia no replicada de una sola fuente. La alta certeza requiere replicacion independiente. La concentracion en un grupo de investigacion es un riesgo critico de sesgo."
+        }
+      }},
+      { type: "story", theme: "dark", content: {
+        label: "La Reversion Hormonal", title: "Dos Millones de Mujeres Traicionadas",
+        text: "Durante cuarenta años, los medicos prescribieron <strong>terapia de reemplazo hormonal (TRH)</strong> para prevenir enfermedades cardiacas en mujeres menopausicas. La evidencia parecia abrumadora: estudios observacionales mostraban <strong>50% menos infartos</strong>. Los expertos estaban seguros. Las guias eran fuertes. Dos millones de mujeres estadounidenses tomaron TRH especificamente para proteccion cardiaca.",
+        followup: "En 2002, el ensayo Women's Health Initiative entrego un veredicto que destrozo decadas de certeza. La TRH no prevenia enfermedades cardiacas—<strong>aumentaba los infartos en 29%</strong>, los accidentes cerebrovasculares en 41% y el cancer de mama en 26%. La evidencia observacional habia sido confundida: las mujeres sanas elegian TRH, creando una ilusion de beneficio. La certeza se habia basado en el tipo equivocado de evidencia. Dos millones de mujeres habian tomado un farmaco que les hizo daño, prescrito por medicos que estaban seguros de que estaban ayudando."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "📊", title: "Escenario: Observacional vs. ECA",
+        xp: 25,
+        scenario: "Veinte grandes estudios observacionales muestran que un tratamiento reduce las muertes cardiovasculares en 45%. Dos pequeños ECAs no muestran ningun efecto. Un panel de guias debe calificar la certeza de la evidencia de beneficio.",
+        question: "¿Que calificacion de certeza es apropiada?",
+        options: [
+          { letter: "A", text: "Alta—20 estudios superan a 2 estudios", correct: false },
+          { letter: "B", text: "Moderada—la evidencia mixta requiere precaucion", correct: false },
+          { letter: "C", text: "Baja—los ECAs superan a los estudios observacionales; el sesgo de confusion probablemente explica la discrepancia", correct: true },
+          { letter: "D", text: "Muy Baja—no es posible ninguna conclusion", correct: false }
+        ],
+        feedback: {
+          correct: "¡Correcto! El desastre de la TRH nos enseño exactamente esta leccion. Los estudios observacionales que mostraban 50% de beneficio fueron superados por ECAs que mostraban daño. Cuando los ECAs contradicen los datos observacionales, la confusion es la explicacion probable. GRADE inicia los ECAs en alto, los observacionales en bajo.",
+          incorrect: "Los estudios observacionales de TRH mostraron 50% de beneficio; el ECA mostro 29% de daño. La discrepancia fue por confusion—las mujeres sanas eligieron TRH. La evidencia de ECAs, incluso de estudios mas pequeños, proporciona mayor certeza que la evidencia observacional para preguntas causales."
+        }
+      }},
+      { type: "stats", theme: "dark", content: {
+        title: "El Costo de la Certeza Equivocada",
+        stats: [
+          { value: "800K", label: "Muertes por fraude de Poldermans" },
+          { value: "2M", label: "Mujeres dañadas por TRH" },
+          { value: "50K", label: "Muertes por farmacos CAST" },
+          { value: "83K", label: "Infartos por Avandia" }
+        ],
+        caption: "Cada desastre involucro guias que estaban 'seguras' basadas en evaluacion defectuosa de la evidencia."
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "El Desastre de la Glucosa Intensiva", title: "ACCORD: Cuando el Control Estricto Mato",
+        text: "Los diabetologos estaban seguros: si el azucar alta causaba complicaciones, entonces un control mas estricto de la glucosa debia prevenirlas. La logica parecia irrefutable. Las guias recomendaban <strong>objetivos agresivos</strong>. El ensayo ACCORD inscribio 10,251 pacientes para probar lo que todos ya 'sabian'—el control intensivo de glucosa salva vidas.",
+        followup: "En febrero de 2008, el ensayo fue detenido prematuramente. No por beneficio—<strong>por daño</strong>. El control intensivo de glucosa aumento las muertes en 22%. La certeza se habia basado en plausibilidad biologica, no en datos reales de resultados. El resultado sustituto (niveles de glucosa) mejoro mientras que el resultado importante para el paciente (supervivencia) empeoro. 257 muertes en exceso ocurrieron en el grupo intensivo. Las guias habian sido confiadas. La confianza fue mal ubicada."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "🎯", title: "Escenario: El Tratamiento Logico",
+        xp: 25,
+        scenario: "Un tratamiento mejora dramaticamente un biomarcador (valor de laboratorio) que se sabe que causa enfermedad. Ningun ensayo ha medido aun resultados clinicos reales como muerte u hospitalizacion. Un colega argumenta que la certeza de beneficio es 'alta' porque el mecanismo es bien comprendido.",
+        question: "¿Que calificacion de certeza deberia aplicarse?",
+        options: [
+          { letter: "A", text: "Alta—el mecanismo claro implica beneficio claro", correct: false },
+          { letter: "B", text: "Moderada—el mecanismo es de apoyo pero no definitivo", correct: false },
+          { letter: "C", text: "Baja o Muy Baja—los resultados sustitutos no garantizan beneficios importantes para el paciente", correct: true },
+          { letter: "D", text: "No se puede calificar hasta que los ensayos esten completos", correct: false }
+        ],
+        feedback: {
+          correct: "¡Correcto! ACCORD, CAST y muchos otros desastres siguieron la falacia del 'mecanismo logico'. Mejorar sustitutos puede empeorar resultados. GRADE requiere reducir por evidencia indirecta cuando solo se miden resultados sustitutos.",
+          incorrect: "La terapia intensiva de ACCORD mejoro la glucosa perfectamente mientras mataba pacientes. Los farmacos CAST arreglaron los ECGs mientras triplicaban las muertes. La plausibilidad biologica no es evidencia clinica. Se requieren resultados importantes para el paciente para alta certeza."
+        }
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "Lo Que Proporciona GRADE",
+        subtitle: "Un marco sistematico para la certeza",
+        text: "GRADE (Grading of Recommendations Assessment, Development and Evaluation) proporciona un metodo estructurado y transparente para calificar cuanta confianza debemos depositar en la evidencia. Separa 'existe evidencia' de 'la evidencia es confiable.'",
+        highlight: "GRADE pregunta: '¿Que tan seguros estamos de que el efecto verdadero esta cerca del efecto estimado?'"
+      }},
+      { type: "story", theme: "dark", content: {
+        label: "La Revelacion de la Artroscopia", title: "Un Placebo de Mil Millones de Dolares",
+        text: "La artroscopia de rodilla para osteoartritis era uno de los procedimientos ortopedicos mas comunes del mundo. <strong>700,000 estadounidenses</strong> la recibian anualmente a un costo de $3 mil millones. Los cirujanos estaban seguros de que funcionaba—veian a los pacientes mejorar. El seguro la cubria. Las guias la recomendaban.",
+        followup: "Luego vinieron los ensayos de cirugia simulada. Los pacientes fueron aleatorizados a artroscopia real o cirugia falsa (incisiones pero sin procedimiento real). El resultado: <strong>sin diferencia</strong>. Los pacientes mejoraron igualmente ya sea que recibieran cirugia real o placebo. Decadas de certeza, miles de millones de dolares, millones de cirugias—todo basado en el efecto placebo que los cirujanos no podian ver. La certeza se habia basado en observaciones no controladas. Los ensayos controlados revelaron la verdad."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "🔬", title: "Escenario: El Cirujano Experimentado",
+        xp: 25,
+        scenario: "Una cirujana senior argumenta que un procedimiento 'definitivamente funciona' porque lo ha realizado 2,000 veces y 'ha visto a los pacientes mejorar.' No existen ensayos aleatorizados. Ella quiere que la guia califique la certeza como 'moderada' basada en experiencia clinica.",
+        question: "¿Que calificacion de certeza es apropiada?",
+        options: [
+          { letter: "A", text: "Moderada—2,000 casos es experiencia sustancial", correct: false },
+          { letter: "B", text: "Baja—las observaciones no controladas no pueden distinguir el efecto del tratamiento del placebo", correct: true },
+          { letter: "C", text: "Alta—la experiencia del experto es la forma mas alta de evidencia", correct: false },
+          { letter: "D", text: "Muy Baja—las anecdotas no son evidencia", correct: false }
+        ],
+        feedback: {
+          correct: "¡Correcto! Los cirujanos de artroscopia de rodilla 'vieron' a los pacientes mejorar durante decadas—luego los ensayos de cirugia simulada mostraron que era placebo. La experiencia del experto no puede detectar efectos placebo. GRADE califica las observaciones no controladas como certeza muy baja.",
+          incorrect: "Los cirujanos realizaban 700,000 artroscopias anuales, 'viendo' beneficio—que era enteramente placebo. La experiencia clinica, sin importar cuan extensa, no puede distinguir los efectos del tratamiento de la mejora natural o el placebo. Los ECAs son esenciales."
+        }
+      }},
+      { type: "refrain", theme: "black", content: { text: "La certeza no se trata de cuanta evidencia existe. Se trata de cuanto debemos confiar en ella." }},
+      { type: "quiz", theme: "dark", content: {
+        question: "¿Por que los estudios observacionales de TRH engañaron a los medicos durante 40 años?",
+        options: [
+          { text: "Los estudios fueron fabricados", correct: false },
+          { text: "Las mujeres sanas tenian mas probabilidad de elegir TRH, creando confusion", correct: true },
+          { text: "Los ECAs usaron dosis diferentes", correct: false },
+          { text: "Las definiciones de enfermedad cardiaca cambiaron con el tiempo", correct: false }
+        ],
+        xp: 20,
+        feedback: {
+          correct: "Exacto. Confusion por indicacion—las mujeres sanas eligieron TRH—creo una ilusion de beneficio. Es por esto que GRADE califica los estudios observacionales mas bajo que los ECAs para preguntas causales.",
+          incorrect: "Los estudios fueron reales, pero confundidos. Las mujeres sanas tenian mas probabilidad de tomar TRH, haciendola parecer beneficiosa. Los ECAs aleatorizan eliminando esta confusion, revelando el efecto verdadero."
+        }
+      }}
+    ]
+  },
+  {
+    id: 2, title: "El Marco GRADE", subtitle: "De alta a muy baja", xp: 120,
+    slides: [
+      { type: "title", theme: "dark", content: { title: "El Marco GRADE", subtitle: "Cuatro niveles de certeza, cinco razones para dudar" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "Aprender los cuatro niveles de certeza GRADE y lo que significan",
+          "Comprender los puntos de partida: ECAs vs estudios observacionales",
+          "Conocer los cinco dominios para reducir la certeza",
+          "Conocer los tres factores para aumentar la evidencia observacional"
+        ],
+        tip: "Este modulo proporciona el marco que aplicaras a lo largo del curso."
+      }},
+      { type: "stats", theme: "dark", content: {
+        title: "Los Cuatro Niveles de Certeza",
+        stats: [
+          { value: "⊕⊕⊕⊕", label: "ALTA" },
+          { value: "⊕⊕⊕○", label: "MODERADA" },
+          { value: "⊕⊕○○", label: "BAJA" },
+          { value: "⊕○○○", label: "MUY BAJA" }
+        ],
+        caption: "Cada nivel dice a los tomadores de decisiones cuanta confianza depositar en la evidencia."
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "Lo Que Significa Cada Nivel",
+        subtitle: "Interpretacion practica",
+        checkpoints: [
+          { day: "ALTA", event: "Muy seguros de que el efecto verdadero esta cerca del estimado" },
+          { day: "MODERADA", event: "Moderadamente seguros; el efecto verdadero probablemente cerca pero puede diferir" },
+          { day: "BAJA", event: "Confianza limitada; el efecto verdadero puede ser sustancialmente diferente" },
+          { day: "MUY BAJA", event: "Muy poca confianza; el efecto verdadero probablemente sustancialmente diferente" }
+        ]
+      }},
+      { type: "story", theme: "dark", content: {
+        label: "El Principio del Punto de Partida", title: "Por Que los ECAs Comienzan Mas Alto",
+        text: "En 1747, James Lind condujo lo que muchos consideran el primer ensayo controlado. Doce marineros con escorbuto fueron divididos en seis pares, cada uno recibiendo un tratamiento diferente. <strong>Solo los dos que recibieron citricos se recuperaron.</strong> Esta simple comparacion—tratados vs. no tratados bajo condiciones similares—revelo una verdad que siglos de observacion habian pasado por alto.",
+        followup: "La aleatorizacion es el gran igualador. Equilibra factores de confusion conocidos y desconocidos entre grupos. Cuando los pacientes son aleatorizados, las diferencias en resultados pueden atribuirse al tratamiento, no a diferencias entre pacientes. Es por esto que GRADE inicia la evidencia de ECAs en <strong>ALTA</strong> certeza y la evidencia observacional en <strong>BAJA</strong>—el diseño del estudio mismo determina cuanto sesgo de confusion podria distorsionar los resultados."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "🎲", title: "Escenario: El Punto de Partida",
+        xp: 25,
+        scenario: "Estas calificando evidencia para un nuevo farmaco. Tienes tres ECAs (total n=1,200) y cinco estudios de cohorte (total n=45,000). Un colega argumenta que los estudios de cohorte deberian comenzar en el mismo nivel de certeza porque tienen mas pacientes.",
+        question: "¿Cual es el punto de partida correcto para cada tipo de evidencia?",
+        options: [
+          { letter: "A", text: "Ambos comienzan en ALTA—el tamaño de muestra determina la certeza", correct: false },
+          { letter: "B", text: "ECAs comienzan ALTA, cohortes comienzan BAJA—el diseño determina el punto de partida", correct: true },
+          { letter: "C", text: "Cohortes comienzan MODERADA debido al gran tamaño de muestra", correct: false },
+          { letter: "D", text: "Ambos comienzan en MODERADA y se ajustan desde ahi", correct: false }
+        ],
+        feedback: {
+          correct: "¡Correcto! Los puntos de partida de GRADE se basan en el diseño del estudio, no en el tamaño de muestra. Los ECAs comienzan ALTA porque la aleatorizacion controla la confusion. Los estudios observacionales comienzan BAJA porque la confusion no puede eliminarse, independientemente del tamaño.",
+          incorrect: "El tamaño de muestra afecta la precision, no la confusion. Los estudios de cohorte de TRH tenian millones de pacientes pero aun estaban equivocados debido a la confusion. Los ECAs comienzan ALTA; los estudios observacionales comienzan BAJA."
+        }
+      }},
+      { type: "checklist", theme: "dark", content: {
+        title: "Cinco Dominios para Reducir",
+        items: [
+          "Riesgo de Sesgo — ¿Los estudios tienen alto riesgo de sesgo?",
+          "Inconsistencia — ¿Los resultados varian inexplicablemente entre estudios?",
+          "Evidencia Indirecta — ¿La evidencia aborda directamente nuestra pregunta?",
+          "Imprecision — ¿La estimacion del efecto es suficientemente precisa?",
+          "Sesgo de Publicacion — ¿Faltan estudios en la base de evidencia?"
+        ]
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "La Saga de Tamiflu", title: "Cuando los Cinco Dominios Fallaron",
+        text: "En 2009, los gobiernos almacenaron Tamiflu para la gripe pandemica. El Reino Unido gasto <strong>£473 millones</strong>. La evidencia parecia solida: los ensayos publicados mostraban complicaciones reducidas. Pero los revisores de Cochrane notaron problemas en cada dominio GRADE.",
+        followup: "<strong>Riesgo de sesgo:</strong> Los ensayos fueron financiados por la industria con metodos poco claros. <strong>Inconsistencia:</strong> Los resultados variaban entre estudios publicados y no publicados. <strong>Evidencia indirecta:</strong> Las 'complicaciones' estaban mal definidas. <strong>Imprecision:</strong> Los intervalos de confianza eran amplios. <strong>Sesgo de publicacion:</strong> El 60% de los datos de pacientes nunca fue publicado. Cuando Roche finalmente libero los datos crudos despues de cinco años, la verdad emergio: Tamiflu reducia la duracion de los sintomas por menos de un dia y no tenia efecto probado en hospitalizaciones o complicaciones. Quinientos millones de libras gastadas en evidencia que deberia haber sido calificada como MUY BAJA."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "📉", title: "Escenario: El Problema Multi-Dominio",
+        xp: 25,
+        scenario: "Estas calificando evidencia de 5 ECAs. Encuentras: ocultamiento de asignacion poco claro (riesgo de sesgo), I² = 75% sin explicacion (inconsistencia), y la mitad de los ensayos nunca publicados (sesgo de publicacion). Los ensayos mismos son precisos y directos.",
+        question: "¿Cuantos niveles deberias reducir desde ALTA?",
+        options: [
+          { letter: "A", text: "Un nivel—multiples preocupaciones menores igualan una reduccion", correct: false },
+          { letter: "B", text: "Dos niveles—preocupaciones serias en dos dominios", correct: false },
+          { letter: "C", text: "Tres niveles—preocupaciones serias en tres dominios (a MUY BAJA)", correct: true },
+          { letter: "D", text: "No se pueden reducir ECAs—siempre son ALTA", correct: false }
+        ],
+        feedback: {
+          correct: "¡Correcto! Preocupaciones serias en cada dominio tipicamente justifican una reduccion cada una. Riesgo de sesgo (−1), inconsistencia (−1), y sesgo de publicacion (−1) llevarian ALTA a MUY BAJA. Multiples dominios pueden acumularse.",
+          incorrect: "Cada dominio con preocupaciones serias tipicamente justifica una reduccion. Tres preocupaciones serias de dominio = tres reducciones. ALTA − 3 = MUY BAJA. GRADE es acumulativo."
+        }
+      }},
+      { type: "checklist", theme: "dark", content: {
+        title: "Tres Factores para Aumentar (Solo Observacional)",
+        items: [
+          "Efecto Grande — Magnitud muy grande del efecto (RR > 2 o < 0.5)",
+          "Dosis-Respuesta — Gradiente claro entre exposicion y resultado",
+          "Confusion — Toda confusion plausible reduciria el efecto"
+        ]
+      }},
+      { type: "story", theme: "green-bg", content: {
+        label: "La Evidencia del Tabaco", title: "Cuando la Observacion Gano Certeza",
+        text: "En los años 1950, Richard Doll y Austin Bradford Hill publicaron estudios observacionales vinculando los cigarrillos con el cancer de pulmon. No existian ECAs—no puedes aleatorizar a las personas a fumar. Sin embargo, la evidencia se convirtio en <strong>ALTA certeza</strong>. ¿Por que?",
+        followup: "Se cumplieron todos los criterios de aumento. <strong>Efecto grande:</strong> Los fumadores tenian tasas de cancer de pulmon 10-30 veces mas altas—un tamaño del efecto que la confusion sola no puede explicar. <strong>Dosis-respuesta:</strong> Mas cigarrillos = mas cancer en un gradiente claro. <strong>Direccion de la confusion:</strong> Cualquier factor de confusion no medido que causara tanto fumar como cancer tendria que ser implausiblemente poderoso para explicar el efecto. Cuando la evidencia observacional cumple los tres criterios de aumento, puede lograr certeza que rivaliza con los ECAs."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "⬆️", title: "Escenario: La Pregunta del Aumento",
+        xp: 25,
+        scenario: "Un estudio observacional muestra que un tratamiento aumenta la supervivencia con RR = 1.3 (30% de aumento relativo). La asociacion es estadisticamente significativa con intervalos de confianza estrechos. Los autores argumentan que esto deberia aumentarse de BAJA a MODERADA.",
+        question: "¿Deberia aumentarse esta evidencia?",
+        options: [
+          { letter: "A", text: "Si—la significancia estadistica justifica el aumento", correct: false },
+          { letter: "B", text: "Si—los intervalos de confianza estrechos justifican el aumento", correct: false },
+          { letter: "C", text: "No—RR 1.3 no es suficientemente grande; la confusion podria explicarlo facilmente", correct: true },
+          { letter: "D", text: "No—la evidencia observacional nunca puede aumentarse", correct: false }
+        ],
+        feedback: {
+          correct: "¡Correcto! RR 1.3 esta bien dentro del rango que la confusion puede producir. El aumento por efecto grande tipicamente requiere RR > 2 o < 0.5—efectos tan grandes que la confusion sola es una explicacion implausible. La significancia estadistica y la precision no son criterios de aumento.",
+          incorrect: "Un aumento relativo del 30% (RR 1.3) puede resultar facilmente de confusion modesta. Los estudios de TRH mostraron RR 0.5 para proteccion cardiaca—enteramente debido a confusion. El aumento por efecto grande requiere efectos que la confusion no puede explicar plausiblemente (tipicamente RR > 2 o < 0.5)."
+        }
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "El Mnemotecnico GRADE: RIESP",
+        subtitle: "Recuerda los 5 dominios de reduccion",
+        text: "<strong style='color:var(--gold);font-size:1.5rem'>R</strong>iesgo de sesgo — ¿Podemos confiar en los estudios?<br><br><strong style='color:var(--gold);font-size:1.5rem'>I</strong>nconsistencia — ¿Los estudios concuerdan?<br><br><strong style='color:var(--gold);font-size:1.5rem'>E</strong>videncia indirecta — ¿La evidencia responde nuestra pregunta?<br><br><strong style='color:var(--gold);font-size:1.5rem'>i</strong>mprecision — ¿Es precisa la estimacion?<br><br><strong style='color:var(--gold);font-size:1.5rem'>S</strong>esgo de <strong style='color:var(--gold);font-size:1.5rem'>P</strong>ublicacion — ¿Falta evidencia?",
+        highlight: "RIESP — Recuerda: 'La evidencia de ECAs puede RIESgosamente dESPlomarse si estos dominios tienen problemas serios.'"
+      }},
+      { type: "quiz", theme: "dark", content: {
+        question: "¿Por que los estudios observacionales comienzan en certeza BAJA en GRADE?",
+        options: [
+          { text: "Usualmente tienen tamaños de muestra mas pequeños", correct: false },
+          { text: "No pueden controlar la confusion no medida", correct: true },
+          { text: "Son mas frecuentemente financiados por la industria", correct: false },
+          { text: "Toman mas tiempo en completarse", correct: false }
+        ],
+        xp: 20,
+        feedback: {
+          correct: "Exacto. La aleatorizacion equilibra los factores de confusion entre grupos. Sin ella, las diferencias en resultados podrian reflejar diferencias en pacientes, no efectos del tratamiento. Los estudios de TRH con millones de pacientes aun estaban equivocados debido a la confusion.",
+          incorrect: "El problema es la confusion, no el tamaño de muestra. Los estudios observacionales no pueden equilibrar factores de confusion desconocidos de la manera que lo hace la aleatorizacion. Esta limitacion fundamental determina el punto de partida."
+        }
+      }}
+    ]
+  },
+  {
+    id: 3, title: "Riesgo de Sesgo", subtitle: "Cuando los estudios mienten", xp: 180,
+    slides: [
+      { type: "title", theme: "purple-bg", content: { title: "Riesgo de Sesgo", subtitle: "El primer dominio: ¿Podemos confiar en estos estudios?" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "Identificar dominios clave de sesgo en ECAs y estudios observacionales",
+          "Reconocer como el sesgo infla o desinfla los efectos del tratamiento",
+          "Aplicar evaluacion de riesgo de sesgo a ejemplos reales",
+          "Decidir cuando reducir la certeza por sesgo"
+        ],
+        tip: "¡Completa todos los escenarios de decision para ganar la insignia de Cazador de Sesgos!"
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "El Engaño de VIGOR", title: "Cuando Merck Eligio la Fecha de Corte",
+        text: "En 2000, Merck publico el ensayo VIGOR comparando Vioxx con naproxeno. El New England Journal of Medicine reporto un aumento de 4 veces en infartos con Vioxx. Pero el articulo publicado oculto algo: <strong>tres infartos adicionales</strong> ocurrieron en el grupo de Vioxx despues de la fecha de corte de datos. Los cientificos de Merck lo sabian.",
+        followup: "Esos tres infartos importaban. Incluirlos habria cambiado el ratio de riesgo de 'preocupante' a 'alarmante.' En cambio, la fecha de corte elegida por Merck—una decision metodologica tomada despues de ver los datos—oscurecio el riesgo verdadero. El NEJM publico despues una 'expresion de preocupacion,' llamando al articulo 'inexacto e incompleto.' Para entonces, decenas de miles habian sufrido infartos por un farmaco cuyo peligro habia sido ocultado por reporte selectivo. El sesgo no estaba en el diseño del ensayo—estaba en como los datos fueron analizados y presentados."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "✂️", title: "Escenario: La Fecha de Corte Movil",
+        xp: 30,
+        scenario: "Estas evaluando un ensayo que cambio su punto de tiempo de analisis primario despues de que el estudio comenzo—de 12 meses a 6 meses. Los resultados de 6 meses favorecen el tratamiento. Los autores dicen que el cambio se hizo por 'razones administrativas' no relacionadas con los resultados.",
+        question: "¿Como deberia esto afectar tu evaluacion de riesgo de sesgo?",
+        options: [
+          { letter: "A", text: "Sin preocupacion—los cambios administrativos suceden", correct: false },
+          { letter: "B", text: "Alto riesgo de sesgo por reporte selectivo—los cambios de punto de tiempo despues de ver datos son sospechosos", correct: true },
+          { letter: "C", text: "Bajo riesgo si los datos de 12 meses tambien se reportan", correct: false },
+          { letter: "D", text: "Riesgo poco claro—no podemos conocer su verdadera motivacion", correct: false }
+        ],
+        feedback: {
+          correct: "¡Correcto! Los cambios post-hoc a los planes de analisis son alto riesgo de reporte selectivo. La fecha de corte de VIGOR fue una 'decision metodologica' que oculto tres infartos. Cuando los puntos de tiempo cambian despues de que se acumulan datos, asume lo peor.",
+          incorrect: "La fecha de corte 'metodologica' de Merck oculto infartos fatales. Los cambios de analisis post-hoc—especialmente cuando los resultados favorecen el tratamiento—son reporte selectivo clasico. GRADE requiere escepticismo sobre modificaciones post-hoc."
+        }
+      }},
+      { type: "story", theme: "dark", content: {
+        label: "El Problema de Etiqueta Abierta", title: "Cuando Saber Cambia Todo",
+        text: "El ensayo ASCOT-LLA comparo atorvastatina con placebo para prevencion cardiovascular. El resultado primario fue IM no fatal mas muerte coronaria—<strong>resultados objetivos</strong> que no deberian depender de si los medicos sabian que tratamiento recibian los pacientes.",
+        followup: "Pero los medicos si sabian. El ensayo fue detenido temprano cuando la Junta de Monitoreo de Seguridad de Datos vio beneficio. El problema: algunos resultados fueron adjudicados por comites que <strong>no estaban cegados</strong> a la asignacion de tratamiento. ¿Saber que un paciente estaba en estatina afecto como se clasificaron los IMs dudosos? Los estudios que comparan evaluacion cegada vs. no cegada muestran diferencias sistematicas. Los diseños de etiqueta abierta pueden inflar los beneficios aparentes en 10-20% incluso para resultados 'objetivos'. ASCOT-LLA fue reducido por riesgo de sesgo a pesar de ser un ECA."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "👁️", title: "Escenario: Los Evaluadores No Cegados",
+        xp: 25,
+        scenario: "Un ECA de una intervencion quirurgica reporta 30% de reduccion en 'eventos cardiovasculares mayores.' El ensayo fue necesariamente no cegado (los pacientes sabian si tenian cirugia). Los evaluadores de resultados tambien estaban no cegados. Los eventos fueron adjudicados por un comite que conocia las asignaciones de tratamiento.",
+        question: "¿Cual es el riesgo de sesgo para sesgo de deteccion?",
+        options: [
+          { letter: "A", text: "Bajo—los eventos cardiovasculares son objetivos", correct: false },
+          { letter: "B", text: "Alto—la evaluacion no cegada de eventos cardiovasculares infla los efectos", correct: true },
+          { letter: "C", text: "Poco claro—necesitamos mas informacion sobre el comite", correct: false },
+          { letter: "D", text: "No aplica—los ensayos quirurgicos no pueden ser cegados", correct: false }
+        ],
+        feedback: {
+          correct: "¡Correcto! Incluso resultados 'objetivos' como IM involucran juicio (troponinas dudosas, interpretaciones de ECG). Los estudios muestran que la evaluacion no cegada infla los efectos 10-20%. Los evaluadores de resultados siempre deben estar cegados cuando sea posible, independientemente del cegamiento de la intervencion.",
+          incorrect: "Los eventos cardiovasculares requieren interpretacion—elevaciones de troponina dudosas, cambios de ECG, clasificacion de sintomas. Los evaluadores no cegados favorecen sistematicamente la intervencion. La evaluacion de resultados debe estar cegada incluso cuando el cegamiento de la intervencion es imposible."
+        }
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "La Violacion de ITT", title: "Los Pacientes Perdidos de Roche",
+        text: "En los ensayos de Tamiflu, Roche excluyo pacientes del analisis despues de la aleatorizacion. Algunos fueron excluidos por 'violaciones de protocolo'—pero las violaciones a menudo ocurrieron <strong>despues</strong> de que los pacientes habian tomado el farmaco y experimentado efectos secundarios. Los pacientes que desarrollaron complicaciones fueron retroactivamente considerados 'violadores de protocolo' y eliminados.",
+        followup: "El analisis por intencion de tratar (ITT) existe precisamente para prevenir esto. Una vez aleatorizado, siempre analizado—independientemente de lo que suceda despues. Excluir pacientes despues de la aleatorizacion destruye el equilibrio que la aleatorizacion creo. Las exclusiones selectivas de Roche eliminaron pacientes que tuvieron resultados adversos, haciendo que Tamiflu pareciera mas seguro y efectivo de lo que era. La revision Cochrane redujo la certeza especificamente por estas violaciones de ITT."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "🚪", title: "Escenario: Las Exclusiones Post-Aleatorizacion",
+        xp: 25,
+        scenario: "Un ensayo aleatoriza 500 pacientes por brazo. El articulo reporta resultados para 420 vs. 380 pacientes, con 80 y 120 exclusiones respectivamente. Las razones incluyen: 'retiro de consentimiento,' 'perdida de seguimiento,' y 'desviacion de protocolo.' Mas pacientes fueron excluidos del brazo de control.",
+        question: "¿Que preocupacion de riesgo de sesgo plantea esto?",
+        options: [
+          { letter: "A", text: "Sin preocupacion—las exclusiones ocurren en cada ensayo", correct: false },
+          { letter: "B", text: "Alto riesgo de sesgo de desercion—las exclusiones diferenciales destruyen el equilibrio de aleatorizacion", correct: true },
+          { letter: "C", text: "Bajo riesgo si las razones estan documentadas", correct: false },
+          { letter: "D", text: "Poco claro—necesitamos saber por que los controles fueron excluidos mas", correct: false }
+        ],
+        feedback: {
+          correct: "¡Correcto! La desercion diferencial (120 vs. 80 exclusiones) sugiere que los grupos ya no son comparables. Si los pacientes control que no estaban mejorando tenian mas probabilidad de abandonar, los controles restantes se ven mas sanos de lo que deberian. Esto infla el beneficio aparente del tratamiento.",
+          incorrect: "Las exclusiones diferenciales (120 vs. 80) rompen la aleatorizacion. Los grupos restantes ya no estan equilibrados. Si pacientes control mas enfermos abandonaron, el grupo control aparece artificialmente sano. GRADE requiere reducir por desercion diferencial sustancial."
+        }
+      }},
+      { type: "story", theme: "dark", content: {
+        label: "La Brecha del Registro", title: "Los Resultados Que Desaparecieron",
+        text: "Una revision sistematica del registro de ensayos encontro que el <strong>31% de los ensayos</strong> cambiaron su resultado primario entre el registro y la publicacion. Los cambios no fueron aleatorios—favorecieron sistematicamente resultados positivos. Los resultados que mostraron beneficio fueron promovidos a primarios; los resultados que no mostraron efecto fueron degradados o desaparecieron.",
+        followup: "El reporte selectivo de resultados es invisible sin comparacion de registro. Un ensayo podria registrar cinco resultados, encontrar beneficio en uno, y publicar solo ese como el resultado 'primario'. El lector ve un ensayo positivo. La realidad: 4 de 5 resultados no mostraron nada. El registro PROSPERO para revisiones sistematicas y ClinicalTrials.gov para ensayos existen especificamente para combatir esto. Al evaluar el riesgo de sesgo, siempre compara los resultados publicados con los protocolos registrados."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "📋", title: "Escenario: El Cambio de Resultado Primario",
+        xp: 25,
+        scenario: "Comparas un ensayo publicado con su registro. El registro lista 'muerte cardiovascular' como primario. La publicacion lista 'compuesto de muerte CV, IM, o ACV' como primario y lo reporta como significativo. La muerte cardiovascular sola esta enterrada en una tabla y no muestra diferencia significativa.",
+        question: "¿Que calificacion de riesgo de sesgo es apropiada?",
+        options: [
+          { letter: "A", text: "Bajo—los resultados compuestos son clinicamente razonables", correct: false },
+          { letter: "B", text: "Alto—esto es cambio de resultado para lograr significancia", correct: true },
+          { letter: "C", text: "Poco claro—los autores pueden haber tenido buenas razones", correct: false },
+          { letter: "D", text: "Bajo si el compuesto fue pre-especificado en el protocolo", correct: false }
+        ],
+        feedback: {
+          correct: "¡Correcto! Cambiar de un resultado estrecho (muerte CV) a un compuesto mas amplio (muerte CV/IM/ACV) despues de ver que el resultado estrecho fallo es cambio de resultado clasico. El 31% de ensayos que hacen esto inflan sistematicamente los resultados positivos.",
+          incorrect: "Esto es cambio de resultado—el primario registrado fallo, asi que un compuesto mas amplio fue promovido. La significancia del compuesto puede estar impulsada enteramente por los componentes menos importantes. Compara cada publicacion con su registro."
+        }
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "La Auditoria de Avandia", title: "38,000 Infartos Expuestos por Un Cardiologo",
+        text: "En 2007, el Dr. Steven Nissen en la Clinica Cleveland hizo lo que los reguladores no habian hecho: agrupo todos los datos disponibles de rosiglitazona (Avandia). <strong>42 ensayos, 27,847 pacientes</strong>. La FDA habia aprobado Avandia basandose en resultados sustitutos—bajaba la glucosa hermosamente. Pero Nissen hizo una pregunta diferente: ¿que pasa con los corazones?",
+        followup: "Su metaanalisis revelo la verdad: Avandia aumentaba los infartos en <strong>43%</strong> (OR 1.43, IC 95% 1.03-1.98). GSK habia conducido estos ensayos. GSK tenia los datos. Pero los datos sobre eventos cardiovasculares habian sido dispersados a traves de ensayos, enterrados en tablas de eventos adversos, nunca agrupados. Cuando Nissen los agrupo, el patron se hizo innegable. La FDA estimo <strong>83,000 infartos en exceso</strong> entre 1999-2007. El sesgo no estaba en la conduccion del estudio—estaba en como los resultados fueron analizados y presentados. La sintesis selectiva puede ser tan peligrosa como el reporte selectivo."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "📑", title: "Escenario: Los Datos de Seguridad Dispersos",
+        xp: 25,
+        scenario: "Un farmaco ha sido estudiado en 30 ensayos para varias condiciones. Cada ensayo reporta algunos eventos cardiacos adversos en tablas suplementarias, pero ningun ensayo individual fue diseñado para resultados cardiacos. Un metaanalisis combinando eventos cardiacos a traves de los 30 ensayos muestra RR 1.35 (IC 95% 1.10-1.65) para infartos.",
+        question: "¿Como deberia esta señal de seguridad post-hoc afectar la certeza?",
+        options: [
+          { letter: "A", text: "Ignorarla—los ensayos no fueron diseñados para resultados cardiacos", correct: false },
+          { letter: "B", text: "Tomarla en serio—los eventos adversos agrupados pueden revelar señales reales incluso del analisis post-hoc", correct: true },
+          { letter: "C", text: "Descartarla—el metaanalisis de eventos adversos no es confiable", correct: false },
+          { letter: "D", text: "Esperar un ensayo de resultados cardiacos dedicado antes de actuar", correct: false }
+        ],
+        feedback: {
+          correct: "¡Correcto! El analisis de Avandia de Nissen fue agrupacion 'post-hoc' de eventos adversos dispersos—y revelo 83,000 infartos en exceso. Las señales de seguridad post-hoc del metaanalisis pueden ser reales. La ausencia de resultados cardiacos pre-especificados no significa que los eventos cardiacos no ocurrieron.",
+          incorrect: "El caso Avandia probo que la agrupacion post-hoc de eventos adversos puede revelar daño genuino. Esperar un ensayo dedicado mientras se acumulaban 83,000 infartos habria sido inconcebible. Las señales de seguridad del metaanalisis de eventos adversos merecen consideracion seria."
+        }
+      }},
+      { type: "story", theme: "dark", content: {
+        label: "El Engaño de ENHANCE", title: "Cuando Merck Oculto Lo Que Encontro",
+        text: "En 2006, Merck completo el ensayo ENHANCE de Vytorin (ezetimibe + simvastatina) para aterosclerosis. El ensayo midio el grosor de la arteria carotida—un sustituto para enfermedad cardiovascular. Los resultados debian publicarse a principios de 2007. Merck anuncio un 'retraso' por 'analisis adicionales.'",
+        followup: "Los 'analisis adicionales' tomaron <strong>dos años</strong>. Cuando finalmente se publicaron en 2008, ENHANCE mostro <strong>ningun beneficio</strong>—Vytorin no redujo el grosor arterial a pesar de bajar el colesterol LDL. Durante esos dos años de ocultamiento, las ventas de Vytorin excedieron <strong>$5 mil millones</strong>. Investigaciones del Congreso revelaron documentos internos mostrando que Merck sabia que los resultados eran negativos en 2006. El retraso no fue para analisis—fue para proteccion comercial. El retraso de publicacion es una forma de reporte selectivo: el tiempo se convierte en una herramienta de sesgo."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "⏰", title: "Escenario: El Retraso Sospechoso",
+        xp: 25,
+        scenario: "Un ensayo muy anticipado de un farmaco exitoso supuestamente debia reportar resultados hace 18 meses. La compañia cita 'analisis en curso' y 'problemas de calidad de datos.' Mientras tanto, el farmaco continua vendiendo miles de millones anualmente. Los ensayos de competidores ya han reportado.",
+        question: "¿Que deberias sospechar sobre los resultados no reportados?",
+        options: [
+          { letter: "A", text: "Nada—la calidad de datos toma tiempo", correct: false },
+          { letter: "B", text: "Probablemente negativos o dañinos—las compañias retrasan malas noticias, no buenas noticias", correct: true },
+          { letter: "C", text: "Probablemente positivos—estan esperando aprobacion regulatoria", correct: false },
+          { letter: "D", text: "No se puede inferir nada del tiempo de publicacion", correct: false }
+        ],
+        feedback: {
+          correct: "¡Correcto! El retraso de ENHANCE nos enseño: las compañias no retrasan buenas noticias por dos años. Los retrasos de publicacion inexplicables, especialmente para productos que aun generan ingresos, son fuerte evidencia de resultados desfavorables. Considera los ensayos retrasados como potencialmente sesgados contra la intervencion.",
+          incorrect: "El tiempo de publicacion es informativo. Las compañias aceleran la publicacion de resultados positivos (precio de acciones, marketing) y retrasan los negativos (ventas continuas). Un retraso de 18 meses para un farmaco exitoso sugiere fuertemente que los resultados no apoyan el uso continuo."
+        }
+      }},
+      { type: "checklist", theme: "dark", content: {
+        title: "Dominios de Riesgo de Sesgo (ECAs)",
+        items: [
+          "Generacion de secuencia aleatoria — ¿Fue la aleatorizacion verdaderamente aleatoria?",
+          "Ocultamiento de asignacion — ¿Alguien pudo predecir las asignaciones?",
+          "Cegamiento de participantes/personal — ¿Sabian el tratamiento?",
+          "Cegamiento de evaluacion de resultados — ¿Los evaluadores sabian el tratamiento?",
+          "Datos de resultados incompletos — ¿La desercion fue equilibrada y explicada?",
+          "Reporte selectivo — ¿Se reportan todos los resultados registrados?",
+          "Otro sesgo — Desequilibrios basales, detencion temprana, etc."
+        ]
+      }},
+      { type: "quiz", theme: "dark", content: {
+        question: "¿Por que GRADE reduce por evaluacion de resultados de etiqueta abierta incluso cuando los resultados parecen 'objetivos'?",
+        options: [
+          { text: "Los ensayos de etiqueta abierta siempre son de menor calidad", correct: false },
+          { text: "Incluso los resultados objetivos involucran juicios afectados por el conocimiento del tratamiento", correct: true },
+          { text: "Las regulaciones requieren evaluacion cegada", correct: false },
+          { text: "Es una convencion conservadora, no basada en evidencia", correct: false }
+        ],
+        xp: 20,
+        feedback: {
+          correct: "¡Correcto! IM dudoso, sintomas de ACV inciertos, cambios de ECG debatibles—todos involucran interpretacion. Los estudios muestran que la evaluacion no cegada favorece sistematicamente el tratamiento conocido en 10-20% incluso para resultados 'duros'.",
+          incorrect: "La investigacion muestra que la evaluacion no cegada infla los efectos incluso para resultados que parecen objetivos. Los casos dudosos se interpretan a favor del efecto esperado. Eso es sesgo de deteccion."
+        }
+      }}
+    ]
+  },
+  {
+    id: 4, title: "Inconsistencia", subtitle: "Cuando los estudios discrepan", xp: 160,
+    slides: [
+      { type: "title", theme: "orange-bg", content: { title: "Inconsistencia", subtitle: "El segundo dominio: ¿Que hacemos cuando los estudios discrepan?" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "Comprender por que los resultados de los estudios varian y cuando la variacion es preocupante",
+          "Interpretar las estadisticas I² y tau² para heterogeneidad",
+          "Distinguir inconsistencia explicable de inexplicable",
+          "Decidir cuando reducir la certeza por inconsistencia"
+        ],
+        tip: "El desacuerdo real entre estudios nos dice algo importante."
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "La Contradiccion de la Vitamina D", title: "Cuando 200 Estudios No Pudieron Ponerse de Acuerdo",
+        text: "Para 2019, mas de <strong>200 ensayos aleatorizados</strong> habian estudiado la suplementacion con vitamina D. Los resultados fueron caoticos. Algunos mostraron que la vitamina D prevenia cancer (RR 0.77). Otros no mostraron efecto (RR 1.02). Algunos mostraron daño (RR 1.15). Los metaanalisis los agruparon todos y proclamaron 'beneficio estadisticamente significativo.' Pero el I² fue <strong>78%</strong>—heterogeneidad masiva que el estimado resumen ocultaba.",
+        followup: "El ensayo mas grande, VITAL (25,871 participantes), finalmente trajo claridad. Mostro <strong>ningun beneficio</strong> para cancer o enfermedad cardiovascular. Los estudios positivos mas pequeños tenian problemas metodologicos: aleatorizacion inadecuada, analisis post-hoc, poblaciones seleccionadas. El estimado agrupado habia ocultado una verdad crucial: cuando los estudios discrepan salvajemente, el promedio puede no representar la verdad de nadie. GRADE requiere reducir por este tipo de inconsistencia, independientemente de lo que muestre el estimado agrupado."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "📊", title: "Escenario: El Metaanalisis Heterogeneo",
+        xp: 25,
+        scenario: "Un metaanalisis de 15 ensayos muestra beneficio agrupado (OR 0.75, p<0.001). Sin embargo, I² = 82%, tau² es grande, y el intervalo de prediccion cruza 1.0. Seis ensayos muestran daño, nueve muestran beneficio. Los autores concluyen 'beneficio significativo con heterogeneidad moderada.'",
+        question: "¿Como deberia la inconsistencia afectar la calificacion de certeza?",
+        options: [
+          { letter: "A", text: "Sin reduccion—el estimado agrupado es estadisticamente significativo", correct: false },
+          { letter: "B", text: "Reducir un nivel—I² > 75% es heterogeneidad sustancial", correct: false },
+          { letter: "C", text: "Reducir uno o dos niveles—el intervalo de prediccion cruzando 1.0 significa que estudios futuros podrian mostrar daño", correct: true },
+          { letter: "D", text: "No se puede calificar—la evidencia inconsistente es ininterpretable", correct: false }
+        ],
+        feedback: {
+          correct: "¡Correcto! El intervalo de prediccion es clave. Cuando cruza el nulo, estamos diciendo: 'Si hicieramos otro estudio, podria mostrar el efecto opuesto.' Eso es incertidumbre profunda. I² = 82% con un intervalo de prediccion cruzando 1.0 justifica reduccion seria.",
+          incorrect: "I² de 82% es heterogeneidad severa, pero el intervalo de prediccion es mas informativo. Que cruce 1.0 significa que estudios futuros podrian mostrar daño—el 'beneficio' agrupado puede no aplicar al siguiente paciente. La significancia estadistica del estimado agrupado no rescata evidencia inconsistente."
+        }
+      }},
+      { type: "story", theme: "dark", content: {
+        label: "El Misterio del ACV", title: "El Beneficio Desvaneciente de la Aspirina",
+        text: "En 1988, el ensayo ISIS-2 probo que la aspirina reducia la muerte despues del infarto en <strong>23%</strong>. La evidencia era solida—17,187 pacientes, beneficio claro, heterogeneidad minima cuando se agrupo con ensayos similares. La aspirina se convirtio en atencion estandar.",
+        followup: "Pero la prevencion de ACV fue diferente. Los metaanalisis de aspirina para prevencion primaria mostraron <strong>resultados salvajemente inconsistentes</strong>. Algunos ensayos mostraron 15% de reduccion en ACV. Otros mostraron 10% de aumento. El I² excedio 60%. La explicacion emergio lentamente: la aspirina previene ACV <strong>isquemico</strong> pero causa ACV <strong>hemorragico</strong>. Cuando los ensayos midieron 'todo ACV,' los resultados dependieron de la mezcla basal de tipos de ACV en cada poblacion. La inconsistencia no fue ruido—fue biologia. Entender <em>por que</em> los estudios difieren cambia la interpretacion completamente."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "🔍", title: "Escenario: La Inconsistencia Explicable",
+        xp: 25,
+        scenario: "Un metaanalisis muestra I² = 70%. Sin embargo, el analisis de subgrupos revela: los ensayos en pacientes de alto riesgo muestran beneficio consistente (I² = 15%, OR 0.60), mientras que los ensayos en pacientes de bajo riesgo muestran efectos nulos consistentes (I² = 20%, OR 1.02). El alto I² se explica enteramente por mezclar estas poblaciones.",
+        question: "¿Deberias reducir por inconsistencia?",
+        options: [
+          { letter: "A", text: "Si—I² = 70% siempre requiere reduccion", correct: false },
+          { letter: "B", text: "No—la inconsistencia esta completamente explicada por un subgrupo pre-especificado y biologicamente plausible", correct: true },
+          { letter: "C", text: "Parcialmente—reducir un nivel a pesar de la explicacion", correct: false },
+          { letter: "D", text: "Reportar dos calificaciones de certeza separadas para cada subgrupo", correct: false }
+        ],
+        feedback: {
+          correct: "¡Correcto! GRADE distingue la heterogeneidad inexplicada (reducir) de la heterogeneidad completamente explicada por efectos de subgrupo creibles (sin reduccion por inconsistencia). La explicacion debe ser pre-especificada y biologicamente plausible—no busqueda de datos post-hoc.",
+          incorrect: "Cuando la heterogeneidad esta completamente explicada por un efecto de subgrupo pre-especificado y creible, la 'inconsistencia' realmente nos dice algo util: el tratamiento funciona diferente en diferentes poblaciones. Esto informa la practica clinica en lugar de socavar la certeza."
+        }
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "La Paradoja de la Albumina", title: "28 Ensayos, Cero Respuestas",
+        text: "¿Deberian los pacientes criticamente enfermos recibir albumina para resucitacion con fluidos? Para 1998, el Grupo de Lesiones de Cochrane habia agrupado <strong>28 ensayos</strong>. Su conclusion: la albumina <strong>aumenta la mortalidad en 68%</strong> (RR 1.68). Los titulares gritaron. El NHS considero prohibir la albumina. La evidencia parecia condenatoria.",
+        followup: "Pero mira mas de cerca esos 28 ensayos. I² fue <strong>0%</strong>—sin heterogeneidad. Un problema diferente acechaba: los ensayos eran diminutos (muchos con <50 pacientes), midieron diferentes poblaciones (quemaduras, trauma, cirugia), y muchos tenian decadas de antiguedad. El <strong>ensayo SAFE</strong> (6,997 pacientes, 2004) finalmente respondio la pregunta: la albumina fue <strong>equivalente a la solucion salina</strong>—sin beneficio, sin daño. El estimado agrupado de 28 pequeños ensayos dispares habia sido un artefacto de variacion aleatoria en estudios sin poder, no una señal real. La consistencia (bajo I²) no garantiza verdad."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "⚖️", title: "Escenario: La Evidencia Consistente pero Preocupante",
+        xp: 25,
+        scenario: "Un metaanalisis agrupa 12 pequeños ensayos (total n=400) con I² = 5%—heterogeneidad muy baja. El efecto agrupado es OR 0.50 (beneficio dramatico), estadisticamente significativo. Un colega argumenta que esto merece certeza ALTA porque los resultados son 'hermosamente consistentes.'",
+        question: "¿Que preocupacion deberias plantear?",
+        options: [
+          { letter: "A", text: "Ninguna—bajo I² significa alta certeza para inconsistencia", correct: false },
+          { letter: "B", text: "Bajo I² en pequeños ensayos puede reflejar sesgo consistente, no verdad consistente", correct: true },
+          { letter: "C", text: "I² = 5% es demasiado bajo y sugiere sesgo de publicacion", correct: false },
+          { letter: "D", text: "El estimado agrupado es demasiado dramatico para ser real", correct: false }
+        ],
+        feedback: {
+          correct: "¡Correcto! Pequeños ensayos con resultados dramaticos consistentes deberian disparar sospecha. Pueden compartir los mismos sesgos (sesgo de publicacion, metodos defectuosos similares). El metaanalisis de albumina tenia I² cerca de 0% de 28 ensayos—pero el gran ensayo SAFE mostro efecto nulo. Consistencia en pequeños ensayos ≠ verdad.",
+          incorrect: "La baja heterogeneidad entre pequeños ensayos potencialmente sesgados puede ser engañosa. Si todos los ensayos comparten sesgos similares (sesgo de publicacion, metodos pobres), mostraran resultados consistentemente sesgados. El caso de la albumina prueba esto: I² fue bajo, pero el efecto fue un artefacto."
+        }
+      }},
+      { type: "stats", theme: "dark", content: {
+        title: "Entendiendo los Umbrales de I²",
+        stats: [
+          { value: "0-25%", label: "Heterogeneidad baja" },
+          { value: "25-50%", label: "Moderada" },
+          { value: "50-75%", label: "Sustancial" },
+          { value: ">75%", label: "Considerable" }
+        ],
+        caption: "Pero I² solo no determina la reduccion—el intervalo de prediccion y el significado clinico importan mas."
+      }},
+      { type: "checklist", theme: "dark", content: {
+        title: "Lista de Verificacion de Evaluacion de Inconsistencia",
+        items: [
+          "Calcular I² y tau² — pero no te detengas ahi",
+          "Examinar el intervalo de prediccion — ¿cruza umbrales clinicamente importantes?",
+          "Buscar intervalos de confianza superpuestos entre estudios",
+          "Verificar si la heterogeneidad puede explicarse por subgrupos creibles",
+          "Considerar si pequeños ensayos estan impulsando la inconsistencia (vs. desacuerdo de grandes ensayos)"
+        ]
+      }},
+      { type: "quiz", theme: "dark", content: {
+        question: "¿Por que el intervalo de prediccion es mas importante que I² para la evaluacion de inconsistencia de GRADE?",
+        options: [
+          { text: "Los intervalos de prediccion son mas faciles de calcular", correct: false },
+          { text: "Los intervalos de prediccion nos dicen que efecto podria mostrar un estudio futuro", correct: true },
+          { text: "I² solo es valido para metaanalisis grandes", correct: false },
+          { text: "Los intervalos de prediccion tienen en cuenta el sesgo de publicacion", correct: false }
+        ],
+        xp: 20,
+        feedback: {
+          correct: "Exacto. El intervalo de prediccion dice: 'El siguiente estudio de esta distribucion de efectos probablemente caera en este rango.' Si ese rango incluye daño mientras que el estimado agrupado muestra beneficio, estamos profundamente inseguros sobre lo que le sucedera al siguiente paciente.",
+          incorrect: "El intervalo de prediccion captura la incertidumbre sobre lo que estudios futuros (o el siguiente paciente) podrian experimentar. I² nos dice si existe heterogeneidad; el intervalo de prediccion nos dice si importa clinicamente."
+        }
+      }}
+    ]
+  },
+  {
+    id: 5, title: "Evidencia Indirecta", subtitle: "Pregunta equivocada, respuesta equivocada", xp: 170,
+    slides: [
+      { type: "title", theme: "purple-bg", content: { title: "Evidencia Indirecta", subtitle: "El tercer dominio: ¿Esta evidencia responde nuestra pregunta real?" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "Reconocer cuatro tipos de evidencia indirecta: poblacion, intervencion, comparador, resultado",
+          "Comprender por que los resultados sustitutos engañan",
+          "Aplicar evaluacion de evidencia indirecta a escenarios reales",
+          "Decidir cuando la evidencia es demasiado indirecta para confiar"
+        ],
+        tip: "La mejor evidencia para la pregunta equivocada sigue siendo la respuesta equivocada."
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "La Catastrofe CAST", title: "50,000 Muertos por un Tratamiento Logico",
+        text: "Despues de un infarto, las arritmias predicen muerte. <strong>Encainida y flecainida</strong> suprimian las arritmias en el ECG hermosamente—85% de reduccion en contracciones ventriculares prematuras. La FDA los aprobo. Los cardiologos los prescribieron a cientos de miles de pacientes post-IM. La logica era irresistible: arritmias peligrosas → muerte subita; suprimir arritmias → prevenir muerte.",
+        followup: "El ensayo CAST fue diseñado para confirmar lo que todos ya 'sabian.' En cambio, entrego un veredicto que aturdio a la cardiologia. Los pacientes con farmacos antiarritmicos murieron a <strong>3.6 veces la tasa</strong> del placebo. Los ensayos fueron detenidos temprano por daño. Se estimo que <strong>50,000 estadounidenses murieron</strong> por farmacos que arreglaron perfectamente el sustituto (ECG) mientras causaban el resultado (muerte). La evidencia para supresion de arritmias fue de certeza ALTA—pero era evidencia indirecta para mortalidad. Esa evidencia indirecta mato a 50,000 personas."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "📈", title: "Escenario: El Sustituto Perfecto",
+        xp: 25,
+        scenario: "Un nuevo farmaco para diabetes muestra reduccion dramatica de HbA1c (1.5% de mejora vs. placebo). La compañia argumenta que dado que HbA1c es un 'sustituto validado' para resultados cardiovasculares, la certeza de beneficio CV deberia calificarse como MODERADA. Aun no existen ensayos de resultados CV.",
+        question: "¿Como deberias calificar la certeza para beneficio cardiovascular?",
+        options: [
+          { letter: "A", text: "MODERADA—HbA1c es un sustituto validado", correct: false },
+          { letter: "B", text: "ALTA—1.5% de reduccion es clinicamente significativo", correct: false },
+          { letter: "C", text: "BAJA o MUY BAJA—reducir por evidencia indirecta (resultado sustituto)", correct: true },
+          { letter: "D", text: "No se puede calificar hasta que se conduzcan ensayos CV", correct: false }
+        ],
+        feedback: {
+          correct: "¡Correcto! ACCORD mostro que la reduccion intensiva de HbA1c <em>aumento</em> las muertes. La rosiglitazona bajo HbA1c mientras aumentaba los infartos. Los resultados sustitutos requieren reduccion por evidencia indirecta, sin importar cuan 'validados' parezcan. Se requieren resultados importantes para el paciente para alta certeza.",
+          incorrect: "Los farmacos CAST arreglaron los ECGs mientras triplicaban las muertes. ACCORD bajo HbA1c mientras aumentaba la mortalidad. Los 'sustitutos validados' han fallado repetidamente. GRADE requiere reducir uno o dos niveles cuando solo se miden resultados sustitutos."
+        }
+      }},
+      { type: "story", theme: "dark", content: {
+        label: "La Traicion de la Densidad Osea", title: "Cuando Huesos Mas Fuertes Se Rompieron Mas",
+        text: "El fluoruro de sodio aumentaba la densidad mineral osea dramaticamente—<strong>8% de mejora por año</strong>. Para la osteoporosis, esto parecia un milagro. La densidad osea era el sustituto aceptado para riesgo de fractura. Mayor densidad = menos fracturas. Las matematicas parecian ineludibles.",
+        followup: "Luego vinieron los ensayos midiendo fracturas reales. El fluoruro de sodio <strong>aumento</strong> las tasas de fractura a pesar de mejorar la densidad osea. La explicacion: el fluoruro creaba hueso denso pero fragil—como añadir cantidad sin calidad. El sustituto (densidad) se movio en la direccion correcta mientras el resultado importante para el paciente (fracturas) se movio en la direccion equivocada. Este caso se convirtio en un hito en el escepticismo de resultados sustitutos."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "🦴", title: "Escenario: La Decision del Farmaco Oseo",
+        xp: 25,
+        scenario: "Un nuevo farmaco para osteoporosis muestra 4% de mejora en densidad mineral osea a 2 años. La compañia presenta evidencia de fracturas reducidas, pero los ensayos de fracturas usaron una formulacion y dosis diferente a la que se esta aprobando. La FDA te pide calificar la certeza de beneficio en fracturas para la formulacion aprobada.",
+        question: "¿Que preocupacion de evidencia indirecta aplica?",
+        options: [
+          { letter: "A", text: "Sin preocupacion—la densidad osea es un sustituto validado", correct: false },
+          { letter: "B", text: "Indirecta para intervencion—se probo formulacion/dosis diferente", correct: true },
+          { letter: "C", text: "Indirecta para poblacion—los ensayos de fracturas pueden tener diferentes pacientes", correct: false },
+          { letter: "D", text: "Indirecta para resultado—las fracturas no son importantes para el paciente", correct: false }
+        ],
+        feedback: {
+          correct: "¡Correcto! La evidencia indirecta puede aplicar a intervencion, poblacion, comparador o resultado. Aqui, la formulacion/dosis probada para fracturas difiere de la que se esta aprobando. No podemos asumir equivalencia. Esto requiere reduccion por intervencion indirecta.",
+          incorrect: "La evidencia de fracturas viene de una formulacion y dosis diferente. Estamos extrapolando del Farmaco A a dosis X al Farmaco A a dosis Y. Eso es evidencia indirecta de intervencion—la evidencia no prueba directamente lo que estamos aprobando."
+        }
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "El Ajuste de Cuentas de Rosiglitazona", title: "La Apuesta de la FDA con 2.5 Millones de Pacientes",
+        text: "En 2007, el cardiologo Steven Nissen publico un metaanalisis mostrando que la rosiglitazona (Avandia) aumentaba los infartos en <strong>43%</strong>. El farmaco habia sido prescrito a millones basandose en el control de glucosa. Pero nunca se habia requerido un gran ensayo de resultados.",
+        followup: "La logica de la FDA habia sido: la diabetes causa enfermedad cardiaca → mejor control de glucosa deberia prevenirla. Eso es <strong>evidencia indirecta</strong>—asumir una cadena de causalidad sin probar el ultimo eslabon. La FDA estimo que la rosiglitazona causo <strong>83,000 infartos en exceso</strong> antes de que se impusieran restricciones. La Agencia Europea de Medicamentos la suspendio completamente. Un farmaco aprobado con evidencia indirecta habia dañado a mas pacientes de los que ayudo."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "💊", title: "Escenario: La Brecha Cabeza a Cabeza",
+        xp: 25,
+        scenario: "Necesitas comparar el Farmaco A vs. Farmaco B para tu guia. No existen ensayos cabeza a cabeza. Tienes: Farmaco A vs. placebo (RR 0.70) y Farmaco B vs. placebo (RR 0.65) de ensayos separados en diferentes poblaciones conducidos con 10 años de diferencia.",
+        question: "¿Que tipo de evidencia indirecta aplica?",
+        options: [
+          { letter: "A", text: "Sin evidencia indirecta—podemos comparar las dos estimaciones controladas por placebo", correct: false },
+          { letter: "B", text: "Las comparaciones indirectas requieren reduccion—diferentes ensayos rompen la aleatorizacion", correct: true },
+          { letter: "C", text: "Solo indirecta para poblacion, no para comparacion", correct: false },
+          { letter: "D", text: "El metaanalisis en red resuelve esta evidencia indirecta", correct: false }
+        ],
+        feedback: {
+          correct: "¡Correcto! Comparar entre ensayos rompe la aleatorizacion. El ensayo del Farmaco A puede haber tenido pacientes mas enfermos, diferente atencion de fondo, diferentes definiciones de resultados. La diferencia de RR (0.70 vs. 0.65) puede reflejar diferencias de ensayo, no diferencias de farmaco. GRADE llama a esto 'comparacion indirecta' y requiere reduccion.",
+          incorrect: "Las comparaciones indirectas son fundamentalmente diferentes de los ensayos cabeza a cabeza. Cuando comparamos Farmaco A vs. placebo (ensayo 1) con Farmaco B vs. placebo (ensayo 2), cualquier diferencia entre ensayos se convierte en un factor de confusion. El metaanalisis en red ayuda pero no elimina esta evidencia indirecta."
+        }
+      }},
+      { type: "checklist", theme: "dark", content: {
+        title: "Cuatro Tipos de Evidencia Indirecta",
+        items: [
+          "Poblacion — Los pacientes del ensayo difieren de los pacientes de la guia",
+          "Intervencion — La intervencion del ensayo difiere de la recomendacion",
+          "Comparador — La comparacion del ensayo difiere de la pregunta clinica",
+          "Resultado — El ensayo mide sustitutos en lugar de resultados importantes para el paciente"
+        ]
+      }},
+      { type: "quiz", theme: "dark", content: {
+        question: "¿Por que los farmacos antiarritmicos CAST mataron a 50,000 personas a pesar de evidencia perfecta para supresion de arritmias?",
+        options: [
+          { text: "Los ensayos fueron fraudulentos", correct: false },
+          { text: "El sustituto (supresion de arritmias) no predijo el resultado (muerte)", correct: true },
+          { text: "Los medicos usaron los farmacos incorrectamente", correct: false },
+          { text: "La poblacion de pacientes fue diferente a los ensayos", correct: false }
+        ],
+        xp: 20,
+        feedback: {
+          correct: "Exacto. La evidencia para supresion de arritmias fue impecable. Los farmacos hicieron exactamente lo que se suponia que hicieran en el ECG. Pero suprimir arritmias no previno la muerte—la causo a traves de diferentes mecanismos. Esto es evidencia indirecta para resultado: medir sustitutos en lugar de resultados importantes para el paciente.",
+          incorrect: "Los ensayos fueron bien conducidos. Los farmacos funcionaron perfectamente para su proposito previsto (suprimir arritmias). El problema fue evidencia indirecta: la supresion de arritmias (el resultado medido) no predijo la mortalidad (el resultado que importa). Los resultados sustitutos pueden engañar incluso cuando la evidencia es metodologicamente perfecta."
+        }
+      }}
+    ]
+  },
+  {
+    id: 6, title: "Imprecision", subtitle: "Datos insuficientes", xp: 150,
+    slides: [
+      { type: "title", theme: "dark", content: { title: "Imprecision", subtitle: "El cuarto dominio: ¿Tenemos suficientes datos?" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "Comprender por que los intervalos de confianza amplios socavan la certeza",
+          "Aplicar el concepto de 'Tamaño de Informacion Optimo'",
+          "Reconocer cuando los IC del 95% cruzan umbrales de decision clinica",
+          "Decidir cuando reducir por imprecision"
+        ],
+        tip: "La significancia estadistica no es suficiente—los intervalos de confianza deben ser clinicamente estrechos."
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "El Espejismo de PROWESS", title: "Cuando 1,690 Muertes No Fueron Suficientes",
+        text: "En 2001, la drotrecogina alfa (Xigris) de Eli Lilly fue aprobada para sepsis severa basandose en el ensayo PROWESS. El ensayo mostro <strong>6.1% de reduccion absoluta de mortalidad</strong>—de 30.8% a 24.7%. La FDA lo aprobo a pesar de las preocupaciones. Costo: $6,800 por tratamiento. Lilly proyecto miles de millones en ingresos.",
+        followup: "Luego vino el analisis del intervalo de confianza. El IC del 95% para reduccion de mortalidad iba de <strong>1.9% a 10.4%</strong>. El beneficio podria ser enorme (10.4%) o clinicamente marginal (1.9%). Con un farmaco tan caro y riesgoso (aumento de sangrado), esa incertidumbre importaba. Los ensayos subsecuentes no pudieron replicar PROWESS. El ensayo ADDRESS en sepsis menos severa no mostro <strong>ningun beneficio</strong>. El ensayo PROWESS-SHOCK confirmo <strong>ningun beneficio de mortalidad</strong> incluso en sepsis severa. En 2011, Lilly retiro Xigris mundialmente. Una decada de uso, miles de millones gastados, y la imprecision nos habia advertido desde el principio."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "📐", title: "Escenario: El Intervalo de Confianza Amplio",
+        xp: 25,
+        scenario: "Un ensayo muestra que un nuevo tratamiento reduce la mortalidad del 20% al 14%—una reduccion absoluta del 6% (RR 0.70, p=0.04). Sin embargo, el IC del 95% para reduccion de riesgo absoluto es 0.5% a 11.5%. El limite inferior (0.5%) esta por debajo de tu diferencia clinicamente importante minima de 2%.",
+        question: "¿Deberias reducir por imprecision?",
+        options: [
+          { letter: "A", text: "No—el resultado es estadisticamente significativo", correct: false },
+          { letter: "B", text: "No—el estimado puntual muestra beneficio clinicamente significativo", correct: false },
+          { letter: "C", text: "Si—el IC incluye efectos clinicamente no importantes", correct: true },
+          { letter: "D", text: "Si—el IC incluye daño", correct: false }
+        ],
+        feedback: {
+          correct: "¡Correcto! La significancia estadistica no garantiza precision clinica. Si el efecto verdadero podria ser tan pequeño como 0.5% (por debajo de tu diferencia minima importante), no puedes recomendar el tratamiento con confianza. GRADE requiere reducir cuando los ICs cruzan umbrales de decision clinica, no solo el nulo.",
+          incorrect: "El limite inferior del IC (0.5%) cae por debajo de la diferencia clinicamente importante minima (2%). Esto significa que el efecto verdadero podria ser demasiado pequeño para justificar los costos/riesgos del tratamiento. La significancia estadistica no es suficiente—los ICs deben excluir efectos clinicamente no importantes para alta certeza."
+        }
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "El Indice de Fragilidad",
+        subtitle: "¿Que tan estable es la significancia estadistica?",
+        text: "El indice de fragilidad pregunta: '¿Cuantos pacientes necesitarian haber tenido un resultado diferente para que este resultado no fuera significativo?' Un indice de fragilidad de 3 significa que si solo 3 pacientes hubieran tenido resultados diferentes, el valor p cruzaria 0.05. Muchos hallazgos 'significativos' publicados tienen indices de fragilidad menores a 10.",
+        highlight: "Un ensayo con indice de fragilidad de 5 significa que el resultado 'significativo' depende de menos pacientes de los que estan sentados en la sala de espera de tu consultorio."
+      }},
+      { type: "checklist", theme: "dark", content: {
+        title: "Lista de Verificacion de Evaluacion de Imprecision",
+        items: [
+          "¿El IC del 95% cruza umbrales clinicamente importantes?",
+          "¿El IC cruza tanto beneficio como daño?",
+          "¿El numero total de eventos esta por debajo del Tamaño de Informacion Optimo?",
+          "¿Cual es el indice de fragilidad para los hallazgos clave?",
+          "¿El limite superior o inferior cambiaria la toma de decisiones clinicas?"
+        ]
+      }},
+      { type: "quiz", theme: "dark", content: {
+        question: "¿Por que GRADE requiere reducir cuando los intervalos de confianza cruzan 'umbrales de decision clinica' incluso si son estadisticamente significativos?",
+        options: [
+          { text: "Las convenciones estadisticas son arbitrarias", correct: false },
+          { text: "El efecto verdadero podria ser demasiado pequeño (o demasiado dañino) para justificar el tratamiento", correct: true },
+          { text: "Los valores p no tienen en cuenta el tamaño de muestra", correct: false },
+          { text: "Los intervalos de confianza son mas precisos que los valores p", correct: false }
+        ],
+        xp: 20,
+        feedback: {
+          correct: "Exacto. Si un tratamiento reduce 'significativamente' la mortalidad pero el IC incluye efectos demasiado pequeños para justificar el costo/riesgo—o incluye daño sustancial—no podemos recomendarlo con confianza. GRADE juzga la precision contra umbrales clinicos, no convenciones estadisticas.",
+          incorrect: "Las decisiones clinicas requieren saber si el efecto verdadero es lo suficientemente grande para importar. Un resultado estadisticamente significativo con un IC que abarca 'trivialmente util' a 'sustancialmente dañino' no guia el tratamiento. GRADE usa umbrales clinicos porque eso es lo que requieren las decisiones."
+        }
+      }}
+    ]
+  },
+  {
+    id: 7, title: "Sesgo de Publicacion", subtitle: "La evidencia invisible", xp: 160,
+    slides: [
+      { type: "title", theme: "red-bg", content: { title: "Sesgo de Publicacion", subtitle: "El quinto dominio: ¿Que evidencia nunca nos llego?" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "Comprender como los ensayos negativos desaparecen de la literatura",
+          "Interpretar los graficos de embudo y sus limitaciones",
+          "Reconocer cuando el sesgo de publicacion probablemente distorsiona la evidencia",
+          "Decidir cuando reducir la certeza por sesgo de publicacion"
+        ],
+        tip: "La evidencia mas peligrosa es la evidencia que nunca ves."
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "El Engaño de Paroxetina", title: "Los Niños Ocultos de GlaxoSmithKline",
+        text: "A principios de los 2000, GSK comercializo paroxetina (Paxil) para depresion adolescente. La evidencia publicada parecia convincente. El Estudio 329, publicado en el <em>Journal of the American Academy of Child and Adolescent Psychiatry</em>, reporto que la paroxetina era <strong>'generalmente bien tolerada y efectiva.'</strong> Miles de adolescentes fueron prescritos el farmaco.",
+        followup: "Luego, las demandas forzaron a GSK a liberar documentos internos. El Estudio 329 realmente habia mostrado que la paroxetina no era <strong>mejor que el placebo</strong> y aumentaba el comportamiento suicida. GSK habia conducido otros ensayos—tambien negativos—que nunca fueron publicados. El articulo publicado habia sido escrito por fantasmas por una compañia de comunicaciones medicas. Cuando todos los estudios fueron combinados, la verdad emergio: la paroxetina no funcionaba para la depresion adolescente y era peligrosa. La literatura publicada habia sido sistematicamente manipulada. El sesgo de publicacion no fue pasivo—fue fabricado."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "📚", title: "Escenario: La Literatura Toda Positiva",
+        xp: 25,
+        scenario: "Un metaanalisis incluye 12 ensayos financiados por la industria de un nuevo antidepresivo—todos mostrando beneficio. El grafico de embudo parece simetrico. Un colega nota que los registros de la FDA muestran que la compañia condujo 8 ensayos adicionales que nunca fueron publicados. No puedes acceder a los datos no publicados.",
+        question: "¿Deberias reducir por sesgo de publicacion?",
+        options: [
+          { letter: "A", text: "No—el grafico de embudo es simetrico", correct: false },
+          { letter: "B", text: "No—solo podemos juzgar la evidencia que existe", correct: false },
+          { letter: "C", text: "Si—los ensayos no publicados documentados sugieren reporte selectivo", correct: true },
+          { letter: "D", text: "Solicitar los datos antes de decidir", correct: false }
+        ],
+        feedback: {
+          correct: "¡Correcto! El grafico de embudo solo muestra estudios publicados—no puede detectar estudios faltantes. Saber que existen 8 ensayos no publicados es evidencia fuerte de sesgo de publicacion. El grafico de embudo simetrico de paroxetina oculto ensayos negativos escondidos. GRADE reduce cuando hay evidencia directa de estudios no publicados.",
+          incorrect: "Los graficos de embudo solo muestran lo que esta publicado. Si los ensayos negativos son sistematicamente suprimidos (como con paroxetina), el embudo puede parecer perfecto mientras oculta evidencia crucial. Los registros de la FDA mostrando ensayos no publicados son evidencia directa de sesgo de publicacion."
+        }
+      }},
+      { type: "stats", theme: "dark", content: {
+        title: "La Escala de Evidencia Oculta",
+        stats: [
+          { value: "50%", label: "Ensayos nunca publicados" },
+          { value: "74%", label: "Datos de reboxetina ocultos" },
+          { value: "60%", label: "Datos de Tamiflu sin liberar" },
+          { value: "31%", label: "Resultados cambiados" }
+        ],
+        caption: "La literatura publicada representa una seleccion curada, no evidencia completa."
+      }},
+      { type: "checklist", theme: "dark", content: {
+        title: "Señales de Alerta de Sesgo de Publicacion",
+        items: [
+          "Todos o la mayoria de los ensayos financiados por la industria",
+          "Los registros de ensayos muestran ensayos completados no publicados",
+          "Asimetria del grafico de embudo con pequeños estudios negativos faltantes",
+          "Los resultados en publicaciones difieren de los protocolos registrados",
+          "Efectos grandes en metaanalisis contradichos por un solo gran ensayo"
+        ]
+      }},
+      { type: "quiz", theme: "dark", content: {
+        question: "¿Por que el sesgo de publicacion con paroxetina para depresion adolescente paso desapercibido durante años?",
+        options: [
+          { text: "Los estudios fueron bien conducidos", correct: false },
+          { text: "Los ensayos negativos fueron ocultados y el ensayo positivo fue escrito por fantasmas para tergiversar resultados", correct: true },
+          { text: "El farmaco genuinamente funciono en algunos pacientes", correct: false },
+          { text: "Las agencias regulatorias no revisaron los datos", correct: false }
+        ],
+        xp: 20,
+        feedback: {
+          correct: "Exacto. GSK oculto ensayos negativos y contrato a una compañia de comunicaciones medicas para escribir el Estudio 329 de una manera que hiciera que la paroxetina pareciera efectiva. El sesgo de publicacion fue deliberado y sistematico—visible solo cuando las demandas forzaron la divulgacion.",
+          incorrect: "El engaño fue activo, no pasivo. GSK sabia que la paroxetina no funcionaba para la depresion adolescente y aumentaba el comportamiento suicida. Enterraron ensayos negativos y tergiversaron el unico ensayo publicado. Los metodos de deteccion tradicionales no pudieron encontrar lo que fue ocultado deliberadamente."
+        }
+      }}
+    ]
+  },
+  {
+    id: 8, title: "Factores de Mejora", subtitle: "Cuando la evidencia observacional gana confianza", xp: 140,
+    slides: [
+      { type: "title", theme: "green-bg", content: { title: "Factores de Mejora", subtitle: "Cuando la observacion rivaliza con la aleatorizacion" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "Comprender los tres factores de mejora de GRADE",
+          "Aprender cuando los efectos grandes pueden superar la confusion",
+          "Reconocer los gradientes dosis-respuesta como evidencia de causalidad",
+          "Aplicar el razonamiento de 'todos los factores de confusion plausibles'"
+        ],
+        tip: "Mejorar es raro—pero a veces la evidencia observacional es inexpugnable."
+      }},
+      { type: "story", theme: "green-bg", content: {
+        label: "La Prueba del Tabaco", title: "Como un Riesgo 30 Veces Mayor Silencio la Duda",
+        text: "En 1950, Richard Doll y Austin Bradford Hill publicaron su estudio de casos y controles: los fumadores tenian <strong>30 veces mas tasas de cancer de pulmon</strong> que los no fumadores. La industria tabacalera exigio ECAs—sabiendo que eran imposibles. 'La correlacion no es causalidad,' insistieron. '¿Donde esta la evidencia aleatorizada?'",
+        followup: "Pero el tamaño del efecto hablo por si mismo. Para que la confusion explicara un aumento de 30 veces, algun factor no medido necesitaria causar tanto fumar como cancer de pulmon con fuerza extraordinaria—y estar distribuido perfectamente a traves de poblaciones, generaciones y geografias. Ningun factor de confusion asi se ha encontrado jamas. La evidencia fue mejorada de BAJA a ALTA. GRADE reconoce que algunos efectos son demasiado grandes para que la confusion los explique."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "📈", title: "Escenario: El Efecto Grande",
+        xp: 25,
+        scenario: "Un estudio observacional muestra que un procedimiento quirurgico reduce la mortalidad del 80% al 10%—un riesgo relativo de 0.125 (87.5% de reduccion relativa). No existen ECAs porque retener el tratamiento seria poco etico dada la dramatica observacion de beneficio.",
+        question: "¿Deberia mejorarse esta evidencia por efecto grande?",
+        options: [
+          { letter: "A", text: "No—la evidencia observacional no puede mejorarse", correct: false },
+          { letter: "B", text: "Si—RR 0.125 es tan grande que la confusion sola es implausible", correct: true },
+          { letter: "C", text: "Solo si el estudio esta bien diseñado", correct: false },
+          { letter: "D", text: "Solo si tambien esta presente la dosis-respuesta", correct: false }
+        ],
+        feedback: {
+          correct: "¡Correcto! RR 0.125 (u 8 veces reduccion relativa) esta en el rango donde la confusion sola es implausible. Ningun factor de confusion no medido podria reducir realisticamente la mortalidad del 80% al 10%. GRADE mejora por efectos grandes cuando RR < 0.5 o > 2, con mejora adicional para efectos muy grandes (RR < 0.2 o > 5).",
+          incorrect: "Efectos tan grandes son esencialmente a prueba de ECAs. Ningun factor de confusion podria explicar plausiblemente una reduccion relativa del 87.5%. Los paracaidas nunca han sido probados en ECAs, pero no dudamos que funcionen—el tamaño del efecto es autoevidente. GRADE permite mejorar para efectos demasiado grandes para que la confusion los explique."
+        }
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "Resumen de Criterios de Mejora",
+        subtitle: "Tres caminos hacia mayor certeza",
+        checkpoints: [
+          { day: "GRANDE", event: "RR > 2 o < 0.5 (mejorar 1); RR > 5 o < 0.2 (mejorar 2)" },
+          { day: "DOSIS", event: "Gradiente claro entre exposicion y resultado" },
+          { day: "CONFUSION", event: "Todos los factores de confusion plausibles reducirian el efecto observado" }
+        ]
+      }},
+      { type: "checklist", theme: "dark", content: {
+        title: "Lista de Verificacion de Criterios de Mejora",
+        items: [
+          "Efecto grande: RR > 2 o < 0.5 (muy grande: > 5 o < 0.2)",
+          "Dosis-respuesta: Gradiente claro a traves de niveles de exposicion",
+          "Confusion: Todos los factores de confusion plausibles reducirian el efecto",
+          "Mejorar es raro—la mayoria de la evidencia observacional permanece BAJA",
+          "Multiples factores de mejora pueden aplicarse si estan claramente presentes"
+        ]
+      }},
+      { type: "quiz", theme: "dark", content: {
+        question: "¿Por que la evidencia observacional para fumar y cancer de pulmon logro certeza ALTA a pesar de no haber ECAs?",
+        options: [
+          { text: "Los estudios fueron metodologicamente perfectos", correct: false },
+          { text: "Efecto grande (30x riesgo) + dosis-respuesta + ningun factor de confusion plausible podria explicarlo", correct: true },
+          { text: "El mecanismo biologico fue bien comprendido", correct: false },
+          { text: "Multiples diseños de estudio concordaron", correct: false }
+        ],
+        xp: 20,
+        feedback: {
+          correct: "Exacto. Un aumento de riesgo de 30 veces esta mas alla de lo que la confusion puede explicar. La clara dosis-respuesta (mas cigarrillos = mas cancer) añadio evidencia. Y ningun factor de confusion no medido ha sido encontrado jamas que pudiera explicar el efecto. Los tres criterios de mejora fueron cumplidos.",
+          incorrect: "La combinacion fue poderosa: un efecto tan grande que la confusion no podia explicarlo, un gradiente dosis-respuesta apoyando la causalidad, y la direccion de cualquier confusion concebible no disminuiria el hallazgo. Los tres factores de mejora empujaron la evidencia a certeza ALTA."
+        }
+      }}
+    ]
+  },
+  {
+    id: 9, title: "Integrando Todo", subtitle: "Decisiones reales de guias", xp: 200,
+    slides: [
+      { type: "title", theme: "dark", content: { title: "Integrando Todo", subtitle: "Aplicando los cinco dominios a decisiones reales de guias" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "Aplicar todos los dominios GRADE a evidencia compleja del mundo real",
+          "Practicar la construccion de resumenes de evidencia",
+          "Hacer juicios de certeza defendibles",
+          "Traducir certeza a fuerza de recomendacion"
+        ],
+        tip: "Este modulo presenta casos completos—usaras todo lo que has aprendido."
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "De Certeza a Recomendaciones",
+        subtitle: "La calidad de la evidencia es solo parte de la ecuacion",
+        text: "GRADE separa la certeza de la evidencia de la fuerza de las recomendaciones. Una recomendacion considera:<br><br>• Certeza de la evidencia<br>• Balance de beneficios vs. daños<br>• Valores y preferencias del paciente<br>• Uso de recursos y factibilidad",
+        highlight: "Incluso evidencia de certeza BAJA puede apoyar una recomendacion FUERTE (ej., paracaidas) si los beneficios superan claramente los daños."
+      }},
+      { type: "quiz", theme: "dark", content: {
+        question: "¿Cual es la leccion mas importante de la experiencia de hidroxicloroquina con COVID-19?",
+        options: [
+          { text: "Los estudios observacionales siempre son poco confiables", correct: false },
+          { text: "La evaluacion GRADE apropiada deberia preceder la adopcion clinica y las politicas", correct: true },
+          { text: "Los farmacos reposicionados no funcionan para nuevas enfermedades", correct: false },
+          { text: "Los medios no deberian reportar sobre estudios medicos", correct: false }
+        ],
+        xp: 20,
+        feedback: {
+          correct: "Exacto. Un estudio de 36 pacientes, no aleatorizado, de etiqueta abierta con exclusiones selectivas era de certeza MUY BAJA por cualquier evaluacion GRADE. La evaluacion sistematica de certeza antes de la adopcion habria prevenido el uso generalizado de un tratamiento inefectivo y mantenido la confianza publica.",
+          incorrect: "La leccion no es que los pequeños estudios sean inutiles—es que necesitan evaluacion apropiada de certeza. Una evaluacion GRADE rigurosa habria etiquetado esto como certeza MUY BAJA inmediatamente. La evaluacion sistematica debe preceder la adopcion clinica, especialmente durante crisis cuando la presion es mas alta."
+        }
+      }}
+    ]
+  },
+  {
+    id: 10, title: "Evaluacion Final", subtitle: "Prueba tu dominio", xp: 250,
+    slides: [
+      { type: "title", theme: "dark", content: { title: "Evaluacion Final", subtitle: "Demuestra tu dominio de la evaluacion de certeza GRADE" }},
+      { type: "concept", theme: "dark", content: {
+        title: "El Desafio Final",
+        subtitle: "Aplica todo lo que has aprendido",
+        text: "Este modulo presenta escenarios complejos que requieren evaluacion GRADE integrada. Necesitaras considerar multiples dominios simultaneamente y hacer juicios matizados.",
+        highlight: "¡Apunta a 80% de precision para ganar la insignia de Maestro GRADE!"
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "📊", title: "Desafio 1: El Nuevo Farmaco Oncologico",
+        xp: 35,
+        scenario: "Un nuevo farmaco oncologico muestra mejora de supervivencia media de 11 a 14 meses en un solo ECA financiado por la industria (n=600). El resultado primario fue cambiado a mitad del ensayo de supervivencia global a supervivencia libre de progresion. Tres de siete resultados secundarios pre-especificados no fueron reportados. El beneficio de supervivencia fue un analisis post-hoc.",
+        question: "¿Que calificacion de certeza es apropiada para beneficio de supervivencia global?",
+        options: [
+          { letter: "A", text: "ALTA—ECA mostrando beneficio de supervivencia", correct: false },
+          { letter: "B", text: "MODERADA—ensayo unico pero clinicamente significativo", correct: false },
+          { letter: "C", text: "BAJA—reducir por riesgo de sesgo (cambio de resultado, reporte selectivo)", correct: true },
+          { letter: "D", text: "MUY BAJA—multiples preocupaciones serias", correct: false }
+        ],
+        feedback: {
+          correct: "¡Correcto! Preocupaciones clave de riesgo de sesgo: (1) resultado primario cambiado a mitad del ensayo, (2) resultados secundarios no reportados, (3) beneficio de supervivencia fue post-hoc. Cada uno sugiere reporte selectivo. Comenzando ALTA, reducir uno o dos niveles por riesgo de sesgo serio. El financiamiento de la industria añade preocupacion pero no es suficiente solo para reducir.",
+          incorrect: "El ensayo muestra reporte selectivo clasico: cambiar el resultado primario, ocultar resultados secundarios desfavorables, promover analisis de supervivencia post-hoc. Estas preocupaciones de riesgo de sesgo requieren reduccion incluso cuando el hallazgo mismo es estadisticamente significativo."
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "🔍", title: "Desafio 2: El Rompecabezas del Metaanalisis",
+        xp: 35,
+        scenario: "Un metaanalisis de 20 ECAs (n=15,000) muestra reduccion significativa de mortalidad (RR 0.85, IC 95% 0.76-0.95). Sin embargo: I²=68%, intervalo de prediccion 0.62-1.15, el grafico de embudo muestra leve asimetria, 4 ensayos registrados pero nunca publicados.",
+        question: "¿Que dominios requieren reduccion y por cuanto?",
+        options: [
+          { letter: "A", text: "Inconsistencia (−1), sesgo de publicacion (−1): ALTA → BAJA", correct: true },
+          { letter: "B", text: "Solo imprecision (−1): ALTA → MODERADA", correct: false },
+          { letter: "C", text: "Inconsistencia (−2): ALTA → BAJA", correct: false },
+          { letter: "D", text: "Solo sesgo de publicacion (−1): ALTA → MODERADA", correct: false }
+        ],
+        feedback: {
+          correct: "¡Correcto! Inconsistencia: I²=68% con intervalo de prediccion cruzando 1.0 (podria mostrar daño) justifica una reduccion. Sesgo de publicacion: 4 ensayos registrados pero no publicados mas asimetria del embudo justifica una reduccion. Dos dominios = dos reducciones = ALTA → BAJA.",
+          incorrect: "El intervalo de prediccion (0.62-1.15) cruza 1.0—el siguiente estudio podria mostrar daño. Eso es inconsistencia seria. La asimetria del embudo mas 4 ensayos registrados no publicados es evidencia directa de sesgo de publicacion. Ambos dominios justifican reduccion."
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "💉", title: "Desafio 3: La Eficacia de la Vacuna",
+        xp: 35,
+        scenario: "Un ensayo de vacuna (n=40,000) muestra 95% de eficacia contra enfermedad sintomatica (RR 0.05, IC 95% 0.03-0.08). Bajo riesgo de sesgo, resultados de subgrupos consistentes, resultado directo. Sin embargo, el seguimiento es solo de 3 meses, y la durabilidad de la proteccion es desconocida.",
+        question: "¿Como deberia calificarse la certeza para eficacia a corto plazo vs. largo plazo?",
+        options: [
+          { letter: "A", text: "ALTA para ambos—ensayo grande y bien conducido", correct: false },
+          { letter: "B", text: "ALTA para corto plazo; MUY BAJA para largo plazo (sin datos)", correct: false },
+          { letter: "C", text: "ALTA para eficacia a corto plazo; BAJA para eficacia a 12 meses (indirecta/imprecisa)", correct: true },
+          { letter: "D", text: "MODERADA para ambos—la incertidumbre de duracion afecta todas las conclusiones", correct: false }
+        ],
+        feedback: {
+          correct: "¡Correcto! Eficacia a corto plazo: ECA grande, bajo sesgo, preciso, directo = ALTA. Eficacia a largo plazo: o indirecta (extrapolando de 3 meses) o imprecisa (sin datos). GRADE es especifico por resultado—diferentes horizontes temporales pueden tener diferentes calificaciones de certeza.",
+          incorrect: "GRADE califica certeza para resultados especificos. Los datos de tres meses apoyan directamente eficacia a 3 meses (ALTA). La eficacia a doce meses requiere extrapolacion (evidencia indirecta) o no tiene datos directos (imprecision). El mismo ensayo apoya diferente certeza para diferentes preguntas."
+        }
+      }},
+      { type: "stats", theme: "dark", content: {
+        title: "GRADE en Numeros",
+        stats: [
+          { value: "4", label: "Niveles de certeza" },
+          { value: "5", label: "Dominios de reduccion" },
+          { value: "3", label: "Factores de mejora" },
+          { value: "∞", label: "Vidas protegidas por evaluacion rigurosa" }
+        ],
+        caption: "La evaluacion sistematica de certeza protege a los pacientes de la medicina sobreconfiada."
+      }},
+      { type: "refrain", theme: "black", content: { text: "La certeza no se trata de cuanta evidencia existe. Se trata de cuanto debemos confiar en ella." }},
+      { type: "quiz", theme: "dark", content: {
+        question: "¿Cual es la perspectiva fundamental que GRADE proporciona para la medicina basada en evidencia?",
+        options: [
+          { text: "Los estudios mas grandes siempre son mejores", correct: false },
+          { text: "Los ECAs son la unica evidencia valida", correct: false },
+          { text: "La certeza debe evaluarse sistematicamente, con razonamiento transparente para cada dominio", correct: true },
+          { text: "Los metaanalisis proporcionan respuestas definitivas", correct: false }
+        ],
+        xp: 25,
+        feedback: {
+          correct: "Exacto. GRADE transforma juicios implicitos en evaluaciones explicitas y transparentes. Al considerar sistematicamente riesgo de sesgo, inconsistencia, evidencia indirecta, imprecision y sesgo de publicacion—y documentar el razonamiento—GRADE hace que la evaluacion de certeza sea reproducible y debatible. Esta transparencia es su contribucion central.",
+          incorrect: "La contribucion fundamental de GRADE es la transparencia estructurada. En lugar de etiquetas vagas de calidad, requiere evaluacion sistematica de dominios especificos con razonamiento explicito. Esto hace que los juicios de certeza sean reproducibles, debatibles y mejorables a medida que se acumula evidencia."
+        }
+      }}
+    ]
+  }
+];
+
+// ===== NAVIGATION STATE =====
+let currentModule = 0;
+let currentSlide = 0;
+let consecutiveCorrect = 0;
+
+// ===== SAVE/LOAD =====
+function saveGame() {
+  safeSetStorage('gradeGame_es_v1', gameState);
+}
+
+function resetProgress() {
+  if (confirm('¿Reiniciar todo el progreso y logros?')) {
+    gameState = { ...DEFAULT_STATE, answeredQuestions: {}, badges: [], completedModules: [] };
+    saveGame();
+    currentModule = 0;
+    currentSlide = 0;
+    renderAll();
+  }
+}
+
+// ===== COURSE PROGRESS =====
+function updateCourseProgress() {
+  const totalModules = MODULES.length;
+  const completedCount = gameState.completedModules.length;
+  const pct = Math.round((completedCount / totalModules) * 100);
+  const fillEl = document.getElementById('courseProgressFill');
+  const pctEl = document.getElementById('courseProgressPct');
+  if (fillEl) fillEl.style.width = pct + '%';
+  if (pctEl) pctEl.textContent = pct + '%';
+}
+
+// ===== XP & LEVELING =====
+function addXP(amount) {
+  gameState.xp += amount;
+  checkLevelUp();
+  saveGame();
+  updateStatsDisplay();
+  showXPPopup(amount);
+}
+
+function checkLevelUp() {
+  for (let i = LEVELS.length - 1; i >= 0; i--) {
+    if (gameState.xp >= LEVELS[i].xp && gameState.level < LEVELS[i].level) {
+      gameState.level = LEVELS[i].level;
+      showLevelUp(LEVELS[i]);
+      break;
+    }
+  }
+}
+
+function showXPPopup(amount) {
+  const popup = document.getElementById('xpPopup');
+  document.getElementById('xpAmount').textContent = `+${amount}`;
+  popup.classList.add('show');
+  setTimeout(() => popup.classList.remove('show'), 1500);
+}
+
+function showLevelUp(levelData) {
+  triggerConfetti();
+}
+
+// ===== BADGES =====
+function awardBadge(badgeId) {
+  if (gameState.badges.includes(badgeId)) return;
+  gameState.badges.push(badgeId);
+  saveGame();
+  const badge = BADGES.find(b => b.id === badgeId);
+  if (badge) showBadgeModal(badge);
+  updateBadges();
+}
+
+function showBadgeModal(badge) {
+  const modal = document.getElementById('badgeModal');
+  document.getElementById('badgeModalIcon').textContent = badge.icon;
+  document.getElementById('badgeModalTitle').textContent = badge.name;
+  document.getElementById('badgeModalDesc').textContent = badge.desc;
+  modal.classList.add('show');
+  triggerConfetti();
+
+  const focusableElements = modal.querySelectorAll('button, [tabindex]:not([tabindex="-1"])');
+  if (focusableElements.length > 0) {
+    focusableElements[0].focus();
+  }
+  modal.addEventListener('keydown', function trapHandler(e) {
+    if (e.key === 'Escape') {
+      closeBadgeModal();
+      modal.removeEventListener('keydown', trapHandler);
+      return;
+    }
+    if (e.key === 'Tab') {
+      const firstFocusable = focusableElements[0];
+      const lastFocusable = focusableElements[focusableElements.length - 1];
+      if (e.shiftKey && document.activeElement === firstFocusable) {
+        e.preventDefault();
+        lastFocusable.focus();
+      } else if (!e.shiftKey && document.activeElement === lastFocusable) {
+        e.preventDefault();
+        firstFocusable.focus();
+      }
+    }
+  });
+}
+
+function closeBadgeModal() {
+  document.getElementById('badgeModal').classList.remove('show');
+}
+
+// ===== STREAK =====
+function updateStreak() {
+  const today = new Date().toDateString();
+  if (gameState.lastActive !== today) {
+    const yesterday = new Date(Date.now() - 86400000).toDateString();
+    if (gameState.lastActive === yesterday) {
+      gameState.streak++;
+      if (gameState.streak >= 3) awardBadge('streak_3');
+      if (gameState.streak >= 7) awardBadge('streak_7');
+    } else if (gameState.lastActive) {
+      gameState.streak = 1;
+    } else {
+      gameState.streak = 1;
+    }
+    gameState.lastActive = today;
+    saveGame();
+  }
+}
+
+// ===== CONFETTI =====
+function triggerConfetti() {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const container = document.getElementById('confettiContainer');
+  const colors = ['#D4AF37', '#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#7c3aed'];
+  for (let i = 0; i < 50; i++) {
+    const confetti = document.createElement('div');
+    confetti.className = 'confetti';
+    confetti.style.left = Math.random() * 100 + '%';
+    confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+    confetti.style.animationDelay = Math.random() * 0.5 + 's';
+    container.appendChild(confetti);
+    setTimeout(() => confetti.remove(), 3500);
+  }
+}
+
+// ===== COMBO =====
+function updateComboDisplay() {
+  const comboEl = document.getElementById('comboDisplay');
+  const countEl = document.getElementById('comboCount');
+  if (consecutiveCorrect >= 2) {
+    countEl.textContent = consecutiveCorrect;
+    comboEl.classList.add('show');
+  } else {
+    comboEl.classList.remove('show');
+  }
+}
+
+// ===== MOBILE SIDEBAR =====
+function toggleSidebar() {
+  document.querySelector('.sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('show');
+  var btn = document.querySelector('.sidebar-toggle, .hamburger, .mobile-menu-btn'); if (btn) btn.setAttribute('aria-expanded', btn.getAttribute('aria-expanded') === 'true' ? 'false' : 'true');
+}
+
+// ===== RENDER =====
+function renderAll() {
+  updateStreak();
+  renderSidebar();
+  renderSlides();
+  updateStatsDisplay();
+  updateBadges();
+  updateCourseProgress();
+}
+
+function updateStatsDisplay() {
+  const levelData = LEVELS.find(l => l.level === gameState.level) || LEVELS[0];
+  const nextLevel = LEVELS.find(l => l.level === gameState.level + 1);
+
+  document.getElementById('levelIcon').textContent = levelData.icon;
+  document.getElementById('levelTitle').textContent = levelData.title;
+  document.getElementById('levelNum').textContent = gameState.level;
+
+  const currentXP = gameState.xp - levelData.xp;
+  const neededXP = nextLevel ? (nextLevel.xp - levelData.xp) : 500;
+  const pct = Math.min(100, (currentXP / neededXP) * 100);
+
+  document.getElementById('xpFill').style.width = pct + '%';
+  document.getElementById('xpCurrent').textContent = currentXP;
+  document.getElementById('xpNeeded').textContent = neededXP;
+
+  document.getElementById('correctCount').textContent = gameState.correctAnswers;
+  document.getElementById('decisionCount').textContent = gameState.decisionsCompleted;
+  document.getElementById('gradesCount').textContent = gameState.gradesAssigned || 0;
+  document.getElementById('streakCount').textContent = gameState.streak;
+
+  const streakEl = document.getElementById('streakDisplay');
+  streakEl.classList.toggle('active', gameState.streak > 0);
+}
+
+function updateBadges() {
+  const grid = document.getElementById('badgesGrid');
+  grid.innerHTML = BADGES.map(b => {
+    const earned = gameState.badges.includes(b.id);
+    return `<div class="badge-item ${earned ? 'earned' : ''}" data-tooltip="${b.name}: ${b.desc}">${b.icon}</div>`;
+  }).join('');
+}
+
+function renderSidebar() {
+  const list = document.getElementById('moduleList');
+  list.innerHTML = MODULES.map((mod, i) => {
+    const completed = gameState.completedModules.includes(mod.id);
+    const locked = i > 0 && !gameState.completedModules.includes(MODULES[i-1].id);
+    const estMins = Math.round(mod.slides.length * 1.5);
+    return `
+      <div class="module-item ${i === currentModule ? 'active' : ''} ${completed ? 'completed' : ''} ${locked ? 'locked' : ''}"
+           onclick="${locked ? '' : `goToModule(${i})`}"
+           tabindex="${locked ? -1 : 0}"
+           role="button">
+        <div class="module-number">${completed ? '✓' : (locked ? '🔒' : mod.id)}</div>
+        <div class="module-info">
+          <div class="module-title">${mod.title}</div>
+          <div class="module-subtitle">${mod.subtitle}</div>
+          <div class="module-xp">+${mod.xp} XP</div>
+          <div class="module-time">⏱️ ~${estMins} min</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderSlides() {
+  const container = document.getElementById('slidesContainer');
+  container.innerHTML = MODULES.map((mod, mi) => {
+    const progressPct = ((currentSlide + 1) / mod.slides.length) * 100;
+    return `
+    <div class="module-slides ${mi === currentModule ? 'active' : ''}" data-module="${mi}">
+      <div class="slide-progress-bar" style="width: ${mi === currentModule ? progressPct : 0}%"></div>
+      ${mod.slides.map((slide, si) => renderSlide(slide, si, mi)).join('')}
+      <div class="slide-nav">
+        <button class="nav-btn" onclick="prevSlide()" ${currentSlide === 0 ? 'disabled' : ''} aria-label="Diapositiva anterior">←</button>
+        <div class="nav-center">
+          <div class="slide-counter">${currentSlide + 1} / ${mod.slides.length}</div>
+          <div class="progress-dots">
+            ${mod.slides.map((_, i) => `<div class="progress-dot ${i === currentSlide ? 'active' : ''}" onclick="goToSlide(${i})"></div>`).join('')}
+          </div>
+        </div>
+        <button class="nav-btn" onclick="nextSlide()" aria-label="Siguiente diapositiva">→</button>
+      </div>
+      <div class="keyboard-hint" style="position:absolute;bottom:5px;left:50%;transform:translateX(-50%);font-size:0.6rem;opacity:0.4;">← → flechas o desliza para navegar</div>
+    </div>
+  `;
+  }).join('');
+  document.getElementById('currentModule').textContent = MODULES[currentModule].title;
+  updateSlideVisibility();
+}
+
+function renderSlide(slide, index, moduleIndex) {
+  const theme = slide.theme || 'dark';
+  let html = `<div class="slide ${theme} ${index === currentSlide ? 'active' : ''}" data-slide="${index}">`;
+
+  switch(slide.type) {
+    case 'title':
+      html += `<div class="content"><h1 class="title gold animate">${slide.content.title}</h1><p class="subtitle animate delay-1">${slide.content.subtitle}</p></div>`;
+      break;
+
+    case 'objectives':
+      html += `<div class="content">
+        <div class="objectives-box animate">
+          <div class="objectives-header">
+            <div class="objectives-icon">🎯</div>
+            <div class="objectives-title">Objetivos de Aprendizaje</div>
+          </div>
+          <ul class="objectives-list">
+            ${slide.content.objectives.map(obj => `<li>${obj}</li>`).join('')}
+          </ul>
+        </div>
+        ${slide.content.tip ? `<p class="subtitle animate delay-1" style="font-size:0.85rem;max-width:600px">${slide.content.tip}</p>` : ''}
+      </div>`;
+      break;
+
+    case 'story':
+      html += `<div class="content">
+        <article class="story-box ${slide.content.success ? 'success' : ''} animate" role="article">
+          <div class="story-label">${slide.content.label}</div>
+          ${slide.content.title ? `<h2 class="title gold" style="font-size:1.8rem;margin-bottom:0.75rem">${slide.content.title}</h2>` : ''}
+          <p class="story-text">${slide.content.text}</p>
+          ${slide.content.followup ? `<p class="story-text" style="margin-top:0.75rem;font-style:italic;opacity:0.9">${slide.content.followup}</p>` : ''}
+        </article>
+      </div>`;
+      break;
+
+    case 'stats':
+      html += `<div class="content">
+        ${slide.content.title ? `<h2 class="title gold animate">${slide.content.title}</h2>` : ''}
+        ${slide.content.subtitle ? `<p class="subtitle animate delay-1">${slide.content.subtitle}</p>` : ''}
+        <div class="stats-grid animate delay-2">
+          ${slide.content.stats.map(s => `<div class="stat-box"><div class="stat-value gold">${s.value}</div><div class="stat-label">${s.label}</div></div>`).join('')}
+        </div>
+        ${slide.content.caption ? `<p class="subtitle animate delay-3" style="font-size:0.85rem;margin-top:0.75rem">${slide.content.caption}</p>` : ''}
+      </div>`;
+      break;
+
+    case 'refrain':
+      html += `<div class="content" style="justify-content:center;height:100%"><p class="refrain animate">"${slide.content.text}"</p></div>`;
+      break;
+
+    case 'concept':
+      html += `<div class="content">
+        <h2 class="title ${theme === 'light' ? 'navy' : 'gold'} animate">${slide.content.title}</h2>
+        ${slide.content.subtitle ? `<p class="subtitle animate delay-1">${slide.content.subtitle}</p>` : ''}
+        ${slide.content.text ? `<div class="card ${theme === 'light' ? '' : 'navy-bg'} animate delay-2"><p class="card-text">${slide.content.text}</p></div>` : ''}
+        ${slide.content.highlight ? `<div class="story-box warning animate delay-3"><div class="story-label">Perspectiva Clave</div><p class="story-text">${slide.content.highlight}</p></div>` : ''}
+        ${slide.content.checkpoints ? `
+          <div class="timeline animate delay-2" style="margin-top:0.75rem">
+            ${slide.content.checkpoints.map(cp => `
+              <div class="timeline-item"><div class="timeline-days">${cp.day}</div><div class="timeline-content"><div class="timeline-title">${cp.event}</div></div></div>
+            `).join('')}
+          </div>
+        ` : ''}
+      </div>`;
+      break;
+
+    case 'checklist':
+      html += `<div class="content">
+        <h2 class="title gold animate">${slide.content.title}</h2>
+        <div class="checklist animate delay-1">
+          ${slide.content.items.map(item => `
+            <div class="checklist-item">
+              <div class="check-icon">✓</div>
+              <div class="checklist-text">${item}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>`;
+      break;
+
+    case 'decision':
+      const did = `dec_${moduleIndex}_${index}`;
+      const answered = gameState.answeredQuestions[did];
+      html += `<div class="content">
+        <div class="decision-tree animate">
+          <div class="decision-header">
+            <div class="decision-icon">${slide.content.icon}</div>
+            <div class="decision-title">${slide.content.title}</div>
+            <div class="decision-xp">+${slide.content.xp} XP</div>
+          </div>
+          <div class="decision-scenario">${slide.content.scenario}</div>
+          <div class="decision-question">${slide.content.question}</div>
+          <div class="decision-options">
+            ${slide.content.options.map(opt => {
+              const isSelected = answered === opt.letter;
+              const showCorrect = answered && opt.correct;
+              const showIncorrect = answered && isSelected && !opt.correct;
+              return `
+                <div class="decision-option ${isSelected ? 'selected' : ''} ${showCorrect ? 'correct' : ''} ${showIncorrect ? 'incorrect' : ''} ${answered ? 'disabled' : ''}"
+                     onclick="answerDecision('${did}', '${opt.letter}', ${opt.correct}, ${slide.content.xp})"
+                     tabindex="0"
+                     role="button">
+                  <div class="option-letter">${opt.letter}</div>
+                  <div class="option-text">${opt.text}</div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+          <div class="decision-feedback ${answered ? 'show' : ''} ${answered && slide.content.options.find(o => o.letter === answered)?.correct ? 'correct' : 'incorrect'}" role="alert" aria-live="polite">
+            <div class="feedback-title">${answered && slide.content.options.find(o => o.letter === answered)?.correct ? '✓ ¡Correcto!' : '✗ No exactamente'}</div>
+            <div class="feedback-text">${answered && slide.content.options.find(o => o.letter === answered)?.correct ? slide.content.feedback.correct : slide.content.feedback.incorrect}</div>
+          </div>
+        </div>
+      </div>`;
+      break;
+
+    case 'quiz':
+      const qid = `quiz_${moduleIndex}_${index}`;
+      const qAnswered = gameState.answeredQuestions[qid];
+      html += `<div class="content">
+        <div class="quiz-container animate">
+          <div class="quiz-question">${slide.content.question}</div>
+          <div class="quiz-options">
+            ${slide.content.options.map((opt, oi) => {
+              const isSelected = qAnswered === oi;
+              const showCorrect = qAnswered !== undefined && opt.correct;
+              const showIncorrect = qAnswered !== undefined && isSelected && !opt.correct;
+              return `
+                <div class="quiz-option ${showCorrect ? 'correct' : ''} ${showIncorrect ? 'incorrect' : ''} ${qAnswered !== undefined ? 'disabled' : ''}"
+                     onclick="answerQuiz('${qid}', ${oi}, ${opt.correct}, ${slide.content.xp})"
+                     tabindex="0"
+                     role="button">
+                  ${opt.text}
+                </div>
+              `;
+            }).join('')}
+          </div>
+          <div class="quiz-feedback ${qAnswered !== undefined ? 'show' : ''} ${qAnswered !== undefined && slide.content.options[qAnswered]?.correct ? 'correct' : 'incorrect'}" role="alert" aria-live="polite">
+            ${qAnswered !== undefined && slide.content.options[qAnswered]?.correct ? slide.content.feedback.correct : slide.content.feedback.incorrect}
+          </div>
+        </div>
+      </div>`;
+      break;
+  }
+
+  html += '</div>';
+  return html;
+}
+
+function updateSlideVisibility() {
+  const container = document.querySelector('.module-slides.active');
+  if (!container) return;
+
+  container.querySelectorAll('.slide').forEach((slide, i) => {
+    slide.classList.toggle('active', i === currentSlide);
+  });
+
+  const progressBar = container.querySelector('.slide-progress-bar');
+  if (progressBar) {
+    const pct = ((currentSlide + 1) / MODULES[currentModule].slides.length) * 100;
+    progressBar.style.width = pct + '%';
+  }
+
+  container.querySelector('.slide-counter').textContent = `${currentSlide + 1} / ${MODULES[currentModule].slides.length}`;
+  container.querySelectorAll('.progress-dot').forEach((dot, i) => {
+    dot.classList.toggle('active', i === currentSlide);
+  });
+  container.querySelector('.nav-btn').disabled = currentSlide === 0;
+}
+
+// ===== ANSWERS =====
+function answerDecision(did, letter, correct, xp) {
+  if (gameState.answeredQuestions[did] !== undefined) return;
+  gameState.answeredQuestions[did] = letter;
+  gameState.decisionsCompleted++;
+  gameState.gradesAssigned = (gameState.gradesAssigned || 0) + 1;
+
+  if (gameState.decisionsCompleted === 1) awardBadge('first_grade');
+
+  if (correct) {
+    gameState.correctAnswers++;
+    consecutiveCorrect++;
+    addXP(xp);
+    if (consecutiveCorrect >= 5) awardBadge('perfect_5');
+    if (gameState.decisionsCompleted >= 15) awardBadge('decision_maker');
+  } else {
+    consecutiveCorrect = 0;
+  }
+  saveGame();
+  renderSlides();
+  updateComboDisplay();
+  updateStatsDisplay();
+}
+
+function answerQuiz(qid, choice, correct, xp) {
+  if (gameState.answeredQuestions[qid] !== undefined) return;
+  gameState.answeredQuestions[qid] = choice;
+
+  if (correct) {
+    gameState.correctAnswers++;
+    consecutiveCorrect++;
+    addXP(xp);
+    if (consecutiveCorrect >= 5) awardBadge('perfect_5');
+  } else {
+    consecutiveCorrect = 0;
+  }
+  saveGame();
+  renderSlides();
+  updateComboDisplay();
+}
+
+// ===== NAVIGATION =====
+function goToModule(index) {
+  if (index > 0 && !gameState.completedModules.includes(MODULES[index-1].id)) return;
+  currentModule = index;
+  currentSlide = 0;
+  renderSlides();
+  renderSidebar();
+}
+
+function goToSlide(index) {
+  currentSlide = index;
+  updateSlideVisibility();
+}
+
+function nextSlide() {
+  const mod = MODULES[currentModule];
+  if (currentSlide < mod.slides.length - 1) {
+    currentSlide++;
+    updateSlideVisibility();
+  } else {
+    completeModule();
+  }
+}
+
+function prevSlide() {
+  if (currentSlide > 0) {
+    currentSlide--;
+    updateSlideVisibility();
+  }
+}
+
+function completeModule() {
+  const mod = MODULES[currentModule];
+  if (!gameState.completedModules.includes(mod.id)) {
+    gameState.completedModules.push(mod.id);
+    addXP(mod.xp);
+
+    if (mod.id === 3) awardBadge('bias_hunter');
+    if (mod.id === 4) awardBadge('consistency_king');
+    if (mod.id === 5) awardBadge('directness_detective');
+    if (mod.id === 6) awardBadge('precision_master');
+    if (mod.id === 7) awardBadge('publication_sleuth');
+    if (mod.id === 8) awardBadge('upgrader');
+    if (mod.id === 10) awardBadge('grade_master');
+    if (gameState.completedModules.length === MODULES.length) awardBadge('finisher');
+
+    saveGame();
+    triggerConfetti();
+    updateCourseProgress();
+  }
+
+  if (currentModule < MODULES.length - 1) {
+    goToModule(currentModule + 1);
+  }
+}
+
+// ===== KEYBOARD =====
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    document.getElementById('badgeModal').classList.remove('show');
+    document.querySelector('.sidebar').classList.remove('open');
+    document.getElementById('sidebarOverlay').classList.remove('show');
+    return;
+  }
+  if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextSlide(); }
+  else if (e.key === 'ArrowLeft') { e.preventDefault(); prevSlide(); }
+});
+
+document.addEventListener('keydown', (e) => {
+  if ((e.target.classList.contains('module-item') || e.target.classList.contains('decision-option') || e.target.classList.contains('quiz-option')) && (e.key === 'Enter' || e.key === ' ')) {
+    e.preventDefault();
+    e.target.click();
+  }
+});
+
+// ===== TOUCH =====
+let touchStartX = 0;
+document.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
+document.addEventListener('touchend', (e) => {
+  const diff = touchStartX - e.changedTouches[0].screenX;
+  if (Math.abs(diff) > 50) { diff > 0 ? nextSlide() : prevSlide(); }
+}, { passive: true });
+
+// ===== INIT =====
+renderAll();
+</script>
+</body>
+</html>

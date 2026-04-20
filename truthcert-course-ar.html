@@ -1,0 +1,2573 @@
+<!DOCTYPE html>
+
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>تروثسيرت أفريقيا: عندما تتحدث الأرقام عن الحقيقة</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&amp;family=Source+Sans+Pro:wght@300;400;600;700&amp;display=swap" rel="stylesheet"/>
+<style>
+    :root {
+      --navy: #1E2761;
+      --deep-navy: #141B3D;
+      --gold: #D4AF37;
+      --cream: #FAF8F5;
+      --light-cream: #FFFFFF;
+      --text: #2D3748;
+      --light-text: #718096;
+      --red: #C53030;
+      --green: #22c55e;
+      --teal: #00D4AA;
+      --purple: #A855F7;
+      --orange: #F97316;
+      --transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      height: 100%;
+      font-family: 'Source Sans Pro', sans-serif;
+      background: var(--deep-navy);
+      color: var(--cream);
+    }
+
+    .course-container {
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 280px;
+      background: linear-gradient(180deg, var(--deep-navy) 0%, #0a0f1a 100%);
+      border-left: 1px solid rgba(212,175,55,0.2);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    /* mobile sidebar handled by hamburger toggle below */
+
+    .sidebar-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+    }
+
+    .sidebar-header h1 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--gold);
+      margin-bottom: 0.25rem;
+    }
+
+    .sidebar-header p {
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.6);
+    }
+
+    .module-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem 0;
+    }
+
+    .module-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      border-right: 3px solid transparent;
+    }
+
+    .module-item:hover { background: rgba(212,175,55,0.1); }
+    .module-item.active { background: rgba(212,175,55,0.15); border-right-color: var(--gold); }
+    .module-item.completed .module-number { background: var(--green); color: white; }
+
+    .module-number {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .module-item.active .module-number { background: var(--gold); color: var(--navy); }
+
+    .module-info { flex: 1; min-width: 0; }
+    .module-title { font-size: 0.85rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .module-subtitle { font-size: 0.7rem; color: rgba(255,255,255,0.7); }
+
+    .sidebar-footer {
+      padding: 1rem 1.5rem;
+      border-top: 1px solid rgba(212,175,55,0.2);
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.4);
+      line-height: 1.4;
+    }
+
+    /* Main Content */
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .content-header {
+      padding: 1rem 2rem;
+      background: rgba(0,0,0,0.3);
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .breadcrumb { font-size: 0.85rem; color: rgba(255,255,255,0.6); }
+    .breadcrumb span { color: var(--gold); }
+
+    .header-actions { display: flex; gap: 0.5rem; }
+
+    .btn {
+      padding: 0.5rem 1rem;
+      border: 1px solid rgba(212,175,55,0.3);
+      border-radius: 6px;
+      background: rgba(255,255,255,0.05);
+      color: var(--cream);
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn:hover { background: rgba(212,175,55,0.2); border-color: var(--gold); }
+    .btn.primary { background: var(--gold); color: var(--navy); border-color: var(--gold); font-weight: 600; }
+
+    .content-body { flex: 1; overflow: hidden; display: flex; }
+
+    /* Slides */
+    .slides-container { flex: 1; position: relative; overflow: hidden; }
+
+    .module-slides { display: none; width: 100%; height: 100%; }
+    .module-slides.active { display: block; }
+
+    .slide {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      padding: 2rem 2rem 4rem 2rem;
+      padding-top: 3rem;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity var(--transition), visibility var(--transition);
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .slide .content { margin-top: auto; margin-bottom: auto; }
+    .slide > * { max-width: 100%; word-wrap: break-word; }
+    .slide.active { opacity: 1; visibility: visible; }
+
+    .slide.dark { background: var(--deep-navy); color: var(--cream); }
+    .slide.light { background: var(--cream); color: var(--text); }
+    .slide.black { background: #000; color: var(--cream); }
+    .slide.gradient { background: linear-gradient(135deg, var(--deep-navy) 0%, #2a1a4a 100%); color: var(--cream); }
+    .slide.blood { background: linear-gradient(135deg, #1a0a0a 0%, #2d1515 100%); color: var(--cream); }
+    .slide.hope { background: linear-gradient(135deg, #0a1a0a 0%, #152d15 100%); color: var(--cream); }
+
+    /* Typography */
+    .serif { font-family: 'Cormorant Garamond', Georgia, serif; }
+
+    .title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(1.8rem, 5vw, 3.5rem);
+      font-weight: 700;
+      margin-bottom: 1rem;
+      line-height: 1.2;
+    }
+
+    .title.navy { color: var(--navy); }
+    .title.gold { color: var(--gold); }
+    .title.cream { color: var(--cream); }
+    .title.red { color: var(--red); }
+    .title.green { color: var(--green); }
+
+    .subtitle {
+      font-size: clamp(1rem, 2vw, 1.5rem);
+      color: var(--light-text);
+      margin-bottom: 2rem;
+    }
+
+    .slide.dark .subtitle { color: rgba(255,255,255,0.7); }
+
+    .big-number {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(4rem, 15vw, 10rem);
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .big-number.navy { color: var(--navy); }
+    .big-number.gold { color: var(--gold); }
+    .big-number.red { color: var(--red); }
+    .big-number.green { color: var(--green); }
+
+    /* Refrain */
+    .refrain {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(1.4rem, 4vw, 2.5rem);
+      font-style: italic;
+      color: var(--gold);
+      text-align: center;
+      max-width: 800px;
+      line-height: 1.4;
+    }
+
+    .refrain.warning {
+      color: var(--red);
+      border-right: 4px solid var(--red);
+      padding-right: 1.5rem;
+      text-align: right;
+    }
+
+    .refrain.hope { color: var(--green); }
+
+    /* Rhetorical */
+    .rhetorical {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(1.2rem, 3vw, 2rem);
+      color: rgba(255,255,255,0.9);
+      text-align: center;
+      max-width: 700px;
+      line-height: 1.5;
+    }
+
+    .rhetorical em { color: var(--gold); font-style: normal; }
+
+    /* Simple explanation box - for accessibility */
+    .simple-box {
+      background: linear-gradient(135deg, rgba(0,212,170,0.1), rgba(0,0,0,0.2));
+      border: 2px solid var(--teal);
+      border-radius: 12px;
+      padding: 1.5rem;
+      max-width: 600px;
+      margin: 1rem 0;
+    }
+
+    .simple-box .simple-title {
+      color: var(--teal);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.75rem;
+    }
+
+    .simple-box .simple-text {
+      font-size: 1.1rem;
+      line-height: 1.6;
+    }
+
+    .simple-box .simple-text strong { color: var(--gold); }
+
+    /* Story card */
+    .story-card {
+      background: rgba(0,0,0,0.3);
+      border-right: 4px solid var(--gold);
+      padding: 1.5rem 2rem;
+      max-width: 700px;
+      margin: 1rem 0;
+    }
+
+    .story-card .place {
+      font-size: 0.75rem;
+      color: var(--gold);
+      letter-spacing: 0.1em;
+      margin-bottom: 0.5rem;
+    }
+
+    .story-card .narrative {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      line-height: 1.6;
+      color: rgba(255,255,255,0.9);
+    }
+
+    .story-card .source {
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.5);
+      margin-top: 1rem;
+      font-style: italic;
+    }
+
+    /* Example output - shows what TruthCert produces */
+    .example-output {
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 8px;
+      padding: 1.5rem;
+      max-width: 650px;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 0.8rem;
+      text-align: right;
+    }
+
+    .example-output .output-header {
+      color: var(--teal);
+      font-weight: 700;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid #30363d;
+    }
+
+    .example-output .output-line {
+      margin: 0.3rem 0;
+      color: rgba(255,255,255,0.8);
+    }
+
+    .example-output .output-key { color: var(--purple); }
+    .example-output .output-value { color: var(--gold); }
+    .example-output .output-stable { color: var(--green); font-weight: 700; }
+    .example-output .output-uncertain { color: var(--red); font-weight: 700; }
+    .example-output .output-comment { color: rgba(255,255,255,0.4); }
+
+    /* Cards */
+    .card {
+      background: var(--light-cream);
+      border: 1px solid var(--gold);
+      padding: 1.5rem 2rem;
+      margin: 0.75rem 0;
+      max-width: 800px;
+      width: 100%;
+    }
+
+    .card.navy-bg { background: var(--navy); color: var(--cream); }
+    .card.dark-bg { background: rgba(0,0,0,0.4); color: var(--cream); border-color: rgba(212,175,55,0.3); }
+    .card.teal-border { border: 2px solid var(--teal); }
+    .card.red-border { border: 2px solid var(--red); }
+    .card.green-border { border: 2px solid var(--green); }
+
+    .card-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+    }
+
+    .card-text { font-size: clamp(0.9rem, 1.8vw, 1.1rem); line-height: 1.6; }
+    .card.navy-bg .card-text { color: var(--cream); }
+
+    /* Stats */
+    .stats-grid {
+      display: flex;
+      gap: 1rem;
+      margin: 1.5rem 0;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .stat-box {
+      background: var(--navy);
+      color: var(--cream);
+      padding: 1rem 1.5rem;
+      text-align: center;
+      min-width: 130px;
+    }
+
+    .stat-value {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(1.4rem, 3vw, 2rem);
+      font-weight: 700;
+    }
+
+    .stat-label { font-size: 0.7rem; opacity: 0.8; margin-top: 0.25rem; }
+
+    /* Death toll */
+    .death-toll {
+      background: linear-gradient(135deg, rgba(197,48,48,0.3), rgba(0,0,0,0.5));
+      border: 2px solid var(--red);
+      padding: 2rem;
+      text-align: center;
+      max-width: 400px;
+    }
+
+    .death-toll .number {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 4rem;
+      font-weight: 700;
+      color: var(--red);
+    }
+
+    .death-toll .label {
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.8);
+      margin-top: 0.5rem;
+    }
+
+    /* Country grid */
+    .country-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.6rem;
+      max-width: 700px;
+      width: 100%;
+    }
+
+    @media (max-width: 768px) { .country-grid { grid-template-columns: repeat(2, 1fr); } }
+
+    .country-item {
+      background: rgba(255,255,255,0.1);
+      border-right: 3px solid var(--gold);
+      padding: 0.6rem;
+      text-align: center;
+      transition: all 0.2s;
+    }
+
+    .country-item:hover { background: rgba(212,175,55,0.2); }
+
+    .country-code {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--gold);
+    }
+
+    .country-name { font-size: 0.65rem; opacity: 0.8; }
+    .country-stat { font-size: 0.6rem; color: var(--teal); margin-top: 0.2rem; }
+
+    /* Lesson items */
+    .lesson-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      margin: 0.6rem 0;
+      max-width: 800px;
+      text-align: right;
+    }
+
+    .lesson-number {
+      background: var(--gold);
+      color: var(--navy);
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      flex-shrink: 0;
+      border-radius: 4px;
+    }
+
+    .lesson-content h4 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--cream);
+      margin-bottom: 0.2rem;
+    }
+
+    .lesson-content p { font-size: 0.85rem; color: rgba(255,255,255,0.7); }
+
+    /* Certification criteria table */
+    .criteria-table {
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(212,175,55,0.3);
+      border-radius: 8px;
+      overflow: hidden;
+      max-width: 700px;
+      width: 100%;
+      font-size: 0.85rem;
+    }
+
+    .criteria-row {
+      display: grid;
+      grid-template-columns: 100px 1fr 1fr;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .criteria-row:last-child { border-bottom: none; }
+
+    .criteria-row.header {
+      background: var(--navy);
+      font-weight: 700;
+      font-size: 0.75rem;
+    }
+
+    .criteria-cell {
+      padding: 0.75rem;
+      border-right: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .criteria-cell:last-child { border-right: none; }
+
+    .criteria-cell.grade-stable { background: rgba(34,197,94,0.2); color: var(--green); font-weight: 700; }
+    .criteria-cell.grade-moderate { background: rgba(212,175,55,0.2); color: var(--gold); font-weight: 700; }
+    .criteria-cell.grade-exposed { background: rgba(249,115,22,0.2); color: var(--orange); font-weight: 700; }
+    .criteria-cell.grade-uncertain { background: rgba(197,48,48,0.2); color: var(--red); font-weight: 700; }
+
+    /* Workflow steps - practical tutorial */
+    .workflow-container {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      max-width: 650px;
+      width: 100%;
+    }
+
+    .workflow-step {
+      display: flex;
+      gap: 1rem;
+      background: rgba(255,255,255,0.05);
+      padding: 1rem;
+      border-radius: 8px;
+      border-right: 4px solid var(--gold);
+    }
+
+    .workflow-step .step-num {
+      background: var(--gold);
+      color: var(--navy);
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .workflow-step .step-content { flex: 1; }
+    .workflow-step .step-content h4 { font-size: 0.95rem; margin-bottom: 0.25rem; color: var(--gold); }
+    .workflow-step .step-content p { font-size: 0.8rem; opacity: 0.8; }
+    .workflow-step .step-content code {
+      background: rgba(0,0,0,0.3);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+    }
+
+    /* Decision matrix for ministers */
+    .decision-matrix {
+      background: rgba(0,0,0,0.3);
+      border: 2px solid var(--gold);
+      border-radius: 12px;
+      padding: 1.5rem;
+      max-width: 600px;
+    }
+
+    .decision-matrix h4 {
+      color: var(--gold);
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+
+    .decision-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .decision-row:last-child { border-bottom: none; }
+
+    .decision-grade {
+      width: 100px;
+      padding: 0.5rem;
+      border-radius: 6px;
+      text-align: center;
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+
+    .decision-grade.stable { background: var(--green); color: white; }
+    .decision-grade.moderate { background: var(--gold); color: var(--navy); }
+    .decision-grade.exposed { background: var(--orange); color: white; }
+    .decision-grade.uncertain { background: var(--red); color: white; }
+
+    .decision-action { flex: 1; font-size: 0.9rem; }
+
+    /* Gold line */
+    .gold-line { width: 150px; height: 2px; background: var(--gold); margin: 1.5rem auto; }
+
+    /* Content wrapper */
+    .content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: 1000px;
+    }
+
+    /* Animation */
+    .slide.active .animate { animation: fadeUp 0.6s ease-out forwards; }
+    .slide.active .animate.delay-1 { animation-delay: 0.1s; }
+    .slide.active .animate.delay-2 { animation-delay: 0.2s; }
+    .slide.active .animate.delay-3 { animation-delay: 0.3s; }
+    .slide.active .animate.delay-4 { animation-delay: 0.4s; }
+    .slide.active .animate.delay-5 { animation-delay: 0.5s; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate { opacity: 0; }
+
+    /* Slide Nav */
+    .slide-nav {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      padding: 1rem 1rem 1.5rem 1rem;
+      z-index: 100;
+      pointer-events: none;
+    }
+
+    .nav-btn {
+      background: rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: white;
+      font-size: 1.25rem;
+      cursor: pointer;
+      opacity: 0.6;
+      transition: all 0.2s;
+      padding: 0.5rem 0.75rem;
+      border-radius: 8px;
+      pointer-events: auto;
+    }
+
+    .nav-btn:hover { opacity: 1; background: rgba(0,0,0,0.7); border-color: var(--gold); }
+    .nav-btn:disabled { opacity: 0.2; cursor: not-allowed; }
+
+    .nav-center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.25rem;
+      pointer-events: auto;
+    }
+
+    .slide-counter { color: rgba(255,255,255,0.6); font-size: 0.85rem; min-width: 50px; text-align: center; }
+    .progress { display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; max-width: 200px; }
+
+    .progress-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.25);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .progress-dot.active { background: var(--gold); transform: scale(1.3); }
+    .progress-dot:hover { background: rgba(255,255,255,0.6); }
+
+    /* Certainty badges */
+    .certainty-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.75rem;
+      max-width: 700px;
+    }
+
+    @media (max-width: 600px) { .certainty-grid { grid-template-columns: 1fr; } }
+
+    .certainty-badge {
+      padding: 1rem;
+      text-align: center;
+      border-radius: 8px;
+    }
+
+    .certainty-badge.stable { background: linear-gradient(135deg, rgba(34,197,94,0.3), rgba(34,197,94,0.1)); border: 2px solid var(--green); }
+    .certainty-badge.moderate { background: linear-gradient(135deg, rgba(212,175,55,0.3), rgba(212,175,55,0.1)); border: 2px solid var(--gold); }
+    .certainty-badge.exposed { background: linear-gradient(135deg, rgba(249,115,22,0.3), rgba(249,115,22,0.1)); border: 2px solid var(--orange); }
+    .certainty-badge.uncertain { background: linear-gradient(135deg, rgba(197,48,48,0.3), rgba(197,48,48,0.1)); border: 2px solid var(--red); }
+
+    .certainty-badge h4 { font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; margin-bottom: 0.4rem; }
+    .certainty-badge p { font-size: 0.7rem; opacity: 0.9; }
+
+    /* Principle box */
+    .principle-box {
+      background: linear-gradient(135deg, rgba(212,175,55,0.15), rgba(0,0,0,0.2));
+      border: 2px solid var(--gold);
+      padding: 1.5rem 2rem;
+      max-width: 600px;
+      text-align: center;
+    }
+
+    .principle-box .icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+    .principle-box h3 { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; color: var(--gold); margin-bottom: 0.5rem; }
+    .principle-box p { font-size: 0.9rem; opacity: 0.9; line-height: 1.5; }
+
+    /* Quiz */
+    .quiz-container {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(212,175,55,0.3);
+      padding: 1.5rem;
+      max-width: 700px;
+      width: 100%;
+      border-radius: 8px;
+    }
+
+    .quiz-question {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+      color: var(--gold);
+      line-height: 1.4;
+    }
+
+    .quiz-options { display: flex; flex-direction: column; gap: 0.5rem; }
+
+    .quiz-option {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: right;
+      border-radius: 6px;
+      font-size: 0.9rem;
+    }
+
+    .quiz-option:hover { background: rgba(212,175,55,0.1); border-color: var(--gold); }
+    .quiz-option.correct { background: rgba(34,197,94,0.2); border-color: var(--green); }
+    .quiz-option.incorrect { background: rgba(197,48,48,0.2); border-color: var(--red); }
+
+    .quiz-feedback {
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: 8px;
+      display: none;
+      font-size: 0.9rem;
+    }
+
+    .quiz-feedback.show { display: block; }
+    .quiz-feedback.correct { background: rgba(34,197,94,0.2); border: 1px solid var(--green); }
+    .quiz-feedback.incorrect { background: rgba(197,48,48,0.2); border: 1px solid var(--red); }
+
+    /* References */
+    .references {
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(212,175,55,0.3);
+      border-radius: 8px;
+      padding: 1.5rem;
+      max-width: 700px;
+      text-align: right;
+      font-size: 0.75rem;
+      line-height: 1.8;
+    }
+
+    .references h4 {
+      color: var(--gold);
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+    }
+
+    .references ol { padding-right: 1.5rem; }
+    .references li { margin-bottom: 0.5rem; color: rgba(255,255,255,0.8); }
+    .references .journal { font-style: italic; }
+
+    /* Sustainability */
+    .sustainability-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      max-width: 700px;
+    }
+
+    @media (max-width: 600px) { .sustainability-grid { grid-template-columns: 1fr; } }
+
+    .sustainability-item {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(212,175,55,0.3);
+      border-radius: 8px;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    .sustainability-item .sus-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+    .sustainability-item h4 { color: var(--gold); font-size: 0.9rem; margin-bottom: 0.5rem; }
+    .sustainability-item p { font-size: 0.75rem; opacity: 0.8; }
+
+    /* Limitations */
+    .limitation-item {
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+      margin: 0.5rem 0;
+      max-width: 600px;
+      text-align: right;
+    }
+
+    .limitation-icon {
+      color: var(--orange);
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    .limitation-text { font-size: 0.9rem; line-height: 1.5; }
+
+    /* Decision Tree - Two Path Contrast */
+    .decision-tree {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      max-width: 800px;
+      width: 100%;
+      margin: 1.5rem 0;
+    }
+
+    .decision-tree .scenario {
+      background: rgba(0,0,0,0.4);
+      border: 2px solid var(--gold);
+      border-radius: 12px;
+      padding: 1.25rem;
+      text-align: center;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      color: var(--gold);
+    }
+
+    .two-paths {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    @media (max-width: 700px) { .two-paths { grid-template-columns: 1fr; } }
+
+    .path {
+      background: rgba(0,0,0,0.3);
+      border-radius: 12px;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .path.path-a {
+      border: 2px solid var(--red);
+      border-left-width: 6px;
+    }
+
+    .path.path-b {
+      border: 2px solid var(--green);
+      border-left-width: 6px;
+    }
+
+    .path .path-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .path.path-a .path-label { color: var(--red); }
+    .path.path-b .path-label { color: var(--green); }
+
+    .path .path-choice {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1rem;
+      font-weight: 600;
+      line-height: 1.4;
+    }
+
+    .path .path-consequence {
+      font-size: 0.85rem;
+      opacity: 0.9;
+      line-height: 1.5;
+    }
+
+    .path .path-arrow {
+      font-size: 1.2rem;
+      opacity: 0.6;
+    }
+
+    /* Revelation box - gold wisdom */
+    .revelation {
+      background: linear-gradient(135deg, rgba(212,175,55,0.2), rgba(212,175,55,0.05));
+      border: 2px solid var(--gold);
+      border-radius: 12px;
+      padding: 1.5rem 2rem;
+      max-width: 700px;
+      text-align: center;
+      margin-top: 1rem;
+    }
+
+    .revelation .revelation-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      color: var(--gold);
+      margin-bottom: 0.75rem;
+    }
+
+    .revelation .revelation-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.15rem;
+      font-style: italic;
+      line-height: 1.6;
+      color: var(--gold);
+    }
+
+    /* Stats box for real data */
+    .real-data-box {
+      background: rgba(0,0,0,0.4);
+      border: 1px solid rgba(0,212,170,0.5);
+      border-radius: 8px;
+      padding: 1.25rem;
+      max-width: 650px;
+      width: 100%;
+      margin: 1rem 0;
+    }
+
+    .real-data-box .data-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: var(--teal);
+      margin-bottom: 0.75rem;
+    }
+
+    .real-data-box .data-content {
+      font-size: 0.9rem;
+      line-height: 1.7;
+    }
+
+    .real-data-box .data-content strong { color: var(--gold); }
+    .real-data-box .data-source {
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.5);
+      margin-top: 0.75rem;
+      font-style: italic;
+    }
+
+    .text-center { text-align: center; }
+    .mb-1 { margin-bottom: 1rem; }
+    .mb-2 { margin-bottom: 2rem; }
+    .mt-1 { margin-top: 1rem; }
+    .mt-2 { margin-top: 2rem; }
+    .skip-link:focus { top: 0; }
+    .mobile-menu-toggle{display:none;position:fixed;top:12px;right: 12px;z-index:1001;background:#1E2761;border:1px solid #D4AF37;color:#D4AF37;width:40px;height:40px;border-radius:8px;font-size:1.2rem;cursor:pointer;align-items:center;justify-content:center;}
+    @media(max-width:768px){.mobile-menu-toggle{display:flex;}.sidebar{transform:translateX(100%);transition:transform 0.3s ease;position:fixed;z-index:1000;height:100vh;}.sidebar.open{transform:translateX(0);}.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:999;}.sidebar-overlay.show{display:block;}}
+
+    /* Focus-visible styles for keyboard navigation */
+    :focus-visible {
+      outline: 2px solid var(--gold, #D4AF37);
+      outline-offset: 2px;
+    }
+
+    :focus:not(:focus-visible) {
+      outline: none;
+    }
+
+    button:focus-visible,
+    a:focus-visible,
+    [role="button"]:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible {
+      outline: 2px solid var(--gold, #D4AF37);
+      outline-offset: 2px;
+      box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.3);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+<body>
+<a class="skip-link" href="#main-content" style="position:absolute;top:-40px;right: 0;background:#D4AF37;color:#1E2761;padding:8px 16px;z-index:100;transition:top 0.3s;">انتقل إلى المحتوى الرئيسي</a>
+<button aria-expanded="false" aria-label="Toggle navigation menu" class="mobile-menu-toggle" onclick="toggleSidebar()">☰</button>
+<div class="sidebar-overlay" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('show');"></div>
+<div class="course-container">
+ الشريط الجانبي 
+<nav aria-label="الملاحة بالطبع" class="sidebar" role="navigation">
+<div class="sidebar-header">
+<a href="index-ar.html" onmouseout="this.style.color='rgba(212,175,55,0.7)'" onmouseover="this.style.color='#D4AF37'" style="display:block;font-size:0.7rem;color:rgba(212,175,55,0.7);text-decoration:none;margin-bottom:0.5rem;">← مكتبة الدورة</a>
+<h1>تروث سيرت أفريقيا</h1>
+<p>عندما تتكلم الأرقام الحقيقة</p>
+</div>
+<div class="module-list" id="moduleList"></div>
+<div class="sidebar-footer">
+        "الرقم بلا دليل هو وعد بلا شاهد".
+        <br/><br/>
+        مفتوح المصدر | غير متصل جاهز | متوافق مع الهاتف المحمول
+      </div>
+</nav>
+ المحتوى الرئيسي 
+<main class="main-content" id="main-content">
+<header class="content-header">
+<div class="breadcrumb">
+          TruthCert &gt; <span id="currentModule">التحذير</span>
+</div>
+<div class="header-actions">
+<button class="btn" onclick="goToModule(9)">مراجع</button>
+<button class="btn primary" onclick="nextSlide()">يكمل</button>
+</div>
+</header>
+<div class="content-body">
+<div class="slides-container">
+ وحدة 1: التحذير 
+<div class="module-slides active" data-module="1">
+ الشريحة 1.1: الافتتاح 
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  ألم تسمع قصة الأطباء<br/>
+                  who, <em>متأكد من علاجهم</em>,<br/>
+                  هل قتل مرضى أكثر من المرض نفسه؟
+                </div>
+</div>
+</div>
+ الشريحة 1.2: قصة CAST 
+<div class="slide blood">
+<div class="content text-center">
+<div class="title gold animate">كان العام 1989</div>
+<div class="story-card animate delay-1">
+<div class="place">الولايات المتحدة</div>
+<div class="narrative">
+                    كان كل طبيب قلب في أمريكا يعرف المنطق: عدم انتظام ضربات القلب بعد نوبة قلبية أمر خطير. من المؤكد أن الأدوية التي تقمع حالات عدم انتظام ضربات القلب هذه ستنقذ الأرواح.
+                    <br/><br/>
+                    وكان المنطق سليما. وكانت الآلية واضحة. تم وصف الأدوية ل
+                    <strong>200,000 أمريكي</strong> كل عام.
+                    <br/><br/>
+                    ولم يطالب أحد بالدليل. وكان المنطق كافيا.
+                  </div>
+<div class="source">إخت DS وآخرون. نجيم 1991؛ مور تي جيه. الطب القاتل، 1995</div>
+</div>
+</div>
+</div>
+ الشريحة 1.3: عدد القتلى 
+<div class="slide black">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  وبعد ذلك جاءت المحاكمة <em>CAST</em>...
+                </div>
+<div class="death-toll animate delay-2">
+<div class="number">50,000</div>
+<div class="label">يقتل الأمريكيون بسبب "العلاج" كل عام</div>
+</div>
+<div class="simple-box animate delay-3">
+<div class="simple-title">بكلمات بسيطة</div>
+<div class="simple-text">
+                    أعطى الأطباء الدواء ذلك <strong>منطقي</strong> ولكن كان <strong>لم يتم اختبارها بشكل صحيح</strong>. لقد قتل الدواء من الناس أكثر مما قتلته حرب فيتنام. كل عام.
+                  </div>
+</div>
+</div>
+</div>
+ الشريحة 1.4: الامتناع 
+<div class="slide dark">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  "وكانت الأرقام عارية -<br/>
+                  بلا شاهد، بلا برهان، بلا شهادة.<br/>
+                  وهلك الناس."
+                </div>
+<div class="gold-line animate delay-2"></div>
+<p class="animate delay-3" style="color:rgba(255,255,255,0.6);font-style:italic;">
+                  هذا هو سبب وجود TruthCert.
+                </p>
+</div>
+</div>
+ الشريحة 1.5: السؤال 
+<div class="slide dark">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  هل تعتقد أن مثل هذه الكوارث تحدث في أمريكا فقط؟
+                  <br/><br/>
+<em>ولنتأمل هنا أفريقيا.</em>
+</div>
+</div>
+</div>
+ الشريحة 1.6: التحدي الذي تواجهه أفريقيا 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">عبء الأدلة المقترضة</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box">
+<div class="stat-value" style="color:var(--red);">90%</div>
+<div class="stat-label">من التجارب السريرية<br/>خارج أفريقيا</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--gold);">13%</div>
+<div class="stat-label">من الأمراض العالمية<br/>العبء في أفريقيا</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--teal);">&lt;2%</div>
+<div class="stat-label">للصحة العالمية<br/>تمويل البحوث</div>
+</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">بكلمات بسيطة</div>
+<div class="simple-text">
+                    أفريقيا لديها <strong>كثير من المرضى</strong> but <strong>دراسات قليلة جداً</strong> حول كيفية علاجهم. يجب على الأطباء استخدام العلاجات التي تم اختبارها على أشخاص في بلدان أخرى. &lt;&lt;&lt;سبتمبر&gt;&gt;&gt; ولكن ما ينجح في لندن قد لا ينجح في لاغوس.
+                    <strong>تموت الأمهات أثناء الولادة</strong>
+</div>
+</div>
+</div>
+</div>
+</div>
+ وحدة 2: الأراضي 
+<div class="module-slides" data-module="2">
+ الشريحة 2.1: الثلاثة عشر 
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  ألم تر إلى الأمم الثلاثة عشر<br/>
+                  حيث <em>يصاب الأطفال بالحمى</em>,<br/>
+                  حيث <em>ثلاث عشرة دولة</em>,<br/>
+                  حيث <em>يتم اتخاذ القرارات في الظلام</em>?
+                </div>
+</div>
+</div>
+ الشريحة 2.2: البلدان 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">وفيات الأمهات لكل 100000 ولادة حية (منظمة الصحة العالمية 2020)</div>
+<div class="subtitle animate delay-1">جنوب أفريقيا</div>
+<div class="country-grid animate delay-2">
+<div class="country-item"><div class="country-code">NGA</div><div class="country-name">نيجيريا</div><div class="country-stat">917</div></div>
+<div class="country-item"><div class="country-code">GHA</div><div class="country-name">غانا</div><div class="country-stat">308</div></div>
+<div class="country-item"><div class="country-code">KEN</div><div class="country-name">كينيا</div><div class="country-stat">342</div></div>
+<div class="country-item"><div class="country-code">TZA</div><div class="country-name">تنزانيا</div><div class="country-stat">524</div></div>
+<div class="country-item"><div class="country-code">UGA</div><div class="country-name">أوغندا</div><div class="country-stat">284</div></div>
+<div class="country-item"><div class="country-code">ZAF</div><div class="country-name">سيراليون</div><div class="country-stat">127</div></div>
+<div class="country-item"><div class="country-code">SLE</div><div class="country-name">كوت ديفوار</div><div class="country-stat">1,120</div></div>
+<div class="country-item"><div class="country-code">LBR</div><div class="country-name">ليبيريا</div><div class="country-stat">652</div></div>
+<div class="country-item"><div class="country-code">CIV</div><div class="country-name">بوركينا فاسو فاسو</div><div class="country-stat">617</div></div>
+<div class="country-item"><div class="country-code">BEN</div><div class="country-name">بنين</div><div class="country-stat">523</div></div>
+<div class="country-item"><div class="country-code">BFA</div><div class="country-name">غامبيا</div><div class="country-stat">320</div></div>
+<div class="country-item"><div class="country-code">GMB</div><div class="country-name">قارن: المملكة المتحدة = 10، الولايات المتحدة الأمريكية = 21، السويد = 4</div><div class="country-stat">458</div></div>
+<div class="country-item"><div class="country-code">SWZ</div><div class="country-name">إيسواتيني</div><div class="country-stat">240</div></div>
+</div>
+<p class="animate delay-3" style="font-size:0.7rem;color:rgba(255,255,255,0.5);margin-top:0.75rem;">
+                  الشريحة 2.3: سيراليون
+                </p>
+</div>
+</div>
+ سيراليون 
+<div class="slide blood">
+<div class="content text-center">
+<div class="story-card animate">
+<div class="place">في فريتاون، تكون المرأة التي تلد</div>
+<div class="narrative">
+                    أكثر عرضة للوفاة <strong>بنسبة 112 مرة</strong>
+                    مقارنة بالمرأة في لندن.
+                    <br/><br/>
+                    على وزير الصحة أن يقرر: ما هي التدخلات التي تستحق الميزانية المحدودة؟ ما هي العلاجات التي ستنقذ معظم الأمهات؟
+                    <br/><br/>
+                    لديها دراسات من أوروبا. لديها نماذج من أمريكا.
+                    <br/><br/>
+<em>ولكن هل لديها دليل ينطبق على قومها؟</em>
+</div>
+<div class="source">تقرير منظمة الصحة العالمية عن وفيات الأمهات، 2023</div>
+</div>
+</div>
+</div>
+ الشريحة 2.4: الآلام السبع 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">مجموعات الأمراض السبع</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box" style="background:var(--red);">
+<div class="stat-value" style="color:white;font-size:1.3rem;">HIV</div>
+<div class="stat-label" style="color:rgba(255,255,255,0.9);">25.6 مليون في أفريقيا</div>
+</div>
+<div class="stat-box" style="background:#8B4513;">
+<div class="stat-value" style="color:white;font-size:1.3rem;">MAL</div>
+<div class="stat-label" style="color:rgba(255,255,255,0.9);">95% من الوفيات</div>
+</div>
+<div class="stat-box" style="background:var(--purple);">
+<div class="stat-value" style="color:white;font-size:1.3rem;">MCH</div>
+<div class="stat-label" style="color:rgba(255,255,255,0.9);">الأم والطفل</div>
+</div>
+<div class="stat-box" style="background:var(--teal);">
+<div class="stat-value" style="color:var(--navy);font-size:1.3rem;">NCD</div>
+<div class="stat-label" style="color:var(--navy);">الأمراض المزمنة</div>
+</div>
+</div>
+<div class="stats-grid animate delay-2">
+<div class="stat-box" style="background:#DC143C;">
+<div class="stat-value" style="color:white;font-size:1.3rem;">CVD</div>
+<div class="stat-label" style="color:rgba(255,255,255,0.9);">أمراض القلب</div>
+</div>
+<div class="stat-box" style="background:#556B2F;">
+<div class="stat-value" style="color:white;font-size:1.3rem;">NTD</div>
+<div class="stat-label" style="color:rgba(255,255,255,0.9);">الأمراض الاستوائية</div>
+</div>
+<div class="stat-box" style="background:var(--gold);">
+<div class="stat-value" style="color:var(--navy);font-size:1.3rem;">HSP</div>
+<div class="stat-label" style="color:var(--navy);">الأنظمة الصحية</div>
+</div>
+</div>
+<p class="animate delay-3" style="margin-top:1rem;color:rgba(255,255,255,0.7);">
+                  13 دولة × 7 مجموعات مرضية = <strong style="color:var(--gold);">91 حزمة تكوين</strong>
+</p>
+</div>
+</div>
+ الشريحة 2.5: الامتناع 
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  "وأخذوا البينة من بعيد<br/>
+                  دون اختبار ما إذا كانت تناسب أراضيهم،<br/>
+                  دون التصديق على ما إذا كانت تناسب شعوبهم.<br/>
+                  وكانت الأرقام عارية."
+                </div>
+</div>
+</div>
+</div>
+ وحدة 3: الحل ==================== 
+<div class="module-slides" data-module="3">
+ الشريحة 3.1: ماذا لو 
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  ولكن ماذا لو كان على كل رقم أن يظهر وجهه؟
+                  <br/><br/>
+                  ماذا لو كان على كل إحصائية تسمية شاهدها؟
+                  <br/><br/>
+<em>ماذا لو تم حظر الأرقام العارية؟</em>
+</div>
+</div>
+</div>
+ الشريحة 3.2: TruthCert 
+<div class="slide gradient">
+<div class="content text-center">
+<div class="title gold animate">مطالبة TruthCert</div>
+<div class="subtitle animate delay-1">تلبيس الأرقام العارية</div>
+<div class="principle-box animate delay-2">
+<div class="icon">🔒</div>
+<h3>القاعدة الأساسية</h3>
+<p>
+<strong>لن يتم عرض أي رقم لصناع القرار</strong><br/>
+                    ما لم يحمل دليلاً على أصله،<br/>
+                    دليلاً على تحوله،<br/>
+                    ودليل صحته في هذا السياق.
+                  </p>
+</div>
+<div class="simple-box animate delay-3">
+<div class="simple-title">بكلمات بسيطة</div>
+<div class="simple-text">
+                    يجب أن يجيب كل رقم: <strong>"من أين أتيت؟"</strong> and <strong>"هل يمكنني أن أثق بك هنا؟"</strong>
+</div>
+</div>
+</div>
+</div>
+ الشريحة 3.3: ماذا يعني الإثبات 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">ما هو الدليل؟</div>
+<div class="lesson-item animate delay-1">
+<div class="lesson-number">1</div>
+<div class="lesson-content">
+<h4>محدد موقع الأدلة</h4>
+<p>الدراسة الدقيقة أو قاعدة البيانات أو المصدر الذي جاء منه هذا الرقم</p>
+</div>
+</div>
+<div class="lesson-item animate delay-2">
+<div class="lesson-number">2</div>
+<div class="lesson-content">
+<h4>تجزئة المحتوى</h4>
+<p>بصمة رقمية تثبت عدم تغيير البيانات</p>
+</div>
+</div>
+<div class="lesson-item animate delay-3">
+<div class="lesson-number">3</div>
+<div class="lesson-content">
+<h4>مسار التحويل</h4>
+<p>كل خطوة حسابية من البيانات الأولية إلى الرقم النهائي</p>
+</div>
+</div>
+<div class="lesson-item animate delay-4">
+<div class="lesson-number">4</div>
+<div class="lesson-content">
+<h4>حالة التحقق</h4>
+<p>هل نجحت الشيكات الآلية؟ ماذا كانت التحذيرات؟</p>
+</div>
+</div>
+</div>
+</div>
+ الشريحة 3.4: مخرجات المثال - جديد 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">كيف تبدو مخرجات TruthCert</div>
+<div class="example-output animate delay-1">
+<div class="output-header">مطالبة معتمدة من TRUTHCERT</div>
+<div class="output-line"><span class="output-key">:</span> <span class="output-value">"الميزوبروستول يخفض النزف التالي للوضع بنسبة 24%"</span></div>
+<div class="output-line"><span class="output-key">الدرجة:</span> <span class="output-stable">مستقرة</span></div>
+<div class="output-line"><span class="output-key">السياق:</span> <span class="output-value">NGA (نيجيريا)</span></div>
+<div class="output-line"><span class="output-key">african_studies:</span> <span class="output-value">k = 6</span> <span class="output-comment"># يفي بعتبة GO</span></div>
+<div class="output-line"><span class="output-key">effect_size:</span> <span class="output-value">RR 0.76 [95% CI: 0.68-0.84]</span></div>
+<div class="output-line"><span class="output-key">evidence_locator:</span> <span class="output-value">doi:10.1016/S0140-6736(10)60348-7</span></div>
+<div class="output-line"><span class="output-key">التجزئة:</span> <span class="output-value">sha256:a3f2c9...</span></div>
+<div class="output-line"><span class="output-key">cost_per_dose:</span> <span class="output-value">NGN 450</span> <span class="output-comment"># العملة المحلية</span></div>
+<div class="output-line"><span class="output-key">الجليد:</span> <span class="output-value">تم تجنب 12,400 NGN لكل DALY</span></div>
+<div class="output-line"><span class="output-key">تم التحقق من صحته:</span> <span class="output-stable">PASS</span> <span class="output-comment"># مرت جميع الشيكات</span></div>
+</div>
+</div>
+</div>
+ الشريحة 3.5: الدرجات الأربع 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">أربع درجات من اليقين</div>
+<div class="certainty-grid animate delay-1">
+<div class="certainty-badge stable">
+<h4>مستقرة</h4>
+<p>أدلة قوية. المضي قدما بثقة.</p>
+</div>
+<div class="certainty-badge moderate">
+<h4>متوسط</h4>
+<p>أدلة جيدة مع الثغرات. عدم اليقين الدولة.</p>
+</div>
+<div class="certainty-badge exposed">
+<h4>مكشوف</h4>
+<p>عدم اليقين الهيكلي. السيناريوهات فقط.</p>
+</div>
+<div class="certainty-badge uncertain">
+<h4>درجة غير مؤكدة</h4>
+<p>رفض الدقة الزائفة. الحدود فقط.</p>
+</div>
+</div>
+</div>
+</div>
+ الشريحة 3.6: معايير الدرجة - جديد 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">كيف يتم تعيين الدرجات</div>
+<div class="criteria-table animate delay-1">
+<div class="criteria-row header">
+<div class="criteria-cell">Grade</div>
+<div class="criteria-cell">الدراسات الأفريقية (ك)</div>
+<div class="criteria-cell">ما يمكنك القيام به</div>
+</div>
+<div class="criteria-row">
+<div class="criteria-cell grade-stable">مستقرة</div>
+<div class="criteria-cell">ك &gt;= 4 مع عدم تجانس منخفض (I² &lt;50%)</div>
+<div class="criteria-cell">كامل HTA، PSA، VOI، تقديرات النقاط</div>
+</div>
+<div class="criteria-row">
+<div class="criteria-cell grade-moderate">متوسط</div>
+<div class="criteria-cell">ك &gt;= 4 مع عدم تجانس عالي، أو ك = 2-3</div>
+<div class="criteria-cell">HTA الكامل مع CIs الموسعة، يؤكد على عدم اليقين</div>
+</div>
+<div class="criteria-row">
+<div class="criteria-cell grade-exposed">مكشوف</div>
+<div class="criteria-cell">k = 1، أو مخاوف كبيرة تتعلق بقابلية النقل</div>
+<div class="criteria-cell">تحليل السيناريو فقط، لا توجد تقديرات نقطة</div>
+</div>
+<div class="criteria-row">
+<div class="criteria-cell grade-uncertain">درجة غير مؤكدة</div>
+<div class="criteria-cell">ك = 0، أو دليل من الذاكرة/لم يتم التحقق منه</div>
+<div class="criteria-cell">الحدود فقط، وفي أسوأ الأحوال، قيمة البحث</div>
+</div>
+</div>
+</div>
+</div>
+ الشريحة 3.7: المحظور 
+<div class="slide blood">
+<div class="content text-center">
+<div class="title red animate">ما هو ممنوع</div>
+<div class="card dark-bg red-border animate delay-1">
+<div class="card-label" style="color:var(--red);">تسرب الذاكرة = كتلة</div>
+<div class="card-text">
+                    إذا قال شخص ما "أتذكر أن الإحصائية كانت حوالي 30%" -<br/>
+                    that <strong>لا يمكن أن يكون</strong> معتمدًا.
+                    <br/><br/>
+                    الذاكرة ليست دليلا. التذكر ليس دليلا.
+                  </div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">بكلمات بسيطة</div>
+<div class="simple-text">
+                    لا يمكنك أن تقول <strong>"أعتقد أنني سمعت..."</strong> or <strong>"أخبرني أحدهم..."</strong>
+                    يجب أن تظهر <strong>أين بالضبط</strong> الرقم جاء من.
+                  </div>
+</div>
+</div>
+</div>
+</div>
+ وحدة 4: الطريقة 
+<div class="module-slides" data-module="4">
+ الشريحة 4.1: مسألة القيمة 
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  عندما يكون لدى الحكومة فقط <em>50 دولارًا للشخص الواحد سنويًا</em> للصحة،
+                  <br/><br/>
+                  كيف يمكنك تحديد العلاجات التي سيتم تمويلها؟
+                </div>
+</div>
+</div>
+ الشريحة 4.2: HTA 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">تقييم التكنولوجيا الصحية</div>
+<div class="simple-box animate delay-1">
+<div class="simple-title">السؤال الأساسي</div>
+<div class="simple-text">
+                    لكل <strong>نيرة، سيدي، أو الشلن</strong> قضى، كم <strong>الصحة</strong> هل نربح؟ وماذا أيضا <strong>كان بإمكاننا فعل ذلك</strong> بهذا المال؟
+                  </div>
+</div>
+</div>
+</div>
+ الشريحة 4.3: فخ الناتج المحلي الإجمالي 
+<div class="slide blood">
+<div class="content text-center">
+<div class="title red animate">فخ العتبة</div>
+<div class="story-card animate delay-1">
+<div class="place">تحذير من التاريخ</div>
+<div class="narrative">
+                    لسنوات عديدة، قال الاقتصاديون: "إنها فعالة من حيث التكلفة إذا كانت تكلفتها أقل من ثلاثة أضعاف نصيب الفرد من الناتج المحلي الإجمالي".
+                    <br/><br/>
+                    وبهذا المنطق فإن العلاج الذي تبلغ قيمته 3000 دولار سوف يكون "مستحقاً" في أمريكا (الناتج المحلي الإجمالي 76000 دولار) ولكنه "لا يستحق كل هذا العناء" في سيراليون (الناتج المحلي الإجمالي 500 دولار).
+                    <br/><br/>
+<strong>نفس المعاملة. نفس الفائدة. أحكام مختلفة بناء على المكان الذي ولدت فيه.</strong>
+</div>
+<div class="source">وودز ب وآخرون. لانسيت للصحة العالمية 2016؛ ريفيل ف وآخرون. خطة السياسة الصحية 2018</div>
+</div>
+</div>
+</div>
+ الشريحة 4.4: الطريقة الأفضل 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">طريقة أفضل</div>
+<div class="lesson-item animate delay-1">
+<div class="lesson-number" style="background:var(--teal);">A</div>
+<div class="lesson-content">
+<h4>تحليل القدرة على تحمل التكاليف</h4>
+<p>هل يستطيع النظام الصحي الدفع فعلاً؟ ما الذي يتم قطعه أيضًا؟</p>
+</div>
+</div>
+<div class="lesson-item animate delay-2">
+<div class="lesson-number" style="background:var(--gold);">N</div>
+<div class="lesson-content">
+<h4>صافي الفوائد الصحية</h4>
+<p>الصحة المكتسبة ناقص الصحة المفقودة عن طريق تحويل الموارد</p>
+</div>
+</div>
+<div class="lesson-item animate delay-3">
+<div class="lesson-number" style="background:var(--purple);">V</div>
+<div class="lesson-content">
+<h4>قيمة المعلومات</h4>
+<p>هل يستحق الأمر إجراء المزيد من البحث قبل اتخاذ القرار؟</p>
+</div>
+</div>
+</div>
+</div>
+ الشريحة 4.5: العملة المحلية 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">العملة المحلية. دائماً.</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box">
+<div class="stat-value" style="color:var(--gold);">NGN</div>
+<div class="stat-label">نيرة نيجيرية</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--teal);">GHS</div>
+<div class="stat-label">غانا سيدي</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--purple);">KES</div>
+<div class="stat-label">الشلن الكيني</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--gold);">XOF</div>
+<div class="stat-label">الفرنك الأفريقي</div>
+</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">لماذا يهم هذا؟</div>
+<div class="simple-text">
+                    وزير في ميزانيات أكرا في <strong>Cedis</strong>. لا ينبغي لها أن تتحول من الدولارات.
+                    <strong>ميزانيتها، عملتها، قرارها.</strong>
+</div>
+</div>
+</div>
+</div>
+ الشريحة 4.6: الامتناع 
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain hope animate">
+                  "ولما ثبتت الأعداد في البرهان<br/>
+                  عندما أظهر كل ادعاء مصدره،<br/>
+                  عندما تطابقت العملة مع الأرض-<br/>
+                  عندها يستطيع صناع القرار أن يروا بوضوح."
+                </div>
+</div>
+</div>
+</div>
+ ==================== الوحدة 5: الانضباط ==================== 
+<div class="module-slides" data-module="5">
+ الشريحة 5.1: إمكانية التكرار 
+<div class="slide dark active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  وفي عام 2012، حاول العلماء في أمجن التكاثر<br/>
+<em>53 دراسة السرطان التاريخية</em>.
+                  <br/><br/>
+                  كم عدد الذين يمكنهم تكرارها؟
+                </div>
+</div>
+</div>
+ الشريحة 5.2: الأزمة 
+<div class="slide blood">
+<div class="content text-center">
+<div class="big-number red animate">6</div>
+<div class="subtitle animate delay-1" style="color:rgba(255,255,255,0.8);">
+                  يمكن إعادة إنتاج 6 فقط من أصل 53 دراسة تاريخية.
+                </div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">بكلمات بسيطة</div>
+<div class="simple-text">
+<strong>89% من الدراسات "الاختراقية" كانت خاطئة</strong> أو لا يمكن تكراره. العلاجات المقدمة للمرضى. بناء على النتائج التي فشلت.
+                  </div>
+</div>
+<p class="animate delay-3" style="font-size:0.7rem;color:rgba(255,255,255,0.5);margin-top:0.5rem;">
+                  بيجلي سي جي وإيليس إل إم. Nature 2012;483:531-533
+                </p>
+</div>
+</div>
+ الشريحة 5.3: البذرة 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">انضباط البذور</div>
+<div class="card dark-bg animate delay-1">
+<div class="card-label">المتطلبات</div>
+<div class="card-text">
+                    يجب أن يكون كل تحليل لـ TruthCert <strong>قابلة للتكرار تمامًا</strong>. يجب أن يحصل محلل في نيروبي ومحلل في جنيف <strong>على نتائج متطابقة</strong>.
+                  </div>
+</div>
+<div class="stats-grid animate delay-2">
+<div class="stat-box">
+<div class="stat-value" style="color:var(--gold);">786888</div>
+<div class="stat-label">البذور الرئيسية</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--teal);">مُثَبَّت</div>
+<div class="stat-label">كل العمليات العشوائية</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--purple);">تم تسجيله</div>
+<div class="stat-label">كل خطوة</div>
+</div>
+</div>
+</div>
+</div>
+ الشريحة 5.4: الأداء 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">مصممة للواقع</div>
+<div class="simple-box animate delay-1">
+<div class="simple-title">القيد</div>
+<div class="simple-text">
+                    لدى خبير اقتصادي في مجال الصحة في فريتاون <strong>جهاز كمبيوتر محمول عادي</strong>، ربما لا يمكن الاعتماد على الإنترنت. يجب أن تعمل TruthCert على <strong>ما لديها بالفعل</strong>.
+                  </div>
+</div>
+<div class="stats-grid animate delay-2">
+<div class="stat-box">
+<div class="stat-value" style="color:var(--gold);">60s</div>
+<div class="stat-label">التحليل الأساسي</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--teal);">45s</div>
+<div class="stat-label">عدم اليقين (سحب 5K)</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--purple);">غير متصل</div>
+<div class="stat-label">يعمل بدون الإنترنت</div>
+</div>
+</div>
+</div>
+</div>
+ الشريحة 5.5: الامتناع 
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain hope animate">
+                  "وزُرعت نفس البذرة في أكرا وفي جنيف،<br/>
+                  ونمت نفس الفاكهة في كلا المكانين.<br/>
+                  ويمكن لأي شخص أن يزرع البذور مرة أخرى،<br/>
+                  وحصد نفس الحقيقة."
+                </div>
+</div>
+</div>
+</div>
+ ==================== الوحدة 6: لصانعي القرار ================= 
+<div class="module-slides" data-module="6">
+ الشريحة 6.1: الملخص التنفيذي 
+<div class="slide gradient active">
+<div class="content text-center">
+<div class="title gold animate">للوزراء والمديرين</div>
+<div class="subtitle animate delay-1">ما تحتاج إلى معرفته في 3 دقائق</div>
+</div>
+</div>
+ الشريحة 6.2: مصفوفة القرار 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">ماذا يعني كل درجة بالنسبة لك</div>
+<div class="decision-matrix animate delay-1">
+<h4>عندما تقول TruthCert... يجب عليك...</h4>
+<div class="decision-row">
+<div class="decision-grade stable">مستقرة</div>
+<div class="decision-action"><strong>المضي قدما بثقة.</strong> تقديرات النقطة الحالية. الدفاع عن الأرقام.</div>
+</div>
+<div class="decision-row">
+<div class="decision-grade moderate">متوسط</div>
+<div class="decision-action"><strong>المضي قدما بحذر.</strong> إظهار النطاقات. قل "بين X وY."</div>
+</div>
+<div class="decision-row">
+<div class="decision-grade exposed">مكشوف</div>
+<div class="decision-action"><strong>عرض السيناريوهات.</strong> "إذا كان A، ثم X. إذا كان B، ثم Y." لا يوجد رقم واحد.</div>
+</div>
+<div class="decision-row">
+<div class="decision-grade uncertain">درجة غير مؤكدة</div>
+<div class="decision-action"><strong>قل "لا نعرف".</strong> اطلب المزيد من البحث قبل الالتزام.</div>
+</div>
+</div>
+</div>
+</div>
+ الشريحة 6.3: الواقع السياسي 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">عندما تتعارض السياسة مع الأدلة</div>
+<div class="story-card animate delay-1">
+<div class="place">الوضع الصعب</div>
+<div class="narrative">
+                    برنامج شعبي لديه أدلة غير مؤكدة. الناخبون يطالبون بذلك. ماذا تفعل؟
+                    <br/><br/>
+<strong>يمنحك TruthCert درعًا:</strong>
+<br/><br/>
+                    "أريد أن أساعد شعبنا. لكن الأدلة تشير إلى أننا لا نعرف ما إذا كان هذا ينجح هنا. اسمحوا لي بتمويل مشروع <strong>دراسة تجريبية</strong> أولاً – حتى نتمكن من التأكد من أننا نساعد، ولا نؤذي".
+                    <br/><br/>
+<em>أنت لا تقول لا. أنت تقول "دعونا نتأكد".</em>
+</div>
+</div>
+</div>
+</div>
+ الشريحة 6.4: ملخص الصفحة الواحدة 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">ملخص صفحة واحدة الخاص بك</div>
+<div class="lesson-item animate delay-1">
+<div class="lesson-number" style="background:var(--green);">1</div>
+<div class="lesson-content">
+<h4>يجب أن يكون للأرقام مصادر</h4>
+<p>إذا لم يتمكن الموظفون من إظهار مصدر الرقم، فلا تستخدمه</p>
+</div>
+</div>
+<div class="lesson-item animate delay-2">
+<div class="lesson-number" style="background:var(--gold);">2</div>
+<div class="lesson-content">
+<h4>ابحث عن الأدلة الأفريقية</h4>
+<p>اسأل "كم عدد الدراسات التي أجريت في أفريقيا؟" (تحتاج 4+ للثقة)</p>
+</div>
+</div>
+<div class="lesson-item animate delay-3">
+<div class="lesson-number" style="background:var(--teal);">3</div>
+<div class="lesson-content">
+<h4>الطلب على العملة المحلية</h4>
+<p>يجب أن تكون التكاليف بالنايرا/السيدي/الشلن، وليس بالدولار الأمريكي</p>
+</div>
+</div>
+<div class="lesson-item animate delay-4">
+<div class="lesson-number" style="background:var(--purple);">4</div>
+<div class="lesson-content">
+<h4>احتضان عدم اليقين</h4>
+<p>"لا نعرف" أكثر صدقًا من رقم دقيق مزيف</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+ ============================================================== الوحدة 7 
+<div class="module-slides" data-module="7">
+ الشريحة 7.1: مقدمة البرنامج التعليمي 
+<div class="slide dark active">
+<div class="content text-center">
+<div class="title gold animate">تشغيل التحليل الأول الخاص بك</div>
+<div class="subtitle animate delay-1">تجول عملي</div>
+</div>
+</div>
+ الشريحة 7.2: ما تحتاجه 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">ما تحتاجه</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box">
+<div class="stat-value" style="color:var(--teal);font-size:1.5rem;">المتصفح</div>
+<div class="stat-label">كروم/فايرفوكس/إيدج</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--gold);font-size:1.5rem;">Data</div>
+<div class="stat-label">مدخلاتك YAML</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--purple);font-size:1.5rem;">~ 2 ساعة</div>
+<div class="stat-label">وقت التدريب</div>
+</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">لا حاجة إلى برامج خاصة</div>
+<div class="simple-text">
+                    يعمل TruthCert في متصفحك. لا التثبيت. يعمل دون اتصال بعد التحميل الأول.
+                  </div>
+</div>
+</div>
+</div>
+ الشريحة 7.3: الخطوات 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">خمس خطوات</div>
+<div class="workflow-container animate delay-1">
+<div class="workflow-step">
+<div class="step-num">1</div>
+<div class="step-content">
+<h4>اختر البلد + المرض</h4>
+<p>اختر من بين 13 دولة و7 مجموعات من الأمراض. مثال: <code>NGA + MCH</code></p>
+</div>
+</div>
+<div class="workflow-step">
+<div class="step-num">2</div>
+<div class="step-content">
+<h4>إدخال البيانات المحلية</h4>
+<p>تكاليف الوحدة، السكان المستهدفين، الميزانية. في <code>NGN</code> (العملة المحلية).</p>
+</div>
+</div>
+<div class="workflow-step">
+<div class="step-num">3</div>
+<div class="step-content">
+<h4>حدد الأدلة</h4>
+<p>رابط للدراسات. يقوم النظام باحتساب الدراسات الإفريقية (ك) تلقائيا.</p>
+</div>
+</div>
+<div class="workflow-step">
+<div class="step-num">4</div>
+<div class="step-content">
+<h4>تشغيل التحليل</h4>
+<p>انقر فوق "تصديق". انتظر ~ 60 ثانية. النظام يعين الدرجة.</p>
+</div>
+</div>
+<div class="workflow-step">
+<div class="step-num">5</div>
+<div class="step-content">
+<h4>نتائج التصدير</h4>
+<p>تحميل التقرير بصيغة PDF. تحتوي جميع المطالبات على محددات مواقع الأدلة + التجزئة.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+ الشريحة 7.4: مصادر البيانات 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">أين يمكن الحصول على البيانات</div>
+<div class="lesson-item animate delay-1">
+<div class="lesson-number">1</div>
+<div class="lesson-content">
+<h4>تكاليف الوحدة</h4>
+<p>قاعدة بيانات WHO-CHOICE، ودراسات تكاليف iDSI، وقوائم أسعار وزارة الصحة المحلية</p>
+</div>
+</div>
+<div class="lesson-item animate delay-2">
+<div class="lesson-number">2</div>
+<div class="lesson-content">
+<h4>عبء المرض</h4>
+<p>GBD (العبء العالمي للمرض)، مسوحات DHS، HMIS المحلية</p>
+</div>
+</div>
+<div class="lesson-item animate delay-3">
+<div class="lesson-number">3</div>
+<div class="lesson-content">
+<h4>أحجام التأثير</h4>
+<p>مراجعات كوكرين، منشورة التحليلات التلوية، المبادئ التوجيهية لمنظمة الصحة العالمية</p>
+</div>
+</div>
+<div class="lesson-item animate delay-4">
+<div class="lesson-number">4</div>
+<div class="lesson-content">
+<h4>بيانات الميزانية</h4>
+<p>حسابات الصحة الوطنية، وثائق ميزانية وزارة المالية، تقارير الجهات المانحة</p>
+</div>
+</div>
+</div>
+</div>
+ الشريحة 7.5: عندما k &lt; 4 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">عندما تكون الأدلة الأفريقية متناثرة</div>
+<div class="simple-box animate delay-1">
+<div class="simple-title">إذا كان k &lt; 4 (أقل من 4 دراسات أفريقية)</div>
+<div class="simple-text">
+                    لن تعطيك TruthCert إجابة واثقة زائفة. بدلاً من:
+                  </div>
+</div>
+<div class="lesson-item animate delay-2">
+<div class="lesson-number" style="background:var(--orange);">1</div>
+<div class="lesson-content">
+<h4>قم بالتمحور حول مجموعة أوسع</h4>
+<p>إذا كانت قيمة "CVD في غانا" تحتوي على k = 1، فجرّب "NCD في غرب أفريقيا"</p>
+</div>
+</div>
+<div class="lesson-item animate delay-3">
+<div class="lesson-number" style="background:var(--orange);">2</div>
+<div class="lesson-content">
+<h4>استخدام تحليل السيناريو</h4>
+<p>اعرض أفضل حالة وأسوأ حالة و السيناريوهات الوسطى</p>
+</div>
+</div>
+<div class="lesson-item animate delay-4">
+<div class="lesson-number" style="background:var(--orange);">3</div>
+<div class="lesson-content">
+<h4>احسب قيمة المعلومات</h4>
+<p>هل تستحق دراسة محلية جديدة التمويل؟</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+ ==================== الوحدة 8: الاستدامة والحدود ===================== 
+<div class="module-slides" data-module="8">
+ الشريحة 8.1: الاستدامة 
+<div class="slide dark active">
+<div class="content text-center">
+<div class="title gold animate">الاستدامة</div>
+<div class="subtitle animate delay-1">كيف يستمر برنامج TruthCert على المدى الطويل</div>
+<div class="sustainability-grid animate delay-2">
+<div class="sustainability-item">
+<div class="sus-icon">📁</div>
+<h4>كود المصدر المفتوح</h4>
+<p>عام. يمكن لأي شخص تشغيل وتعديل وتحسين.</p>
+</div>
+<div class="sustainability-item">
+<div class="sus-icon">🎓</div>
+<h4>تدريب السكان المحليين</h4>
+<p>تقوم كل دولة ببناء قدرة HTA الخاصة بها. لا تعتمد على الغرباء.</p>
+</div>
+<div class="sustainability-item">
+<div class="sus-icon">💻</div>
+<h4>غير متصل أولاً</h4>
+<p>يعمل بدون انترنت. لا حاجة للاشتراك السحابي.</p>
+</div>
+</div>
+</div>
+</div>
+ الشريحة 8.2: القيود 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">ما لا تستطيع TruthCert فعله</div>
+<div class="limitation-item animate delay-1">
+<div class="limitation-icon">⚠</div>
+<div class="limitation-text"><strong>لا يمكن إنشاء الأدلة.</strong> إذا لم تكن هناك دراسات، فلا يمكن لـ TruthCert اختراعها.</div>
+</div>
+<div class="limitation-item animate delay-2">
+<div class="limitation-icon">⚠</div>
+<div class="limitation-text"><strong>ولا يمكن ضمان القبول السياسي.</strong> الأدلة ضرورية ولكنها ليست كافية لتغيير السياسات.</div>
+</div>
+<div class="limitation-item animate delay-3">
+<div class="limitation-icon">⚠</div>
+<div class="limitation-text"><strong>لا يمكن أن يحل محل الحكم.</strong> إنه يبلغ القرارات، ولا يتخذها.</div>
+</div>
+<div class="limitation-item animate delay-4">
+<div class="limitation-icon">⚠</div>
+<div class="limitation-text"><strong>لا يمكن إصلاح البيانات السيئة.</strong> إذا كانت تكاليف المدخلات خاطئة، فستكون المخرجات خاطئة.</div>
+</div>
+<div class="limitation-item animate delay-5">
+<div class="limitation-icon">⚠</div>
+<div class="limitation-text"><strong>لا يمكن حساب التنفيذ.</strong> فالتدخل الفعال من حيث التكلفة الذي يتم تنفيذه بشكل سيئ قد يفشل.</div>
+</div>
+</div>
+</div>
+ الشريحة 8.3: الحقيقة الصادقة 
+<div class="slide dark">
+<div class="content text-center">
+<div class="refrain animate">
+                  "لا تعد شركة TruthCert باليقين.<br/>
+                  يعد <em>الصدق بشأن عدم اليقين</em>.<br/>
+                  وهذا الصدق ينقذ الأرواح."
+                </div>
+</div>
+</div>
+</div>
+ ================================== الوحدة 9: 
+<div class="module-slides" data-module="9">
+ الشريحة 9.1: المراجع 
+<div class="slide dark active">
+<div class="content text-center">
+<div class="title gold animate">مراجع</div>
+<div class="references animate delay-1">
+<h4>المصادر الرئيسية المذكورة في هذه الدورة</h4>
+<ol>
+<li>إكت دي إس، ليبسون بي آر، ميتشل إل بي، وآخرون. الوفيات والمراضة لدى المرضى الذين يتلقون الإنكايينيد أو الفليكاينيد أو الدواء الوهمي: CAST. <span class="journal">NEJM</span> 1991;324:781-788.</li>
+<li>Moore TJ. <span class="journal">الطب القاتل: لماذا مات عشرات الآلاف من مرضى القلب في أسوأ كارثة مخدرات في أمريكا.</span> سايمون اند شوستر، 1995.</li>
+<li>بيجلي سي جي، إليس إل إم. تطوير الأدوية: رفع معايير أبحاث السرطان قبل السريرية. <span class="journal">الطبيعة</span> 2012;483:531-533.</li>
+<li>Woods B, Revill P, Sculpher M, Claxton K. عتبات فعالية التكلفة على المستوى القطري: التقديرات الأولية والحاجة إلى مزيد من البحث. <span class="journal">لانسيت للصحة العالمية</span> 2016;4:e594-e601.</li>
+<li>من. الاتجاهات في وفيات الأمهات 2000-2020. جنيف: منظمة الصحة العالمية، 2023.</li>
+<li>من. تقرير الملاريا في العالم 2022. جنيف: منظمة الصحة العالمية، 2022.</li>
+<li>برنامج الأمم المتحدة المشترك لمكافحة الإيدز. إحصاءات فيروس نقص المناعة البشرية العالمية 2023. جنيف: برنامج الأمم المتحدة المشترك المعني بفيروس نقص المناعة البشرية/الإيدز، 2023.</li>
+<li>ريفيل بي، أوشاليك جي، لوماس جي، وآخرون. عتبات فعالية التكلفة: توجيه الإنفاق على الرعاية الصحية لتحسين صحة السكان. <span class="journal">خطة السياسة الصحية</span> 2018;33:707-716.</li>
+</ol>
+</div>
+</div>
+</div>
+ الشريحة 9.2: الاختبار 1 - قائم على القصة 
+<div class="slide dark">
+<div class="content text-center">
+<div class="quiz-container animate">
+<div class="quiz-question">في قصة الأطباء الذين "علموا" أن علاجهم سينجح، ما الذي كشفته تجربة CAST؟</div>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkAnswer(this, false)">عملت الأدوية كما هو متوقع</div>
+<div class="quiz-option" onclick="checkAnswer(this, true)">لقد قتلت المخدرات من الناس أكثر مما أنقذتهم</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)">ولم يكن للأدوية أي تأثير</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)">وكانت المحاكمة غير حاسمة</div>
+</div>
+<div class="quiz-feedback"></div>
+</div>
+</div>
+</div>
+ الشريحة 9.3: الاختبار 2 - قائم على القصة 
+<div class="slide dark">
+<div class="content text-center">
+<div class="quiz-container animate">
+<div class="quiz-question">عندما تكون الأرقام "عارية"، ماذا يعني ذلك؟</div>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkAnswer(this, false)">يتم عرضها بدون التنسيق</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)">إنها تقريبية</div>
+<div class="quiz-option" onclick="checkAnswer(this, true)">ليس لديهم أي دليل على المكان الذي أتوا منه</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)">إنهم يعملون بالعملة الخاطئة</div>
+</div>
+<div class="quiz-feedback"></div>
+</div>
+</div>
+</div>
+ الشريحة 9.4: الاختبار 3 
+<div class="slide dark">
+<div class="content text-center">
+<div class="quiz-container animate">
+<div class="quiz-question">يتلقى أحد الوزراء تقرير TruthCert الذي يحمل علامة "مكشوف". ماذا يجب أن تفعل؟</div>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkAnswer(this, false)">رفض البرنامج نهائيا</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)">المضي قدما كما لو كانت الأدلة قوية</div>
+<div class="quiz-option" onclick="checkAnswer(this, true)">اعرض السيناريوهات ("إذا كان A ثم X، وإذا كان B ثم Y") وفكر في تجربة تجريبية</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)">انتظروا المزيد من الدراسات الدولية</div>
+</div>
+<div class="quiz-feedback"></div>
+</div>
+</div>
+</div>
+ الشريحة 9.5: الاختبار 4 
+<div class="slide dark">
+<div class="content text-center">
+<div class="quiz-container animate">
+<div class="quiz-question">لماذا تصر TruthCert على العملة المحلية؟</div>
+<div class="quiz-options">
+<div class="quiz-option" onclick="checkAnswer(this, false)">لتسهيل الحسابات</div>
+<div class="quiz-option" onclick="checkAnswer(this, true)">لأن ميزانية الوزراء بالعملة المحلية ولا ينبغي عليهم التحويل</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)">لتجنب تقلبات أسعار الصرف</div>
+<div class="quiz-option" onclick="checkAnswer(this, false)">إنه مطلب تعسفي</div>
+</div>
+<div class="quiz-feedback"></div>
+</div>
+</div>
+</div>
+ الشريحة 9.6: الإكمال 
+<div class="slide hope">
+<div class="content text-center">
+<div class="big-number green animate" style="font-size:5rem;">✔</div>
+<div class="title green animate delay-1">اكتملت الدورة</div>
+<div class="gold-line animate delay-2"></div>
+<div class="refrain hope animate delay-3">
+                  ""ولما لبس الأعداد،<br/>
+                  حين كان لكل ادعاء برهانه،<br/>
+                  عندما تم اختبار الأدلة في الأرض التي سيتم استخدامها فيها -<br/>
+<br/>
+                  ثم عاشت الأمهات<br/>
+                  وازدهر الأطفال،<br/>
+                  ويمكن لصانعي القرار أن يناموا ليلاً".
+                </div>
+<p class="animate delay-4" style="color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:1.2rem;margin-top:1.5rem;">
+                  هذا هو تروثسيرت.
+                </p>
+</div>
+</div>
+</div>
+ ==================== الوحدة 10: قصص حقيقية ==================== 
+<div class="module-slides" data-module="10">
+ الشريحة 10.1: فتح الوحدة 
+<div class="slide black active">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  ماذا لو كان التاريخ قد أعطانا تحذيرات –<br/>
+<em>مكتوبة في جداول البيانات، مخفية في البيانات،</em><br/>
+                  مدفونة في ملفات لم يفكر أحد في التحقق منها؟
+                </div>
+<div class="gold-line animate delay-2"></div>
+<div class="subtitle animate delay-3" style="color:rgba(255,255,255,0.7);">
+                  هذه هي قصص اليقين والخطأ وثمن عدم التحقق.
+                </div>
+</div>
+</div>
+ الشريحة 10.2: افتتاحية راينهارت-روجوف 
+<div class="slide dark">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  ماذا لو كانت <em>خطأ في جدول البيانات</em><br/>
+                  يشكل مصير الأمم؟
+                </div>
+</div>
+</div>
+ الشريحة 10.3: قصة راينهارت-روجوف 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">جدول البيانات الذي غير التاريخ</div>
+<div class="real-data-box animate delay-1">
+<div class="data-label">البيانات الحقيقية</div>
+<div class="data-content">
+                    في عام 2010، نشر الاقتصاديان رينهارت وروجوف من جامعة هارفارد مقالاً <strong>"النمو في زمن الديون"</strong>. زعمهم: عندما يتجاوز دين الدولة <strong>90% من الناتج المحلي الإجمالي</strong>، ينهار النمو الاقتصادي.
+                    <br/><br/>
+                    وقد استشهد السياسيون في جميع أنحاء العالم بهذا لتبريره <strong>تدابير التقشف</strong>- خفض الإنفاق العام، وتقليص الخدمات، وتجميد الأجور.
+                    <br/><br/>
+                    ثم في عام 2013، طالب دراسات عليا اسمه <strong>توماس هيرندون</strong> طلب جدول البيانات الخاص بهم. وجد: <strong>خطأ في Excel أدى إلى استبعاد 5 دول</strong>وترجيح البيانات الانتقائية والأساليب غير التقليدية. وكانت العلاقة الحقيقية <strong>أضعف بكثير</strong>.
+                  </div>
+<div class="data-source">هيرندون، الرماد وبولين (2014). مجلة كامبريدج للاقتصاد.</div>
+</div>
+</div>
+</div>
+ الشريحة 10.4: شجرة قرارات راينهارت-روجوف 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">المساران</div>
+<div class="decision-tree animate delay-1">
+<div class="scenario">أنت مستشار سياسي. راينهارت روجوف على مكتبك. ماذا تفعل؟</div>
+<div class="two-paths">
+<div class="path path-a">
+<div class="path-label">المسار أ: ثق بالنتيجة</div>
+<div class="path-choice">قبول عتبة 90٪ كحقيقة</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">الدعوة إلى سياسات التقشف</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence"><strong>الملايين يعانون</strong> من التخفيضات غير الضرورية في الميزانية، وارتفاع معدلات البطالة، وتوقف التعافي</div>
+</div>
+<div class="path path-b">
+<div class="path-label">المسار ب: طلب البيانات</div>
+<div class="path-choice">اطلب جدول البيانات والأساليب</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">اكتشف خطأ Excel</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence"><strong>وضع سياسة قائمة على الأدلة</strong> الذي يخدم المواطنين في الواقع</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+ الشريحة 10.5: رؤيا راينهارت-روجوف 
+<div class="slide dark">
+<div class="content text-center">
+<div class="revelation animate">
+<div class="revelation-label">الرؤيا</div>
+<div class="revelation-text">
+                    خطأ جدول بيانات Excel هو سبب حاجتنا إلى التكرار. ولو طُلب من راينهارت وروجوف مشاركة جدول البيانات الخاص بهما، لكان الخطأ قد تم اكتشافه في عام 2010، وليس في عام 2013.
+                    <br/><br/>
+                    ثلاث سنوات من السياسة المبنية على صيغة أخطأت خمس خلايا.
+                  </div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">الدرس</div>
+<div class="simple-text">
+<strong>إن إعادة الإنتاج ليست بيروقراطية.</strong> إنه الفرق بين اكتشاف الخطأ قبل أن تتصرف الأمم عليه، وبين اكتشافه بعد ذلك.
+                  </div>
+</div>
+</div>
+</div>
+ الشريحة 10.6: افتتاحية برج السرطان في دوق 
+<div class="slide blood">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  ماذا يحدث عندما <em>التوقيعات الجينومية</em><br/>
+                  مبنية على الرمال؟
+                </div>
+</div>
+</div>
+ الشريحة 10.7: قصة دوق السرطان 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">المحاكمات المبنية على الاحتيال</div>
+<div class="real-data-box animate delay-1">
+<div class="data-label">البيانات الحقيقية</div>
+<div class="data-content">
+                    نشر الدكتور أنيل بوتي من جامعة ديوك تنبؤات جينية تزعم أنها متطابقة
+                    <strong>مرضى السرطان إلى العلاج الكيميائي الأكثر احتمالا أن يساعدهم</strong>.
+                    <br/><br/>
+                    سجلت التجارب السريرية المرضى. تم اختيار العلاجات بناءً على خوارزمياته. الوعد: <strong>الطب الشخصي</strong> يمكن أن يحدث ثورة في رعاية مرضى السرطان.
+                    <br/><br/>
+                    ثم كشفت التحقيقات: <strong>بيانات ملفقة، نتائج مستحيلة، أرقام تم التلاعب بها</strong>. توقفت المحاكمات. تلقى المرضى علاجات مبنية على الاحتيال.
+                  </div>
+<div class="data-source">باجرلي وكومبس (2009). حوليات الإحصاء التطبيقي. تقرير المنظمة الدولية للهجرة (2012).</div>
+</div>
+</div>
+</div>
+ الشريحة 10.8: شجرة قرارات دوق السرطان 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">المساران</div>
+<div class="decision-tree animate delay-1">
+<div class="scenario">أنت مريض بالسرطان في عام 2010. يُعرض عليك علاج تحت إشراف بوتي. ماذا تفعل؟</div>
+<div class="two-paths">
+<div class="path path-a">
+<div class="path-label">المسار أ: الثقة بالنشر</div>
+<div class="path-choice">قبول النتائج التي توصلت إليها المجلة المرموقة</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">قم بالتسجيل في التجربة السريرية</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence"><strong>تلقي العلاج على أساس الاحتيال</strong>- من المحتمل أن تكون ضارة، وبالتأكيد ليست شخصية</div>
+</div>
+<div class="path path-b">
+<div class="path-label">المسار ب: اسأل عن التحقق من الصحة</div>
+<div class="path-choice">طلب دليل على النسخ المتماثل المستقل</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">اكتشاف لا شيء موجود</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence"><strong>تجنب العلاج الضار</strong>- انتظر الأساليب التي تم التحقق من صحتها بشكل صحيح</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+ الشريحة 10.9: ظهور دوق السرطان 
+<div class="slide dark">
+<div class="content text-center">
+<div class="revelation animate">
+<div class="revelation-label">الرؤيا</div>
+<div class="revelation-text">
+                    إن إعادة الإنتاج ليست بيروقراطية. إنها حماية للمريض.
+                    <br/><br/>
+                    أدت فضيحة ديوك إلى توصية معهد الطب بذلك
+                    <strong>تتطلب الاختبارات المستندة إلى omics التحقق المستقل قبل الاستخدام السريري</strong>.
+                    <br/><br/>
+                    جاءت هذه السياسة متأخرة للغاية بالنسبة للمرضى في تلك التجارب.
+                  </div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">الدرس</div>
+<div class="simple-text">
+<strong>التحقق المستقل ينقذ الأرواح.</strong> مؤسسة مرموقة، أو باحث مشهور، أو مجلة مرموقة - لا شيء من هذا يحل محل الفعل البسيط المتمثل في قيام شخص آخر بفحص العمل.
+                  </div>
+</div>
+</div>
+</div>
+ الشريحة 10.10: إعادة فتح RIAT 
+<div class="slide hope">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  Can <em>المحاكمات الميتة</em><br/>
+                  إلى الحياة؟
+                </div>
+</div>
+</div>
+ الشريحة 10.11: قصة RIAT 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">قيامة الأدلة المدفونة</div>
+<div class="real-data-box animate delay-1">
+<div class="data-label">البيانات الحقيقية</div>
+<div class="data-content">
+                    مبادرة ريات (<strong>استعادة المحاكمات غير المرئية والمهجورة</strong>) حددت التجارب السريرية ذات النتائج غير المنشورة أو التي تم الإبلاغ عنها بشكل خاطئ.
+                    <br/><br/>
+<strong>دراسة 329</strong> (الباروكستين لعلاج اكتئاب المراهقين): ادعى المنشور الأصلي لعام 2001 أن الدواء كان <strong>"آمنة وفعالة."</strong>
+                    لمدة 14 عامًا، وصفه الأطباء بناءً على هذا الادعاء.
+                    <br/><br/>
+                    حصل باحثو RIAT على البيانات الكاملة. وجدت إعادة التحليل التي أجروها عام 2015 أن الدواء كان كذلك <strong>ليست آمنة ولا فعالة</strong> لهذه الفئة من السكان. وقد أبلغ المؤلفون الأصليون عن النتائج بشكل انتقائي.
+                  </div>
+<div class="data-source">لو نوري وآخرون. (2015). بي إم جيه. مشروع RIAT: riat-support.org</div>
+</div>
+</div>
+</div>
+ الشريحة 10.12: شجرة قرارات RIAT 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">المساران</div>
+<div class="decision-tree animate delay-1">
+<div class="scenario">تكتشف أنه تم الإبلاغ عن محاكمة بشكل خاطئ منذ 15 عامًا. ربما لا يزال الضرر يحدث. ماذا تفعل؟</div>
+<div class="two-paths">
+<div class="path path-a">
+<div class="path-label">المسار أ: قبول الوقت متأخر جدًا</div>
+<div class="path-choice">افترض أن اللحظة قد مرت</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">تظل الدراسة المعيبة هي السجل</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence"><strong>تستمر الأضرار القديمة</strong>- يستمر الأطباء في وصف الوصفات بناءً على أدلة كاذبة</div>
+</div>
+<div class="path path-b">
+<div class="path-label">المسار ب: ابحث عن البيانات الأصلية</div>
+<div class="path-choice">احصل على البيانات الأولية من خلال الوسائل القانونية/التنظيمية</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">إعادة تحليل ونشر التصحيح</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence"><strong>منع الضرر المستقبلي</strong>- تحديث الإرشادات وتغيير الممارسات</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+ الشريحة 10.13: رؤيا RIAT 
+<div class="slide dark">
+<div class="content text-center">
+<div class="revelation animate">
+<div class="revelation-label">الرؤيا</div>
+<div class="revelation-text">
+                    لم يفت الأوان أبدًا لتصحيح السجل.
+                    <br/><br/>
+                    أثبت RIAT أنه مع التصميم والوصول إلى البيانات،
+                    <strong>حتى الخداع الذي دام عقودًا من الزمن يمكن قلبه</strong>.
+                    <br/><br/>
+                    الحقيقة لا تنتهي. ولا وجوب السعي إليه.
+                  </div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">الدرس</div>
+<div class="simple-text">
+<strong>الوصول إلى البيانات يتيح العدالة.</strong> عندما يتم حجب البيانات الأصلية، تصبح الأخطاء والاحتيال دائمة. عندما تكون البيانات متاحة، يمكن دائمًا تصحيح السجل العلمي.
+                  </div>
+</div>
+</div>
+</div>
+ الشريحة 10.14: افتتاح أزمة التكرار 
+<div class="slide gradient">
+<div class="content text-center">
+<div class="rhetorical animate">
+                  ما هو جزء من <em>النتائج المنشورة</em><br/>
+                  هل هي في الواقع صحيحة؟
+                </div>
+</div>
+</div>
+ الشريحة 10.15: قصة أزمة النسخ 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">أزمة الاستنساخ</div>
+<div class="real-data-box animate delay-1">
+<div class="data-label">البيانات الحقيقية</div>
+<div class="data-content">
+                    التي حاولت مؤسسة التعاون العلمي المفتوح (2015) تكرار
+                    <strong>100 دراسة علم النفس المنشورة</strong>.
+                    <br/><br/>
+                    الدراسات الأصلية: <strong>أبلغ 97٪ عن نتائج ذات دلالة إحصائية</strong>.
+                    <br/><br/>
+                    التكرارات: فقط <strong>36% حققوا الأهمية</strong>. انخفضت أحجام التأثير بمقدار <strong>إلى النصف في المتوسط </strong>.
+                    <br/><br/>
+                    أصبحت "أزمة التكرار" سائدة. ما اعتقدنا أننا نعرفه - عن التهيئة، واستنزاف الأنا، وإظهار القوة - كان أقل تأكيدًا بكثير مما تم نشره.
+                  </div>
+<div class="data-source">التعاون العلمي المفتوح (2015). علوم. doi:10.1126/science.aac4716</div>
+</div>
+</div>
+</div>
+ الشريحة 10.16: إحصائيات أزمة التكرار 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">الأرقام</div>
+<div class="stats-grid animate delay-1">
+<div class="stat-box">
+<div class="stat-value" style="color:var(--gold);">97%</div>
+<div class="stat-label">الدراسات الأصلية<br/>تكرارات مهمة</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--red);">36%</div>
+<div class="stat-label">Replications<br/>تكرارات مهمة</div>
+</div>
+<div class="stat-box">
+<div class="stat-value" style="color:var(--orange);">50%</div>
+<div class="stat-label">متوسط التأثير<br/>انخفاض الحجم</div>
+</div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">ماذا يعني هذا؟</div>
+<div class="simple-text">
+                    مقابل كل 3 نتائج في علم النفس تقرأ عنها، <strong>2 لا يجوز تكرارها</strong>. ليس بسبب الاحتيال، بل بسبب الضجيج، والمرونة في التحليل، والضغط لنشر نتائج إيجابية.
+                  </div>
+</div>
+</div>
+</div>
+ الشريحة 10.17: شجرة قرار أزمة التكرار 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">المساران</div>
+<div class="decision-tree animate delay-1">
+<div class="scenario">أنت تقوم بتصميم برنامج سريري يعتمد على أبحاث علم النفس المنشورة. ماذا تفعل؟</div>
+<div class="two-paths">
+<div class="path path-a">
+<div class="path-label">المسار ج: ثق بالمنشورات الأصلية</div>
+<div class="path-choice">أنشئ برنامجك بناءً على النتائج المنشورة</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">استثمر الموارد في التنفيذ</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence"><strong>اكتشاف الأساس غير موثوق</strong>— فشل البرنامج في إنتاج النتائج المتوقعة</div>
+</div>
+<div class="path path-b">
+<div class="path-label">المسار ب: التحقق من التكرارات</div>
+<div class="path-choice">ابحث عن النسخ المتماثلة المستقلة أولاً</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence">ابحث عن معدل النسخ المتماثل 36%</div>
+<div class="path-arrow">↓</div>
+<div class="path-consequence"><strong>اطلب أدلة أقوى</strong>— اختبار تجريبي، يتطلب النسخ المتماثل متعدد المواقع قبل القياس</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+ الشريحة 10.18: كشف أزمة النسخ المتماثل 
+<div class="slide dark">
+<div class="content text-center">
+<div class="revelation animate">
+<div class="revelation-label">الرؤيا</div>
+<div class="revelation-text">
+                    "منشور" لا يعني "صحيح".
+                    <br/><br/>
+                    النسخ المتماثل ليس كذلك شك—<strong>إنه المنهج العلمي الذي يعمل على النحو المنشود</strong>.
+                    <br/><br/>
+                    لم تكن الأزمة هي فشل العلم. وكانت الأزمة هي أننا اكتشفنا مدى ندرة ما كنا نتحقق منه.
+                  </div>
+</div>
+<div class="simple-box animate delay-2">
+<div class="simple-title">الدرس</div>
+<div class="simple-text">
+<strong>الدراسات المنفردة هي فرضيات وليست حقائق.</strong> قبل بناء سياسة البحث، اسأل: هل تم تكرار هذا؟ بواسطة من؟ ما النتيجة؟
+                  </div>
+</div>
+</div>
+</div>
+ الشريحة 10.19: ملخص الوحدة 
+<div class="slide dark">
+<div class="content text-center">
+<div class="title gold animate">أربع قصص، حقيقة واحدة</div>
+<div class="lesson-item animate delay-1">
+<div class="lesson-number" style="background:var(--red);">1</div>
+<div class="lesson-content">
+<h4>راينهارت روجوف</h4>
+<p>شارك بياناتك. خطأ في Excel شكل سياسة التقشف لسنوات.</p>
+</div>
+</div>
+<div class="lesson-item animate delay-2">
+<div class="lesson-number" style="background:var(--orange);">2</div>
+<div class="lesson-content">
+<h4>فضيحة سرطان دوق</h4>
+<p>تتطلب التحقق من الصحة بشكل مستقل. الهيبة لا تساوي الحقيقة.</p>
+</div>
+</div>
+<div class="lesson-item animate delay-3">
+<div class="lesson-number" style="background:var(--teal);">3</div>
+<div class="lesson-content">
+<h4>مبادرة RIAT</h4>
+<p>لم يفت الأوان أبدًا. يمكن إحياء الأدلة المدفونة.</p>
+</div>
+</div>
+<div class="lesson-item animate delay-4">
+<div class="lesson-number" style="background:var(--purple);">4</div>
+<div class="lesson-content">
+<h4>أزمة النسخ المتماثل</h4>
+<p>النشر لا يعني أنه صحيح. التكرار هو كيف يعمل العلم.</p>
+</div>
+</div>
+</div>
+</div>
+ الشريحة 10.20: الامتناع النهائي 
+<div class="slide black">
+<div class="content text-center">
+<div class="refrain warning animate">
+                  "وعندما لم يتحققوا،<br/>
+                  عندما وثقوا دون التحقق،<br/>
+                  عندما افترضوا أن المرموقة معصومون من الخطأ -<br/>
+<br/>
+                  بقيت الأرقام عارية،<br/>
+                  ودفع الناس الثمن السعر."
+                </div>
+<div class="gold-line animate delay-2"></div>
+<div class="refrain hope animate delay-3">
+                  "لكن عندما طالبوا بالدليل،<br/>
+                  عندما شاركوا بياناتهم،<br/>
+                  عندما قاموا بالنسخ المتماثل قبل أن يثقوا -<br/>
+<br/>
+                  ظهرت الحقيقة،<br/>
+                  ومنع الضرر،<br/>
+                  وتقدمت المعرفة."
+                </div>
+</div>
+</div>
+</div>
+ التنقل بين الشرائح 
+<div class="slide-nav">
+<button class="nav-btn" onclick="prevSlide()">←</button>
+<div class="nav-center">
+<div class="slide-counter" id="slideCounter">1 / 6</div>
+<div class="progress" id="progressDots"></div>
+</div>
+<button class="nav-btn" onclick="nextSlide()">→</button>
+</div>
+</div>
+</div>
+</main>
+</div>
+<script>
+    function toggleSidebar() {
+      document.querySelector('.sidebar').classList.toggle('open');
+      var overlay = document.querySelector('.sidebar-overlay');
+      if (overlay) overlay.classList.toggle('show');
+      var btn = document.querySelector('.mobile-menu-toggle, .sidebar-toggle, .hamburger');
+      if (btn) btn.setAttribute('aria-expanded', btn.getAttribute('aria-expanded') === 'true' ? 'false' : 'true');
+    }
+
+    const modules = [
+      { id: 1, title: "التحذير", subtitle: "عندما يقتل اليقين", slides: 6 },
+      { id: 2, title: "الأراضي", subtitle: "Thirteen nations", slides: 5 },
+      { id: 3, title: "الحل", subtitle: "تلبيس الأرقام", slides: 7 },
+      { id: 4, title: "الطريقة", subtitle: "Measuring worth", slides: 6 },
+      { id: 5, title: "الانضباط", subtitle: "Reproducibility", slides: 5 },
+      { id: 6, title: "للقادة", subtitle: "Executive summary", slides: 4 },
+      { id: 7, title: "Hands-On", subtitle: "تحليلك الأول", slides: 5 },
+      { id: 8, title: "Sustainability", subtitle: "Limits & longevity", slides: 3 },
+      { id: 9, title: "Test & Sources", subtitle: "مسابقة + المراجع", slides: 6 },
+      { id: 10, title: "Real Stories", subtitle: "أدلة من التاريخ", slides: 20 }
+    ];
+
+    let currentModule = 1;
+    let currentSlide = 1;
+    const completedModules = new Set();
+
+    function init() {
+      renderModuleList();
+      updateSlideNav();
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === ' ') {
+          e.preventDefault();
+          nextSlide();
+        } else if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          prevSlide();
+        }
+      });
+    }
+
+    function renderModuleList() {
+      const list = document.getElementById('moduleList');
+      list.innerHTML = modules.map(m => `
+        <div class="عنصر الوحدة ${m.id === currentModule ? 'active' : ''} ${CompletedModules.has(m.id) ؟ 'مكتمل' : ''}"
+             onclick="goToModule(${m.id})" tabindex="0" role="button" aria-label="الوحدة النمطية ${m.id}: ${m.title}"
+             onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();goToModule(${m.id});}">
+          <div class="module-number">${completedModules.has(m.id) ? '&#10003;' : m.id}</div>
+          <div class="module-info">
+            <div class="module-title">${m.title}</div>
+            <div class="module-subtitle">${m.subtitle}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function goToModule(moduleId) {
+      if (moduleId > currentModule) completedModules.add(currentModule);
+      currentModule = moduleId;
+      currentSlide = 1;
+
+      document.querySelectorAll('.module-slides').forEach(el => el.classList.remove('active'));
+      document.querySelector(`.module-slides[data-module="${moduleId}"]`).classList.add('active');
+
+      updateSlideVisibility();
+      updateSlideNav();
+      renderModuleList();
+      document.getElementById('currentModule').textContent = modules[moduleId - 1].title;
+    }
+
+    function updateSlideVisibility() {
+      const moduleSlides = document.querySelector(`.module-slides[data-module="${currentModule}"]`);
+      const slides = moduleSlides.querySelectorAll('.slide');
+      slides.forEach((slide, index) => slide.classList.toggle('active', index + 1 === currentSlide));
+    }
+
+    function updateSlideNav() {
+      const module = modules[currentModule - 1];
+      document.getElementById('slideCounter').textContent = `${currentSlide} / ${module.slides}`;
+      document.getElementById('progressDots').innerHTML = Array.from({ length: module.slides }, (_, i) =>
+        `<div class="progress-dot ${i + 1 === currentSlide ? 'active' : ''}" onclick="goToSlide(${i + 1})"></div>`
+      ).join('');
+    }
+
+    function goToSlide(slideNum) {
+      currentSlide = slideNum;
+      updateSlideVisibility();
+      updateSlideNav();
+    }
+
+    function nextSlide() {
+      const module = modules[currentModule - 1];
+      if (currentSlide < module.slides) {
+        currentSlide++;
+        updateSlideVisibility();
+        updateSlideNav();
+      } else if (currentModule < modules.length) {
+        goToModule(currentModule + 1);
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 1) {
+        currentSlide--;
+        updateSlideVisibility();
+        updateSlideNav();
+      } else if (currentModule > 1) {
+        const prevModuleSlides = modules[currentModule - 2].slides;
+        currentModule--;
+        currentSlide = prevModuleSlides;
+
+        document.querySelectorAll('.module-slides').forEach(el => el.classList.remove('active'));
+        document.querySelector(`.module-slides[data-module="${currentModule}"]`).classList.add('active');
+
+        updateSlideVisibility();
+        updateSlideNav();
+        renderModuleList();
+        document.getElementById('currentModule').textContent = modules[currentModule - 1].title;
+      }
+    }
+
+    function checkAnswer(element, isCorrect) {
+      const container = element.closest('.quiz-container');
+      const options = container.querySelectorAll('.quiz-option');
+      const feedback = container.querySelector('.quiz-feedback');
+
+      options.forEach(opt => {
+        opt.style.pointerEvents = 'none';
+        if (opt === element) opt.classList.add(isCorrect ? 'correct' : 'incorrect');
+      });
+
+      feedback.classList.add('show', isCorrect ? 'correct' : 'incorrect');
+      feedback.textContent = isCorrect
+        ? 'صحيحة. لقد فهمت.'
+        : 'ليس تمامًا. فكر في القصص التي سمعتها.';
+    }
+
+    init();
+  </script>
+</body>
+</html>

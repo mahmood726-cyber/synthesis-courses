@@ -1,0 +1,2062 @@
+HTML
+<html lang="fr">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Maîtrise du Risque de Biais : Les Menaces Cachées</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&amp;family=Source+Sans+Pro:wght@300;400;600;700&amp;display=swap" rel="stylesheet"/>
+<style>
+    :root {
+      --navy: #1E2761;
+      --deep-navy: #141B3D;
+      --gold: #D4AF37;
+      --cream: #FAF8F5;
+      --light-cream: #FFFFFF;
+      --text: #2D3748;
+      --light-text: #718096;
+      --red: #C53030;
+      --green: #22c55e;
+      --teal: #0f766e;
+      --purple: #7c3aed;
+      --orange: #f59e0b;
+      --transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      height: 100%;
+      font-family: 'Source Sans Pro', sans-serif;
+      background: var(--deep-navy);
+      color: var(--cream);
+    }
+
+    .course-container { display: flex; height: 100vh; overflow: hidden; }
+
+    /* Skip Link */
+    .skip-link {
+      position: absolute;
+      top: -40px;
+      left: 0;
+      background: var(--gold);
+      color: var(--navy);
+      padding: 8px 16px;
+      z-index: 10000;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .skip-link:focus { top: 0; }
+
+    /* Sidebar */
+    .sidebar {
+      width: 300px;
+      background: linear-gradient(180deg, var(--deep-navy) 0%, #0a0f1a 100%);
+      border-right: 1px solid rgba(212,175,55,0.2);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    .sidebar-header {
+      padding: 1.25rem;
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+      text-align: center;
+    }
+    .sidebar-header h1 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--gold);
+    }
+    .sidebar-header p {
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.6);
+    }
+
+    .stats-panel {
+      padding: 1rem;
+      background: rgba(212,175,55,0.1);
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+    }
+    .level-display {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+    .level-badge {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, var(--gold), #f0c040);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      box-shadow: 0 2px 8px rgba(212,175,55,0.4);
+    }
+    .level-info { flex: 1; }
+    .level-title { font-weight: 700; font-size: 0.9rem; color: var(--gold); }
+    .level-subtitle { font-size: 0.7rem; color: rgba(255,255,255,0.6); }
+    .xp-bar {
+      height: 8px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 0.5rem;
+    }
+    .xp-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--gold), var(--orange));
+      border-radius: 4px;
+      transition: width 0.5s ease;
+    }
+    .xp-text {
+      font-size: 0.65rem;
+      color: rgba(255,255,255,0.5);
+      text-align: right;
+      margin-top: 0.25rem;
+    }
+    .quick-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+    }
+    .quick-stat {
+      background: rgba(0,0,0,0.2);
+      padding: 0.5rem;
+      border-radius: 6px;
+      text-align: center;
+    }
+    .quick-stat-value {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--gold);
+    }
+    .quick-stat-label {
+      font-size: 0.6rem;
+      color: rgba(255,255,255,0.5);
+    }
+
+    .course-progress {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+      background: rgba(0,0,0,0.2);
+    }
+    .course-progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.6);
+      margin-bottom: 0.35rem;
+    }
+    .course-progress-bar {
+      height: 6px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .course-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--green), #22d3ee);
+      border-radius: 3px;
+      transition: width 0.5s ease;
+    }
+
+    .module-list { flex: 1; overflow-y: auto; padding: 0.5rem 0; }
+    .module-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.6rem 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      border-left: 3px solid transparent;
+    }
+    .module-item:hover { background: rgba(212,175,55,0.1); }
+    .module-item.active { background: rgba(212,175,55,0.15); border-left-color: var(--gold); }
+    .module-item.completed .module-number { background: var(--green); color: white; }
+    .module-item.locked { opacity: 0.5; cursor: not-allowed; }
+    .module-number {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .module-item.active .module-number { background: var(--gold); color: var(--navy); }
+    .module-info { flex: 1; min-width: 0; }
+    .module-title { font-size: 0.8rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .module-subtitle { font-size: 0.65rem; color: rgba(255,255,255,0.5); }
+    .module-xp { font-size: 0.6rem; color: var(--gold); }
+    .module-time { font-size: 0.55rem; color: rgba(255,255,255,0.4); display: flex; align-items: center; gap: 0.25rem; margin-top: 0.15rem; }
+
+    .badges-panel {
+      padding: 1rem;
+      border-top: 1px solid rgba(212,175,55,0.2);
+    }
+    .badges-title { font-size: 0.75rem; font-weight: 600; color: var(--gold); margin-bottom: 0.5rem; }
+    .badges-grid { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+    .badge-item {
+      width: 32px;
+      height: 32px;
+      background: rgba(255,255,255,0.05);
+      border: 2px solid rgba(255,255,255,0.1);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      font-family: inherit;
+      color: inherit;
+      padding: 0;
+      opacity: 0.3;
+      transition: all 0.3s;
+      cursor: pointer;
+      position: relative;
+    }
+    .badge-item.earned { opacity: 1; background: rgba(212,175,55,0.2); border-color: var(--gold); }
+    .badge-item:hover::after,
+    .badge-item:focus::after,
+    .badge-item:focus-visible::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--navy);
+      color: white;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.6rem;
+      white-space: nowrap;
+      z-index: 100;
+    }
+    .badge-item:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+    /* Main Content */
+    .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .content-header {
+      padding: 0.75rem 1.5rem;
+      background: rgba(0,0,0,0.3);
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .breadcrumb { font-size: 0.85rem; color: rgba(255,255,255,0.6); }
+    .breadcrumb span { color: var(--gold); }
+    .header-actions { display: flex; gap: 0.5rem; align-items: center; }
+    .streak-display {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: rgba(239,68,68,0.2);
+      border: 1px solid rgba(239,68,68,0.4);
+      padding: 0.35rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+    }
+    .streak-display.active { background: rgba(249,115,22,0.2); border-color: var(--orange); }
+    .streak-flame { font-size: 1rem; }
+    .streak-count { font-weight: 700; color: var(--orange); }
+
+    .btn {
+      padding: 0.5rem 1rem;
+      border: 1px solid rgba(212,175,55,0.3);
+      border-radius: 6px;
+      background: rgba(255,255,255,0.05);
+      color: var(--cream);
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn:hover { background: rgba(212,175,55,0.2); border-color: var(--gold); }
+    .btn.primary { background: var(--gold); color: var(--navy); border-color: var(--gold); font-weight: 600; }
+
+    .content-body { flex: 1; overflow: hidden; display: flex; }
+
+    /* Slides */
+    .slides-container { flex: 1; position: relative; overflow: hidden; }
+    .module-slides { display: none; width: 100%; height: 100%; }
+    .module-slides.active { display: block; }
+
+    .slide {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      padding: 2rem 2rem 4rem;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity var(--transition), visibility var(--transition);
+      overflow-y: auto;
+    }
+    .slide.active { opacity: 1; visibility: visible; }
+    .slide.dark { background: var(--deep-navy); }
+    .slide.light { background: var(--cream); color: var(--text); }
+    .slide.black { background: #000; }
+    .slide.red-bg { background: linear-gradient(135deg, #7f1d1d, #450a0a); }
+    .slide.green-bg { background: linear-gradient(135deg, #14532d, #052e16); }
+    .slide.purple-bg { background: linear-gradient(135deg, #4c1d95, #2e1065); }
+    .slide.orange-bg { background: linear-gradient(135deg, #9a3412, #431407); }
+    .slide.teal-bg { background: linear-gradient(135deg, #0f766e, #042f2e); }
+
+    .slide-progress-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--gold), var(--orange));
+      transition: width 0.3s ease;
+      z-index: 50;
+    }
+
+    .serif { font-family: 'Cormorant Garamond', Georgia, serif; }
+    .title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      font-weight: 700;
+      margin-bottom: 1rem;
+      line-height: 1.2;
+      text-align: center;
+    }
+    .title.gold { color: var(--gold); }
+    .title.navy { color: var(--navy); }
+    .subtitle {
+      font-size: clamp(0.9rem, 2vw, 1.3rem);
+      color: rgba(255,255,255,0.7);
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .slide.light .subtitle { color: var(--light-text); }
+
+    .big-number {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(4rem, 12vw, 8rem);
+      font-weight: 700;
+      line-height: 1;
+    }
+    .big-number.gold { color: var(--gold); }
+    .big-number.red { color: var(--red); }
+
+    .refrain {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(1.3rem, 3vw, 2rem);
+      font-style: italic;
+      color: var(--gold);
+      text-align: center;
+      max-width: 700px;
+    }
+
+    .content { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 850px; }
+
+    /* Cards */
+    .card {
+      background: var(--light-cream);
+      border: 1px solid var(--gold);
+      padding: 1.25rem 1.5rem;
+      margin: 0.5rem 0;
+      max-width: 750px;
+      width: 100%;
+      border-radius: 8px;
+    }
+    .card.navy-bg { background: var(--navy); color: var(--cream); }
+    .card-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 0.05em;
+      margin-bottom: 0.4rem;
+      text-transform: uppercase;
+    }
+    .card-text { font-size: 0.95rem; line-height: 1.6; }
+    .card.navy-bg .card-text { color: var(--cream); }
+
+    /* Story box */
+    .story-box {
+      background: linear-gradient(135deg, rgba(197,48,48,0.15), rgba(30,39,97,0.2));
+      border-left: 4px solid var(--red);
+      padding: 1.25rem;
+      margin: 0.75rem 0;
+      max-width: 750px;
+      width: 100%;
+      border-radius: 0 8px 8px 0;
+    }
+    .story-box.success { background: linear-gradient(135deg, rgba(34,197,94,0.15), rgba(30,39,97,0.2)); border-left-color: var(--green); }
+    .story-box.warning { background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(30,39,97,0.2)); border-left-color: var(--orange); }
+    .story-box.teal { background: linear-gradient(135deg, rgba(15,118,110,0.15), rgba(30,39,97,0.2)); border-left-color: var(--teal); }
+    .story-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: var(--red);
+      margin-bottom: 0.4rem;
+      text-transform: uppercase;
+    }
+    .story-box.success .story-label { color: var(--green); }
+    .story-box.warning .story-label { color: var(--orange); }
+    .story-box.teal .story-label { color: var(--teal); }
+    .story-text { font-size: 0.95rem; line-height: 1.6; }
+
+    /* Confidence Colors */
+    .cerqual-high { background: linear-gradient(135deg, rgba(34,197,94,0.2), rgba(30,39,97,0.2)); border-color: var(--green); }
+    .cerqual-moderate { background: linear-gradient(135deg, rgba(59,130,246,0.2), rgba(30,39,97,0.2)); border-color: #3b82f6; }
+    .cerqual-low { background: linear-gradient(135deg, rgba(245,158,11,0.2), rgba(30,39,97,0.2)); border-color: var(--orange); }
+    .cerqual-very-low { background: linear-gradient(135deg, rgba(197,48,48,0.2), rgba(30,39,97,0.2)); border-color: var(--red); }
+
+    .cerqual-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .cerqual-badge.high { background: var(--green); color: white; }
+    .cerqual-badge.moderate { background: #3b82f6; color: white; }
+    .cerqual-badge.low { background: var(--orange); color: white; }
+    .cerqual-badge.very-low { background: var(--red); color: white; }
+
+    /* Stats */
+    .stats-grid {
+      display: flex;
+      gap: 0.75rem;
+      margin: 1rem 0;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .stat-box {
+      background: var(--navy);
+      color: var(--cream);
+      padding: 1rem 1.25rem;
+      text-align: center;
+      min-width: 120px;
+      border-radius: 8px;
+    }
+    .stat-value {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.3rem, 2.5vw, 2rem);
+      font-weight: 700;
+    }
+    .stat-value.gold { color: var(--gold); }
+    .stat-value.red { color: var(--red); }
+    .stat-value.green { color: var(--green); }
+    .stat-label { font-size: 0.75rem; opacity: 0.8; margin-top: 0.2rem; }
+
+    /* Timeline */
+    .timeline { display: flex; flex-direction: column; gap: 0.4rem; width: 100%; max-width: 650px; }
+    .timeline-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.6rem 0.75rem;
+      background: rgba(255,255,255,0.05);
+      border-radius: 6px;
+      border-left: 4px solid var(--gold);
+    }
+    .timeline-days { font-weight: 700; font-size: 0.8rem; min-width: 70px; color: var(--gold); }
+    .timeline-content { flex: 1; }
+    .timeline-title { font-weight: 600; font-size: 0.9rem; }
+    .timeline-desc { font-size: 0.75rem; opacity: 0.7; }
+
+    /* Checklist */
+    .checklist { display: flex; flex-direction: column; gap: 0.4rem; width: 100%; max-width: 650px; }
+    .checklist-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+      padding: 0.6rem 0.75rem;
+      background: rgba(255,255,255,0.05);
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .check-icon {
+      width: 20px;
+      height: 20px;
+      background: var(--green);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      color: white;
+      flex-shrink: 0;
+    }
+    .checklist-text { font-size: 0.9rem; }
+
+    /* Decision Tree */
+    .decision-tree {
+      background: linear-gradient(135deg, rgba(124,58,237,0.1), rgba(30,39,97,0.2));
+      border: 2px solid var(--purple);
+      border-radius: 12px;
+      padding: 1.25rem;
+      width: 100%;
+      max-width: 700px;
+    }
+    .decision-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    .decision-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--purple);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+    }
+    .decision-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+    .decision-xp {
+      margin-left: auto;
+      background: rgba(212,175,55,0.2);
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      color: var(--gold);
+      font-weight: 600;
+    }
+    .decision-scenario {
+      background: rgba(0,0,0,0.2);
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+    .decision-question {
+      font-weight: 600;
+      color: var(--gold);
+      margin-bottom: 0.75rem;
+      font-size: 1rem;
+    }
+    .decision-options { display: flex; flex-direction: column; gap: 0.5rem; }
+    .decision-option {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      background: rgba(255,255,255,0.05);
+      border: 2px solid rgba(255,255,255,0.15);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .decision-option:hover { background: rgba(124,58,237,0.2); border-color: var(--purple); }
+    .decision-option.selected { background: rgba(124,58,237,0.3); border-color: var(--purple); }
+    .decision-option.correct { background: rgba(34,197,94,0.2); border-color: var(--green); }
+    .decision-option.incorrect { background: rgba(239,68,68,0.15); border-color: var(--red); }
+    .decision-option.disabled { pointer-events: none; opacity: 0.7; }
+    .decision-option:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+    .option-letter {
+      width: 24px;
+      height: 24px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.8rem;
+      flex-shrink: 0;
+    }
+    .decision-option.correct .option-letter { background: var(--green); color: white; }
+    .decision-option.incorrect .option-letter { background: var(--red); color: white; }
+    .option-text { font-size: 0.9rem; }
+    .decision-feedback {
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: 8px;
+      display: none;
+    }
+    .decision-feedback.show { display: block; }
+    .decision-feedback.correct { background: rgba(34,197,94,0.2); border: 1px solid var(--green); }
+    .decision-feedback.incorrect { background: rgba(239,68,68,0.15); border: 1px solid var(--red); }
+    .feedback-title { font-weight: 700; margin-bottom: 0.5rem; }
+    .feedback-text { font-size: 0.9rem; line-height: 1.5; }
+
+    /* Quiz */
+    .quiz-container { width: 100%; max-width: 650px; }
+    .quiz-question {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.2rem;
+      margin-bottom: 1.25rem;
+      text-align: center;
+    }
+    .quiz-options { display: flex; flex-direction: column; gap: 0.5rem; }
+    .quiz-option {
+      padding: 0.75rem 1rem;
+      background: rgba(255,255,255,0.05);
+      border: 2px solid rgba(255,255,255,0.2);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+    .quiz-option:hover { background: rgba(212,175,55,0.15); border-color: var(--gold); }
+    .quiz-option.correct { background: rgba(34,197,94,0.2); border-color: var(--green); }
+    .quiz-option.incorrect { background: rgba(239,68,68,0.15); border-color: var(--red); }
+    .quiz-option.disabled { pointer-events: none; }
+    .quiz-option:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+    .quiz-feedback {
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: 8px;
+      display: none;
+      font-size: 0.9rem;
+    }
+    .quiz-feedback.show { display: block; }
+    .quiz-feedback.correct { background: rgba(34,197,94,0.2); border: 1px solid var(--green); }
+    .quiz-feedback.incorrect { background: rgba(239,68,68,0.15); border: 1px solid var(--red); }
+
+    /* Learning Objectives */
+    .objectives-box {
+      background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(30,39,97,0.25));
+      border: 2px solid #3b82f6;
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin: 0.75rem 0;
+      max-width: 700px;
+      width: 100%;
+    }
+    .objectives-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+    .objectives-icon {
+      width: 36px;
+      height: 36px;
+      background: #3b82f6;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+    }
+    .objectives-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #60a5fa;
+    }
+    .objectives-list { list-style: none; padding: 0; }
+    .objectives-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      padding: 0.4rem 0;
+      font-size: 0.9rem;
+    }
+    .objectives-list li::before { content: 'o'; color: #3b82f6; font-weight: bold; }
+
+    /* Animation */
+    .slide.active .animate { animation: fadeUp 0.5s ease-out forwards; }
+    .slide.active .animate.delay-1 { animation-delay: 0.1s; }
+    .slide.active .animate.delay-2 { animation-delay: 0.2s; }
+    .slide.active .animate.delay-3 { animation-delay: 0.3s; }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate { opacity: 0; }
+
+    /* XP Popup */
+    .xp-popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      background: linear-gradient(135deg, var(--gold), #f0c040);
+      color: var(--navy);
+      padding: 1.5rem 2.5rem;
+      border-radius: 12px;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2rem;
+      font-weight: 700;
+      z-index: 1000;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+      transition: transform 0.3s ease;
+    }
+    .xp-popup.show { transform: translate(-50%, -50%) scale(1); }
+    .xp-popup .xp-amount { font-size: 3rem; display: block; }
+
+    /* Badge Modal */
+    .badge-modal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.85);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1001;
+    }
+    .badge-modal.show { display: flex; }
+    .badge-modal-content {
+      background: linear-gradient(135deg, var(--deep-navy), #0a0f1a);
+      border: 2px solid var(--gold);
+      border-radius: 16px;
+      padding: 2rem;
+      text-align: center;
+      max-width: 350px;
+    }
+    .badge-modal-icon { font-size: 4rem; margin-bottom: 1rem; }
+    .badge-modal-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.5rem;
+      color: var(--gold);
+      margin-bottom: 0.5rem;
+    }
+    .badge-modal-desc { font-size: 0.9rem; opacity: 0.8; margin-bottom: 1rem; }
+    .badge-modal-close {
+      padding: 0.5rem 1.5rem;
+      background: var(--gold);
+      color: var(--navy);
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* Confetti */
+    .confetti-container {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 999;
+      overflow: hidden;
+    }
+    .confetti {
+      position: absolute;
+      width: 10px; height: 10px;
+      opacity: 0;
+      animation: confetti-fall 3s ease-out forwards;
+    }
+    @keyframes confetti-fall {
+      0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .confetti { animation: none; display: none; }
+      .xp-popup { transition: none; }
+      .slide { transition: none; }
+    }
+
+    /* Nav */
+    .slide-nav {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      padding: 0.75rem 1rem 1.25rem;
+      z-index: 100;
+      pointer-events: none;
+    }
+    .nav-btn {
+      background: rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: white;
+      font-size: 1.1rem;
+      cursor: pointer;
+      opacity: 0.6;
+      transition: all 0.2s;
+      padding: 0.4rem 0.6rem;
+      border-radius: 6px;
+      pointer-events: auto;
+    }
+    .nav-btn:hover { opacity: 1; background: rgba(0,0,0,0.7); border-color: var(--gold); }
+    .nav-btn:disabled { opacity: 0.2; cursor: not-allowed; }
+    .nav-btn:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+    .nav-center { display: flex; flex-direction: column; align-items: center; gap: 0.2rem; pointer-events: auto; }
+    .slide-counter { font-size: 0.7rem; opacity: 0.5; }
+    .progress-dots { display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; max-width: 220px; }
+    .progress-dot {
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border: none;
+      padding: 0;
+      appearance: none;
+      background: transparent;
+    }
+    .progress-dot::after {
+      content: '';
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--text-muted, #ccc);
+      transition: all 0.2s ease;
+    }
+    .progress-dot.active::after,
+    .progress-dot.completed::after {
+      background: var(--gold);
+      width: 14px;
+      height: 14px;
+    }
+    .progress-dot:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+    /* Mobile */
+    @media (max-width: 768px) {
+      .sidebar {
+        position: fixed;
+        left: -300px;
+        top: 0;
+        bottom: 0;
+        z-index: 1000;
+        transition: left 0.3s ease;
+      }
+      .sidebar.open { left: 0; }
+      .sidebar-toggle {
+        display: flex;
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        z-index: 1001;
+        width: 40px;
+        height: 40px;
+        background: var(--gold);
+        color: var(--navy);
+        border: none;
+        border-radius: 8px;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        cursor: pointer;
+      }
+      .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 999;
+      }
+      .sidebar-overlay.show { display: block; }
+    }
+    @media (min-width: 769px) {
+      .sidebar-toggle { display: none; }
+      .sidebar-overlay { display: none !important; }
+    }
+
+    /* Combo Counter */
+    .combo-display {
+      position: fixed;
+      top: 80px;
+      right: 20px;
+      background: linear-gradient(135deg, var(--orange), #ef4444);
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      z-index: 500;
+      transform: scale(0);
+      transition: transform 0.3s ease;
+      box-shadow: 0 4px 15px rgba(239,68,68,0.4);
+    }
+    .combo-display.show { transform: scale(1); }
+
+    /* Quote Block */
+    .quote-block {
+      background: linear-gradient(135deg, rgba(15,118,110,0.2), rgba(30,39,97,0.2));
+      border-left: 4px solid var(--teal);
+      padding: 1.25rem;
+      margin: 0.75rem 0;
+      max-width: 700px;
+      width: 100%;
+      border-radius: 0 8px 8px 0;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      font-style: italic;
+    }
+    .quote-attribution {
+      margin-top: 0.75rem;
+      font-size: 0.85rem;
+      font-style: normal;
+      color: var(--teal);
+    }
+  </style>
+</head>
+<body>
+<a class="skip-link" href="#main-content">Aller au contenu principal</a>
+<div class="course-container">
+<!-- Sidebar -->
+<nav aria-label="Navigation du cours" class="sidebar" role="navigation">
+<div class="sidebar-header">
+<a href="index.html" onmouseout="this.style.color='rgba(212,175,55,0.7)'" onmouseover="this.style.color='#D4AF37'" style="display:block;font-size:0.7rem;color:rgba(212,175,55,0.7);text-decoration:none;margin-bottom:0.5rem;">← Bibliothèque de cours</a>
+<h1>Risque de Biais</h1>
+<p>Compétence fondamentale pour chaque revue</p>
+</div>
+<div class="stats-panel">
+<div class="level-display">
+<div class="level-badge" id="levelIcon">SB</div>
+<div class="level-info">
+<div class="level-title" id="levelTitle">Sentinelle du Biais</div>
+<div class="level-subtitle">Niveau <span id="levelNum">1</span></div>
+</div>
+</div>
+<div class="xp-bar"><div class="xp-fill" id="xpFill" style="width: 0%"></div></div>
+<div class="xp-text"><span id="xpCurrent">0</span> / <span id="xpNeeded">100</span> XP</div>
+<div class="quick-stats">
+<div class="quick-stat">
+<div class="quick-stat-value" id="correctCount">0</div>
+<div class="quick-stat-label">Corriger</div>
+</div>
+<div class="quick-stat">
+<div class="quick-stat-value" id="decisionCount">0</div>
+<div class="quick-stat-label">Décisions</div>
+</div>
+<div class="quick-stat">
+<div class="quick-stat-value" id="synthesisCount">0</div>
+<div class="quick-stat-label">Jugements</div>
+</div>
+</div>
+</div>
+<div class="course-progress">
+<div class="course-progress-label">
+<span>Progression du cours</span>
+<span id="courseProgressPct">0%</span>
+</div>
+<div class="course-progress-bar">
+<div class="course-progress-fill" id="courseProgressFill" style="width: 0%"></div>
+</div>
+</div>
+<div class="module-list" id="moduleList"></div>
+<div class="badges-panel">
+<div class="badges-title">Accomplissements</div>
+<div class="badges-grid" id="badgesGrid"></div>
+</div>
+</nav>
+<!-- Main Content -->
+<main class="main-content" id="main-content">
+<header class="content-header">
+<div class="breadcrumb">Risque de Biais / <span id="currentModule">Module 1</span></div>
+<div class="header-actions">
+<div class="streak-display" id="streakDisplay">
+<span class="streak-flame">SR</span>
+<span class="streak-count" id="streakCount">0</span>
+<span>jours consécutifs</span>
+</div>
+<button class="btn" onclick="resetProgress()">Réinitialiser</button>
+</div>
+</header>
+<div class="content-body">
+<div class="slides-container" id="slidesContainer"></div>
+</div>
+</main>
+</div>
+<!-- XP Popup -->
+<div aria-atomic="true" aria-live="polite" class="xp-popup" id="xpPopup" role="status">
+<span class="xp-amount" id="xpAmount">+25</span>
+    XP
+  </div>
+<!-- Badge Modal -->
+<div aria-labelledby="badgeModalTitle" aria-modal="true" class="badge-modal" id="badgeModal" role="dialog">
+<div class="badge-modal-content">
+<div class="badge-modal-icon" id="badgeModalIcon">BD</div>
+<div class="badge-modal-title" id="badgeModalTitle">Badge obtenu !</div>
+<div class="badge-modal-desc" id="badgeModalDesc">Vous avez débloqué un nouvel accomplissement</div>
+<button class="badge-modal-close" onclick="closeBadgeModal()">Excellent !</button>
+</div>
+</div>
+<!-- Confetti Container -->
+<div class="confetti-container" id="confettiContainer"></div>
+<!-- Combo Counter -->
+<div aria-live="polite" class="combo-display" id="comboDisplay" role="status">COMBO <span id="comboCount">0</span>x</div>
+<!-- Mobile Sidebar Toggle -->
+<button aria-expanded="false" aria-label="Afficher/masquer le menu" class="sidebar-toggle" onclick="toggleSidebar()">MENU</button>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<script>
+// ===== GAMIFICATION STATE =====
+const DEFAULT_STATE = {
+  xp: 0,
+  level: 1,
+  streak: 0,
+  lastActive: null,
+  correctAnswers: 0,
+  decisionsCompleted: 0,
+  synthesisCount: 0,
+  badges: [],
+  completedModules: [],
+  answeredQuestions: {}
+};
+
+function safeGetStorage(key, fallback) {
+  try {
+    const item = localStorage.getItem(key);
+    return item ? JSON.parse(item) : fallback;
+  } catch (e) {
+    return fallback;
+  }
+}
+
+function safeSetStorage(key, value) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch (e) {}
+}
+
+// Migration from old storage key to versioned key
+(function migrateStorage() {
+  try {
+    const oldData = localStorage.getItem('riskBiasMasteryGame_fr');
+    if (oldData && !localStorage.getItem('riskBiasMasteryGame_fr_v1')) {
+      localStorage.setItem('riskBiasMasteryGame_fr_v1', oldData);
+      localStorage.removeItem('riskBiasMasteryGame_fr');
+    }
+  } catch (e) {}
+})();
+
+let gameState = safeGetStorage('riskBiasMasteryGame_fr_v1', DEFAULT_STATE);
+
+const LEVELS = [
+  { level: 1, title: "Sentinelle du Biais", icon: "SB", xp: 0 },
+  { level: 2, title: "Gardien de l'Allocation", icon: "GA", xp: 120 },
+  { level: 3, title: "Veilleur de l'Aveugle", icon: "VA", xp: 300 },
+  { level: 4, title: "Auditeur de l'Attrition", icon: "AA", xp: 520 },
+  { level: 5, title: "Traqueur du Rapport", icon: "TR", xp: 780 },
+  { level: 6, title: "Analyste de Confusion", icon: "AC", xp: 1050 },
+  { level: 7, title: "Juge du RdB", icon: "JR", xp: 1350 },
+  { level: 8, title: "Maître du Biais", icon: "MB", xp: 1700 }
+];
+
+const BADGES = [
+  { id: "first_judgment", icon: "PJ", name: "Premier Jugement", desc: "Terminer votre premier scénario de décision" },
+  { id: "allocation_guard", icon: "GA", name: "Gardien de l'Allocation", desc: "Terminer le module L'Allocation" },
+  { id: "blinding_watch", icon: "VA", name: "Veilleur de l'Aveugle", desc: "Terminer le module Le Bandeau" },
+  { id: "attrition_auditor", icon: "AA", name: "Auditeur de l'Attrition", desc: "Terminer le module La Piste Manquante" },
+  { id: "reporting_tracker", icon: "TR", name: "Traqueur du Rapport", desc: "Terminer le module Le Critère Caché" },
+  { id: "confounding_analyst", icon: "AC", name: "Analyste de Confusion", desc: "Terminer le module Le Chemin Confondu" },
+  { id: "judgment_master", icon: "JR", name: "Maître du Jugement", desc: "Terminer le module Le Jugement" },
+  { id: "perfect_5", icon: "5X", name: "Cinq Étoiles", desc: "Obtenir 5 réponses correctes consécutives" },
+  { id: "decision_maker", icon: "DM", name: "Décideur", desc: "Terminer 14 arbres de décision" },
+  { id: "finisher", icon: "FN", name: "Cours Terminé", desc: "Terminer tout le cours" },
+  { id: "streak_3", icon: "S3", name: "En Feu", desc: "Maintenir une série de 3 jours" },
+  { id: "streak_7", icon: "S7", name: "Guerrier Hebdomadaire", desc: "Maintenir une série de 7 jours" }
+];
+
+// ===== MODULES DATA =====
+const MODULES = [
+  {
+    id: 1, title: "L'Ouverture", subtitle: "Pourquoi le biais change tout", xp: 140,
+    slides: [
+      { type: "title", theme: "teal-bg", content: { title: "Maîtrise du Risque de Biais", subtitle: "Voir les menaces cachées avant qu'elles ne façonnent la réponse" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "Définir le risque de biais comme une menace à la vérité causale",
+          "Reconnaître quand des résultats impressionnants reposent sur des fondations fragiles",
+          "Utiliser l'histoire, le contraste et le refrain pour affiner le jugement",
+          "Pratiquer les arbres de décision sur des cas réels"
+        ],
+        tip: "Nous utilisons des techniques narratives : contraste, refrains et fins en miroir pour entraîner un jugement discipliné."
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "LE MIROIR", title: "L'hormonothérapie et la réponse polie",
+        text: "Pendant des années, les études observationnelles suggéraient que l'hormonothérapie réduisait le risque de maladie cardiaque. L'histoire était simple et élégante. Puis l'essai Women's Health Initiative a recruté environ 16 000 femmes et a été arrêté prématurément pour cause de préjudice. La direction s'est inversée.",
+        followup: "La leçon n'était pas que les essais ont toujours raison. La leçon était que le biais peut polir un miroir jusqu'à ce qu'il ressemble à la vérité. Le risque de biais détermine si le miroir reflète la réalité ou la décoration."
+      }},
+      { type: "stats", theme: "dark", content: {
+        title: "Aperçu du Cas",
+        stats: [
+          { value: "16 000", label: "Participantes WHI (approx.)" },
+          { value: "1", label: "Grand ECR a inversé la direction" },
+          { value: "2", label: "Flux de preuves en conflit" },
+          { value: "Précoce", label: "Essai arrêté pour préjudice" }
+        ],
+        caption: "Chiffres simplifiés pour l'enseignement."
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "Qu'est-ce que le Risque de Biais",
+        subtitle: "Pas de mauvaises méthodes, mais une vérité déformée",
+        text: "Le risque de biais est la probabilité qu'une conception, conduite ou publication d'étude pousse les résultats loin de la vérité. Il s'agit de validité interne, pas de prestige ou de taille d'échantillon.",
+        highlight: "Une grande étude biaisée peut induire plus en erreur qu'une petite étude honnête."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "SB", title: "Scénario : Preuves Contradictoires", xp: 25,
+        scenario: "Vous avez 6 études observationnelles suggérant un bénéfice et 1 grand essai randomisé montrant un préjudice.",
+        question: "Quel jugement reflète le mieux les principes du risque de biais ?",
+        options: [
+          { letter: "A", text: "Faire la moyenne de tous les résultats pour être équitable", correct: false },
+          { letter: "B", text: "Prioriser l'essai randomisé pour les affirmations causales", correct: true },
+          { letter: "C", text: "Exclure l'essai parce qu'il est en conflit", correct: false },
+          { letter: "D", text: "Supposer que les études observationnelles sont plus réalistes", correct: false }
+        ],
+        feedback: {
+          correct: "Correct. Lorsque l'inférence causale est l'objectif, les designs à plus faible risque de biais ont plus de poids. Les conflits doivent être expliqués, pas moyennés.",
+          incorrect: "Le risque de biais concerne la crédibilité causale. Lorsque les designs diffèrent, vous devez pondérer les preuves par le risque de biais, pas seulement par le volume."
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "SB", title: "Scénario : Le Miroir Poli", xp: 25,
+        scenario: "Un très grand ensemble de données montre une forte association, mais l'exposition est auto-sélectionnée et les résultats sont auto-déclarés.",
+        question: "Quelle est la réponse la plus défendable ?",
+        options: [
+          { letter: "A", text: "Haute confiance car la taille de l'échantillon est grande", correct: false },
+          { letter: "B", text: "Signaler un risque sérieux de biais dû à la confusion et à la mesure", correct: true },
+          { letter: "C", text: "Ignorer le biais si l'effet est important", correct: false },
+          { letter: "D", text: "Supposer que la randomisation n'est pas nécessaire", correct: false }
+        ],
+        feedback: {
+          correct: "Correct. Une grande taille ne corrige pas la confusion ou le biais de mesure. Le risque de biais doit être évalué avant de faire confiance à la taille de l'effet.",
+          incorrect: "La taille de l'échantillon peut réduire l'erreur aléatoire, mais elle ne peut pas réparer le biais systématique."
+        }
+      }},
+      { type: "refrain", theme: "black", content: { text: "Le miroir peut briller et quand même mentir." }}
+    ]
+  },
+  {
+    id: 2, title: "L'Allocation", subtitle: "Biais de sélection et dissimulation", xp: 150,
+    slides: [
+      { type: "title", theme: "gold-bg", content: { title: "L'Allocation", subtitle: "Qui entre dans le chemin et qui est retenu" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "Distinguer la séquence aléatoire de la dissimulation de l'allocation",
+          "Détecter l'assignation prévisible et le biais de recrutement",
+          "Utiliser l'équilibre de base comme signal d'alerte, pas comme preuve",
+          "Faire un jugement clair de risque faible ou élevé"
+        ],
+        tip: "L'allocation aléatoire de l'essai CAST a assuré que les groupes étaient comparables—permettant la conclusion choquante que les médicaments tuaient les patients."
+      }},
+      { type: "story", theme: "gold-bg", content: {
+        label: "LA PORTE", title: "Quand la prochaine assignation est connue",
+        text: "Les premiers essais utilisaient souvent l'alternance ou la date de naissance. Les cliniciens pouvaient deviner qui recevrait le nouveau traitement et qui ne le recevrait pas. Des choix subtils suivaient.",
+        followup: "Une séquence aléatoire sans dissimulation est une porte laissée ouverte. La bonne méthode est les deux : vraiment aléatoire et vraiment cachée."
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "Liste de Contrôle du Biais de Sélection",
+        subtitle: "Deux questions qui doivent toutes deux être oui",
+        text: "1) La séquence était-elle aléatoire ? <br><br>2) L'allocation était-elle dissimulée aux recruteurs ?",
+        highlight: "Si l'une des réponses est non, la porte est compromise."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "GA", title: "Scénario : Assignation Prévisible", xp: 25,
+        scenario: "Les participants sont assignés selon que leur numéro de dossier médical est pair ou impair.",
+        question: "Quel est le risque de biais pour la randomisation ?",
+        options: [
+          { letter: "A", text: "Risque faible car c'est simple", correct: false },
+          { letter: "B", text: "Risque élevé car l'assignation est prévisible", correct: true },
+          { letter: "C", text: "Quelques préoccupations seulement", correct: false },
+          { letter: "D", text: "Impossible de juger", correct: false }
+        ],
+        feedback: {
+          correct: "Correct. Une assignation prévisible permet la manipulation, même involontairement. C'est un risque élevé de biais de sélection.",
+          incorrect: "La simplicité n'est pas l'aléatoire. Si les cliniciens peuvent prédire l'allocation, le biais de sélection est probable."
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "GA", title: "Scénario : Le Test de l'Enveloppe", xp: 25,
+        scenario: "L'essai utilise des enveloppes scellées, mais elles ne sont pas opaques et sont ouvertes avant le consentement.",
+        question: "Comment la dissimulation de l'allocation doit-elle être jugée ?",
+        options: [
+          { letter: "A", text: "Risque faible car des enveloppes ont été utilisées", correct: false },
+          { letter: "B", text: "Risque élevé car la dissimulation a été rompue", correct: true },
+          { letter: "C", text: "Quelques préoccupations seulement", correct: false },
+          { letter: "D", text: "Incertain", correct: false }
+        ],
+        feedback: {
+          correct: "Correct. Si les recruteurs peuvent voir la prochaine assignation avant le consentement, la dissimulation échoue et le biais de sélection est probable.",
+          incorrect: "Les enveloppes ne valent que par leur opacité et leur timing. La prévisibilité signifie un risque élevé."
+        }
+      }},
+      { type: "refrain", theme: "black", content: { text: "Une porte juste est cachée à celui qui choisit." }}
+    ]
+  },
+  {
+    id: 3, title: "Le Bandeau", subtitle: "Biais de performance et de détection", xp: 160,
+    slides: [
+      { type: "title", theme: "purple-bg", content: { title: "Le Bandeau", subtitle: "Quand savoir change ce qui est vu" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "Distinguer l'aveuglement des participants, des prestataires et des évaluateurs",
+          "Reconnaître quand les critères subjectifs gonflent les effets",
+          "Utiliser des critères objectifs pour réduire le biais quand l'aveuglement échoue",
+          "Attribuer le risque de biais pour la mesure"
+        ],
+        tip: "Dans les essais DECREASE, le manque d'aveuglement a permis aux investigateurs de favoriser inconsciemment le traitement—contribuant à la fraude des données."
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "LE TÉMOIN", title: "Essais sur la douleur et l'élévation en ouvert",
+        text: "Les essais ouverts sur la douleur rapportent souvent des effets plus importants que les essais en aveugle. Quand les attentes sont visibles, les résultats changent, surtout quand les mesures sont subjectives.",
+        followup: "C'est pourquoi les contrôles simulés et l'évaluation en aveugle comptent. Un bandeau ne rend pas une étude parfaite, mais il protège le résultat de l'espoir et de la déception."
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "Carte de l'Aveuglement",
+        subtitle: "Qui peut être influencé ?",
+        text: "Les participants, les prestataires et les évaluateurs de résultats peuvent chacun introduire un biais. Plus le critère est subjectif, plus l'aveuglement compte.",
+        highlight: "Pas d'aveuglement plus des critères subjectifs est un signal de risque élevé."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "VA", title: "Scénario : Critère Subjectif", xp: 25,
+        scenario: "Les participants ne sont pas en aveugle et le critère principal est un score de douleur auto-déclaré.",
+        question: "Comment le biais de détection doit-il être jugé ?",
+        options: [
+          { letter: "A", text: "Risque faible car la douleur est réelle", correct: false },
+          { letter: "B", text: "Risque élevé car le critère est subjectif et non en aveugle", correct: true },
+          { letter: "C", text: "Quelques préoccupations", correct: false },
+          { letter: "D", text: "Non applicable", correct: false }
+        ],
+        feedback: {
+          correct: "Correct. Les critères subjectifs sans aveuglement présentent un risque élevé de biais de détection.",
+          incorrect: "Le critère peut être réel, mais les attentes peuvent quand même gonfler les scores."
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "VA", title: "Scénario : Critère Objectif", xp: 25,
+        scenario: "Les participants ne sont pas en aveugle, mais le critère est la mortalité toutes causes vérifiée par registre.",
+        question: "Quel est le jugement le plus défendable ?",
+        options: [
+          { letter: "A", text: "Risque faible pour le biais de détection", correct: true },
+          { letter: "B", text: "Risque élevé car pas d'aveuglement", correct: false },
+          { letter: "C", text: "Quelques préoccupations", correct: false },
+          { letter: "D", text: "Impossible de juger", correct: false }
+        ],
+        feedback: {
+          correct: "Correct. Les critères objectifs sont moins susceptibles au biais de détection même sans aveuglement.",
+          incorrect: "L'aveuglement compte, mais les critères objectifs peuvent quand même être à faible risque de biais de mesure."
+        }
+      }},
+      { type: "refrain", theme: "black", content: { text: "Ce qui est vu dépend de qui peut le voir." }}
+    ]
+  },
+  {
+    id: 4, title: "La Piste Manquante", subtitle: "Attrition et données incomplètes", xp: 160,
+    slides: [
+      { type: "title", theme: "green-bg", content: { title: "La Piste Manquante", subtitle: "Quand le chemin perd des voyageurs" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "Identifier quand les données manquantes peuvent changer les conclusions",
+          "Utiliser l'intention de traiter comme protection contre le biais",
+          "Détecter l'abandon différentiel entre les groupes",
+          "Juger le risque quand les hypothèses ne sont pas étayées"
+        ],
+        tip: "Dans les essais sur la rosiglitazone, les patients qui ont abandonné étaient plus malades—faisant paraître le médicament plus sûr qu'il ne l'était."
+      }},
+      { type: "story", theme: "gold-bg", content: {
+        label: "LES LACUNES", title: "Programmes de perte de poids et les sorties silencieuses",
+        text: "Un essai a rapporté une perte de poids importante parmi les participants qui ont terminé, mais 35 pour cent ont abandonné le groupe d'intervention. Le résultat publié semblait fort.",
+        followup: "Quand les données manquantes sont inégales, la fin peut être écrite par ceux qui sont restés, pas par ce qui a fonctionné."
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "Signaux d'Attrition",
+        subtitle: "Qui est parti et pourquoi",
+        text: "Cherchez : l'abandon global, le déséquilibre entre les groupes et les raisons liées aux résultats.",
+        highlight: "Un abandon élevé ou inégal sans analyse de sensibilité est un signal d'alerte de biais."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "AA", title: "Scénario : Abandon Inégal", xp: 25,
+        scenario: "L'abandon est de 10 pour cent dans le groupe contrôle et 35 pour cent dans le groupe intervention, sans analyse des résultats manquants.",
+        question: "Comment le biais d'attrition doit-il être évalué ?",
+        options: [
+          { letter: "A", text: "Risque faible car certaines données restent", correct: false },
+          { letter: "B", text: "Risque élevé car les données manquantes sont déséquilibrées", correct: true },
+          { letter: "C", text: "Quelques préoccupations", correct: false },
+          { letter: "D", text: "Impossible de juger", correct: false }
+        ],
+        feedback: {
+          correct: "Correct. Un abandon important et déséquilibré sans justification ou analyse de sensibilité est à risque élevé.",
+          incorrect: "Quand les données manquantes diffèrent entre les groupes, le résultat peut être déformé."
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "AA", title: "Scénario : Intention de Traiter", xp: 25,
+        scenario: "Un essai ne rapporte que l'analyse per protocole, excluant 20 pour cent des participants randomisés.",
+        question: "Quel est le meilleur jugement ?",
+        options: [
+          { letter: "A", text: "Risque faible si les résultats sont significatifs", correct: false },
+          { letter: "B", text: "Quelques préoccupations ou risque élevé selon les exclusions", correct: true },
+          { letter: "C", text: "Aucun risque car les exclusions sont autorisées", correct: false },
+          { letter: "D", text: "Impossible de juger", correct: false }
+        ],
+        feedback: {
+          correct: "Correct. Exclure des participants randomisés peut biaiser les résultats. Si les exclusions sont substantielles ou liées aux résultats, le risque est élevé.",
+          incorrect: "Le per protocole peut être valide pour certaines questions, mais il augmente le risque de biais pour les estimations d'efficacité."
+        }
+      }},
+      { type: "refrain", theme: "black", content: { text: "Ceux qui sont partis façonnent encore le résultat." }}
+    ]
+  },
+  {
+    id: 5, title: "Le Critère Caché", subtitle: "Rapport sélectif", xp: 160,
+    slides: [
+      { type: "title", theme: "red-bg", content: { title: "Le Critère Caché", subtitle: "Quand le dossier est modifié" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "Comparer les critères publiés au protocole",
+          "Détecter le changement de critères et le rapport sélectif",
+          "Juger le risque quand seuls les résultats favorables apparaissent",
+          "Comprendre pourquoi les registres sont importants"
+        ],
+        tip: "L'Étude 329 a caché des tentatives de suicide chez les adolescents. Ce qui a été rapporté sélectivement a changé les prescriptions mondiales."
+      }},
+      { type: "story", theme: "red-bg", content: {
+        label: "LA MODIFICATION", title: "L'Étude 329 et la fin réécrite",
+        text: "L'Étude 329 a testé la paroxétine chez les adolescents. L'article publié rapportait un bénéfice, mais une réanalyse ultérieure a montré que les critères principaux étaient négatifs et que les effets nocifs étaient sous-déclarés.",
+        followup: "Ce n'était pas un petit détail. C'était une histoire différente. Le rapport sélectif peut faire paraître qu'un essai répond à une question à laquelle il n'a pas répondu."
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "Vérification du Biais de Rapport",
+        subtitle: "Comparer le plan et la publication",
+        text: "Demandez : Tous les critères préspécifiés ont-ils été rapportés ? Les points temporels ont-ils été changés ? De nouveaux critères ont-ils été introduits sans justification ?",
+        highlight: "Quand le plan et l'article sont en désaccord, le risque augmente."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "TR", title: "Scénario : Changement de Critère", xp: 25,
+        scenario: "Un registre d'essai liste le score de dépression à 12 semaines comme critère principal, mais l'article rapporte le score d'anxiété à 6 semaines comme critère principal.",
+        question: "Comment le biais de rapport doit-il être évalué ?",
+        options: [
+          { letter: "A", text: "Risque faible car un résultat positif a été trouvé", correct: false },
+          { letter: "B", text: "Risque élevé en raison du changement de critère", correct: true },
+          { letter: "C", text: "Quelques préoccupations seulement", correct: false },
+          { letter: "D", text: "Impossible de juger", correct: false }
+        ],
+        feedback: {
+          correct: "Correct. Changer les critères principaux après avoir vu les données est un signal de risque élevé de rapport sélectif.",
+          incorrect: "Le changement de critère rompt le contrat entre le protocole et la publication."
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "TR", title: "Scénario : Effets Nocifs Manquants", xp: 25,
+        scenario: "Le protocole liste les événements indésirables, mais l'article n'en rapporte aucun et ne fournit pas de tableau.",
+        question: "Quel est le meilleur jugement ?",
+        options: [
+          { letter: "A", text: "Risque faible si l'efficacité est forte", correct: false },
+          { letter: "B", text: "Risque élevé car les effets nocifs sont sélectivement omis", correct: true },
+          { letter: "C", text: "Quelques préoccupations", correct: false },
+          { letter: "D", text: "Impossible de juger", correct: false }
+        ],
+        feedback: {
+          correct: "Correct. Les effets nocifs omis sont un rapport sélectif. Le risque de biais augmente quand les effets nocifs préspécifiés sont manquants.",
+          incorrect: "L'omission sélective des effets nocifs peut inverser l'équilibre des bénéfices et des risques."
+        }
+      }},
+      { type: "refrain", theme: "black", content: { text: "Ce qui n'est pas rapporté parle encore." }}
+    ]
+  },
+  {
+    id: 6, title: "Le Chemin Confondu", subtitle: "Biais dans les preuves observationnelles", xp: 170,
+    slides: [
+      { type: "title", theme: "green-bg", content: { title: "Le Chemin Confondu", subtitle: "Quand les causes se mêlent aux choix" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "Identifier la confusion et le biais d'indication",
+          "Reconnaître le biais lié au temps et le temps immortel",
+          "Juger les preuves observationnelles avec des standards clairs",
+          "Décider quand les résultats sont suffisamment crédibles pour être regroupés"
+        ],
+        tip: "L'essai WHI semblait simple jusqu'à ce que des analyses post-hoc révèlent l'hypothèse du timing—une complexité cachée."
+      }},
+      { type: "story", theme: "gold-bg", content: {
+        label: "LE VIRAGE", title: "Le bêta-carotène et le cancer du poumon",
+        text: "Les études observationnelles suggéraient que le bêta-carotène protégeait contre le cancer du poumon. De grands essais chez les fumeurs ont ensuite montré un risque accru de cancer du poumon et ont été arrêtés prématurément.",
+        followup: "Les facteurs de confusion étaient forts : les personnes qui choisissent des suppléments diffèrent de nombreuses façons de celles qui n'en prennent pas. Quand les choix déterminent l'exposition, le biais suit."
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "Signaux de Confusion",
+        subtitle: "Quand cause et choix se mêlent",
+        text: "Cherchez les différences de risque de base, d'accès aux soins et de comportement de santé. Vérifiez comment les facteurs de confusion ont été mesurés et ajustés.",
+        highlight: "La confusion non mesurée peut inverser l'effet apparent."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "AC", title: "Scénario : Biais d'Indication", xp: 25,
+        scenario: "Les patients plus malades sont plus susceptibles de recevoir l'intervention dans les études de soins de routine.",
+        question: "Comment le risque de biais doit-il être jugé ?",
+        options: [
+          { letter: "A", text: "Risque faible si la taille de l'échantillon est grande", correct: false },
+          { letter: "B", text: "Risque élevé sauf si la confusion est traitée de manière convaincante", correct: true },
+          { letter: "C", text: "Quelques préoccupations", correct: false },
+          { letter: "D", text: "Non applicable", correct: false }
+        ],
+        feedback: {
+          correct: "Correct. Le biais d'indication peut submerger le signal. Sans ajustement solide, le risque est élevé.",
+          incorrect: "Une grande taille ne corrige pas la confusion. La clé est de savoir si les facteurs de confusion sont mesurés et contrôlés."
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "AC", title: "Scénario : Temps Immortel", xp: 25,
+        scenario: "L'exposition est définie après une période pendant laquelle les patients doivent survivre pour être classés comme traités.",
+        question: "Qu'est-ce que cela implique ?",
+        options: [
+          { letter: "A", text: "Risque faible car c'est courant", correct: false },
+          { letter: "B", text: "Risque élevé en raison du biais du temps immortel", correct: true },
+          { letter: "C", text: "Quelques préoccupations", correct: false },
+          { letter: "D", text: "Impossible de juger", correct: false }
+        ],
+        feedback: {
+          correct: "Correct. Le temps immortel crée un faux avantage de survie et constitue un risque de biais sérieux.",
+          incorrect: "Le moment de l'exposition est crucial. Une mauvaise classification du temps-personne peut créer un bénéfice trompeur."
+        }
+      }},
+      { type: "refrain", theme: "black", content: { text: "Quand le choix mène le chemin, la causalité s'estompe." }}
+    ]
+  },
+  {
+    id: 7, title: "Le Jugement", subtitle: "Tout mettre ensemble", xp: 190,
+    slides: [
+      { type: "title", theme: "teal-bg", content: { title: "Le Jugement", subtitle: "Résumer le risque sans crainte ni faveur" }},
+      { type: "objectives", theme: "dark", content: {
+        objectives: [
+          "Appliquer les jugements par domaine à un risque de biais global",
+          "Justifier les décisions avec des raisons transparentes",
+          "Utiliser l'analyse de sensibilité pour tester les conclusions",
+          "Repartir avec un script de décision reproductible"
+        ],
+        tip: "La structure en anneau clôt la leçon là où elle a commencé : le miroir et la vérité."
+      }},
+      { type: "story", theme: "green-bg", content: {
+        label: "LE RETOUR", title: "Deux revues, une honnête",
+        text: "Deux équipes ont examiné la même intervention. L'une a évalué tous les essais à faible risque parce que les résultats semblaient propres. L'autre a documenté des fuites d'allocation, des données manquantes et des changements de critères. Leur conclusion était prudente et a changé les recommandations.",
+        followup: "L'objectif n'est pas le pessimisme. C'est la précision. La revue la plus utile est celle qui nomme clairement l'incertitude."
+      }},
+      { type: "concept", theme: "dark", content: {
+        title: "Jugement Global",
+        subtitle: "Un script de décision simple",
+        text: "Si un domaine est à risque élevé et affecte directement le critère principal, le risque global est élevé. Si les préoccupations sont modérées et peu susceptibles de changer la direction, le risque global peut être « quelques préoccupations ».",
+        highlight: "Le jugement doit être raisonné, pas moyenné."
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "JR", title: "Scénario : Risque Global", xp: 35,
+        scenario: "Un essai a un risque faible pour la randomisation, un risque élevé pour les données manquantes, et le critère principal est sensible aux données manquantes.",
+        question: "Quel est le risque de biais global ?",
+        options: [
+          { letter: "A", text: "Risque faible", correct: false },
+          { letter: "B", text: "Quelques préoccupations", correct: false },
+          { letter: "C", text: "Risque élevé", correct: true },
+          { letter: "D", text: "Impossible de juger", correct: false }
+        ],
+        feedback: {
+          correct: "Correct. Un domaine à risque élevé qui affecte directement le critère principal détermine le jugement global.",
+          incorrect: "Le risque global n'est pas une moyenne. C'est un jugement sur la capacité du biais à changer la réponse."
+        }
+      }},
+      { type: "decision", theme: "dark", content: {
+        icon: "JR", title: "Scénario : Vérification de Sensibilité", xp: 35,
+        scenario: "Votre méta-analyse inclut 3 essais à faible risque et 4 essais à risque élevé. L'effet regroupé disparaît quand les essais à risque élevé sont retirés.",
+        question: "Quelle est la conclusion la plus défendable ?",
+        options: [
+          { letter: "A", text: "Rapporter l'effet regroupé complet comme final", correct: false },
+          { letter: "B", text: "Rapporter la conclusion principale basée sur les essais à faible risque", correct: true },
+          { letter: "C", text: "Exclure les essais à faible risque pour garder la taille de l'échantillon", correct: false },
+          { letter: "D", text: "Ignorer l'analyse de sensibilité", correct: false }
+        ],
+        feedback: {
+          correct: "Correct. Les analyses de sensibilité testent la robustesse. Si l'effet dépend des essais à risque élevé, les conclusions doivent refléter cette incertitude.",
+          incorrect: "Si les résultats changent quand les essais à risque élevé sont retirés, la conclusion la plus sûre repose sur les preuves les plus crédibles."
+        }
+      }},
+      { type: "refrain", theme: "black", content: { text: "Nommez le biais, et la réponse devient claire." }}
+    ]
+  }
+];
+
+// ===== NAVIGATION STATE =====
+let currentModule = 0;
+let currentSlide = 0;
+let consecutiveCorrect = 0;
+
+// ===== SAVE/LOAD =====
+function saveGame() {
+  safeSetStorage('riskBiasMasteryGame_fr_v1', gameState);
+}
+
+function resetProgress() {
+  if (confirm('Réinitialiser toute la progression et les accomplissements ?')) {
+    gameState = { ...DEFAULT_STATE, answeredQuestions: {}, badges: [], completedModules: [] };
+    saveGame();
+    currentModule = 0;
+    currentSlide = 0;
+    renderAll();
+  }
+}
+
+// ===== COURSE PROGRESS =====
+function updateCourseProgress() {
+  const totalModules = MODULES.length;
+  const completedCount = gameState.completedModules.length;
+  const pct = Math.round((completedCount / totalModules) * 100);
+  const fillEl = document.getElementById('courseProgressFill');
+  const pctEl = document.getElementById('courseProgressPct');
+  if (fillEl) fillEl.style.width = pct + '%';
+  if (pctEl) pctEl.textContent = pct + '%';
+}
+
+// ===== XP & LEVELING =====
+function addXP(amount) {
+  gameState.xp += amount;
+  checkLevelUp();
+  saveGame();
+  updateStatsDisplay();
+  showXPPopup(amount);
+}
+
+function checkLevelUp() {
+  for (let i = LEVELS.length - 1; i >= 0; i--) {
+    if (gameState.xp >= LEVELS[i].xp && gameState.level < LEVELS[i].level) {
+      gameState.level = LEVELS[i].level;
+      showLevelUp(LEVELS[i]);
+      break;
+    }
+  }
+}
+
+function showXPPopup(amount) {
+  const popup = document.getElementById('xpPopup');
+  document.getElementById('xpAmount').textContent = `+${amount}`;
+  popup.classList.add('show');
+  setTimeout(() => popup.classList.remove('show'), 1500);
+}
+
+function showLevelUp(levelData) {
+  triggerConfetti();
+}
+
+// ===== BADGES =====
+function awardBadge(badgeId) {
+  if (gameState.badges.includes(badgeId)) return;
+  gameState.badges.push(badgeId);
+  saveGame();
+  const badge = BADGES.find(b => b.id === badgeId);
+  if (badge) showBadgeModal(badge);
+  updateBadges();
+}
+
+function showBadgeModal(badge, celebrate = true) {
+  document.getElementById('badgeModalIcon').textContent = badge.icon;
+  document.getElementById('badgeModalTitle').textContent = badge.name;
+  document.getElementById('badgeModalDesc').textContent = badge.desc;
+  const modal = document.getElementById('badgeModal');
+  modal.classList.add('show');
+  if (celebrate) triggerConfetti();
+
+  // Focus trap
+  const focusableElements = modal.querySelectorAll('button, [tabindex]:not([tabindex="-1"])');
+  if (focusableElements.length > 0) {
+    const firstFocusable = focusableElements[0];
+    const lastFocusable = focusableElements[focusableElements.length - 1];
+    firstFocusable.focus();
+
+    // Remove any existing focus trap listener
+    if (modal._focusTrapHandler) {
+      modal.removeEventListener('keydown', modal._focusTrapHandler);
+    }
+
+    modal._focusTrapHandler = function(e) {
+      if (e.key === 'Tab') {
+        if (e.shiftKey && document.activeElement === firstFocusable) {
+          e.preventDefault();
+          lastFocusable.focus();
+        } else if (!e.shiftKey && document.activeElement === lastFocusable) {
+          e.preventDefault();
+          firstFocusable.focus();
+        }
+      }
+      if (e.key === 'Escape') {
+        closeBadgeModal();
+      }
+    };
+    modal.addEventListener('keydown', modal._focusTrapHandler);
+  }
+}
+
+function showBadgeDetails(badgeId) {
+  const badge = BADGES.find(b => b.id === badgeId);
+  if (!badge) return;
+  const earned = gameState.badges.includes(badgeId);
+  const desc = earned ? badge.desc : `${badge.desc} (Verrouillé)`;
+  showBadgeModal({ ...badge, desc }, earned);
+}
+
+function closeBadgeModal() {
+  document.getElementById('badgeModal').classList.remove('show');
+}
+
+// ===== STREAK =====
+function updateStreak() {
+  const today = new Date().toDateString();
+  if (gameState.lastActive !== today) {
+    const yesterday = new Date(Date.now() - 86400000).toDateString();
+    if (gameState.lastActive === yesterday) {
+      gameState.streak++;
+      if (gameState.streak >= 3) awardBadge('streak_3');
+      if (gameState.streak >= 7) awardBadge('streak_7');
+    } else if (gameState.lastActive) {
+      gameState.streak = 1;
+    } else {
+      gameState.streak = 1;
+    }
+    gameState.lastActive = today;
+    saveGame();
+  }
+}
+
+// ===== CONFETTI =====
+function triggerConfetti() {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const container = document.getElementById('confettiContainer');
+  const colors = ['#D4AF37', '#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#0f766e'];
+  for (let i = 0; i < 50; i++) {
+    const confetti = document.createElement('div');
+    confetti.className = 'confetti';
+    confetti.style.left = Math.random() * 100 + '%';
+    confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+    confetti.style.animationDelay = Math.random() * 0.5 + 's';
+    container.appendChild(confetti);
+    setTimeout(() => confetti.remove(), 3500);
+  }
+}
+
+// ===== COMBO =====
+function updateComboDisplay() {
+  const comboEl = document.getElementById('comboDisplay');
+  const countEl = document.getElementById('comboCount');
+  if (consecutiveCorrect >= 2) {
+    countEl.textContent = consecutiveCorrect;
+    comboEl.classList.add('show');
+  } else {
+    comboEl.classList.remove('show');
+  }
+}
+
+// ===== MOBILE SIDEBAR =====
+function toggleSidebar() {
+  document.querySelector('.sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('show');
+  var btn = document.querySelector('.sidebar-toggle, .hamburger, .mobile-menu-btn'); if (btn) btn.setAttribute('aria-expanded', btn.getAttribute('aria-expanded') === 'true' ? 'false' : 'true');
+}
+
+// ===== RENDER =====
+function renderAll() {
+  updateStreak();
+  renderSidebar();
+  renderSlides();
+  updateStatsDisplay();
+  updateBadges();
+  updateCourseProgress();
+}
+
+function updateStatsDisplay() {
+  const levelData = LEVELS.find(l => l.level === gameState.level) || LEVELS[0];
+  const nextLevel = LEVELS.find(l => l.level === gameState.level + 1);
+
+  document.getElementById('levelIcon').textContent = levelData.icon;
+  document.getElementById('levelTitle').textContent = levelData.title;
+  document.getElementById('levelNum').textContent = gameState.level;
+
+  const currentXP = gameState.xp - levelData.xp;
+  const neededXP = nextLevel ? (nextLevel.xp - levelData.xp) : 500;
+  const pct = Math.min(100, (currentXP / neededXP) * 100);
+
+  document.getElementById('xpFill').style.width = pct + '%';
+  document.getElementById('xpCurrent').textContent = currentXP;
+  document.getElementById('xpNeeded').textContent = neededXP;
+
+  document.getElementById('correctCount').textContent = gameState.correctAnswers;
+  document.getElementById('decisionCount').textContent = gameState.decisionsCompleted;
+  document.getElementById('synthesisCount').textContent = gameState.synthesisCount || 0;
+  document.getElementById('streakCount').textContent = gameState.streak;
+
+  const streakEl = document.getElementById('streakDisplay');
+  streakEl.classList.toggle('active', gameState.streak > 0);
+}
+
+function updateBadges() {
+  const grid = document.getElementById('badgesGrid');
+  grid.innerHTML = BADGES.map(b => {
+    const earned = gameState.badges.includes(b.id);
+    const label = `${b.name}: ${b.desc}`;
+    return `<button class="badge-item ${earned ? 'earned' : ''}" type="button" data-tooltip="${label}" aria-label="${label}" title="${label}" onclick="showBadgeDetails('${b.id}')">${b.icon}</button>`;
+  }).join('');
+}
+
+function renderSidebar() {
+  const list = document.getElementById('moduleList');
+  list.innerHTML = MODULES.map((mod, i) => {
+    const completed = gameState.completedModules.includes(mod.id);
+    const locked = i > 0 && !gameState.completedModules.includes(MODULES[i-1].id);
+    const estMins = Math.round(mod.slides.length * 1.5);
+    return `
+      <div class="module-item ${i === currentModule ? 'active' : ''} ${completed ? 'completed' : ''} ${locked ? 'locked' : ''}"
+           onclick="${locked ? '' : `goToModule(${i})`}"
+           tabindex="${locked ? -1 : 0}"
+           role="button"
+           aria-disabled="${locked ? 'true' : 'false'}">
+        <div class="module-number">${completed ? 'OK' : (locked ? 'VR' : mod.id)}</div>
+        <div class="module-info">
+          <div class="module-title">${mod.title}</div>
+          <div class="module-subtitle">${mod.subtitle}</div>
+          <div class="module-xp">+${mod.xp} XP</div>
+          <div class="module-time">T ~${estMins} min</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderSlides() {
+  const container = document.getElementById('slidesContainer');
+  container.innerHTML = MODULES.map((mod, mi) => {
+    const progressPct = ((currentSlide + 1) / mod.slides.length) * 100;
+    return `
+    <div class="module-slides ${mi === currentModule ? 'active' : ''}" data-module="${mi}">
+      <div class="slide-progress-bar" style="width: ${mi === currentModule ? progressPct : 0}%"></div>
+      ${mod.slides.map((slide, si) => renderSlide(slide, si, mi)).join('')}
+      <div class="slide-nav">
+        <button class="nav-btn" onclick="prevSlide()" ${currentSlide === 0 ? 'disabled' : ''} aria-label="Diapositive précédente">&lt;</button>
+        <div class="nav-center">
+          <div class="slide-counter">${currentSlide + 1} / ${mod.slides.length}</div>
+          <div class="progress-dots">
+            ${mod.slides.map((_, i) => `<button class="progress-dot ${i === currentSlide ? 'active' : ''}" type="button" onclick="goToSlide(${i})" aria-label="Aller à la diapositive ${i + 1}" ${i === currentSlide ? 'aria-current="true"' : ''}></button>`).join('')}
+          </div>
+        </div>
+        <button class="nav-btn" onclick="nextSlide()" aria-label="Diapositive suivante">&gt;</button>
+      </div>
+      <div class="keyboard-hint" style="position:absolute;bottom:5px;left:50%;transform:translateX(-50%);font-size:0.6rem;opacity:0.4;">Flèches gauche/droite ou balayez pour naviguer</div>
+    </div>
+  `;
+  }).join('');
+  document.getElementById('currentModule').textContent = MODULES[currentModule].title;
+  updateSlideVisibility();
+}
+
+function renderSlide(slide, index, moduleIndex) {
+  const theme = slide.theme || 'dark';
+  let html = `<div class="slide ${theme} ${index === currentSlide ? 'active' : ''}" data-slide="${index}">`;
+
+  switch(slide.type) {
+    case 'title':
+      html += `<div class="content"><h1 class="title gold animate">${slide.content.title}</h1><p class="subtitle animate delay-1">${slide.content.subtitle}</p></div>`;
+      break;
+
+    case 'objectives':
+      html += `<div class="content">
+        <div class="objectives-box animate">
+          <div class="objectives-header">
+            <div class="objectives-icon">OBJ</div>
+            <div class="objectives-title">Objectifs d'apprentissage</div>
+          </div>
+          <ul class="objectives-list">
+            ${slide.content.objectives.map(obj => `<li>${obj}</li>`).join('')}
+          </ul>
+        </div>
+        ${slide.content.tip ? `<p class="subtitle animate delay-1" style="font-size:0.85rem;max-width:600px">${slide.content.tip}</p>` : ''}
+      </div>`;
+      break;
+
+    case 'story':
+      html += `<div class="content">
+        <article class="story-box ${slide.content.success ? 'success' : ''} ${slide.content.warning ? 'warning' : ''} ${slide.content.teal ? 'teal' : ''} animate" role="article">
+          <div class="story-label">${slide.content.label}</div>
+          ${slide.content.title ? `<h2 class="title gold" style="font-size:1.8rem;margin-bottom:0.75rem">${slide.content.title}</h2>` : ''}
+          <p class="story-text">${slide.content.text}</p>
+          ${slide.content.followup ? `<p class="story-text" style="margin-top:0.75rem;font-style:italic;opacity:0.9">${slide.content.followup}</p>` : ''}
+        </article>
+      </div>`;
+      break;
+
+    case 'stats':
+      html += `<div class="content">
+        ${slide.content.title ? `<h2 class="title gold animate">${slide.content.title}</h2>` : ''}
+        ${slide.content.subtitle ? `<p class="subtitle animate delay-1">${slide.content.subtitle}</p>` : ''}
+        <div class="stats-grid animate delay-2">
+          ${slide.content.stats.map(s => `<div class="stat-box"><div class="stat-value gold">${s.value}</div><div class="stat-label">${s.label}</div></div>`).join('')}
+        </div>
+        ${slide.content.caption ? `<p class="subtitle animate delay-3" style="font-size:0.85rem;margin-top:0.75rem">${slide.content.caption}</p>` : ''}
+      </div>`;
+      break;
+
+    case 'refrain':
+      html += `<div class="content" style="justify-content:center;height:100%"><p class="refrain animate">"${slide.content.text}"</p></div>`;
+      break;
+
+    case 'concept':
+      html += `<div class="content">
+        <h2 class="title ${theme === 'light' ? 'navy' : 'gold'} animate">${slide.content.title}</h2>
+        ${slide.content.subtitle ? `<p class="subtitle animate delay-1">${slide.content.subtitle}</p>` : ''}
+        ${slide.content.text ? `<div class="card ${theme === 'light' ? '' : 'navy-bg'} animate delay-2"><p class="card-text">${slide.content.text}</p></div>` : ''}
+        ${slide.content.highlight ? `<div class="story-box warning animate delay-3"><div class="story-label">Point Clé</div><p class="story-text">${slide.content.highlight}</p></div>` : ''}
+        ${slide.content.checkpoints ? `
+          <div class="timeline animate delay-2" style="margin-top:0.75rem">
+            ${slide.content.checkpoints.map(cp => `
+              <div class="timeline-item"><div class="timeline-days">${cp.day}</div><div class="timeline-content"><div class="timeline-title">${cp.event}</div></div></div>
+            `).join('')}
+          </div>
+        ` : ''}
+      </div>`;
+      break;
+
+    case 'checklist':
+      html += `<div class="content">
+        <h2 class="title gold animate">${slide.content.title}</h2>
+        <div class="checklist animate delay-1">
+          ${slide.content.items.map(item => `
+            <div class="checklist-item">
+              <div class="check-icon">OK</div>
+              <div class="checklist-text">${item}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>`;
+      break;
+
+    case 'decision':
+      const did = `dec_${moduleIndex}_${index}`;
+      const answered = gameState.answeredQuestions[did];
+      html += `<div class="content">
+        <div class="decision-tree animate">
+          <div class="decision-header">
+            <div class="decision-icon">${slide.content.icon}</div>
+            <div class="decision-title">${slide.content.title}</div>
+            <div class="decision-xp">+${slide.content.xp} XP</div>
+          </div>
+          <div class="decision-scenario">${slide.content.scenario}</div>
+          <div class="decision-question">${slide.content.question}</div>
+          <div class="decision-options">
+            ${slide.content.options.map(opt => {
+              const isSelected = answered === opt.letter;
+              const showCorrect = answered && opt.correct;
+              const showIncorrect = answered && isSelected && !opt.correct;
+              return `
+                <div class="decision-option ${isSelected ? 'selected' : ''} ${showCorrect ? 'correct' : ''} ${showIncorrect ? 'incorrect' : ''} ${answered ? 'disabled' : ''}"
+                     onclick="answerDecision('${did}', '${opt.letter}', ${opt.correct}, ${slide.content.xp})"
+                     tabindex="0"
+                     role="button"
+                     aria-pressed="${isSelected ? 'true' : 'false'}"
+                     aria-disabled="${answered ? 'true' : 'false'}">
+                  <div class="option-letter">${opt.letter}</div>
+                  <div class="option-text">${opt.text}</div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+          <div class="decision-feedback ${answered ? 'show' : ''} ${answered && slide.content.options.find(o => o.letter === answered)?.correct ? 'correct' : 'incorrect'}" role="alert" aria-live="polite">
+            <div class="feedback-title">${answered && slide.content.options.find(o => o.letter === answered)?.correct ? 'Correct !' : 'Pas tout à fait'}</div>
+            <div class="feedback-text">${answered && slide.content.options.find(o => o.letter === answered)?.correct ? slide.content.feedback.correct : slide.content.feedback.incorrect}</div>
+          </div>
+        </div>
+      </div>`;
+      break;
+
+    case 'quiz':
+      const qid = `quiz_${moduleIndex}_${index}`;
+      const qAnswered = gameState.answeredQuestions[qid];
+      html += `<div class="content">
+        <div class="quiz-container animate">
+          <div class="quiz-question">${slide.content.question}</div>
+          <div class="quiz-options">
+            ${slide.content.options.map((opt, oi) => {
+              const isSelected = qAnswered === oi;
+              const showCorrect = qAnswered !== undefined && opt.correct;
+              const showIncorrect = qAnswered !== undefined && isSelected && !opt.correct;
+              return `
+                <div class="quiz-option ${showCorrect ? 'correct' : ''} ${showIncorrect ? 'incorrect' : ''} ${qAnswered !== undefined ? 'disabled' : ''}"
+                     onclick="answerQuiz('${qid}', ${oi}, ${opt.correct}, ${slide.content.xp})"
+                     tabindex="0"
+                     role="button"
+                     aria-pressed="${isSelected ? 'true' : 'false'}"
+                     aria-disabled="${qAnswered !== undefined ? 'true' : 'false'}">
+                  ${opt.text}
+                </div>
+              `;
+            }).join('')}
+          </div>
+          <div class="quiz-feedback ${qAnswered !== undefined ? 'show' : ''} ${qAnswered !== undefined && slide.content.options[qAnswered]?.correct ? 'correct' : 'incorrect'}" role="alert" aria-live="polite">
+            ${qAnswered !== undefined && slide.content.options[qAnswered]?.correct ? slide.content.feedback.correct : slide.content.feedback.incorrect}
+          </div>
+        </div>
+      </div>`;
+      break;
+  }
+
+  html += '</div>';
+  return html;
+}
+
+function updateSlideVisibility() {
+  const container = document.querySelector('.module-slides.active');
+  if (!container) return;
+
+  container.querySelectorAll('.slide').forEach((slide, i) => {
+    slide.classList.toggle('active', i === currentSlide);
+  });
+
+  const progressBar = container.querySelector('.slide-progress-bar');
+  if (progressBar) {
+    const pct = ((currentSlide + 1) / MODULES[currentModule].slides.length) * 100;
+    progressBar.style.width = pct + '%';
+  }
+
+  container.querySelector('.slide-counter').textContent = `${currentSlide + 1} / ${MODULES[currentModule].slides.length}`;
+  container.querySelectorAll('.progress-dot').forEach((dot, i) => {
+    const isActive = i === currentSlide;
+    dot.classList.toggle('active', isActive);
+    if (isActive) {
+      dot.setAttribute('aria-current', 'true');
+    } else {
+      dot.removeAttribute('aria-current');
+    }
+  });
+  container.querySelector('.nav-btn').disabled = currentSlide === 0;
+}
+
+// ===== ANSWERS =====
+function answerDecision(did, letter, correct, xp) {
+  if (gameState.answeredQuestions[did] !== undefined) return;
+  gameState.answeredQuestions[did] = letter;
+  gameState.decisionsCompleted++;
+  gameState.synthesisCount = (gameState.synthesisCount || 0) + 1;
+
+  if (gameState.decisionsCompleted === 1) awardBadge('first_judgment');
+
+  if (correct) {
+    gameState.correctAnswers++;
+    consecutiveCorrect++;
+    addXP(xp);
+    if (consecutiveCorrect >= 5) awardBadge('perfect_5');
+    if (gameState.decisionsCompleted >= 14) awardBadge('decision_maker');
+  } else {
+    consecutiveCorrect = 0;
+  }
+  saveGame();
+  renderSlides();
+  updateComboDisplay();
+  updateStatsDisplay();
+}
+
+function answerQuiz(qid, choice, correct, xp) {
+  if (gameState.answeredQuestions[qid] !== undefined) return;
+  gameState.answeredQuestions[qid] = choice;
+
+  if (correct) {
+    gameState.correctAnswers++;
+    consecutiveCorrect++;
+    addXP(xp);
+    if (consecutiveCorrect >= 5) awardBadge('perfect_5');
+  } else {
+    consecutiveCorrect = 0;
+  }
+  saveGame();
+  renderSlides();
+  updateComboDisplay();
+}
+
+// ===== NAVIGATION =====
+function goToModule(index) {
+  if (index > 0 && !gameState.completedModules.includes(MODULES[index-1].id)) return;
+  currentModule = index;
+  currentSlide = 0;
+  renderSlides();
+  renderSidebar();
+}
+
+function goToSlide(index) {
+  currentSlide = index;
+  updateSlideVisibility();
+}
+
+function nextSlide() {
+  const mod = MODULES[currentModule];
+  if (currentSlide < mod.slides.length - 1) {
+    currentSlide++;
+    updateSlideVisibility();
+  } else {
+    completeModule();
+  }
+}
+
+function prevSlide() {
+  if (currentSlide > 0) {
+    currentSlide--;
+    updateSlideVisibility();
+  }
+}
+
+function completeModule() {
+  const mod = MODULES[currentModule];
+  if (!gameState.completedModules.includes(mod.id)) {
+    gameState.completedModules.push(mod.id);
+    addXP(mod.xp);
+
+    // Module-specific badges
+    if (mod.id === 2) awardBadge('allocation_guard');
+    if (mod.id === 3) awardBadge('blinding_watch');
+    if (mod.id === 4) awardBadge('attrition_auditor');
+    if (mod.id === 5) awardBadge('reporting_tracker');
+    if (mod.id === 6) awardBadge('confounding_analyst');
+    if (mod.id === 7) awardBadge('judgment_master');
+    if (gameState.completedModules.length === MODULES.length) awardBadge('finisher');
+
+    saveGame();
+    triggerConfetti();
+    updateCourseProgress();
+  }
+
+  if (currentModule < MODULES.length - 1) {
+    goToModule(currentModule + 1);
+  }
+}
+
+// ===== KEYBOARD =====
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    document.getElementById('badgeModal').classList.remove('show');
+    document.querySelector('.sidebar').classList.remove('open');
+    document.getElementById('sidebarOverlay').classList.remove('show');
+    return;
+  }
+  const isRoleButton = e.target && e.target.getAttribute && e.target.getAttribute('role') === 'button';
+  const isFormControl = e.target && e.target.closest && e.target.closest('button, a, input, textarea, select');
+  if (isRoleButton || isFormControl) {
+    if (e.key === ' ' && isRoleButton) {
+      e.preventDefault();
+      e.target.click();
+    }
+    return;
+  }
+  if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextSlide(); }
+  else if (e.key === 'ArrowLeft') { e.preventDefault(); prevSlide(); }
+});
+
+document.addEventListener('keydown', (e) => {
+  if ((e.target.classList.contains('module-item') || e.target.classList.contains('decision-option') || e.target.classList.contains('quiz-option')) && (e.key === 'Enter' || e.key === ' ')) {
+    e.preventDefault();
+    e.target.click();
+  }
+});
+
+// ===== TOUCH =====
+let touchStartX = 0;
+document.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
+document.addEventListener('touchend', (e) => {
+  const diff = touchStartX - e.changedTouches[0].screenX;
+  if (Math.abs(diff) > 50) { diff > 0 ? nextSlide() : prevSlide(); }
+}, { passive: true });
+
+// ===== INIT =====
+renderAll();
+</script>
+</body>
+</html>
