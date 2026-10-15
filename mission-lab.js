@@ -57,7 +57,7 @@
     const filtered = missions.filter(function(t) {return (t.title+' '+t.tag+' '+labels[t.kind]).toLowerCase().includes(q);});
     $('railCounter').textContent = filtered.length + ' shown';
     grid.innerHTML = filtered.map(function (t) {
-      return '<button type="button" role="listitem" class="mission-tile '+(t.id===current?'current':'')+'" data-id="'+t.id+'" aria-current="'+(t.id===current?'true':'false')+'">'+
+      return '<button type="button" class="mission-tile '+(t.id===current?'current':'')+'" data-id="'+t.id+'" aria-current="'+(t.id===current?'true':'false')+'">'+
         '<span class="n">'+String(t.id).padStart(2,'0')+'</span><span><span class="title">'+esc(t.title)+'</span><span class="mode">'+esc(labels[t.kind])+' · '+t.minutes+' min</span></span>'+badgeFor(t)+'</button>';
     }).join('') || '<p class="mission-empty">No matching missions. Try a method or topic.</p>';
   }
