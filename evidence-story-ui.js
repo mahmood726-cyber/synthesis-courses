@@ -4,6 +4,15 @@
   const api=window.EvidenceStoryMath;
   const picks=document.getElementById('trial-picks');
   const results=document.getElementById('numerical-results');
+  const plotStyle=document.createElement('style');
+  plotStyle.textContent='.forest-figure{margin:1rem 0;padding:1rem;background:#12263d;border:1px solid #6b8099;border-radius:.75rem;overflow-x:auto}'+
+    '.forest-figure figcaption,.forest-summary-label,.forest-axis-label{color:#f5cf70;fill:#f5cf70;font-weight:700}'+
+    '.forest-figure svg{display:block;width:100%;min-width:650px;height:auto;font:13px system-ui}'+
+    '.forest-figure text{fill:#edf3ff}.forest-figure .forest-grid{stroke:#51677d;stroke-dasharray:3 6}'+
+    '.forest-figure .forest-null{stroke:#f5cf70;stroke-width:2;stroke-dasharray:5 4}'+
+    '.forest-study-ci{stroke:#94f0e0;stroke-width:2}.forest-summary-ci{stroke:#f5cf70;stroke-width:2}'+
+    '.forest-point{fill:#94f0e0;stroke:#0d182a}.forest-diamond{fill:#f5cf70;stroke:#0d182a}';
+  document.head.append(plotStyle);
   if(!api||!picks||!results)return;
   const selected=new Set(api.TRIALS.map(function(t){return t.id;}));
   const fmt=function(x,n){return x.toFixed(n);};
