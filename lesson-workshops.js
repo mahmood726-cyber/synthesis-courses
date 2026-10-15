@@ -61,7 +61,7 @@
       obs.observe(slide,{attributes:true,attributeFilter:['class']});
       check(slide);
     });
-    if(typeof window.updateSlideDisplay==='function' && Number.isInteger(window.currentModule)){
+    if(typeof window.updateSlideDisplay==='function'){
       const current=document.querySelector('.module-slides.active');
       if(current)window.updateSlideDisplay(current);
     }
