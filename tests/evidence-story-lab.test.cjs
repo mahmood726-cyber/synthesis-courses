@@ -37,3 +37,38 @@ test('sources, reflective framing and boundaries are explicit',()=>{
  assert.match(page,/not an exhaustive search/i);
  assert.match(page,/metafor/);
 });
+test('interactive log-RR forest plot stays in sync with study inclusion',()=>{
+ const {JSDOM}=require('jsdom');
+ const dom=new JSDOM(page,{url:'https://example.test/evidence-story-lab.html',runScripts:'outside-only'});
+ const math=fs.readFileSync(path.join(__dirname,'../evidence-story-lab.js'),'utf8');
+ const ui=fs.readFileSync(path.join(__dirname,'../evidence-story-ui.js'),'utf8');
+ dom.window.eval(math);dom.window.eval(ui);
+ const d=dom.window.document;
+ const chart=()=>d.querySelector('.forest-figure svg');
+ assert.ok(chart(),'Accessible plot is rendered next to the result cards');
+ assert.equal(d.querySelectorAll('.forest-point').length,6);
+ assert.equal(d.querySelectorAll('.forest-diamond').length,2);
+ assert.match(chart().getAttribute('aria-label'),/log-scale forest plot/i);
+ assert.equal(d.getElementById('chosen-count').textContent,'6');
+ const before=d.querySelector('.stat-grid .stat strong').textContent;
+ assert.equal(before,'0.659');
+ d.querySelector('button[data-preset="madras-out"]').click();
+ assert.equal(d.querySelectorAll('.forest-point').length,5);
+ assert.equal(d.getElementById('chosen-count').textContent,'5');
+ assert.equal(d.querySelector('.stat-grid .stat strong').textContent,'0.405');
+ d.querySelector('button[data-preset="all"]').click();
+ assert.equal(d.querySelectorAll('.forest-point').length,6);
+ assert.equal(d.querySelector('.stat-grid .stat strong').textContent,'0.659');
+ assert.ok(d.head.querySelector('style').textContent.includes('forest-figure'));
+ dom.window.close();
+});
+test('axis covers the 95% intervals for every possible two-to-six-study subset',()=>{
+ for(let mask=1;mask<(1<<TRIALS.length);mask++){
+  const subset=TRIALS.filter((_,i)=>(mask&(1<<i))!==0);
+  if(subset.length<2)continue;
+  const a=analyse(subset);
+  for(const value of [a.fixed.lo,a.fixed.hi,a.dl.lo,a.dl.hi]){
+   assert.ok(value>0.05 && value<2.5,'interval must be visible: '+value);
+  }
+ }
+});
