@@ -12,7 +12,7 @@
     '.forest-figure .forest-null{stroke:#f5cf70;stroke-width:2;stroke-dasharray:5 4}'+
     '.forest-study-ci{stroke:#94f0e0;stroke-width:2}.forest-summary-ci{stroke:#f5cf70;stroke-width:2}'+
     '.forest-point{fill:#94f0e0;stroke:#0d182a}.forest-diamond{fill:#f5cf70;stroke:#0d182a}';
-  document.head.append(plotStyle);
+  document.head.prepend(plotStyle);
   if(!api||!picks||!results)return;
   const selected=new Set(api.TRIALS.map(function(t){return t.id;}));
   const fmt=function(x,n){return x.toFixed(n);};
