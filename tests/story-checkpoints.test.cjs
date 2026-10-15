@@ -20,8 +20,8 @@ test('story moments are inside every existing course language route',()=>{
   const dom=fixture(lang),doc=dom.window.document;
   assert.equal(doc.querySelectorAll('.lesson-workshop-slide').length,25);
   const slides=doc.querySelectorAll('.lesson-story-slide');
-  assert.equal(slides.length,3);
-  assert.deepEqual(Array.from(slides,s=>Number(s.dataset.storyModule)),[3,7,22]);
+  assert.equal(slides.length,4);
+  assert.deepEqual(Array.from(slides,s=>Number(s.dataset.storyModule)),[3,7,9,22]);
   assert.equal(slides[1].previousElementSibling.classList.contains('lesson-workshop-slide'),true);
   assert.match(slides[0].textContent,lang==='en'?/English-only pilot/:/untranslated and unreviewed/);
   dom.window.close();
