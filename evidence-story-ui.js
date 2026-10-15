@@ -7,6 +7,67 @@
   if(!api||!picks||!results)return;
   const selected=new Set(api.TRIALS.map(function(t){return t.id;}));
   const fmt=function(x,n){return x.toFixed(n);};
+
+  // The forest plot uses the same study-level log RRs and sampling variances as
+  // the numerical cards; all comparisons share a log-scale axis across presets.
+  function forestFigure(trials,analysis){
+    const ns='http://www.w3.org/2000/svg';
+    const figure=document.createElement('figure');
+    figure.className='forest-figure';
+    const heading=document.createElement('figcaption');
+    heading.textContent='Forest plot · archival, selected teaching rows';
+    figure.append(heading);
+    const svg=document.createElementNS(ns,'svg');
+    const first=174,last=625,top=42,step=35;
+    const pooledY=top+trials.length*step+13,randomY=pooledY+37;
+    const height=randomY+74;
+    svg.setAttribute('viewBox','0 0 720 '+height);
+    svg.setAttribute('role','img');
+    svg.setAttribute('aria-label','Log-scale forest plot showing selected study risk ratios and 95% confidence intervals, plus fixed-effect and DerSimonian-Laird pooled estimates');
+    const low=Math.log(.05),high=Math.log(2.5);
+    const pos=rr=>first+(Math.log(rr)-low)/(high-low)*(last-first);
+    function el(tag,attrs,body){
+      const node=document.createElementNS(ns,tag);
+      Object.keys(attrs||{}).forEach(k=>node.setAttribute(k,String(attrs[k])));
+      if(body!==undefined)node.textContent=String(body);
+      svg.append(node);
+      return node;
+    }
+    el('title',{},'Selected historical BCG trials: risk ratio forest plot');
+    el('desc',{},'The solid reference line is risk ratio one. Round markers are trial estimates; diamonds are pooled estimates. All intervals are normal-approximation 95% intervals from the displayed illustrative model. Refer to the adjacent table for exact values.');
+    [0.05,.1,.25,.5,1,2.5].forEach(rr=>{
+      const xx=pos(rr);
+      el('line',{x1:xx,x2:xx,y1:18,y2:randomY+16,class:rr===1?'forest-null':'forest-grid'});
+      el('text',{x:xx,y:height-26,'text-anchor':'middle',class:'forest-tick'},rr);
+    });
+    function interval(label,rr,lo,hi,y,pooled){
+      el('text',{x:6,y:y+4,class:pooled?'forest-summary-label':'forest-study-label'},label);
+      el('line',{x1:pos(lo),x2:pos(hi),y1:y,y2:y,class:pooled?'forest-summary-ci':'forest-study-ci'});
+      [lo,hi].forEach(v=>el('line',{x1:pos(v),x2:pos(v),y1:y-5,y2:y+5,class:pooled?'forest-summary-ci':'forest-study-ci'}));
+      if(pooled){
+        const x=pos(rr);
+        el('polygon',{points:[pos(lo)+','+y,x+','+(y-9),pos(hi)+','+y,x+','+(y+9)].join(' '),class:'forest-diamond'});
+      }else{
+        el('circle',{cx:pos(rr),cy:y,r:5,class:'forest-point'});
+      }
+      el('text',{x:635,y:y+4,class:'forest-value'},rr.toFixed(3));
+    }
+    trials.forEach((t,i)=>{
+      const e=analysis.rows.find(row=>row.id===t.id);
+      const z=1.959963984540054,sd=Math.sqrt(e.vi);
+      const name=t.name.replace(' and ',' & ').replace(' et al.','');
+      interval(name,e.rr,Math.exp(e.yi-z*sd),Math.exp(e.yi+z*sd),top+i*step,false);
+    });
+    interval('Fixed effect',analysis.fixed.rr,analysis.fixed.lo,analysis.fixed.hi,pooledY,true);
+    interval('DL random',analysis.dl.rr,analysis.dl.lo,analysis.dl.hi,randomY,true);
+    el('text',{x:(first+last)/2,y:height-5,'text-anchor':'middle',class:'forest-axis-label'},'Risk ratio (logarithmic axis; 1 = no difference)');
+    figure.append(svg);
+    const note=document.createElement('p');
+    note.className='muted';
+    note.textContent='Circles denote individual study RRs with 95% CIs. Diamonds denote illustrative pooled RRs. Axis is logarithmic and held constant across selections. No study is declared ineligible by toggling it.';
+    figure.append(note);
+    return figure;
+  }
   function render(){
     const trials=api.TRIALS.filter(function(t){return selected.has(t.id);});
     document.getElementById('chosen-count').textContent=String(trials.length);
@@ -40,7 +101,7 @@
     });
     const caution=document.createElement('p');caution.className='warning';
     caution.textContent='Interpretation guardrail: this subset is selected for teaching, not by review eligibility. Heterogeneity is substantial, and two rows are not randomly allocated. Neither pooled summary is a clinical treatment-effect estimate.';
-    results.append(grid,caution);
+    results.append(forestFigure(trials,a),grid,caution);
     const detail=document.createElement('details'),summary=document.createElement('summary');
     summary.textContent='See individual historical risk ratios';
     const table=document.createElement('table'),head=document.createElement('thead'),body=document.createElement('tbody');
