@@ -7,12 +7,13 @@ const {test} = require('node:test');
 const {JSDOM} = require('jsdom');
 const root=path.join(__dirname,'..');
 const read=(f)=>fs.readFileSync(path.join(root,f),'utf8');
-const html=read('mission-lab.html'),data=read('mission-lab-data.js'),engine=read('mission-lab.js');
+const html=read('mission-lab.html'),source=read('small-meta-data.js'),data=read('mission-lab-data.js'),engine=read('mission-lab.js');
 
 function mount() {
   const dom=new JSDOM(html,{runScripts:'outside-only',url:'https://example.test/mission-lab.html',pretendToBeVisual:true});
   dom.window.Element.prototype.scrollIntoView=function(){};
   dom.window.confirm=()=>true;
+  dom.window.eval(source);
   dom.window.eval(data);
   dom.window.eval(engine);
   return dom;
@@ -27,7 +28,7 @@ function change(window,el,value,type='change'){
 }
 
 test('course data and scripts parse with 25 well-formed independent missions',()=>{
-  new vm.Script(data);new vm.Script(engine);
+  new vm.Script(source);new vm.Script(data);new vm.Script(engine);
   const c={window:{}};vm.runInNewContext(data,c);
   const tasks=c.window.SYNTHESIS_MISSIONS;
   assert.equal(tasks.length,25);
@@ -43,6 +44,7 @@ test('course data and scripts parse with 25 well-formed independent missions',()
     if(task.kind==='number'){assert.ok(task.fields.every(x=>x[3]>0));}
     if(task.kind==='decision'){assert.ok(task.steps.every(s=>s.correct>=0 && s.correct<s.options.length));}
   }
+  assert.ok(html.indexOf('small-meta-data.js')<html.indexOf('mission-lab-data.js'));
   assert.ok(html.indexOf('mission-lab-data.js')<html.indexOf('mission-lab.js'));
   assert.ok(read('index.html').includes('href="mission-lab.html"'));
   assert.ok(read('synthesis-course.html').includes('id="missionLabLink"'));
@@ -56,7 +58,7 @@ test('navigation, selection and feedback affect actual progress',()=>{
   assert.equal(d.getElementById('doneCount').textContent,'1');
   assert.match(d.getElementById('feedback').textContent,/Mission logged/);
   go(d,5);
-  for(const [name,value] of [['rr','.60'],['arr','.06'],['nnt','17']]){
+  for(const [name,value] of [['chopra','.028026'],['obrien','.044031'],['pooled','.029444']]){
     change(w,d.getElementById('number-'+name),value,'input');
   }
   action(d,'check');assert.equal(d.getElementById('doneCount').textContent,'2');
@@ -69,7 +71,7 @@ test('live forest plot and Bayesian slider recalculate on interaction',()=>{
   const dom=mount(),w=dom.window,d=w.document;
   go(d,7);
   const before=d.getElementById('poolViz').textContent;
-  const checkbox=d.querySelector('[data-pool="C"]');
+  const checkbox=d.querySelector('[data-pool="F"]');
   checkbox.checked=false;checkbox.dispatchEvent(new w.Event('change',{bubbles:true}));
   const after=d.getElementById('poolViz').textContent;
   assert.notEqual(after,before);

@@ -2,6 +2,14 @@
 
 **Status:** Companion resource for the 25-module *Evidence Reversal* flagship course. Exercises are **English-language v1** and are educational simulations, **not** clinical decision-support or evidence that a real publication is erroneous.
 
+## New real-data practical after every module
+
+The flagship course now embeds an extra, short real-dataset exercise slide immediately following each module's objectives. Students interact with original Hine (six myocardial-infarction lidocaine trials) and Berkey (five periodontal trials with two dependent outcomes) examples. This complements, **rather than silently converting**, the Mission Lab's fictional process/decision scenarios.
+
+For a 15-minute real-data workshop, ask learners to (1) identify the actual numerator, denominator and estimand, (2) predict the expected direction, (3) calculate the pooled result/try one sensitivity analysis, (4) reproduce the result using the source R snippet, then (5) list one limitation not resolved by the published table.
+
+Data lineage, exact R reference outputs, conditional method equivalence and translation status are in [REAL_DATA_PROVENANCE.md](REAL_DATA_PROVENANCE.md). The newly authored practice prompts are translated across the 12 course languages, **but specialist/native-speaker sign-off is still outstanding**. Do not use practice scores as accreditation.
+
 ## Learning design
 
 The original flagship course has slides, quizzes, modelling tools, progression and spaced repetition. The Mission Lab is deliberately different: learners have to **make reproducible decisions**, carry out arithmetic, alter assumptions, reconcile disagreements and explain what would change a claim.

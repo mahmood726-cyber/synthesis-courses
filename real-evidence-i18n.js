@@ -1,0 +1,165 @@
+/* Human-readable practice labels and compact task prompts.
+ * Translation drafts are under automated structural QA; subject-matter/native-speaker
+ * review is still required before calling any new language version validated.
+ * Scientific numbers and attribution are invariant across locales.
+ */
+(function (global) {
+  'use strict';
+  const en={
+    common:{
+      badge:'REAL R DATA · 5–6 STUDIES',title:'The three-minute evidence challenge',
+      subtitle:'Small published datasets · independently checkable calculations',
+      data:'Original study-level observations',task:'Your lesson challenge',module:'Module',
+      original:'R source and provenance',check:'Check my answer',hint:'Show a clue',reset:'Try again',
+      correct:'Correct — now test the assumptions',retry:'Not yet — check the data and try again',
+      enter:'Enter a number (use a decimal point)',yes:'Supported',no:'Not supported',
+      noteH:'Mortality during treatment; RD = lidocaine risk minus control risk. This is historical evidence, not a current treatment recommendation.',
+      noteB:'Five trials contribute two related outcomes each; ten rows are not ten independent trials.',
+      notClinical:'Historical teaching records; do not infer current treatment benefit/harm without an updated review and assessment of bias.',
+      source:'View official R dataset',model:'Reproduce in R',study:'Study',treatment:'Lidocaine deaths / total',
+      control:'Control deaths / total',difference:'RD (percentage points)',row:'Trials',pd:'Probing depth MD',al:'Attachment level MD',cov:'Covariance',
+      prior:'Prior standard deviation',posterior:'Posterior RD',interval:'95% credible interval',all:'All studies',
+      tryOne:'Toggle at least one study and then restore all six.',verified:'Reference result reproduced using the documented estimand.',
+      hintRD:'Divide deaths by the total in each group, then subtract control risk from lidocaine risk.',
+      hintPool:'Weight each study by 1 / sampling variance. The pooled result is a proportion, not a percent.',
+      hintBinary:'Use the source tables to separate what the numbers show from what needs protocols, full texts and additional evidence.',
+      hintCount:'Count independent trials, not the number of reported outcomes or rows.',
+      hintPrior:'A sceptical narrow prior pulls towards RD = 0; a wider prior lets the likelihood contribute more.',
+      hintToggle:'Removing one trial changes the weights and can change the pooled estimate; restoration protects the full-data reference.',
+      chart:'Live fixed-effect illustration',change:'Sensitivity explored; all six studies restored',wrongToggle:'Explore at least one omission and restore every study to complete this challenge.',
+      uncertainty:'Statistical replication is not a risk-of-bias, completeness or clinical-validity audit.',
+      pending:'Language copy is a draft pending independent specialist review.',
+      noComplete:'Complete the exercise to save local progress.',done:'✓ Completed locally'
+    },
+    prompts:[
+      'How many independent trials are included in the Hine lidocaine dataset?',
+      'For Chopra et al., calculate risk difference: (2/39) − (1/43). Enter a proportion.',
+      'A registered protocol is unnecessary because the data are included in an R package.',
+      'Assessing search completeness requires dated database and trial-register searches.',
+      'A screening/PRISMA flow needs individual eligibility decisions beyond this numerical table.',
+      "For O'Brien et al., calculate risk difference: (11/154) − (4/146). Enter a proportion.",
+      'Randomisation quality and allocation concealment can be established from death counts alone.',
+      'Calculate the inverse-variance pooled risk difference for all six Hine trials. Enter a proportion.',
+      'Calculate I² (%) from Q = 0.8597 across 6 studies: max(0, (Q−5)/Q) × 100.',
+      'With only six studies, funnel-asymmetry tests are generally unreliable.',
+      'The pooled estimate alone automatically establishes high GRADE certainty.',
+      'A living review needs dated, versioned surveillance rather than only a static R file.',
+      'Randomised mortality counts provide sensitivity and specificity for a diagnostic test.',
+      'Move the prior SD slider. Find a posterior credible interval above zero and observe prior sensitivity.',
+      'A two-treatment lidocaine/control dataset can estimate rankings across three or more drugs.',
+      'Individual-patient treatment interactions cannot be identified from these aggregate totals alone.',
+      'A dose–response relation is identifiable even without dose categories or exposure information.',
+      'Toggle any one real lidocaine trial, inspect the pooled RD and then restore all six.',
+      'Treatment-effect equity by age and sex can be established from totals without covariate data.',
+      'The presence of this dataset in R proves that AI screening recovered every eligible trial.',
+      'Event-count tables include the qualitative interview material needed for meta-ethnography.',
+      'How many independent Berkey trials produced the ten correlated outcome rows?',
+      'A reproducible R result, by itself, proves screening and extraction decisions were correct.',
+      'Calculate the five-trial Berkey probing-depth (PD) inverse-variance pooled mean difference.',
+      'Even a replicated pooled effect requires bias, population and context checks before clinical application.'
+    ]
+  };
+  const langs={
+    es:{common:{badge:'DATOS REALES DE R · 5–6 ESTUDIOS',title:'El reto de evidencia de tres minutos',subtitle:'Conjuntos publicados pequeños · cálculos verificables',data:'Datos originales por estudio',task:'Ejercicio de esta lección',module:'Módulo',original:'Fuente y procedencia en R',check:'Comprobar respuesta',hint:'Mostrar pista',reset:'Volver a intentar',correct:'Correcto — examine ahora los supuestos',retry:'Revise los datos e inténtelo de nuevo',enter:'Introduzca un número con punto decimal',yes:'Compatible con los datos',no:'No compatible con los datos',model:'Reproducir en R',source:'Consultar datos oficiales de R',study:'Estudio',treatment:'Muertes / total con lidocaína',control:'Muertes / total de control',difference:'Diferencia de riesgos (puntos porcentuales)',row:'Ensayos',pd:'DM profundidad de sondaje',al:'DM nivel de inserción',cov:'Covarianza',prior:'Desviación estándar previa',posterior:'DR posterior',interval:'Intervalo creíble del 95 %',all:'Todos los estudios',done:'✓ Completado localmente',pending:'Traducción pendiente de revisión metodológica independiente.'},
+    prompts:[
+    '¿Cuántos ensayos independientes contiene el conjunto de datos de Hine?',
+    'Para Chopra y cols., calcule la diferencia de riesgos: (2/39) − (1/43). Indique la proporción.',
+    'No se necesita un protocolo registrado porque los datos están en un paquete de R.',
+    'Para evaluar si la búsqueda es completa se necesitan búsquedas fechadas en bases de datos y registros de ensayos.',
+    'El diagrama PRISMA requiere decisiones de elegibilidad individuales que no aparecen en esta tabla.',
+    'Para O’Brien y cols., calcule la diferencia de riesgos: (11/154) − (4/146). Indique la proporción.',
+    'Los recuentos de fallecimientos bastan para establecer la calidad de la aleatorización y la ocultación de la asignación.',
+    'Calcule la diferencia de riesgos combinada por varianza inversa de los seis ensayos de Hine. Indique la proporción.',
+    'Calcule I² (%) con Q = 0,8597 para seis estudios: máx(0, (Q−5)/Q) × 100.',
+    'Con solo seis estudios, las pruebas de asimetría del embudo suelen ser poco fiables.',
+    'La estimación combinada por sí sola establece automáticamente una certeza GRADE alta.',
+    'Una revisión viva necesita vigilancia fechada y versiones documentadas, no solo un archivo de R.',
+    'Los recuentos de mortalidad por grupo proporcionan sensibilidad y especificidad de una prueba diagnóstica.',
+    'Mueva la desviación estándar previa. Busque un intervalo creíble posterior por encima de cero y observe la sensibilidad a la previa.',
+    'Los datos de lidocaína frente a control permiten clasificar tres o más fármacos.',
+    'Las interacciones del tratamiento a nivel individual no se identifican solo con estos totales agregados.',
+    'Puede identificarse una relación dosis–respuesta sin categorías de dosis ni información de exposición.',
+    'Excluya temporalmente un ensayo de lidocaína, compruebe la DR combinada y después restaure los seis.',
+    'Los totales permiten evaluar la equidad del efecto por edad y sexo sin datos de covariables.',
+    'Estar en un paquete de R demuestra que la selección mediante IA recuperó todos los ensayos pertinentes.',
+    'Las tablas de eventos incluyen entrevistas cualitativas suficientes para una metaetnografía.',
+    '¿Cuántos ensayos Berkey independientes originaron diez filas de resultados correlacionados?',
+    'Un resultado reproducible en R demuestra por sí mismo que la selección y extracción fueron correctas.',
+    'Calcule la diferencia media de profundidad de sondaje de Berkey combinando cinco ensayos por varianza inversa.',
+    'Incluso un efecto combinado reproducido requiere evaluar sesgo, población y contexto antes de su aplicación clínica.']},
+    fr:{common:{badge:'VRAIES DONNÉES R · 5–6 ÉTUDES',title:'Défi de synthèse en trois minutes',subtitle:'Petits jeux de données publiés · calculs vérifiables',data:'Données originales par étude',task:'Exercice de la leçon',module:'Module',original:'Source et traçabilité R',check:'Vérifier ma réponse',hint:'Voir un indice',reset:'Recommencer',correct:'Correct — examinons les hypothèses',retry:'Revoyez les données et réessayez',enter:'Entrez un nombre avec un point décimal',yes:'Étayé',no:'Non étayé',model:'Reproduire dans R',source:'Consulter les données R',study:'Étude',treatment:'Décès / total sous lidocaïne',control:'Décès / total sous contrôle',difference:'Différence de risques (points de %)',row:'Essais',pd:'DM profondeur de sondage',al:'DM niveau d’attache',cov:'Covariance',prior:'Écart-type a priori',posterior:'DR a posteriori',interval:'Intervalle de crédibilité à 95 %',all:'Toutes les études',done:'✓ Enregistré localement',pending:'Traduction en attente de validation indépendante.'},
+    prompts:[
+    'Combien d’essais indépendants compte le jeu de données Hine ?',
+    'Pour Chopra et coll., calculez la différence de risques : (2/39) − (1/43). Donnez une proportion.',
+    'Un protocole enregistré est inutile puisque les données sont dans un paquet R.',
+    'Vérifier l’exhaustivité de la recherche nécessite des recherches datées dans les bases et registres.',
+    'Un diagramme PRISMA exige des décisions individuelles d’éligibilité absentes de ce tableau.',
+    'Pour O’Brien et coll., calculez la différence de risques : (11/154) − (4/146). Donnez une proportion.',
+    'Les seuls décès permettent d’établir la qualité de la randomisation et la dissimulation de l’attribution.',
+    'Calculez la différence de risques combinée par variance inverse des six essais Hine. Donnez une proportion.',
+    'Calculez I² (%) avec Q = 0,8597 pour six études : max(0, (Q−5)/Q) × 100.',
+    'Avec seulement six études, les tests d’asymétrie du graphique en entonnoir sont généralement peu fiables.',
+    'L’estimation combinée établit à elle seule une certitude GRADE élevée.',
+    'Une revue vivante nécessite une veille datée et versionnée, et pas seulement un fichier R.',
+    'Des décès par bras randomisé permettent de calculer la sensibilité et la spécificité d’un test.',
+    'Faites varier l’écart-type a priori. Obtenez un intervalle crédible au-dessus de zéro et observez l’effet du prior.',
+    'Une comparaison lidocaïne/témoin permet de classer trois médicaments ou plus.',
+    'Les interactions au niveau des patients ne peuvent être identifiées à partir de ces totaux agrégés seuls.',
+    'Une relation dose-réponse peut être déterminée sans catégories de dose ni données d’exposition.',
+    'Écartez provisoirement un essai, observez la DR combinée, puis rétablissez les six.',
+    'Les totaux suffisent pour étudier l’équité selon l’âge et le sexe sans covariables.',
+    'La présence dans R prouve que le tri par IA a retrouvé tous les essais éligibles.',
+    'Les tableaux de décès contiennent les entretiens qualitatifs nécessaires à la méta-ethnographie.',
+    'Combien d’essais indépendants Berkey ont produit les dix lignes de résultats corrélés ?',
+    'Un résultat reproductible dans R suffit à prouver la validité du tri et de l’extraction.',
+    'Calculez la différence moyenne combinée par variance inverse pour la profondeur de sondage dans cinq essais Berkey.',
+    'Même un effet reproduit nécessite d’examiner biais, population et contexte avant toute application clinique.']},
+    de:{common:{badge:'ECHTE R-DATEN · 5–6 STUDIEN',title:'Drei-Minuten-Evidenzaufgabe',subtitle:'Kleine publizierte Datensätze · nachprüfbare Berechnungen',data:'Originaldaten je Studie',task:'Aufgabe dieser Lektion',module:'Modul',original:'R-Quelle und Datenherkunft',check:'Antwort prüfen',hint:'Hinweis anzeigen',reset:'Erneut versuchen',correct:'Richtig — jetzt die Annahmen prüfen',retry:'Daten prüfen und erneut versuchen',enter:'Zahl mit Dezimalpunkt eingeben',yes:'Belegt',no:'Nicht belegt',model:'In R reproduzieren',source:'Offizielle R-Daten ansehen',study:'Studie',treatment:'Todesfälle / Gesamtzahl Lidocain',control:'Todesfälle / Gesamtzahl Kontrolle',difference:'Risikodifferenz (Prozentpunkte)',row:'Studien',pd:'MD Sondierungstiefe',al:'MD Attachmentlevel',cov:'Kovarianz',prior:'Prior-Standardabweichung',posterior:'Posterior-RD',interval:'95-%-Glaubwürdigkeitsintervall',all:'Alle Studien',done:'✓ Lokal abgeschlossen',pending:'Übersetzung noch nicht unabhängig fachlich geprüft.'},
+    prompts:[
+    'Wie viele unabhängige Studien enthält der Hine-Datensatz?',
+    'Berechnen Sie für Chopra et al. die Risikodifferenz: (2/39) − (1/43). Geben Sie einen Anteil an.',
+    'Ein registriertes Protokoll ist unnötig, da der Datensatz in einem R-Paket vorliegt.',
+    'Für die Vollständigkeit der Suche sind datierte Datenbank- und Registerrecherchen erforderlich.',
+    'Ein PRISMA-Flussdiagramm braucht individuelle Ein- und Ausschlussentscheidungen, die hier fehlen.',
+    'Berechnen Sie für O’Brien et al. die Risikodifferenz: (11/154) − (4/146). Geben Sie einen Anteil an.',
+    'Todesfallzahlen allein belegen die Qualität der Randomisierung und Zuteilungsverdeckung.',
+    'Berechnen Sie die inverse-varianzgewichtete gepoolte Risikodifferenz aller sechs Hine-Studien.',
+    'Berechnen Sie I² (%) mit Q = 0,8597 und sechs Studien: max(0, (Q−5)/Q) × 100.',
+    'Bei nur sechs Studien sind Funnel-Asymmetrietests im Allgemeinen unzuverlässig.',
+    'Allein der gepoolte Schätzer belegt automatisch eine hohe GRADE-Sicherheit.',
+    'Ein Living Review braucht datierte, versionierte Recherchen und nicht nur eine R-Datei.',
+    'Todesfälle nach Randomisierungsarm liefern Sensitivität und Spezifität eines Diagnosetests.',
+    'Ändern Sie die Prior-Standardabweichung und finden Sie ein Posterior-Intervall oberhalb von null.',
+    'Ein Zweiarm-Datensatz Lidocain/Kontrolle ermöglicht eine Rangfolge von drei oder mehr Arzneien.',
+    'Individuelle Therapieinteraktionen lassen sich aus diesen aggregierten Zahlen allein nicht bestimmen.',
+    'Ohne Dosisgruppen oder Expositionswerte lässt sich eine Dosis-Wirkungs-Beziehung bestimmen.',
+    'Entfernen Sie testweise eine Lidocain-Studie, beobachten Sie die gepoolte RD und stellen Sie alle wieder her.',
+    'Die Gesamtzahlen reichen ohne Kovariaten aus, um Effekte nach Alter und Geschlecht zu untersuchen.',
+    'Ein R-Datensatz beweist, dass KI-Screening alle geeigneten Studien gefunden hat.',
+    'Ereignistabellen enthalten die Interviews für eine qualitative Metaethnografie.',
+    'Wie viele unabhängige Berkey-Studien lieferten zehn korrelierte Ergebniszeilen?',
+    'Reproduzierbarer R-Code beweist allein, dass Studienauswahl und Extraktion korrekt waren.',
+    'Berechnen Sie die inverse-varianzgewichtete mittlere Differenz der Sondierungstiefe aus fünf Berkey-Studien.',
+    'Auch ein replizierter Effekt erfordert Bias-, Populations- und Kontextprüfung vor klinischer Anwendung.']}
+  };
+  // Other language interfaces are translated for essential controls; prompts fall back
+  // visibly to English rather than silently pretending they were validated.
+  const compact={
+    it:['DATI REALI R · 5–6 STUDI','Esercizio sui dati reali','Dati originali','Esercizio della lezione','Modulo','Verifica','Suggerimento','Riprova','Corretto','Rivedi la risposta','Supportato','Non supportato','Riproduci in R','Consulta i dati R','Traduzione degli esercizi in attesa di revisione specialistica.'],
+    pt:['DADOS REAIS R · 5–6 ESTUDOS','Desafio com dados reais','Dados originais','Exercício desta lição','Módulo','Verificar','Dica','Tentar novamente','Correto','Reveja a resposta','Sustentado','Não sustentado','Reproduzir em R','Ver os dados R','Tradução dos exercícios pendente de revisão especializada.'],
+    ru:['РЕАЛЬНЫЕ ДАННЫЕ R · 5–6 ИССЛЕДОВАНИЙ','Задание по реальным данным','Исходные данные','Задание урока','Модуль','Проверить','Подсказка','Повторить','Верно','Проверьте ответ','Подтверждается','Не подтверждается','Воспроизвести в R','Источник данных R','Перевод заданий ожидает независимой экспертной проверки.'],
+    ar:['بيانات حقيقية من R · ٥–٦ دراسات','تحدٍّ لبيانات الأدلة الحقيقية','بيانات الدراسات الأصلية','تمرين الدرس','الوحدة','تحقق من الإجابة','تلميح','أعد المحاولة','صحيح','راجع الإجابة','تدعمه البيانات','لا تدعمه البيانات','إعادة التحليل في R','مصدر بيانات R','ترجمة التمارين بانتظار مراجعة متخصصة مستقلة.'],
+    hi:['वास्तविक R डेटा · ५–६ अध्ययन','वास्तविक प्रमाण अभ्यास','मूल अध्ययन डेटा','पाठ का अभ्यास','मॉड्यूल','उत्तर जाँचें','संकेत','फिर प्रयास करें','सही','उत्तर जाँचकर फिर प्रयास करें','समर्थित','समर्थित नहीं','R में पुनः विश्लेषण','आधिकारिक R स्रोत','अभ्यास अनुवाद स्वतंत्र विशेषज्ञ समीक्षा के लिए लंबित है।'],
+    zh:['真实 R 数据 · 5–6 项研究','真实证据小练习','原始研究数据','本课练习','模块','检查答案','提示','重试','正确','请重新检查','有数据支持','数据不支持','在 R 中复现','查看 R 数据来源','练习译文仍需独立专业审核。'],
+    ja:['実際の R データ · 5～6 試験','実データで学ぶミニ演習','原著研究データ','レッスン演習','モジュール','回答を確認','ヒント','再挑戦','正解','もう一度確認','支持される','支持されない','R で再現','R の公式データ','設問の翻訳は専門家による確認前です。'],
+    ko:['실제 R 자료 · 연구 5~6편','실제 근거 미니 실습','원 연구 자료','이번 학습 실습','모듈','답안 확인','힌트','다시 시도','정답','답안을 다시 확인하세요','근거 있음','근거 없음','R에서 재현','공식 R 자료','문항 번역은 전문가 검토 전입니다.']
+  };
+  const keys=['badge','title','data','task','module','check','hint','reset','correct','retry','yes','no','model','source','pending'];
+  Object.entries(compact).forEach(([lang,arr])=>{
+    const o={};keys.forEach((key,i)=>{o[key]=arr[i];});
+    langs[lang]={common:o,prompts:null};
+  });
+  global.SYNTHESIS_REAL_I18N={en,langs,available:['en','es','fr','de','it','pt','ru','ar','hi','zh','ja','ko'],
+    get:function(lang){const own=langs[lang]||{};return {lang:langs[lang]?lang:'en',common:Object.assign({},en.common,own.common||{}),
+      prompts:own.prompts||en.prompts,promptTranslated:lang==='en'||!!own.prompts};}};
+})(typeof window!=='undefined'?window:globalThis);
