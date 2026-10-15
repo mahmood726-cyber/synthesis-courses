@@ -3281,6 +3281,9 @@
         </button>
       </div>
       <div class="sidebar-footer">
+        <a id="missionLabLink" href="mission-lab.html?module=0" class="dashboard-btn" style="text-decoration:none;background:rgba(92,224,208,.14);border:1px solid rgba(92,224,208,.45);color:#d8fff5;display:flex;margin-bottom:.5rem;">
+          <span>🧪</span><span>Practice this module</span><span style="margin-left:auto;">↗</span>
+        </a>
         <button class="dashboard-btn" onclick="openDashboard()">
           <span>📊</span>
           <span>Progress Dashboard</span>
@@ -3383,6 +3386,7 @@
           Module <span id="currentModuleNum">0</span>: <span id="currentModuleName">The Opening</span>
         </div>
         <div class="header-actions">
+          <a id="missionHeaderLink" class="btn" href="mission-lab.html?module=0" style="display:inline-flex;align-items:center;text-decoration:none;background:rgba(34,106,108,.25);border:1px solid #65c9bd;color:#e1fff9;font-weight:700;" aria-label="Practice activities for this module">🧪 Practice</a>
           <button class="btn" onclick="toggleToolsPanel()">Tools</button>
           <button class="btn primary" onclick="nextModule()">Next Module</button>
         </div>
@@ -13877,6 +13881,11 @@
       // Update header
       document.getElementById('currentModuleNum').textContent = moduleId;
       document.getElementById('currentModuleName').textContent = modules[moduleId].title;
+      // Keep the new hands-on mission linked to the module currently being studied.
+      ['missionLabLink', 'missionHeaderLink'].forEach(function(id) {
+        const link = document.getElementById(id);
+        if (link) link.href = 'mission-lab.html?module=' + moduleId;
+      });
 
       // Update live story data panel
       updateStoryPanel(moduleId);
@@ -16706,9 +16715,16 @@
         }
       } catch(e) {}
 
-      // Load saved progress
+      // Explicit deep links from Mission Lab take priority over saved slide progress.
+      // Validated IDs only; existing users without a deep link retain their prior progress.
+      const requestedModule = new URLSearchParams(window.location.search).get('module');
+      const deepLinkModule = requestedModule !== null && /^\d{1,2}$/.test(requestedModule)
+        ? Number(requestedModule) : null;
       const savedProgress = loadProgress();
-      if (savedProgress) {
+      if (deepLinkModule !== null && deepLinkModule < modules.length) {
+        goToModule(deepLinkModule);
+        saveProgress();
+      } else if (savedProgress) {
         goToModule(savedProgress.module);
         if (savedProgress.slide > 0) {
           setTimeout(() => goToSlide(savedProgress.slide), 100);

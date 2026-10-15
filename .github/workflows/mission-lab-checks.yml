@@ -1,0 +1,41 @@
+name: Synthesis Mission Lab Checks
+on:
+  push:
+    branches:
+      - main
+      - feature/interactive-mission-lab-oct2026
+    paths:
+      - 'mission-lab*'
+      - 'synthesis-course.html'
+      - 'index.html'
+      - 'tests/mission-lab.test.cjs'
+      - '.github/workflows/mission-lab-checks.yml'
+  pull_request:
+    paths:
+      - 'mission-lab*'
+      - 'synthesis-course.html'
+      - 'index.html'
+      - 'tests/mission-lab.test.cjs'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test-mission-lab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install DOM test dependency
+        run: npm install --no-save --package-lock=false jsdom@26.1.0
+      - name: Check JavaScript syntax
+        run: |
+          node --check mission-lab-data.js
+          node --check mission-lab.js
+          node --check tests/mission-lab.test.cjs
+      - name: Run interactive learning tests
+        run: node --test tests/mission-lab.test.cjs
