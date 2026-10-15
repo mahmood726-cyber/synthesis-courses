@@ -99,10 +99,10 @@
   function drawHine(){
     const result=D.metaRD(Array.from(allIds));
     if(!result){$('livePlot').innerHTML='<p class="field-note">'+escapeHTML(T.tryOne)+'</p>';return;}
-    const min=-.09,max=.15,x=y=>112+(Math.max(min,Math.min(max,y))-min)/(max-min)*375;
+    const min=-.14,max=.17,x=y=>112+(Math.max(min,Math.min(max,y))-min)/(max-min)*375;
     const height=95+(result.effects.length+1)*30;
     let svg='<svg xmlns="http://www.w3.org/2000/svg" role="img" viewBox="0 0 540 '+height+'"><title>Hine 1989 real risk differences and a live inverse-variance teaching estimate</title>';
-    [-.05,0,.05,.10,.15].forEach(v=>{
+    [-.10,-.05,0,.05,.10,.15].forEach(v=>{
       const X=x(v);
       svg+='<line x1="'+X+'" x2="'+X+'" y1="11" y2="'+(height-28)+'" class="'+(v===0?'zero':'')+'"/>'+
         '<text x="'+X+'" y="'+(height-8)+'" text-anchor="middle">'+(v*100).toFixed(0)+'%</text>';
@@ -157,19 +157,19 @@
       $('taskControls').innerHTML='<p class="field-note">'+escapeHTML(T.tryOne)+'</p>'+
         D.hine.studies.map(s=>'<label class="selectable"><input data-id="'+s.id+'" type="checkbox" checked/> '+
           escapeHTML(s.study)+' — '+s.ai+'/'+s.n1i+' vs '+s.ci+'/'+s.n2i+'</label>').join('');
-      $('taskControls').addEventListener('change',e=>{
+      $('taskControls').onchange=e=>{
         const input=e.target.closest('input[data-id]');if(!input)return;
         const id=Number(input.dataset.id);if(input.checked)allIds.add(id);else{allIds.delete(id);hadOmission=true;}
         drawHine();
-      });drawHine();
+      };drawHine();
     } else {
       $('taskControls').innerHTML='<div role="group" aria-label="Choose whether the assertion is supported">'+
         '<button type="button" class="option" data-choice="1" aria-pressed="false"><span class="letter">A</span>'+escapeHTML(T.yes)+'</button>'+
         '<button type="button" class="option" data-choice="0" aria-pressed="false"><span class="letter">B</span>'+escapeHTML(T.no)+'</button></div>';
-      $('taskControls').addEventListener('click',e=>{
+      $('taskControls').onclick=e=>{
         const b=e.target.closest('button[data-choice]');if(!b)return;selected=b.dataset.choice==='1';
         $('taskControls').querySelectorAll('[data-choice]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));
-      });
+      };
     }
   }
   function explainNumeric(m) {
