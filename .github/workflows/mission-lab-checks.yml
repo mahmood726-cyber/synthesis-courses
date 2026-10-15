@@ -6,11 +6,15 @@ on:
       - feature/interactive-mission-lab-oct2026
       - feature/real-small-evidence-lessons-20261015
       - feature/evidence-story-lesson-integration-20261015
+      - feature/magnesium-evidence-reversal-20261015
     paths:
       - 'mission-lab*'
       - 'real-evidence*'
       - 'evidence-story*'
       - 'lesson-story*'
+      - 'magnesium-*'
+      - 'tests/magnesium-reversal.test.cjs'
+      - 'scripts/verify_magnesium_reversal.R'
       - 'tests/evidence-story-lab.test.cjs'
       - 'tests/story-checkpoints.test.cjs'
       - 'small-meta-data.js'
@@ -27,6 +31,9 @@ on:
       - 'real-evidence*'
       - 'evidence-story*'
       - 'lesson-story*'
+      - 'magnesium-*'
+      - 'tests/magnesium-reversal.test.cjs'
+      - 'scripts/verify_magnesium_reversal.R'
       - 'tests/evidence-story-lab.test.cjs'
       - 'tests/story-checkpoints.test.cjs'
       - 'small-meta-data.js'
@@ -67,6 +74,23 @@ jobs:
           node --check lesson-story-checkpoints.js
           node --check tests/evidence-story-lab.test.cjs
           node --check tests/story-checkpoints.test.cjs
+          node --check magnesium-reversal-data.js
+          node --check magnesium-reversal-ui.js
+          node --check magnesium-lesson-integration.js
+          node --check tests/magnesium-reversal.test.cjs
           node --check tests/real-evidence-lab.test.cjs
       - name: Run interactive learning tests
-        run: node --test tests/mission-lab.test.cjs tests/real-evidence-lab.test.cjs tests/evidence-story-lab.test.cjs tests/story-checkpoints.test.cjs
+        run: node --test tests/mission-lab.test.cjs tests/real-evidence-lab.test.cjs tests/evidence-story-lab.test.cjs tests/story-checkpoints.test.cjs tests/magnesium-reversal.test.cjs
+
+  verify-magnesium-r:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+      - name: Install verification packages
+        run: Rscript -e 'install.packages(c("metadat", "metafor"), repos="https://cloud.r-project.org")'
+      - name: Reproduce archival magnesium Peto benchmarks
+        run: Rscript scripts/verify_magnesium_reversal.R

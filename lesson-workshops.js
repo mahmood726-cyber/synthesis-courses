@@ -80,6 +80,10 @@
     storyScript.src='lesson-story-checkpoints.js';
     storyScript.dataset.storyCheckpoints='1';
     document.head.appendChild(storyScript);
+    const magnesiumScript=document.createElement('script');
+    magnesiumScript.src='magnesium-lesson-integration.js';
+    magnesiumScript.dataset.magnesiumCase='1';
+    document.head.appendChild(magnesiumScript);
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);
   else init();
