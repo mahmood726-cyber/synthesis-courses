@@ -210,7 +210,7 @@
     $('sourceLink').textContent=T.source+' ↗';$('sourceLink').href=dataset.sourceUrl;
     $('verify').textContent=T.check;$('hint').textContent=T.hint;$('reset').textContent=T.reset;
     $('reproLabel').textContent=T.model;$('rCode').textContent=isBerkey?rBerkey:rHine;
-    $('disclaimer').textContent=T.notClinical+(loc.promptTranslated?'':' '+T.pending);
+    $('disclaimer').textContent=T.notClinical+(lang==='en'?'':' '+T.pending);
     $('courseBack').href='synthesis-course'+(lang==='en'?'':'-'+lang)+'.html?module='+mod;
     $('miniFull').href='real-evidence-lab.html?module='+mod+'&lang='+lang;
     if(!loc.promptTranslated){
