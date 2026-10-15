@@ -14,12 +14,10 @@
     return;
   }
   const labels = {multi:'Spot the evidence',match:'Match the clues',order:'Arrange the workflow',triage:'Two-reviewer game',number:'Calculate the answer',pool:'Live forest-plot lab',bayes:'Prior experiment',dossier:'Portfolio builder',decision:'Editorial choices'};
-  const poolTrials = [
-    {id:'A',name:'Trial A',a:20,n1:200,c:35,n0:200},
-    {id:'B',name:'Trial B',a:18,n1:180,c:30,n0:180},
-    {id:'C',name:'Trial C',a:300,n1:1000,c:150,n0:1000},
-    {id:'D',name:'Trial D',a:12,n1:100,c:20,n0:100}
-  ];
+  const realSource = window.SYNTHESIS_REAL_DATA;
+  const poolTrials = realSource.hine.studies.map(function(s,i){
+    return {id:String.fromCharCode(65+i),name:s.study,a:s.ai,n1:s.n1i,c:s.ci,n0:s.n2i,sourceId:s.id};
+  });
   const valid = ['Include','Exclude','Unclear'];
   let current = 0;
   let work;
@@ -47,7 +45,7 @@
   function mkWork(t) {
     return {selected:new Set(),answer:-1,order:(t.items || []).map(function (row) {return row[0];}),
       matches:{},numbers:{},triage:[{},{},{}],triagePhase:0,
-      pool:{A:true,B:true,C:true,D:true},poolTouched:false,prior:0.1,priorMoved:false,
+      pool:{A:true,B:true,C:true,D:true,E:true,F:true},poolTouched:false,prior:0.1,priorMoved:false,
       decisionStep:0,failures:0,hint:false,checks:{},notes:Object.assign({},saved.notes[t.id] || {})};
   }
   function recordFor(id) {return saved.records[String(id)] || {};}
@@ -172,50 +170,45 @@
     return html;
   }
   function poolActivity(t) {
-    return '<h3 class="task-header">'+esc(t.prompt)+'</h3><p class="task-intro">Check the studies you want included in an illustrative sensitivity calculation. Unchecking does not remove anything from the original evidence.</p>'+
+    return '<h3 class="task-header">'+esc(t.prompt)+'</h3><p class="task-intro">These six published trials can be temporarily omitted for a sensitivity analysis. The full published dataset remains the reference. The outcome is mortality during assigned treatment.</p>'+
       '<div class="pool-studies">'+poolTrials.map(function(s){
-        return '<div class="pool-item"><label><input type="checkbox" data-pool="'+s.id+'" '+(work.pool[s.id]?'checked':'')+'><strong>'+s.name+'</strong> — '+s.a+'/'+s.n1+' events vs '+s.c+'/'+s.n0+'</label></div>';
-      }).join('')+'</div><div id="poolViz" aria-live="polite">'+poolDisplay()+'</div><p class="formula">Teaching method: fixed-effect inverse-variance pooling of log risk ratios with normal 95% confidence intervals. All counts positive; not a clinical meta-analysis. Different-study effects may invalidate this summary.</p>'+
+        return '<div class="pool-item"><label><input type="checkbox" data-pool="'+s.id+'" '+(work.pool[s.id]?'checked':'')+'><strong>'+esc(s.name)+'</strong> — '+s.a+'/'+s.n1+' deaths vs '+s.c+'/'+s.n0+'</label></div>';
+      }).join('')+'</div><div id="poolViz" aria-live="polite">'+poolDisplay()+'</div>'+
+      '<p class="formula">Real source: <a href="https://wviechtb.github.io/metadat/reference/dat.hine1989.html" target="_blank" rel="noopener">R metadat::dat.hine1989</a> (six trials). Teaching model: common-effect inverse-variance pooling of risk differences (lidocaine minus control). This happens to agree with the published metafor REML example because estimated tau² = 0 here. Neither replication nor leaving out a trial establishes a current treatment recommendation.</p>'+
       '<h3 class="task-header">Editorial judgement</h3>'+choiceButtons(t.options,'answer')+checkAction();
   }
   function computePool() {
-    const included=poolTrials.filter(function(s){return work.pool[s.id];}).map(function(s){
-      const log=Math.log((s.a/s.n1)/(s.c/s.n0));
-      const variance=1/s.a - 1/s.n1 + 1/s.c - 1/s.n0;
-      return Object.assign({},s,{log:log,se:Math.sqrt(variance),weight:1/variance});
-    });
-    if (!included.length) return {included:[],pooled:null};
-    const sumW=included.reduce(function(a,s){return a+s.weight;},0);
-    const mean=included.reduce(function(a,s){return a+s.weight*s.log;},0)/sumW;
-    const se=Math.sqrt(1/sumW);
-    const Q=included.reduce(function(a,s){return a+s.weight*Math.pow(s.log-mean,2);},0);
-    const df=included.length-1;
-    const I2=Q>0?Math.max(0,(Q-df)/Q*100):0;
-    return {included:included,pooled:{log:mean,se:se,rr:Math.exp(mean),lower:Math.exp(mean-1.96*se),upper:Math.exp(mean+1.96*se),I2:I2}};
+    const included=poolTrials.filter(function(s){return work.pool[s.id];});
+    if(included.length<2)return {included:[],pooled:null};
+    const ids=included.map(function(s){return s.sourceId;});
+    const result=realSource.metaRD(ids);
+    return {included:result.effects.map(function(e){return {name:e.study,rd:e.rd,se:e.se};}),
+      pooled:{rd:result.estimate,se:result.se,lower:result.lower,upper:result.upper,I2:result.I2,k:result.k}};
   }
   function poolDisplay() {
     const c=computePool();
-    if (!c.pooled) return '<p class="feedback try">Select at least one trial to calculate a result.</p>';
-    const p=c.pooled, pretty=function(n){return n.toFixed(2);};
-    const min=-1.6,max=1.5,x=function(v){return 170+(Math.max(min,Math.min(max,v))-min)/(max-min)*500;};
-    const ticks=[0.25,0.5,1,2,4];
+    if(!c.pooled)return '<p class="feedback try">Select at least two trials to calculate a result.</p>';
+    const p=c.pooled,pretty=function(n){return (100*n).toFixed(2);};
+    const min=-0.15,max=0.18,x=function(v){return 170+(Math.max(min,Math.min(max,v))-min)/(max-min)*500;};
+    const ticks=[-0.1,-0.05,0,0.05,0.1,0.15];
     const height=90+(c.included.length+1)*38;
-    let svg='<svg role="img" viewBox="0 0 710 '+height+'" xmlns="http://www.w3.org/2000/svg"><title>Study risk ratios with 95% confidence intervals</title>'+
-      '<desc>Horizontal logarithmic risk-ratio axis; the gold diamond is the teaching fixed-effect pooled estimate. Read numerical results below.</desc>';
-    ticks.forEach(function(t){const xx=x(Math.log(t));svg+='<line x1="'+xx+'" y1="18" x2="'+xx+'" y2="'+(height-35)+'" class="'+(t===1?'reference':'')+'" opacity="'+(t===1?1:.35)+'"></line><text x="'+xx+'" y="'+(height-12)+'" text-anchor="middle">'+t+'</text>';});
+    let svg='<svg role="img" viewBox="0 0 710 '+height+'" xmlns="http://www.w3.org/2000/svg"><title>Published Hine study risk differences with 95% confidence intervals</title>'+
+      '<desc>Horizontal risk difference axis in percentage points; positive means greater mortality in lidocaine arm. The gold diamond is the teaching pooled estimate.</desc>';
+    ticks.forEach(function(t){const xx=x(t);svg+='<line x1="'+xx+'" y1="18" x2="'+xx+'" y2="'+(height-35)+'" class="'+(t===0?'reference':'')+'" opacity="'+(t===0?1:0.35)+'"></line><text x="'+xx+'" y="'+(height-12)+'" text-anchor="middle">'+(t*100).toFixed(0)+'</text>';});
     c.included.forEach(function(s,i){
-      const y=36+i*38,lo=x(s.log-1.96*s.se),hi=x(s.log+1.96*s.se),dot=x(s.log);
-      svg+='<text x="8" y="'+(y+4)+'">'+esc(s.name)+'</text><line x1="'+lo+'" x2="'+hi+'" y1="'+y+'" y2="'+y+'" stroke="#5ce0d0" stroke-width="3"></line>'+
+      const y=36+i*38,lo=x(s.rd-1.959963984540054*s.se),hi=x(s.rd+1.959963984540054*s.se),dot=x(s.rd);
+      svg+='<text x="8" y="'+(y+4)+'">'+esc(s.name.replace(' et al.',''))+'</text>'+
+        '<line x1="'+lo+'" x2="'+hi+'" y1="'+y+'" y2="'+y+'" stroke="#5ce0d0" stroke-width="3"></line>'+
         '<line x1="'+lo+'" x2="'+lo+'" y1="'+(y-6)+'" y2="'+(y+6)+'" stroke="#5ce0d0"></line>'+
         '<line x1="'+hi+'" x2="'+hi+'" y1="'+(y-6)+'" y2="'+(y+6)+'" stroke="#5ce0d0"></line>'+
         '<rect x="'+(dot-5)+'" y="'+(y-5)+'" width="10" height="10" class="point"></rect>';
     });
     const y=36+c.included.length*38;
-    svg+='<text x="8" y="'+(y+4)+'">Pooled</text><polygon class="diamond" points="'+x(Math.log(p.lower))+','+y+' '+x(p.log)+','+(y-9)+' '+x(Math.log(p.upper))+','+y+' '+x(p.log)+','+(y+9)+'"></polygon>';
-    svg+='</svg>';
-    return '<div class="figure">'+svg+'</div><div class="pool-result"><div><strong>'+pretty(p.rr)+'</strong><span>Pooled RR</span></div>'+
-      '<div><strong>'+pretty(p.lower)+'–'+pretty(p.upper)+'</strong><span>95% CI</span></div>'+
-      '<div><strong>'+Math.round(p.I2)+'%</strong><span>Descriptive I²</span></div></div>';
+    svg+='<text x="8" y="'+(y+4)+'">Pooled</text><polygon class="diamond" points="'+x(p.lower)+','+y+' '+x(p.rd)+','+(y-9)+' '+x(p.upper)+','+y+' '+x(p.rd)+','+(y+9)+'"></polygon></svg>';
+    return '<div class="figure">'+svg+'</div><div class="pool-result">'+
+      '<div><strong>'+pretty(p.rd)+' pp</strong><span>Pooled risk difference</span></div>'+
+      '<div><strong>'+pretty(p.lower)+' to '+pretty(p.upper)+' pp</strong><span>95% CI</span></div>'+
+      '<div><strong>'+Math.round(p.I2)+'%</strong><span>Descriptive I²; '+p.k+' of six trials</span></div></div>';
   }
   function bayesMath() {
     const priorVar=work.prior*work.prior,likelihoodVar=0.15*0.15,postVar=1/(1/priorVar+1/likelihoodVar);
@@ -288,10 +281,10 @@
       else tryAgain('At least one calculation is out of range or missing. Tip: '+t.fields.map(function(f){return f[1]+' = '+f[4];}).join('; ')+'.');
     } else if (t.kind==='pool') {
       if (!work.poolTouched) return tryAgain('Change at least one study selection first, so you can see how the summary reacts.');
-      const goals=t.goal==='excludeC'? !work.pool.C && work.pool.A && work.pool.B && work.pool.D :
+      const goals=t.goal==='excludeF'? !work.pool.F && poolTrials.every(function(s){return s.id==='F'||work.pool[s.id];}) :
         poolTrials.every(function(s){return work.pool[s.id];});
       if (goals && work.answer===t.correct) complete(t,t.explain);
-      else tryAgain(t.goal==='excludeC'?'Exclude only Trial C for the demonstration, then select the transparent reporting decision.':'After exploring a removal, restore all studies and select the transparent reporting decision.');
+      else tryAgain(t.goal==='excludeF'?"Temporarily exclude only O'Brien et al. (Trial F) and select transparent reporting.":'After exploring a removal, restore all six studies and select transparent reporting.');
     } else if (t.kind==='bayes') {
       if (!work.priorMoved) return tryAgain('Move the prior slider and watch the posterior respond.');
       if (bayesMath().hi<0 && work.answer===t.correct) complete(t,t.explain);
@@ -492,21 +485,12 @@
   });
   // Validate the core worked examples before showing them. Throw a visible error on regression.
   const sanity = (function(){
-    const counts=(18/200)/(30/200);
-    const i2=(12-3)/12*100;
-    const diag=72/(72+18)*100;
-    const testPool=computePoolForAll();
-    return Math.abs(counts-0.6)<1e-12 && i2===75 && diag===80 &&
-      testPool && testPool.rr>1 && testPool.rr<2;
+    const r=realSource.metaRD(),published=realSource.hine.rReference;
+    return realSource.verify() && poolTrials.length===6 && r.k===6 &&
+      Math.abs(r.estimate-published.estimate)<0.00005 && r.I2===0 &&
+      poolTrials.every(function(t){return Number.isInteger(t.a)&&Number.isInteger(t.c);});
   })();
-  function computePoolForAll(){
-    const p=work;
-    work={pool:{A:true,B:true,C:true,D:true}};
-    const rr=computePool().pooled.rr;
-    work=p;
-    return {rr:rr};
-  }
-  if(!sanity) {
+    if(!sanity) {
     stage.innerHTML='<p role="alert">A numerical regression check failed. Exercises are temporarily unavailable; please report a bug.</p>';
   } else {
     const initial=Number(new URLSearchParams(location.search).get('module'));
