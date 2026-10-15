@@ -70,7 +70,7 @@
     $('meterFill').style.width = (100*done.length/missions.length)+'%';
     $('missionMeter').setAttribute('aria-valuenow',String(done.length));
   }
-  function chooseMission(id) {
+  function chooseMission(id, scrollToExercise) {
     if (!Number.isInteger(id) || id<0 || id>=missions.length) return;
     current=id;work=mkWork(missions[id]);
     try {
@@ -81,6 +81,13 @@
     refreshBoard();
     const title = $('challengeTitle');
     if (title) title.focus({preventScroll:true});
+    // Keep mobile and keyboard users oriented after selecting a challenge.
+    // Do not auto-scroll on initial page load.
+    if (scrollToExercise !== false) {
+      const target = $('challenge');
+      const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (target && typeof target.scrollIntoView === 'function') target.scrollIntoView({behavior:reduceMotion?'auto':'smooth',block:'start'});
+    }
   }
   function score(t) {
     return t.kind === 'dossier' ? 50 : Math.max(50,100 - 15*work.failures - (work.hint?10:0));
@@ -503,7 +510,7 @@
     stage.innerHTML='<p role="alert">A numerical regression check failed. Exercises are temporarily unavailable; please report a bug.</p>';
   } else {
     const initial=Number(new URLSearchParams(location.search).get('module'));
-    chooseMission(Number.isInteger(initial)&&initial>=0&&initial<25?initial:0);
+    chooseMission(Number.isInteger(initial)&&initial>=0&&initial<25?initial:0, false);
     refreshStats();
   }
 })();
