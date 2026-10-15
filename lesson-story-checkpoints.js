@@ -1,4 +1,4 @@
-/* Optional three-part evidence story. English pilot available from all 12 course routes.
+/* Optional four-part evidence story. English pilot available from all 12 course routes.
    Clinical numbers are archival subset demonstrations, not current recommendations.
    Qur'anic narratives are optional ethical reflections, not empirical estimators. */
 (function(){
@@ -21,6 +21,15 @@ const scenes={
     why:'A common-effect inverse-variance model gives approximately 0.405 without Madras and 0.659 with it. This cherry-picked six-row scenario has substantial heterogeneity and is not a clinical-effectiveness synthesis.',
     verse:'An-Naml 27:27',url:'https://quran.com/27/27',
     lens:'Sulayman indicates he will check a report from the hoopoe. This can inspire verification, but cannot supply a risk ratio or determine vaccine effectiveness.'
+  },
+  9:{
+    title:'The funnel plot on trial',scene:'The investigator sees six deliberately selected archival BCG studies and an I² near 96%. A colleague claims a funnel plot has definitively proved that no unpublished studies exist.',
+    ask:'What can six heterogenous, non-exhaustively selected records establish about publication bias?',
+    good:'No definitive verdict. Investigate missing evidence and selective reporting independently; explain the tiny sample, extreme heterogeneity and selection.',
+    bad:'A symmetrical-looking six-point funnel proves complete retrieval and no selective publication.',
+    why:'With just six deliberately chosen rows, asymmetry tests and funnel shapes are especially unreliable. Heterogeneity, nonrandom allocation and study selection complicate any interpretation; source checks are indispensable.',
+    verse:'Al-Isra 17:36',url:'https://quran.com/17/36',
+    lens:'The verse cautions against following claims without knowledge and speaks of accountability for hearing, sight and heart. The optional reflection is intellectual restraint; it does not prescribe a funnel-plot threshold or prove an empirical finding.'
   },
   22:{
     title:'When a compelling account is not proof',scene:'The R arithmetic reproduces a number from six selected BCG rows. A colleague argues that reproducibility and a religious analogy together settle the clinical question.',
@@ -61,7 +70,7 @@ function init(){
  if(!document.querySelector('.module-slides[data-module]')||document.querySelector('.lesson-story-slide'))return;
  const m=location.pathname.match(/synthesis-course-([a-z]{2})\.html$/),lang=m?m[1]:'en';
  const css=document.createElement('link');css.rel='stylesheet';css.href='lesson-story-checkpoints.css';document.head.append(css);
- [3,7,22].forEach(id=>{
+ [3,7,9,22].forEach(id=>{
   const mod=document.querySelector('.module-slides[data-module="'+id+'"]');
   const after=mod&&mod.querySelector('.lesson-workshop-slide');
   if(after)after.after(slideFor(id,lang));
