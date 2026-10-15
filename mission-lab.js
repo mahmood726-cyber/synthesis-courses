@@ -255,7 +255,7 @@
       '<div class="mission-meta"><strong>'+esc(t.tag)+'</strong> &nbsp;·&nbsp; Difficulty '+t.level+'/3 &nbsp;·&nbsp; ~'+t.minutes+' minutes'+(done?' &nbsp;·&nbsp; ✓ Previously completed':'')+'</div>'+
       '<div class="brief"><strong>CASE FILE</strong><p>'+esc(t.brief)+'</p></div>'+activities(t)+
       '<div id="hintBox" class="hint" '+(work.hint?'':'hidden')+'><strong>Clue:</strong> '+esc(t.hint)+'</div>'+feedbackSlot()+
-      '<p class="module-back"><a href="synthesis-course.html">← Return to the 25-module flagship course</a> · '+
+      '<p class="module-back"><a href="synthesis-course.html?module='+t.id+'">← Return to this course module</a> · '+
       '<button class="text-link" type="button" data-action="restart">Restart this mission</button></p>';
     if (t.kind==='dossier') saved.notes[String(t.id)]=Object.assign({},work.notes);
   }
