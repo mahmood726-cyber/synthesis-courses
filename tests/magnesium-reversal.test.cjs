@@ -72,6 +72,9 @@ test('new English pilot case embeds directly in all 12 language routes without r
   const dom=new JSDOM(html,{url,runScripts:'outside-only'});
   const d=dom.window.document;
   dom.window.eval(script);
+  // In this synthetic page the DOM is still loading; in production this script
+  // is injected after the workshop DOMContentLoaded event.
+  d.dispatchEvent(new dom.window.Event('DOMContentLoaded'));
   const slide=d.querySelector('.lesson-magnesium-slide');
   assert.ok(slide,'missing slide '+lang);
   assert.equal(d.querySelectorAll('.lesson-workshop-slide').length,1);
