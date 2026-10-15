@@ -8,14 +8,15 @@ const {JSDOM}=require('jsdom');
 const root=path.resolve(__dirname,'..');
 const load=name=>fs.readFileSync(path.join(root,name),'utf8');
 const fixture=load('small-meta-data.js'),i18n=load('real-evidence-i18n.js');
+const extra=load('real-evidence-full-prompts.js');
 const engine=load('real-evidence-lab.js'),embedder=load('lesson-workshops.js');
 const page=load('real-evidence-lab.html');
-const scripts=[fixture,i18n,engine,embedder];
+const scripts=[fixture,i18n,extra,engine,embedder];
 const truth={2:false,3:true,4:true,6:false,9:true,10:false,11:true,12:false,14:false,15:true,16:false,18:false,19:false,20:false,22:false,24:true};
 const answers={0:6,1:2/39-1/43,5:11/154-4/146,7:0.029444320344763953,8:0,21:5,23:0.3472008701943795};
 function make(url){
   const dom=new JSDOM(page,{url,runScripts:'outside-only',pretendToBeVisual:true});
-  dom.window.eval(fixture);dom.window.eval(i18n);dom.window.eval(engine);
+  dom.window.eval(fixture);dom.window.eval(i18n);dom.window.eval(extra);dom.window.eval(engine);
   return dom;
 }
 function choose(dom,x){
@@ -85,7 +86,7 @@ test('wrong responses do not award completion and reset enables replay',()=>{
   dom.window.close();
 });
 test('12 languages preserve evidence and scientific invariants; full lesson translations in selected languages',()=>{
-  const scope={window:{}};vm.runInNewContext(i18n,scope);
+  const scope={window:{}};vm.runInNewContext(i18n,scope);vm.runInNewContext(extra,scope);
   const I=scope.window.SYNTHESIS_REAL_I18N;
   assert.equal(I.available.length,12);
   for(const lang of I.available){
@@ -99,11 +100,10 @@ test('12 languages preserve evidence and scientific invariants; full lesson tran
     assert.equal(d.querySelectorAll('#dataTable tbody tr').length,6);
     assert.equal(d.getElementById('miniFull').getAttribute('href').includes('lang='+lang),true);
     assert.ok(d.querySelector('#rCode').textContent.includes('dat.hine1989'));
-    if(x.promptTranslated)assert.ok(!d.getElementById('disclaimer').textContent.includes('pending'));
+    if(lang!=='en')assert.ok(d.getElementById('disclaimer').textContent.includes(x.common.pending));
     dom.window.close();
   }
-  for(const lang of ['en','es','fr','de'])assert.equal(I.get(lang).promptTranslated,true);
-  for(const lang of ['ar','hi','it','ja','ko','pt','ru','zh'])assert.equal(I.get(lang).promptTranslated,false);
+  for(const lang of I.available)assert.equal(I.get(lang).promptTranslated,true);
 });
 test('embedded 25-slide insertion is lazy and keeps published course content untouched',async()=>{
   const skeleton=['<!doctype html><html><head></head><body><main>'];
