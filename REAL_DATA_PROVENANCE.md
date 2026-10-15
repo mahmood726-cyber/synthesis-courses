@@ -31,8 +31,8 @@ The browser demonstration applies the uncorrected within-study binomial sampling
 | k | 6 | 6 |
 | Pooled RD | 0.0294443203 | 0.0294 |
 | SE | 0.0130683170 | 0.0131 |
-| Lower 95% CI | 0.0038304191 | 0.0038 |
-| Upper 95% CI | 0.0550582216 | 0.0551 |
+| Lower 95% CI | 0.0038308897 | 0.0038 |
+| Upper 95% CI | 0.0550577509 | 0.0551 |
 | Q | 0.8596926775 | 0.8597 |
 | I² | 0% | 0% |
 
