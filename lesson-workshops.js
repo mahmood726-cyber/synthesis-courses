@@ -76,6 +76,10 @@
       const label=slide.querySelector('.lesson-workshop-label');
       if(label&&!label.textContent.includes(' ✓'))label.textContent+=' ✓';
     });
+    const storyScript=document.createElement('script');
+    storyScript.src='lesson-story-checkpoints.js';
+    storyScript.dataset.storyCheckpoints='1';
+    document.head.appendChild(storyScript);
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);
   else init();
