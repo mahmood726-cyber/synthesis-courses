@@ -161,5 +161,5 @@
   });
   global.SYNTHESIS_REAL_I18N={en,langs,available:['en','es','fr','de','it','pt','ru','ar','hi','zh','ja','ko'],
     get:function(lang){const own=langs[lang]||{};return {lang:langs[lang]?lang:'en',common:Object.assign({},en.common,own.common||{}),
-      prompts:own.prompts||en.prompts,promptTranslated:!!own.prompts};}};
+      prompts:own.prompts||en.prompts,promptTranslated:lang==='en'||!!own.prompts};}};
 })(typeof window!=='undefined'?window:globalThis);
