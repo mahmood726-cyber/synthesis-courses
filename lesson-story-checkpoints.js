@@ -1,61 +1,62 @@
-/* Optional four-part evidence story. English pilot available from all 12 course routes.
-   Clinical numbers are archival subset demonstrations, not current recommendations.
-   Qur'anic narratives are optional ethical reflections, not empirical estimators. */
+/* Four source-based narrative decision checkpoints, English pilot across 12 language routes.
+   Narrative order is instructional, not a fictional historical account.
+   All numbers are computed from an explicitly selected archive subset.
+   The storytelling uses suspense and verification without religious content. */
 (function(){
 'use strict';
 const scenes={
   3:{
-    title:'The missing report',scene:'In this fictional BCG evidence desk, an editor discovers another plausible historical study. The full published R example has 13 studies; a six-row subset is only a learning exercise.',
-    ask:'What should the editor do before announcing an omission?',
-    good:'Retrieve the trial, check eligibility and search dates, and document the decision.',
-    bad:'Accuse the authors of suppressing evidence without checking the record.',
-    why:'A new citation is not proof of an eligible missed trial. Audit its design, population, outcomes and sources.',
-    verse:'Yusuf 12:87',url:'https://quran.com/12/87',
-    lens:'Ya‘qub calls for further inquiry about Yusuf and his brother. A possible analogy is perseverance; the verse cannot tell us whether a clinical trial exists.'
+    title:'Six were shown. Thirteen existed.',
+    scene:'The established R BCG dataset contains thirteen historical study records. Our practical displays only six of them. The other seven were not newly discovered: they were always in the source dataset. You are deciding how a partial selection should be reported.',
+    ask:'What is the most defensible next step before presenting a clinical conclusion?',
+    good:'Open all thirteen original records, establish the selection rule, and document eligibility.',
+    bad:'Call the seven unshown records suppressed trials without checking the archive.',
+    why:'A retrospective six-of-thirteen subset is a sensitivity exercise, not proof that an eligible study was withheld or that an exhaustive review was performed.',
+    turn:'The turning point is the source table, not a dramatic allegation. Six records can be reproduced faithfully and still fail to represent the full evidence base.'
   },
   7:{
-    title:'The study that moved the number',scene:'Five selected archival BCG rows yield a fixed-effect RR near 0.405. In a fictional editorial sequence, the large TPT Madras row is added as the sixth of those selected rows.',
-    ask:'Which description of the recalculated RR is supported?',
-    good:'It moves toward 1, to about 0.659.',
-    bad:'It moves farther below 1 and proves greater protection.',
-    why:'A common-effect inverse-variance model gives approximately 0.405 without Madras and 0.659 with it. This cherry-picked six-row scenario has substantial heterogeneity and is not a clinical-effectiveness synthesis.',
-    verse:'An-Naml 27:27',url:'https://quran.com/27/27',
-    lens:'Sulayman indicates he will check a report from the hoopoe. This can inspire verification, but cannot supply a risk ratio or determine vaccine effectiveness.'
+    title:'The row that moves the answer.',
+    scene:'With five deliberately selected archival BCG study records the inverse-variance fixed-effect RR is approximately 0.405. Add the TPT Madras 1980 record as the sixth row. This is retrospective teaching order, not publication chronology.',
+    ask:'How does the six-record pooled RR change when Madras is added?',
+    good:'It moves towards 1, to approximately 0.659.',
+    bad:'It moves farther below 1, showing stronger protection.',
+    why:'The five-record fixed-effect RR is approximately 0.405; adding Madras yields approximately 0.659. Neither subset is an exhaustive or prespecified clinical synthesis.',
+    turn:'The surprise comes from unequal contributions, not from a fictional late-breaking discovery. Source verification and the choice of eligible records must precede a clinical claim.'
   },
   9:{
-    title:'The funnel plot on trial',scene:'The investigator sees six deliberately selected archival BCG studies and an I² near 96%. A colleague claims a funnel plot has definitively proved that no unpublished studies exist.',
-    ask:'What can six heterogenous, non-exhaustively selected records establish about publication bias?',
-    good:'No definitive verdict. Investigate missing evidence and selective reporting independently; explain the tiny sample, extreme heterogeneity and selection.',
-    bad:'A symmetrical-looking six-point funnel proves complete retrieval and no selective publication.',
-    why:'With just six deliberately chosen rows, asymmetry tests and funnel shapes are especially unreliable. Heterogeneity, nonrandom allocation and study selection complicate any interpretation; source checks are indispensable.',
-    verse:'Al-Isra 17:36',url:'https://quran.com/17/36',
-    lens:'The verse cautions against following claims without knowledge and speaks of accountability for hearing, sight and heart. The optional reflection is intellectual restraint; it does not prescribe a funnel-plot threshold or prove an empirical finding.'
+    title:'The funnel plot cannot testify.',
+    scene:'Six selected archival BCG rows show substantial heterogeneity (I² about 96%). A visually appealing funnel plot would be tempting, but a six-point, non-exhaustive selection is an exceptionally weak basis for judging selective publication.',
+    ask:'What can the shape of this chosen six-record plot establish?',
+    good:'No definitive verdict; investigate missing evidence, selection, heterogeneity and reporting.',
+    bad:'A symmetric six-study shape would prove that every trial was published.',
+    why:'A small selected subset cannot verify search completeness or rule out publication bias. Allocation and clinical heterogeneity also complicate any small-study-effect interpretation.',
+    turn:'A confident-looking shape is not a witness. The reproducible observations are six recorded points; completeness and causes require additional evidence.'
   },
   22:{
-    title:'When a compelling account is not proof',scene:'The R arithmetic reproduces a number from six selected BCG rows. A colleague argues that reproducibility and a religious analogy together settle the clinical question.',
-    ask:'Which response keeps clinical evidence and ethical reflection distinct?',
-    good:'Check completeness, allocation, bias and applicability independently.',
-    bad:'Treat a script or verse as proof of the clinical conclusion.',
-    why:'Reproducibility cannot substitute for complete retrieval and critical appraisal. Scriptures are not trial records or statistical tests.',
-    verse:'Al-Hujurat 49:6',url:'https://quran.com/49/6',
-    lens:'The verse advises verification of reports to avoid harm. Its relevance here is an optional ethical reflection, not an empirical causal conclusion.'
+    title:'The reproducible number meets its limit.',
+    scene:'The six archived BCG records reproduce a precise calculation. Yet the official dataset has thirteen records, including different allocation methods and study settings. Reproducing a calculation is not the same as validating the research question.',
+    ask:'What must happen before interpreting the pooled number clinically?',
+    good:'Audit retrieval, allocation, bias, heterogeneity and applicability of the full source set.',
+    bad:'Declare the clinical question settled because the six-row arithmetic is reproducible.',
+    why:'Exact numerical reproduction checks one part of the chain. Completeness, appropriate synthesis methods and external applicability still need independent assessment.',
+    turn:'The final lesson is a distinction: numerical fidelity describes how a result was produced; scientific validity asks whether the result answers the right question.'
   }
 };
 function slideFor(id,lang){
  const c=scenes[id],slide=document.createElement('div');
  slide.className='slide light lesson-story-slide';slide.dataset.storyModule=String(id);
- slide.innerHTML='<div class="lesson-story-content"><p class="story-kicker">EVIDENCE STORY · ARCHIVAL DATA / FICTIONAL EDITOR</p>'+
+ slide.innerHTML='<div class="lesson-story-content"><p class="story-kicker">EVIDENCE STORY · ARCHIVAL STUDY DATA / LEARNER DECISION</p>'+
  '<h2>'+c.title+'</h2><p>'+c.scene+'</p><h3>'+c.ask+'</h3>'+
  '<div class="story-answers" role="group" aria-label="Evidence reasoning choice">'+
  '<button type="button" data-answer="0" aria-pressed="false">'+c.good+'</button>'+
  '<button type="button" data-answer="1" aria-pressed="false">'+c.bad+'</button></div>'+
  '<p class="story-feedback" role="status" aria-live="polite" hidden></p>'+
- '<details class="story-lens"><summary>Optional Qur’anic analogy — not an analysis result</summary>'+
- '<p>'+c.lens+' <a href="'+c.url+'" target="_blank" rel="noopener">'+c.verse+' ↗</a></p>'+
- '<p>No verse is quoted as a scientific method; religious agreement is not graded.</p></details>'+
+ '<details class="story-lens"><summary>Reveal the narrative turning point</summary>'+
+ '<p>'+c.turn+'</p>'+
+ '<p>Every empirical inference requires original records, a transparent selection rule and explicit modelling assumptions. <a href="https://wviechtb.github.io/metafor/reference/escalc.html" target="_blank" rel="noopener">Verify the thirteen source records ↗</a></p></details>'+
  '<p class="story-links"><a href="evidence-story-lab.html" target="_blank" rel="noopener">Explore the real six-row BCG case ↗</a> · '+
  '<a href="https://www.metafor-project.org/doku.php/analyses:berkey1995" target="_blank" rel="noopener">Verify all 13 original data rows ↗</a></p>'+
- '<p class="story-caveat">Not clinical guidance. English-only pilot '+(lang==='en'?'':'(untranslated and unreviewed in '+lang+')')+'; all 12 original course languages remain accessible.</p></div>';
+ '<p class="story-caveat">Source-based narrative, not a reconstructed historical conversation or clinical guidance. English-only pilot '+(lang==='en'?'':'(untranslated and unreviewed in '+lang+')')+'; all 12 original course languages remain accessible.</p></div>';
  slide.querySelector('.story-answers').addEventListener('click',e=>{
   const b=e.target.closest('button[data-answer]');if(!b)return;
   const group=b.parentElement;
