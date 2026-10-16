@@ -15,6 +15,22 @@ fit <- function(x) {
 }
 near <- function(x,y,tol) all(is.finite(x) & abs(x-y)<tol)
 a <- fit(subset(s,id!=16)); b <- fit(s)
+# The Research Studio's four retrospective year-cutoff snapshots use the
+# SAME six archived records, in teaching-year order, not actual registered
+# year-specific systematic reviews. Verify every revealed numerical estimate.
+teaching_ids <- c(1L,2L,3L,6L,14L,16L)
+snapshots <- lapply(c(3L,4L,5L,6L), function(n) fit(subset(s, id %in% teaching_ids[seq_len(n)])))
+targets <- list(
+ c(0.365388498371,0.196665562913,0.678861884941),
+ c(0.315338477301,0.180380510143,0.551269952543),
+ c(0.622306235403,0.482840768907,0.802055409484),
+ c(1.027995495150,0.967911363111,1.091809413882))
+stopifnot(all(vapply(seq_along(snapshots),
+  function(i) near(snapshots[[i]],targets[[i]],1e-6), logical(1))))
+cat("PASS: 1986/1989/1992/1995 classroom snapshot Peto estimates and intervals.\n")
+cat("R environment: ", R.version.string, "; metadat ", as.character(packageVersion("metadat")),
+    "; metafor ", as.character(packageVersion("metafor")), "\n", sep="")
+
 stopifnot(near(a,c(0.6223062354,0.4828407689,0.8020554095),1e-5),
           near(b,c(1.0279954951,0.9679113631,1.0918094139),1e-5))
 # Replicate the real chronological analysis snapshots documented by metadat.
