@@ -179,7 +179,7 @@ function dossier(st,deps){
    '','This dossier is a self-assessed learning artifact, not a registered review, clinical advice, source adjudication, or a competency certificate.','');
  return lines.join('\n');
 }
-const api=Object.freeze({MAG_URL,HINE_URL,BUS_KEY,ORIGIN,APPS,STAGES,YEARS,CHALLENGES,SKILLS,fresh,validText,
+const api=Object.freeze({MAG_URL,HINE_URL,BUS_KEY,ORIGIN,APPS,STAGES,YEARS,CHALLENGES,SKILLS,SCREEN_CHOICES,fresh,validText,
  protocolValid,records,screenPassComplete,reconcile,snapshots,hines,hinesRows,handoffCsv,busPayload,sameOrigin,stageBus,challenge,recommend,completion,dossier});
 if(typeof module!=='undefined'&&module.exports)module.exports=api;
 if(root)root.SynthesisResearchCore=api;
