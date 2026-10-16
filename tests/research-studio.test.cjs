@@ -240,6 +240,6 @@ test('discoverability, honest research claims and source documentation are prese
  assert.match(load('mission-lab.html'),/href="research-studio.html"/);
  assert.match(load('ALLMETA_COURSE_INTEGRATION.md'),/verified against repository source/);
  assert.match(load('research-studio.html'),/not a registered or complete living systematic review/i);
- assert.match(load('research-studio.html'),/not independently/i);
+ assert.match(load('research-studio.html'),/not scientifically adjudicated|not accredited/i);
  assert.doesNotMatch(load('research-studio.html'),/quran\.com|Qur.anic|scripture/i);
 });
