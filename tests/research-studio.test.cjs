@@ -148,7 +148,8 @@ test('full DOM workflow: freeze protocol, independent A/B passes, reconcile, pre
  }
  assert.match(d.getElementById('screenPhase').textContent,/Adjudication/);
  assert.match(d.getElementById('screenPhase').textContent,/1 disagreements/);
- for(const card of d.querySelectorAll('#adjudication [data-id]')){
+ for(const record of core.records(deps)){
+  const card=d.querySelector('#adjudication [data-id="'+record.id+'"]');
   card.querySelector('select').value='unclear';
   card.querySelector('textarea').value='Check original paper before deciding clinical eligibility';
   card.querySelector('button').click();
@@ -238,7 +239,7 @@ test('English Studio station is embedded from six modules across all existing 12
 test('discoverability, honest research claims and source documentation are present',()=>{
  assert.match(load('index.html'),/href="research-studio.html"/);
  assert.match(load('mission-lab.html'),/href="research-studio.html"/);
- assert.match(load('ALLMETA_COURSE_INTEGRATION.md'),/verified against repository source/);
+ assert.match(load('ALLMETA_COURSE_INTEGRATION.md'),/checked against the GitHub default-branch catalog/);
  assert.match(load('research-studio.html'),/not a registered or complete living systematic review/i);
  assert.match(load('research-studio.html'),/not scientifically adjudicated|not accredited/i);
  assert.doesNotMatch(load('research-studio.html'),/quran\.com|Qur.anic|scripture/i);
