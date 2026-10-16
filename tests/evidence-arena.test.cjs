@@ -126,6 +126,12 @@ test('each case saves independently and supports a two-click non-destructive res
  assert.match(d.getElementById('commitFeedback').textContent,/not a defensible eligibility rule/);
  d.getElementById('showCandidate').click();
  assert.match(d.getElementById('numericResult').textContent,/0\.659/);
+ d.querySelector('button[data-verdict=transparent]').click();
+ d.getElementById('editorialNote').value='The selected BCG studies are an incomplete historical subset. I would restore all thirteen source rows, review allocation and heterogeneity, and document eligibility before any clinical interpretation.';
+ for(const x of d.querySelectorAll('.audit input'))x.checked=true;
+ d.getElementById('saveReport').click();
+ assert.match(d.getElementById('reportFeedback').textContent,/reset and register a transparent rule/);
+ assert.equal(JSON.parse(w.localStorage.getItem('synthesis_evidence_arena_v1')).bcg.completed,false);
  d.querySelector('button[data-case=lidocaine]').click();
  assert.equal(d.getElementById('analysisStage').hidden,true);
  d.querySelector('button[data-case=bcg]').click();
@@ -165,4 +171,11 @@ test('shared lesson script inserts source-specific English pilot investigations 
   assert.match(frame.getAttribute('src'),new RegExp('case=magnesium&lang='+lang));
   dom.window.close();
  }
+});
+
+test('the library and Mission Lab make the new verified source-based simulator discoverable',()=>{
+ assert.match(load('index.html'),/href="evidence-arena.html"/);
+ assert.match(load('mission-lab.html'),/href="evidence-arena.html"/);
+ assert.match(load('WORLD_CLASS_INTERACTIVE_COURSE_BENCHMARK.md'),/Cochrane Interactive Learning/);
+ assert.match(load('WORLD_CLASS_INTERACTIVE_COURSE_BENCHMARK.md'),/Most interactive ever/);
 });
