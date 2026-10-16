@@ -47,7 +47,7 @@ AllMeta's schema and source: `allmeta/shared/ma-studies-v1.md` (stable bus contr
 
 ## Real R dataset grounding
 
-- Magnesium: `metadat::dat.egger2001`, **six deliberately chosen** of sixteen records with Peto OR fit. Reproduction: [`scripts/verify_magnesium_reversal.R`](scripts/verify_magnesium_reversal.R). The live-update education scene is retrospectively reconstructed from years, not a full actual living review.
+- Magnesium: `metadat::dat.egger2001`, **six deliberately chosen** of sixteen records with Peto OR fit. Reproduction: [`scripts/verify_magnesium_reversal.R`](scripts/verify_magnesium_reversal.R). All four Research Studio retrospective snapshots (k = 3, 4, 5, 6) are now pinned to independently run package-native R Peto results, with exact ORs and normal-model confidence intervals tested in both R and JavaScript. The R CI job prints the CRAN package versions it used. The live-update education scene is retrospectively reconstructed from years, not a full actual living review.
 - Lidocaine: `metadat::dat.hine1989`, six trial-arm mortality tables, RD point estimate and variance computed from the source's `small-meta-data.js`. Independent R reproduction: [`scripts/verify_small_meta.R`](scripts/verify_small_meta.R). No patient-level record is used or invented.
 - Original source pages: https://wviechtb.github.io/metadat/reference/dat.egger2001.html and https://wviechtb.github.io/metadat/reference/dat.hine1989.html .
 
