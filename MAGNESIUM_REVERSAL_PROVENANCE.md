@@ -20,3 +20,13 @@ For each study with deaths `a` among `n1` on magnesium and deaths `c` among `n2`
 The selected 5/6 comparison is a **constructed demonstration**, not the published full review. Peto estimates may be unsuitable for particular imbalanced or large-effect data. No clinical outcome has been simulated, but the editorial narrative is fictional. This case is separate from spiritual reflection.
 
 **Independent reproduction:** `Rscript scripts/verify_magnesium_reversal.R` (requires installed `metadat` and `metafor`); the GitHub Actions job `verify-magnesium-r` runs this script, and `test-mission-lab` checks browser interaction. Both must pass on the PR's latest head before merging.
+
+## Documented chronology (not a fictional case)
+
+- **1991:** The `metadat` source reproduces a seven-early-trial Peto OR of **0.45 (95% CI 0.28–0.71)**, as in the Teo et al. overview. Historical source: https://doi.org/10.1136/bmj.303.6816.1499
+- **1992:** LIMIT-2 randomised **2,316** patients with suspected acute MI, reporting **28-day** mortality **7.8% with magnesium versus 10.3% with placebo**. The original report is https://pubmed.ncbi.nlm.nih.gov/1351547/ . In the official R archive, early trial IDs 1–7 plus LIMIT-2 (ID 14) give an illustrative full-eight-record Peto OR of **0.65 (0.51–0.82)**.
+- **1995:** ISIS-4 randomised **58,050** patients in a factorial study. The magnesium comparison was against **open control**, reporting **five-week** deaths of **2,216/29,011 (7.64%) versus 2,103/29,039 (7.24%)**, without a significant mortality reduction: https://pubmed.ncbi.nlm.nih.gov/7661937/ . The 16-trial R exercise is retrospective and is *not* the full current evidence base.
+
+The browser's three acts follow these **real publications**, while questions and the six-row selection are deliberately scripted teaching devices, **not** historical transcripts or formal trial inclusion decisions. Different timing, dose, background care, publication selection and statistical assumptions have been discussed as potential reasons for divergent results; the six-record subset cannot assign causes. See the later Cochrane synthesis for wider context: https://pmc.ncbi.nlm.nih.gov/articles/PMC8407081/ .
+
+**Verification:** `scripts/verify_magnesium_reversal.R` independently checks the early 7/8-trial, full 15/16-trial, and selected 5/6-trial Peto results with `metadat` and `metafor`. The interactive table also ranks the leave-one-out influence of each selected record (change in log OR); numerical influence is not proof of quality, bias or eligibility.
