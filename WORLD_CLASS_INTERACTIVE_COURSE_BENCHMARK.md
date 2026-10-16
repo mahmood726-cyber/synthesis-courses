@@ -62,3 +62,7 @@ Proposed auditable rubric (0–4 per dimension):
 - A learner can write and locally save a self-assessed evidence dossier and export a source-linked Markdown document.
 - The new content is accessible from modules 3, 7 and 22 of all 12 routes while clearly flagged as an **English-only provisional pilot**.
 - The existing story labs, course routes and source computations retain passing regression checks.
+
+## Connected real-app research practicum — addition 16 October 2026
+
+The [Research Studio](research-studio.html) is a six-stage, source-linked practicum connecting locally locked protocol decisions, separate archive-row reviewer passes, retrospective magnesium Peto snapshots, a six-study Hine RD analysis, methodological challenge feedback and a learner-authored capstone. It uses the real AllMeta app catalog (protocols, screen, forest plot, MA Workbench, WebR, bias, GRADE, PRISMA and other tools); the verified effect/SE transfer is limited to correctly labelled Hine RD with a same-origin, explicit-approval `ma-studies-v1` staging contract. Full details and limits: [AllMeta Integration](ALLMETA_COURSE_INTEGRATION.md). This does not yet establish professional education equivalence, external deployment or independent competence.

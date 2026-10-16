@@ -88,6 +88,10 @@
     arenaScript.src='evidence-arena-integration.js';
     arenaScript.dataset.evidenceArena='1';
     document.head.appendChild(arenaScript);
+    const researchScript=document.createElement('script');
+    researchScript.src='research-studio-integration.js';
+    researchScript.dataset.researchStudio='1';
+    document.head.appendChild(researchScript);
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);
   else init();
