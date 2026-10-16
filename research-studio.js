@@ -93,7 +93,7 @@ function renderScreen(){
  box.replaceChildren();
  finalBox.hidden=false;
  const rec=core.reconcile(st.screening,recs);
- status('screenPhase','Adjudication — both private passes are recorded; '+rec.disagreements+' disagreements. Decisions require full-publication verification outside this exercise.');
+ status('screenPhase','Adjudication — both private passes are recorded; '+rec.disagreements+(rec.disagreements===1?' disagreement':' disagreements')+'. Decisions require full-publication verification outside this exercise.');
  for(const row of rec.rows){
   const wrapper=node('div',null,'adjudication-card');wrapper.dataset.id=String(row.id);
   wrapper.append(node('strong',recs.find(r=>r.id===row.id).label),
