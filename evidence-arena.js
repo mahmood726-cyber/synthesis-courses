@@ -38,8 +38,10 @@ function renderPicker(st){
     const input=document.createElement('input');input.type='checkbox';input.value=String(study.id);
     input.checked=selected.has(study.id);input.dataset.study=String(study.id);
     const span=document.createElement('span');
-    span.textContent=study.name+(study.id===c.added?' (contrasting sixth record)':'');
-    label.append(input,span);target.append(label);
+    span.textContent=study.name+(study.id===c.added?' (sixth record)':'');
+    const counts=document.createElement('small');counts.textContent=study.counts;
+    counts.style.display='block';counts.style.color='#405d6b';counts.style.fontSize='.85rem';
+    span.append(counts);label.append(input,span);target.append(label);
   }
 }
 function elem(svg,tag,attrs,text){
