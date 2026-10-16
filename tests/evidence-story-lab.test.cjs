@@ -30,12 +30,14 @@ test('invalid selection and numeric inputs fail closed',()=>{
  assert.throws(()=>analyse([TRIALS[0]]),/two or more/);
  assert.throws(()=>analyse([TRIALS[0],{...TRIALS[1],tp:0}]),/Positive cells/);
 });
-test('sources, reflective framing and boundaries are explicit',()=>{
- for(const link of ['https://quran.com/27/27','https://quran.com/12/87','https://quran.com/49/6'])assert.ok(page.includes(link));
- assert.match(page,/paraphrases.*not translations quoted/s);
- assert.match(page,/not.*source of effect estimates/i);
+test('sources, nonreligious real-data narrative and selection boundaries are explicit',()=>{
+ for(const link of ['https://wviechtb.github.io/metafor/reference/escalc.html','magnesium-reversal-lab.html'])assert.ok(page.includes(link));
+ assert.match(page,/thirteen historical BCG study records/i);
+ assert.match(page,/not.*historical/i);
  assert.match(page,/not an exhaustive search/i);
  assert.match(page,/metafor/);
+ assert.match(page,/two trials used alternate allocation/i);
+ assert.doesNotMatch(page,/quran\\.com|Qur.an|scripture/i);
 });
 test('interactive log-RR forest plot stays in sync with study inclusion',()=>{
  const {JSDOM}=require('jsdom');
