@@ -39,9 +39,9 @@ function build(deps){
  const byId=id=>{const c=configs.find(x=>x.id===id);if(!c)throw Error('Unknown case');return c;};
  function rows(id){
    byId(id);
-   if(id==='magnesium')return D.MagnesiumReversal.trials.map(t=>({id:t.id,name:t.study+' '+t.year}));
-   if(id==='bcg')return D.EvidenceStoryMath.TRIALS.map(t=>({id:t.id,name:t.name}));
-   return D.SYNTHESIS_REAL_DATA.hine.studies.map(t=>({id:t.id,name:t.study}));
+   if(id==='magnesium')return D.MagnesiumReversal.trials.map(t=>({id:t.id,name:t.study+' '+t.year,counts:'Deaths: '+t.a+'/'+t.n1+' magnesium vs '+t.c+'/'+t.n2+' control'}));
+   if(id==='bcg')return D.EvidenceStoryMath.TRIALS.map(t=>({id:t.id,name:t.name,counts:'TB cases: '+t.tp+'/'+(t.tp+t.tn)+' vaccinated vs '+t.cp+'/'+(t.cp+t.cn)+' control'}));
+   return D.SYNTHESIS_REAL_DATA.hine.studies.map(t=>({id:t.id,name:t.study,counts:'Deaths: '+t.ai+'/'+t.n1i+' lidocaine vs '+t.ci+'/'+t.n2i+' control'}));
  }
  function analyse(id, chosen){
    const c=byId(id);
