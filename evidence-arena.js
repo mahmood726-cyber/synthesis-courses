@@ -115,8 +115,9 @@ function render(){
     (st.scope==='report'?'Methodologically defensible scope. ':'Omitting an inconvenient study is not a defensible eligibility rule. ')+moveDirection(st):
     'Record a selection policy and prediction before the sixth-row calculation is revealed.';
   $('analysisStage').hidden=!st.locked;
-  $('reviewStage').hidden=!st.experimented;
-  $('reportStage').hidden=st.verdict!=='transparent';
+  const enoughRecords=!st.chosen||st.chosen.length>=2;
+  $('reviewStage').hidden=!st.experimented||!enoughRecords;
+  $('reportStage').hidden=st.verdict!=='transparent'||!enoughRecords;
   $('precommitRecord').textContent='Your recorded prediction: '+(st.prediction||'none')+' the no-effect value. Expected numerical direction after adding the sixth row: '+d.move+'.';
   $('studyStory').textContent=c.why;
   $('methodWarning').textContent='Clinical interpretation remains unresolved: '+c.limitation+' The chosen calculation is a teaching diagnostic, not proof that one treatment should or should not be used.';
@@ -189,6 +190,11 @@ $('reportStage').addEventListener('change',e=>{
 $('saveReport').addEventListener('click',()=>{
  const s=state();s.note=$('editorialNote').value.trim();
  s.checks=Array.from(document.querySelectorAll('.audit input:checked')).map(x=>x.value);
+ if(!Array.isArray(s.chosen)||s.chosen.length<2){
+   s.completed=false;save(s);
+   $('reportFeedback').textContent='Include at least two valid source records before saving an estimated result.';
+   return;
+ }
  if(s.scope!=='report'){
    s.completed=false;save(s);
    $('reportFeedback').textContent='Your precommitted rule would exclude an inconvenient study to favour a result. You can still export these educational notes, but to complete this practice case, reset and register a transparent rule before seeing the data.';
@@ -202,8 +208,9 @@ $('saveReport').addEventListener('click',()=>{
  if(window.parent!==window)window.parent.postMessage({type:'SYNTHESIS_ARENA_DONE',caseId:active},location.origin);
 });
 $('exportReport').addEventListener('click',()=>{
- const s=state();const content=engine.exportText(active,s);
+ const s=state();
  try{
+   const content=engine.exportText(active,s);
    const blob=new Blob([content],{type:'text/markdown;charset=utf-8'});
    const href=URL.createObjectURL(blob),link=document.createElement('a');
    link.href=href;link.download='synthesis-evidence-dossier-'+active+'.md';document.body.append(link);link.click();link.remove();
