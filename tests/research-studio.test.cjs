@@ -21,7 +21,17 @@ test('source trial rows and small chronological snapshots remain accurate and ex
  assert.deepEqual(snaps.map(x=>x.year),[1986,1989,1992,1995]);
  assert.deepEqual(snaps.map(x=>x.k),[3,4,5,6]);
  assert.ok(snaps.every(x=>x.lower>0&&x.lower<x.or&&x.or<x.upper));
- assert.ok(Math.abs(snaps[3].or-1.0279954951)<1e-8);
+ const benchmarks=[
+ [0.365388498371,0.196665562913,0.678861884941],
+ [0.315338477301,0.180380510143,0.551269952543],
+ [0.622306235403,0.482840768907,0.802055409484],
+ [1.027995495150,0.967911363111,1.091809413882]
+ ];
+ for(let i=0;i<4;i++){
+  assert.ok(Math.abs(snaps[i].or-benchmarks[i][0])<1e-9,'OR snapshot '+snaps[i].year);
+  assert.ok(Math.abs(snaps[i].lower-benchmarks[i][1])<1e-9,'lower CI '+snaps[i].year);
+  assert.ok(Math.abs(snaps[i].upper-benchmarks[i][2])<1e-9,'upper CI '+snaps[i].year);
+ }
  assert.match(snaps[0].note,/Retrospective classroom selection/);
  assert.equal(core.MAG_URL,'https://wviechtb.github.io/metadat/reference/dat.egger2001.html');
 });
