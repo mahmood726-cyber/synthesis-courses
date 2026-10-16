@@ -55,7 +55,7 @@ function slideFor(id,lang){
  '<p>'+c.turn+'</p>'+
  '<p>Every empirical inference requires original records, a transparent selection rule and explicit modelling assumptions. <a href="https://wviechtb.github.io/metafor/reference/escalc.html" target="_blank" rel="noopener">Verify the thirteen source records ↗</a></p></details>'+
  '<p class="story-links"><a href="evidence-story-lab.html" target="_blank" rel="noopener">Explore the real six-row BCG case ↗</a> · '+
- '<a href="https://www.metafor-project.org/doku.php/analyses:berkey1995" target="_blank" rel="noopener">Verify all 13 original data rows ↗</a></p>'+
+ '<a href="https://wviechtb.github.io/metafor/reference/escalc.html" target="_blank" rel="noopener">Verify all 13 original data rows ↗</a></p>'+
  '<p class="story-caveat">Source-based narrative, not a reconstructed historical conversation or clinical guidance. English-only pilot '+(lang==='en'?'':'(untranslated and unreviewed in '+lang+')')+'; all 12 original course languages remain accessible.</p></div>';
  slide.querySelector('.story-answers').addEventListener('click',e=>{
   const b=e.target.closest('button[data-answer]');if(!b)return;
