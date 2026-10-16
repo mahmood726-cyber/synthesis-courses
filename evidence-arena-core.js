@@ -22,7 +22,7 @@ const DEFINITIONS=Object.freeze([
   why:'The selected fixed-effect RR changes from about 0.405 to 0.659. The six-record calculation has very high heterogeneity and includes alternate allocation; it is not a vaccine-effectiveness estimate.',
   limitation:'Non-exhaustive retrieval, differences in design, latitude, allocation and heterogeneity prevent clinical interpretation of this selected teaching subset.',
   reference:'scripts/verify_bcg_story.R'},
- {id:'lidocaine',module:22,title:'The Small Trial That Changes the Interval',
+ {id:'lidocaine',module:22,title:'The Sixth Lidocaine Trial Changes the Estimate',
   subtitle:'Prophylactic lidocaine after myocardial infarction',
   source:'metadat::dat.hine1989',sourceUrl:'https://wviechtb.github.io/metadat/reference/dat.hine1989.html',
   archiveCount:6,model:'Common-effect inverse-variance risk difference',unit:'RD',nullValue:0,decimals:4,
