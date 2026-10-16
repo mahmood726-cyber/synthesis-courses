@@ -143,7 +143,10 @@ test('full DOM workflow: freeze protocol, independent A/B passes, reconcile, pre
    d.getElementById('screenChoice').value=pass==='B'&&i===0?'include':'unclear';
    d.getElementById('screenReason').value='Original full text required before eligibility verdict';
    d.getElementById('recordScreen').click();
-   if(pass==='B')assert.doesNotMatch(d.getElementById('screenPhase').textContent,/Reviewer A decisions/);
+   if(pass==='B'){
+    assert.match(d.getElementById('screenPhase').textContent,/decisions are deliberately hidden/);
+    assert.doesNotMatch(d.getElementById('screenPanel').textContent,/Reviewer A:\\s*(include|exclude|unclear)/i);
+   }
   }
  }
  assert.match(d.getElementById('screenPhase').textContent,/Adjudication/);
