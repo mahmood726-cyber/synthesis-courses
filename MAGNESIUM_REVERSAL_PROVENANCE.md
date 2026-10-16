@@ -17,7 +17,7 @@ For each study with deaths `a` among `n1` on magnesium and deaths `c` among `n2`
 - Official package's full fifteen without ISIS-4: printed OR **0.55** (0.44–0.68).
 - Official package's full sixteen including ISIS-4: printed OR **1.01** (0.95–1.07).
 
-The selected 5/6 comparison is a **constructed demonstration**, not the published full review. Peto estimates may be unsuitable for particular imbalanced or large-effect data. No clinical outcome has been simulated, but the editorial narrative is fictional. This case is separate from spiritual reflection.
+The selected 5/6 comparison is a **constructed demonstration**, not the published full review. Peto estimates may be unsuitable for particular imbalanced or large-effect data. No clinical outcome, researcher's conversation or trial finding has been invented. The learning choices and study inclusion order are constructed for education; the clinical chronology is anchored in original publications.
 
 **Independent reproduction:** `Rscript scripts/verify_magnesium_reversal.R` (requires installed `metadat` and `metafor`); the GitHub Actions job `verify-magnesium-r` runs this script, and `test-mission-lab` checks browser interaction. Both must pass on the PR's latest head before merging.
 
