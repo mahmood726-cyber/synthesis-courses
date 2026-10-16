@@ -12,8 +12,8 @@ This branch adds an independent **non-religious** clinical evidence-reversal inv
 ## Scientific and editorial boundaries
 - Six rows are a deliberately chosen classroom sensitivity example, not a published six-trial review or treatment recommendation.
 - ISIS-4's large information share is not proof of study quality, a causal explanation of the reversal, or evidence that selective publication alone caused differences.
-- The editorial story is simulated; archived event counts and bibliographic citations are real.
+- The chronology follows actual LIMIT-2 and ISIS-4 publications. Learner choices and the deliberately selected six-record teaching sequence are constructed, **not fabricated clinical data or reconstructed historical conversations**.
 - All twelve existing language routes remain available. This *new* case is an **English-language pilot** and has not received professional translation review.
-- Existing Qur’anic reflections are unchanged. No religious claim is used to validate a statistical or clinical result.
+- Course stories use **secular narrative structure** (a documented question, developing evidence, a turning point and an accountable conclusion). They do not include religious quotations or arguments.
 
 **Post-merge caveats:** independent expert assessment of clinical teaching framing, native-speaker translation reviews, and live deployed-page verification remain outstanding.
