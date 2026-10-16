@@ -84,6 +84,10 @@
     magnesiumScript.src='magnesium-lesson-integration.js';
     magnesiumScript.dataset.magnesiumCase='1';
     document.head.appendChild(magnesiumScript);
+    const arenaScript=document.createElement('script');
+    arenaScript.src='evidence-arena-integration.js';
+    arenaScript.dataset.evidenceArena='1';
+    document.head.appendChild(arenaScript);
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);
   else init();
