@@ -17,9 +17,14 @@ near <- function(x,y,tol) all(is.finite(x) & abs(x-y)<tol)
 a <- fit(subset(s,id!=16)); b <- fit(s)
 stopifnot(near(a,c(0.6223062354,0.4828407689,0.8020554095),1e-5),
           near(b,c(1.0279954951,0.9679113631,1.0918094139),1e-5))
+# Replicate the real chronological analysis snapshots documented by metadat.
+early7 <- fit(subset(d,id %in% 1:7))
+early8 <- fit(subset(d,id %in% c(1:7,14)))
+stopifnot(near(early7,c(0.45,0.28,0.71),0.011),
+          near(early8,c(0.65,0.51,0.82),0.011))
 full15 <- fit(subset(d,id!=16)); full16 <- fit(d)
 # Full-dataset comparators are rounded as printed on the official metadat reference page.
 stopifnot(near(full15,c(0.55,0.44,0.68),0.011),
           near(full16,c(1.01,0.95,1.07),0.011))
-print(rbind(classroom_five=a,classroom_six=b,reference_fifteen=full15,reference_sixteen=full16))
+print(rbind(classroom_five=a,classroom_six=b,early_seven=early7,early_plus_LIMIT2=early8,reference_fifteen=full15,reference_sixteen=full16))
 cat('PASS: selected 5/6-trial and full 15/16-trial reference Peto comparisons.\n')
