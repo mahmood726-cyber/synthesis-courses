@@ -20,6 +20,9 @@ test('all three cases are existing source-grounded, small-k demonstrations, not 
  assert.deepEqual(Array.from(api.cases,x=>x.id),['magnesium','bcg','lidocaine']);
  assert.deepEqual(Array.from(api.cases,x=>x.archiveCount),[16,13,6]);
  assert.deepEqual(Array.from(api.cases,x=>x.unit),['OR','RR','RD']);
+ assert.match(api.rows('magnesium')[0].counts,/1\/40 magnesium vs 2\/36 control/);
+ assert.match(api.rows('bcg')[0].counts,/TB cases: 4\/123 vaccinated vs 11\/139 control/);
+ assert.match(api.rows('lidocaine')[0].counts,/2\/39 lidocaine vs 1\/43 control/);
  for(const c of api.cases){
    assert.ok(api.rows(c.id).length===6);
    assert.ok(c.sourceUrl.startsWith('https://wviechtb.github.io/'));
