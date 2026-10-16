@@ -21,7 +21,7 @@ test('story moments are inside every existing course language route',()=>{
   assert.equal(doc.querySelectorAll('.lesson-workshop-slide').length,25);
   const slides=doc.querySelectorAll('.lesson-story-slide');
   assert.equal(slides.length,4);
-  for(const slide of slides)assert.doesNotMatch(slide.textContent,/quran\\.com|Qur.an|verse/i);
+  for(const slide of slides)assert.doesNotMatch(slide.textContent,/quran\.com|Qur.an|verse/i);
   assert.deepEqual(Array.from(slides,s=>Number(s.dataset.storyModule)),[3,7,9,22]);
   assert.equal(slides[1].previousElementSibling.classList.contains('lesson-workshop-slide'),true);
   assert.match(slides[0].textContent,lang==='en'?/English-only pilot/:/untranslated and unreviewed/);
@@ -39,6 +39,6 @@ test('story choice feedback reports numerical evidence without scoring belief',(
  assert.ok(slide.querySelector('a[href="https://wviechtb.github.io/metafor/reference/escalc.html"]'));
  assert.ok(slide.querySelector('a[href="evidence-story-lab.html"]'));
  assert.match(slide.textContent,/narrative turning point/i);
- assert.doesNotMatch(slide.textContent,/Qur.an|verse|quran\\.com/i);
+ assert.doesNotMatch(slide.textContent,/Qur.an|verse|quran\.com/i);
  dom.window.close();
 });
