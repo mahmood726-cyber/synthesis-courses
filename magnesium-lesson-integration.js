@@ -19,7 +19,7 @@
      '<p style="font-weight:800">NON-RELIGIOUS CLINICAL EVIDENCE REVERSAL · ARCHIVAL DATA</p>'+
      '<h2 style="color:#173e50">The Trial That Changed the Argument</h2>'+
      '<p>Investigate mortality results from selected historical intravenous-magnesium trials after myocardial infarction. Predict the effect of adding ISIS-4, then recompute the <strong>Peto odds ratio</strong> yourself.</p>'+
-     '<p style="font-size:.9rem">A deliberately selected <strong>six-of-sixteen</strong> classroom exercise, not a systematic review or current treatment recommendation. The editor scenario is fictional. No Qur’anic analogy is presented as empirical evidence.</p>'+
+     '<p style="font-size:.9rem">A deliberately selected <strong>six-of-sixteen</strong> classroom exercise, not a systematic review or current treatment recommendation. This is a documented clinical-history investigation; the retrospective classroom selection is instructional, not the historical review.</p>'+
      '<p style="font-size:.85rem">English-only exercise'+(language==='en'?'; translation not applicable.':'; not translated or professionally reviewed for '+language+' — provisional.')+'</p>'+
      '<iframe title="Interactive magnesium evidence-reversal case study, English-language pilot" data-magnesium-src="magnesium-reversal-lab.html" loading="lazy" style="width:100%;min-height:600px;border:1px solid #74909b;border-radius:9px;background:white"></iframe>'+
      '<p><a href="magnesium-reversal-lab.html" target="_blank" rel="noopener">Open the interactive case in a separate tab ↗</a> · <a href="https://wviechtb.github.io/metadat/reference/dat.egger2001.html" target="_blank" rel="noopener">Original archive and all sixteen study records ↗</a></p>'+
