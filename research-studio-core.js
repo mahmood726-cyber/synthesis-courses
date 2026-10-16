@@ -115,7 +115,8 @@ function sameOrigin(hostname,pathname){return hostname==='mahmood726-cyber.githu
 function stageBus(storage,hostname,pathname,approvedReplace,payload){
  if(!sameOrigin(hostname,pathname))return {ok:false,code:'different-origin'};
  if(!payload||payload._schema!=='ma-studies-v1'||!Array.isArray(payload.studies)||payload.studies.length<2||payload.studies.some(s=>!Number.isFinite(s.est)||!(s.se>0)))return {ok:false,code:'invalid'};
- const prev=storage.getItem(BUS_KEY);
+ let prev;
+ try{prev=storage.getItem(BUS_KEY);}catch(e){return {ok:false,code:'storage-unavailable'};}
  if(prev&&!approvedReplace)return {ok:false,code:'occupied'};
  try{storage.setItem(BUS_KEY,JSON.stringify(payload));return {ok:true,code:'staged',count:payload.studies.length,replaced:Boolean(prev)};}
  catch(e){return {ok:false,code:'storage-unavailable'};}
@@ -142,12 +143,14 @@ function completion(st,deps){
   screen:screenPassComplete(st.screening.A,recs)&&screenPassComplete(st.screening.B,recs)&&reconcile(st.screening,recs).complete,
   living:YEARS.every(y=>st.living.revealed.includes(y)&&!!st.living.predictions[y]),
   stats:!!st.stats.inspected&&Array.isArray(st.stats.selected)&&st.stats.selected.length>=2,
-  review:CHALLENGES.every(c=>Number.isInteger(st.review.answers[c.id])),
+  review:CHALLENGES.every(c=>st.review.answers[c.id]===c.answer),
   capstone:!!st.capstone.saved&&['interpretation','limitations','nextSteps'].every(k=>validText(st.capstone[k]).length>=60)
  };
 }
 function dossier(st,deps){
- const x=ensure(deps),s=snapshots(deps),c=completion(st,deps),results=hines(deps,st.stats.selected);
+ const x=ensure(deps),s=snapshots(deps),c=completion(st,deps);
+ let results=null;
+ try{results=hines(deps,st.stats.selected);}catch(e){/* Valid draft: effect not yet calculable. */}
  const lines=['# Synthesis Research Studio — learner-authored capstone (not certified)','',
    'AllMeta links source: https://github.com/mahmood726-cyber/allmeta/blob/main/hub/projects.js',
    'Training data: '+MAG_URL,'Statistical data: '+HINE_URL,
@@ -163,7 +166,7 @@ function dossier(st,deps){
  for(const r of s){if(st.living.revealed.includes(r.year))lines.push('- '+r.year+': k='+r.k+', OR='+r.or.toFixed(3)+', 95% CI '+r.lower.toFixed(3)+'–'+r.upper.toFixed(3)+', prior prediction='+validText(st.living.predictions[r.year]));}
  lines.push('','## Separate real Hine risk-difference analysis',
   'Selected Hine IDs: '+st.stats.selected.join(','),
-  'Risk difference: '+results.rd.toFixed(6)+', 95% CI '+results.lower.toFixed(6)+'–'+results.upper.toFixed(6),
+  'Risk difference: '+(results?results.rd.toFixed(6)+', 95% CI '+results.lower.toFixed(6)+'–'+results.upper.toFixed(6):'not yet calculable (fewer than two selected studies)'),
   'R package source: metadat::dat.hine1989. Hine RD is NOT the magnesium Peto OR.',
   'AllMeta handoff: study RD and standard errors on identity scale; null 0; outputs need separate inspection.','',
   '## Peer review and adaptive practice');
