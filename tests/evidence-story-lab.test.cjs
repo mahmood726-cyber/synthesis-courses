@@ -37,7 +37,7 @@ test('sources, nonreligious real-data narrative and selection boundaries are exp
  assert.match(page,/not an exhaustive search/i);
  assert.match(page,/metafor/);
  assert.match(page,/two trials used alternate allocation/i);
- assert.doesNotMatch(page,/quran\\.com|Qur.an|scripture/i);
+ assert.doesNotMatch(page,/quran\.com|Qur.an|scripture/i);
 });
 test('interactive log-RR forest plot stays in sync with study inclusion',()=>{
  const {JSDOM}=require('jsdom');
