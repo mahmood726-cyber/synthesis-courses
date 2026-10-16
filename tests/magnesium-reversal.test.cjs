@@ -42,7 +42,7 @@ test('all 63 nonempty study subsets have finite ordered intervals and sum of inf
 });
 test('English evidence reversal interface updates estimate, information and methodological feedback',()=>{
  const page=load('magnesium-reversal-lab.html');
- for(const word of ['English','selected','not a systematic','odds ratio','Peto','metadat::dat.egger2001','No spiritual analogy'])
+ for(const word of ['English','selected','not a systematic','odds ratio','Peto','metadat::dat.egger2001','No patient outcomes are invented'])
    assert.ok(page.toLowerCase().includes(word.toLowerCase()),'Missing disclosure '+word);
  const dom=new JSDOM(page,{url:'https://example.test/magnesium-reversal-lab.html',runScripts:'outside-only'});
  const w=dom.window,d=w.document;
@@ -87,5 +87,68 @@ test('new English pilot case embeds directly in all 12 language routes without r
   await new Promise(resolve=>setImmediate(resolve));
   assert.ok(frame.src.endsWith('/magnesium-reversal-lab.html'),lang);
   dom.window.close();
+ }
+});
+
+test('published chronological evidence acts are documented and explicitly separate from selected classroom data',()=>{
+ const page=load('magnesium-reversal-lab.html');
+ for(const fact of ['Act I','Act II','Act III','2,316','7.8%','10.3%','58,050','2,216','2,103','7.64%','7.24%','0.45','0.55','1.01']){
+   assert.ok(page.includes(fact),'Missing historical report '+fact);
+ }
+ for(const src of ['pubmed.ncbi.nlm.nih.gov/1351547','pubmed.ncbi.nlm.nih.gov/7661937','wviechtb.github.io/metadat/reference/dat.egger2001.html']){
+   assert.ok(page.includes(src),'Missing direct source link '+src);
+ }
+ assert.doesNotMatch(page,/fictional journal-club|quran\.com|Qur.anic verse/i);
+ assert.match(page,/not the complete body of evidence/);
+ assert.match(page,/English only/);
+});
+test('three-act investigation reveals new historical evidence only after decisions; all-source bypass works',()=>{
+ const dom=new JSDOM(load('magnesium-reversal-lab.html'),{
+   url:'https://example.test/magnesium-reversal-lab.html',
+   runScripts:'outside-only'
+ });
+ const w=dom.window,d=w.document;
+ w.eval(load('magnesium-reversal-data.js'));
+ w.eval(load('magnesium-reversal-ui.js'));
+ w.eval(load('magnesium-evidence-chronicle.js'));
+ const a2=d.getElementById('act-two'),a3=d.getElementById('act-three'),a4=d.getElementById('act-four');
+ assert.equal(a2.hidden,true);
+ assert.equal(a3.hidden,true);
+ assert.equal(a4.hidden,true);
+ assert.equal(d.getElementById('chapter-progress').dataset.chapter,'1');
+ d.getElementById('predict-toward').click();
+ assert.equal(a2.hidden,false);
+ assert.equal(a3.hidden,true);
+ d.getElementById('preset-six').click();
+ assert.equal(a3.hidden,false);
+ assert.equal(a4.hidden,true);
+ const influence=Array.from(d.querySelectorAll('#influence-rows tr'));
+ assert.equal(influence.length,6);
+ assert.equal(influence[0].querySelector('td').textContent,'ISIS-4');
+ assert.match(influence[0].textContent,/0\.622/);
+ assert.match(d.getElementById('influence-insight').textContent,/not study quality or eligibility/);
+ d.getElementById('decision-no').click();
+ assert.equal(a4.hidden,false);
+ assert.equal(d.getElementById('chapter-progress').dataset.chapter,'4');
+ w.close();
+ const skip=new JSDOM(load('magnesium-reversal-lab.html'),{url:'https://example.test/magnesium-reversal-lab.html',runScripts:'outside-only'});
+ skip.window.eval(load('magnesium-reversal-data.js'));
+ skip.window.eval(load('magnesium-reversal-ui.js'));
+ skip.window.eval(load('magnesium-evidence-chronicle.js'));
+ skip.window.document.getElementById('show-all-chapters').click();
+ for(const id of ['act-two','act-three','act-four'])assert.equal(skip.window.document.getElementById(id).hidden,false);
+ skip.window.close();
+});
+test('leave-one-out calculations are finite across every possible 2–6-study selected set',()=>{
+ for(let mask=1;mask<64;mask++){
+   const selected=api.trials.filter((_,i)=>Boolean(mask&(1<<i)));
+   if(selected.length<2)continue;
+   const all=api.peto(selected);
+   const ranking=selected.map(t=>{
+     const omitted=api.peto(selected.filter(x=>x.id!==t.id));
+     return Math.abs(Math.log(omitted.OR)-all.logOR);
+   });
+   assert.equal(ranking.length,selected.length);
+   assert.ok(ranking.every(x=>Number.isFinite(x)&&x>=0));
  }
 });

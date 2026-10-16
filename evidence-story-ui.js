@@ -154,7 +154,7 @@
     const p=document.getElementById('provenance-feedback');p.hidden=false;
     p.textContent=btn.dataset.source==='trial'?
       'Correct: numerical estimates derive from reported trial counts, after verification of provenance, design, endpoint and analysis assumptions.':
-      'A narrative offers ethical reflection; it cannot generate or validate a numerical treatment effect. Check empirical data and methods.';
+      'A memorable story alone cannot generate or validate a numerical treatment effect. Check the recorded trial events, study designs, provenance and model assumptions.';
   });
   render();
 })();
