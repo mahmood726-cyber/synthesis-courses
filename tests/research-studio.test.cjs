@@ -28,10 +28,10 @@ test('source trial rows and small chronological snapshots remain accurate and ex
 test('Hine real trial-arm data transfer reproduces published six-study risk difference',()=>{
  const studies=core.hinesRows(deps);
  assert.equal(studies.length,6);
- assert.deepEqual(studies.map(s=>s.events),[2,4,6,7,7,11]);
- assert.deepEqual(studies.map(s=>s.controlEvents),[1,4,4,5,3,4]);
- assert.deepEqual(studies.map(s=>s.n),[39,44,107,103,110,154]);
- assert.deepEqual(studies.map(s=>s.controlN),[43,44,110,100,106,146]);
+ assert.deepEqual(Array.from(studies,s=>s.events),[2,4,6,7,7,11]);
+ assert.deepEqual(Array.from(studies,s=>s.controlEvents),[1,4,4,5,3,4]);
+ assert.deepEqual(Array.from(studies,s=>s.n),[39,44,107,103,110,154]);
+ assert.deepEqual(Array.from(studies,s=>s.controlN),[43,44,110,100,106,146]);
  const pooled=core.hines(deps,[1,2,3,4,5,6]);
  assert.ok(Math.abs(pooled.rd-0.029444320344763953)<1e-12);
  assert.ok(Math.abs(pooled.lower-0.003830889)<1e-7);
@@ -227,7 +227,7 @@ test('English Studio station is embedded from six modules across all existing 12
   assert.equal(slides.length,6,lang);
   assert.deepEqual(Array.from(slides,x=>x.dataset.researchStation),['protocol','screen','living','stats','review','capstone']);
   assert.equal(dom.window.document.querySelectorAll('.lesson-workshop-slide').length,6);
-  if(lang!=='en')assert.match(slides[0].textContent,/not translated or professionally method-reviewed/);
+  if(lang!=='en')assert.match(slides[0].textContent,/not translated or professionally method-reviewed/i);
   const frame=slides[2].querySelector('iframe');
   assert.equal(frame.getAttribute('src'),null);
   slides[2].classList.add('active');
