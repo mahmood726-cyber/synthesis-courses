@@ -89,6 +89,16 @@ test('prediction is precommitted, incorrect peer claim triggers remediation, wri
  assert.equal(d.getElementById('reviewStage').hidden,false);
  assert.match(d.getElementById('numericResult').textContent,/1\.028/);
  assert.ok(d.querySelector('#comparisonPlot svg[role=img]'));
+ const included=Array.from(d.querySelectorAll('#studyPicks input:checked')).map(x=>x.value);
+ for(const id of included.slice(1)){
+   const box=d.querySelector('#studyPicks input[value="'+id+'"]');
+   box.checked=false;box.dispatchEvent(new w.Event('change',{bubbles:true}));
+ }
+ assert.match(d.getElementById('numericResult').textContent,/at least two/);
+ assert.equal(d.getElementById('reviewStage').hidden,true);
+ assert.equal(d.getElementById('reportStage').hidden,true);
+ d.getElementById('showCandidate').click();
+ assert.equal(d.getElementById('reviewStage').hidden,false);
  d.querySelector('button[data-verdict=certify]').click();
  assert.equal(d.getElementById('reportStage').hidden,true);
  assert.match(d.getElementById('reviewFeedback').textContent,/cannot certify/);
