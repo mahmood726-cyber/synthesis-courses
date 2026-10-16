@@ -17,9 +17,9 @@ function make(caseId='magnesium',lang='en'){
 }
 test('all three cases are existing source-grounded, small-k demonstrations, not fabricated clinical cases',()=>{
  const dom=make(),d=dom.window.document,api=dom.window.SynthesisArenaCore.build(dom.window);
- assert.deepEqual(api.cases.map(x=>x.id),['magnesium','bcg','lidocaine']);
- assert.deepEqual(api.cases.map(x=>x.archiveCount),[16,13,6]);
- assert.deepEqual(api.cases.map(x=>x.unit),['OR','RR','RD']);
+ assert.deepEqual(Array.from(api.cases,x=>x.id),['magnesium','bcg','lidocaine']);
+ assert.deepEqual(Array.from(api.cases,x=>x.archiveCount),[16,13,6]);
+ assert.deepEqual(Array.from(api.cases,x=>x.unit),['OR','RR','RD']);
  for(const c of api.cases){
    assert.ok(api.rows(c.id).length===6);
    assert.ok(c.sourceUrl.startsWith('https://wviechtb.github.io/'));
