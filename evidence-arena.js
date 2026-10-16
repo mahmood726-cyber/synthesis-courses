@@ -189,6 +189,11 @@ $('reportStage').addEventListener('change',e=>{
 $('saveReport').addEventListener('click',()=>{
  const s=state();s.note=$('editorialNote').value.trim();
  s.checks=Array.from(document.querySelectorAll('.audit input:checked')).map(x=>x.value);
+ if(s.scope!=='report'){
+   s.completed=false;save(s);
+   $('reportFeedback').textContent='Your precommitted rule would exclude an inconvenient study to favour a result. You can still export these educational notes, but to complete this practice case, reset and register a transparent rule before seeing the data.';
+   return;
+ }
  if(s.note.length<60||s.checks.length<5){
    $('reportFeedback').textContent='Continue drafting (at least 60 characters) and review all five method-reporting prompts. Checking a box is your own acknowledgement, not expert validation.';save(s);return;
  }
