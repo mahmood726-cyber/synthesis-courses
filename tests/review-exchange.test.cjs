@@ -51,7 +51,7 @@ test('malformed files, duplicate or missing decisions, false independence and mi
  assert.throws(()=>X.makePack('Reviewer A',rows().map((x,i)=>({...x,reason:i===0?'guess':x.reason})),date,rule),/substantive/);
  assert.throws(()=>X.validatePack({...p,dataset:'wrong'}),/Wrong schema/);
  assert.throws(()=>X.validatePack({...p,source:'other'}),/Wrong schema/);
- assert.throws(()=>X.validatePack({...p,declaredIndependent:false}),/independent/);
+ assert.throws(()=>X.validatePack({...p,declaredIndependent:false}),/independent/i);
  assert.throws(()=>X.validatePack('broken JSON'),/Invalid JSON/);
  assert.throws(()=>X.compare(p,{...p,authorLabel:'REVIEWER A'}),/labels must differ/);
 });
