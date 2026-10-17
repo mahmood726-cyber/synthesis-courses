@@ -92,3 +92,25 @@ Prespecified primary comparison: blinded expert score on an **unseen** small rev
 - Oxford: https://www.cebm.ox.ac.uk/study-with-us/meta-analysis
 
 **Remaining verification:** protected/access-controlled modules were not independently completed; competitors were not asked to participate; no paid course subscriptions, user-identity checks, learning trials or external human peer review were performed. Public descriptions and source code form the basis for this preliminary benchmark, nothing more.
+
+## Hourly follow-up: novice entry and meaningful interaction (17 October 2026)
+
+This is a **new iteration of the simulated multi-persona critique**, not feedback from independent external people. The original eight-lens review identified novice cognitive overload as a High priority. The course hub, 25 Mission Lab activities, 25 real-data labs, Evidence Decision Arena, Research Studio and Reviewer Exchange all remain valuable, but a first-time learner needs an explicit first 10–15 minutes.
+
+**Implemented response:** [Start Here — six real-data decisions](guided-start.html), a source-linked guided path grounded in three established \`metadat\` records: Hine 1989 (six mortality trials; 2/39 vs 1/43 in the first study), Berkey 1998 (five trials and ten correlated outcome rows), and magnesium-after-MI Egger 2001 (separate Peto odds-ratio teaching example). The six actions require *source interpretation, an actual numerical risk difference, a prereveal influence prediction, cautious I² interpretation, a correct effect-family choice, and recognition of dependent outcomes*. Learners receive immediate reasoned feedback, a before/after source-derived risk-difference uncertainty plot, private first-attempt history and links to the appropriate existing exercises.
+
+**Simulated reviewer lenses and release conditions:**
+
+| Perspective | Specific challenge to this change | Evidence available now | Unresolved requirement |
+|---|---|---|---|
+| Beginner | Will a novice actually understand risk difference and confidence intervals before joining the major simulations? | Sequential choices and immediate explanations; no enforced timer or account | Observe 5–10 novices without assistance; collect task success, time, confusion and retention |
+| Evidence-methods reviewer | Does the source table get mistaken for a complete clinical review? | Every task cites original R dataset and notes that trial eligibility needs independent source assessment | External methodologist review of every answer and narrative |
+| Statistician | Is the individual-trial RD and all-six source benchmark exactly reproducible? | Hine \`metadat\` rows and existing R reference script; automated unit checks are planned/required in PR | Independent check of effect family, estimator, variance convention and paired 5-vs-6 comparison |
+| Learning scientist | Is the new assessment truly diagnostic and psychometrically sound? | First-attempt errors trigger specific practice recommendations; no competence badge | Calibration, held-out validation and controlled learning-outcome comparison |
+| UX/accessibility | Can keyboard and assistive-technology learners complete it? | Native buttons/input, status messaging, focusable exercises, reduced-motion support, JSDOM 12-route checks | Real NVDA/VoiceOver and mobile usability audit |
+| Multilingual learner | Does navigation imply the new content is professionally translated? | Existing 12 language routes preserved; English-only newcomer module marked provisional | Expert native-speaker and methods reviews of all translated new prompts |
+
+**Discriminating standard:** a learner manipulating genuine trial counts and explaining an effect has made a substantive interaction; pressing Next does not count. This adds a documented onboarding experience, **not** evidence that Synthesis outperforms Cochrane, JBI, Campbell/OLI, Covidence Academy or Oxford. Genuine human validation remains the critical gap.
+
+Current comparator provider pages reviewed 17 October 2026: Cochrane (>20 hours, 14 modules) https://www.cochrane.org/products-and-services/cochrane-interactive-learning ; Campbell/OLI (40 listed modules) https://oli.cmu.edu/courses/systematic-reviews-and-meta-analysis/ ; JBI (expert-led practical protocol) https://jbi.global/training/systematic-review-training ; Covidence Academy (workflow articles/webinars) https://academy.covidence.org/learn/ ; Oxford meta-analysis short course https://www.cebm.ox.ac.uk/study-with-us/meta-analysis .
+
