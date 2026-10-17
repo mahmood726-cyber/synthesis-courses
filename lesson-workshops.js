@@ -46,6 +46,18 @@
       const target=objectives&&objectives.closest('.slide')||module.querySelector('.slide');
       if(target)target.after(slide);else module.prepend(slide);
     });
+    // Shorter entry point for novice learners, without another mandatory slide.
+    // The new page is English-only and explicitly provisional on translated routes.
+    const starterFoot=document.querySelector('.lesson-workshop-slide[data-workshop-module="0"] .lesson-workshop-foot');
+    if(starterFoot&&!starterFoot.querySelector('.guided-start-entry')){
+      const starter=document.createElement('a');
+      starter.className='guided-start-entry';
+      starter.href='guided-start.html?lang='+encodeURIComponent(lang);
+      starter.target='_blank';
+      starter.rel='noopener';
+      starter.textContent='New to meta-analysis? Guided start (English pilot; translation unreviewed) ↗';
+      starterFoot.prepend(starter);
+    }
     const check=slide=>{
       if(slide.classList.contains('active')){
         const frame=slide.querySelector('iframe[data-lesson-src]');
