@@ -109,3 +109,9 @@ When expanding the bank, preserve the 0–24 linkage to flagship course modules,
 ## Design ideas for a future iteration
 
 Add anonymised peer-review rubric forms, opt-in facilitator-led teamwork, screen-reader QA with actual assistive technology, thoroughly reviewed translations and separate calibration exercises. Any scored assessment should be validated against independently adjudicated expert work before claims of learning effectiveness are made.
+
+## Two-person screening and independent course review
+
+Use the [Two-Person Review Exchange](review-exchange.html) to give two independently recruited humans the same six archival magnesium trial *count rows* on **separate devices**. Each completes an eligibility decision and explanation without seeing the other's file. A facilitator imports the two JSON submissions and adjudicates every decision, exporting an audit with descriptive agreement and κ. Labels are **self-declared**, not authenticated; the count rows alone do **not** establish actual eligibility. Ask for the original publications and independent reviewer sign-off for any serious research task. This is different from the previous one-device A/B role simulation.
+
+For a published-program comparison and simulated perspectives from novice, expert, statistician, librarian, facilitator and accessibility lenses, see [Benchmark and multi-persona review](COURSE_BENCHMARK_MULTIPERSONA_REVIEW_2026.md). Simulated personas are not human peer reviewers or course accreditors.
