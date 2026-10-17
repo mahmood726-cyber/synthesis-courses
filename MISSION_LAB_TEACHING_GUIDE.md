@@ -10,6 +10,14 @@ For a 15-minute real-data workshop, ask learners to (1) identify the actual nume
 
 Data lineage, exact R reference outputs, conditional method equivalence and translation status are in [REAL_DATA_PROVENANCE.md](REAL_DATA_PROVENANCE.md). The newly authored practice prompts are translated across the 12 course languages, **but specialist/native-speaker sign-off is still outstanding**. Do not use practice scores as accreditation.
 
+## Novice starting route — six evidence decisions (untimed, roughly 10–15 minutes)
+
+Before presenting twenty-five missions, new learners can complete the source-linked [Guided Start](guided-start.html). The challenge follows genuine Hine, Berkey and magnesium trial records in a secular narrative: what can the trial counts establish, how do you calculate a risk difference, what happens when another existing study record is included, what does I²=0 **not** prove, why cannot RD and OR be pooled unchanged, and why do ten correlated measurements not equal ten independent trials?
+
+Ask learners to attempt each decision independently, listen to their explanation of the source, then use their ungraded first-attempt errors to choose focused practice. Wrong responses can be corrected. The result is not a validated pre-test or a certificate. In translated course routes this new content is clearly designated an English-language pilot, still awaiting professional translation and methods review.
+
+**Teaching observation to record (human, not automatically graded):** whether the learner identifies the effect family, reports numerator/denominator correctly, explains a post hoc selection as a sensitivity rather than eligibility decision, and articulates a concrete source-retrieval next step. Save observations and use the held-out capstone rubric in [the comparative review](COURSE_BENCHMARK_MULTIPERSONA_REVIEW_2026.md) before asserting pedagogical effectiveness.
+
 ## Learning design
 
 The original flagship course has slides, quizzes, modelling tools, progression and spaced repetition. The Mission Lab is deliberately different: learners have to **make reproducible decisions**, carry out arithmetic, alter assumptions, reconcile disagreements and explain what would change a claim.
