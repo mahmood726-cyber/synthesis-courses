@@ -61,9 +61,32 @@ for(const lang of ['en','ar','de','es','fr','hi','it','ja','ko','pt','ru','zh'])
    async function focused(locator,description){
     if(!await locator.evaluate(e=>e===document.activeElement))interactionFailures.push({description,active:await page.evaluate(()=>document.activeElement.outerHTML.slice(0,600)),target:await locator.evaluate(e=>({html:e.outerHTML.slice(0,500),inert:!!e.closest('[inert]'),display:getComputedStyle(e).display,visibility:getComputedStyle(e).visibility}))});
    }
-   await page.addScriptTag({path:require.resolve('axe-core/axe.min.js')});
    async function audit(state){
-    const results=await page.evaluate(async()=>await axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa']}}));
+    // Keep scanner instrumentation out of the keyboard/focus interaction page.
+    const scanContext=await browser.newContext({viewport:{width:1440,height:1000},reducedMotion:'reduce'});
+    let results;
+    try{
+     const scan=await scanContext.newPage();
+     await scan.route('**/*',route=>route.request().url().startsWith('http://127.0.0.1:8000/')?route.continue():route.abort());
+     await scan.goto('http://127.0.0.1:8000/'+file);
+     await scan.locator('.module-item').first().waitFor();
+     if(state==='tools'){
+      await scan.locator('.module-item[data-module="1"]').click();
+      await scan.locator('[onclick="toggleToolsPanel()"]').first().click();
+      await scan.locator('.tool-section').filter({has:scan.locator('#picoP')}).locator('.tool-section-header').click();
+     }else if(state==='glossary'){
+      await scan.locator('.glossary-btn').click();await scan.locator('#glossarySearch').fill('meta');
+     }else{
+      await scan.locator('.tier-btn[data-tier="methodologist"]').click();
+      const quiz=await scan.locator('.module-slides').evaluateAll(modules=>{for(const module of modules){const index=[...module.querySelectorAll('.slide')].findIndex(s=>s.querySelector('.quiz-option'));if(index>=0)return {module:module.dataset.module,index};}});
+      await scan.locator(`.module-item[data-module="${quiz.module}"]`).click();
+      await scan.locator('#progress .progress-dot').nth(quiz.index).click();
+      await scan.locator('.module-slides.active .slide.active .quiz-option').first().click();
+      if(state==='mobile')await scan.setViewportSize({width:390,height:844});
+     }
+     await scan.addScriptTag({path:require.resolve('axe-core/axe.min.js')});
+     results=await scan.evaluate(async()=>await axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa']}}));
+    }finally{await scanContext.close();}
     findings.push({state,violations:results.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))}))});
     fs.mkdirSync('browser-a11y-results',{recursive:true});
     fs.writeFileSync(path.join('browser-a11y-results',`${lang}.json`),JSON.stringify({lang,findings,errors,interactionFailures},null,2));
@@ -98,12 +121,6 @@ for(const lang of ['en','ar','de','es','fr','hi','it','ja','ko','pt','ru','zh'])
    await page.locator('#picoP').press('Escape');
    assert.equal(await page.locator('#toolsPanel').isVisible(),false);
    const glossary=page.locator('.glossary-btn');
-   await page.evaluate(()=>{
-    window.a11yKeyTrace=[];
-    document.addEventListener('keydown',e=>{if(e.key==='Escape')window.a11yKeyTrace.push({key:e.key,phase:'capture',prevented:e.defaultPrevented,composing:e.isComposing,ctrl:e.ctrlKey,alt:e.altKey,meta:e.metaKey,target:e.target.id});},true);
-    const original=window.toggleGlossary;
-    window.toggleGlossary=function(...args){window.a11yKeyTrace.push({call:'toggleGlossary',before:document.getElementById('glossaryPanel').className});const result=original.apply(this,args);window.a11yKeyTrace.push({after:document.getElementById('glossaryPanel').className});return result;};
-   });
    await glossary.click();
    assert.equal(await page.evaluate(()=>document.activeElement.id),'glossarySearch');
    await page.locator('#glossarySearch').fill('meta');
@@ -116,7 +133,7 @@ for(const lang of ['en','ar','de','es','fr','hi','it','ja','ko','pt','ru','zh'])
    await page.locator('#glossarySearch').press('Escape');
    await focused(glossary,'glossary focus return');
    if(await page.locator('#glossaryPanel').isVisible()){
-    interactionFailures.push({description:'Escape did not dismiss glossary',trace:await page.evaluate(()=>window.a11yKeyTrace)});
+    interactionFailures.push({description:'Escape did not dismiss glossary'});
     // Continue collecting other states while retaining this failure in the final assertion.
     await page.locator('.glossary-close').click();
    }
