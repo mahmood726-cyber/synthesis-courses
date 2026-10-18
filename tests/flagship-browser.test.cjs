@@ -58,6 +58,10 @@ for(const lang of ['en','ar','de','es','fr','hi','it','ja','ko','pt','ru','zh'])
    await page.locator('#moduleList .module-item').first().waitFor();
    const findings=[];
    const interactionFailures=[];
+   async function clearPointerTargets(){
+    const blocked=await page.locator('.glossary-btn,.story-indicator-btn,#prevBtn,#nextBtn').evaluateAll(elements=>elements.filter(e=>!e.disabled&&e.getClientRects().length&&getComputedStyle(e).visibility==='visible').flatMap(e=>{const r=e.getBoundingClientRect(),hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return e.contains(hit)?[]:[{target:e.id||e.className,cover:hit?.outerHTML.slice(0,200)}];}));
+    assert.deepEqual(blocked,[],'Floating actions and slide controls must not cover each other');
+   }
    async function focused(locator,description){
     if(!await locator.evaluate(e=>e===document.activeElement))interactionFailures.push({description,active:await page.evaluate(()=>document.activeElement.outerHTML.slice(0,600)),target:await locator.evaluate(e=>({html:e.outerHTML.slice(0,500),inert:!!e.closest('[inert]'),display:getComputedStyle(e).display,visibility:getComputedStyle(e).visibility}))});
    }
@@ -162,6 +166,7 @@ for(const lang of ['en','ar','de','es','fr','hi','it','ja','ko','pt','ru','zh'])
    await option.waitFor({state:'visible'});
    await option.press('Enter');
    if(await option.getAttribute('aria-disabled')!=='true')interactionFailures.push({description:'Keyboard quiz activation did not mark options disabled',details:await option.evaluate(e=>({active:document.activeElement.outerHTML.slice(0,400),role:e.getAttribute('role'),inert:!!e.closest('[inert]'),visibility:getComputedStyle(e).visibility,onclick:typeof e.onclick,html:e.outerHTML.slice(0,800),openDialogs:[...document.querySelectorAll('[role="dialog"]:not([hidden])')].map(p=>p.id)}))});
+   await clearPointerTargets();
    await page.setViewportSize({width:390,height:844});
    await page.waitForFunction(()=>document.querySelector('.sidebar').hasAttribute('inert'));
    assert.equal(await page.locator('.sidebar').getAttribute('inert'),'');
@@ -170,6 +175,7 @@ for(const lang of ['en','ar','de','es','fr','hi','it','ja','ko','pt','ru','zh'])
    await page.locator('.sidebar a').first().press('Escape');
    assert.equal(await page.locator('.mobile-menu-btn').evaluate(e=>e===document.activeElement),true);
    assert.equal(await page.locator('.mobile-menu-btn').getAttribute('aria-expanded'),'false');
+   await clearPointerTargets();
    for(const state of ['tools','glossary','quiz','mobile'])await audit(state);
    fs.mkdirSync('browser-a11y-results',{recursive:true});
    fs.writeFileSync(path.join('browser-a11y-results',`${lang}.json`),JSON.stringify({lang,findings,errors,interactionFailures},null,2));
