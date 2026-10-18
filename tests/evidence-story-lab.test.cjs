@@ -74,3 +74,35 @@ test('axis covers the 95% intervals for every possible two-to-six-study subset',
   }
  }
 });
+
+test('BCG prediction requires a decision before numerical reveal and supports replay',()=>{
+ const {JSDOM}=require('jsdom');
+ const dom=new JSDOM(page,{url:'https://example.test/evidence-story-lab.html',runScripts:'outside-only'});
+ const math=fs.readFileSync(path.join(__dirname,'../evidence-story-lab.js'),'utf8');
+ const ui=fs.readFileSync(path.join(__dirname,'../evidence-story-ui.js'),'utf8');
+ dom.window.eval(math);dom.window.eval(ui);
+ const d=dom.window.document;
+ const results=d.getElementById('numerical-results');
+ const retry=d.getElementById('prediction-retry');
+ assert.equal(results.hidden,true,'the complete forest plot and numerical results must start concealed');
+ assert.equal(results.querySelectorAll('.forest-figure svg').length,1,'underlying source-bound calculations remain rendered');
+ assert.equal(retry.hidden,true,'replay is only available after a first choice');
+ d.querySelector('button[data-guess="away"]').click();
+ assert.equal(results.hidden,false,'any committed prediction unlocks the worked evidence');
+ assert.equal(retry.hidden,false);
+ assert.match(d.getElementById('prediction-feedback').textContent,/Try again/);
+ assert.equal(d.querySelectorAll('button[data-guess][aria-pressed="true"]').length,1);
+ d.querySelector('button[data-preset="madras-out"]').click();
+ assert.equal(d.getElementById('chosen-count').textContent,'5');
+ assert.equal(results.querySelector('.stat-grid .stat strong').textContent,'0.405');
+ retry.click();
+ assert.equal(results.hidden,true,'replay must conceal all numerical cards and the plot again');
+ assert.equal(retry.hidden,true);
+ assert.equal(d.getElementById('prediction-feedback').hidden,true);
+ assert.equal(d.querySelectorAll('button[data-guess][aria-pressed="true"]').length,0);
+ d.querySelector('button[data-guess="toward-null"]').click();
+ assert.equal(results.hidden,false);
+ assert.match(d.getElementById('prediction-feedback').textContent,/Correct/);
+ assert.equal(retry.tagName,'BUTTON');
+ dom.window.close();
+});
