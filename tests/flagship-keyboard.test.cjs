@@ -28,6 +28,7 @@ for(const lang of ['en','ar','de','es','fr','hi','it','ja','ko','pt','ru','zh'])
   }
   for(const dl of d.querySelectorAll('#glossaryContent dl'))assert.equal([...dl.childNodes].some(n=>n.nodeType===3&&n.textContent.trim()),false);
   assert.equal(d.getElementById('glossaryContent').tabIndex,0);
+  for(const action of d.querySelectorAll('.glossary-btn,.story-indicator-btn'))assert.equal(action.parentElement.className,'slides-container');
   const key=(target,value,extra={})=>target.dispatchEvent(new w.KeyboardEvent('keydown',{key:value,bubbles:true,cancelable:true,...extra}));
   const main=d.getElementById('main-content');
   key(d.getElementById('picoP'),' ');key(d.getElementById('picoP'),'ArrowRight');key(d.getElementById('nextBtn'),' ');

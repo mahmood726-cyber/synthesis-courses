@@ -19,6 +19,8 @@
   const menuButton = d.querySelector('.mobile-menu-btn');
   const tools = d.getElementById('toolsPanel');
   const glossaryTrigger = d.querySelector('.glossary-btn');
+  // Keep floating actions inside the slide pane, away from sidebar/tool controls.
+  d.querySelector('.slides-container').append(glossaryTrigger, d.getElementById('storyIndicatorBtn'));
   const glossaryContent = d.getElementById('glossaryContent');
   const glossaryHeading = dialogs[0].querySelector('h3');
   glossaryHeading.id = 'flagship-glossary-heading';
