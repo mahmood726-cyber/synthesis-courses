@@ -149,6 +149,14 @@ for(const lang of ['en','ar','de','es','fr','hi','it','ja','ko','pt','ru','zh'])
    await dashboard.click();await page.locator('.dashboard-close').press('Escape');
    assert.equal(await dashboard.evaluate(e=>e===document.activeElement),true);
    const review=page.locator('#dailyReviewBtn');
+   // Regression: in RTL the floating story badge previously covered this
+   // visible sidebar control even though it remained keyboard focusable.
+   const reviewPointer=await review.evaluate(button=>{
+    const bounds=button.getBoundingClientRect();
+    const hit=document.elementFromPoint(bounds.x+bounds.width/2,bounds.y+bounds.height/2);
+    return {reachable:button.contains(hit),cover:hit?.outerHTML.slice(0,240)};
+   });
+   assert.equal(reviewPointer.reachable,true,`${lang}: Daily Review must be pointer-reachable; covering element: ${reviewPointer.cover}`);
    await review.click();
    assert.equal(await page.locator('#dailyReviewModal').isVisible(),true);
    await page.locator('.daily-review-close').press('Escape');
