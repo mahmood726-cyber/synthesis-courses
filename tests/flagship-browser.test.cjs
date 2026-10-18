@@ -121,6 +121,13 @@ for(const lang of ['en','ar','de','es','fr','hi','it','ja','ko','pt','ru','zh'])
    await page.locator('#picoP').press('Escape');
    assert.equal(await page.locator('#toolsPanel').isVisible(),false);
    const glossary=page.locator('.glossary-btn');
+   await page.evaluate(()=>{
+    window.a11yTrace=[];
+    document.addEventListener('keydown',e=>window.a11yTrace.push({key:e.key,phase:'capture',target:e.target.id||e.target.className,prevented:e.defaultPrevented,composing:e.isComposing,ctrl:e.ctrlKey,alt:e.altKey,meta:e.metaKey}),true);
+    for(const name of ['toggleGlossary','checkQuizAnswer']){
+     const original=window[name];window[name]=function(...args){window.a11yTrace.push({call:name,args});const result=original.apply(this,args);window.a11yTrace.push({after:name,glossary:document.getElementById('glossaryPanel').className});return result;};
+    }
+   });
    await glossary.click();
    assert.equal(await page.evaluate(()=>document.activeElement.id),'glossarySearch');
    await page.locator('#glossarySearch').fill('meta');
@@ -132,6 +139,7 @@ for(const lang of ['en','ar','de','es','fr','hi','it','ja','ko','pt','ru','zh'])
    await audit('glossary');
    await page.locator('#glossarySearch').press('Escape');
    await focused(glossary,'glossary focus return');
+   console.log('escape-trace',lang,JSON.stringify(await page.evaluate(()=>({trace:window.a11yTrace,active:document.activeElement.outerHTML.slice(0,300),inert:[...document.querySelectorAll('[inert]')].map(e=>e.id||e.className)}))));
    if(await page.locator('#glossaryPanel').isVisible()){
     interactionFailures.push({description:'Escape did not dismiss glossary'});
     // Continue collecting other states while retaining this failure in the final assertion.
@@ -152,7 +160,9 @@ for(const lang of ['en','ar','de','es','fr','hi','it','ja','ko','pt','ru','zh'])
    await page.locator(`.module-item[data-module="${quiz.module}"]`).click();
    await page.locator('#progress .progress-dot').nth(quiz.index).press('Enter');
    const option=page.locator('.module-slides.active .slide.active .quiz-option').first();
-   await option.press('Enter');assert.equal(await option.getAttribute('aria-disabled'),'true');
+   await option.press('Enter');
+   console.log('quiz-trace',lang,JSON.stringify(await option.evaluate(e=>({trace:window.a11yTrace,active:document.activeElement.outerHTML.slice(0,300),inert:!!e.closest('[inert]'),option:e.outerHTML.slice(0,700)}))));
+   if(await option.getAttribute('aria-disabled')!=='true')interactionFailures.push({description:'Keyboard quiz activation did not mark options disabled'});
    await audit('quiz');
    await page.setViewportSize({width:390,height:844});
    await page.waitForFunction(()=>document.querySelector('.sidebar').hasAttribute('inert'));
