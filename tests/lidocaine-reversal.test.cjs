@@ -48,7 +48,7 @@ test('1989 primary source, 1999 archive and 2015 review are not falsely equated'
   'risk difference','risk ratio','English-language pilot'
  ]) assert.ok(html.includes(needle),'missing historical/provenance boundary '+needle);
  assert.doesNotMatch(html,/clinically validated|independent human review completed|most interactive in the world/i);
- assert.match(html,/not.*modern clinical decision/i);
+ assert.match(html,/Never use these archival classroom subsets for a modern clinical decision/i);
 });
 test('surrogate misconception receives feedback before mortality counts are exposed',()=>{
  const dom=init(),d=dom.window.document;
@@ -71,7 +71,7 @@ test('wrong sign reveals real counts, exact pooled RD and meaningful reversible 
  assert.match(d.getElementById('mortality-feedback').textContent,/Effect-direction misconception/);
  assert.equal(d.getElementById('archive-results').hidden,false);
  assert.equal(d.getElementById('act-3').hidden,false);
- assert.match(d.getElementById('estimate').textContent,/k/);
+ assert.match(d.getElementById('estimate').textContent,/Selected 6 of 6/);
  assert.match(d.getElementById('estimate').textContent,/\+2\.944 percentage points/);
  assert.match(d.getElementById('estimate').textContent,/\+0\.383 to \+5\.506/);
  assert.equal(d.querySelectorAll('#trials input[type="checkbox"]').length,6);
@@ -123,7 +123,7 @@ test('first-commit dossier requires learner reasoning and preserves both origina
  assert.match(out,/first: identical; current: qualified/);
  assert.match(out,/k=6/);
  assert.match(out,/Rscript scripts\/verify_small_meta.R/);
- assert.match(d.getElementById('commit-feedback').textContent,/No commit or upload occurred/);
+ assert.match(d.getElementById('commit-feedback').textContent,/no commit or upload occurred/i);
  dom.window.close();
 });
 test('open-book skip gives access without inventing decisions; reset restores encounter',()=>{
