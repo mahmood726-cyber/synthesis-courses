@@ -3,6 +3,8 @@ const {test,before,after}=require('node:test');
 const assert=require('node:assert/strict');
 const {spawn}=require('node:child_process');
 const {chromium}=require('playwright');
+const fs=require('node:fs');
+const path=require('node:path');
 let browser,server;
 before(async()=>{
  server=spawn(process.env.PYTHON || 'python3',['-m','http.server','8000','--bind','127.0.0.1'],{stdio:'ignore'});
@@ -40,6 +42,95 @@ for(const lang of ['en','ar','de','es','fr','hi','it','ja','ko','pt','ru','zh'])
    const pico=page.locator('#picoP');
    assert.equal(await pico.getAttribute('aria-label'),null);
    assert.ok(await pico.evaluate(e=>e.labels[0].textContent.trim()));
+  }finally{await context.close();}
+ });
+}
+for(const lang of ['en','ar','de','es','fr','hi','it','ja','ko','pt','ru','zh']){
+ test(`${lang}: keyboard, focus, mobile menu and axe checks`,{timeout:120000},async()=>{
+  const context=await browser.newContext({viewport:{width:1440,height:1000}});
+  try{
+   const page=await context.newPage();
+   const errors=[];
+   page.on('pageerror',error=>errors.push(error.message));
+   await page.route('**/*',route=>route.request().url().startsWith('http://127.0.0.1:8000/')?route.continue():route.abort());
+   const file=lang==='en'?'synthesis-course.html':`synthesis-course-${lang}.html`;
+   await page.goto('http://127.0.0.1:8000/'+file);
+   await page.locator('#moduleList .module-item').first().waitFor();
+   const findings=[];
+   await page.addScriptTag({path:require.resolve('axe-core/axe.min.js')});
+   async function audit(state){
+    const results=await page.evaluate(async()=>await axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa']}}));
+    findings.push({state,violations:results.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))}))});
+   }
+   const activeSlide=()=>page.locator('#progress .progress-dot').evaluateAll(items=>items.findIndex(e=>e.classList.contains('active')));
+   await page.locator('[data-module="0"].module-item').press('Enter');
+   assert.equal(await activeSlide(),0);
+   await page.locator('#nextBtn').press('Space');assert.equal(await activeSlide(),1);
+   await page.locator('#prevBtn').press('Space');assert.equal(await activeSlide(),0);
+   await page.locator('#progress .progress-dot').nth(1).press('Enter');assert.equal(await activeSlide(),1);
+   await page.locator('.module-item[data-module="1"]').press('Space');
+   assert.equal(await page.locator('.module-item[aria-current="step"]').getAttribute('data-module'),'1');
+   await page.locator('.tier-btn[data-tier="foundation"]').press('ArrowRight');
+   assert.equal(await page.locator('.tier-btn[aria-checked="true"]').getAttribute('data-tier'),'researcher');
+   assert.equal(await page.locator('.tier-btn[tabindex="0"]').count(),1);
+   await page.locator('[onclick="toggleToolsPanel()"]').first().click();
+   const picoSection=page.locator('.tool-section').filter({has:page.locator('#picoP')});
+   if(!await page.locator('#picoP').isVisible())await picoSection.locator('.tool-section-header').press('Enter');
+   const slideBeforeTyping=await activeSlide();
+   await page.locator('#picoP').fill('Synthetic population');
+   await page.locator('#picoP').press('End');await page.locator('#picoP').press('Space');
+   await page.locator('#picoP').press('ArrowLeft');
+   assert.equal(await page.locator('#picoP').inputValue(),'Synthetic population ');
+   assert.equal(await activeSlide(),slideBeforeTyping);
+   const check=page.locator('#useHKSJ');
+   if(await check.isVisible()){
+    const checked=await check.isChecked();await check.press('Space');assert.equal(await check.isChecked(),!checked);
+   }
+   await audit('tools');
+   await page.locator('#picoP').press('Escape');
+   assert.equal(await page.locator('#toolsPanel').isVisible(),false);
+   const glossary=page.locator('.glossary-btn');
+   await glossary.click();
+   assert.equal(await page.evaluate(()=>document.activeElement.id),'glossarySearch');
+   await page.locator('#glossarySearch').fill('meta');
+   await page.locator('#glossarySearch').press('Tab');
+   assert.equal(await page.evaluate(()=>document.activeElement.classList.contains('glossary-close')),true);
+   await page.locator('.glossary-close').press('Shift+Tab');
+   assert.equal(await page.evaluate(()=>document.activeElement.id),'glossarySearch');
+   await audit('glossary');
+   await page.locator('#glossarySearch').press('Escape');
+   assert.equal(await glossary.evaluate(e=>e===document.activeElement),true);
+   assert.equal(await page.locator('#glossaryPanel').isVisible(),false);
+   await page.locator('.keyboard-help-trigger').click();
+   await page.locator('#keyboardHelp').press('Escape');
+   assert.equal(await page.locator('.keyboard-help-trigger').evaluate(e=>e===document.activeElement),true);
+   const dashboard=page.locator('[onclick="openDashboard()"]');
+   await dashboard.click();await page.locator('.dashboard-close').press('Escape');
+   assert.equal(await dashboard.evaluate(e=>e===document.activeElement),true);
+   await page.locator('.tier-btn[data-tier="methodologist"]').click();
+   const quiz=await page.locator('.module-slides').evaluateAll(modules=>{
+    for(const module of modules){const slides=[...module.querySelectorAll('.slide')];const index=slides.findIndex(s=>s.querySelector('.quiz-option'));
+     if(index>=0)return {module:module.dataset.module,index};}
+   });
+   assert.ok(quiz);
+   await page.locator(`.module-item[data-module="${quiz.module}"]`).click();
+   await page.locator('#progress .progress-dot').nth(quiz.index).press('Enter');
+   const option=page.locator('.module-slides.active .slide.active .quiz-option').first();
+   await option.press('Enter');assert.equal(await option.getAttribute('aria-disabled'),'true');
+   await audit('quiz');
+   await page.setViewportSize({width:390,height:844});
+   assert.equal(await page.locator('.sidebar').getAttribute('inert'),'');
+   await page.locator('.mobile-menu-btn').press('Enter');
+   assert.equal(await page.locator('.mobile-menu-btn').getAttribute('aria-expanded'),'true');
+   await page.locator('.sidebar a').first().press('Escape');
+   assert.equal(await page.locator('.mobile-menu-btn').evaluate(e=>e===document.activeElement),true);
+   assert.equal(await page.locator('.mobile-menu-btn').getAttribute('aria-expanded'),'false');
+   await audit('mobile');
+   fs.mkdirSync('browser-a11y-results',{recursive:true});
+   fs.writeFileSync(path.join('browser-a11y-results',`${lang}.json`),JSON.stringify({lang,findings,errors},null,2));
+   const violations=findings.flatMap(f=>f.violations.map(v=>({state:f.state,...v,nodes:v.nodes.slice(0,8)})));
+   assert.deepEqual(errors,[],'Unexpected runtime errors');
+   assert.deepEqual(violations,[],JSON.stringify(violations));
   }finally{await context.close();}
  });
 }
