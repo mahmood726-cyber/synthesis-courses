@@ -100,11 +100,18 @@
       button.setAttribute('aria-expanded', String(!tools.hidden));
     });
   }
-  wrap('toggleToolsPanel', () => {
+  function afterTools() {
     syncTools();
     if (!tools.hidden) {toolsReturn = openingTrigger; tools.querySelector(focusable)?.focus();}
-    else if (toolsReturn?.isConnected) toolsReturn.focus();
+    else {tools.classList.remove('open');if (toolsReturn?.isConnected) toolsReturn.focus();}
+  }
+  wrap('toggleToolsPanel', afterTools);
+  wrap('openToolsWithStory', () => {
+    tools.classList.add('visible');
+    d.querySelector('.content-body').classList.add('tools-open');
+    afterTools();
   });
+  new MutationObserver(syncTools).observe(tools,{attributes:true,attributeFilter:['class']});
   function disclosures() {
     d.querySelectorAll('.tool-section-header').forEach((header,i) => {
       const body = header.nextElementSibling;

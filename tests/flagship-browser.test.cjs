@@ -51,7 +51,7 @@ for(const lang of ['en','ar','de','es','fr','hi','it','ja','ko','pt','ru','zh'])
   try{
    const page=await context.newPage();
    const errors=[];
-   page.on('pageerror',error=>errors.push(error.message));
+   page.on('pageerror',error=>{errors.push(error.message);console.log('runtime-error',lang,error.message);});
    await page.route('**/*',route=>route.request().url().startsWith('http://127.0.0.1:8000/')?route.continue():route.abort());
    const file=lang==='en'?'synthesis-course.html':`synthesis-course-${lang}.html`;
    await page.goto('http://127.0.0.1:8000/'+file);
@@ -65,6 +65,9 @@ for(const lang of ['en','ar','de','es','fr','hi','it','ja','ko','pt','ru','zh'])
    async function audit(state){
     const results=await page.evaluate(async()=>await axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa']}}));
     findings.push({state,violations:results.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))}))});
+    fs.mkdirSync('browser-a11y-results',{recursive:true});
+    fs.writeFileSync(path.join('browser-a11y-results',`${lang}.json`),JSON.stringify({lang,findings,errors,interactionFailures},null,2));
+    console.log('axe-summary',lang,state,JSON.stringify(findings.at(-1)));
    }
    const activeSlide=()=>page.locator('#progress .progress-dot').evaluateAll(items=>items.findIndex(e=>e.classList.contains('active')));
    await page.locator('[data-module="0"].module-item').press('Enter');
@@ -105,7 +108,7 @@ for(const lang of ['en','ar','de','es','fr','hi','it','ja','ko','pt','ru','zh'])
    await audit('glossary');
    await page.locator('#glossarySearch').press('Escape');
    await focused(glossary,'glossary focus return');
-   assert.equal(await page.locator('#glossaryPanel').isVisible(),false);
+   assert.equal(await page.locator('#glossaryPanel').isVisible(),false,JSON.stringify({errors,interactionFailures,panels:await page.locator('[role="dialog"]').evaluateAll(es=>es.map(e=>({id:e.id,hidden:e.hidden,classes:e.className}))) }));
    await page.locator('.keyboard-help-trigger').click();
    await page.locator('#keyboardHelp').press('Escape');
    assert.equal(await page.locator('.keyboard-help-trigger').evaluate(e=>e===document.activeElement),true);
