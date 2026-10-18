@@ -19,6 +19,12 @@
   const menuButton = d.querySelector('.mobile-menu-btn');
   const tools = d.getElementById('toolsPanel');
   const glossaryTrigger = d.querySelector('.glossary-btn');
+  const glossaryContent = d.getElementById('glossaryContent');
+  const glossaryHeading = dialogs[0].querySelector('h3');
+  glossaryHeading.id = 'flagship-glossary-heading';
+  glossaryContent.tabIndex = 0;
+  glossaryContent.setAttribute('role','region');
+  glossaryContent.setAttribute('aria-labelledby',glossaryHeading.id);
   let toolsReturn = null;
 
   function wrap(name, after) {
@@ -161,6 +167,13 @@
   helpButton.addEventListener('click',() => window.toggleKeyboardHelp());
   d.querySelector('[onclick="toggleToolsPanel()"]').after(helpButton);
 
+  // Handle modal dismissal before an input or browser widget consumes Escape.
+  d.addEventListener('keydown', e => {
+    const dialog = openDialogs.at(-1);
+    if (dialog && e.key === 'Escape' && !e.isComposing && !e.ctrlKey && !e.altKey && !e.metaKey) {
+      e.preventDefault();closeDialog(dialog);
+    }
+  }, true);
   d.addEventListener('keydown', e => {
     if (e.defaultPrevented || e.isComposing || e.ctrlKey || e.metaKey || e.altKey) return;
     const target = e.target;

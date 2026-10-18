@@ -100,7 +100,7 @@ for(const lang of ['en','ar','de','es','fr','hi','it','ja','ko','pt','ru','zh'])
    await glossary.click();
    assert.equal(await page.evaluate(()=>document.activeElement.id),'glossarySearch');
    await page.locator('#glossarySearch').fill('meta');
-   const glossaryStops=page.locator('#glossaryPanel').locator('button,input,a[href]').filter({visible:true});
+   const glossaryStops=page.locator('#glossaryPanel').locator('button,input,a[href],[tabindex="0"]').filter({visible:true});
    await glossaryStops.last().press('Tab');
    await focused(glossaryStops.first(),'forward glossary focus cycle');
    await glossaryStops.first().press('Shift+Tab');
