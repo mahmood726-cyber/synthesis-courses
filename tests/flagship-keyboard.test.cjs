@@ -16,7 +16,7 @@ for(const lang of ['en','ar','de','es','fr','hi','it','ja','ko','pt','ru','zh'])
    assert.ok(match,name);w.eval(match[0]);
   }
   // Navigation counters isolate event routing, not scientific computations.
-  w.eval(`var nextCalls=0,previousCalls=0,currentModule=0,modules=[{},{}];
+  w.eval(`var nextCalls=0,previousCalls=0,currentModule=0,modules=[{id:0},{id:7}];
    function nextSlide(){nextCalls++;} function prevSlide(){previousCalls++;}
    function goToModule(index){currentModule=index;}
    function setTier(tier){document.querySelectorAll('.tier-btn').forEach(b=>b.setAttribute('aria-checked',String(b.dataset.tier===tier)));}`);
@@ -28,6 +28,7 @@ for(const lang of ['en','ar','de','es','fr','hi','it','ja','ko','pt','ru','zh'])
   assert.equal(w.nextCalls,0);
   main.focus();key(main,'ArrowRight');assert.equal(w.nextCalls,1);
   key(main,'ArrowRight',{ctrlKey:true});assert.equal(w.nextCalls,1);
+  key(main,'n');assert.equal(w.currentModule,7);key(main,'p');assert.equal(w.currentModule,0);
   key(d.body,'g');assert.equal(d.getElementById('glossaryPanel').hidden,true);
   const header=d.querySelector('.tool-section-header');let activated=0;
   header.addEventListener('click',()=>activated++);header.focus();key(header,'Enter');key(header,' ');

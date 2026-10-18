@@ -57,6 +57,10 @@ for(const lang of ['en','ar','de','es','fr','hi','it','ja','ko','pt','ru','zh'])
    await page.goto('http://127.0.0.1:8000/'+file);
    await page.locator('#moduleList .module-item').first().waitFor();
    const findings=[];
+   const interactionFailures=[];
+   async function focused(locator,description){
+    if(!await locator.evaluate(e=>e===document.activeElement))interactionFailures.push({description,active:await page.evaluate(()=>document.activeElement.outerHTML.slice(0,600)),target:await locator.evaluate(e=>({html:e.outerHTML.slice(0,500),inert:!!e.closest('[inert]'),display:getComputedStyle(e).display,visibility:getComputedStyle(e).visibility}))});
+   }
    await page.addScriptTag({path:require.resolve('axe-core/axe.min.js')});
    async function audit(state){
     const results=await page.evaluate(async()=>await axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa']}}));
@@ -93,13 +97,14 @@ for(const lang of ['en','ar','de','es','fr','hi','it','ja','ko','pt','ru','zh'])
    await glossary.click();
    assert.equal(await page.evaluate(()=>document.activeElement.id),'glossarySearch');
    await page.locator('#glossarySearch').fill('meta');
-   await page.locator('#glossarySearch').press('Tab');
-   assert.equal(await page.evaluate(()=>document.activeElement.classList.contains('glossary-close')),true);
-   await page.locator('.glossary-close').press('Shift+Tab');
-   assert.equal(await page.evaluate(()=>document.activeElement.id),'glossarySearch');
+   const glossaryStops=page.locator('#glossaryPanel').locator('button,input,a[href]').filter({visible:true});
+   await glossaryStops.last().press('Tab');
+   await focused(glossaryStops.first(),'forward glossary focus cycle');
+   await glossaryStops.first().press('Shift+Tab');
+   await focused(glossaryStops.last(),'backward glossary focus cycle');
    await audit('glossary');
    await page.locator('#glossarySearch').press('Escape');
-   assert.equal(await glossary.evaluate(e=>e===document.activeElement),true);
+   await focused(glossary,'glossary focus return');
    assert.equal(await page.locator('#glossaryPanel').isVisible(),false);
    await page.locator('.keyboard-help-trigger').click();
    await page.locator('#keyboardHelp').press('Escape');
@@ -119,6 +124,7 @@ for(const lang of ['en','ar','de','es','fr','hi','it','ja','ko','pt','ru','zh'])
    await option.press('Enter');assert.equal(await option.getAttribute('aria-disabled'),'true');
    await audit('quiz');
    await page.setViewportSize({width:390,height:844});
+   await page.waitForFunction(()=>document.querySelector('.sidebar').hasAttribute('inert'));
    assert.equal(await page.locator('.sidebar').getAttribute('inert'),'');
    await page.locator('.mobile-menu-btn').press('Enter');
    assert.equal(await page.locator('.mobile-menu-btn').getAttribute('aria-expanded'),'true');
@@ -127,10 +133,9 @@ for(const lang of ['en','ar','de','es','fr','hi','it','ja','ko','pt','ru','zh'])
    assert.equal(await page.locator('.mobile-menu-btn').getAttribute('aria-expanded'),'false');
    await audit('mobile');
    fs.mkdirSync('browser-a11y-results',{recursive:true});
-   fs.writeFileSync(path.join('browser-a11y-results',`${lang}.json`),JSON.stringify({lang,findings,errors},null,2));
+   fs.writeFileSync(path.join('browser-a11y-results',`${lang}.json`),JSON.stringify({lang,findings,errors,interactionFailures},null,2));
    const violations=findings.flatMap(f=>f.violations.map(v=>({state:f.state,...v,nodes:v.nodes.slice(0,8)})));
-   assert.deepEqual(errors,[],'Unexpected runtime errors');
-   assert.deepEqual(violations,[],JSON.stringify(violations));
+   assert.deepEqual({errors,interactionFailures,violations},{errors:[],interactionFailures:[],violations:[]},JSON.stringify({errors,interactionFailures,violations}));
   }finally{await context.close();}
  });
 }

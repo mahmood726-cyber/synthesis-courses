@@ -126,7 +126,7 @@
       element.setAttribute('role', 'button');
       element.tabIndex = 0;
     });
-    root.querySelectorAll('.quiz-feedback,[id$="-feedback"]').forEach(element => {
+    root.querySelectorAll('.quiz-feedback,[id$="-feedback"],#reviewFeedback,.scenario-consequence,.misconception-result').forEach(element => {
       element.setAttribute('role','status');
       element.setAttribute('aria-live','polite');
       element.setAttribute('aria-atomic','true');
@@ -140,6 +140,7 @@
     d.querySelectorAll(`#${id} .quiz-option`).forEach(option => option.setAttribute('aria-disabled','true'));
   });
   for (const name of ['initModuleList','goToModule','updateProgressDots']) wrap(name, () => {controls();syncSidebar();});
+  for (const name of ['renderScenario','renderMisconceptionChallenge','renderPracticeProblem','renderReviewQuestion']) wrap(name, () => controls());
   for (const id of ['moduleList','progress']) {
     const element = d.getElementById(id);
     if (element) new MutationObserver(() => controls(element)).observe(element,{childList:true});
@@ -193,8 +194,12 @@
     if (!main.contains(target)) return;
     const actions = {ArrowRight:nextSlide,' ':nextSlide,ArrowLeft:prevSlide,Backspace:prevSlide,t:toggleToolsPanel,T:toggleToolsPanel,g:toggleGlossary,G:toggleGlossary,'?':toggleKeyboardHelp};
     if (actions[e.key] && !(e.key === ' ' && e.shiftKey)) {e.preventDefault();actions[e.key]();}
-    else if (['ArrowDown','n','N'].includes(e.key) && currentModule < modules.length-1) {e.preventDefault();goToModule(currentModule+1);}
-    else if (['ArrowUp','p','P'].includes(e.key) && currentModule > 0) {e.preventDefault();goToModule(currentModule-1);}
+    else {
+      // French uses a different module sequence; navigate by source order, not ID arithmetic.
+      const index = modules.findIndex(module => module.id === currentModule);
+      if (['ArrowDown','n','N'].includes(e.key) && index >= 0 && index < modules.length-1) {e.preventDefault();goToModule(modules[index+1].id);}
+      else if (['ArrowUp','p','P'].includes(e.key) && index > 0) {e.preventDefault();goToModule(modules[index-1].id);}
+    }
   });
   controls();disclosures();tiers();syncDialogs();syncTools();syncSidebar();
   d.addEventListener('DOMContentLoaded',() => {controls();tiers();syncSidebar();});
