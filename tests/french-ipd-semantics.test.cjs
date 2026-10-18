@@ -19,10 +19,10 @@ test('French IPD glossary and evidence story never confuse aggregate data with C
 test('French IPD explanations are explicitly provisional and remain source-linked',()=>{
  const page=new JSDOM(fr,{runScripts:'outside-only'}),d=page.window.document;
  const rows=[...d.querySelectorAll('.glossary-term[data-term="ipd"] dd')];
- assert.equal(rows.length,2,'existing glossary duplication is a distinct future correction');
+ assert.equal(rows.length,1,'one canonical IPD definition');
  assert.match(rows[0].textContent,/résultats agrégés publiés/);
  assert.match(rows[0].textContent,/Traduction provisoire/);
- assert.match(rows[1].textContent,/statistiques résumées/);
+ assert.match(rows[0].textContent,/interactions traitement-covariate/);
  const paragraphs=[...d.querySelectorAll('p')].filter(p=>p.textContent.includes('publiaient des résultats agrégés'));
  assert.equal(paragraphs.length,1,'one corrected breast-cancer narrative slide');
  assert.match(paragraphs[0].nextElementSibling?.textContent||'',/Traduction provisoire/);
