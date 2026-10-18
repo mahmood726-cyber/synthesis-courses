@@ -101,6 +101,9 @@ for(const lang of ['en','ar','de','es','fr','hi','it','ja','ko','pt','ru','zh'])
    assert.equal(await page.locator('#progress .progress-dot.active').evaluate(e=>e===document.activeElement),true);
    await page.locator('.module-item[data-module="1"]').press('Space');
    assert.equal(await page.locator('.module-item[aria-current="step"]').getAttribute('data-module'),'1');
+   // Regress the old two-second review popup stealing focus after fast navigation.
+   await page.waitForTimeout(2200);
+   assert.equal(await page.locator('#dailyReviewModal').isVisible(),false,'Review must open only on learner request');
    await page.locator('.tier-btn[data-tier="foundation"]').press('ArrowRight');
    assert.equal(await page.locator('.tier-btn[aria-checked="true"]').getAttribute('data-tier'),'researcher');
    assert.equal(await page.locator('.tier-btn[tabindex="0"]').count(),1);
@@ -117,17 +120,9 @@ for(const lang of ['en','ar','de','es','fr','hi','it','ja','ko','pt','ru','zh'])
    if(await check.isVisible()){
     const checked=await check.isChecked();await check.press('Space');assert.equal(await check.isChecked(),!checked);
    }
-   await audit('tools');
    await page.locator('#picoP').press('Escape');
    assert.equal(await page.locator('#toolsPanel').isVisible(),false);
    const glossary=page.locator('.glossary-btn');
-   await page.evaluate(()=>{
-    window.a11yTrace=[];
-    document.addEventListener('keydown',e=>window.a11yTrace.push({key:e.key,phase:'capture',target:e.target.id||e.target.className,prevented:e.defaultPrevented,composing:e.isComposing,ctrl:e.ctrlKey,alt:e.altKey,meta:e.metaKey}),true);
-    for(const name of ['toggleGlossary','checkQuizAnswer']){
-     const original=window[name];window[name]=function(...args){window.a11yTrace.push({call:name,args});const result=original.apply(this,args);window.a11yTrace.push({after:name,glossary:document.getElementById('glossaryPanel').className});return result;};
-    }
-   });
    await glossary.click();
    assert.equal(await page.evaluate(()=>document.activeElement.id),'glossarySearch');
    await page.locator('#glossarySearch').fill('meta');
@@ -136,10 +131,8 @@ for(const lang of ['en','ar','de','es','fr','hi','it','ja','ko','pt','ru','zh'])
    await focused(glossaryStops.first(),'forward glossary focus cycle');
    await glossaryStops.first().press('Shift+Tab');
    await focused(glossaryStops.last(),'backward glossary focus cycle');
-   await audit('glossary');
    await page.locator('#glossarySearch').press('Escape');
    await focused(glossary,'glossary focus return');
-   console.log('escape-trace',lang,JSON.stringify(await page.evaluate(()=>({trace:window.a11yTrace,active:document.activeElement.outerHTML.slice(0,300),inert:[...document.querySelectorAll('[inert]')].map(e=>e.id||e.className)}))));
    if(await page.locator('#glossaryPanel').isVisible()){
     interactionFailures.push({description:'Escape did not dismiss glossary'});
     // Continue collecting other states while retaining this failure in the final assertion.
@@ -151,6 +144,12 @@ for(const lang of ['en','ar','de','es','fr','hi','it','ja','ko','pt','ru','zh'])
    const dashboard=page.locator('[onclick="openDashboard()"]');
    await dashboard.click();await page.locator('.dashboard-close').press('Escape');
    assert.equal(await dashboard.evaluate(e=>e===document.activeElement),true);
+   const review=page.locator('#dailyReviewBtn');
+   await review.click();
+   assert.equal(await page.locator('#dailyReviewModal').isVisible(),true);
+   await page.locator('.daily-review-close').press('Escape');
+   assert.equal(await review.evaluate(e=>e===document.activeElement),true);
+   assert.equal(await page.evaluate(()=>reviewState.active),false);
    await page.locator('.tier-btn[data-tier="methodologist"]').click();
    const quiz=await page.locator('.module-slides').evaluateAll(modules=>{
     for(const module of modules){const slides=[...module.querySelectorAll('.slide')];const index=slides.findIndex(s=>s.querySelector('.quiz-option'));
@@ -161,9 +160,7 @@ for(const lang of ['en','ar','de','es','fr','hi','it','ja','ko','pt','ru','zh'])
    await page.locator('#progress .progress-dot').nth(quiz.index).press('Enter');
    const option=page.locator('.module-slides.active .slide.active .quiz-option').first();
    await option.press('Enter');
-   console.log('quiz-trace',lang,JSON.stringify(await option.evaluate(e=>({trace:window.a11yTrace,active:document.activeElement.outerHTML.slice(0,300),inert:!!e.closest('[inert]'),option:e.outerHTML.slice(0,700)}))));
    if(await option.getAttribute('aria-disabled')!=='true')interactionFailures.push({description:'Keyboard quiz activation did not mark options disabled'});
-   await audit('quiz');
    await page.setViewportSize({width:390,height:844});
    await page.waitForFunction(()=>document.querySelector('.sidebar').hasAttribute('inert'));
    assert.equal(await page.locator('.sidebar').getAttribute('inert'),'');
@@ -172,7 +169,7 @@ for(const lang of ['en','ar','de','es','fr','hi','it','ja','ko','pt','ru','zh'])
    await page.locator('.sidebar a').first().press('Escape');
    assert.equal(await page.locator('.mobile-menu-btn').evaluate(e=>e===document.activeElement),true);
    assert.equal(await page.locator('.mobile-menu-btn').getAttribute('aria-expanded'),'false');
-   await audit('mobile');
+   for(const state of ['tools','glossary','quiz','mobile'])await audit(state);
    fs.mkdirSync('browser-a11y-results',{recursive:true});
    fs.writeFileSync(path.join('browser-a11y-results',`${lang}.json`),JSON.stringify({lang,findings,errors,interactionFailures},null,2));
    const violations=findings.flatMap(f=>f.violations.map(v=>({state:f.state,...v,nodes:v.nodes.slice(0,8)})));
