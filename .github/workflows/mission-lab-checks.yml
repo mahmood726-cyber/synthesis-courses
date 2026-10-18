@@ -13,6 +13,7 @@ on:
       - feature/benchmark-human-review-exchange-20261017
       - feature/guided-meta-onramp-20261017
       - feature/hart-source-transfer-20261017
+      - feature/french-html5-standards-20261018
     paths:
       - 'mission-lab*'
       - 'real-evidence*'
@@ -24,6 +25,7 @@ on:
       - 'hart-transfer*'
       - 'tests/hart-transfer.test.cjs'
       - 'tests/hart-dom.test.cjs'
+      - 'tests/french-standards-mode.test.cjs'
       - 'scripts/verify_hart_transfer.R'
       - 'tests/guided-start.test.cjs'
       - 'tests/review-exchange.test.cjs'
@@ -56,6 +58,7 @@ on:
       - 'hart-transfer*'
       - 'tests/hart-transfer.test.cjs'
       - 'tests/hart-dom.test.cjs'
+      - 'tests/french-standards-mode.test.cjs'
       - 'scripts/verify_hart_transfer.R'
       - 'tests/guided-start.test.cjs'
       - 'tests/review-exchange.test.cjs'
@@ -86,6 +89,13 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact source checkout
+        run: |
+          EXPECTED='${{ github.event.pull_request.head.sha || github.sha }}'
+          ACTUAL="$(git rev-parse HEAD)"
+          test "$ACTUAL" = "$EXPECTED"
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -129,15 +139,23 @@ jobs:
           node --check hart-transfer.js
           node --check tests/hart-transfer.test.cjs
           node --check tests/hart-dom.test.cjs
+          node --check tests/french-standards-mode.test.cjs
           node --check tests/real-evidence-lab.test.cjs
       - name: Run interactive learning tests
-        run: node --test tests/mission-lab.test.cjs tests/real-evidence-lab.test.cjs tests/evidence-story-lab.test.cjs tests/story-checkpoints.test.cjs tests/magnesium-reversal.test.cjs tests/evidence-arena.test.cjs tests/research-studio.test.cjs tests/review-exchange.test.cjs tests/guided-start.test.cjs tests/hart-transfer.test.cjs tests/hart-dom.test.cjs
+        run: node --test tests/mission-lab.test.cjs tests/real-evidence-lab.test.cjs tests/evidence-story-lab.test.cjs tests/story-checkpoints.test.cjs tests/magnesium-reversal.test.cjs tests/evidence-arena.test.cjs tests/research-studio.test.cjs tests/review-exchange.test.cjs tests/guided-start.test.cjs tests/hart-transfer.test.cjs tests/hart-dom.test.cjs tests/french-standards-mode.test.cjs
 
   verify-magnesium-r:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact source checkout
+        run: |
+          EXPECTED='${{ github.event.pull_request.head.sha || github.sha }}'
+          ACTUAL="$(git rev-parse HEAD)"
+          test "$ACTUAL" = "$EXPECTED"
       - uses: r-lib/actions/setup-r@v2
         with:
           use-public-rspm: true
