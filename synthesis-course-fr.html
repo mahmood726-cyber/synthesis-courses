@@ -12681,12 +12681,18 @@
       // Re-render slide display to account for newly visible/hidden slides
       const moduleEl = document.querySelector('.module-slides[data-module="' + currentModule + '"]');
       if (moduleEl) updateSlideDisplay(moduleEl);
-      localStorage.setItem('synthCourseTier', tier);
+      try { localStorage.setItem('synthesis_course_tier', tier); } catch (e) {}
     }
 
     // Restore tier from localStorage on load
     (function() {
-      const saved = localStorage.getItem('synthCourseTier');
+      let saved = null;
+      try {
+        const shared = localStorage.getItem('synthesis_course_tier');
+        const legacy = localStorage.getItem('synthCourseTier');
+        const valid = ['foundation', 'researcher', 'methodologist'];
+        saved = valid.includes(shared) ? shared : (valid.includes(legacy) ? legacy : null);
+      } catch (e) {}
       if (saved && saved !== 'foundation') {
         document.body.classList.add('tier-' + saved);
         // Defer button state until DOM ready
