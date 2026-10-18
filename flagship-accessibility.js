@@ -31,11 +31,14 @@
     const original = window[name];
     if (typeof original !== 'function') return;
     window[name] = function (...args) {
-      openingTrigger = d.activeElement;
-      const result = original.apply(this, args);
-      after(...args);
-      openingTrigger = null;
-      return result;
+      const trigger = d.activeElement, previous = openingTrigger;
+      try {
+        openingTrigger = trigger;
+        const result = original.apply(this, args);
+        openingTrigger = trigger;
+        after(...args);
+        return result;
+      } finally {openingTrigger = previous;}
     };
   }
   function restoreBackground() {
@@ -153,6 +156,9 @@
     d.querySelectorAll(`#${id} .quiz-option`).forEach(option => option.setAttribute('aria-disabled','true'));
   });
   for (const name of ['initModuleList','goToModule','updateProgressDots']) wrap(name, () => {controls();syncSidebar();});
+  wrap('goToSlide', () => {
+    if (openingTrigger?.classList.contains('progress-dot')) d.querySelector('#progress .progress-dot.active')?.focus();
+  });
   for (const name of ['renderScenario','renderMisconceptionChallenge','renderPracticeProblem','renderReviewQuestion']) wrap(name, () => controls());
   for (const id of ['moduleList','progress']) {
     const element = d.getElementById(id);

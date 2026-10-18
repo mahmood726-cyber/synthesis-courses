@@ -47,7 +47,7 @@ for(const lang of ['en','ar','de','es','fr','hi','it','ja','ko','pt','ru','zh'])
 }
 for(const lang of ['en','ar','de','es','fr','hi','it','ja','ko','pt','ru','zh']){
  test(`${lang}: keyboard, focus, mobile menu and axe checks`,{timeout:120000},async()=>{
-  const context=await browser.newContext({viewport:{width:1440,height:1000}});
+  const context=await browser.newContext({viewport:{width:1440,height:1000},reducedMotion:'reduce'});
   try{
    const page=await context.newPage();
    const errors=[];
@@ -75,6 +75,7 @@ for(const lang of ['en','ar','de','es','fr','hi','it','ja','ko','pt','ru','zh'])
    await page.locator('#nextBtn').press('Space');assert.equal(await activeSlide(),1);
    await page.locator('#prevBtn').press('Space');assert.equal(await activeSlide(),0);
    await page.locator('#progress .progress-dot').nth(1).press('Enter');assert.equal(await activeSlide(),1);
+   assert.equal(await page.locator('#progress .progress-dot.active').evaluate(e=>e===document.activeElement),true);
    await page.locator('.module-item[data-module="1"]').press('Space');
    assert.equal(await page.locator('.module-item[aria-current="step"]').getAttribute('data-module'),'1');
    await page.locator('.tier-btn[data-tier="foundation"]').press('ArrowRight');
@@ -97,6 +98,12 @@ for(const lang of ['en','ar','de','es','fr','hi','it','ja','ko','pt','ru','zh'])
    await page.locator('#picoP').press('Escape');
    assert.equal(await page.locator('#toolsPanel').isVisible(),false);
    const glossary=page.locator('.glossary-btn');
+   await page.evaluate(()=>{
+    window.a11yKeyTrace=[];
+    document.addEventListener('keydown',e=>{if(e.key==='Escape')window.a11yKeyTrace.push({key:e.key,phase:'capture',prevented:e.defaultPrevented,composing:e.isComposing,ctrl:e.ctrlKey,alt:e.altKey,meta:e.metaKey,target:e.target.id});},true);
+    const original=window.toggleGlossary;
+    window.toggleGlossary=function(...args){window.a11yKeyTrace.push({call:'toggleGlossary',before:document.getElementById('glossaryPanel').className});const result=original.apply(this,args);window.a11yKeyTrace.push({after:document.getElementById('glossaryPanel').className});return result;};
+   });
    await glossary.click();
    assert.equal(await page.evaluate(()=>document.activeElement.id),'glossarySearch');
    await page.locator('#glossarySearch').fill('meta');
@@ -108,7 +115,11 @@ for(const lang of ['en','ar','de','es','fr','hi','it','ja','ko','pt','ru','zh'])
    await audit('glossary');
    await page.locator('#glossarySearch').press('Escape');
    await focused(glossary,'glossary focus return');
-   assert.equal(await page.locator('#glossaryPanel').isVisible(),false,JSON.stringify({errors,interactionFailures,panels:await page.locator('[role="dialog"]').evaluateAll(es=>es.map(e=>({id:e.id,hidden:e.hidden,classes:e.className}))) }));
+   if(await page.locator('#glossaryPanel').isVisible()){
+    interactionFailures.push({description:'Escape did not dismiss glossary',trace:await page.evaluate(()=>window.a11yKeyTrace)});
+    // Continue collecting other states while retaining this failure in the final assertion.
+    await page.locator('.glossary-close').click();
+   }
    await page.locator('.keyboard-help-trigger').click();
    await page.locator('#keyboardHelp').press('Escape');
    assert.equal(await page.locator('.keyboard-help-trigger').evaluate(e=>e===document.activeElement),true);
