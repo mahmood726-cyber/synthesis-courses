@@ -80,7 +80,6 @@ for(const lang of ['en','ar','de','es','fr','hi','it','ja','ko','pt','ru','zh'])
       await scan.locator('.tier-btn[data-tier="methodologist"]').click();
       const quiz=await scan.locator('.module-slides').evaluateAll(modules=>{for(const module of modules){const index=[...module.querySelectorAll('.slide')].findIndex(s=>s.querySelector('.quiz-option'));if(index>=0)return {module:module.dataset.module,index};}});
       await scan.locator(`.module-item[data-module="${quiz.module}"]`).click();
-      if(lang==='ar')console.log('progress-hit-test',await scan.locator('#progress .progress-dot').nth(quiz.index).evaluate(e=>{const r=e.getBoundingClientRect(),hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return {rect:r.toJSON(),hit:hit?.outerHTML.slice(0,250),ancestors:[e,e.parentElement,e.parentElement.parentElement,e.closest('.slides-container')].map(n=>({class:n.className,rect:n.getBoundingClientRect().toJSON(),pointer:getComputedStyle(n).pointerEvents}))};}));
       await scan.locator('#progress .progress-dot').nth(quiz.index).click();
       await scan.locator('.module-slides.active .slide.active .quiz-option').first().click();
       if(state==='mobile')await scan.setViewportSize({width:390,height:844});

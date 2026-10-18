@@ -22,6 +22,10 @@ for(const lang of ['en','ar','de','es','fr','hi','it','ja','ko','pt','ru','zh'])
    function setTier(tier){document.querySelectorAll('.tier-btn').forEach(b=>b.setAttribute('aria-checked',String(b.dataset.tier===tier)));}`);
   for(const b of d.querySelectorAll('.tier-btn'))b.addEventListener('click',()=>w.setTier(b.dataset.tier));
   w.eval(fs.readFileSync(path.join(root,'flagship-accessibility.js'),'utf8'));
+  // Translation must not turn source comments into anonymous flex items or speech.
+  for(const shell of d.querySelectorAll('body,.course-container,.main-content,.content-body,.slides-container,.sidebar,.content-header')){
+   assert.equal([...shell.childNodes].some(n=>n.nodeType===3&&n.textContent.trim()),false,'Unwrapped source comment in '+shell.className);
+  }
   for(const dl of d.querySelectorAll('#glossaryContent dl'))assert.equal([...dl.childNodes].some(n=>n.nodeType===3&&n.textContent.trim()),false);
   assert.equal(d.getElementById('glossaryContent').tabIndex,0);
   const key=(target,value,extra={})=>target.dispatchEvent(new w.KeyboardEvent('keydown',{key:value,bubbles:true,cancelable:true,...extra}));
