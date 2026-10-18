@@ -96,6 +96,10 @@
     magnesiumScript.src='magnesium-lesson-integration.js';
     magnesiumScript.dataset.magnesiumCase='1';
     document.head.appendChild(magnesiumScript);
+    const lidocaineScript=document.createElement('script');
+    lidocaineScript.src='lidocaine-lesson-integration.js';
+    lidocaineScript.dataset.lidocaineCase='1';
+    document.head.appendChild(lidocaineScript);
     const arenaScript=document.createElement('script');
     arenaScript.src='evidence-arena-integration.js';
     arenaScript.dataset.evidenceArena='1';
