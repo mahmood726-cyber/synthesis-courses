@@ -16,6 +16,27 @@
   if(!api||!picks||!results)return;
   const selected=new Set(api.TRIALS.map(function(t){return t.id;}));
   const fmt=function(x,n){return x.toFixed(n);};
+  // A first commitment comes before the numerical reveal. No answers are saved.
+  const predictionBox=document.getElementById('prediction');
+  const feedback=document.getElementById('prediction-feedback');
+  const retry=document.createElement('button');
+  retry.type='button';
+  retry.id='prediction-retry';
+  retry.textContent='Replay: hide the result and predict again';
+  retry.hidden=true;
+  predictionBox.append(retry);
+  const hint=document.createElement('p');
+  hint.className='help';
+  hint.textContent='The forest plot and estimates are concealed until you choose a prediction. You may replay this exercise; it does not grade your beliefs.';
+  predictionBox.after(hint);
+  results.hidden=true;
+  retry.addEventListener('click',function(){
+    results.hidden=true;
+    retry.hidden=true;
+    feedback.hidden=true;
+    feedback.textContent='';
+    predictionBox.querySelectorAll('button[data-guess]').forEach(function(b){b.setAttribute('aria-pressed','false');});
+  });
 
   // The forest plot uses the same study-level log RRs and sampling variances as
   // the numerical cards; all comparisons share a log-scale axis across presets.
@@ -143,6 +164,8 @@
     const btn=e.target.closest('button[data-guess]');if(!btn)return;
     const before=api.analyse(api.TRIALS.filter(function(t){return t.id!==8;})).fixed.rr;
     const after=api.analyse(api.TRIALS).fixed.rr;
+    results.hidden=false;
+    retry.hidden=false;
     const p=document.getElementById('prediction-feedback');p.hidden=false;
     p.textContent=(btn.dataset.guess==='toward-null'?'Correct. ':'Try again. ')+
       'Including TPT Madras moves the fixed-effect demonstration from RR '+fmt(before,3)+' to '+fmt(after,3)+
