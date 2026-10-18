@@ -1,7 +1,8 @@
 # Standalone reproducibility of the six-row archival BCG teaching exercise.
 # Requires a locally installed metafor R package. Not a clinical review.
 library(metafor)
-d <- subset(metafor::dat.bcg, trial %in% c(1, 2, 4, 5, 6, 8))
+# metadat holds this archival dataset; metafor supplies the estimators.
+d <- subset(metadat::dat.colditz1994, trial %in% c(1, 2, 4, 5, 6, 8))
 stopifnot(nrow(d) == 6L,
           identical(as.integer(d$trial), c(1L,2L,4L,5L,6L,8L)),
           identical(as.integer(d$tpos), c(4L,6L,62L,33L,180L,505L)),
